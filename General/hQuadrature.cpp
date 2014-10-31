@@ -1,5 +1,5 @@
 #include "hmathCPU.h"
-#include <memory.h>
+#include <cstring>
 #include "hConstTypes.h"
 #include "hQuadrature.h"
 
@@ -57,8 +57,8 @@ void cQuadrature::ReadQuadrature(int qii, int nqi, sQ1 &Qo, double tai){
 			CoefGaussLaguerrexnhzero2pinfty(nqi);
 			break;
 	}
-	memcpy(Qo.x, Q.x, nqi*cSizeofRD);
-	memcpy(Qo.w, Q.w, nqi*cSizeofRD);
+	std::memcpy(Qo.x, Q.x, nqi*cSizeofRD);
+	std::memcpy(Qo.w, Q.w, nqi*cSizeofRD);
 }
 
 // 0: int_-1^1 f(x) dx

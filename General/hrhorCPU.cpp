@@ -1,5 +1,5 @@
 #include "hmathCPU.h"
-#include "memory.h"
+#include <cstring>
 #include "hConstTypes.h"
 #include "hrhorCPU.h"
 
@@ -18,7 +18,7 @@ crhorCPU::~crhorCPU(){
 // Set Atom type
 void crhorCPU::SetAtomT(int PotPari, sAtomTypesCPU AtomTypesCPUi){
 	PotPar = PotPari;
-	memcpy(&AtomTypesCPU, &AtomTypesCPUi, sizeof(sAtomTypesCPU));
+	std::memcpy(&AtomTypesCPU, &AtomTypesCPUi, sizeof(sAtomTypesCPU));
 }
 
 // 3D electron density (Pr, dPr) where dPr is the first derivative along r

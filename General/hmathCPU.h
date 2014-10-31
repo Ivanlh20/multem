@@ -2,7 +2,7 @@
 #define hmathCPU_H
 
 #include "hConstTypes.h"
-#include "math.h"
+#include <cmath>
 
 //extern double __cdecl abs (double);
 //extern double __cdecl fabs (double);

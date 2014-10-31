@@ -1,5 +1,5 @@
 #include <memory>
-#include "math.h"
+#include <cmath>
 #include "hConstTypes.h"
 #include "hgeneralCPU.h"
 #include "hgeneralGPU.h"

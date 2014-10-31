@@ -5,7 +5,7 @@
 #include "hAtomTypesGPU.h"
 #include "hPotentialGPU.h"
 #include "hQuadrature.h"
-#include "math.h"
+#include <cmath>
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_functions.h>

@@ -1,6 +1,6 @@
 #include "hmathCPU.h"
 #include "hConstTypes.h"
-#include "..\General\hfxegTabData.h"
+#include "hfxegTabData.h"
 
 cfxegTabData::cfxegTabData(){
 	ng = 0;

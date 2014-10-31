@@ -1,5 +1,6 @@
 #include "hmathCPU.h"
-#include "memory.h"
+#include <cmath>
+#include <cstring>
 #include "hConstTypes.h"
 #include "hPotentialCPU.h"
 #include "hQuadrature.h"
@@ -32,7 +33,7 @@ void cPotentialCPU::SetSigma(double sigmai){
 // Set Atom type
 void cPotentialCPU::SetAtomTypes(int PotPari, sAtomTypesCPU AtomTypesi){
 	PotPar = PotPari;
-	memcpy(&AtomTypes, &AtomTypesi, sizeof(sAtomTypesCPU));
+	std::memcpy(&AtomTypes, &AtomTypesi, sizeof(sAtomTypesCPU));
 }
 
 /************************************************************************************/
@@ -380,11 +381,11 @@ double cPotentialCPU::AtomicRadius_Cutoff(int Dim, double Vrl){
 		rmin = AtomTypes.rn_c; 
 		rmax = 50.0;
 		Vr(0, Dim, rmin, Vrm, dVrm); 
-		Vrm = abs(Vrm);
-		while (abs(Vrm-Vrl)>eps){
+		Vrm = std::abs(Vrm);
+		while (std::abs(Vrm-Vrl)>eps){
 			rm = 0.5*(rmin+rmax);
 			Vr(0, Dim, rm, Vrm, dVrm);
-			Vrm = abs(Vrm);
+			Vrm = std::abs(Vrm);
 			if (Vrm>Vrl)
 				rmin = rm;
 			else

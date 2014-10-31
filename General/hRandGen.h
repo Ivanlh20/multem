@@ -2,9 +2,9 @@
 #define hRandGen_H
 
 #include "hmathCPU.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
+#include <cstdlib>
+#include <cstdio>
+#include <ctime>
 
 class cRandGen { 
  private:

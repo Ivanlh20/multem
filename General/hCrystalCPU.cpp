@@ -1,4 +1,4 @@
-#include <memory.h>
+#include <cstring>
 #include "hConstTypes.h"
 #include "hCrystalCPU.h"
 
@@ -94,7 +94,7 @@ void cCrystalCPU::SetInputData(int nai, int nbi, int nci, double ai, double bi, 
 	for(int i=0; i<nuLayer; i++){
 		uLayer[i].nAtoms = uLayeri[i].nAtoms;
 		uLayer[i].Atoms = new sAtoms[uLayer[i].nAtoms];
-		memcpy(uLayer[i].Atoms, uLayeri[i].Atoms, uLayer[i].nAtoms*sizeof(sAtoms));
+		std::memcpy(uLayer[i].Atoms, uLayeri[i].Atoms, uLayer[i].nAtoms*sizeof(sAtoms));
 	}
 
 	Layers = new sAtomsGroup[nuLayer]; 	

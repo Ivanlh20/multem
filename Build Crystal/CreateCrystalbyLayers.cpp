@@ -1,6 +1,6 @@
-#include "..\General\hCrystalCPU.h"
-#include "..\General\hMatlab2Cpp.h"
-#include "mex.h"
+#include "hCrystalCPU.h"
+#include "hMatlab2Cpp.h"
+#include <mex.h>
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int na, nb, nc;

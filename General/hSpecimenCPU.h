@@ -12,7 +12,7 @@ class cSpecimenCPU{
 		void QuickSortAtomsAlongz(sAtoms *&Atoms, int left, int right);
 		void setRandomSeed(unsigned long s, int iConf);
 		void getDimCom(int Dim, double &bx, double &by, double &bz);
-		void cSpecimenCPU::getPlanes(int nAtoms, sAtoms *&Atoms, int &nPlanes, double *&Planes);
+		void getPlanes(int nAtoms, sAtoms *&Atoms, int &nPlanes, double *&Planes);
 		int getAtomsInSlice(double z0, double ze, int nAtoms, sAtoms *&Atoms, int &z0_id, int &ze_id);
 		void Slicing(int ApproxModel, double dz, double Rmax, int nAtoms, sAtoms *&Atoms, int ZeroDefTyp, double ZeroDefPlane, int &nSlice, sSlice *&Slice, double &z_BackProp);
 	public:

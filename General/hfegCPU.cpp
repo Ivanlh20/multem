@@ -1,5 +1,5 @@
 #include "hmathCPU.h"
-#include "memory.h"
+#include <cstring>
 #include "hConstTypes.h"
 #include "hfegCPU.h"
 
@@ -18,7 +18,7 @@ cfegCPU::~cfegCPU(){
 // Set Atom type
 void cfegCPU::SetAtomT(int PotPari, sAtomTypesCPU AtomTypesCPUi){
 	PotPar = PotPari;
-	memcpy(&AtomTypesCPU, &AtomTypesCPUi, sizeof(sAtomTypesCPU));
+	std::memcpy(&AtomTypesCPU, &AtomTypesCPUi, sizeof(sAtomTypesCPU));
 }
 
 // Electron scattering factor(fg, dfg) where dfg is the first derivative along g

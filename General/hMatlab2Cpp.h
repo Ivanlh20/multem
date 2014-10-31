@@ -2,7 +2,8 @@
 #define hMatlab2Cpp_H
 
 #include "hConstTypes.h"
-#include "mex.h"
+
+#include <mex.h>
 
 void Matlab2uLayer(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, int &nuLayer, sAtomsGroup *&uLayer);
 

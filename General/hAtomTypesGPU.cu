@@ -1,10 +1,10 @@
-#include <memory.h>
+#include <memory>
 #include "hConstTypes.h"
 #include "hgeneralCPU.h"
 #include "hgeneralGPU.h"
 #include "hPotentialCPU.h"
 #include "hAtomTypesGPU.h"
-#include "math.h"
+#include <cmath>
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_functions.h>

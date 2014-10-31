@@ -1,9 +1,9 @@
 #include "math.h"
 #include <memory.h>
-#include "..\General\hConstTypes.h"
-#include "..\General\hgeneralCPU.h"
-#include "..\General\hMatlab2Cpp.h"
-#include "..\General\hMulSliGPU.h"
+#include "hConstTypes.h"
+#include "hgeneralCPU.h"
+#include "hMatlab2Cpp.h"
+#include "hMulSliGPU.h"
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include <device_functions.h>

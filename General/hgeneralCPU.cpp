@@ -1,4 +1,5 @@
-#include <memory.h>
+#include <cmath>
+#include <cstring>
 #include "hmathCPU.h"
 #include "hConstTypes.h"
 #include "hgeneralCPU.h"
@@ -390,8 +391,8 @@ void f_BuildGrid(int line, int ns, double x0, double y0, double xe, double ye, i
 			nxs = ns;
 			nys = ns;
 	}else{
-		nxs = (abs(lxs)>abs(lys))?ns:(int)ceil(ns*abs(lxs/lys));
-		nys = (abs(lxs)>abs(lys))?(int)ceil(ns*abs(lys/lxs)):ns;
+		nxs = (std::abs(lxs)>std::abs(lys))?ns:(int)ceil(ns*std::abs(lxs/lys));
+		nys = (std::abs(lxs)>std::abs(lys))?(int)ceil(ns*std::abs(lys/lxs)):ns;
 	}
 
 	xs = new double [nxs];
@@ -557,7 +558,7 @@ void f_InMulSli_Free(sInMSTEM &InMSTEM){
 }
 
 void f_InMulSli_Check(sInMSTEM &InMSTEMi, sInMSTEM &InMSTEMo){
-	memcpy(&InMSTEMo, &InMSTEMi, sizeof(sInMSTEM));
+	std::memcpy(&InMSTEMo, &InMSTEMi, sizeof(sInMSTEM));
 
 	//if(InMSTEMo.gpu<0)			// gpu device 
 	//	InMSTEMo.gpu = 0;

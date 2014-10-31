@@ -1,8 +1,8 @@
-#include "math.h"
+#include <cmath>
 #include <memory.h>
 #include "hConstTypes.h"
 #include "hgeneralCPU.h"
-#include "mex.h"
+#include <mex.h>
 
 void iScaleVector(int n, double *Vi, double f, double *Vo){
 	for(int i=0; i<n; i++)
@@ -92,15 +92,15 @@ void Matlab2RadSchr(const mxArray *mxRadSchr, sInRadSchr &InRadSchr){
 void AtomTypesCPU2Matlab(int nAtomTypesCPU, sAtomTypesCPU *&AtomTypesCPU, mxArray *&mxAtomTypesCPU){
 	const char *field_names[] = {"Z", "m", "A", "rn_e", "rn_c", "ra_e", "ra_c", "Rmin", "Rmax", "cfeg", "cfxg", "cPr", "cVr", "cVR", "ns", "Vo"};
 	int number_of_fields = 16;
-	int dims[2] = {nAtomTypesCPU, 1};
+	mwSize dims[2] = {nAtomTypesCPU, 1};
 
 	const char *field_names_Vpog[] = {"sigma", "Vr", "Vi", "gr", "gVr", "gVi"};
 	int number_of_fields_Vpog = 6;
-	int dims_Vpog[2] = {1, 1};
+	mwSize dims_Vpog[2] = {1, 1};
 
 	const char *field_names_Coef[] = {"cl", "cnl"};
 	int number_of_fields_Coef = 2;
-	int dims_Coef[2] = {1, 1};
+	mwSize dims_Coef[2] = {1, 1};
 
 	mxArray *mxfield, *mxVpog;
 	int i, j;
@@ -181,11 +181,11 @@ void AtomTypesCPU2Matlab(int nAtomTypesCPU, sAtomTypesCPU *&AtomTypesCPU, mxArra
 void ImSTEM2Matlab(int nThk, int nDet, int line, int nxs, int nys, sImSTEM *ImSTEM, mxArray *&mxImSTEM){
 	const char *field_names_ImSTEM[] = {"DetInt"};
 	int number_of_fields_ImSTEM = 1;
-	int dims_ImSTEM[2] = {nThk, 1};
+	mwSize dims_ImSTEM[2] = {nThk, 1};
 
 	const char *field_names_DetInt[] = {"Tot", "Coh"};
 	int number_of_fields_DetInt = 2;
-	int dims_DetInt[2] = {nDet, 1};
+	mwSize dims_DetInt[2] = {nDet, 1};
 
 	mxArray *mxDetInt;
 	mxImSTEM = mxCreateStructArray(2, dims_ImSTEM, number_of_fields_ImSTEM, field_names_ImSTEM);

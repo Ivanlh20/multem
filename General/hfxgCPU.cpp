@@ -1,5 +1,5 @@
 #include "hmathCPU.h"
-#include "memory.h"
+#include <cstring>
 #include "hConstTypes.h"
 #include "hfxgCPU.h"
 
@@ -18,7 +18,7 @@ cfxgCPU::~cfxgCPU(){
 // Set Atom type
 void cfxgCPU::SetAtomT(int PotPari, sAtomTypesCPU AtomTypesCPUi){
 	PotPar = PotPari;
-	memcpy(&AtomTypesCPU, &AtomTypesCPUi, sizeof(sAtomTypesCPU));
+	std::memcpy(&AtomTypesCPU, &AtomTypesCPUi, sizeof(sAtomTypesCPU));
 }
 
 // x-ray scattering factor(fx, dfx) where dfx is the first derivative along g
