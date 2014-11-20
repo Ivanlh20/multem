@@ -30,7 +30,7 @@ class cMT_Potential_GPU{
 		int ncVph;
 		scVp *cVph;
 
-		sMGP MGP;						// Multislice general parameters
+		cMGP MGP;						// Multislice general parameters
 		sGP GP;							// xy-Grid properties
 
 		int nAtomTypesGPU;				// Number of atom types
@@ -51,7 +51,7 @@ class cMT_Potential_GPU{
 		cMT_Potential_GPU();
 		~cMT_Potential_GPU();
 
-		void SetInputData(sMGP &MGP_io, sGP &GP_i, int nAtomsM_i, double *AtomsM_i);
+		void SetInputData(cMGP &MGP_io, sGP &GP_i, int nAtomsM_i, double *AtomsM_i);
 		void ProjectedPotential(int iSlice);
 };
 

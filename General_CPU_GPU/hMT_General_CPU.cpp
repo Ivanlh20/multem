@@ -125,22 +125,26 @@ void f_SetAtomTypes(int PotPar, int ns, double Vrl, int nAtomTypes, sAtomTypesCP
 }
 
 // Set Atoms
-void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms){
+void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms, double sigma_min, double &sigma_max){
 	double x, y, dl = 1e-03;
 	double lxb = lxi-dl, lyb = lyi-dl;
-
+	double sigma;
+	sigma_min = 0.0;
+	sigma_max = 0.0;
 	Atoms = new sAtoms[nAtomsM_i];
 	nAtoms = 0;
 	for (int i=0; i<nAtomsM_i; i++){		
-		x = AtomsM_i[0*nAtomsM_i + i];				// x-position
-		y = AtomsM_i[1*nAtomsM_i + i];				// y-position
+		x = AtomsM_i[0*nAtomsM_i + i];								// x-position
+		y = AtomsM_i[1*nAtomsM_i + i];								// y-position
 		if(!PBC_xyi||((x<lxb)&&(y<lyb))){
-			Atoms[nAtoms].x = x;					// x-position
-			Atoms[nAtoms].y = y;					// y-position
-			Atoms[nAtoms].z = AtomsM_i[2*nAtomsM_i + i];		// z-position
+			Atoms[nAtoms].x = x;									// x-position
+			Atoms[nAtoms].y = y;									// y-position
+			Atoms[nAtoms].z = AtomsM_i[2*nAtomsM_i + i];			// z-position
 			Atoms[nAtoms].Z = (int)AtomsM_i[3*nAtomsM_i + i];		// Atomic number
-			Atoms[nAtoms].sigma = AtomsM_i[4*nAtomsM_i + i];		// Standard deviation
+			Atoms[nAtoms].sigma = sigma = AtomsM_i[4*nAtomsM_i + i];		// Standard deviation
 			Atoms[nAtoms].occ = AtomsM_i[5*nAtomsM_i + i];			// Occupancy
+			if(sigma<sigma_min) sigma_min = sigma;
+			if(sigma>sigma_max) sigma_max = sigma;
 			nAtoms++;
 		}
 	}
@@ -186,29 +190,34 @@ void f_sGP_Init(sGP &GP){
 	GP.gmaxl2 = 0;
 }
 
-// Grid's parameter calculation
+// Set input data Grid's parameter
 void f_sGP_Cal(int nx, int ny, double lx, double ly, double dz, bool PBC_xy, bool BWL, sGP &GP){
 	GP.nx = nx;
 	GP.ny = ny;
 	GP.nxh = nx/2;
 	GP.nyh = ny/2;
 	GP.nxy = GP.nx*GP.ny; 
-	GP.inxy = (GP.nxy==0)?(0.0):(1.0/double(GP.nxy));
+	GP.inxy = (GP.nxy==0)?0.0:(1.0/double(GP.nxy));
 	GP.lx = lx;
 	GP.ly = ly;
 	GP.dz = dz;
 	GP.PBC_xy = PBC_xy;
 	GP.BWL = BWL;
-	GP.dRx = (GP.nx==0)?(0.0):(GP.lx/double(GP.nx));
-	GP.dRy = (GP.ny==0)?(0.0):(GP.ly/double(GP.ny));
+	GP.dRx = (GP.nx==0)?0.0:(GP.lx/double(GP.nx));
+	GP.dRy = (GP.ny==0)?0.0:(GP.ly/double(GP.ny));
 	GP.dRmin = MIN(GP.dRx, GP.dRy);
-	GP.dgx = (lx==0)?(0.0):(1.0/GP.lx);
-	GP.dgy = (ly==0)?(0.0):(1.0/GP.ly);
+	GP.dgx = (GP.lx==0)?0.0:(1.0/GP.lx);
+	GP.dgy = (GP.ly==0)?0.0:(1.0/GP.ly);
 	GP.dgmin = MIN(GP.dgx, GP.dgy);
 	GP.gmax = MIN(double(GP.nxh)*GP.dgx, double(GP.nyh)*GP.dgy);
 	GP.gmax2 = pow(GP.gmax, 2);
 	GP.gmaxl = 2.0*GP.gmax/3.0;
 	GP.gmaxl2 = pow(GP.gmaxl, 2);
+}
+
+// Grid's parameter calculation
+void f_sGP_SetInputData(cMGP &MGP, sGP &GP){
+	f_sGP_Cal(MGP.nx, MGP.ny, MGP.lx, MGP.ly, MGP.dz, MGP.PBC_xy, MGP.BWL, GP);
 }
 
 /****************************************************************************/
@@ -301,6 +310,25 @@ void f_sLens_Cal(double E0, sGP &GP, sLens &Lens){
 	Lens.ngys = (int)floor(nbeta*gmaxs/GP.dgy) + 1;
 	Lens.dgys = gmaxs/Lens.ngys;
 };
+
+// Set input data Lens' parameter
+void f_sLens_SetInputData(sInMSTEM &InMSTEM, sGP &GP, sLens &Lens){
+	Lens.m = InMSTEM.MC_m;
+	Lens.f = InMSTEM.MC_f;
+	Lens.Cs3 = InMSTEM.MC_Cs3;
+	Lens.Cs5 = InMSTEM.MC_Cs5;
+	Lens.mfa2 = InMSTEM.MC_mfa2;
+	Lens.afa2 = InMSTEM.MC_afa2;
+	Lens.mfa3 = InMSTEM.MC_mfa3;
+	Lens.afa3 = InMSTEM.MC_afa3;
+	Lens.aobjl = InMSTEM.MC_aobjl;
+	Lens.aobju = InMSTEM.MC_aobju;
+	Lens.sf = InMSTEM.MC_sf;
+	Lens.nsf = InMSTEM.MC_nsf;
+	Lens.beta = InMSTEM.MC_beta;
+	Lens.nbeta = InMSTEM.MC_nbeta;
+	f_sLens_Cal(InMSTEM.E0, GP, Lens);
+}
 
 /****************************************************************************/
 /****************************************************************************/

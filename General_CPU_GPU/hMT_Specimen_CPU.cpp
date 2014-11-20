@@ -24,8 +24,10 @@
 #include "hAtomicData.h"
 #include "hRandGen.h"
 
-void cMT_Specimen_CPU::freeMemory(){
-	f_sMPG_Init(MGP);
+void cMT_Specimen_CPU::freeMemory()
+{
+	sigma_min = 0.0;
+	sigma_max = 0.0;
 
 	Lzu = 0.0;
 	Lztu = 0.0;
@@ -52,8 +54,10 @@ void cMT_Specimen_CPU::freeMemory(){
 }
 
 // Constructor
-cMT_Specimen_CPU::cMT_Specimen_CPU(){
-	f_sMPG_Init(MGP);
+cMT_Specimen_CPU::cMT_Specimen_CPU()
+{
+	sigma_min = 0.0;
+	sigma_max = 0.0;
 
 	Lzu = 0.0;
 	Lztu = 0.0;
@@ -293,7 +297,7 @@ int cMT_Specimen_CPU::getBorderSlicing(double z0, double ze, double zi, double d
 }
 
 // Select atoms respect to z-coordinate
-void cMT_Specimen_CPU::Slicing(sMGP &MGP, double Rmax, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
+void cMT_Specimen_CPU::Slicing(cMGP &MGP, double Rmax, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
 	delete [] Slice; Slice = 0;
 	double zmin = Atoms[0].z, zmax = Atoms[nAtoms-1].z;
 	double Lz = zmax - zmin;
@@ -340,7 +344,7 @@ void cMT_Specimen_CPU::Slicing(sMGP &MGP, double Rmax, int nAtoms, sAtoms *&Atom
 }
 
 // Select atoms respect to z-coordinate
-void cMT_Specimen_CPU::Slicing(sMGP &MGP, double Rmax, int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
+void cMT_Specimen_CPU::Slicing(cMGP &MGP, double Rmax, int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
 	delete [] Slice; Slice = 0;
 	double zmin = Atoms[0].z, zmax = Atoms[nAtoms-1].z;
 	double Lzt = zmax-zmin+2.0*Rmax;
@@ -383,7 +387,7 @@ void cMT_Specimen_CPU::Slicing(sMGP &MGP, double Rmax, int nSliceu, sSlice *Slic
 }
 
 // Select atoms respect to z-coordinate
-void cMT_Specimen_CPU::Slicing(sMGP &MGP, int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
+void cMT_Specimen_CPU::Slicing(cMGP &MGP, int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
 	nSlice = nPlanesu;
 	delete [] Slice; Slice = 0;
 	double dzh;
@@ -407,7 +411,7 @@ void cMT_Specimen_CPU::Slicing(sMGP &MGP, int nPlanesu, double *Planesu, int nAt
 
 /*****************************************************************************/
 // Set atoms: Copy input Atoms to the new format Atoms, count number of atoms, Ascending sort by z, Set relative atomic number position, Get maximum interaction distance
-void cMT_Specimen_CPU::SetInputData(sMGP &MGP_io, int nAtomsM_i, double *AtomsM_i){
+void cMT_Specimen_CPU::SetInputData(cMGP &MGP_io, int nAtomsM_i, double *AtomsM_i){
 	freeMemory();
 
 	MGP = MGP_io;
@@ -415,7 +419,7 @@ void cMT_Specimen_CPU::SetInputData(sMGP &MGP_io, int nAtomsM_i, double *AtomsM_
 	AtomTypes = new sAtomTypesCPU[nAtomTypes];
 	f_SetAtomTypes(MGP.PotPar, 0, MGP.Vrl, nAtomTypes, AtomTypes);
 	/**************************************************************************/
-	f_AtomsM2Atoms(nAtomsM_i, AtomsM_i, MGP.PBC_xy, MGP.lx, MGP.ly, nAtomsu, Atomsu);
+	f_AtomsM2Atoms(nAtomsM_i, AtomsM_i, MGP.PBC_xy, MGP.lx, MGP.ly, nAtomsu, Atomsu, sigma_min, sigma_max);
 	QuickSortAtomsAlongz(Atomsu, 0, nAtomsu-1);	// Ascending sort by z
 	Rmax = f_getRMax(nAtomsu, Atomsu, AtomTypes); 
 	/**************************************************************************/

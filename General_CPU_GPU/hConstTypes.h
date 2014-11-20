@@ -557,37 +557,7 @@ typedef struct sInRadSchr{
 /****************Multislice general parameters******************/
 class cMGP{
 	private:
-		void Init(){
-			gpu = 0;
-			SimType = 10;
-			MulOrder = 2;
-			nConfFP = 0;
-			DimFP = 111;
-			DistFP = 1;
-			SeedFP = 1983;
-			PotPar = 6;
-			MEffect = 1;
-			STEffect = 1;
-			ZeroDefTyp = 3;
-			ZeroDefPlane = 0.0;
-			ApproxModel = 1;
-			ThkTyp = 1;
-			nThk = 0;
-			Thk = 0;
-			BWL = true;
-			PBC_xy = true;
-			Vrl = stVrl;
-			E0 = 300;
-			theta = 0;	
-			phi = 0;
-			lx = 4.078;
-			ly = 4.078;	
-			dz = 0.25;
-			nx = 1024;
-			ny = 1024;
-		}
-
-		void Free(){
+		void freeMemory(){
 			SimType = 0;
 			MulOrder = 0;
 			nConfFP = 0;
@@ -645,47 +615,76 @@ class cMGP{
 		int ny;						// Number of pixels in y direction
 
 		cMGP(){
-			Init();
+			gpu = 0;
+			SimType = 10;
+			MulOrder = 2;
+			nConfFP = 0;
+			DimFP = 111;
+			DistFP = 1;
+			SeedFP = 1983;
+			PotPar = 6;
+			MEffect = 1;
+			STEffect = 1;
+			ZeroDefTyp = 3;
+			ZeroDefPlane = 0.0;
+			ApproxModel = 1;
+			ThkTyp = 1;
+			nThk = 0;
+			Thk = 0;
+			BWL = true;
+			PBC_xy = true;
+			Vrl = stVrl;
+			E0 = 300;
+			theta = 0;	
+			phi = 0;
+			lx = 4.078;
+			ly = 4.078;	
+			dz = 0.25;
+			nx = 1024;
+			ny = 1024;
 		}
 
 		~cMGP(){
-			Free();
+			freeMemory();
 		}
 
-		//void operator=(const cMGP &MPG){
-		//	Free();
-		//	gpu = MGP.gpu;
-		//	SimType = MGP.SimType;
-		//	MulOrder = MGP.MulOrder;
-		//	nConfFP = MGP.nConfFP;
-		//	DimFP = MGP.DimFP;
-		//	DistFP = MGP.DistFP;
-		//	SeedFP = MGP.SeedFP;
-		//	PotPar = MGP.PotPa;
-		//	MEffect = MGP.MEffect;
-		//	STEffect = MGP.STEffect;
-		//	ZeroDefTyp = MGP.ZeroDefTyp;
-		//	ZeroDefPlane = MGP.ZeroDefPlane;
-		//	ApproxModel = MGP.ApproxModel;
-		//	ThkTyp = MGP.ThkTyp;
-		//	nThk = MGP.nThk;
-		//	Thk = new double[nThk];
-		//	memcpy(Thk, MGP.Thk, nThk*cSizeofRD);
-		//	BWL = MGP.BWL;
-		//	PBC_xy = MGP.PBC_xy;
-		//	Vrl = MGP.Vrl;
-		//	E0 = MGP.E0;
-		//	theta = MGP.theta;	
-		//	phi = MGP.phi;
-		//	lx = MGP.lx;
-		//	ly = MGP.ly;	
-		//	dz = MGP.dz;
-		//	nx = MGP.nx;
-		//	ny = MGP.ny;
-		//}
+		cMGP& operator= (const cMGP &MGP){
+			freeMemory();
+
+			gpu = MGP.gpu;
+			SimType = MGP.SimType;
+			MulOrder = MGP.MulOrder;
+			nConfFP = MGP.nConfFP;
+			DimFP = MGP.DimFP;
+			DistFP = MGP.DistFP;
+			SeedFP = MGP.SeedFP;
+			PotPar = MGP.PotPar;
+			MEffect = MGP.MEffect;
+			STEffect = MGP.STEffect;
+			ZeroDefTyp = MGP.ZeroDefTyp;
+			ZeroDefPlane = MGP.ZeroDefPlane;
+			ApproxModel = MGP.ApproxModel;
+			ThkTyp = MGP.ThkTyp;
+			nThk = MGP.nThk;
+			Thk = new double[nThk];
+			memcpy(Thk, MGP.Thk, nThk*cSizeofRD);
+			BWL = MGP.BWL;
+			PBC_xy = MGP.PBC_xy;
+			Vrl = MGP.Vrl;
+			E0 = MGP.E0;
+			theta = MGP.theta;	
+			phi = MGP.phi;
+			lx = MGP.lx;
+			ly = MGP.ly;	
+			dz = MGP.dz;
+			nx = MGP.nx;
+			ny = MGP.ny;
+
+			return *this;
+		}
 
 		void SetInputData(sInMSTEM &InMSTEM){
-			Free();
+			freeMemory();
 
 			gpu = InMSTEM.gpu;
 			SimType = InMSTEM.SimType;	

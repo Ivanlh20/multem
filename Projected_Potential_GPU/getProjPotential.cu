@@ -31,11 +31,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	int iConfFP, iSlice;
 	int nAtomsM;
 	double *AtomsM;
-	sMGP MGP;
+	cMGP MGP;
 	sGP GP;
-	sBT BT;
-
-	f_sMPG_Init(MGP);
 
 	nAtomsM = (int)mxGetM(prhs[0]); 
 	AtomsM = mxGetPr(prhs[0]);

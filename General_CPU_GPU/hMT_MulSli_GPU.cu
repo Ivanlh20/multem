@@ -38,7 +38,6 @@ void cMT_MulSli_GPU::freeMemory(){
 
 	cSynCPU = ccSynCPU;
 
-	f_sMPG_Init(MGP);
 	f_sGP_Init(GP);
 	f_sLens_Init(Lens);
 	
@@ -86,7 +85,6 @@ void cMT_MulSli_GPU::freeMemory(){
 cMT_MulSli_GPU::cMT_MulSli_GPU(){
 	cSynCPU = ccSynCPU;
 
-	f_sMPG_Init(MGP);
 	f_sGP_Init(GP);
 	f_sLens_Init(Lens);
 	
@@ -507,56 +505,12 @@ void cMT_MulSli_GPU::get_Imagefuncion(int nConfFP, eSpace Space, double xi, doub
 void cMT_MulSli_GPU::SetInputData(sInMSTEM &InMSTEM){
 	freeMemory();
 
-	MGP.gpu = InMSTEM.gpu;
-	MGP.SimType = InMSTEM.SimType;	
-	MGP.MulOrder = 2;	
-	MGP.nConfFP = InMSTEM.nConfFP;		
-	MGP.DimFP = InMSTEM.DimFP;	
-	MGP.DistFP = 1;
-	MGP.SeedFP = InMSTEM.SeedFP;
-	MGP.PotPar = InMSTEM.PotPar;
-	MGP.MEffect = InMSTEM.MEffect;
-	MGP.STEffect = InMSTEM.STEffect;
-	MGP.ZeroDefTyp = InMSTEM.ZeroDefTyp;
-	MGP.ZeroDefPlane = InMSTEM.ZeroDefPlane;
-	MGP.ApproxModel = InMSTEM.ApproxModel;
-	MGP.ThkTyp = InMSTEM.ThicknessTyp;
-	MGP.nThk = InMSTEM.nThickness;
-	memcpy(MGP.Thk, InMSTEM.Thickness, MGP.nThk*cSizeofRD); // change
-	MGP.BWL = (InMSTEM.BandwidthLimit==1)?true:false;
-	MGP.Vrl = stVrl;
-	MGP.E0 = InMSTEM.E0;	
-	MGP.theta = InMSTEM.theta;	
-	MGP.phi = InMSTEM.phi;
-	MGP.lx = InMSTEM.lx;
-	MGP.ly = InMSTEM.ly;
-	MGP.dz = InMSTEM.dz;
-	MGP.nx = InMSTEM.nx;
-	MGP.ny = InMSTEM.ny;
-	if(MGP.ApproxModel>1){
-		MGP.MulOrder = 1;
-		MGP.DimFP = MGP.DimFP - MGP.DimFP%10;
-	}
+	MGP.SetInputData(InMSTEM);
 
 	cudaSetDevice(MGP.gpu);
 
-	f_sGP_Cal(MGP.nx, MGP.ny, MGP.lx, MGP.ly, MGP.dz, MGP.PBC_xy, MGP.BWL, GP);
-
-	Lens.m = InMSTEM.MC_m;
-	Lens.f = InMSTEM.MC_f;
-	Lens.Cs3 = InMSTEM.MC_Cs3;
-	Lens.Cs5 = InMSTEM.MC_Cs5;
-	Lens.mfa2 = InMSTEM.MC_mfa2;
-	Lens.afa2 = InMSTEM.MC_afa2;
-	Lens.mfa3 = InMSTEM.MC_mfa3;
-	Lens.afa3 = InMSTEM.MC_afa3;
-	Lens.aobjl = InMSTEM.MC_aobjl;
-	Lens.aobju = InMSTEM.MC_aobju;
-	Lens.sf = InMSTEM.MC_sf;
-	Lens.nsf = InMSTEM.MC_nsf;
-	Lens.beta = InMSTEM.MC_beta;
-	Lens.nbeta = InMSTEM.MC_nbeta;
-	f_sLens_Cal(MGP.E0, GP, Lens);
+	f_sGP_SetInputData(MGP, GP);
+	f_sLens_SetInputData(InMSTEM, GP, Lens);
 
 	gxu = sin(MGP.theta)*cos(MGP.phi)/Lens.lambda;
 	gyu = sin(MGP.theta)*sin(MGP.phi)/Lens.lambda;
@@ -604,6 +558,9 @@ void cMT_MulSli_GPU::SetInputData(sInMSTEM &InMSTEM){
 
 	// Microscope parameters
 	MT_MicroscopeEffects_GPU.SetInputData(GP, Lens, PlanPsi, Trans);
+
+	// STEM
+	STEM.SetInputData(InMSTEM, MT_Potential_GPU.MT_Specimen_CPU);
 }
 
 void cMT_MulSli_GPU::Cal_ExitWaveRS(sComplex &aPsih, double *&aM2Psih){

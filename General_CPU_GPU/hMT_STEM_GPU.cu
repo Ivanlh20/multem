@@ -129,11 +129,22 @@ cSTEM_GPU::~cSTEM_GPU(){
 	freeMemory();
 }
 
-void cSTEM_GPU::SetInputData(sInMSTEM &InMSTEM, cMT_Specimen_CPU *MT_Specimen_CPU)
+void cSTEM_GPU::InitImSTEM()
+{
+	int iThk, iDet, ist;
+	for (iThk = 0; iThk<nThk; iThk++)
+		for (iDet=0; iDet<nDet; iDet++)
+			for (ist=0; ist<nst; ist++){
+				ImSTEM[iThk].DetInt[iDet].Coh[ist] = 0.0;
+				ImSTEM[iThk].DetInt[iDet].Tot[ist] = 0.0;
+			}
+}
+
+void cSTEM_GPU::SetInputData(sInMSTEM &InMSTEM, cMT_Specimen_CPU &MT_Specimen_CPU)
 {
 	freeMemory();
 
-	MGP = MT_Specimen_CPU->MGP;
+	MGP = MT_Specimen_CPU.MGP;
 	f_sGP_Cal(MGP.nx, MGP.ny, MGP.lx, MGP.ly, MGP.dz, MGP.PBC_xy, MGP.BWL, GP);
 
 	line = InMSTEM.STEM_line;
@@ -192,10 +203,26 @@ void cSTEM_GPU::SetInputData(sInMSTEM &InMSTEM, cMT_Specimen_CPU *MT_Specimen_CP
 	}
 
 	/*****************************************************************/
-	size_t SizeFreeM, SizeTotM;
+	int nSliceSigma = (MGP.ApproxModel>1)?0:(int)ceil(6*MT_Specimen_CPU.sigma_max/MGP.dz);
+	int nSliceMax = MT_Specimen_CPU.nSlice + nSliceSigma;
+
+	size_t SizeFreeM, SizeTotM, SizeTrans;
 	cudaMemGetInfo(&SizeFreeM, &SizeTotM);
-	size_t SizeTrans = GP.nxy*(SliceMTyp==1)?cSizeofCD:(SliceMTyp==2)?cSizeofRD:cSizeofRF;
-	int nSliceMt = (SizeFreeM-10*cMb)/SizeTrans;
+	int nSliceMt;
+
+	if((SizeFreeM-10*cMb)/(GP.nxy*cSizeofCD)>=nSliceMax){
+		SliceMTyp = 1;
+		SizeTrans = GP.nxy*cSizeofCD;
+		nSliceMt = (SizeFreeM-10*cMb)/SizeTrans;
+	}else if((SizeFreeM-10*cMb)/(GP.nxy*cSizeofRD)>=nSliceMax){
+		SliceMTyp = 2;
+		SizeTrans = GP.nxy*cSizeofRD;
+		nSliceMt = (SizeFreeM-10*cMb)/SizeTrans;
+	}else{
+		SliceMTyp = 3;
+		SizeTrans = GP.nxy*cSizeofRF;
+		nSliceMt = (SizeFreeM-10*cMb)/SizeTrans;
+	}
 
 	if((FastCal)&&(nSliceMt>0)&&(MGP.SimType==1)&&(MGP.ApproxModel<=2)){
 		nSliceM = nSliceMt;
@@ -218,15 +245,4 @@ void cSTEM_GPU::SetInputData(sInMSTEM &InMSTEM, cMT_Specimen_CPU *MT_Specimen_CP
 				break;
 		}
 	}
-}
-
-void cSTEM_GPU::InitImSTEM()
-{
-	int iThk, iDet, ist;
-	for (iThk = 0; iThk<nThk; iThk++)
-		for (iDet=0; iDet<nDet; iDet++)
-			for (ist=0; ist<nst; ist++){
-				ImSTEM[iThk].DetInt[iDet].Coh[ist] = 0.0;
-				ImSTEM[iThk].DetInt[iDet].Tot[ist] = 0.0;
-			}
 }

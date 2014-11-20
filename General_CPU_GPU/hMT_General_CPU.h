@@ -43,7 +43,7 @@ void f_SetAtomTypes(int Z, int PotPar, int ns, double Vrl, sAtomTypesCPU &AtomTy
 void f_SetAtomTypes(int PotPar, int ns, double Vrl, int nAtomTypes, sAtomTypesCPU *&AtomTypes);
 
 // Set Atoms
-void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms);
+void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms, double sigma_min, double &sigma_max);
 
 // get 2D maximum interaction distance
 double f_getRMax(int nAtoms, sAtoms *&Atoms, sAtomTypesCPU *&AtomTypes);
@@ -56,6 +56,9 @@ void f_sGP_Init(sGP &GP);
 
 // Grid's parameter calculation
 void f_sGP_Cal(int nx, int ny, double lx, double ly, double dz, bool PBC_xy, bool BWL, sGP &GP);
+
+// Grid's parameter calculation
+void f_sGP_SetInputData(cMGP &MGP, sGP &GP);
 
 /****************************************************************************/
 /****************************************************************************/
@@ -77,6 +80,8 @@ void f_sLens_Init(sLens &Lens);
 // Lens' parameter calculation
 void f_sLens_Cal(double E0, sGP &GP, sLens &Lens);
 
+// Set input data Lens' parameter
+void f_sLens_SetInputData(sInMSTEM &InMSTEM, sGP &GP, sLens &Lens);
 /****************************************************************************/
 /****************************************************************************/
 

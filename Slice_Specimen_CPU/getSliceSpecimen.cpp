@@ -25,9 +25,7 @@
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	int nAtomsM, iConfFP, nAtoms;
 	double *AtomsM;
-	sMGP MGP;
-
-	f_sMPG_Init(MGP);
+	cMGP MGP;
 
 	nAtomsM = (int)mxGetM(prhs[0]); 
 	AtomsM = mxGetPr(prhs[0]);

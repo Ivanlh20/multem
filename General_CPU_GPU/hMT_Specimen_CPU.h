@@ -39,11 +39,14 @@ class cMT_Specimen_CPU{
 		void getnSlice(double z10, double z1i, double z20, double z2i, double dzi, int &nSlice, double &dz0, double &dze);
 		int getBorderSlicing(double z0, double ze, double zi, double dzi, double &dzb);
 		int getAtomsInSlice(double z0, double ze, int nAtoms, sAtoms *&Atoms, int &z0_id, int &ze_id);
-		void Slicing(sMGP &MGP, double Rmax,int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
-		void Slicing(sMGP &MGP, double Rmax, int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
-		void Slicing(sMGP &MGP, int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
-public:
-		sMGP MGP;					// Multislice general parameters
+		void Slicing(cMGP &MGP, double Rmax,int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
+		void Slicing(cMGP &MGP, double Rmax, int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
+		void Slicing(cMGP &MGP, int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
+	public:
+		cMGP MGP;					// Multislice general parameters
+
+		double sigma_min;
+		double sigma_max;
 
 		double Lzu;
 		double Lztu;
@@ -65,7 +68,7 @@ public:
 		void freeMemory();
 		cMT_Specimen_CPU();
 		~cMT_Specimen_CPU();
-		void SetInputData(sMGP &MGP_io, int nAtomsM_i, double *AtomsM_i);
+		void SetInputData(cMGP &MGP_io, int nAtomsM_i, double *AtomsM_i);
 		void MoveAtoms(int iConf);
 		double get_dz(int iSlice);
 };

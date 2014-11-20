@@ -31,7 +31,7 @@ class cProbe{
 	private:
 		double x0;
 		double y0;
-		sMGP MGP;
+		cMGP MGP;
 		sGP GP;
 		sLens Lens;
 		sComplex Psii;
@@ -49,7 +49,6 @@ class cProbe{
 void cProbe::freeMemory(){
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
-	f_sMPG_Init(MGP);
 	f_sGP_Init(GP);
 	f_sLens_Init(Lens);
 
@@ -64,7 +63,6 @@ cProbe::~cProbe(){
 }
 
 cProbe::cProbe(){
-	f_sMPG_Init(MGP);
 	f_sGP_Init(GP);
 	f_sLens_Init(Lens);
 	Psii.real = 0;

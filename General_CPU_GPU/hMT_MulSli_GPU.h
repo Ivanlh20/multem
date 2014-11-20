@@ -119,7 +119,7 @@ class cMT_MulSli_GPU{
 		void GPU2CPU(double2 *&Psid, double *&M2Psid, sComplex &Psih, double *&M2Psih);
 		void GPU2CPU(double2 *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h);
 	public:
-		sMGP MGP;
+		cMGP MGP;
 
 		cSTEM_GPU STEM;
 		sCBED CBED;

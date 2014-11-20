@@ -549,7 +549,6 @@ void cMT_Potential_GPU::freeMemory(){
 	cudaFreen(Qz.w);
  
 	f_scVp_cudaFree(ncVph, cVph);
-	f_sMPG_Init(MGP);
 	f_sGP_Init(GP);
 
 	nAtomTypesGPU = 0;
@@ -569,7 +568,6 @@ cMT_Potential_GPU::cMT_Potential_GPU(){
 	ncVph = 0;
 	cVph = 0;
 
-	f_sMPG_Init(MGP);
 	f_sGP_Init(GP);
 
 	nAtomTypesGPU = 0;
@@ -584,7 +582,7 @@ cMT_Potential_GPU::~cMT_Potential_GPU(){
 	freeMemory();
 }
 
-void cMT_Potential_GPU::SetInputData(sMGP &MGP_io, sGP &GP_i, int nAtomsM_i, double *AtomsM_i){
+void cMT_Potential_GPU::SetInputData(cMGP &MGP_io, sGP &GP_i, int nAtomsM_i, double *AtomsM_i){
 	freeMemory();
 
 	SetPotPar(MGP.PotPar);				// Set Potential parameterization

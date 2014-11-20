@@ -35,7 +35,7 @@
 /******************************STEM********************************/
 class cSTEM_GPU{
 	public:
-		sMGP MGP;			// Multislice general parameters
+		cMGP MGP;			// Multislice general parameters
 		sGP GP;				// xy-Grid properties
 
 		int line;			// 0: Area, 1: Line
@@ -70,8 +70,8 @@ class cSTEM_GPU{
 		cSTEM_GPU();
 		~cSTEM_GPU();
 
-		void SetInputData(sInMSTEM &InMSTEM, cMT_Specimen_CPU *MT_Specimen_CPU);
 		void InitImSTEM();
+		void SetInputData(sInMSTEM &InMSTEM, cMT_Specimen_CPU &MT_Specimen_CPU);
 };
 
 #endif
