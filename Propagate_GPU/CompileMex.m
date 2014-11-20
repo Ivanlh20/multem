@@ -1,0 +1,3 @@
+clc; clear all;
+mexGPU(1, 'getPropagate.cu', 'D:/MULTEM/General_CPU_GPU', 'hQuadrature.cpp', 'hAtomicdata.cpp'...
+    , 'hPotential_CPU.cpp', 'hMT_General_CPU.cpp', 'hMT_General_GPU.cu');

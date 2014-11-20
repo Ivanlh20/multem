@@ -1,0 +1,3 @@
+clc; clear all;
+mexGPU(1, 'getProbe.cu', 'D:/MULTEM/General_CPU_GPU', 'hQuadrature.cpp', 'hAtomicdata.cpp'...
+    , 'hMatlab2Cpp.cpp', 'hPotential_CPU.cpp', 'hMT_General_CPU.cpp', 'hMT_General_GPU.cu', 'hMT_IncidentWave_GPU.cu');

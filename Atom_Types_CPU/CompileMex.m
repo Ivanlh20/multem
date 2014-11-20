@@ -1,0 +1,3 @@
+clc; clear all;
+mexCPU(1, 'getAtomTypes.cpp', 'D:/MULTEM/General_CPU_GPU', 'hQuadrature.cpp', 'hAtomicdata.cpp'...
+    , 'hPotential_CPU.cpp', 'hMT_General_CPU.cpp', 'hMatlab2Cpp.cpp');
