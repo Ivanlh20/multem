@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef hSAGaussianExpFit_H
@@ -63,14 +63,14 @@ cSAGEF::cSAGEF(){
 	M = 0;
 	Mt = 0;
 	F = 0;
-	/******************************************/
+	/*****************************************/
 	iwork = 0;
 	work = 0;
 	Sv = 0;
 	rcond = -1;
-	/******************************************/
+	/*****************************************/
 	RandGen.reset();
-	/******************************************/
+	/*****************************************/
 	for (int i=0; i<32; i++){
 		clt[i] = cnlt[i] = cl[i] = cnl[i] = cln[i] = cnln[i] = 0;
 		cnlmin[i] = cnlmax[i] = cnll[i] = cnld[i] = icnl2[i] = 0;
@@ -80,12 +80,12 @@ cSAGEF::cSAGEF(){
 cSAGEF::~cSAGEF(){
 	x = 0;
 	y = 0;
-	/******************************************/
+	/*****************************************/
 	delete [] x2; x2 = 0;
 	delete [] M; M = 0;
 	delete [] Mt; Mt = 0;
 	delete [] F; F = 0;
-	/******************************************/
+	/*****************************************/
 	delete [] iwork; iwork = 0;
 	delete [] work; work = 0;
 	delete [] Sv; Sv = 0;
@@ -159,22 +159,22 @@ inline void cSAGEF::SetInputData(int nxi, double *xi, double *yi, int ngi, int n
 	ng = ngi;
 	ne = nei;
 	nt = ng + ne;
-	/****************************************************************/
+	/***************************************************************/
 	delete [] x2; x2 = new double[nx*1];
 	for (int i=0; i<nx; i++)
 		x2[i] = x[i]*x[i];
-	/****************************************************************/
+	/***************************************************************/
 	delete [] F; F = new double[nx*1];
 	delete [] M; M = new double[nx*nt];
 	delete [] Mt; Mt = new double[nt*nx];
-	/****************************************************************/
+	/***************************************************************/
 	lwork = 256*256;
 	delete [] work; work = new double[lwork];
 	delete [] iwork; iwork = new ptrdiff_t[256*nt]; 
 	delete [] Sv; Sv = new double[nt*nt];
 	rcond = -1;
 	onei = 1;
-	/****************************************************************/
+	/***************************************************************/
 }
 
 inline void cSAGEF::NextCoeff(double *clo, double *cnlo){

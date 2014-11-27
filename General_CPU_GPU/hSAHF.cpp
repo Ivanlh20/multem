@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "hSAHF.h"
@@ -39,7 +39,7 @@
 #endif
 
 void cSAHF::freeMemory(){
-	/******************************************/
+	/*****************************************/
 	delete [] M; M = 0;
 	delete [] Mt; Mt = 0;
 	delete [] N; N = 0;
@@ -48,7 +48,7 @@ void cSAHF::freeMemory(){
 	delete [] Rm; Rm = 0;
 	delete [] Rmt; Rmt = 0;
 	delete [] Fm; Fm = 0;
-	/******************************************/
+	/*****************************************/
 	rcond = 0;
 	rank = 0;
 	lwork = 0;
@@ -57,12 +57,12 @@ void cSAHF::freeMemory(){
 	Zk = 0;
 	onei = 1;
 	oned = 1;
-	/******************************************/
+	/*****************************************/
 	delete [] iwork; iwork = 0;
 	delete [] work; work = 0;
 	delete [] Sv; Sv = 0;
 	delete [] ipiv; ipiv = 0;
-	/******************************************/
+	/*****************************************/
 	for(int i=0; i<nhmax; i++){
 		clmin[i] = clmax[i] = cnlmin[i] = cnlmax[i] = cnll[i] = cnld[i] = 0;
 		srcnl[i] = icnl[i] = cnl2[i] = gamma[i] = 0;
@@ -80,7 +80,7 @@ cSAHF::~cSAHF(){
 }
 
 cSAHF::cSAHF(){
-	/******************************************/
+	/*****************************************/
 	M = 0;
 	Mt = 0;
 	N = 0;
@@ -89,7 +89,7 @@ cSAHF::cSAHF(){
 	Rm = 0;
 	Rmt = 0;
 	Fm = 0;
-	/******************************************/
+	/*****************************************/
 	rcond = 0;
 	rank = 0;
 	lwork = 0;
@@ -98,12 +98,12 @@ cSAHF::cSAHF(){
 	Zk = 0;
 	onei = 1;
 	oned = 1;
-	/******************************************/
+	/*****************************************/
 	iwork = 0;
 	work = 0;
 	Sv = 0;
 	ipiv = 0;
-	/******************************************/
+	/*****************************************/
 	for(int i=0; i<nhmax; i++){
 		clmin[i] = clmax[i] = cnlmin[i] = cnlmax[i] = cnll[i] = cnld[i] = 0;
 		srcnl[i] = icnl[i] = cnl2[i] = gamma[i] = 0;
@@ -151,7 +151,7 @@ void cSAHF::SetInputData(int Zi, int typi, int nhti, int nhbi, int dgi, double *
 
 	Zk = (double)Z/ca0;
 
-	/******************************************/
+	/*****************************************/
 	delete [] M; M = new double[nhb*nhb];
 	delete [] Mt; Mt = new double[nhb*nhb];
 	delete [] N; N = new double[nhb*nhbc];
@@ -165,7 +165,7 @@ void cSAHF::SetInputData(int Zi, int typi, int nhti, int nhbi, int dgi, double *
 	gamma[1] = 0.0;
 	gamma[2] = feg[0];
 
-	/******************************************/
+	/*****************************************/
 	lwork = 256*256;
 	work = new double[lwork];
 	iwork = new ptrdiff_t[256*nht]; 
@@ -173,7 +173,7 @@ void cSAHF::SetInputData(int Zi, int typi, int nhti, int nhbi, int dgi, double *
 	ipiv = new ptrdiff_t[nhb];
 	rcond = -1;
 
-	/******************************************/
+	/*****************************************/
 	cTn = "N";
 	onei = 1;
 	oned = 1.0;
@@ -291,11 +291,11 @@ void cSAHF::GetLinealCoeff(double *cnl, double *cl, bool &bc){
 			else
 				Rmt[j*nhbc+i-nhb] = t;
 		}	
-	/*************************************************************/	
+	/************************************************************/	
 	dgesv(&nhb, &ng, Mt, &nhb, ipiv, St, &nhb, &info);
-	/*************************************************************/	
+	/************************************************************/	
 	dgemm(cTn, cTn, &nhbc, &ng, &nhb, &oned, Nt, &nhbc, St, &nhb, &oned, Rmt, &nhbc);
-	/*************************************************************/
+	/************************************************************/
 	for (j=0; j<ng; j++){
 		t = 0;
 		for (i=0; i<nhb; i++)
@@ -306,18 +306,18 @@ void cSAHF::GetLinealCoeff(double *cnl, double *cl, bool &bc){
 		for (i=0; i<nhbc; i++)
 			Rm[i*ng+j] = Rmt[j*nhbc+i];
 	}
-	/*************************************************************/		
+	/************************************************************/		
 	dgelsd(&ng, &nhbc, &onei, Rm, &ng, Fm, &ng, Sv, &rcond, &rank, work, &lwork, iwork, &info); 
-	/*************************************************************/	
+	/************************************************************/	
 
 	for (i=0; i<nht; i++)
 		cl[i] = (i<nhb)?gamma[i]:Fm[i-nhb];
 
-	/*************************************************************/	
+	/************************************************************/	
 	dgemm(cTn, cTn, &nhb, &onei, &nhbc, &oned, N, &nhb, &cl[nhb], &nhbc, &oned, cl, &nhb);
-	/*************************************************************/	
+	/************************************************************/	
 	dgesv(&nhb, &onei, M, &nhb, ipiv, cl, &nhb, &info);
-	/*************************************************************/	
+	/************************************************************/	
 
 	bc = BoundaryConditions(cl, cnl);
 }

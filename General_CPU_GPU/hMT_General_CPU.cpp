@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <cstring>
@@ -125,12 +125,11 @@ void f_SetAtomTypes(int PotPar, int ns, double Vrl, int nAtomTypes, sAtomTypesCP
 }
 
 // Set Atoms
-void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms, double sigma_min, double &sigma_max){
+void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms, double &sigma_min, double &sigma_max){
 	double x, y, dl = 1e-03;
 	double lxb = lxi-dl, lyb = lyi-dl;
 	double sigma;
-	sigma_min = 0.0;
-	sigma_max = 0.0;
+	sigma_min = sigma_max = AtomsM_i[4*nAtomsM_i + 0];
 	Atoms = new sAtoms[nAtomsM_i];
 	nAtoms = 0;
 	for (int i=0; i<nAtomsM_i; i++){		
@@ -162,8 +161,8 @@ double f_getRMax(int nAtoms, sAtoms *&Atoms, sAtomTypesCPU *&AtomTypes){
 	return Rmax;
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 // Grid's parameter initialization
 void f_sGP_Init(sGP &GP){
@@ -216,12 +215,12 @@ void f_sGP_Cal(int nx, int ny, double lx, double ly, double dz, bool PBC_xy, boo
 }
 
 // Grid's parameter calculation
-void f_sGP_SetInputData(cMGP &MGP, sGP &GP){
-	f_sGP_Cal(MGP.nx, MGP.ny, MGP.lx, MGP.ly, MGP.dz, MGP.PBC_xy, MGP.BWL, GP);
+void f_sGP_SetInputData(cMT_MGP_CPU &MT_MGP_CPU, sGP &GP){
+	f_sGP_Cal(MT_MGP_CPU.nx, MT_MGP_CPU.ny, MT_MGP_CPU.lx, MT_MGP_CPU.ly, MT_MGP_CPU.dz, MT_MGP_CPU.PBC_xy, MT_MGP_CPU.BWL, GP);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_get_BTnxny(sGP &GP, dim3 &B, dim3 &T){
 	B.x = (GP.ny+thrnxny-1)/thrnxny; B.y = (GP.nx+thrnxny-1)/thrnxny; B.z = 1;
@@ -243,8 +242,8 @@ void f_get_BTnxy(sGP &GP, dim3 &B, dim3 &T){
 	T.x = thrnxy; T.y = 1; T.z = 1;
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 // Block and Thread parameter initialization
 void f_sLens_Init(sLens &Lens){
@@ -312,26 +311,26 @@ void f_sLens_Cal(double E0, sGP &GP, sLens &Lens){
 };
 
 // Set input data Lens' parameter
-void f_sLens_SetInputData(sInMSTEM &InMSTEM, sGP &GP, sLens &Lens){
-	Lens.m = InMSTEM.MC_m;
-	Lens.f = InMSTEM.MC_f;
-	Lens.Cs3 = InMSTEM.MC_Cs3;
-	Lens.Cs5 = InMSTEM.MC_Cs5;
-	Lens.mfa2 = InMSTEM.MC_mfa2;
-	Lens.afa2 = InMSTEM.MC_afa2;
-	Lens.mfa3 = InMSTEM.MC_mfa3;
-	Lens.afa3 = InMSTEM.MC_afa3;
-	Lens.aobjl = InMSTEM.MC_aobjl;
-	Lens.aobju = InMSTEM.MC_aobju;
-	Lens.sf = InMSTEM.MC_sf;
-	Lens.nsf = InMSTEM.MC_nsf;
-	Lens.beta = InMSTEM.MC_beta;
-	Lens.nbeta = InMSTEM.MC_nbeta;
-	f_sLens_Cal(InMSTEM.E0, GP, Lens);
+void f_sLens_SetInputData(cMT_InMULTEM_CPU &MT_InMULTEM_CPU, sGP &GP, sLens &Lens){
+	Lens.m = MT_InMULTEM_CPU.MC_m;
+	Lens.f = MT_InMULTEM_CPU.MC_f;
+	Lens.Cs3 = MT_InMULTEM_CPU.MC_Cs3;
+	Lens.Cs5 = MT_InMULTEM_CPU.MC_Cs5;
+	Lens.mfa2 = MT_InMULTEM_CPU.MC_mfa2;
+	Lens.afa2 = MT_InMULTEM_CPU.MC_afa2;
+	Lens.mfa3 = MT_InMULTEM_CPU.MC_mfa3;
+	Lens.afa3 = MT_InMULTEM_CPU.MC_afa3;
+	Lens.aobjl = MT_InMULTEM_CPU.MC_aobjl;
+	Lens.aobju = MT_InMULTEM_CPU.MC_aobju;
+	Lens.sf = MT_InMULTEM_CPU.MC_sf;
+	Lens.nsf = MT_InMULTEM_CPU.MC_nsf;
+	Lens.beta = MT_InMULTEM_CPU.MC_beta;
+	Lens.nbeta = MT_InMULTEM_CPU.MC_nbeta;
+	f_sLens_Cal(MT_InMULTEM_CPU.E0, GP, Lens);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_sCoefPar_Free(sCoefPar &CoefPar){
 	delete [] CoefPar.cl; CoefPar.cl = 0;
@@ -350,8 +349,8 @@ void f_sCoefPar_Malloc(int nCoefPar, sCoefPar &CoefPar){
 	CoefPar.cnl = new double[nCoefPar];
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_sciVn_Free(sciVn &ciVn){
 	delete [] ciVn.c0; ciVn.c0 = 0;
@@ -376,8 +375,8 @@ void f_sciVn_Malloc(int nciVn, sciVn &ciVn){
 	ciVn.c3 = new double[nciVn];
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_sDetCir_Free(sDetCir &DetCir){
 	delete [] DetCir.g2min; DetCir.g2min = 0;
@@ -396,8 +395,8 @@ void f_sDetCir_Malloc(int nDetCir, sDetCir &DetCir){
 	DetCir.g2max = new double[nDetCir];
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_BuildGrid(int line, int ns, double x0, double y0, double xe, double ye, int &nxs, int &nys, double *&xs, double *&ys){
 	if(ns<=0){
@@ -439,153 +438,4 @@ void f_BuildGrid(int line, int ns, double x0, double y0, double xe, double ye, i
 			ys[i] = y0 + i*ds;
 	}
 
-}
-
-/****************************************************************************/
-/****************************************************************************/
-
-void f_InMulSli_Init(sInMSTEM &InMSTEM){
-	InMSTEM.gpu = 0;
-	InMSTEM.SimType = 0;
-	InMSTEM.nConfFP = 0;
-	InMSTEM.DimFP = 0;
-	InMSTEM.SeedFP = 0;
-	InMSTEM.PotPar = 0;
-	InMSTEM.MEffect = 0;		
-	InMSTEM.STEffect = 0;	
-	InMSTEM.ZeroDefTyp = 0;
-	InMSTEM.ZeroDefPlane = 0;
-	InMSTEM.ApproxModel = 0;
-	InMSTEM.BandwidthLimit = 0;
-	InMSTEM.ThicknessTyp = 0;
-	InMSTEM.nThickness = 0;
-	InMSTEM.Thickness = 0;
-
-	InMSTEM.E0 = 0;
-	InMSTEM.theta = 0;
-	InMSTEM.phi = 0;
-	InMSTEM.nx = 0;
-	InMSTEM.ny = 0;
-	InMSTEM.lx = 0;
-	InMSTEM.ly = 0;
-	InMSTEM.dz = 0;
-
-	InMSTEM.MC_m = 0;
-	InMSTEM.MC_f = 0;
-	InMSTEM.MC_Cs3 = 0;
-	InMSTEM.MC_Cs5 = 0;
-	InMSTEM.MC_mfa2 = 0;
-	InMSTEM.MC_afa2 = 0;
-	InMSTEM.MC_mfa3 = 0;
-	InMSTEM.MC_afa3 = 0;
-	InMSTEM.MC_aobjl = 0;
-	InMSTEM.MC_aobju = 0;
-	InMSTEM.MC_sf = 0;
-	InMSTEM.MC_nsf = 0;
-	InMSTEM.MC_beta = 0;
-	InMSTEM.MC_nbeta = 0;
-
-	InMSTEM.nAtomsM = 0;
-	InMSTEM.AtomsM = 0;
-
-	InMSTEM.STEM_line = 0;
-	InMSTEM.STEM_FastCal = false;
-	InMSTEM.STEM_ns = 0;
-	InMSTEM.STEM_x1u = 0;
-	InMSTEM.STEM_y1u = 0;
-	InMSTEM.STEM_x2u = 0;
-	InMSTEM.STEM_y2u = 0;
-	
-	InMSTEM.STEM_nDet = 0;
-	InMSTEM.STEM_DetCir = 0;
-
-	InMSTEM.CBED_x0 = 0;
-	InMSTEM.CBED_y0 = 0;
-	InMSTEM.CBED_Space = 0;
-
-	//InMSTEM.HRTEM_xx;
-
-	InMSTEM.PED_nrot = 0;
-	InMSTEM.PED_theta = 0;
-
-	InMSTEM.HCI_nrot = 0;
-	InMSTEM.HCI_theta = 0;
-	//InMSTEM.HCI_xx;
-
-	//InMSTEM.EWRS_xx;
-
-	//InMSTEM.EWFS_xx;
-}
-
-void f_InMulSli_Free(sInMSTEM &InMSTEM){
-	InMSTEM.gpu = 0;
-	InMSTEM.SimType = 0;
-	InMSTEM.nConfFP = 0;
-	InMSTEM.DimFP = 0;
-	InMSTEM.SeedFP = 0;
-	InMSTEM.PotPar = 0;
-	InMSTEM.MEffect = 0;		
-	InMSTEM.STEffect = 0;	
-	InMSTEM.ZeroDefTyp = 0;
-	InMSTEM.ZeroDefPlane = 0;
-	InMSTEM.ApproxModel = 0;
-	InMSTEM.BandwidthLimit = 0;
-	InMSTEM.ThicknessTyp = 0;
-	InMSTEM.nThickness = 0;
-	delete [] InMSTEM.Thickness; InMSTEM.Thickness = 0;
-
-	InMSTEM.E0 = 0;
-	InMSTEM.theta = 0;
-	InMSTEM.phi = 0;
-	InMSTEM.nx = 0;
-	InMSTEM.ny = 0;
-	InMSTEM.lx = 0;
-	InMSTEM.ly = 0;
-	InMSTEM.dz = 0;
-
-	InMSTEM.MC_m = 0;
-	InMSTEM.MC_f = 0;
-	InMSTEM.MC_Cs3 = 0;
-	InMSTEM.MC_Cs5 = 0;
-	InMSTEM.MC_mfa2 = 0;
-	InMSTEM.MC_afa2 = 0;
-	InMSTEM.MC_mfa3 = 0;
-	InMSTEM.MC_afa3 = 0;
-	InMSTEM.MC_aobjl = 0;
-	InMSTEM.MC_aobju = 0;
-	InMSTEM.MC_sf = 0;
-	InMSTEM.MC_nsf = 0;
-	InMSTEM.MC_beta = 0;
-	InMSTEM.MC_nbeta = 0;
-
-	InMSTEM.nAtomsM = 0;
-	InMSTEM.AtomsM = 0;
-
-	InMSTEM.STEM_line = 0;
-	InMSTEM.STEM_FastCal = false;
-	InMSTEM.STEM_ns = 0;
-	InMSTEM.STEM_x1u = 0;
-	InMSTEM.STEM_y1u = 0;
-	InMSTEM.STEM_x2u = 0;
-	InMSTEM.STEM_y2u = 0;
-	
-	InMSTEM.STEM_nDet = 0;
-	delete [] InMSTEM.STEM_DetCir; InMSTEM.STEM_DetCir = 0;
-
-	InMSTEM.CBED_x0 = 0;
-	InMSTEM.CBED_y0 = 0;
-	InMSTEM.CBED_Space = 0;
-
-	//InMSTEM.HRTEM_xx;
-
-	InMSTEM.PED_nrot = 0;
-	InMSTEM.PED_theta = 0;
-
-	InMSTEM.HCI_nrot = 0;
-	InMSTEM.HCI_theta = 0;
-	//InMSTEM.HCI_xx;
-
-	//InMSTEM.EWRS_xx;
-
-	//InMSTEM.EWFS_xx;
 }

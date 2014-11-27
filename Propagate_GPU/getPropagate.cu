@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <cstring>
@@ -96,7 +96,7 @@ void cPropagator::Propagate(double dz, sComplex &Psih){
 	f_Propagate(PlanPsi, GP, eSReal, gxu, gyu, lambda, dz, Prop_x, Prop_y, Psi);
 	// fft2shift 
 	f_fft2Shift_MC(GP, Psi);
-	/**********************copy data to host************************/
+	/*********************copy data to host************************/
 	f_Copy_MCd(GP, Psi, Psii.real, Psii.imag, Psih);
 }
 
@@ -117,7 +117,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	ly = mxGetScalar(prhs[6]);
 	dz = mxGetScalar(prhs[7]);
 	BWL = ((int)mxGetScalar(prhs[8])==1)?true:false;
-	/*************************Output data**************************/
+	/************************Output data**************************/
 	plhs[0] = mxCreateDoubleMatrix(ny, nx, mxCOMPLEX);
 	Psioh.real = mxGetPr(plhs[0]);
 	Psioh.imag = mxGetPi(plhs[0]);

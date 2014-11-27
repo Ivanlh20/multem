@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <cstring>
@@ -25,24 +25,24 @@
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	int nAtomsM, iConfFP, nAtoms;
 	double *AtomsM;
-	cMGP MGP;
+	cMT_MGP_CPU MT_MGP_CPU;
 
 	nAtomsM = (int)mxGetM(prhs[0]); 
 	AtomsM = mxGetPr(prhs[0]);
-	MGP.lx = mxGetScalar(prhs[1]); 
-	MGP.ly = mxGetScalar(prhs[2]); 
-	MGP.dz = mxGetScalar(prhs[3]);
+	MT_MGP_CPU.lx = mxGetScalar(prhs[1]); 
+	MT_MGP_CPU.ly = mxGetScalar(prhs[2]); 
+	MT_MGP_CPU.dz = mxGetScalar(prhs[3]);
 	iConfFP = (int)mxGetScalar(prhs[4]); 
-	MGP.DimFP = (int)mxGetScalar(prhs[5]); 
-	MGP.SeedFP = (int)mxGetScalar(prhs[6]);
+	MT_MGP_CPU.DimFP = (int)mxGetScalar(prhs[5]); 
+	MT_MGP_CPU.SeedFP = (int)mxGetScalar(prhs[6]);
 
-	/**************************Input data**************************/
+	/*************************Input data**************************/
 	cMT_Specimen_CPU MT_Specimen_CPU;
-	MT_Specimen_CPU.SetInputData(MGP, nAtomsM, AtomsM);
+	MT_Specimen_CPU.SetInputData(MT_MGP_CPU, nAtomsM, AtomsM);
 	MT_Specimen_CPU.MoveAtoms(iConfFP);
 
 	nAtoms = MT_Specimen_CPU.nAtoms;
-	/*************************Output data**************************/
+	/************************Output data**************************/
 	plhs[0] = mxCreateDoubleMatrix(nAtoms, 6, mxREAL);
 	double *Atoms = mxGetPr(plhs[0]);
 

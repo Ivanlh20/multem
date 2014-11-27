@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <cstring>
@@ -169,7 +169,7 @@ void cMT_AtomTypes_GPU::SetAtomTypes(int PotPari, sAtomTypesCPU &AtomTypesCPUi, 
 	Rmin2 = Rmin*Rmin;
 	Rmax2 = Rmax*Rmax;
 
-	/***************************************************************/
+	/**************************************************************/
 	f_sCoefPar_Malloc(6, cfegh);
 	memcpy(cfegh.cl, AtomTypesCPUi.cfeg.cl, 6*cSizeofRD);
 	memcpy(cfegh.cnl, AtomTypesCPUi.cfeg.cnl, 6*cSizeofRD);
@@ -192,7 +192,7 @@ void cMT_AtomTypes_GPU::SetAtomTypes(int PotPari, sAtomTypesCPU &AtomTypesCPUi, 
 		cVRh.cl[i] = AtomTypesCPUi.cVR.cl[i]/cPotf;
 	memcpy(cVRh.cnl, AtomTypesCPUi.cVR.cnl, 6*cSizeofRD);
 
-	/***************************************************************/
+	/**************************************************************/
 	f_sCoefPar_cudaMalloc(6, cfeg);
 	cudaMemcpy(cfeg.cl, cfegh.cl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 	cudaMemcpy(cfeg.cnl, cfegh.cnl, 6*cSizeofRD, cudaMemcpyHostToDevice);
@@ -213,7 +213,7 @@ void cMT_AtomTypes_GPU::SetAtomTypes(int PotPari, sAtomTypesCPU &AtomTypesCPUi, 
 	cudaMemcpy(cVR.cl, cVRh.cl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 	cudaMemcpy(cVR.cnl, cVRh.cnl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 
-	/***********************************************************************************/
+	/**********************************************************************************/
 	ns = AtomTypesCPUi.ns;
 	if(ns>0){
 		Vo = new sVoGPU[ns];

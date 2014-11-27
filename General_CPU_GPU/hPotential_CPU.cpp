@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "hmathCPU.h"
@@ -55,7 +55,7 @@ void cPotential_CPU::SetAtomTypes(int PotPari, sAtomTypesCPU AtomTypesi){
 	memcpy(&AtomTypes, &AtomTypesi, sizeof(sAtomTypesCPU));
 }
 
-/****************************************************************************/
+/***************************************************************************/
 // 1D Potential calculation (Vx, dVx) where dVx is the first derivative along x
 void cPotential_CPU::Pot1Da(double &r, double *cl, double *cnl, double &f, double &df){
 
@@ -66,7 +66,7 @@ void cPotential_CPU::Pot1Dn(double &r, double *cl, double *cnl, double &f, doubl
 
 }
 
-/****************************************************************************/
+/***************************************************************************/
 // 2D Potential calculation (VR, dVR) where dVR is the first derivative along R
 void cPotential_CPU::Pot2Da(double &r, double *cl, double *cnl,double &f, double &df){
 	int i;
@@ -176,7 +176,7 @@ void cPotential_CPU::Pot2Dn(double &r, double *cl, double *cnl, double &f, doubl
 //	dVR *= 4.0*R*cPotf;
 }
 
-/****************************************************************************/
+/***************************************************************************/
 // 3D Potential calculation (Vr, dVr) where dVr is the first derivative along r
 void cPotential_CPU::Pot3Da(double &r, double *cl, double *cnl, double &f, double &df){
 	int i;
@@ -283,7 +283,7 @@ void cPotential_CPU::Pot3Dn(double &r, double *cl, double *cnl, double &f, doubl
 //	dVr = 2.0*cPotf*M*h*dVr/(r*r);
 }
 
-/****************************************************************************/
+/***************************************************************************/
 void cPotential_CPU::Vr(int IntType, int Dim, double r, double &f, double &df){
 	switch (Dim){
 		case 1:
@@ -312,7 +312,7 @@ void cPotential_CPU::Vr(int IntType, int Dim, double r, double &f, double &df){
 
 }
 
-/****************************************************************************/
+/***************************************************************************/
 // 2D Potential calculation (VR, dVR) where dVR is the first derivative along R
 void cPotential_CPU::Vr(int IntType, int Dim, int nr, double *r, double *f, double *df){
 	for (int i=0; i<nr; i++)
@@ -355,7 +355,7 @@ void cPotential_CPU::Vr(int PotPar, int nAtoms, sAtoms *Atoms, int nAtomTypes, s
 	delete [] dft;
 }
 
-/****************************************************************************/
+/***************************************************************************/
 double cPotential_CPU::AtomicRadius_rms(int Dim){
 	double iVr, iVrn, Vrt;
 	double ri, wi, Vri, dVri;
@@ -369,7 +369,7 @@ double cPotential_CPU::AtomicRadius_rms(int Dim){
 
 		iVr = Vri*pow(rmin, Dim)/Dim;
 		iVrn = Vri*pow(rmin, Dim+2)/(Dim+2);
-		/*************************************************************/
+		/************************************************************/
 		for (int i=0; i<nQ1; i++){
 			ri = Q1.x[i] + rmin;
 			wi = Q1.w[i];

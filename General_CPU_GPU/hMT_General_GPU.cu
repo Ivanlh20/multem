@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "hConstTypes.h"
@@ -155,8 +155,8 @@ __device__ inline void k_reduceBlockComplex256(volatile double2 *M1, volatile do
 	}
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 __global__ void k_Scale_MD(sGP GP, double w, double * __restrict MD_io)
 {
@@ -231,8 +231,8 @@ void f_Scale_MC(sGP &GP, double w, double2 *&MC1_io, double2 *&MC2_io){
 	k_Scale_MC<<<Bnxny, Tnxny>>>(GP, w, MC1_io, MC2_io);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 // Set value to Double vector:
 __global__ void k_Set_MD(sGP GP, double M, double * __restrict MD_o)
@@ -369,8 +369,8 @@ void f_Get_MC(sGP &GP, double2 *&MC_i, sComplex &MC_o){
 	k_Get_MC<<<Bnxny, Tnxny>>>(GP, MC_i, MC_o);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 template <bool add>
 __global__ void k_Add_wMD(sGP GP, double w, const double * __restrict MD_i, double * __restrict MD_io)
@@ -571,8 +571,8 @@ void f_Add_wMC_wMD(bool add, sGP &GP, double w, double2 *&MC_i, double *&MD_i, d
 		k_Add_wMC_wMD<false><<<Bnxny, Tnxny>>>(GP, w, MC_i, MD_i, MC_io, MD_io);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 __device__ inline void ExcVal(double &v1, double &v2)
 {
 	 double v = v1;
@@ -763,8 +763,8 @@ void f_fft2Shift_MC(sGP &GP, sComplex &MC_io){
 	k_fft2Shift_MC<<<Bnxhnyh, Tnxhnyh>>>(GP, MC_io);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 // Sum module square over all the elements
 __global__ void k_Sum_MD(sGP GP, const double * __restrict MD_i, double * __restrict MDp_o){ 
@@ -1049,8 +1049,8 @@ void f_Sum_MC_Det(sGP &GP, double2 *&MC_i, double gmin2, double gmax2, double *&
 	k_Sum_MDp<<<1, thrnxy>>>(Bnxny.x*Bnxny.y, MDp_i, iSum, Sum_MD_o);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 // Phase
 __global__ void k_Phase(sGP GP, double gxu, double gyu, sACD ExpR_x_o, sACD ExpR_y_o){
@@ -1128,17 +1128,67 @@ __global__ void k_Transmission2(sGP GP, eSlicePos SlicePo, double f, const doubl
 		double theta, x, y;
 		switch (SlicePo){
 			case eSPFirst: // initial slice
-				theta = f*(V0-V1);
+				theta = V0 = f*(V0-V1);
 				V1o_io[ixy] = V1;
 				break;
 			case eSPMedium: // intermediate slice
-				theta = f*(V0-V1+V1o_io[ixy]);
+				theta = V0 = f*(V0-V1+V1o_io[ixy]);
 				V1o_io[ixy] = V1;
 				break;
 			case eSPLast: // last slice
-				theta = f*V1o_io[ixy];
+				theta = V0 = f*V1o_io[ixy];
 				break;
 		}
+		sincos(theta, &y , &x);
+		Trans_o[ixy].x = x;
+		Trans_o[ixy].y = y;
+	}
+}
+
+// Calculated projected potential
+__global__ void k_Potential1(sGP GP, double f, const double * __restrict V0_i, float * __restrict Ve_o){
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if ((ix < GP.nx)&&(iy < GP.ny)){
+		int ixy = ix*GP.ny+iy;
+		double V0 = f*V0_i[ixy];
+		Ve_o[ixy] = V0;
+	}
+}
+
+// Calculated effective potential
+__global__ void k_Potential2(sGP GP, eSlicePos SlicePo, double f, const double * __restrict V0_i, const double * __restrict V1_i, double * __restrict V1o_io, float * __restrict Ve_o){
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if ((ix < GP.nx)&&(iy < GP.ny)){
+		int ixy = ix*GP.ny+iy;
+		double V0 = V0_i[ixy], V1 = V1_i[ixy];
+		switch (SlicePo){
+			case eSPFirst: // initial slice
+				Ve_o[ixy] = V0 = f*(V0-V1);
+				V1o_io[ixy] = V1;
+				break;
+			case eSPMedium: // intermediate slice
+				Ve_o[ixy] = V0 = f*(V0-V1+V1o_io[ixy]);
+				V1o_io[ixy] = V1;
+				break;
+			case eSPLast: // last slice
+				Ve_o[ixy] = V0 = f*V1o_io[ixy];
+				break;
+		}
+	}
+}
+
+// Calculated transmission function
+__global__ void k_Transmission_1_2(sGP GP, const float * __restrict Ve_i, double2 * __restrict Trans_o){
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if ((ix < GP.nx)&&(iy < GP.ny)){
+		int ixy = ix*GP.ny+iy;
+		double theta = Ve_i[ixy], x, y;
 		sincos(theta, &y , &x);
 		Trans_o[ixy].x = x;
 		Trans_o[ixy].y = y;
@@ -1427,14 +1477,33 @@ void f_Transmission1(cufftHandle &PlanPsi, sGP &GP, double fPot, double *&V0_i, 
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);	
 	k_Transmission1<<<Bnxny, Tnxny>>>(GP, fPot, V0_i, Trans_o);		// Transmission
-	f_BandwidthLimit2D(PlanPsi, GP, Trans_o);		// AntiAliasing
+	f_BandwidthLimit2D(PlanPsi, GP, Trans_o);						// AntiAliasing
 }
 
 void f_Transmission2(cufftHandle &PlanPsi, sGP &GP, double fPot, double *&V0_i, double *&V1_i, double *&V1o_io, eSlicePos SlicePos, double2 *&Trans_o){
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);	
 	k_Transmission2<<<Bnxny, Tnxny>>>(GP, SlicePos, fPot, V0_i, V1_i, V1o_io, Trans_o);	// Transmission
-	f_BandwidthLimit2D(PlanPsi, GP, Trans_o);								// AntiAliasing
+	f_BandwidthLimit2D(PlanPsi, GP, Trans_o);											// AntiAliasing
+}
+
+void f_Potential1(sGP &GP, double fPot, double *&V0_i, float *&Ve_o){
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);	
+	k_Potential1<<<Bnxny, Tnxny>>>(GP, fPot, V0_i, Ve_o);	// Transmission
+}
+
+void f_Potential2(sGP &GP, double fPot, double *&V0_i, double *&V1_i, double *&V1o_io, eSlicePos SlicePos, float *&Ve_o){
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);	
+	k_Potential2<<<Bnxny, Tnxny>>>(GP, SlicePos, fPot, V0_i, V1_i, V1o_io, Ve_o);	// Transmission
+}
+
+void f_Transmission_1_2(cufftHandle &PlanPsi, sGP &GP, float *&Ve_i, double2 *&Trans_o){
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);	
+	k_Transmission_1_2<<<Bnxny, Tnxny>>>(GP, Ve_i, Trans_o);	// Transmission
+	f_BandwidthLimit2D(PlanPsi, GP, Trans_o);						// AntiAliasing
 }
 
 void f_Transmit(sGP &GP, double2 *&Trans_i, double2 *&Psi_io){
@@ -1491,8 +1560,8 @@ void f_Apply_PCTF(sGP &GP, sLens &Lens, double2 *&fPsi_i, double2 *&fPsi_o){
 	k_Apply_PCTF<<<Bnxny, Tnxny>>>(GP, Lens, fPsi_i, fPsi_o);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 // From Device To Host
 void f_Copy_MCd(sGP &GP, double2 *&MC_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o){	
@@ -1521,8 +1590,8 @@ void f_Copy_MCd_MDd(sGP &GP, double2 *&MC_d_i, double *&MD1_d_i, double *&MD2_d_
 	cudaMemcpy(MD2_h_o, MD2_d_i, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_ReadQuadratureGPU(int typ, int nQGPU, sQ1 &QGPU){
 	if(nQGPU<=0) return;
@@ -1553,8 +1622,8 @@ void f_ReadQuadratureCPUGPU(int typ, int nQ, sQ1 &QCPU, sQ1 &QGPU){
 	cudaMemcpy(QGPU.w, QCPU.w, nQ*cSizeofRD, cudaMemcpyHostToDevice);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_sCoefPar_cudaFree(sCoefPar &CoefPar){
 	cudaFreen(CoefPar.cl);
@@ -1573,8 +1642,8 @@ void f_sCoefPar_cudaMalloc(int nCoefPar, sCoefPar &CoefPar){
 	cudaMalloc((void**)&(CoefPar.cnl), nCoefPar*cSizeofRD);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_sciVn_cudaFree(sciVn &ciVn){
 	cudaFreen(ciVn.c0);
@@ -1599,8 +1668,8 @@ void f_sciVn_cudaMalloc(int nciVn, sciVn &ciVn){
 	cudaMalloc((void**)&(ciVn.c3), nciVn*cSizeofRD);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_sDetCir_cudaFree(sDetCir &DetCir){
 	cudaFreen(DetCir.g2min);
@@ -1619,8 +1688,8 @@ void f_sDetCir_cudaMalloc(int nDetCir, sDetCir &DetCir){
 	cudaMalloc((void**)&(DetCir.g2max), nDetCir*cSizeofRD);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_sACD_cudaFree(sACD &ACD){
 	cudaFreen(ACD.x);
@@ -1639,8 +1708,8 @@ void f_sACD_cudaMalloc(int nACD, sACD &ACD){
 	cudaMalloc((void**)&(ACD.y), nACD*cSizeofRD);
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_GPU_Sync_CPU(int &iSynCPU, int &cSynCPU){
 	if(cSynCPU<0) cSynCPU = ccSynCPU;
@@ -1650,8 +1719,8 @@ void f_GPU_Sync_CPU(int &iSynCPU, int &cSynCPU){
 		cudaDeviceSynchronize();
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void f_scVp_cudaFree(int &ncVp, scVp *&cVp){
 	for(int icVp=0; icVp<ncVp; icVp++){

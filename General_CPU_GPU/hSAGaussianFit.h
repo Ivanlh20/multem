@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef hSAGaussianFit_H
@@ -63,19 +63,19 @@ class cSAGF{
 };
 
 cSAGF::cSAGF(){
-	/******************************************/
+	/*****************************************/
 	M = 0;
 	Mt = 0;
 	F = 0;
-	/******************************************/
+	/*****************************************/
 	iwork = 0;
 	work = 0;
 	Sv = 0;
 	rcond = -1;
 	cTn = "N";
-	/******************************************/
+	/*****************************************/
 	RandGen.reset();
-	/******************************************/
+	/*****************************************/
 	for (int i=0; i<ngmax; i++){
 		clt[i] = cnlt[i] = cl[i] = cnl[i] = cln[i] = cnln[i] = clbc[i] = cnlbc[i] = 0;
 		cnlmin[i] = cnlmax[i] = cnll[i] = cnld[i] = 0;
@@ -84,11 +84,11 @@ cSAGF::cSAGF(){
 
 cSAGF::~cSAGF(){
 	cTn = "N";
-	/******************************************/
+	/*****************************************/
 	delete [] M; M = 0;
 	delete [] Mt; Mt = 0;
 	delete [] F; F = 0;
-	/******************************************/
+	/*****************************************/
 	delete [] iwork; iwork = 0;
 	delete [] work; work = 0;
 	delete [] Sv; Sv = 0;
@@ -97,17 +97,17 @@ cSAGF::~cSAGF(){
 inline void cSAGF::SetInputData(int nxi, double *xi, double *yi, int ngi){	
 	nx = nxi;
 	ng = ngi;
-	/****************************************************************/
+	/***************************************************************/
 	for (int i=0; i<nx; i++){
 		x[i] = xi[i];
 		x2[i] = x[i]*x[i];
 		y[i] = yi[i];
 	}
-	/****************************************************************/
+	/***************************************************************/
 	delete [] F; F = new double[nx*1];
 	delete [] M; M = new double[nx*ng];
 	delete [] Mt; Mt = new double[ng*nx];
-	/****************************************************************/
+	/***************************************************************/
 	lwork = 8*nx*ng;
 	delete [] work; work = new double[lwork];
 	delete [] iwork; iwork = new ptrdiff_t[8*nx*ng]; 
@@ -115,7 +115,7 @@ inline void cSAGF::SetInputData(int nxi, double *xi, double *yi, int ngi){
 	rcond = -1;
 	onei = 1;
 	cTn = "N";
-	/****************************************************************/
+	/***************************************************************/
 }
 
 inline void cSAGF::GetMinMaxcnl(){
@@ -137,7 +137,7 @@ inline void cSAGF::GetMinMaxcnl(){
 		cnlmin[i] = smin/30.0;
 		cnlmax[i] = 3.0*smax;
 	}
-	/********************************************************/
+	/*******************************************************/
 	ff = 1.0/(0.5*(t0+t1));
 	for (i=1; i<(nx-1); i++)
 		wb[i] = 0.5*(x[i+1]-x[i-1]);

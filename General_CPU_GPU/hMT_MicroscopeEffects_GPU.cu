@@ -1,33 +1,34 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "math.h"
-#include <cstring>
 #include "hConstTypes.h"
+#include "hQuadrature.h"
 #include "hMT_General_CPU.h"
 #include "hMT_General_GPU.h"
-#include "hQuadrature.h"
 #include "hMT_MicroscopeEffects_GPU.h"
+
+#include "math.h"
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <device_functions.h>
 #include <cufft.h>
 
-/****************************************************************************/
+/***************************************************************************/
 void cMT_MicroscopeEffects_GPU::freeMemory(){
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
@@ -163,7 +164,7 @@ void cMT_MicroscopeEffects_GPU::ReadSpatialQuadrature(sLens &Lens, int &nQs, sQ2
 	Qst.x = new double [(2*Lens.ngxs+1)*(2*Lens.ngys+1)];
 	Qst.y = new double [(2*Lens.ngxs+1)*(2*Lens.ngys+1)];
 	Qst.w = new double [(2*Lens.ngxs+1)*(2*Lens.ngys+1)];
-	/***********************************************************************/
+	/**********************************************************************/
 	nQs = 0; sumwia = 0.0;
 	 for(j=-Lens.ngys; j<=Lens.ngys; j++)
 		 for(i=-Lens.ngxs; i<=Lens.ngxs; i++){
@@ -176,7 +177,7 @@ void cMT_MicroscopeEffects_GPU::ReadSpatialQuadrature(sLens &Lens, int &nQs, sQ2
 				nQs++;
 			}
 		}
-	/***********************************************************************/
+	/**********************************************************************/
 	Qs.x = new double [nQs];
 	Qs.y = new double [nQs];
 	Qs.w = new double [nQs];
@@ -186,7 +187,7 @@ void cMT_MicroscopeEffects_GPU::ReadSpatialQuadrature(sLens &Lens, int &nQs, sQ2
 		Qs.y[i] = Qst.y[i];
 		Qs.w[i] = Qst.w[i]/sumwia;
 	}
-	/***********************************************************************/
+	/**********************************************************************/
 	delete [] Qst.x; Qst.x = 0;
 	delete [] Qst.y; Qst.y = 0;
 	delete [] Qst.w; Qst.w = 0;
@@ -199,14 +200,14 @@ void cMT_MicroscopeEffects_GPU::SetInputData(sGP &GP_i, sLens &Lens_i, cufftHand
 	Lens = Lens_i;
 	PlanPsi = PlanPsi_i;
 	Psit = Psit_i;
-	/**********************Temporal quadrature**********************/
+	/*********************Temporal quadrature**********************/
 	Qt.x = new double[Lens.nsf]; 
 	Qt.w = new double [Lens.nsf];
 	cQuadrature Quad;
 	Quad.ReadQuadrature(8, Lens.nsf, Qt);		// 8: int_-infty^infty f(x) Exp[-x^2] dx
 	for(int i=0; i<Lens.nsf; i++)
 		Qt.w[i] /= cPii2;
-	/**********************Spatial quadrature**********************/
+	/*********************Spatial quadrature**********************/
 	ReadSpatialQuadrature(Lens, nQs, Qs);
 }
 

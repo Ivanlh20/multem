@@ -1,25 +1,31 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef hMT_Specimen_CPU_H
 #define hMT_Specimen_CPU_H
 
+#include <cstring>
 #include "hConstTypes.h"
+#include "hmathCPU.h"
+#include "hMT_General_CPU.h"
+#include "hMT_Specimen_CPU.h"
+#include "hMT_MGP_CPU.h"
+#include "hAtomicData.h"
 #include "hRandGen.h"
 
 class cMT_Specimen_CPU{
@@ -39,11 +45,11 @@ class cMT_Specimen_CPU{
 		void getnSlice(double z10, double z1i, double z20, double z2i, double dzi, int &nSlice, double &dz0, double &dze);
 		int getBorderSlicing(double z0, double ze, double zi, double dzi, double &dzb);
 		int getAtomsInSlice(double z0, double ze, int nAtoms, sAtoms *&Atoms, int &z0_id, int &ze_id);
-		void Slicing(cMGP &MGP, double Rmax,int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
-		void Slicing(cMGP &MGP, double Rmax, int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
-		void Slicing(cMGP &MGP, int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
+		void Slicing(cMT_MGP_CPU &MT_MGP_CPU, double Rmax,int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
+		void Slicing(cMT_MGP_CPU &MT_MGP_CPU, double Rmax, int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
+		void Slicing(cMT_MGP_CPU &MT_MGP_CPU, int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
 	public:
-		cMGP MGP;					// Multislice general parameters
+		cMT_MGP_CPU MT_MGP_CPU;					// Multislice general parameters
 
 		double sigma_min;
 		double sigma_max;
@@ -68,7 +74,7 @@ class cMT_Specimen_CPU{
 		void freeMemory();
 		cMT_Specimen_CPU();
 		~cMT_Specimen_CPU();
-		void SetInputData(cMGP &MGP_io, int nAtomsM_i, double *AtomsM_i);
+		void SetInputData(cMT_MGP_CPU &MGP_io, int nAtomsM_i, double *AtomsM_i);
 		void MoveAtoms(int iConf);
 		double get_dz(int iSlice);
 };

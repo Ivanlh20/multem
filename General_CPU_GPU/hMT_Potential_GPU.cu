@@ -1,28 +1,30 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "hConstTypes.h"
 #include "hMT_General_CPU.h"
 #include "hMT_General_GPU.h"
+#include "hMT_MGP_CPU.h"
 #include "hMT_Specimen_CPU.h"
 #include "hMT_AtomTypes_GPU.h"
 #include "hMT_Potential_GPU.h"
 #include "hQuadrature.h"
+
 #include "math.h"
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -362,8 +364,8 @@ __device__ inline void reduceBlockDouble128(volatile double *M1, volatile double
 	}
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 // Linear projected potential: V and zV
 template <int MulOrder>
@@ -441,8 +443,8 @@ void LinearProjAtomicPotentialGPU(dim3 grid, dim3 threads, int MulOrder, sQ1 &Qz
 	}
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 // Get Local interpolation coefficients
 template <int MulOrder>
@@ -452,14 +454,14 @@ __global__ void k_CubicPolyCoef(void){
 	if (iR < stnR-1){
 		double dx = 1.0/(cVp[isatom].R2[iR+1]-cVp[isatom].R2[iR]), dx2 = dx*dx;
 		double V, Vn, dV, dVn, m, n;
-		/*********************************************************/
+		/********************************************************/
 		V = cVp[isatom].ciV0.c0[iR]; Vn = cVp[isatom].ciV0.c0[iR+1];
 		dV = cVp[isatom].ciV0.c1[iR]; dVn = cVp[isatom].ciV0.c1[iR+1];
 		m = (Vn-V)*dx; n = dV+dVn;
 		cVp[isatom].ciV0.c0[iR] = V-cVp[isatom].ciV0.c0[stnR-1];
 		cVp[isatom].ciV0.c2[iR] = (3.0*m-n-dV)*dx;
 		cVp[isatom].ciV0.c3[iR] = (n-2.0*m)*dx2;
-		/*********************************************************/
+		/********************************************************/
 		if(MulOrder>=2){
 			V = cVp[isatom].ciV1.c0[iR]; Vn = cVp[isatom].ciV1.c0[iR+1];
 			dV = cVp[isatom].ciV1.c1[iR]; dVn = cVp[isatom].ciV1.c1[iR+1];
@@ -483,8 +485,8 @@ void CubicPolyCoef(dim3 grid, dim3 threads, int MulOrder){
 	
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 __global__ void k_CubicPolyEval(sGP GP, scVp cVp, double * __restrict V0g, double * __restrict V1g)
 {
@@ -533,8 +535,8 @@ void CubicPolyEval(sGP &GP, scVp *&cVph, int nsatom, double *&V0g, double *&V1g)
 	}
 }
 
-/****************************************************************************/
-/****************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
 void cMT_Potential_GPU::SetPotPar(int PotParh){
 	cudaMemcpyToSymbol(PotPar, &PotParh, cSizeofI);
@@ -557,6 +559,8 @@ void cMT_Potential_GPU::freeMemory(){
 	cudaFreen(V0);
 	cudaFreen(V1);
 	cudaFreen(V2);
+
+	delete MT_Specimen_CPU; MT_Specimen_CPU = 0;
 }
 
 cMT_Potential_GPU::cMT_Potential_GPU(){
@@ -576,36 +580,39 @@ cMT_Potential_GPU::cMT_Potential_GPU(){
 	V0 = 0;
 	V1 = 0;
 	V2 = 0;
+
+	MT_Specimen_CPU = 0;
 }
 
 cMT_Potential_GPU::~cMT_Potential_GPU(){
 	freeMemory();
 }
 
-void cMT_Potential_GPU::SetInputData(cMGP &MGP_io, sGP &GP_i, int nAtomsM_i, double *AtomsM_i){
+void cMT_Potential_GPU::SetInputData(cMT_MGP_CPU &MGP_io, sGP &GP_i, int nAtomsM_i, double *AtomsM_i){
 	freeMemory();
 
-	SetPotPar(MGP.PotPar);				// Set Potential parameterization
+	SetPotPar(MT_MGP_CPU.PotPar);				// Set Potential parameterization
 	f_ReadQuadratureGPU(0, stnQz, Qz);	// TanhSinh
 
 	ncVph = stncVp;
 	f_scVp_cudaMalloc(ncVph, cVph);
 
-	MGP = MGP_io;
+	MT_MGP_CPU = MGP_io;
 	GP = GP_i;
 
-	MT_Specimen_CPU.SetInputData(MGP, nAtomsM_i, AtomsM_i);
+	MT_Specimen_CPU = new cMT_Specimen_CPU;
+	MT_Specimen_CPU->SetInputData(MT_MGP_CPU, nAtomsM_i, AtomsM_i);
 
-	nAtomTypesGPU = MT_Specimen_CPU.nAtomTypes;
+	nAtomTypesGPU = MT_Specimen_CPU->nAtomTypes;
 	AtomTypesGPU = new cMT_AtomTypes_GPU[nAtomTypesGPU];
 	for (int iAtomTypesGPU=0; iAtomTypesGPU<nAtomTypesGPU; iAtomTypesGPU++)
-		AtomTypesGPU[iAtomTypesGPU].SetAtomTypes(MGP.PotPar, MT_Specimen_CPU.AtomTypes[iAtomTypesGPU], stnR, GP.dRmin);
+		AtomTypesGPU[iAtomTypesGPU].SetAtomTypes(MT_MGP_CPU.PotPar, MT_Specimen_CPU->AtomTypes[iAtomTypesGPU], stnR, GP.dRmin);
 
 	cudaMalloc((void**)&V0, GP.nxy*cSizeofRD);
 	cudaMalloc((void**)&V1, GP.nxy*cSizeofRD);
 	cudaMalloc((void**)&V2, GP.nxy*cSizeofRD);
-	/**************************************************************************/
-	MGP_io = MGP;
+	/*************************************************************************/
+	MGP_io = MT_MGP_CPU;
 }
 
 int cMT_Potential_GPU::CheckGridLimits(int i, int n){
@@ -628,17 +635,17 @@ void cMT_Potential_GPU::getbn(sGP &GP, double x, double y, double Rmax, sbn &bnx
 	bny.i = iy0; bny.n = (iy0==iye)?0:iye-iy0+1;
 };
 
-void cMT_Potential_GPU::setcVp(int ApproxModel, cMT_Specimen_CPU &MT_Specimen_CPU, cMT_AtomTypes_GPU *&AtomTypesGPU, int iSlice, int iatom, int nsatom, dim3 &BPot, dim3 &TPot, dim3 &BCoef, dim3 &TCoef){
+void cMT_Potential_GPU::setcVp(int ApproxModel, cMT_Specimen_CPU *&MT_Specimen_CPU, cMT_AtomTypes_GPU *&AtomTypesGPU, int iSlice, int iatom, int nsatom, dim3 &BPot, dim3 &TPot, dim3 &BCoef, dim3 &TCoef){
 	int Z;
 
 	for(int i=0; i<nsatom; i++){
-		Z = MT_Specimen_CPU.Atoms[iatom+i].Z-1;
-		cVph[i].x = MT_Specimen_CPU.Atoms[iatom+i].x;
-		cVph[i].y = MT_Specimen_CPU.Atoms[iatom+i].y;
-		cVph[i].z0 = MT_Specimen_CPU.Slice[iSlice].z0 - MT_Specimen_CPU.Atoms[iatom+i].z; 
-		cVph[i].ze = MT_Specimen_CPU.Slice[iSlice].ze - MT_Specimen_CPU.Atoms[iatom+i].z;
+		Z = MT_Specimen_CPU->Atoms[iatom+i].Z-1;
+		cVph[i].x = MT_Specimen_CPU->Atoms[iatom+i].x;
+		cVph[i].y = MT_Specimen_CPU->Atoms[iatom+i].y;
+		cVph[i].z0 = MT_Specimen_CPU->Slice[iSlice].z0 - MT_Specimen_CPU->Atoms[iatom+i].z; 
+		cVph[i].ze = MT_Specimen_CPU->Slice[iSlice].ze - MT_Specimen_CPU->Atoms[iatom+i].z;
 		cVph[i].split = (cVph[i].z0<0)&&(0<cVph[i].ze);
-		cVph[i].occ = MT_Specimen_CPU.Atoms[iatom+i].occ;
+		cVph[i].occ = MT_Specimen_CPU->Atoms[iatom+i].occ;
 		cVph[i].Rmin2 = AtomTypesGPU[Z].Rmin2;
 		cVph[i].Rmax2 = AtomTypesGPU[Z].Rmax2;
 		cVph[i].cVr.cl = AtomTypesGPU[Z].cVr.cl;
@@ -664,8 +671,8 @@ void cMT_Potential_GPU::setcVp(int ApproxModel, cMT_Specimen_CPU &MT_Specimen_CP
 // Projected potential calculation: iSlice = slice position
 void cMT_Potential_GPU::ProjectedPotential(int iSlice){	
 	int iatom, nsatom;
-	int iatom0 = MT_Specimen_CPU.Slice[iSlice].z0i_id;
-	int iatome = MT_Specimen_CPU.Slice[iSlice].zei_id;
+	int iatom0 = MT_Specimen_CPU->Slice[iSlice].z0i_id;
+	int iatome = MT_Specimen_CPU->Slice[iSlice].zei_id;
 	dim3 BPot, TPot, BCoef, TCoef;
 
 	f_Set_MD(GP, 0.0, V0, V1);
@@ -675,17 +682,15 @@ void cMT_Potential_GPU::ProjectedPotential(int iSlice){
 	iatom = iatom0;
 	while (iatom<=iatome){
 		nsatom = MIN(stncVp, iatome-iatom+1);
-		setcVp(MGP.ApproxModel, MT_Specimen_CPU, AtomTypesGPU, iSlice, iatom, nsatom, BPot, TPot, BCoef, TCoef);
-		if(MGP.ApproxModel==1){
-			LinearProjAtomicPotentialGPU(BPot, TPot, MGP.MulOrder, Qz);
-			CubicPolyCoef(BCoef, TCoef, MGP.MulOrder);
+		setcVp(MT_MGP_CPU.ApproxModel, MT_Specimen_CPU, AtomTypesGPU, iSlice, iatom, nsatom, BPot, TPot, BCoef, TCoef);
+		if(MT_MGP_CPU.ApproxModel==1){
+			LinearProjAtomicPotentialGPU(BPot, TPot, MT_MGP_CPU.MulOrder, Qz);
+			CubicPolyCoef(BCoef, TCoef, MT_MGP_CPU.MulOrder);
 		}
 		CubicPolyEval(GP, cVph, nsatom, V0, V1);
 		iatom += nsatom;
 	}
 
-	if((MGP.ApproxModel==1)&&(MGP.MulOrder==2)){
-		double dz = MT_Specimen_CPU.Slice[iSlice].ze - MT_Specimen_CPU.Slice[iSlice].z0;
-		f_Scale_MD(GP, 1.0/dz, V1);
-	}
+	if((MT_MGP_CPU.ApproxModel==1)&&(MT_MGP_CPU.MulOrder==2))
+		f_Scale_MD(GP, 1.0/MT_Specimen_CPU->get_dz(iSlice), V1);
 }

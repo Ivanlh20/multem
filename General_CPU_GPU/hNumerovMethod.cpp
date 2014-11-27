@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "math.h"
@@ -43,7 +43,7 @@ void cNumerov::ReadInputdata(int nri, double *ri, double *Vri)
 		Vr[i] = -Vri[i]/cHa;
 	 }
 
-	/****************Useful constants****************/
+	/***************Useful constants****************/
 	dx = log(r[nr-1]/r[0])/double(nr-1);
 	dxf = dx*dx/12;
 	def = dx/(2.0*dxf);
@@ -60,7 +60,7 @@ void cNumerov::SolveRadSchEq(int ni, double gamma, int Dim, double *aEner, doubl
 			nodes = n-l-1;
 			switch (Dim){
 				case 1:
-					/******************************************/
+					/*****************************************/
 					break;
 				case 2:
 					lh2 = 0.5*l*l;
@@ -174,10 +174,10 @@ void cNumerov::SolveRadSchEq(int ni, double gamma, int Dim, double *aEner, doubl
 			aEner[c++] = e*cHa/gamma;
 			switch (Dim){
 				case 1:
-					/******************************************/
+					/*****************************************/
 					break;
 				case 2:
-					/******************************************/
+					/*****************************************/
 					break;
 				case 3:
 					for (i=0; i<nr; i++)

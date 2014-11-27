@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "hConstTypes.h"
@@ -152,12 +152,12 @@ void cTEMIm::TEMImage(double *Psir_hi, double *Psii_hi, double *M2Psi_ho){
 	// Forward fft2
 	cufftExecZ2Z(PlanPsi, fPsi, fPsi, CUFFT_FORWARD);
 
-	/**********************Microscope effects**********************/
+	/*********************Microscope effects**********************/
 	//if (MEffect==0)
 	//	MT_MicroscopeEffects_GPU.PCLIMWPOTEM(M2Psis);	
 	//else
 	//	MT_MicroscopeEffects_GPU.PCTCCTEM(M2Psis);
-	/*************************************************************/
+	/************************************************************/
 	// fft2shift
 	f_fft2Shift_MD(BT.Bhnxny, BT.Thnxny, GP.nxh, GP.nyh, M2Psis);
 	// copy M2Psi to the host

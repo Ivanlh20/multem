@@ -1,19 +1,19 @@
-/**
- *  This file is part of MULTEM.
- *  Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
+/*
+ * This file is part of MULTEM.
+ * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- *  MULTEM is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  MULTEM is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MULTEM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with MULTEM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "hConstTypes.h"
@@ -31,7 +31,7 @@ class cProbe{
 	private:
 		double x0;
 		double y0;
-		cMGP MGP;
+		cMT_MGP_CPU MT_MGP_CPU;
 		sGP GP;
 		sLens Lens;
 		sComplex Psii;
@@ -74,19 +74,19 @@ cProbe::cProbe(){
 void cProbe::SetInputData(sInProbe &InProbe){
 	freeMemory();
 
-	MGP.gpu = InProbe.gpu;
-	MGP.E0 = InProbe.E0;	
-	MGP.theta = InProbe.theta;	
-	MGP.phi = InProbe.phi;
-	MGP.lx = InProbe.lx;
-	MGP.ly = InProbe.ly;
-	MGP.nx = InProbe.nx;
-	MGP.ny = InProbe.ny;
-	MGP.BWL = true;
+	MT_MGP_CPU.gpu = InProbe.gpu;
+	MT_MGP_CPU.E0 = InProbe.E0;	
+	MT_MGP_CPU.theta = InProbe.theta;	
+	MT_MGP_CPU.phi = InProbe.phi;
+	MT_MGP_CPU.lx = InProbe.lx;
+	MT_MGP_CPU.ly = InProbe.ly;
+	MT_MGP_CPU.nx = InProbe.nx;
+	MT_MGP_CPU.ny = InProbe.ny;
+	MT_MGP_CPU.BWL = true;
 
-	cudaSetDevice(MGP.gpu);
+	cudaSetDevice(MT_MGP_CPU.gpu);
 
-	f_sGP_Cal(MGP.nx, MGP.ny, MGP.lx, MGP.ly, MGP.dz, MGP.PBC_xy, MGP.BWL, GP);
+	f_sGP_Cal(MT_MGP_CPU.nx, MT_MGP_CPU.ny, MT_MGP_CPU.lx, MT_MGP_CPU.ly, MT_MGP_CPU.dz, MT_MGP_CPU.PBC_xy, MT_MGP_CPU.BWL, GP);
 
 	Lens.m = InProbe.m;
 	Lens.f = InProbe.f;
@@ -102,10 +102,10 @@ void cProbe::SetInputData(sInProbe &InProbe){
 	Lens.nsf = InProbe.nsf;
 	Lens.beta = InProbe.beta;
 	Lens.nbeta = InProbe.nbeta;
-	f_sLens_Cal(MGP.E0, GP, Lens);
+	f_sLens_Cal(MT_MGP_CPU.E0, GP, Lens);
 
-	double gxu = sin(MGP.theta)*cos(MGP.phi)/Lens.lambda;
-	double gyu = sin(MGP.theta)*sin(MGP.phi)/Lens.lambda;;
+	double gxu = sin(MT_MGP_CPU.theta)*cos(MT_MGP_CPU.phi)/Lens.lambda;
+	double gyu = sin(MT_MGP_CPU.theta)*sin(MT_MGP_CPU.phi)/Lens.lambda;
 
 	x0 = InProbe.x0;
 	y0 = InProbe.y0;
@@ -122,7 +122,7 @@ void cProbe::getProbe(sComplex &Psih){
 	MT_IncidentWave_GPU.Psi0(x0, y0, Psi);
 	// fft2shift 
 	f_fft2Shift_MC(GP, Psi);
-	/**********************copy data to host************************/
+	/*********************copy data to host************************/
 	f_Copy_MCd(GP, Psi, Psii.real, Psii.imag, Psih);
 }
 
@@ -131,8 +131,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	sComplex Psih;
 	cProbe Probe;
 
-	Matlab2InProbe(prhs[0], InProbe);
-	/*************************Output data**************************/
+	f_Matlab2InProbe(prhs[0], InProbe);
+	/************************Output data**************************/
 	plhs[0] = mxCreateDoubleMatrix(InProbe.ny, InProbe.nx, mxCOMPLEX);
 	Psih.real = mxGetPr(plhs[0]);
 	Psih.imag = mxGetPi(plhs[0]);
