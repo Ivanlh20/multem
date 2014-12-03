@@ -20,11 +20,13 @@
 #define hPotential_CPU_H
 
 #include "hConstTypes.h"
+#include "hMT_AtomTypes_CPU.h"
 
 class cPotential_CPU{
 	private:
 		int PotPar;
-		sAtomTypesCPU AtomTypes;
+		cMT_AtomTypes_CPU *MT_AtomTypes_CPU;
+
 		double *cl, *cnl;	
 		double ft, t, g2;
 		double k0, k1;
@@ -46,11 +48,11 @@ class cPotential_CPU{
 		~cPotential_CPU();
 
 		void SetSigma(double sigmai);
-		void SetAtomTypes(int PotPari, sAtomTypesCPU AtomTypesi);
+		void SetAtomTypes(int PotPar_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU_i);
 
 		void Vr(int IntType, int Dim, double r, double &f, double &df);
 		void Vr(int IntType, int Dim, int nr, double *r, double *f, double *df);
-		void Vr(int PotPar, int nAtoms, sAtoms *Atoms, int nAtomTypes, sAtomTypesCPU *AtomTypes, int IntType, int Dim, int nr, double *r, double factor, double *f, double *df);
+		void Vr(int PotPar, int nAtoms, sAtoms *Atoms, int nMT_AtomTypes, cMT_AtomTypes_CPU *MT_AtomTypes_CPU, int IntType, int Dim, int nr, double *r, double factor, double *f, double *df);
 
 		double AtomicRadius_rms(int Dim);
 		double AtomicRadius_Cutoff(int Dim, double Vrl);

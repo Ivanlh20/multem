@@ -21,22 +21,13 @@
 
 #include <cstring>
 #include "hConstTypes.h"
-#include "hmathCPU.h"
-#include "hMT_General_CPU.h"
-#include "hMT_Specimen_CPU.h"
 #include "hMT_MGP_CPU.h"
-#include "hAtomicData.h"
 #include "hRandGen.h"
+#include "hMT_General_CPU.h"
 
 class cMT_Specimen_CPU{
 	private:
-		cRandGen RandGen;			// Ramdom generator
-
-		int nAtomsu;
-		sAtoms *Atomsu;				// Undisplaced Atoms
-
-		int nSliceu;				// Number of slices
-		sSlice *Sliceu;				// Slicing procedure
+		cRandGen RandGen;						// Ramdom generator
 
 		void QuickSortAtomsAlongz(sAtoms *&Atoms, int left, int right);
 		void setRandomSeed(unsigned long s, int iConf);
@@ -45,11 +36,17 @@ class cMT_Specimen_CPU{
 		void getnSlice(double z10, double z1i, double z20, double z2i, double dzi, int &nSlice, double &dz0, double &dze);
 		int getBorderSlicing(double z0, double ze, double zi, double dzi, double &dzb);
 		int getAtomsInSlice(double z0, double ze, int nAtoms, sAtoms *&Atoms, int &z0_id, int &ze_id);
-		void Slicing(cMT_MGP_CPU &MT_MGP_CPU, double Rmax,int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
-		void Slicing(cMT_MGP_CPU &MT_MGP_CPU, double Rmax, int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
-		void Slicing(cMT_MGP_CPU &MT_MGP_CPU, int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
+		void Slicing(double Rmax,int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
+		void Slicing(double Rmax, int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
+		void Slicing(int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp);
+	protected:
+		int nAtomsu;
+		sAtoms *Atomsu;							// Undisplaced Atoms
+
+		int nSliceu;							// Number of slices
+		sSlice *Sliceu;							// Slicing procedure
 	public:
-		cMT_MGP_CPU MT_MGP_CPU;					// Multislice general parameters
+		cMT_MGP_CPU *MT_MGP_CPU;				// Multislice general parameters
 
 		double sigma_min;
 		double sigma_max;
@@ -57,24 +54,25 @@ class cMT_Specimen_CPU{
 		double Lzu;
 		double Lztu;
 		double Rmax;
-		double z_BackProp;			// Back propagator
+		double z_BackProp;						// Back propagator
 
-		int nAtomTypes;				// Number of atom types
-		sAtomTypesCPU *AtomTypes;	// Atom types
+		int nMT_AtomTypes;						// Number of atom types
+		cMT_AtomTypes_CPU *MT_AtomTypes_CPU;	// Atom types
 
-		int nAtoms;					// Number of atoms in the specimen
-		sAtoms *Atoms;				// Displaced Atoms
+		int nAtoms;								// Number of atoms in the specimen
+		sAtoms *Atoms;							// Displaced Atoms
 
-		int nSlice;					// Number of slices
-		sSlice *Slice;				// Slicing procedure
+		int nSlice;								// Number of slices
+		sSlice *Slice;							// Slicing procedure
 
-		int nPlanesu;				// Number of Planes
-		double *Planesu;			// Planes
+		int nPlanesu;							// Number of Planes
+		double *Planesu;						// Planes
 
 		void freeMemory();
 		cMT_Specimen_CPU();
 		~cMT_Specimen_CPU();
-		void SetInputData(cMT_MGP_CPU &MGP_io, int nAtomsM_i, double *AtomsM_i);
+
+		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i, double dRmin=0);
 		void MoveAtoms(int iConf);
 		double get_dz(int iSlice);
 };

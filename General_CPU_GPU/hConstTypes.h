@@ -192,50 +192,6 @@ typedef struct sAtDa{
 	double ra;
 } sAtDa;
 
-/***********Optical potential coefficients CPU**************/
-typedef struct sVoCPU{
-	double sigma;		// Isotropic standard deviation
-	sCoefCPU cVr;		// Real Potential coefficients
-	sCoefCPU cVi;		// Imaginary Potential coefficients
-
-	double gr[stngbp];
-	double gVr[stngbp];
-	double gVi[stngbp];
-} sVoCPU;
-
-/***********Optical potential coefficients GPU**************/
-typedef struct sVoGPU{
-	double sigma;		// Isotropic standard deviation
-	sCoefPar cVr;		// Real Potential coefficients
-	sCoefPar cVi;		// Imaginary Potential coefficients
-
-	//double gr[stngbp];
-	//double gVr[stngbp];
-	//double gVi[stngbp];
-} sVoGPU;
-
-/************************Atomic type************************/
-typedef struct sAtomTypesCPU{
-	int Z;			// Atomic number
-	double m;		// Atomic mass
-	int A;			// Mass number
-	double rn_e;	// Experimental Nuclear radius
-	double rn_c;	// Calculated Nuclear radius 
-	double ra_e;	// Experimental atomic radius
-	double ra_c;	// Calculated atomic radius
-	double Rmin;	// Minimum interaction radius-R
-	double Rmax;	// Maximum interaction radius-R
-
-	sCoefCPU cfeg;	// Electron scattering factor coefficients
-	sCoefCPU cfxg;	// X-ray scattering factor coefficients
-	sCoefCPU cPr;	// Potential coefficients
-	sCoefCPU cVr;	// Potential coefficients
-	sCoefCPU cVR;	// Projected potential coefficients
-
-	int ns;			// Number of different sigmas
-	sVoCPU *Vo;		// Optical potential coefficients + grid
-} sAtomTypesCPU;
-
 /************************Quadrature*************************/
 typedef struct sHt{
 	int n;
@@ -305,10 +261,10 @@ typedef struct smVn{
 
 /***************Cubic interpolation coefficients*****************/
 typedef struct sciVn{
-	double * __restrict c0;		// zero coefficient
-	double * __restrict c1;		// first coefficient
-	double * __restrict c2;		// second coefficient
-	double * __restrict c3;		// third coefficient
+	double * c0;		// zero coefficient
+	double * c1;		// first coefficient
+	double * c2;		// second coefficient
+	double * c3;		// third coefficient
 } sciVn;
 
 /**********************structure borders*************************/
@@ -336,6 +292,61 @@ struct scVp{
 };
 
 const int cSizeofcVp = sizeof(scVp);
+
+/************************Atomic type************************/
+class cMT_AtomTypes{
+	public:
+		int Z;			// Atomic number
+		double m;		// Atomic mass
+		int A;			// Mass number
+		double rn_e;	// Experimental Nuclear radius
+		double rn_c;	// Calculated Nuclear radius 
+		double ra_e;	// Experimental atomic radius
+		double ra_c;	// Calculated atomic radius
+		double Rmin;	// Minimum interaction radius
+		double Rmax;	// Maximum interaction radius
+		double Rmin2;	// Minimum interaction radius squared
+		double Rmax2;	// Maximum interaction radius squared
+
+		sCoefPar cfeg;	// Electron scattering factor coefficients
+		sCoefPar cfxg;	// X-ray scattering factor coefficients
+		sCoefPar cPr;	// Potential coefficients
+		sCoefPar cVr;	// Potential coefficients
+		sCoefPar cVR;	// Projected potential coefficients
+
+		int nR;			// Number of grid points
+		double *R;		// R Grid
+		double *R2;		// R2 Grid
+		sciVn ciVR;		// Look up table - Projected potential coefficients
+
+		virtual void freeMemory()=0;
+
+		cMT_AtomTypes(){
+			Z = 0;
+			m = 0;
+			A = 0;
+			rn_e = 0;
+			rn_c = 0;
+			ra_e = 0;
+			ra_c = 0;
+			Rmin = 0;
+			Rmax = 0;
+			Rmin2 = 0;
+			Rmax2 = 0;
+
+			cfeg.cl = cfeg.cnl = 0;
+			cfxg.cl = cfxg.cnl = 0;
+			cPr.cl = cPr.cnl = 0;
+			cVr.cl = cVr.cnl = 0;
+			cVR.cl = cVR.cnl = 0;
+
+			nR = 0;
+			R = 0;
+			R2 = 0;
+			ciVR.c0 = ciVR.c1 = 0;
+			ciVR.c2 = ciVR.c3 = 0;
+		}
+};
 
 /****************************Lens*******************************/
 typedef struct sLens{

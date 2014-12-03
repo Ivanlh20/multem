@@ -16,23 +16,16 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef hAtomicData_H
-#define hAtomicData_H
+#ifndef hMT_AtomTypes_CPU_H
+#define hMT_AtomTypes_CPU_H
 
 #include "hConstTypes.h"
-#include "hPotential_CPU.h"
-#include "hMT_AtomTypes_CPU.h"
 
-class cAtomicData{
-	private:
-		cPotential_CPU Potential_CPU;
-		sAtDa AtDa[NE];
-		sfep fep[NE];
-		void AtomicData();
-		void AtomicParameterization();	
+class cMT_AtomTypes_CPU: public cMT_AtomTypes{
 	public:
-		cAtomicData();
-		void ReadAtomicData(int Z_i, int PotPar_i, double Vrl_i, int nR_i, double Rmin_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU);
+		void freeMemory();
+		~cMT_AtomTypes_CPU(){ freeMemory(); }
+		void SetAtomTypes(int Z_i, int PotPar_i, double Vrl_i, int nR_i, double Rmin_i);
 };
 
 #endif

@@ -191,14 +191,4 @@ void f_sACD_cudaMalloc(int nACD, sACD &ACD);
 
 void f_GPU_Sync_CPU(int &iSynCPU, int &cSynCPU);
 
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_scVp_cudaFree(int &ncVp, scVp *&cVp);
-
-void f_scVp_cudaInit(int ncVp, scVp *&cVp);
-
-void f_scVp_cudaMalloc(int ncVp, scVp *&cVp);
-
 #endif

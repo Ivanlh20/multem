@@ -24,7 +24,7 @@
 #include "hConstTypes.h"
 #include "hMT_General_CPU.h"
 #include "hMT_General_GPU.h"
-#include "hMT_InMULTEM_CPU.h"
+#include "hMT_InMulSli_CPU.h"
 #include "hMT_MGP_CPU.h"
 #include "hMT_Specimen_CPU.h"
 #include "hMT_Potential_GPU.h"
@@ -105,7 +105,7 @@ class cMT_MulSli_GPU{
 		cMT_MulSli_GPU();
 		~cMT_MulSli_GPU();
 
-		void SetInputData(cMT_InMULTEM_CPU &MT_InMULTEM_CPU);
+		void SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU);
 		void Cal_STEM();
 		void Cal_ISTEM();
 

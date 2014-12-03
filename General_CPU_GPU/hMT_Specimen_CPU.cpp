@@ -17,16 +17,18 @@
  */
 
 #include <cstring>
-#include "hConstTypes.h"
 #include "hmathCPU.h"
-#include "hMT_General_CPU.h"
-#include "hMT_Specimen_CPU.h"
+#include "hConstTypes.h"
 #include "hMT_MGP_CPU.h"
-#include "hAtomicData.h"
 #include "hRandGen.h"
+#include "hMT_General_CPU.h"
+
+#include "hMT_Specimen_CPU.h"
 
 void cMT_Specimen_CPU::freeMemory()
 {
+	MT_MGP_CPU = 0;
+
 	sigma_min = 0.0;
 	sigma_max = 0.0;
 
@@ -50,13 +52,15 @@ void cMT_Specimen_CPU::freeMemory()
 	nSlice = 0;
 	delete [] Slice; Slice = 0;
 
-	nAtomTypes = 0;
-	delete [] AtomTypes; AtomTypes = 0;
+	nMT_AtomTypes = 0;
+	delete [] MT_AtomTypes_CPU; MT_AtomTypes_CPU = 0;
 }
 
 // Constructor
 cMT_Specimen_CPU::cMT_Specimen_CPU()
 {
+	MT_MGP_CPU = 0;
+
 	sigma_min = 0.0;
 	sigma_max = 0.0;
 
@@ -80,8 +84,8 @@ cMT_Specimen_CPU::cMT_Specimen_CPU()
 	nSlice = 0;
 	Slice = 0;
 
-	nAtomTypes = 0;
-	AtomTypes = 0;
+	nMT_AtomTypes = 0;
+	MT_AtomTypes_CPU = 0;
 }
 
 // Destructor
@@ -93,7 +97,7 @@ cMT_Specimen_CPU::~cMT_Specimen_CPU(){
 void cMT_Specimen_CPU::setRandomSeed(unsigned long s, int iConf){	
 	int randiu;
 	RandGen.seed(s);
-	for(int iSlice=0; iSlice<iConf; iSlice++)
+	for(int iSlice = 0; iSlice<iConf; iSlice++)
 		randiu = RandGen.randiu();
 	RandGen.seed(randiu);
 }
@@ -298,12 +302,12 @@ int cMT_Specimen_CPU::getBorderSlicing(double z0, double ze, double zi, double d
 }
 
 // Select atoms respect to z-coordinate
-void cMT_Specimen_CPU::Slicing(cMT_MGP_CPU &MT_MGP_CPU, double Rmax, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
+void cMT_Specimen_CPU::Slicing(double Rmax, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
 	delete [] Slice; Slice = 0;
 	double zmin = Atoms[0].z, zmax = Atoms[nAtoms-1].z;
 	double Lz = zmax - zmin;
 
-	if(MT_MGP_CPU.ApproxModel>1){
+	if(MT_MGP_CPU->ApproxModel>1){
 		nSlice = 1;
 		Slice = new sSlice[nSlice];
 		// Get atom's index in the slice
@@ -317,18 +321,18 @@ void cMT_Specimen_CPU::Slicing(cMT_MGP_CPU &MT_MGP_CPU, double Rmax, int nAtoms,
 		return;
 	}
 
-	nSlice = ceil(Lz/MT_MGP_CPU.dz);
-	if(nSlice*MT_MGP_CPU.dz<=Lz) nSlice++;
+	nSlice = (int)ceil(Lz/MT_MGP_CPU->dz);
+	if(nSlice*MT_MGP_CPU->dz<=Lz) nSlice++;
 
 	double dz0, dze;
-	double z10 = zmin-0.5*(nSlice*MT_MGP_CPU.dz-Lz)+MT_MGP_CPU.dz, z20 = zmax+0.5*(nSlice*MT_MGP_CPU.dz-Lz)-MT_MGP_CPU.dz;
-	getnSlice(z10, zmin-Rmax, z20, zmax+Rmax, MT_MGP_CPU.dz, nSlice, dz0, dze);
+	double z10 = zmin-0.5*(nSlice*MT_MGP_CPU->dz-Lz)+MT_MGP_CPU->dz, z20 = zmax+0.5*(nSlice*MT_MGP_CPU->dz-Lz)-MT_MGP_CPU->dz;
+	getnSlice(z10, zmin-Rmax, z20, zmax+Rmax, MT_MGP_CPU->dz, nSlice, dz0, dze);
 	if(nSlice==1) dz0 = dze = 2.0*Rmax;
 
 	double dz, zm, z0 = zmin-Rmax;
 	Slice = new sSlice[nSlice];
-	for(int iSlice=0; iSlice<nSlice; iSlice++){
-		dz = (iSlice==0)?dz0:(iSlice==nSlice-1)?dze:MT_MGP_CPU.dz;
+	for(int iSlice = 0; iSlice<nSlice; iSlice++){
+		dz = (iSlice==0)?dz0:(iSlice==nSlice-1)?dze:MT_MGP_CPU->dz;
 		// Get atom's index in the slice
 		Slice[iSlice].z0 = z0; Slice[iSlice].ze = z0 += dz;
 		// Get atom's index in the slice
@@ -345,7 +349,7 @@ void cMT_Specimen_CPU::Slicing(cMT_MGP_CPU &MT_MGP_CPU, double Rmax, int nAtoms,
 }
 
 // Select atoms respect to z-coordinate
-void cMT_Specimen_CPU::Slicing(cMT_MGP_CPU &MT_MGP_CPU, double Rmax, int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
+void cMT_Specimen_CPU::Slicing(double Rmax, int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
 	delete [] Slice; Slice = 0;
 	double zmin = Atoms[0].z, zmax = Atoms[nAtoms-1].z;
 	double Lzt = zmax-zmin+2.0*Rmax;
@@ -366,12 +370,12 @@ void cMT_Specimen_CPU::Slicing(cMT_MGP_CPU &MT_MGP_CPU, double Rmax, int nSliceu
 
 	double dz0, dze;
 	double z10 = Sliceu[0].ze, z20 = Sliceu[nSliceu-1].z0;
-	getnSlice(z10, zmin-Rmax, z20, zmax+Rmax, MT_MGP_CPU.dz, nSlice, dz0, dze);
+	getnSlice(z10, zmin-Rmax, z20, zmax+Rmax, MT_MGP_CPU->dz, nSlice, dz0, dze);
 
 	double dz, zm, z0 = zmin-Rmax;
 	Slice = new sSlice[nSlice];
-	for(int iSlice=0; iSlice<nSlice; iSlice++){
-		dz = (iSlice==0)?dz0:(iSlice==nSlice-1)?dze:MT_MGP_CPU.dz;
+	for(int iSlice = 0; iSlice<nSlice; iSlice++){
+		dz = (iSlice==0)?dz0:(iSlice==nSlice-1)?dze:MT_MGP_CPU->dz;
 		// Get atom's index in the slice
 		Slice[iSlice].z0 = z0; Slice[iSlice].ze = z0 += dz;
 		// Get atom's index in the slice
@@ -384,16 +388,16 @@ void cMT_Specimen_CPU::Slicing(cMT_MGP_CPU &MT_MGP_CPU, double Rmax, int nSliceu
 		if(Slice[iSlice].zei<Slice[iSlice].ze) Slice[iSlice].zei = Slice[iSlice].ze;
 		getAtomsInSlice(Slice[iSlice].z0i, Slice[iSlice].zei, nAtoms, Atoms, Slice[iSlice].z0i_id, Slice[iSlice].zei_id);
 	}
-	z_BackProp = MT_MGP_CPU.ZeroDefPlane - Slice[nSlice-1].ze;
+	z_BackProp = MT_MGP_CPU->ZeroDefPlane - Slice[nSlice-1].ze;
 }
 
 // Select atoms respect to z-coordinate
-void cMT_Specimen_CPU::Slicing(cMT_MGP_CPU &MT_MGP_CPU, int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
+void cMT_Specimen_CPU::Slicing(int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, double &z_BackProp){
 	nSlice = nPlanesu;
 	delete [] Slice; Slice = 0;
 	double dzh;
 	Slice = new sSlice[nPlanesu];
-	for(int iSlice=0; iSlice<nSlice; iSlice++){
+	for(int iSlice = 0; iSlice<nSlice; iSlice++){
 		// Get atom's index in the slice
 		if(iSlice<nSlice-1){
 			dzh = 0.5*(Planesu[iSlice+1]-Planesu[iSlice]);
@@ -407,56 +411,54 @@ void cMT_Specimen_CPU::Slicing(cMT_MGP_CPU &MT_MGP_CPU, int nPlanesu, double *Pl
 	if(nSlice>1)
 		Slice[nSlice-1].z0 = Planesu[nSlice-1]-dzh; Slice[nSlice-1].ze = Planesu[nSlice-1]+dzh;
 
-	z_BackProp = MT_MGP_CPU.ZeroDefPlane - Planesu[nSlice-1];
+	z_BackProp = MT_MGP_CPU->ZeroDefPlane - Planesu[nSlice-1];
 }
 
-/****************************************************************************/
 // Set atoms: Copy input Atoms to the new format Atoms, count number of atoms, Ascending sort by z, Set relative atomic number position, Get maximum interaction distance
-void cMT_Specimen_CPU::SetInputData(cMT_MGP_CPU &MGP_io, int nAtomsM_i, double *AtomsM_i){
+void cMT_Specimen_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i, double dRmin){
 	freeMemory();
 
-	MT_MGP_CPU = MGP_io;
-	nAtomTypes = NE;
-	AtomTypes = new sAtomTypesCPU[nAtomTypes];
-	f_SetAtomTypes(MT_MGP_CPU.PotPar, 0, MT_MGP_CPU.Vrl, nAtomTypes, AtomTypes);
+	MT_MGP_CPU = MT_MGP_CPU_io;
+	nMT_AtomTypes = NE;
+	MT_AtomTypes_CPU = new cMT_AtomTypes_CPU[nMT_AtomTypes];
+	for(int i=0; i<nMT_AtomTypes; i++)
+		MT_AtomTypes_CPU[i].SetAtomTypes(i+1, MT_MGP_CPU->PotPar, MT_MGP_CPU->Vrl, stnR, dRmin);
 	/*************************************************************************/
-	f_AtomsM2Atoms(nAtomsM_i, AtomsM_i, MT_MGP_CPU.PBC_xy, MT_MGP_CPU.lx, MT_MGP_CPU.ly, nAtomsu, Atomsu, sigma_min, sigma_max);
+	f_AtomsM2Atoms(nAtomsM_i, AtomsM_i, MT_MGP_CPU->PBC_xy, MT_MGP_CPU->lx, MT_MGP_CPU->ly, nAtomsu, Atomsu, sigma_min, sigma_max);
 	QuickSortAtomsAlongz(Atomsu, 0, nAtomsu-1);	// Ascending sort by z
-	Rmax = f_getRMax(nAtomsu, Atomsu, AtomTypes); 
+	Rmax = f_getRMax(nAtomsu, Atomsu, MT_AtomTypes_CPU); 
 	/*************************************************************************/
 	Lzu = Atomsu[nAtomsu-1].z-Atomsu[0].z;
 	Lztu = Lzu + 2.0*Rmax;
 	if(Lzu==0) Lzu = Lztu;
 
-	if(Lzu<MT_MGP_CPU.dz){
-		MT_MGP_CPU.MulOrder = 1;
-		MT_MGP_CPU.dz = Lzu;
-		if(MT_MGP_CPU.ApproxModel==1)
-			MT_MGP_CPU.ApproxModel = 3;
+	if(Lzu<MT_MGP_CPU->dz){
+		MT_MGP_CPU->MulOrder = 1;
+		MT_MGP_CPU->dz = Lzu;
+		if(MT_MGP_CPU->ApproxModel==1)
+			MT_MGP_CPU->ApproxModel = 3;
 	}
 	// get Zero defocus plane
-	switch(MT_MGP_CPU.ZeroDefTyp){
+	switch(MT_MGP_CPU->ZeroDefTyp){
 		case 1:
-			MT_MGP_CPU.ZeroDefPlane = Atomsu[0].z;
+			MT_MGP_CPU->ZeroDefPlane = Atomsu[0].z;
 			break;
 		case 2:
-			MT_MGP_CPU.ZeroDefPlane = 0.5*(Atomsu[0].z+Atomsu[nAtomsu-1].z);
+			MT_MGP_CPU->ZeroDefPlane = 0.5*(Atomsu[0].z+Atomsu[nAtomsu-1].z);
 			break;
 		case 3:
-			MT_MGP_CPU.ZeroDefPlane = Atomsu[nAtomsu-1].z;
+			MT_MGP_CPU->ZeroDefPlane = Atomsu[nAtomsu-1].z;
 			break;
 	}
-	if(MT_MGP_CPU.ApproxModel>1)
-		MT_MGP_CPU.ZeroDefPlane = 0.0;
 
 	// get planes
 	getPlanes(nAtomsu, Atomsu, nPlanesu, Planesu);
 
 	// Slicing procedure
-	if(MT_MGP_CPU.ApproxModel==1)
-		Slicing(MT_MGP_CPU, Rmax, nAtomsu, Atomsu, nSliceu, Sliceu, z_BackProp);
+	if(MT_MGP_CPU->ApproxModel==1)
+		Slicing(Rmax, nAtomsu, Atomsu, nSliceu, Sliceu, z_BackProp);
 	else
-		Slicing(MT_MGP_CPU, nPlanesu, Planesu, nAtomsu, Atomsu, nSliceu, Sliceu, z_BackProp);
+		Slicing(nPlanesu, Planesu, nAtomsu, Atomsu, nSliceu, Sliceu, z_BackProp);
 	
 	/*************************************************************************/
 	// Copy Atomsu to Atoms
@@ -468,8 +470,6 @@ void cMT_Specimen_CPU::SetInputData(cMT_MGP_CPU &MGP_io, int nAtomsM_i, double *
 	nSlice = nSliceu;
 	Slice = new sSlice[nSlice];
 	memcpy(Slice, Sliceu, nSlice*cSizeofSlice);
-	/*************************************************************************/
-	MGP_io = MT_MGP_CPU;
 }
 
 // Move atoms (ramdom distribution will be included in the future)
@@ -481,9 +481,9 @@ void cMT_Specimen_CPU::MoveAtoms(int iConf){
 		return;
 
 	// Get dimension components
-	getDimCom(MT_MGP_CPU.DimFP, bx, by, bz);
-	setRandomSeed(MT_MGP_CPU.SeedFP, iConf);
-	for (int iSlice=0; iSlice<nAtoms; iSlice++){
+	getDimCom(MT_MGP_CPU->DimFP, bx, by, bz);
+	setRandomSeed(MT_MGP_CPU->SeedFP, iConf);
+	for (int iSlice = 0; iSlice<nAtoms; iSlice++){
 		Atoms[iSlice].Z = Atomsu[iSlice].Z;
 		sigmax = sigmay = sigmaz = Atomsu[iSlice].sigma;
 		Atoms[iSlice].x = Atomsu[iSlice].x + bx*sigmax*RandGen.randn();
@@ -492,16 +492,16 @@ void cMT_Specimen_CPU::MoveAtoms(int iConf){
 		Atoms[iSlice].sigma = 0.0;
 		Atoms[iSlice].occ = Atomsu[iSlice].occ ;
 	}
-	if(MT_MGP_CPU.ApproxModel==1){
+	if(MT_MGP_CPU->ApproxModel==1){
 		// Ascending sort by z
 		QuickSortAtomsAlongz(Atoms, 0, nAtoms-1);	
 		// Slicing procedure
-		Slicing(MT_MGP_CPU, Rmax, nSliceu, Sliceu, nAtoms, Atoms, nSlice, Slice, z_BackProp);
+		Slicing(Rmax, nSliceu, Sliceu, nAtoms, Atoms, nSlice, Slice, z_BackProp);
 	}
 }
 
-// get dz
+// Get dz
 double cMT_Specimen_CPU::get_dz(int iSlice){
-	double dz = (iSlice<nSlice)?(Slice[iSlice].ze - Slice[iSlice].z0)/cos(MT_MGP_CPU.theta):0.0;
+	double dz = (iSlice<nSlice)?(Slice[iSlice].ze - Slice[iSlice].z0)/cos(MT_MGP_CPU->theta):0.0;
 	return dz;
 }

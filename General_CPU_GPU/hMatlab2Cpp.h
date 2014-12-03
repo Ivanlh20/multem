@@ -19,33 +19,39 @@
 #ifndef hMatlab2Cpp_H
 #define hMatlab2Cpp_H
 
-#include "hConstTypes.h"
-#include "hMT_InMULTEM_CPU.h"
 #include <mex.h>
 
-/******************Matlab to layer unit cell*********************/
-void f_Matlab2uLayer(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, int &nuLayer, sAtomsGroup *&uLayer);
+inline void CreateSetValue2mxField(mxArray *mxB, int p, const char *field_name, double field_value){
+	mxArray *mxfield = mxCreateDoubleMatrix(1, 1, mxREAL);
+	*mxGetPr(mxfield) = field_value;
+	mxSetField(mxB, p, field_name, mxfield);
+}
 
-/**************Matlab to radial Schrodinger equation****************/
-void f_Matlab2RadSchr(const mxArray *mxRadSchr, sInRadSchr &InRadSchr);
+inline void CreateSetValue2mxField(mxArray *mxB, int p, const char *field_name, int n, double *field_value){
+	mxArray *mxfield = mxCreateDoubleMatrix(1, n, mxREAL);
+	double *pfield = mxGetPr(mxfield); 
+	memcpy(pfield, field_value, n*cSizeofRD);
+	mxSetField(mxB, p, field_name, mxfield);
+}
 
-/***************************MUlTEM********************************/
-// From AtomTypesCPU to Matlab structure 
-void f_ImSTEM2Matlab(int nThk, int nDet, int line, int nxs, int nys, sImSTEM *ImSTEM, mxArray *&mxImSTEM);
+inline void CreateSetValue2mxField(mxArray *mxB, int p, const char *field_name, int nx, int ny, double *field_value){
+	mxArray *mxfield = mxCreateDoubleMatrix(ny, nx, mxREAL);
+	double *pfield = mxGetPr(mxfield); 
+	memcpy(pfield, field_value, ny*nx*cSizeofRD);
+	mxSetField(mxB, p, field_name, mxfield);
+}
 
-// From AtomTypesCPU to Matlab structure 
-void f_AtomTypesCPU2Matlab(int nAtomTypesCPU, sAtomTypesCPU *&AtomTypesCPU, mxArray *&mxAtomTypesCPU);
+template <class Type>
+inline Type ReadValuemxField(const mxArray *mxB, int p, const char *field_name, double factor=1){
+	double val =factor*mxGetScalar(mxGetField(mxB, p, field_name));
+	return (Type)val;
+}
 
-// From Matlab structure to AtomTypesCPU
-void f_Matlab2AtomTypesCPU(const mxArray *mxAtomTypesCPU, int &nAtomTypesCPU, sAtomTypesCPU *&AtomTypesCPU);
-
-/**********************read input TEMim*************************/
-void f_Matlab2InTEMIm(const mxArray *mxInTEMIm, sInTEMIm &InTEMIm);
-
-/**********************read input MulSli*************************/
-void f_Matlab2InMulSli(const mxArray *mxInMSTEM, cMT_InMULTEM_CPU &MT_InMULTEM_CPU);
-
-/**********************read input Probe*************************/
-void f_Matlab2InProbe(const mxArray *mxInProbe, sInProbe &InProbe);
+inline void ReadValuemxField(const mxArray *mxB, int p, const char *field_name, int n, double *field_value, double factor=1){
+	double *pfield = mxGetPr(mxGetField(mxB, p, field_name));
+	memcpy(field_value, pfield, n*cSizeofRD);
+	for(int i=0; i<n; i++)
+		field_value[i] *= factor;
+}
 
 #endif

@@ -142,9 +142,9 @@ void cSAHF::SetInputData(int Zi, int typi, int nhti, int nhbi, int dgi, double *
 
 	// numerical grid for Vr and Pr
 	nrb = 32; 
-	sAtomTypesCPU AtomTypesCPU;
-	f_SetAtomTypes(Z, 6, 0, stVrl, AtomTypesCPU);
-	double rmin = AtomTypesCPU.rn_c, rmax = 20;	
+	cMT_AtomTypes_CPU MT_AtomTypes_CPU;
+	MT_AtomTypes_CPU.SetAtomTypes(Z, 6, stVrl, stnR, 0);
+	double rmin = MT_AtomTypes_CPU.rn_c, rmax = 20;	
 	double dlnr = log(rmax/rmin)/(nrb-1);
 	for (int i=0; i<nrb; i++)
 		rb[i] = rmin*exp(i*dlnr);

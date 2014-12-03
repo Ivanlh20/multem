@@ -19,12 +19,15 @@
 #include "hmathCPU.h"
 #include <cstring>
 #include "hConstTypes.h"
-#include "hPotential_CPU.h"
+#include "hMT_AtomTypes_CPU.h"
 #include "hQuadrature.h"
+#include "hPotential_CPU.h"
+
 
 // Constructor
 cPotential_CPU::cPotential_CPU(){
 	PotPar = 0;
+	MT_AtomTypes_CPU = 0;
 	sigma = 0;
 	nQ1 = 127;
 	Q1.x = new double [nQ1];
@@ -37,6 +40,7 @@ cPotential_CPU::cPotential_CPU(){
 // Destructor
 cPotential_CPU::~cPotential_CPU(){
 	PotPar = 0;
+	MT_AtomTypes_CPU = 0;
 	sigma = 0;
 	nQ1 = 0;
 	delete [] Q1.x; Q1.x = 0;
@@ -50,9 +54,9 @@ void cPotential_CPU::SetSigma(double sigmai){
 }
 
 // Set Atom type
-void cPotential_CPU::SetAtomTypes(int PotPari, sAtomTypesCPU AtomTypesi){
-	PotPar = PotPari;
-	memcpy(&AtomTypes, &AtomTypesi, sizeof(sAtomTypesCPU));
+void cPotential_CPU::SetAtomTypes(int PotPar_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU_i){
+	PotPar = PotPar_i;
+	MT_AtomTypes_CPU = MT_AtomTypes_CPU_i;
 }
 
 /***************************************************************************/
@@ -293,16 +297,16 @@ void cPotential_CPU::Vr(int IntType, int Dim, double r, double &f, double &df){
 				Pot1Dn(r, cl, cnl, f, df);
 			break;
 		case 2:
-			cl = AtomTypes.cVR.cl;
-			cnl = AtomTypes.cVR.cnl;
+			cl = MT_AtomTypes_CPU->cVR.cl;
+			cnl = MT_AtomTypes_CPU->cVR.cnl;
 			if(~IntType) 
 				Pot2Da(r, cl, cnl, f, df);
 			else
 				Pot2Dn(r, cl, cnl, f, df);
 			break;
 		case 3:
-			cl = AtomTypes.cVr.cl;
-			cnl = AtomTypes.cVr.cnl;
+			cl = MT_AtomTypes_CPU->cVr.cl;
+			cnl = MT_AtomTypes_CPU->cVr.cnl;
 			if(~IntType) 
 				Pot3Da(r, cl, cnl, f, df);
 			else
@@ -320,7 +324,7 @@ void cPotential_CPU::Vr(int IntType, int Dim, int nr, double *r, double *f, doub
 }
 
 // Calculate the total Potential
-void cPotential_CPU::Vr(int PotPar, int nAtoms, sAtoms *Atoms, int nAtomTypes, sAtomTypesCPU *AtomTypes, int IntType, int Dim, int nr, double *r, double factor, double *f, double *df){
+void cPotential_CPU::Vr(int PotPar, int nAtoms, sAtoms *Atoms, int nMT_AtomTypes, cMT_AtomTypes_CPU *MT_AtomTypes_CPU, int IntType, int Dim, int nr, double *r, double factor, double *f, double *df){
 	int i, j;
 	double *ft, *dft; 
 	double occ;
@@ -333,14 +337,14 @@ void cPotential_CPU::Vr(int PotPar, int nAtoms, sAtoms *Atoms, int nAtomTypes, s
 		f[i] = df[i] = 0.0;
 	};
 
-	for (i=0; i<nAtomTypes; i++){
+	for (i=0; i<nMT_AtomTypes; i++){
 		occ = 0.0;
 		for (j=0; j<nAtoms; j++)
-			if(Atoms[j].Z==AtomTypes[i].Z)
+			if(Atoms[j].Z==MT_AtomTypes_CPU[i].Z)
 				occ += Atoms[j].occ;
 
 		if(occ>0){
-			SetAtomTypes(PotPar, AtomTypes[i]);
+			SetAtomTypes(PotPar, &(MT_AtomTypes_CPU[i]));
 			SetSigma(0.0);
 			Vr(IntType, Dim, nr, r, ft, dft);
 			// Add potential
@@ -361,10 +365,10 @@ double cPotential_CPU::AtomicRadius_rms(int Dim){
 	double ri, wi, Vri, dVri;
 	double ra, rmin;
 
-	if (AtomTypes.cVr.cl[0]==0)
+	if (MT_AtomTypes_CPU->cVr.cl[0]==0)
 		ra = 0.0;
 	else{
-		rmin = AtomTypes.rn_c;
+		rmin = MT_AtomTypes_CPU->rn_c;
 		Vr(0, Dim, rmin, Vri, dVri);
 
 		iVr = Vri*pow(rmin, Dim)/Dim;
@@ -387,10 +391,10 @@ double cPotential_CPU::AtomicRadius_Cutoff(int Dim, double Vrl){
 	double rmin, rmax;
 	double rm, Vrm, dVrm;
 
-	if ((Vrl==0)||(AtomTypes.cVr.cl[0]==0))
+	if ((Vrl==0)||(MT_AtomTypes_CPU->cVr.cl[0]==0))
 		rmax = 0;
 	else{
-		rmin = AtomTypes.rn_c; 
+		rmin = MT_AtomTypes_CPU->rn_c; 
 		rmax = 50.0;
 		Vr(0, Dim, rmin, Vrm, dVrm); 
 		Vrm = abs(Vrm);

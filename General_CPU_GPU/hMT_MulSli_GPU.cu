@@ -21,7 +21,7 @@
 #include "hConstTypes.h"
 #include "hMT_General_CPU.h"
 #include "hMT_General_GPU.h"
-#include "hMT_InMULTEM_CPU.h"
+#include "hMT_InMulSli_CPU.h"
 #include "hMT_MGP_CPU.h"
 #include "hMT_Specimen_CPU.h"
 #include "hMT_Potential_GPU.h"
@@ -218,7 +218,7 @@ void cMT_MulSli_GPU::Propagate(eSpace Space, double gxu, double gyu, double z, d
 
 // Phase object approximation: Space :1 Real and 2 Fourier
 void cMT_MulSli_GPU::Cal_Wavefunction_POA_WPOA(eSpace Space, double2 *&Psi){
-	int iSlice=0;
+	int iSlice = 0;
 	// get Transmission and Transmit
 	Transmission_Transmit(iSlice, Psi);
 	// Inclined ilumination
@@ -232,9 +232,9 @@ void cMT_MulSli_GPU::Cal_Wavefunction_POA_WPOA(eSpace Space, double2 *&Psi){
 
 // Exit wave calculation: Space :1 Real and 2 Fourier
 void cMT_MulSli_GPU::Cal_Wavefunction_MSA(eSpace Space, double2 *&Psi){
-	int iSlice=0, iSynCPU = 0;
+	int iSlice = 0, iSynCPU = 0;
 
-	for (iSlice=0; iSlice<MT_Specimen_CPU->nSlice; iSlice++){
+	for (iSlice = 0; iSlice<MT_Specimen_CPU->nSlice; iSlice++){
 		// get Transmission and Transmit
 		Transmission_Transmit(iSlice, Psi);
 		// Propagate
@@ -326,20 +326,20 @@ void cMT_MulSli_GPU::Image_Convergence_Wave_Illumination(int nConfFP, eSpace Spa
 }
 
 // Set Input data
-void cMT_MulSli_GPU::SetInputData(cMT_InMULTEM_CPU &MT_InMULTEM_CPU){
+void cMT_MulSli_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
 	freeMemory();
 
-	MT_MGP_CPU.SetInputData(MT_InMULTEM_CPU);
+	MT_MGP_CPU.SetInputData(MT_InMulSli_CPU);
 
 	cudaSetDevice(MT_MGP_CPU.gpu);
 
 	f_sGP_SetInputData(MT_MGP_CPU, GP);
-	f_sLens_SetInputData(MT_InMULTEM_CPU, GP, Lens);
+	f_sLens_SetInputData(MT_InMulSli_CPU, GP, Lens);
 
 	gxu = sin(MT_MGP_CPU.theta)*cos(MT_MGP_CPU.phi)/Lens.lambda;
 	gyu = sin(MT_MGP_CPU.theta)*sin(MT_MGP_CPU.phi)/Lens.lambda;
 
-	fPot = Lens.gamma*Lens.lambda/cos(MT_MGP_CPU.theta);
+	fPot = Lens.gamma*Lens.lambda/(cPotf*cos(MT_MGP_CPU.theta));
 
 	f_sACD_cudaMalloc(GP.nx, ExpRg_x);
 	f_sACD_cudaMalloc(GP.ny, ExpRg_y);
@@ -358,7 +358,7 @@ void cMT_MulSli_GPU::SetInputData(cMT_InMULTEM_CPU &MT_InMULTEM_CPU){
 
 	// Potential parameters
 	MT_Potential_GPU = new cMT_Potential_GPU;
-	MT_Potential_GPU->SetInputData(MT_MGP_CPU, GP, MT_InMULTEM_CPU.nAtomsM, MT_InMULTEM_CPU.AtomsM);
+	MT_Potential_GPU->SetInputData(MT_MGP_CPU, GP, MT_InMulSli_CPU.nAtomsM, MT_InMulSli_CPU.AtomsM);
 
 	// Specimen parameters
 	MT_Specimen_CPU = MT_Potential_GPU->MT_Specimen_CPU;
@@ -374,21 +374,21 @@ void cMT_MulSli_GPU::SetInputData(cMT_InMULTEM_CPU &MT_InMULTEM_CPU){
 	/***************************************************************************/
 	/***************************************************************************/
 
-	switch (MT_InMULTEM_CPU.SimType){
+	switch (MT_InMulSli_CPU.SimType){
 		case 11:		// STEM
 			STEM = new cMT_STEM_GPU;
-			STEM->SetInputData(MT_InMULTEM_CPU, this);
+			STEM->SetInputData(MT_InMulSli_CPU, this);
 			break;
 		case 12:		// ISTEM
 
 			break;
 		case 21:		// CBED
-			CBED.x0 = MT_InMULTEM_CPU.CBED_x0;
-			CBED.y0 = MT_InMULTEM_CPU.CBED_y0;
+			CBED.x0 = MT_InMulSli_CPU.CBED_x0;
+			CBED.y0 = MT_InMulSli_CPU.CBED_y0;
 			break;
 		case 22:		// CBEI
-			CBEI.x0 = MT_InMULTEM_CPU.CBEI_x0;
-			CBEI.y0 = MT_InMULTEM_CPU.CBEI_y0;
+			CBEI.x0 = MT_InMulSli_CPU.CBEI_x0;
+			CBEI.y0 = MT_InMulSli_CPU.CBEI_y0;
 			break;
 		case 31:		// ED
 
@@ -397,12 +397,12 @@ void cMT_MulSli_GPU::SetInputData(cMT_InMULTEM_CPU &MT_InMULTEM_CPU){
 
 			break;
 		case 41:		// PED
-			PED.nrot = MT_InMULTEM_CPU.PED_nrot;
-			PED.theta = MT_InMULTEM_CPU.PED_theta;
+			PED.nrot = MT_InMulSli_CPU.PED_nrot;
+			PED.theta = MT_InMulSli_CPU.PED_theta;
 			break;
 		case 42:		// HCI
-			HCI.nrot = MT_InMULTEM_CPU.HCI_nrot;
-			HCI.theta = MT_InMULTEM_CPU.HCI_theta;
+			HCI.nrot = MT_InMulSli_CPU.HCI_nrot;
+			HCI.theta = MT_InMulSli_CPU.HCI_theta;
 			break;
 		case 51:	// EW real
 

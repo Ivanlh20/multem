@@ -24,12 +24,12 @@
 class crhor_CPU{
 	private:
 		int PotPar;
-		sAtomTypesCPU AtomTypesCPU;
+		cMT_AtomTypes_CPU *MT_AtomTypes_CPU;
 		double cl, cnl;	
 		double ft, t, ir, r2;
 		void rhor(double r, double &f, double &df);
 	public:
-		void SetAtomT(int PotPari, sAtomTypesCPU AtomTypesCPUi);
+		void SetAtomT(int PotPar_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU_i);
 		void rhor(int nr, double *r, double *f, double *df);
 		crhor_CPU();
 		~crhor_CPU();

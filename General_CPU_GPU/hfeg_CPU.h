@@ -20,16 +20,17 @@
 #define hfeg_CPU_H
 
 #include "hConstTypes.h"
+#include "hMT_AtomTypes_CPU.h"
 
 class cfeg_CPU{
 	private:
 		int PotPar;
-		sAtomTypesCPU AtomTypesCPU;
+		cMT_AtomTypes_CPU *MT_AtomTypes_CPU;
 		double cl, cnl;	
 		double ft, t, g2;
 		void feg(double g, double &f, double &df);
 	public:
-		void SetAtomT(int PotPari, sAtomTypesCPU AtomTypesCPUi);
+		void SetAtomT(int PotPar_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU_i);
 		void feg(int ng, double *g, double *f, double *df);
 		cfeg_CPU();
 		~cfeg_CPU();

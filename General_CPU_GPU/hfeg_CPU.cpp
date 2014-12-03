@@ -16,27 +16,30 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "hmathCPU.h"
 #include <cstring>
+#include "hmathCPU.h"
 #include "hConstTypes.h"
+#include "hMT_AtomTypes_CPU.h"
 #include "hfeg_CPU.h"
 
 // Constructor
 cfeg_CPU::cfeg_CPU(){
 	PotPar = 0;
 	cl = cnl = 0;
+	MT_AtomTypes_CPU = 0;
 }
 
 // Destructor
 cfeg_CPU::~cfeg_CPU(){
 	PotPar = 0;
 	cl = cnl = 0;
+	MT_AtomTypes_CPU = 0;
 }
 
 // Set Atom type
-void cfeg_CPU::SetAtomT(int PotPari, sAtomTypesCPU AtomTypesCPUi){
-	PotPar = PotPari;
-	memcpy(&AtomTypesCPU, &AtomTypesCPUi, sizeof(sAtomTypesCPU));
+void cfeg_CPU::SetAtomT(int PotPar_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU_i){
+	PotPar = PotPar_i;
+	MT_AtomTypes_CPU = MT_AtomTypes_CPU_i;
 }
 
 // Electron scattering factor(fg, dfg) where dfg is the first derivative along g
@@ -48,7 +51,7 @@ void cfeg_CPU::feg(double g, double &f, double &df){
 		case 1:
 			// 1: Doyle and Tugner pagametegization - 4 Gaussians - [0, 4]
 			for (i=0; i<4; i++){
-				cl = AtomTypesCPU.cfeg.cl[i]; cnl = AtomTypesCPU.cfeg.cnl[i];
+				cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
 				f += ft = cl*exp(-cnl*g2);
 				df += cnl*ft;
 			}
@@ -57,7 +60,7 @@ void cfeg_CPU::feg(double g, double &f, double &df){
 		case 2:
 			// 2: Peng et al. parameterization - 5 Gaussians - [0, 4]
 			for (i=0; i<5; i++){
-				cl = AtomTypesCPU.cfeg.cl[i]; cnl = AtomTypesCPU.cfeg.cnl[i];
+				cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
 				f += ft = cl*exp(-cnl*g2);
 				df += cnl*ft;
 			}
@@ -66,7 +69,7 @@ void cfeg_CPU::feg(double g, double &f, double &df){
 		case 3:
 			// 3: Peng et al. parameterization - 5 Gaussians - [0, 12]
 			for (i=0; i<5; i++){
-				cl = AtomTypesCPU.cfeg.cl[i]; cnl = AtomTypesCPU.cfeg.cnl[i];
+				cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
 				f += ft = cl*exp(-cnl*g2);
 				df += cnl*ft;
 			}
@@ -75,14 +78,14 @@ void cfeg_CPU::feg(double g, double &f, double &df){
 		case 4:
 			// 4: Kirkland parameterization - 3 Yukawa + 3 Gaussians - [0, 12]					
 			for (i=0; i<3;i++){
-				cl = AtomTypesCPU.cfeg.cl[i]; cnl = AtomTypesCPU.cfeg.cnl[i];
+				cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
 				t = 1.0/(cnl + g2);
 				f += ft = cl*t;
 				df += ft*t;
 			}
 
 			for (i=3; i<6; i++){
-				cl = AtomTypesCPU.cfeg.cl[i]; cnl = AtomTypesCPU.cfeg.cnl[i];
+				cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
 				f += ft = cl*exp(-cnl*g2);
 				df += cnl*ft;
 			}
@@ -92,7 +95,7 @@ void cfeg_CPU::feg(double g, double &f, double &df){
 			// 5: Weickenmeier and H.Kohl - a*(1-exp(-bg^2)/g^2 - [0, 12]
 			if (g != 0){
 				for (i=0; i<6;i++){
-					cl = AtomTypesCPU.cfeg.cl[i]; cnl = AtomTypesCPU.cfeg.cnl[i];
+					cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
 					t = exp(-cnl*g2);
 					f += ft = cl*(1.0-t);
 					df += cl*(1.0-(1.0+cnl*g2)*t);
@@ -101,14 +104,14 @@ void cfeg_CPU::feg(double g, double &f, double &df){
 				df = -2.0*df/(g*g2);
 			}else
 				for (i=0; i<6;i++){
-					cl = AtomTypesCPU.cfeg.cl[i]; cnl = AtomTypesCPU.cfeg.cnl[i];
+					cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
 					f += cl*cnl;
 				}
 			break;
 		case 6:
 			// 6: Lobato parameterization - 5 Hydrogen fe - [0, 12]
 			for (i=0; i<5; i++){
-				cl = AtomTypesCPU.cfeg.cl[i]; cnl = AtomTypesCPU.cfeg.cnl[i];
+				cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
 				t = 1.0/(1.0 + cnl*g2);
 				f += cl*t*(t + 1.0);
 				df += cl*cnl*t*t*(2.0*t + 1.0);

@@ -16,8 +16,8 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef hMT_Potential_GPU_H
-#define hMT_Potential_GPU_H
+#ifndef hMT_Transmission_GPU_H
+#define hMT_Transmission_GPU_H
 
 #include "hConstTypes.h"
 #include "hQuadrature.h"
@@ -26,38 +26,32 @@
 #include "hMT_MGP_CPU.h"
 #include "hMT_Specimen_CPU.h"
 #include "hMT_AtomTypes_GPU.h"
+#include "hMT_Potential_GPU.h"
 
-#include "math.h"
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_functions.h>
+#include <cufft.h>
 
-class cMT_Potential_GPU: public cMT_Specimen_CPU{
+class cMT_Transmission_GPU: public cMT_Potential_GPU{
 	private:
-		sQ1 Qz;
-
-		void SetPotPar(int PotParh);
-		void LinearProjAtomicPotentialGPU(dim3 grid, dim3 threads);
-		void CubicPolyCoef(dim3 grid, dim3 threads);
-		void CubicPolyEval(int nsatom, double *&V0g, double *&V1g);
-
-		int CheckGridLimits(int i, int n);
-		void getbn(sGP &GP, double x, double y, double Rmax, sbn &bnx, sbn &bny);
-		void setcVp(int iSlice, int iatom, int nsatom, dim3 &BPot, dim3 &TPot, dim3 &BCoef, dim3 &TCoef);
+		int cSynCPU;
+		int nSliceM;
+		int SliceMTyp;
+		double2 **Trans;
+		float **Vpe;
+		cufftHandle PlanPsi;
+		void Potential_Efective(int iSlice, double fPot, float *&Vpe);
+		void Transmission(int iSlice, double2 *&Trans);
 	public:
-		sGP GP;									// xy-Grid properties
-		cMT_AtomTypes_GPU *MT_AtomTypes_GPU;	// Atom types
 
-		double *V0;								// Zero moment of the potential
-		double *V1;								// first moment of the potential
-		double *V2;								// Second moment of the potential
+		void freeMemory();
+		cMT_Transmission_GPU();
+		~cMT_Transmission_GPU();
 
-		void freeMemory();	
-		cMT_Potential_GPU();
-		~cMT_Potential_GPU();
+		void SetInputData(cMT_MGP_CPU &MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i);
+		void getTrans(int iSlice);
 
-		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i);
-		void ProjectedPotential(int iSlice);
 };
 
 #endif

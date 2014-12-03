@@ -19,64 +19,25 @@
 #include <cstring>
 #include "math.h"
 
-#include "hMT_STEM_GPU.h"
-
 #include "hConstTypes.h"
+#include "hQuadrature.h"
 #include "hMT_General_CPU.h"
 #include "hMT_General_GPU.h"
+#include "hMT_MGP_CPU.h"
 #include "hMT_Specimen_CPU.h"
+#include "hMT_AtomTypes_GPU.h"
 #include "hMT_Potential_GPU.h"
-#include "hMT_IncidentWave_GPU.h"
-#include "hMT_Detector_CPU.h"
-#include "hMT_Detector_GPU.h"
-#include "hMT_MulSli_GPU.h"
+#include "hMT_Transmission_GPU.h"
 
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_functions.h>
 #include <cufft.h>
 
-void cMT_STEM_GPU::freeMemory(){
+void cMT_Transmission_GPU::freeMemory(){
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
 	cSynCPU = ccSynCPU;
-
-	MT_MulSli_GPU = 0;
-	MT_Specimen_CPU = 0;
-	MT_Potential_GPU = 0;
-	MT_IncidentWave_GPU = 0;
-	delete MT_Detector_GPU; MT_Detector_GPU = 0;
-
-	line = 0;
-	FastCal = false;
-	ns = 0;	
-	x1u = 0;
-	y1u = 0;		
-	x2u = 0;	
-	y2u = 0;	
-
-	f_sDetCir_Free(DetCir);
-	for (int iThk = 0; iThk<nThk; iThk++){
-		for (int iDet=0; iDet<nDet; iDet++){
-			delete [] ImSTEM[iThk].DetInt[iDet].Coh; ImSTEM[iThk].DetInt[iDet].Coh = 0;
-			delete [] ImSTEM[iThk].DetInt[iDet].Tot; ImSTEM[iThk].DetInt[iDet].Tot = 0;
-		}
-		delete [] ImSTEM[iThk].DetInt; ImSTEM[iThk].DetInt = 0;
-	}
-	delete [] ImSTEM; ImSTEM = 0;
-	nDet = 0;
-
-	nThk = 0;
-	delete [] Thk; Thk = 0;
-
-	nxs = 0;
-	nys = 0;
-	delete [] xs; xs = 0;
-	delete [] ys; ys = 0;
-
-	nst = 0;
-	delete [] xst; xst = 0;
-	delete [] yst; yst = 0;
 
 	if(nSliceM>0)
 		if(SliceMTyp==1){
@@ -93,83 +54,59 @@ void cMT_STEM_GPU::freeMemory(){
 	SliceMTyp = 0;
 }
 
-cMT_STEM_GPU::cMT_STEM_GPU()
+cMT_Transmission_GPU::cMT_Transmission_GPU()
 {
 	cSynCPU = ccSynCPU;
 
-	MT_MulSli_GPU = 0;
-	MT_Specimen_CPU = 0;
-	MT_Potential_GPU = 0;
-	MT_IncidentWave_GPU = 0;
-	MT_Detector_GPU = 0;
-
-	line = 0;
-	FastCal = false;
-	ns = 0;
-	x1u = 0;
-	y1u = 0;		
-	x2u = 0;	
-	y2u = 0;	
-
-	f_sDetCir_Init(DetCir);
-	ImSTEM = 0;
-	nDet = 0;
-
-	nThk = 0;
-	Thk = 0;
-
-	nxs = 0;
-	nys = 0;
-	xs = 0;
-	ys = 0;
-
-	nst = 0;
-	xst = 0;
-	yst = 0;
+	nSliceM = 0;
+	SliceMTyp = 0;
 
 	Trans = 0;
 	Vpe = 0;
-
-	nSliceM = 0;
-	SliceMTyp = 0;
 }
 
-cMT_STEM_GPU::~cMT_STEM_GPU(){
+cMT_Transmission_GPU::~cMT_Transmission_GPU(){
 	freeMemory();
 }
 
-void cMT_STEM_GPU::InitImSTEM()
-{
-	int iThk, iDet, ist;
-	for (iThk = 0; iThk<nThk; iThk++)
-		for (iDet=0; iDet<nDet; iDet++)
-			for (ist=0; ist<nst; ist++){
-				ImSTEM[iThk].DetInt[iDet].Coh[ist] = 0.0;
-				ImSTEM[iThk].DetInt[iDet].Tot[ist] = 0.0;
-			}
-}
-
-void cMT_STEM_GPU::Potential_Efective(int iSlice, double fPot, float *&Vpe){
-	int nSlice = MT_Potential_GPU->MT_Specimen_CPU->nSlice;
+void cMT_Transmission_GPU::Potential_Efective(int iSlice, double fPot, float *&Vpe){
 	eSlicePos SlicePos = (iSlice==0)?eSPFirst:(iSlice<nSlice)?eSPMedium:eSPLast;
 
 	// Projected potential
-	if(iSlice<nSlice)
-		MT_Potential_GPU->ProjectedPotential(iSlice);
+	if(iSlice<nSlice) ProjectedPotential(iSlice);
 
 	switch (MT_MGP_CPU.MulOrder)
 	{
 		case 1:
-			f_Potential1(GP, fPot, MT_Potential_GPU->V0, Vpe);
+			f_Potential1(GP, fPot, V0, Vpe);
 			break;
 		case 2:
-			f_Potential2(GP, fPot, MT_Potential_GPU->V0, MT_Potential_GPU->V1, MT_Potential_GPU->V2, SlicePos, Vpe);
+			f_Potential2(GP, fPot, V0, V1, V2, SlicePos, Vpe);
 			break;
 	}
 }
 
-void cMT_STEM_GPU::Cal_Trans_Vpe(){
-	int nSlice = MT_Specimen_CPU->nSlice;
+void cMT_Transmission_GPU::Transmission(int iSlice, double2 *&Trans){
+	eSlicePos SlicePos = (iSlice==0)?eSPFirst:(iSlice<nSlice)?eSPMedium:eSPLast;
+
+	// Projected potential
+	if(iSlice<nSlice) ProjectedPotential(iSlice); 
+
+	switch (MT_MGP_CPU.MulOrder)
+	{
+		case 1:
+			if(MT_MGP_CPU.ApproxModel==4) 
+				f_TransmissionWPO(PlanPsi, GP, fPot, V0, Trans);
+			else 
+				f_Transmission1(PlanPsi, GP, fPot, V0, Trans);
+			break;
+		case 2:
+			f_Transmission2(PlanPsi, GP, fPot, MT_Potential_GPU->V0, MT_Potential_GPU->V1, MT_Potential_GPU->V2, SlicePos, Trans);
+			break;
+	}
+}
+
+void cMT_Transmission_GPU::Cal_Trans_Vpe(){
 	int iSliceM, nSliceMm = MIN(nSliceM, nSlice);
 	if((MT_MGP_CPU.MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
 
@@ -182,7 +119,7 @@ void cMT_STEM_GPU::Cal_Trans_Vpe(){
 	cudaDeviceSynchronize();
 }
 
-void cMT_STEM_GPU::Transmission_Transmit(int iSlice, double2 *&Psi){
+void cMT_Transmission_GPU::Transmission_Transmit(int iSlice, double2 *&Psi){
 	int nSlice = MT_Specimen_CPU->nSlice;
 	int nSliceMm = MIN(nSliceM, nSlice);
 	if((MT_MGP_CPU.MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
@@ -198,7 +135,7 @@ void cMT_STEM_GPU::Transmission_Transmit(int iSlice, double2 *&Psi){
 		MT_MulSli_GPU->Transmission_Transmit(iSlice, Psi);
 }
 
-void cMT_STEM_GPU::Cal_FAST_STEM_Wavefunction_POA_WPOA(int nConfFP, sDetInt *DetInt){
+void cMT_Transmission_GPU::Cal_FAST_STEM_Wavefunction_POA_WPOA(int nConfFP, sDetInt *DetInt){
 	int iSlice = 0;
 	int ist, iThk = 0;
 	int iConf0 = (nConfFP==0)?0:1;
@@ -228,7 +165,7 @@ void cMT_STEM_GPU::Cal_FAST_STEM_Wavefunction_POA_WPOA(int nConfFP, sDetInt *Det
 	}
 }
 
-void cMT_STEM_GPU::Cal_FAST_STEM_Wavefunction_MSA(int nConfFP, sDetInt *DetInt){
+void cMT_Transmission_GPU::Cal_FAST_STEM_Wavefunction_MSA(int nConfFP, sDetInt *DetInt){
 	int iSlice = 0, iSynCPU = 0;
 	int ist, iThk = 0;
 	int iConf0 = (nConfFP==0)?0:1;
@@ -267,25 +204,18 @@ void cMT_STEM_GPU::Cal_FAST_STEM_Wavefunction_MSA(int nConfFP, sDetInt *DetInt){
 	}
 }
 
-void cMT_STEM_GPU::Cal_STEM(){
-	int iThk = 0;
-
-	if(!FastCal){
-		for (int ist=0; ist<nst; ist++){
-			MT_MulSli_GPU->Image_Convergence_Wave_Illumination(MT_MGP_CPU.nConfFP, eSReciprocal, xst[ist], yst[ist], MT_MulSli_GPU->aPsi, MT_MulSli_GPU->M2aPsi, MT_MulSli_GPU->aM2Psi);
-			MT_Detector_GPU->getDetectorIntensity(MT_MulSli_GPU->aM2Psi, MT_MulSli_GPU->M2aPsi, ist, ImSTEM[iThk].DetInt);
-		}
-	}else{
-		if(MT_MGP_CPU.ApproxModel<=2)
-			Cal_FAST_STEM_Wavefunction_MSA(MT_MGP_CPU.nConfFP, ImSTEM[iThk].DetInt);
-		else
-			Cal_FAST_STEM_Wavefunction_POA_WPOA(MT_MGP_CPU.nConfFP, ImSTEM[iThk].DetInt);
-	}
-}
-
-void cMT_STEM_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, cMT_MulSli_GPU *MT_MulSli_GPU_i)
+void cMT_Transmission_GPU::SetInputData(cMT_MGP_CPU &MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i)
 {
 	freeMemory();
+
+	cMT_Potential_GPU::SetInputData(MT_MGP_CPU_io, nAtomsM_i, AtomsM_i, GP.dRmin);
+	MT_MGP_CPU_io = MT_MGP_CPU;
+
+	double gamma = f_getGamma(MT_MGP_CPU.E0);
+
+	doublelambda = f_getLambda(E0);
+
+	fPot = Lens.gamma*Lens.lambda/(cPotf*cos(MT_MGP_CPU.theta));
 
 	MT_MulSli_GPU = MT_MulSli_GPU_i;
 	MT_Potential_GPU = MT_MulSli_GPU->MT_Potential_GPU;

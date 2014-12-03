@@ -16,11 +16,12 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstring>
-#include "hmathCPU.h"
+#include "math.h"
 #include "hConstTypes.h"
+#include "hMT_AtomTypes_CPU.h"
+#include "hMT_MGP_CPU.h"
+#include "hMT_inMulSli_CPU.h"
 #include "hMT_General_CPU.h"
-#include "hAtomicData.h"
 
 // Input: E0(keV), Output: lambda (electron wave)
 double f_getLambda(double E0){
@@ -102,28 +103,6 @@ void f_get2DRadDist(int nR, double *R, double *fR, int nRl, double *Rl, double *
 				frl[i] /= cfrl[i];
 }
 
-// Set atom types
-void f_SetAtomTypes(int Z, int PotPar, int ns, double Vrl, sAtomTypesCPU &AtomTypes){
-	int nAtomTypes = 1;
-
-	AtomTypes.Z = Z;
-	AtomTypes.ns = ns;
-
-	cAtomicData AtomicData;
-	AtomicData.ReadAtomicData(PotPar, nAtomTypes, &AtomTypes, Vrl);
-}
-
-// Set atom types
-void f_SetAtomTypes(int PotPar, int ns, double Vrl, int nAtomTypes, sAtomTypesCPU *&AtomTypes){
-	for (int iAtomTypes=0; iAtomTypes<nAtomTypes; iAtomTypes++){
-		AtomTypes[iAtomTypes].Z = iAtomTypes+1;
-		AtomTypes[iAtomTypes].ns = ns;
-		AtomTypes[iAtomTypes].Vo = 0; //Implementation in the future
-	}
-	cAtomicData AtomicData;
-	AtomicData.ReadAtomicData(PotPar, nAtomTypes, AtomTypes, Vrl);
-}
-
 // Set Atoms
 void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms, double &sigma_min, double &sigma_max){
 	double x, y, dl = 1e-03;
@@ -150,11 +129,11 @@ void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, d
 }
 
 // get 2D maximum interaction distance
-double f_getRMax(int nAtoms, sAtoms *&Atoms, sAtomTypesCPU *&AtomTypes){
+double f_getRMax(int nAtoms, sAtoms *&Atoms, cMT_AtomTypes_CPU *&MT_AtomTypes_CPU){
 	double R, Rmax=0;
 
 	for(int iAtoms=0; iAtoms<nAtoms; iAtoms++){
-		R = AtomTypes[Atoms[iAtoms].Z-1].Rmax;
+		R = MT_AtomTypes_CPU[Atoms[iAtoms].Z-1].Rmax;
 		if (Rmax < R)
 			Rmax = R;
 	}
@@ -215,8 +194,8 @@ void f_sGP_Cal(int nx, int ny, double lx, double ly, double dz, bool PBC_xy, boo
 }
 
 // Grid's parameter calculation
-void f_sGP_SetInputData(cMT_MGP_CPU &MT_MGP_CPU, sGP &GP){
-	f_sGP_Cal(MT_MGP_CPU.nx, MT_MGP_CPU.ny, MT_MGP_CPU.lx, MT_MGP_CPU.ly, MT_MGP_CPU.dz, MT_MGP_CPU.PBC_xy, MT_MGP_CPU.BWL, GP);
+void f_sGP_SetInputData(cMT_MGP_CPU *MT_MGP_CPU, sGP &GP){
+	f_sGP_Cal(MT_MGP_CPU->nx, MT_MGP_CPU->ny, MT_MGP_CPU->lx, MT_MGP_CPU->ly, MT_MGP_CPU->dz, MT_MGP_CPU->PBC_xy, MT_MGP_CPU->BWL, GP);
 }
 
 /***************************************************************************/
@@ -311,22 +290,22 @@ void f_sLens_Cal(double E0, sGP &GP, sLens &Lens){
 };
 
 // Set input data Lens' parameter
-void f_sLens_SetInputData(cMT_InMULTEM_CPU &MT_InMULTEM_CPU, sGP &GP, sLens &Lens){
-	Lens.m = MT_InMULTEM_CPU.MC_m;
-	Lens.f = MT_InMULTEM_CPU.MC_f;
-	Lens.Cs3 = MT_InMULTEM_CPU.MC_Cs3;
-	Lens.Cs5 = MT_InMULTEM_CPU.MC_Cs5;
-	Lens.mfa2 = MT_InMULTEM_CPU.MC_mfa2;
-	Lens.afa2 = MT_InMULTEM_CPU.MC_afa2;
-	Lens.mfa3 = MT_InMULTEM_CPU.MC_mfa3;
-	Lens.afa3 = MT_InMULTEM_CPU.MC_afa3;
-	Lens.aobjl = MT_InMULTEM_CPU.MC_aobjl;
-	Lens.aobju = MT_InMULTEM_CPU.MC_aobju;
-	Lens.sf = MT_InMULTEM_CPU.MC_sf;
-	Lens.nsf = MT_InMULTEM_CPU.MC_nsf;
-	Lens.beta = MT_InMULTEM_CPU.MC_beta;
-	Lens.nbeta = MT_InMULTEM_CPU.MC_nbeta;
-	f_sLens_Cal(MT_InMULTEM_CPU.E0, GP, Lens);
+void f_sLens_SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, sGP &GP, sLens &Lens){
+	Lens.m = MT_InMulSli_CPU.MC_m;
+	Lens.f = MT_InMulSli_CPU.MC_f;
+	Lens.Cs3 = MT_InMulSli_CPU.MC_Cs3;
+	Lens.Cs5 = MT_InMulSli_CPU.MC_Cs5;
+	Lens.mfa2 = MT_InMulSli_CPU.MC_mfa2;
+	Lens.afa2 = MT_InMulSli_CPU.MC_afa2;
+	Lens.mfa3 = MT_InMulSli_CPU.MC_mfa3;
+	Lens.afa3 = MT_InMulSli_CPU.MC_afa3;
+	Lens.aobjl = MT_InMulSli_CPU.MC_aobjl;
+	Lens.aobju = MT_InMulSli_CPU.MC_aobju;
+	Lens.sf = MT_InMulSli_CPU.MC_sf;
+	Lens.nsf = MT_InMulSli_CPU.MC_nsf;
+	Lens.beta = MT_InMulSli_CPU.MC_beta;
+	Lens.nbeta = MT_InMulSli_CPU.MC_nbeta;
+	f_sLens_Cal(MT_InMulSli_CPU.E0, GP, Lens);
 }
 
 /***************************************************************************/
@@ -393,6 +372,28 @@ void f_sDetCir_Malloc(int nDetCir, sDetCir &DetCir){
 
 	DetCir.g2min = new double[nDetCir];
 	DetCir.g2max = new double[nDetCir];
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_scVp_Init(int ncVp, scVp *cVp){
+	for(int icVp=0; icVp<ncVp; icVp++){
+		cVp[icVp].x = 0;
+		cVp[icVp].y = 0;
+		cVp[icVp].z0 = 0;
+		cVp[icVp].ze = 0;
+		cVp[icVp].split = false;
+		cVp[icVp].occ = 0;
+		cVp[icVp].Rmin2 = 0;
+		cVp[icVp].Rmax2 = 0;
+		cVp[icVp].R2 = 0;
+		f_sCoefPar_Init(cVp[icVp].cVr);
+		cVp[icVp].bnx.i = 0;
+		cVp[icVp].bnx.n = 0;
+		cVp[icVp].bny.i = 0;
+		cVp[icVp].bny.n = 0;
+	}
 }
 
 /***************************************************************************/

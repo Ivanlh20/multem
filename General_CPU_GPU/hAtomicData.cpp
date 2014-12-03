@@ -761,162 +761,194 @@ void cAtomicData::AtomicParameterization(){
 	fep[102].Par[5].cl[0] = 4.52147421198378830e+00;	fep[102].Par[5].cnl[0] = 8.28309906861142050e+00;	fep[102].Par[5].cl[1] = 3.20212985587804380e+00;	fep[102].Par[5].cnl[1] = 7.31918958125393870e-01;	fep[102].Par[5].cl[2] = 2.23028726956451650e-01;	fep[102].Par[5].cnl[2] = 5.80942773018654980e-02;	fep[102].Par[5].cl[3] = 2.81716453892029730e-03;	fep[102].Par[5].cnl[3] = 2.56168016047444900e-03;	fep[102].Par[5].cl[4] = 4.06427954038620530e-08;	fep[102].Par[5].cnl[4] = 4.03816515529006540e-05;	fep[102].Par[5].cl[5] = 0.00000000000000000e+00;	fep[102].Par[5].cnl[5] = 0.00000000000000000e+00;
 }
 
+cAtomicData::cAtomicData(){
+	AtomicData();				// Load atomic data tables	
+	AtomicParameterization();	// Load atomic Parameterization
+}
+
 // Load atomic data tables (Atomic dat. + Atomic par.)
-void cAtomicData::ReadAtomicData(int PotPar, int nAtomTypes, sAtomTypesCPU *AtomTypes, double Vrl){
-	
-	AtomicData(); // Load atomic data tables	
-	AtomicParameterization(); // Load atomic Parameterization
-
-	int i, j, k;
+void cAtomicData::ReadAtomicData(int Z_i, int PotPar_i, double Vrl_i, int nR_i, double Rmin_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU){
+	int i, iZ = Z_i - 1;
 	double cl, cnl;
+	if(Vrl_i<=0) Vrl_i = stVrl;
+	if(nR_i<=0) nR_i = stnR;
 
-	for (i=0; i<nAtomTypes; i++){
-		k = AtomTypes[i].Z-1;
-		AtomTypes[i].A = AtDa[k].A;
-		AtomTypes[i].m = AtDa[k].m;
-		AtomTypes[i].rn_e = AtDa[k].rn*1e-05;
-		AtomTypes[i].rn_c = (1.2e-05)*pow((double)(AtDa[k].A), 1.0/3.0);
-		AtomTypes[i].ra_e = AtDa[k].ra;
-		AtomTypes[i].ra_c = 0.0;
-		AtomTypes[i].Rmin = 0;
-		AtomTypes[i].Rmax = 0;
-		for (j=0; j<6; j++){
-			AtomTypes[i].cfxg.cl[j] = AtomTypes[i].cfxg.cnl[j] = 0.0;
-			AtomTypes[i].cPr.cl[j] = AtomTypes[i].cPr.cnl[j] = 0.0;
-			AtomTypes[i].cVr.cl[j] = AtomTypes[i].cVr.cnl[j] = 0.0;
-			AtomTypes[i].cVR.cl[j] = AtomTypes[i].cVR.cnl[j] = 0.0;
+	MT_AtomTypes_CPU->Z = Z_i;
+	MT_AtomTypes_CPU->A = AtDa[iZ].A;
+	MT_AtomTypes_CPU->m = AtDa[iZ].m;
+	MT_AtomTypes_CPU->rn_e = AtDa[iZ].rn*1e-05;
+	MT_AtomTypes_CPU->rn_c = (1.2e-05)*pow((double)(AtDa[iZ].A), 1.0/3.0);
+	MT_AtomTypes_CPU->ra_e = AtDa[iZ].ra;
+	MT_AtomTypes_CPU->ra_c = 0.0;
+	MT_AtomTypes_CPU->Rmin = MAX(MT_AtomTypes_CPU->rn_c, Rmin_i);
+	MT_AtomTypes_CPU->Rmin2 = pow(MT_AtomTypes_CPU->Rmin, 2);
+	MT_AtomTypes_CPU->Rmax = 0;
+	MT_AtomTypes_CPU->Rmax2 = 0;
+	for (i=0; i<6; i++){
+		MT_AtomTypes_CPU->cfxg.cl[i] = MT_AtomTypes_CPU->cfxg.cnl[i] = 0.0;
+		MT_AtomTypes_CPU->cPr.cl[i] = MT_AtomTypes_CPU->cPr.cnl[i] = 0.0;
+		MT_AtomTypes_CPU->cVr.cl[i] = MT_AtomTypes_CPU->cVr.cnl[i] = 0.0;
+		MT_AtomTypes_CPU->cVR.cl[i] = MT_AtomTypes_CPU->cVR.cnl[i] = 0.0;
+	}
+	if ((PotPar_i==1)||(PotPar_i==2)||(PotPar_i==3)){
+		// 1: Doyle and Turner parameterization - 4 Gaussians - [0, 4]
+		// 2: Peng et al. parameterization - 5 Gaussians - [0, 4]
+		// 3: Peng et al. parameterization - 5 Gaussians - [0, 12]
+		for (i=0; i<6; i++){
+			MT_AtomTypes_CPU->cfeg.cl[i] = fep[iZ].Par[PotPar_i-1].cl[i];
+			MT_AtomTypes_CPU->cfeg.cnl[i] = fep[iZ].Par[PotPar_i-1].cnl[i]/4.0;
+			if (MT_AtomTypes_CPU->cfeg.cnl[i]==0) MT_AtomTypes_CPU->cfeg.cl[i] = 0;
 		}
-		if ((PotPar==1)||(PotPar==2)||(PotPar==3)){
-			// 1: Doyle and Turner parameterization - 4 Gaussians - [0, 4]
-			// 2: Peng et al. parameterization - 5 Gaussians - [0, 4]
-			// 3: Peng et al. parameterization - 5 Gaussians - [0, 12]
-			for (j=0; j<6; j++){
-				AtomTypes[i].cfeg.cl[j] = fep[k].Par[PotPar-1].cl[j];
-				AtomTypes[i].cfeg.cnl[j] = fep[k].Par[PotPar-1].cnl[j]/4.0;
-				if (AtomTypes[i].cfeg.cnl[j]==0)
-					AtomTypes[i].cfeg.cl[j] = 0;
+		for (i=0; i<6; i++)
+			if ((MT_AtomTypes_CPU->cfeg.cl[i]!=0)&&(MT_AtomTypes_CPU->cfeg.cnl[i]!=0)){
+				cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
+
+				MT_AtomTypes_CPU->cfxg.cl[i] = c2Pi2a0*cl;
+				MT_AtomTypes_CPU->cfxg.cnl[i] = cnl;
+
+				MT_AtomTypes_CPU->cPr.cl[i] = 0.5*c2Pi2a0*cl*pow(cPi/cnl, 3.5);
+				MT_AtomTypes_CPU->cPr.cnl[i] = cPi2/cnl;
+
+				MT_AtomTypes_CPU->cVr.cl[i] = cPotf*cl*pow(cPi/cnl, 1.5);
+				MT_AtomTypes_CPU->cVr.cnl[i] = cPi2/cnl;
+
+				MT_AtomTypes_CPU->cVR.cl[i] = cPotf*cPi*cl/cnl;
+				MT_AtomTypes_CPU->cVR.cnl[i] = cPi2/cnl;
 			}
-			for (j=0; j<6; j++)
-				if ((AtomTypes[i].cfeg.cl[j]!=0)&&(AtomTypes[i].cfeg.cnl[j]!=0)){
-					cl = AtomTypes[i].cfeg.cl[j]; cnl = AtomTypes[i].cfeg.cnl[j];
+	} else if (PotPar_i==4){
+		// 4: Kirkland parameterization - 3 Yukawa + 3 Gaussians - [0, 12]
+		for (i=0; i<6; i++){
+			MT_AtomTypes_CPU->cfeg.cl[i] = fep[iZ].Par[PotPar_i-1].cl[i];
+			MT_AtomTypes_CPU->cfeg.cnl[i] = fep[iZ].Par[PotPar_i-1].cnl[i];
+			if (MT_AtomTypes_CPU->cfeg.cnl[i]==0) MT_AtomTypes_CPU->cfeg.cl[i] = 0;
+		} 
+		for (i=0; i<3; i++)
+			if ((MT_AtomTypes_CPU->cfeg.cl[i]!=0)&&(MT_AtomTypes_CPU->cfeg.cnl[i]!=0)){
+				cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
 
-					AtomTypes[i].cfxg.cl[j] = c2Pi2a0*cl;
-					AtomTypes[i].cfxg.cnl[j] = cnl;
+				MT_AtomTypes_CPU->cfxg.cl[i] = c2Pi2a0*cl;
+				MT_AtomTypes_CPU->cfxg.cnl[i] = cnl;
 
-					AtomTypes[i].cPr.cl[j] = 0.5*c2Pi2a0*cl*pow(cPi/cnl, 3.5);
-					AtomTypes[i].cPr.cnl[j] = cPi2/cnl;
+				MT_AtomTypes_CPU->cPr.cl[i] = c2Pi2a0*cPi*cl*cnl;
+				MT_AtomTypes_CPU->cPr.cnl[i] = c2Pi*sqrt(cnl);
 
-					AtomTypes[i].cVr.cl[j] = cPotf*cl*pow(cPi/cnl, 1.5);
-					AtomTypes[i].cVr.cnl[j] = cPi2/cnl;
+				MT_AtomTypes_CPU->cVr.cl[i]= cPotf*cPi*cl;
+				MT_AtomTypes_CPU->cVr.cnl[i] = c2Pi*sqrt(cnl);
 
-					AtomTypes[i].cVR.cl[j] = cPotf*cPi*cl/cnl;
-					AtomTypes[i].cVR.cnl[j] = cPi2/cnl;
-				}
-		} else if (PotPar==4){
-			// 4: Kirkland parameterization - 3 Yukawa + 3 Gaussians - [0, 12]
-			for (j=0; j<6; j++){
-				AtomTypes[i].cfeg.cl[j] = fep[k].Par[PotPar-1].cl[j];
-				AtomTypes[i].cfeg.cnl[j] = fep[k].Par[PotPar-1].cnl[j];
-				if (AtomTypes[i].cfeg.cnl[j]==0)
-					AtomTypes[i].cfeg.cl[j] = 0;
+				MT_AtomTypes_CPU->cVR.cl[i] = cPotf*c2Pi*cl;
+				MT_AtomTypes_CPU->cVR.cnl[i] = c2Pi*sqrt(cnl);
 			} 
-			for (j=0; j<3; j++)
-				if ((AtomTypes[i].cfeg.cl[j]!=0)&&(AtomTypes[i].cfeg.cnl[j]!=0)){
-					cl = AtomTypes[i].cfeg.cl[j]; cnl = AtomTypes[i].cfeg.cnl[j];
+		for (i=3; i<6; i++)
+			if ((MT_AtomTypes_CPU->cfeg.cl[i]!=0)&&(MT_AtomTypes_CPU->cfeg.cnl[i]!=0)){
+				cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
 
-					AtomTypes[i].cfxg.cl[j] = c2Pi2a0*cl;
-					AtomTypes[i].cfxg.cnl[j] = cnl;
+				MT_AtomTypes_CPU->cfxg.cl[i] = c2Pi2a0*cl;
+				MT_AtomTypes_CPU->cfxg.cnl[i] = cnl;
 
-					AtomTypes[i].cPr.cl[j] = c2Pi2a0*cPi*cl*cnl;
-					AtomTypes[i].cPr.cnl[j] = c2Pi*sqrt(cnl);
+				MT_AtomTypes_CPU->cPr.cl[i] = 0.5*c2Pi2a0*cl*pow(cPi/cnl, 3.5);
+				MT_AtomTypes_CPU->cPr.cnl[i] = cPi2/cnl;
 
-					AtomTypes[i].cVr.cl[j]= cPotf*cPi*cl;
-					AtomTypes[i].cVr.cnl[j] = c2Pi*sqrt(cnl);
+				MT_AtomTypes_CPU->cVr.cl[i] = cPotf*cl*pow(cPi/cnl, 1.5);
+				MT_AtomTypes_CPU->cVr.cnl[i] = cPi2/cnl;
 
-					AtomTypes[i].cVR.cl[j] = cPotf*c2Pi*cl;
-					AtomTypes[i].cVR.cnl[j] = c2Pi*sqrt(cnl);
-				} 
-			for (j=3; j<6; j++)
-				if ((AtomTypes[i].cfeg.cl[j]!=0)&&(AtomTypes[i].cfeg.cnl[j]!=0)){
-					cl = AtomTypes[i].cfeg.cl[j]; cnl = AtomTypes[i].cfeg.cnl[j];
-
-					AtomTypes[i].cfxg.cl[j] = c2Pi2a0*cl;
-					AtomTypes[i].cfxg.cnl[j] = cnl;
-
-					AtomTypes[i].cPr.cl[j] = 0.5*c2Pi2a0*cl*pow(cPi/cnl, 3.5);
-					AtomTypes[i].cPr.cnl[j] = cPi2/cnl;
-
-					AtomTypes[i].cVr.cl[j] = cPotf*cl*pow(cPi/cnl, 1.5);
-					AtomTypes[i].cVr.cnl[j] = cPi2/cnl;
-
-					AtomTypes[i].cVR.cl[j] = cPotf*cPi*cl/cnl;
-					AtomTypes[i].cVR.cnl[j] = cPi2/cnl;
-				}
-		} else if (PotPar==5){
-			// 5: Weickenmeier and H.Kohl - a*(1-exp(-bg^2)/g^2 - [0, 12]
-			for (j=0; j<6; j++){
-				AtomTypes[i].cfeg.cl[j] = 4.0*0.0239336609991378*AtomTypes[i].Z/(3.0*(1.0+fep[k].Par[PotPar-1].cl[j]));
-				if (j>=3) AtomTypes[i].cfeg.cl[j] *= fep[k].Par[PotPar-1].cl[j];
-				AtomTypes[i].cfeg.cnl[j] = fep[k].Par[PotPar-1].cnl[j]/4.0;
-				if (AtomTypes[i].cfeg.cnl[j]==0)
-					AtomTypes[i].cfeg.cl[j] = 0;
+				MT_AtomTypes_CPU->cVR.cl[i] = cPotf*cPi*cl/cnl;
+				MT_AtomTypes_CPU->cVR.cnl[i] = cPi2/cnl;
 			}
-			for (j=0; j<6; j++)
-				if ((AtomTypes[i].cfeg.cl[j]!=0)&&(AtomTypes[i].cfeg.cnl[j]!=0)){
-					cl = AtomTypes[i].cfeg.cl[j]; cnl = AtomTypes[i].cfeg.cnl[j];
-
-					AtomTypes[i].cfxg.cl[j] = c2Pi2a0*cl;
-					AtomTypes[i].cfxg.cnl[j] = cnl;
-
-					AtomTypes[i].cPr.cl[j] = c2Pi2a0*cl*pow(cPi/cnl, 1.5);
-					AtomTypes[i].cPr.cnl[j] = cPi2/cnl;
-
-					AtomTypes[i].cVr.cl[j] = cPotf*cPi*cl;
-					AtomTypes[i].cVr.cnl[j] = cPi/sqrt(cnl);
-
-					AtomTypes[i].cVR.cl[j] = cPotf*0;
-					AtomTypes[i].cVR.cnl[j] = 0;
-				}
-		} else if (PotPar==6){
-				// 6: Lobato parameterization - Hydrogen functions - [0, 12]
-			for (j=0; j<6; j++){
-				AtomTypes[i].cfeg.cl[j] = fep[k].Par[PotPar-1].cl[j];
-				AtomTypes[i].cfeg.cnl[j] = fep[k].Par[PotPar-1].cnl[j];
-				if (AtomTypes[i].cfeg.cnl[j]==0)
-					AtomTypes[i].cfeg.cl[j] = 0;
-			} 
-			for (j=0; j<5; j++)
-				if ((AtomTypes[i].cfeg.cl[j]!=0)&&(AtomTypes[i].cfeg.cnl[j]!=0)){
-					cl = AtomTypes[i].cfeg.cl[j]; cnl = AtomTypes[i].cfeg.cnl[j];
-
-					AtomTypes[i].cfxg.cl[j] = c2Pi2a0*cl/cnl;
-					AtomTypes[i].cfxg.cnl[j] = cnl;
-
-					AtomTypes[i].cPr.cl[j] = c2Pi2a0*cPi2*cl/pow(cnl, 2.5);
-					AtomTypes[i].cPr.cnl[j] = c2Pi/sqrt(cnl);
-
-					AtomTypes[i].cVr.cl[j] = cPotf*cPi2*cl/pow(cnl, 1.5);
-					AtomTypes[i].cVr.cnl[j] = c2Pi/sqrt(cnl);
-
-					AtomTypes[i].cVR.cl[j] = 2.0*cPotf*cPi2*cl/pow(cnl, 1.5);
-					AtomTypes[i].cVR.cnl[j] = c2Pi/sqrt(cnl);
-				}
+	} else if (PotPar_i==5){
+		// 5: Weickenmeier and H.Kohl - a*(1-exp(-bg^2)/g^2 - [0, 12]
+		for (i=0; i<6; i++){
+			MT_AtomTypes_CPU->cfeg.cl[i] = 4.0*0.0239336609991378*Z_i/(3.0*(1.0+fep[iZ].Par[PotPar_i-1].cl[i]));
+			if (i>=3) MT_AtomTypes_CPU->cfeg.cl[i] *= fep[iZ].Par[PotPar_i-1].cl[i];
+			MT_AtomTypes_CPU->cfeg.cnl[i] = fep[iZ].Par[PotPar_i-1].cnl[i]/4.0;
+			if (MT_AtomTypes_CPU->cfeg.cnl[i]==0) MT_AtomTypes_CPU->cfeg.cl[i] = 0;
 		}
+		for (i=0; i<6; i++)
+			if ((MT_AtomTypes_CPU->cfeg.cl[i]!=0)&&(MT_AtomTypes_CPU->cfeg.cnl[i]!=0)){
+				cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
+
+				MT_AtomTypes_CPU->cfxg.cl[i] = c2Pi2a0*cl;
+				MT_AtomTypes_CPU->cfxg.cnl[i] = cnl;
+
+				MT_AtomTypes_CPU->cPr.cl[i] = c2Pi2a0*cl*pow(cPi/cnl, 1.5);
+				MT_AtomTypes_CPU->cPr.cnl[i] = cPi2/cnl;
+
+				MT_AtomTypes_CPU->cVr.cl[i] = cPotf*cPi*cl;
+				MT_AtomTypes_CPU->cVr.cnl[i] = cPi/sqrt(cnl);
+
+				MT_AtomTypes_CPU->cVR.cl[i] = cPotf*0;
+				MT_AtomTypes_CPU->cVR.cnl[i] = 0;
+			}
+	} else if (PotPar_i==6){
+			// 6: Lobato parameterization - Hydrogen functions - [0, 12]
+		for (i=0; i<6; i++){
+			MT_AtomTypes_CPU->cfeg.cl[i] = fep[iZ].Par[PotPar_i-1].cl[i];
+			MT_AtomTypes_CPU->cfeg.cnl[i] = fep[iZ].Par[PotPar_i-1].cnl[i];
+			if (MT_AtomTypes_CPU->cfeg.cnl[i]==0) MT_AtomTypes_CPU->cfeg.cl[i] = 0;
+		} 
+		for (i=0; i<5; i++)
+			if ((MT_AtomTypes_CPU->cfeg.cl[i]!=0)&&(MT_AtomTypes_CPU->cfeg.cnl[i]!=0)){
+				cl = MT_AtomTypes_CPU->cfeg.cl[i]; cnl = MT_AtomTypes_CPU->cfeg.cnl[i];
+
+				MT_AtomTypes_CPU->cfxg.cl[i] = c2Pi2a0*cl/cnl;
+				MT_AtomTypes_CPU->cfxg.cnl[i] = cnl;
+
+				MT_AtomTypes_CPU->cPr.cl[i] = c2Pi2a0*cPi2*cl/pow(cnl, 2.5);
+				MT_AtomTypes_CPU->cPr.cnl[i] = c2Pi/sqrt(cnl);
+
+				MT_AtomTypes_CPU->cVr.cl[i] = cPotf*cPi2*cl/pow(cnl, 1.5);
+				MT_AtomTypes_CPU->cVr.cnl[i] = c2Pi/sqrt(cnl);
+
+				MT_AtomTypes_CPU->cVR.cl[i] = 2.0*cPotf*cPi2*cl/pow(cnl, 1.5);
+				MT_AtomTypes_CPU->cVR.cnl[i] = c2Pi/sqrt(cnl);
+			}
 	}
 
-	if(Vrl>0){
-		cPotential_CPU Potential_CPU;
-		for (i=0; i<nAtomTypes; i++){
-			Potential_CPU.SetAtomTypes(PotPar, AtomTypes[i]);
-			Potential_CPU.SetSigma(0.0);
-			AtomTypes[i].ra_c = 3.0*Potential_CPU.AtomicRadius_rms(3);
-			AtomTypes[i].Rmax = Potential_CPU.AtomicRadius_Cutoff(3, Vrl);
+	Potential_CPU.SetAtomTypes(PotPar_i, MT_AtomTypes_CPU);
+	Potential_CPU.SetSigma(0.0);
+	MT_AtomTypes_CPU->ra_c = 3.0*Potential_CPU.AtomicRadius_rms(3);
+	MT_AtomTypes_CPU->Rmax = Potential_CPU.AtomicRadius_Cutoff(3, Vrl_i);
 
-			if(AtomTypes[i].ra_c == 0)
-				AtomTypes[i].ra_c = 1.75*AtomTypes[i].ra_e;
+	if(MT_AtomTypes_CPU->ra_c == 0)
+		MT_AtomTypes_CPU->ra_c = 1.75*MT_AtomTypes_CPU->ra_e;
 
-			if(AtomTypes[i].Rmax == 0)
-				AtomTypes[i].Rmax = 1.75*AtomTypes[i].ra_e;
-		}
+	if(MT_AtomTypes_CPU->Rmax == 0)
+		MT_AtomTypes_CPU->Rmax = 1.75*MT_AtomTypes_CPU->ra_e;
+
+	MT_AtomTypes_CPU->Rmax2 = pow(MT_AtomTypes_CPU->Rmax, 2);
+
+	MT_AtomTypes_CPU->nR = nR_i;
+
+	int IntType = 0, Dim = 2;
+	double dR2, m, n;
+	double V, Vn, dV, dVn;
+
+	double *VR = new double[MT_AtomTypes_CPU->nR];
+	double *dVR = new double[MT_AtomTypes_CPU->nR];
+
+	double dlnr = log(MT_AtomTypes_CPU->Rmax/MT_AtomTypes_CPU->Rmin)/double(MT_AtomTypes_CPU->nR-1);
+	for (int iR=0; iR<MT_AtomTypes_CPU->nR; iR++){
+		MT_AtomTypes_CPU->R[iR] = MT_AtomTypes_CPU->Rmin*exp(iR*dlnr);
+		MT_AtomTypes_CPU->R2[iR] = pow(MT_AtomTypes_CPU->R[iR], 2);
 	}
+
+	Potential_CPU.SetAtomTypes(PotPar_i, MT_AtomTypes_CPU);
+	Potential_CPU.SetSigma(0.0);
+	Potential_CPU.Vr(IntType, Dim, MT_AtomTypes_CPU->nR, MT_AtomTypes_CPU->R, VR, dVR);
+	for(int iR=0; iR<MT_AtomTypes_CPU->nR; iR++){
+		MT_AtomTypes_CPU->ciVR.c0[iR] = VR[iR];
+		MT_AtomTypes_CPU->ciVR.c1[iR] = 0.5*dVR[iR]/MT_AtomTypes_CPU->R[iR];
+	}
+
+	for(int iR=0; iR<MT_AtomTypes_CPU->nR-1; iR++){
+		dR2 = 1.0/(MT_AtomTypes_CPU->R2[iR+1]-MT_AtomTypes_CPU->R2[iR]);
+		V = MT_AtomTypes_CPU->ciVR.c0[iR]; Vn = MT_AtomTypes_CPU->ciVR.c0[iR+1];
+		dV = MT_AtomTypes_CPU->ciVR.c1[iR]; dVn = MT_AtomTypes_CPU->ciVR.c1[iR+1];
+		m = (Vn-V)*dR2; n = dV+dVn;
+		MT_AtomTypes_CPU->ciVR.c0[iR] = V-MT_AtomTypes_CPU->ciVR.c0[MT_AtomTypes_CPU->nR-1];
+		MT_AtomTypes_CPU->ciVR.c2[iR] = (3.0*m-n-dV)*dR2;
+		MT_AtomTypes_CPU->ciVR.c3[iR] = (n-2.0*m)*dR2*dR2;
+	}
+
+	delete [] VR; VR = 0;
+	delete [] dVR; dVR = 0;
 }

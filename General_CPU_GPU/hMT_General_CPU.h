@@ -20,7 +20,9 @@
 #define hMT_GeneralCPU_H
 
 #include "hConstTypes.h"
+#include "hMT_AtomTypes_CPU.h"
 #include "hMT_MGP_CPU.h"
+#include "hMT_inMulSli_CPU.h"
 
 // Input: E0(keV), Output: lambda (electron wave)
 double f_getLambda(double E0);
@@ -37,17 +39,11 @@ int f_getIndex(int ixmin, int ixmax, double *x, int typ, double x0);
 // get two dimensional radial distribution for regular grid
 void f_get2DRadDist(int nR, double *R, double *fR, int nRl, double *Rl, double *rl, double *frl, double *cfrl, bool reg, int typ=0);
 
-// Set atom types
-void f_SetAtomTypes(int Z, int PotPar, int ns, double Vrl, sAtomTypesCPU &AtomTypes);
-
-// Set atom types
-void f_SetAtomTypes(int PotPar, int ns, double Vrl, int nAtomTypes, sAtomTypesCPU *&AtomTypes);
-
 // Set Atoms
 void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms, double &sigma_min, double &sigma_max);
 
 // get 2D maximum interaction distance
-double f_getRMax(int nAtoms, sAtoms *&Atoms, sAtomTypesCPU *&AtomTypes);
+double f_getRMax(int nAtoms, sAtoms *&Atoms, cMT_AtomTypes_CPU *&MT_AtomTypes_CPU);
 
 /***************************************************************************/
 /***************************************************************************/
@@ -59,7 +55,7 @@ void f_sGP_Init(sGP &GP);
 void f_sGP_Cal(int nx, int ny, double lx, double ly, double dz, bool PBC_xy, bool BWL, sGP &GP);
 
 // Grid's parameter calculation
-void f_sGP_SetInputData(cMT_MGP_CPU &MT_MGP_CPU, sGP &GP);
+void f_sGP_SetInputData(cMT_MGP_CPU *MT_MGP_CPU, sGP &GP);
 
 /***************************************************************************/
 /***************************************************************************/
@@ -82,7 +78,7 @@ void f_sLens_Init(sLens &Lens);
 void f_sLens_Cal(double E0, sGP &GP, sLens &Lens);
 
 // Set input data Lens' parameter
-void f_sLens_SetInputData(cMT_InMULTEM_CPU &MT_InMULTEM_CPU, sGP &GP, sLens &Lens);
+void f_sLens_SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, sGP &GP, sLens &Lens);
 /***************************************************************************/
 /***************************************************************************/
 
@@ -109,6 +105,11 @@ void f_sDetCir_Free(sDetCir &DetCir);
 void f_sDetCir_Init(sDetCir &DetCir);
 
 void f_sDetCir_Malloc(int nDetCir, sDetCir &DetCir);
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_scVp_Init(int ncVp, scVp *cVp);
 
 /***************************************************************************/
 /***************************************************************************/

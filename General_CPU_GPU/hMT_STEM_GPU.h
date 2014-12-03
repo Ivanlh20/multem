@@ -89,7 +89,7 @@ class cMT_STEM_GPU{
 		cMT_STEM_GPU();
 		~cMT_STEM_GPU();
 
-		void SetInputData(cMT_InMULTEM_CPU &MT_InMULTEM_CPU, cMT_MulSli_GPU *MT_MulSli_GPU_i);
+		void SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, cMT_MulSli_GPU *MT_MulSli_GPU_i);
 		void Cal_STEM();
 
 };

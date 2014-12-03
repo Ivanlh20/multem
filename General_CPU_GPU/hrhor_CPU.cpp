@@ -16,9 +16,10 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "hmathCPU.h"
 #include <cstring>
+#include "hmathCPU.h"
 #include "hConstTypes.h"
+#include "hMT_General_CPU.h"
 #include "hrhor_CPU.h"
 
 // Constructor
@@ -34,9 +35,9 @@ crhor_CPU::~crhor_CPU(){
 }
 
 // Set Atom type
-void crhor_CPU::SetAtomT(int PotPari, sAtomTypesCPU AtomTypesCPUi){
-	PotPar = PotPari;
-	memcpy(&AtomTypesCPU, &AtomTypesCPUi, sizeof(sAtomTypesCPU));
+void crhor_CPU::SetAtomT(int PotPar_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU_i){
+	PotPar = PotPar_i;
+	MT_AtomTypes_CPU = MT_AtomTypes_CPU_i;
 }
 
 // 3D electron density (Pr, dPr) where dPr is the first derivative along r
@@ -48,7 +49,7 @@ void crhor_CPU::rhor(double r, double &f, double &df){
 		case 1:
 			// 1: Doyle and Turner parameterization - 4 Gaussians - [0, 4]
 			for (i=0; i<4; i++){
-				cl = AtomTypesCPU.cPr.cl[i]; cnl = AtomTypesCPU.cPr.cnl[i];
+				cl = MT_AtomTypes_CPU->cPr.cl[i]; cnl = MT_AtomTypes_CPU->cPr.cnl[i];
 				ft = cl*exp(-cnl*r2);
 				f += (2.0*r2 - 3.0/cnl)*ft;
 				df += (2.0*cnl*r2 - 5.0)*ft;
@@ -58,7 +59,7 @@ void crhor_CPU::rhor(double r, double &f, double &df){
 		case 2:
 			// 2: Peng et al. parameterization - 5 Gaussians - [0, 4]
 			for (i=0; i<5; i++){
-				cl = AtomTypesCPU.cPr.cl[i]; cnl = AtomTypesCPU.cPr.cnl[i];
+				cl = MT_AtomTypes_CPU->cPr.cl[i]; cnl = MT_AtomTypes_CPU->cPr.cnl[i];
 				ft = cl*exp(-cnl*r2);
 				f += (2.0*r2 - 3.0/cnl)*ft;
 				df += (2.0*cnl*r2 - 5.0)*ft;
@@ -68,7 +69,7 @@ void crhor_CPU::rhor(double r, double &f, double &df){
 		case 3:
 			// 3: Peng et al. parameterization - 5 Gaussians - [0, 12]
 			for (i=0; i<5; i++){
-				cl = AtomTypesCPU.cPr.cl[i]; cnl = AtomTypesCPU.cPr.cnl[i];
+				cl = MT_AtomTypes_CPU->cPr.cl[i]; cnl = MT_AtomTypes_CPU->cPr.cnl[i];
 				ft = cl*exp(-cnl*r2);
 				f += (2.0*r2 - 3.0/cnl)*ft;
 				df += (2.0*cnl*r2 - 5.0)*ft;
@@ -78,13 +79,13 @@ void crhor_CPU::rhor(double r, double &f, double &df){
 		case 4:
 			// 4: Kirkland parameterization - 3 Yukawa + 3 Gaussians - [0, 12]			
 			for (i=0; i<3;i++){
-				cl = AtomTypesCPU.cPr.cl[i]; cnl = AtomTypesCPU.cPr.cnl[i];
+				cl = MT_AtomTypes_CPU->cPr.cl[i]; cnl = MT_AtomTypes_CPU->cPr.cnl[i];
 				f += ft = cl*exp(-cnl*r)*ir;
 				df += -(cnl + ir)*ft;
 			}
 
 			for (i=3; i<6; i++){
-				cl = AtomTypesCPU.cPr.cl[i]; cnl = AtomTypesCPU.cPr.cnl[i];
+				cl = MT_AtomTypes_CPU->cPr.cl[i]; cnl = MT_AtomTypes_CPU->cPr.cnl[i];
 				ft = cl*exp(-cnl*r2);
 				f += (2.0*r2 - 3.0/cnl)*ft;
 				df += -2.0*r*(2.0*cnl*r2 - 5.0)*ft;
@@ -93,7 +94,7 @@ void crhor_CPU::rhor(double r, double &f, double &df){
 		case 5:
 			// 5: Weickenmeier and H.Kohl - a*(1-exp(-bg^2)/g^2 - [0, 12]
 			for (i=0; i<6; i++){
-				cl = AtomTypesCPU.cPr.cl[i]; cnl = AtomTypesCPU.cPr.cnl[i];
+				cl = MT_AtomTypes_CPU->cPr.cl[i]; cnl = MT_AtomTypes_CPU->cPr.cnl[i];
 				f += ft = cl*exp(-cnl*r2);
 				df += cnl*ft;
 			}
@@ -102,7 +103,7 @@ void crhor_CPU::rhor(double r, double &f, double &df){
 		case 6:
 			// 6: Lobato parameterization - 5 Hydrogen fe - [0, 12]
 			for (i=0; i<5; i++){
-				cl = AtomTypesCPU.cPr.cl[i]; cnl = AtomTypesCPU.cPr.cnl[i];
+				cl = MT_AtomTypes_CPU->cPr.cl[i]; cnl = MT_AtomTypes_CPU->cPr.cnl[i];
 				f += ft = cl*exp(-cnl*r);
 				df += -cnl*ft;
 			}

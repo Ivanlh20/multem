@@ -20,16 +20,17 @@
 #define hfxg_CPU_H
 
 #include "hConstTypes.h"
+#include "hMT_AtomTypes_CPU.h"
 
 class cfxg_CPU{
 	private:
 		int PotPar;
-		sAtomTypesCPU AtomTypesCPU;
+		cMT_AtomTypes_CPU *MT_AtomTypes_CPU;
 		double cl, cnl;	
 		double ft, t, g2;
 		void fxg(double g, double &f, double &df);
 	public:
-		void SetAtomT(int PotPari, sAtomTypesCPU AtomTypesCPUi);
+		void SetAtomT(int PotPar_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU_i);
 		void fxg(int ng, double *g, double *f, double *df);
 		cfxg_CPU();
 		~cfxg_CPU();
