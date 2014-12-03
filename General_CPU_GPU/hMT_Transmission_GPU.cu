@@ -75,7 +75,7 @@ void cMT_Transmission_GPU::Potential_Efective(int iSlice, double fPot, float *&V
 	// Projected potential
 	if(iSlice<nSlice) ProjectedPotential(iSlice);
 
-	switch (MT_MGP_CPU.MulOrder)
+	switch (MT_MGP_CPU->MulOrder)
 	{
 		case 1:
 			f_Potential1(GP, fPot, V0, Vpe);
@@ -92,10 +92,10 @@ void cMT_Transmission_GPU::Transmission(int iSlice, double2 *&Trans){
 	// Projected potential
 	if(iSlice<nSlice) ProjectedPotential(iSlice); 
 
-	switch (MT_MGP_CPU.MulOrder)
+	switch (MT_MGP_CPU->MulOrder)
 	{
 		case 1:
-			if(MT_MGP_CPU.ApproxModel==4) 
+			if(MT_MGP_CPU->ApproxModel==4) 
 				f_TransmissionWPO(PlanPsi, GP, fPot, V0, Trans);
 			else 
 				f_Transmission1(PlanPsi, GP, fPot, V0, Trans);
@@ -108,7 +108,7 @@ void cMT_Transmission_GPU::Transmission(int iSlice, double2 *&Trans){
 
 void cMT_Transmission_GPU::Cal_Trans_Vpe(){
 	int iSliceM, nSliceMm = MIN(nSliceM, nSlice);
-	if((MT_MGP_CPU.MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
+	if((MT_MGP_CPU->MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
 
 	for (iSliceM=0; iSliceM<nSliceMm; iSliceM++){
 		if(SliceMTyp==1)
@@ -122,7 +122,7 @@ void cMT_Transmission_GPU::Cal_Trans_Vpe(){
 void cMT_Transmission_GPU::Transmission_Transmit(int iSlice, double2 *&Psi){
 	int nSlice = MT_Specimen_CPU->nSlice;
 	int nSliceMm = MIN(nSliceM, nSlice);
-	if((MT_MGP_CPU.MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
+	if((MT_MGP_CPU->MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
 
 	double2 *Transt;
 	Transt = (SliceMTyp==1)?Trans[iSlice]:MT_MulSli_GPU->Trans;
@@ -135,158 +135,19 @@ void cMT_Transmission_GPU::Transmission_Transmit(int iSlice, double2 *&Psi){
 		MT_MulSli_GPU->Transmission_Transmit(iSlice, Psi);
 }
 
-void cMT_Transmission_GPU::Cal_FAST_STEM_Wavefunction_POA_WPOA(int nConfFP, sDetInt *DetInt){
-	int iSlice = 0;
-	int ist, iThk = 0;
-	int iConf0 = (nConfFP==0)?0:1;
-	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
-	double nxy2 = pow(double(GP.nxy), 2);
-
-	InitImSTEM();
-	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
-		// Move atoms
-		MT_Specimen_CPU->MoveAtoms(iConf);
-		// Transmission
-		MT_MulSli_GPU->Transmission(iSlice, MT_MulSli_GPU->Trans);
-		for (ist=0; ist<nst; ist++){
-			// Plane wave ilumination
-			MT_IncidentWave_GPU->Psi0(xst[ist], yst[ist], MT_MulSli_GPU->Psi);
-			// Transmit
-			MT_MulSli_GPU->Transmit(MT_MulSli_GPU->Trans, MT_MulSli_GPU->Psi);
-			// Inclined ilumination
-			MT_MulSli_GPU->PhaseMul(MT_MulSli_GPU->Psi);
-			// Backward fft2
-			cufftExecZ2Z(MT_MulSli_GPU->PlanPsi, MT_MulSli_GPU->Psi, MT_MulSli_GPU->Psi, CUFFT_FORWARD);
-			// Add Psi to aM2Psi
-			f_Add_wMC2(false, GP, inConfFP/nxy2, MT_MulSli_GPU->Psi, MT_MulSli_GPU->aM2Psi);
-			// Detector integration
-			MT_Detector_GPU->getDetectorIntensity(MT_MulSli_GPU->aM2Psi, ist, ImSTEM[iThk].DetInt, true);
-		}
-	}
-}
-
-void cMT_Transmission_GPU::Cal_FAST_STEM_Wavefunction_MSA(int nConfFP, sDetInt *DetInt){
-	int iSlice = 0, iSynCPU = 0;
-	int ist, iThk = 0;
-	int iConf0 = (nConfFP==0)?0:1;
-	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
-	double nxy2 = pow(double(GP.nxy), 2);
-
-	InitImSTEM();
-	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
-		// Move atoms
-		MT_Specimen_CPU->MoveAtoms(iConf);
-
-		//Load Trans or Vpe
-		Cal_Trans_Vpe();
-		for (ist=0; ist<nst; ist++){
-			// Plane wave ilumination
-			MT_IncidentWave_GPU->Psi0(xst[ist], yst[ist], MT_MulSli_GPU->Psi);
-			for (iSlice = 0; iSlice<MT_Specimen_CPU->nSlice; iSlice++){
-				// Transmission and Transmit
-				Transmission_Transmit(iSlice, MT_MulSli_GPU->Psi);
-				// Propagate
-				MT_MulSli_GPU->Propagate(eSReal, MT_MulSli_GPU->gxu, MT_MulSli_GPU->gyu, MT_Specimen_CPU->get_dz(iSlice), MT_MulSli_GPU->Psi);
-				// GPU Synchronize
-				f_GPU_Sync_CPU(iSynCPU, cSynCPU); 
-			}
-			// Last Transmission and Transmit
-			if (MT_MGP_CPU.MulOrder==2) Transmission_Transmit(iSlice, MT_MulSli_GPU->Psi);
-			// Inclined ilumination
-			MT_MulSli_GPU->PhaseMul(MT_MulSli_GPU->Psi);
-			// Backward fft2
-			cufftExecZ2Z(MT_MulSli_GPU->PlanPsi, MT_MulSli_GPU->Psi, MT_MulSli_GPU->Psi, CUFFT_FORWARD);
-			// Add Psi to aM2Psi
-			f_Add_wMC2(false, GP, inConfFP/nxy2, MT_MulSli_GPU->Psi, MT_MulSli_GPU->aM2Psi);
-			// Detector integration
-			MT_Detector_GPU->getDetectorIntensity(MT_MulSli_GPU->aM2Psi, ist, ImSTEM[iThk].DetInt, true);
-		}
-	}
-}
-
-void cMT_Transmission_GPU::SetInputData(cMT_MGP_CPU &MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i)
+void cMT_Transmission_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i)
 {
 	freeMemory();
 
-	cMT_Potential_GPU::SetInputData(MT_MGP_CPU_io, nAtomsM_i, AtomsM_i, GP.dRmin);
-	MT_MGP_CPU_io = MT_MGP_CPU;
+	cMT_Potential_GPU::SetInputData(MT_MGP_CPU_io, nAtomsM_i, AtomsM_i);
 
-	double gamma = f_getGamma(MT_MGP_CPU.E0);
+	double Gamma = f_getGamma(MT_MGP_CPU->E0);
+	double Lambda = f_getLambda(MT_MGP_CPU->E0);
+	fPot = Gamma*Lambda/(cPotf*cos(MT_MGP_CPU->theta));
 
-	doublelambda = f_getLambda(E0);
-
-	fPot = Lens.gamma*Lens.lambda/(cPotf*cos(MT_MGP_CPU.theta));
-
-	MT_MulSli_GPU = MT_MulSli_GPU_i;
-	MT_Potential_GPU = MT_MulSli_GPU->MT_Potential_GPU;
-	MT_Specimen_CPU = MT_Potential_GPU->MT_Specimen_CPU;
-	MT_IncidentWave_GPU = MT_MulSli_GPU->MT_IncidentWave_GPU;
-	
-	MT_MGP_CPU = MT_MulSli_GPU->MT_MGP_CPU;
-	GP = MT_MulSli_GPU->GP;
-
-	line = MT_InMulSli_CPU.STEM_line;
-	FastCal = MT_InMulSli_CPU.STEM_FastCal;
-	ns = MT_InMulSli_CPU.STEM_ns;
-	x1u = MT_InMulSli_CPU.STEM_x1u;	
-	y1u = MT_InMulSli_CPU.STEM_y1u;
-	x2u = MT_InMulSli_CPU.STEM_x2u;
-	y2u = MT_InMulSli_CPU.STEM_y2u;
-	f_BuildGrid(line, ns, x1u, y1u, x2u, y2u, nxs, nys, xs, ys);
-
-	nThk = MT_MGP_CPU.nThk;
-	if(nThk>0){
-		Thk = new double[nThk];
-		memcpy(Thk, MT_InMulSli_CPU.Thickness, nThk*cSizeofRD);
-	}
-
-	nDet = MT_InMulSli_CPU.STEM_nDet;
-	double lambda = f_getLambda(MT_InMulSli_CPU.E0);
-	f_sDetCir_Malloc(nDet, DetCir);
-	for (int iDet=0; iDet<nDet; iDet++){
-		DetCir.g2min[iDet] = pow(MT_InMulSli_CPU.STEM_DetCir[iDet].InnerAng/lambda, 2);
-		DetCir.g2max[iDet] = pow(MT_InMulSli_CPU.STEM_DetCir[iDet].OuterAng/lambda, 2);
-	}
-
-	MT_Detector_GPU = new cMT_Detector_GPU;
-	MT_Detector_GPU->SetInputData(GP, nDet, DetCir);
-
-	nst = (line==1)?ns:nxs*nys;
-	int ils, ixs, iys, ixys;
-	xst = new double[nst];
-	yst = new double[nst];
-	if(line==1){
-		for (ils=0; ils<ns; ils++){
-			xst[ils] = xs[ils];
-			yst[ils] = ys[ils];
-		}
-	}else{
-		for (ixs=0; ixs<nxs; ixs++)
-			for (iys=0; iys<nys; iys++){
-				ixys = ixs*nys + iys;
-				xst[ixys] = xs[ixs];
-				yst[ixys] = ys[iys];
-			}
-	}
-
-	int iThk, iDet, ist;
-	ImSTEM = new sImSTEM[nThk];
-	for (iThk = 0; iThk<nThk; iThk++){
-		ImSTEM[iThk].DetInt = new sDetInt[nDet];
-		for (iDet=0; iDet<nDet; iDet++){
-			ImSTEM[iThk].DetInt[iDet].Coh = new double[nst];
-			ImSTEM[iThk].DetInt[iDet].Tot = new double[nst];
-			for (ist=0; ist<nst; ist++){
-				ImSTEM[iThk].DetInt[iDet].Coh[ist] = 0.0;
-				ImSTEM[iThk].DetInt[iDet].Tot[ist] = 0.0;
-			}
-		}
-	}
-
-	/****************************************************************/
-	int nSliceSigma = ((MT_MGP_CPU.ApproxModel>1)||(MT_MGP_CPU.DimFP%10==0))?0:(int)ceil(6*MT_Specimen_CPU->sigma_max/MT_MGP_CPU.dz);
-	int nSliceMax = MT_Specimen_CPU->nSlice + nSliceSigma;
-	nSliceMax = (MT_MGP_CPU.MulOrder==1)?nSliceMax:nSliceMax+1;
+	int nSliceSigma = ((MT_MGP_CPU->ApproxModel>1)||(MT_MGP_CPU->DimFP%10==0))?0:(int)ceil(6*sigma_max/MT_MGP_CPU->dz);
+	int nSliceMax = nSlice + nSliceSigma;
+	nSliceMax = (MT_MGP_CPU->MulOrder==1)?nSliceMax:nSliceMax+1;
 
 	size_t SizeFreeM, SizeTotM;
 	cudaMemGetInfo(&SizeFreeM, &SizeTotM);
@@ -301,7 +162,7 @@ void cMT_Transmission_GPU::SetInputData(cMT_MGP_CPU &MT_MGP_CPU_io, int nAtomsM_
 		nSliceMt = SizeFreeM/(GP.nxy*cSizeofRF);
 	}
 
-	if((FastCal)&&(nSliceMt>0)&&(MT_MGP_CPU.SimType==1)&&(MT_MGP_CPU.ApproxModel<=2)){
+	if((nSliceMt>0)&&(MT_MGP_CPU->SimType==1)&&(MT_MGP_CPU->ApproxModel<=2)){
 		nSliceM = MIN(nSliceMt, nSliceMax);
 		if(SliceMTyp==1){
 			Trans = new double2*[nSliceM];

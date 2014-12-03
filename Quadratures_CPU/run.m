@@ -1,5 +1,4 @@
-clear all;
-clc;
+clear all; clc;
 % QuadType
 % 0: int_-1^1 f(x) dx
 % 1: int_0^infty f(x) dx
@@ -13,13 +12,19 @@ clc;
 % 9: int_0^infty f(x) Exp[-x] dx
 % 10: int_0^infty f(x) Exp[-x]/Sqrt[x] dx
 
-QuadType = 1; nQuad = 4;
-[xi, wi] = getQuadrature(QuadType, nQuad);
-% num2str([xi, wi], 20)
-a0 = 0.52917721077817892;
+QuadType = 1; nQuad = 128;
 
-for Z = 1:54
-    [rhoi, ~] = getrho(6, Z, xi);
-    ar2(Z) = sum(4*pi*(xi.^4).*rhoi.*wi/a0.^2);
-end;
-num2str(ar2', 6)
+% Load quadrature
+[xi, wi] = getQuadrature(QuadType, nQuad);
+
+Z = 6; PotPar = 6; sigma = 0.0; IntTyp = 0; Dim = 3;
+[rhoi, ~] = getrho(6, Z, xi);
+[Vi, ~] = getPotential(PotPar, Z, sigma, IntTyp, Dim, xi);
+% get volumen
+Volume1 = sum(4*pi*(xi.^2).*Vi.*wi);
+
+%first component of f_e(g)
+cPotf=47.877645145863056; g0 = 0.0;
+Volume2 = getfeg(6, Z, g0);
+
+num2str([Volume1 cPotf*Volume2], 8)

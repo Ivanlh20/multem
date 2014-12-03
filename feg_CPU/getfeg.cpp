@@ -17,8 +17,9 @@
  */
 
 #include "hConstTypes.h"
-#include "hMT_General_CPU.h"
+#include "hMT_AtomTypes_CPU.h"
 #include "hfeg_CPU.h"
+
 #include <mex.h>
 	
 void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[]){
@@ -37,10 +38,10 @@ void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	plhs[1] = mxCreateDoubleMatrix(m, n, mxREAL);
 	dfeg = mxGetPr(plhs[1]);
 
-	sAtomTypesCPU AtomTypesCPU;
-	f_SetAtomTypes(Z, PotPar, 0, stVrl, AtomTypesCPU);
+	cMT_AtomTypes_CPU MT_AtomTypes_CPU;
+	MT_AtomTypes_CPU.SetAtomTypes(Z, PotPar, stVrl, stnR, 0);
 
 	cfeg_CPU feg_CPU;
-	feg_CPU.SetAtomT(PotPar, AtomTypesCPU);
+	feg_CPU.SetAtomT(PotPar, &MT_AtomTypes_CPU);
 	feg_CPU.feg(ng, g, feg, dfeg);
 }

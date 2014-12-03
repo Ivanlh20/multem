@@ -36,10 +36,10 @@ void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	plhs[1] = mxCreateDoubleMatrix(m, n, mxREAL);
 	dPr = mxGetPr(plhs[1]);
 
-	sAtomTypesCPU AtomTypesCPU;
-	f_SetAtomTypes(Z, PotPar, 0, stVrl, AtomTypesCPU);
+	cMT_AtomTypes_CPU MT_AtomTypes_CPU;
+	MT_AtomTypes_CPU.SetAtomTypes(Z, PotPar, stVrl, stnR, 0);
 
 	crhor_CPU rhor_CPU;
-	rhor_CPU.SetAtomT(PotPar, AtomTypesCPU);
+	rhor_CPU.SetAtomT(PotPar, &MT_AtomTypes_CPU);
 	rhor_CPU.rhor(nr, r, Pr, dPr);
 }

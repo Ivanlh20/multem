@@ -18,7 +18,7 @@
 
 #include <cstring>
 #include "hConstTypes.h"
-#include "hMT_General_CPU.h"
+#include "hMT_MGP_CPU.h"
 #include "hMT_Specimen_CPU.h"
 #include <mex.h>
 
@@ -38,7 +38,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 
 	/*************************Input data**************************/
 	cMT_Specimen_CPU MT_Specimen_CPU;
-	MT_Specimen_CPU.SetInputData(MT_MGP_CPU, nAtomsM, AtomsM);
+	MT_Specimen_CPU.SetInputData(&MT_MGP_CPU, nAtomsM, AtomsM);
 	MT_Specimen_CPU.MoveAtoms(iConfFP);
 
 	nAtoms = MT_Specimen_CPU.nAtoms;

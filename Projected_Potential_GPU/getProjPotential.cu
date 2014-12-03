@@ -32,7 +32,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	int nAtomsM;
 	double *AtomsM;
 	cMT_MGP_CPU MT_MGP_CPU;
-	sGP GP;
 
 	nAtomsM = (int)mxGetM(prhs[0]); 
 	AtomsM = mxGetPr(prhs[0]);
@@ -46,8 +45,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	MT_MGP_CPU.DimFP = (int)mxGetScalar(prhs[8]); 
 	MT_MGP_CPU.SeedFP = (int)mxGetScalar(prhs[9]);
 	iSlice = (int)mxGetScalar(prhs[10])-1; 
-	if(iSlice<0)
-		iSlice=0;
+	if(iSlice<0) iSlice = 0;
 
 	/************************Output data**************************/
 	plhs[0] = mxCreateDoubleMatrix(MT_MGP_CPU.ny, MT_MGP_CPU.nx, mxREAL);
@@ -57,16 +55,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	double *V1h = mxGetPr(plhs[1]);
 
 	cudaSetDevice(MT_MGP_CPU.gpu);
-	f_sGP_Cal(MT_MGP_CPU.nx, MT_MGP_CPU.ny, MT_MGP_CPU.lx, MT_MGP_CPU.ly, MT_MGP_CPU.dz, MT_MGP_CPU.PBC_xy, MT_MGP_CPU.BWL, GP);
 
 	cMT_Potential_GPU MT_Potential_GPU;	
-	MT_Potential_GPU.SetInputData(MT_MGP_CPU, GP, nAtomsM, AtomsM);
-	MT_Potential_GPU.MT_Specimen_CPU.MoveAtoms(iConfFP);
+	MT_Potential_GPU.SetInputData(&MT_MGP_CPU, nAtomsM, AtomsM);
+	MT_Potential_GPU.MoveAtoms(iConfFP);
 	MT_Potential_GPU.ProjectedPotential(iSlice);
 
-	f_fft2Shift_MD(GP, MT_Potential_GPU.V0, MT_Potential_GPU.V1);
-	cudaMemcpy(V0h, MT_Potential_GPU.V0, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
-	cudaMemcpy(V1h, MT_Potential_GPU.V1, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
+	f_fft2Shift_MD(MT_Potential_GPU.GP, MT_Potential_GPU.V0, MT_Potential_GPU.V1);
+	cudaMemcpy(V0h, MT_Potential_GPU.V0, MT_Potential_GPU.GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
+	cudaMemcpy(V1h, MT_Potential_GPU.V1, MT_Potential_GPU.GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
 
 	//MT_Potential_GPU.freeMemory();
 	//cudaDeviceReset();

@@ -17,28 +17,30 @@
  */
 
 #include "hConstTypes.h"
+#include "hMT_AtomTypes_CPU.h"
 #include "hMT_General_CPU.h"
 #include "hPotential_CPU.h"
 #include <mex.h>
 
 void GetAtomicRadius(int PotPar, int Dim, double Vrl, double *r){
-	int nAtomTypes;
-	sAtomTypesCPU *AtomTypes=0;
+	int nMT_AtomTypes;
+	cMT_AtomTypes_CPU *MT_AtomTypes_CPU;
 
-	nAtomTypes = NE;
-	AtomTypes = new sAtomTypesCPU[nAtomTypes];
-	f_SetAtomTypes(PotPar, 0, Vrl, nAtomTypes, AtomTypes);
+	nMT_AtomTypes = NE;
+	MT_AtomTypes_CPU = new cMT_AtomTypes_CPU[nMT_AtomTypes];
+	for(int i=0; i<nMT_AtomTypes; i++)
+		MT_AtomTypes_CPU[i].SetAtomTypes(i+1, PotPar, Vrl, stnR, 0);
 
 	cPotential_CPU Potential_CPU;
 	for (int i=0; i<NE; i++){	
-		Potential_CPU.SetAtomTypes(PotPar, AtomTypes[i]);
+		Potential_CPU.SetAtomTypes(PotPar, &(MT_AtomTypes_CPU[i]));
 		Potential_CPU.SetSigma(0.0);
 		r[i] = Potential_CPU.AtomicRadius_rms(Dim);
 		r[i+NE] = Potential_CPU.AtomicRadius_Cutoff(Dim, Vrl);
-		r[i+2*NE] = AtomTypes[i].ra_e;
+		r[i+2*NE] = MT_AtomTypes_CPU[i].ra_e;
 	}
 
-	delete [] AtomTypes; AtomTypes = 0;
+	delete [] MT_AtomTypes_CPU; MT_AtomTypes_CPU = 0;
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 

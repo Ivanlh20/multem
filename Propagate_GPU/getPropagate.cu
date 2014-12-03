@@ -29,7 +29,6 @@
 class cPropagator{
 	private:
 		sGP GP;
-		sBT BT;
 		sACD Prop_x;
 		sACD Prop_y;
 		sComplex Psii;

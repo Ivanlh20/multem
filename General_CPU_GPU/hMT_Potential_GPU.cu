@@ -477,8 +477,8 @@ __global__ void k_CubicPolyEval(sGP GP, scVp cVp, double * __restrict V0g, doubl
 			double dx, dx2, dx3, V0, V1;
 			if(R2 < cVp.Rmin2) R2 = cVp.Rmin2;
 
-			ix = (ix<GP.nx)?ix:ix-(ix/GP.nx)*GP.nx;
-			iy = (iy<GP.ny)?iy:iy-(iy/GP.ny)*GP.ny;
+			ix = ix-(int)floor(ix*GP.dRx/GP.lx)*GP.nx;
+			iy = iy-(int)floor(iy*GP.dRy/GP.ly)*GP.ny;
 
 			ix = IsRS(ix, GP.nxh);
 			iy = IsRS(iy, GP.nyh);
@@ -640,12 +640,11 @@ void cMT_Potential_GPU::setcVp(int iSlice, int iatom, int nsatom, dim3 &BPot, di
 void cMT_Potential_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i){
 	freeMemory();
 
+	f_sGP_SetInputData(MT_MGP_CPU, GP);
 	cMT_Specimen_CPU::SetInputData(MT_MGP_CPU_io, nAtomsM_i, AtomsM_i, GP.dRmin);
 
 	SetPotPar(MT_MGP_CPU->PotPar);			// Set Potential parameterization
 	f_ReadQuadratureGPU(0, stnQz, Qz);		// TanhSinh
-
-	f_sGP_SetInputData(MT_MGP_CPU, GP);
 
 	for(int icVp=0; icVp<stncVp; icVp++){
 		f_sciVn_cudaMalloc(stnR, cVph[icVp].ciV0);

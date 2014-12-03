@@ -17,7 +17,7 @@
  */
 
 #include "hConstTypes.h"
-#include "hMT_General_CPU.h"
+#include "hMT_AtomTypes_CPU.h"
 #include "hPotential_CPU.h"
 #include <mex.h>
 	
@@ -40,11 +40,11 @@ void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	plhs[1] = mxCreateDoubleMatrix(m, n, mxREAL);
 	dVr = mxGetPr(plhs[1]);
 
-	sAtomTypesCPU AtomTypes;
-	f_SetAtomTypes(Z, PotPar, 0, stVrl, AtomTypes);
+	cMT_AtomTypes_CPU MT_AtomTypes_CPU;
+	MT_AtomTypes_CPU.SetAtomTypes(Z, PotPar, stVrl, stnR, 0);
 
 	cPotential_CPU Potential_CPU;
-	Potential_CPU.SetAtomTypes(PotPar, AtomTypes);
+	Potential_CPU.SetAtomTypes(PotPar, &MT_AtomTypes_CPU);
 	Potential_CPU.SetSigma(sigma);
 	Potential_CPU.Vr(IntType, Dim, nr, r, Vr, dVr);
 }

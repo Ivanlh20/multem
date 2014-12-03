@@ -21,6 +21,7 @@
 #include "hMT_General_GPU.h"
 #include "hMT_IncidentWave_GPU.h"
 #include "hMatlab2Cpp.h"
+
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include <device_functions.h>
@@ -125,6 +126,38 @@ void cProbe::getProbe(sComplex &Psih){
 	/*********************copy data to host************************/
 	f_Copy_MCd(GP, Psi, Psii.real, Psii.imag, Psih);
 }
+
+/**********************read input Probe*************************/
+void f_Matlab2InProbe(const mxArray *mxInProbe, sInProbe &InProbe){
+	InProbe.gpu = ReadValuemxField<int>(mxInProbe, 0, "gpu");						// gpu device
+	
+	/**************************Multislice*************************/
+	InProbe.E0 = ReadValuemxField<double>(mxInProbe, 0, "E0");						// Acceleration voltage
+	InProbe.theta = ReadValuemxField<double>(mxInProbe, 0, "theta", deg2rad);		// incident tilt (in spherical coordinates) (degrees-->rad)
+	InProbe.phi = ReadValuemxField<double>(mxInProbe, 0, "phi", deg2rad);			// incident tilt (in spherical coordinates) (degrees-->rad)
+	InProbe.nx = ReadValuemxField<int>(mxInProbe, 0, "nx");							// Number of pixels in x direction
+	InProbe.ny = ReadValuemxField<int>(mxInProbe, 0, "ny");							// Number of pixels in y direction
+	InProbe.lx = ReadValuemxField<double>(mxInProbe, 0, "lx");						// distance in x direction(Angstroms)
+	InProbe.ly = ReadValuemxField<double>(mxInProbe, 0, "ly");						// distance in y direction(Angstroms)
+
+	InProbe.x0 = ReadValuemxField<double>(mxInProbe, 0, "x0");	// 
+	InProbe.y0 = ReadValuemxField<double>(mxInProbe, 0, "y0");	//
+
+	InProbe.m =ReadValuemxField<int>(mxInProbe, 0, "m");						// momentum of the vortex
+	InProbe.f = ReadValuemxField<double>(mxInProbe, 0, "f");						// defocus(Angstrom)
+	InProbe.Cs3 = ReadValuemxField<double>(mxInProbe, 0, "Cs3", mm2Ags);			// spherical aberration(mm-->Angstrom)
+	InProbe.Cs5 = ReadValuemxField<double>(mxInProbe, 0, "Cs5", mm2Ags);			// spherical aberration(mm-->Angstrom)
+	InProbe.mfa2 = ReadValuemxField<double>(mxInProbe, 0, "mfa2");					// magnitude 2-fold astigmatism(Angstrom)
+	InProbe.afa2 = ReadValuemxField<double>(mxInProbe, 0, "afa2", deg2rad);			// angle 2-fold astigmatism(degrees-->rad)
+	InProbe.mfa3 = ReadValuemxField<double>(mxInProbe, 0, "mfa3");					// magnitude 3-fold astigmatism(Angstrom)
+	InProbe.afa3 = ReadValuemxField<double>(mxInProbe, 0, "afa3", deg2rad);			// angle 3-fold astigmatism(degrees-->rad)
+	InProbe.aobjl = ReadValuemxField<double>(mxInProbe, 0, "aobjl", mrad2rad);		// lower objective aperture(mrad-->rad)
+	InProbe.aobju = ReadValuemxField<double>(mxInProbe, 0, "aobju", mrad2rad);		// upper objective aperture(mrad-->rad)
+	InProbe.sf = ReadValuemxField<double>(mxInProbe, 0, "sf");						// defocus spread(Angstrom)
+	InProbe.nsf = ReadValuemxField<int>(mxInProbe, 0, "nsf");						// Number of defocus sampling point
+	InProbe.beta = ReadValuemxField<double>(mxInProbe, 0, "beta", mrad2rad);		// semi-convergence angle(mrad-->rad)
+	InProbe.nbeta = ReadValuemxField<int>(mxInProbe, 0, "nbeta");					// half number sampling points
+ }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	sInProbe InProbe;

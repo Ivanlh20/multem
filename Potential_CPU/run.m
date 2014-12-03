@@ -1,28 +1,37 @@
-clear all;
-clc;
+clear all; clc;
 
 Z = 79; Dim = 3; RMSPro = 0.0; sigma = sqrt(RMSPro^2/3); IntTyp = 0;
 
-rmin = 1e-02; rmax = 5.0; nr = 64;
+rmin = 1e-02; rmax = 5.0; nr = 128;
 dlnr = log(rmax/rmin)/(nr-1); r = rmin*exp((0:1:(nr-1))*dlnr);
 
 tic;
-[V1, dV1] = getPotential(1, Z, sigma, IntTyp, Dim, r);
-[V2, dV2] = getPotential(2, Z, sigma, IntTyp, Dim, r);
-[V3, dV3] = getPotential(3, Z, sigma, IntTyp, Dim, r);
-[V4, dV4] = getPotential(4, Z, sigma, IntTyp, Dim, r);
-[V5, dV5] = getPotential(5, Z, sigma, IntTyp, Dim, r);
-[V6, dV6] = getPotential(6, Z, sigma, IntTyp, Dim, r);
+[f1, df1] = getPotential(1, Z, sigma, IntTyp, Dim, r);
+[f2, df2] = getPotential(2, Z, sigma, IntTyp, Dim, r);
+[f3, df3] = getPotential(3, Z, sigma, IntTyp, Dim, r);
+[f4, df4] = getPotential(4, Z, sigma, IntTyp, Dim, r);
+[f5, df5] = getPotential(5, Z, sigma, IntTyp, Dim, r);
+[f6, df6] = getPotential(6, Z, sigma, IntTyp, Dim, r);
 toc;
 
 figure(1);
+
 subplot(1, 2, 1);
-plot(r, V3, '-b', r, V4, '-c', r, V5, '-k', r, V6, '-r');
-% plot(r, V1, '-k', r, V2, '-y', r, V3, '-c', r, V4, '-b', r, V5, '-m', r, V6, '-r');
-% xlim([0 rmax]);
+plot(r, f1, '-k', r, f2, '-b', r, f3, '-c', r, f4, '-m', r, f5, '-r', r, f6, '-g');
+set(gca,'FontSize',12,'LineWidth',1,'PlotBoxAspectRatio',[1.25 1 1]);
+title('Atomic potential');
+ylabel('$\displaystyle V(r)$','interpreter','latex','FontSize',14);
+xlabel('$\mathbf{r}$','interpreter','latex','FontSize',12);
+xlim([0 rmax]);
+legend('Doyle [0-4]', 'Peng [0-4]', 'Peng [0-12]', 'Kirkland [0-12]', 'Weickenmeier [0-12]', 'Lobato [0-12]');
+
 subplot(1, 2, 2);
-plot(r, dV3, '-b', r, dV4, '-c', r, dV5, '-k', r, dV6, '-r');
-% % hold on
-% plot(r, dV1, '-k', r, dV2, '-y', r, dV3, '-c', r, dV4, '-b', r, dV5, '-m', r, dV6, '-r');
-% xlim([0 0.1]);
-[V4, dV4] = getPotential(4, 14, sigma, IntTyp, 2, 0.1)
+plot(r, df1, '-k', r, df2, '-b', r, df3, '-c', r, df4, '-m', r, df5, '-r', r, df6, '-g');
+set(gca,'FontSize',12,'LineWidth',1,'PlotBoxAspectRatio',[1.25 1 1]);
+title('Derivative of the Atomic potential');
+ylabel('$\displaystyle \frac{d V(r)}{dr}$','interpreter','latex','FontSize',14);
+xlabel('$\mathbf{r}$','interpreter','latex','FontSize',12);
+xlim([0 rmax]);
+legend('Doyle [0-4]', 'Peng [0-4]', 'Peng [0-12]', 'Kirkland [0-12]', 'Weickenmeier [0-12]', 'Lobato [0-12]');
+
+set(gcf,'units','normalized','outerposition',[0 0 1 1]);

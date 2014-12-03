@@ -21,15 +21,15 @@
 #include <mex.h>
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-int Z, ng, typ;
-double g[1024], g2[1024], fxg[1024], feg[1024];
+	int Z, ng, typ;
+	double g[1024], g2[1024], fxg[1024], feg[1024];
 	cfxegTabData fxegTabData;
 
 	Z = (int)mxGetScalar(prhs[0]); 
 	typ = (int)mxGetScalar(prhs[1]); 
-fxegTabData.ReadTabData(Z, typ, 1, ng, g, g2, fxg, feg);
+	fxegTabData.ReadTabData(Z, typ, 1, ng, g, g2, fxg, feg);
 	
-double *go,*fxgo,*fego;
+	double *go,*fxgo,*fego;
 	plhs[0] = mxCreateDoubleMatrix(ng, 1, mxREAL);
 	go = mxGetPr(plhs[0]);
 	plhs[1] = mxCreateDoubleMatrix(ng, 1, mxREAL);
@@ -37,7 +37,7 @@ double *go,*fxgo,*fego;
  	plhs[2] = mxCreateDoubleMatrix(ng, 1, mxREAL);
 	fego = mxGetPr(plhs[2]);
 
-memcpy(go, g, ng*sizeof(double));
-memcpy(fxgo, fxg, ng*sizeof(double));
-memcpy(fego, feg, ng*sizeof(double));
+	memcpy(go, g, ng*sizeof(double));
+	memcpy(fxgo, fxg, ng*sizeof(double));
+	memcpy(fego, feg, ng*sizeof(double));
 }

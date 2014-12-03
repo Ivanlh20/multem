@@ -1,5 +1,5 @@
 clear all; clc;
-na = 20; nb = 20; nc = 10; pp = 6; ncu = 8; sigma = 0;
+na = 1; nb = 1; nc = 5; pp = 6; ncu = 8; sigma = 0;
 tic;
 [Atomsi, lx, ly, lz, a, b, c, dz] = Au001Crystal(na, nb, nc, ncu, sigma);
 toc;
@@ -11,7 +11,7 @@ tic;
 toc;
 [nAtoms,~] = size(Atoms); [nSlice, ~] = size(Slice);
 
-for i = 1:nSlice
+for i = 1
     figure(1); clf;
     i1 = Slice(i, 7); i2 = Slice(i, 8); ii = i1:1:i2;
     plot3(Atoms(:, 1), Atoms(:, 2), Atoms(:, 3), '*k', Atoms(ii, 1), Atoms(ii, 2), Atoms(ii, 3), '*r');

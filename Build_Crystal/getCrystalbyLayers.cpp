@@ -20,6 +20,41 @@
 #include "hMatlab2Cpp.h"
 #include <mex.h>
 
+/*******************Matlab to layer unit cell*********************/
+void f_Matlab2uLayer(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, int &nuLayer, sAtomsGroup *&uLayer){
+int i, j, nAtoms;
+	double *AtomsM;
+
+	na = ReadValuemxField<int>(mxCrystal, 0, "na"); 
+	nb = ReadValuemxField<int>(mxCrystal, 0, "nb");
+	nc = ReadValuemxField<int>(mxCrystal, 0, "nc"); 
+
+	a = ReadValuemxField<double>(mxCrystal, 0, "a");
+	b = ReadValuemxField<double>(mxCrystal, 0, "b"); 
+	c = ReadValuemxField<double>(mxCrystal, 0, "c");
+
+	nuLayer = ReadValuemxField<int>(mxCrystal, 0, "nuLayer");
+
+	mxArray *mexuLayer, *mexAtoms; 
+	mexuLayer = mxGetField(mxCrystal, 0, "uLayer");
+	
+	uLayer = new sAtomsGroup[nuLayer];
+	for (i=0; i<nuLayer; i++){
+		mexAtoms = mxGetField(mexuLayer, i, "Atoms");
+		AtomsM = mxGetPr(mexAtoms);
+		uLayer[i].nAtoms = nAtoms = (int)mxGetM(mexAtoms);
+		uLayer[i].Atoms = new sAtoms[nAtoms];
+		for(j=0; j<nAtoms; j++){
+			uLayer[i].Atoms[j].x = a*AtomsM[0*nAtoms+j];
+			uLayer[i].Atoms[j].y = b*AtomsM[1*nAtoms+j];
+			uLayer[i].Atoms[j].z = c*AtomsM[2*nAtoms+j];
+			uLayer[i].Atoms[j].Z = (int)AtomsM[3*nAtoms+j];
+			uLayer[i].Atoms[j].sigma = AtomsM[4*nAtoms+j];
+			uLayer[i].Atoms[j].occ = AtomsM[5*nAtoms+j];
+		}
+	}
+}
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 int na, nb, nc;
 	double a, b, c;

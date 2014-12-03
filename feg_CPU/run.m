@@ -13,13 +13,24 @@ g = gmin:dg:gmax;
 [f5, df5] = getfeg(5, Z, g);
 [f6, df6] = getfeg(6, Z, g);
 
-figure(1);
+figure(1); clf;
+
 subplot(1, 2, 1);
-plot(g, f3, '-b', g, f4, '-c', g, f5, '-k', g, f6, '-r');
-% plot(g, f6/f6(1), '-r');
-% plot(g, f1, '-k', g, f2, '-y', g, f3, '-c', g, f4, '-b', g, f5, '-m', g, f6, '-r');
+plot(g, f1, '-k', g, f2, '-b', g, f3, '-c', g, f4, '-m', g, f5, '-r', g, f6, '-g');
+set(gca,'FontSize',12,'LineWidth',1,'PlotBoxAspectRatio',[1.25 1 1]);
+title('Electron Scattering factor');
+ylabel('$\displaystyle f_e(g)$','interpreter','latex','FontSize',14);
+xlabel('$\mathbf{g}$','interpreter','latex','FontSize',12);
+xlim([0 gmax]);
+legend('Doyle [0-4]', 'Peng [0-4]', 'Peng [0-12]', 'Kirkland [0-12]', 'Weickenmeier [0-12]', 'Lobato [0-12]');
+
 subplot(1, 2, 2);
-plot(g, df1, '-k', g, df2, '-y', g, df3, '-c', g, df4, '-b', g, df5, '-m', g, df6, '-r');
-% plot(g, f3, '-k', g, f4, '-b', g, f5, '-c', g, f6, '-r');
-% xlim([0 200])
-% ylim([min(f6) max(f6)]);
+plot(g, df1, '-k', g, df2, '-b', g, df3, '-c', g, df4, '-m', g, df5, '-r', g, df6, '-g');
+set(gca,'FontSize',12,'LineWidth',1,'PlotBoxAspectRatio',[1.25 1 1]);
+title('Derivative of the electron Scattering factor');
+ylabel('$\displaystyle \frac{d f_e(g)}{dg}$','interpreter','latex','FontSize',14);
+xlabel('$\mathbf{g}$','interpreter','latex','FontSize',12);
+xlim([0 gmax]);
+legend('Doyle [0-4]', 'Peng [0-4]', 'Peng [0-12]', 'Kirkland [0-12]', 'Weickenmeier [0-12]', 'Lobato [0-12]');
+
+set(gcf,'units','normalized','outerposition',[0 0 1 1]);
