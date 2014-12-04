@@ -3,8 +3,8 @@ clc;
 na = 1; nb = 1; nc = 5; pp = 6; ncu = 4; sigma = 0.084; gpu = 0;
 Dim = 110; Seed = 1983; iConfFP = 0; nx = 2048; ny = 2048;
 [Atomsi, lx, ly, lz, a, b, c, dz] = Au001Crystal(na, nb, nc, ncu, sigma);
-Atomsi = [ 5 5 0 79 0.084 1.0];
- lx = 10; ly = 10; dz = 0.5;
+% Atomsi = [ 2.0 2.0 0 79 0.084 1.0];
+%  lx = 4; ly = 4.0; dz = 0.5;
 [Atoms, Slice] = getSliceSpecimen(Atomsi, lx, ly, dz, iConfFP, Dim, Seed);
 [nAtoms,~] = size(Atoms); [nSlice, ~] = size(Slice);
 for iSlice = 1:nSlice
@@ -16,6 +16,7 @@ for iSlice = 1:nSlice
 %     axis equal;
     
     tic;
+    clear getProjPotential;
     [V0, V1] = getProjPotential(Atomsi, gpu, nx, ny, lx, ly, dz, iConfFP, Dim, Seed, iSlice);
     toc;
     figure(1);

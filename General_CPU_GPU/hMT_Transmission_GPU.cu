@@ -38,6 +38,9 @@ void cMT_Transmission_GPU::freeMemory(){
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
 	cSynCPU = ccSynCPU;
+	fPot = 0.0;
+
+	cudaFreen(Trans0);
 
 	if(nSliceM>0)
 		if(SliceMTyp==1){
@@ -49,31 +52,37 @@ void cMT_Transmission_GPU::freeMemory(){
 				cudaFreen(Vpe[iSliceM]);
 			delete [] Vpe; Vpe = 0;
 		}
-
 	nSliceM = 0;
 	SliceMTyp = 0;
+
+	PlanTrans = 0;
 }
 
 cMT_Transmission_GPU::cMT_Transmission_GPU()
 {
 	cSynCPU = ccSynCPU;
+	fPot = 0.0;
 
 	nSliceM = 0;
 	SliceMTyp = 0;
 
+	Trans0 = 0;
 	Trans = 0;
 	Vpe = 0;
+
+	PlanTrans = 0;
 }
 
 cMT_Transmission_GPU::~cMT_Transmission_GPU(){
 	freeMemory();
 }
 
-void cMT_Transmission_GPU::Potential_Efective(int iSlice, double fPot, float *&Vpe){
-	eSlicePos SlicePos = (iSlice==0)?eSPFirst:(iSlice<nSlice)?eSPMedium:eSPLast;
+eSlicePos cMT_Transmission_GPU::SlicePos(int iSlice, int nSlice){
+	return (iSlice==0)?eSPFirst:(iSlice<nSlice)?eSPMedium:eSPLast;
+}
 
-	// Projected potential
-	if(iSlice<nSlice) ProjectedPotential(iSlice);
+void cMT_Transmission_GPU::EfectivePotential(int iSlice, double fPot, float *&Vpe){
+	ProjectedPotential(iSlice);  // Projected potential
 
 	switch (MT_MGP_CPU->MulOrder)
 	{
@@ -81,27 +90,24 @@ void cMT_Transmission_GPU::Potential_Efective(int iSlice, double fPot, float *&V
 			f_Potential1(GP, fPot, V0, Vpe);
 			break;
 		case 2:
-			f_Potential2(GP, fPot, V0, V1, V2, SlicePos, Vpe);
+			f_Potential2(GP, fPot, V0, V1, V2, SlicePos(iSlice, nSlice), Vpe);
 			break;
 	}
 }
 
-void cMT_Transmission_GPU::Transmission(int iSlice, double2 *&Trans){
-	eSlicePos SlicePos = (iSlice==0)?eSPFirst:(iSlice<nSlice)?eSPMedium:eSPLast;
-
-	// Projected potential
-	if(iSlice<nSlice) ProjectedPotential(iSlice); 
+void cMT_Transmission_GPU::Transmission(int iSlice, double fPot, double2 *&Trans){
+	ProjectedPotential(iSlice);  // Projected potential
 
 	switch (MT_MGP_CPU->MulOrder)
 	{
 		case 1:
 			if(MT_MGP_CPU->ApproxModel==4) 
-				f_TransmissionWPO(PlanPsi, GP, fPot, V0, Trans);
+				f_TransmissionWPO(PlanTrans, GP, fPot, V0, Trans);
 			else 
-				f_Transmission1(PlanPsi, GP, fPot, V0, Trans);
+				f_Transmission1(PlanTrans, GP, fPot, V0, Trans);
 			break;
 		case 2:
-			f_Transmission2(PlanPsi, GP, fPot, MT_Potential_GPU->V0, MT_Potential_GPU->V1, MT_Potential_GPU->V2, SlicePos, Trans);
+			f_Transmission2(PlanTrans, GP, fPot, V0, V1, V2, SlicePos(iSlice, nSlice), Trans);
 			break;
 	}
 }
@@ -129,7 +135,7 @@ void cMT_Transmission_GPU::Transmission_Transmit(int iSlice, double2 *&Psi){
 
 	if(iSlice<nSliceMm){
 		if(SliceMTyp==2)
-			f_Transmission_1_2(MT_MulSli_GPU->PlanPsi, GP, Vpe[iSlice], Transt);
+			f_Transmission_1_2(MT_MulSli_GPU->PlanTrans, GP, Vpe[iSlice], Transt);
 		MT_MulSli_GPU->Transmit(Transt, Psi);
 	}else
 		MT_MulSli_GPU->Transmission_Transmit(iSlice, Psi);

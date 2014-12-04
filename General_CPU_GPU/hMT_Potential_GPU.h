@@ -37,9 +37,8 @@ class cMT_Potential_GPU: public cMT_Specimen_CPU{
 		sQ1 Qz;
 
 		void SetPotPar(int PotParh);
-		void LinearProjAtomicPotentialGPU(dim3 grid, dim3 threads);
-		void CubicPolyCoef(dim3 grid, dim3 threads);
-		void CubicPolyEval(int nsatom, double *&V0g, double *&V1g);
+		void getCubicPoly(dim3 BPot, dim3 TPot, dim3 BCoef, dim3 TCoef);
+		void evalCubicPoly(int nsatom, double *&V0g, double *&V1g);
 
 		int CheckGridLimits(int i, int n);
 		void getbn(sGP &GP, double x, double y, double Rmax, sbn &bnx, sbn &bny);

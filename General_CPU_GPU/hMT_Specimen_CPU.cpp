@@ -474,11 +474,10 @@ void cMT_Specimen_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, d
 
 // Move atoms (ramdom distribution will be included in the future)
 void cMT_Specimen_CPU::MoveAtoms(int iConf){
+	if (iConf<=0) return;
+
 	double sigmax, sigmay, sigmaz;
 	double bx, by, bz;
-
-	if (iConf<=0)
-		return;
 
 	// Get dimension components
 	getDimCom(MT_MGP_CPU->DimFP, bx, by, bz);
