@@ -39,20 +39,26 @@ class cMT_Transmission_GPU: public cMT_Potential_GPU{
 
 		double fPot;
 
-		int nSliceM;
 		int SliceMTyp;
+
+		int nSliceM;
+		int nSliceM0;
 
 		double2 *Trans0;
 		double2 **Trans;
 		float **Vpe;
 
 		cufftHandle PlanTrans;
-		eSlicePos SlicePos(int iSlice, int nSlice);
+
+		void f_V0_D2F(sGP &GP, double *&V0_i, float *&Ve_o);
+		void Transmission(cufftHandle &PlanPsi, sGP &GP, int ApproxModel, double fPot, double *&V0_i, double2 *&Trans_o);	
+		void Transmission(cufftHandle &PlanPsi, sGP &GP, int ApproxModel, double fPot, float *&V0_i, double2 *&Trans_o);
+
 		void Cal_Trans_Vpe();
 		void Transmission_Transmit(int iSlice, double2 *&Psi);
 
 		void EfectivePotential(int iSlice, double fPot, float *&Vpe);
-		void Transmission(int iSlice, double fPot, double2 *&Trans);
+		double2* Transmission(int iSlice);
 	public:
 
 		void freeMemory();

@@ -7,7 +7,7 @@ Dim = 110; Seed = 1983; iConfFP = 0; nx = 2048; ny = 2048;
 %  lx = 4; ly = 4.0; dz = 0.5;
 [Atoms, Slice] = getSliceSpecimen(Atomsi, lx, ly, dz, iConfFP, Dim, Seed);
 [nAtoms,~] = size(Atoms); [nSlice, ~] = size(Slice);
-for iSlice = 1:nSlice
+for iSlice = 2%nSlice
 %     i1 = Slice(iSlice, 3); i2 = Slice(iSlice, 4); ii1 = i1:1:i2;
 %     i1 = Slice(iSlice, 7); i2 = Slice(iSlice, 8); ii2 = i1:1:i2;
 %     subplot(1, 4, 2);

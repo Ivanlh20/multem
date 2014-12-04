@@ -105,18 +105,6 @@ void f_PhaseMul(sGP &GP, double gxu, double gyu, sACD &ExpRg_x_o, sACD &ExpRg_y_
 
 void f_BandwidthLimit2D(cufftHandle &PlanPsi, sGP &GP, double2 *&MC_io);
 
-void f_TransmissionWPO(cufftHandle &PlanPsi, sGP &GP, double fPot, double *&V0_i, double2 *&Trans_o);
-
-void f_Transmission1(cufftHandle &PlanPsi, sGP &GP, double fPot, double *&V0_i, double2 *&Trans_o);
-
-void f_Transmission2(cufftHandle &PlanPsi, sGP &GP, double fPot, double *&V0_i, double *&V1_i, double *&V1o_io, eSlicePos SlicePos, double2 *&Trans_o);
-
-void f_Potential1(sGP &GP, double fPot, double *&V0_i, float *&Ve_o);
-
-void f_Potential2(sGP &GP, double fPot, double *&V0_i, double *&V1_i, double *&V1o_io, eSlicePos SlicePos, float *&Ve_o);
-
-void f_Transmission_1_2(cufftHandle &PlanPsi, sGP &GP, float *&Ve_i, double2 *&Trans_o);
-
 void f_Transmit(sGP &GP, double2 *&Trans_i, double2 *&Psi_io);
 
 void f_Propagate(cufftHandle &PlanPsi, sGP &GP, eSpace Space, double gxu, double gyu, double lambda, double z, sACD &Prop_x_o, sACD &Prop_y_o, double2 *&Psi_io);

@@ -34,6 +34,37 @@
 #include <device_functions.h>
 #include <cufft.h>
 
+// From double to float potential
+__global__ void k_V0_D2F(sGP GP, const double * __restrict V0_i, float * __restrict Ve_o){
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if ((ix < GP.nx)&&(iy < GP.ny)){
+		int ixy = ix*GP.ny+iy;
+		double V0 = V0_i[ixy];
+		Ve_o[ixy] = V0;
+	}
+}
+
+// Calculated transmission function
+template <class Type>
+__global__ void k_Transmission(sGP GP, int ApproxModel, double f, const Type * __restrict V0_i, double2 * __restrict Trans_o){
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if ((ix < GP.nx)&&(iy < GP.ny)){
+		int ixy = ix*GP.ny+iy;
+		double V0 = V0_i[ixy];
+		double theta = f*V0, x = 1.0, y = theta;
+		if(ApproxModel~=4) sincos(theta, &y , &x);
+		Trans_o[ixy].x = x;
+		Trans_o[ixy].y = y;
+	}
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
 void cMT_Transmission_GPU::freeMemory(){
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
@@ -77,39 +108,40 @@ cMT_Transmission_GPU::~cMT_Transmission_GPU(){
 	freeMemory();
 }
 
-eSlicePos cMT_Transmission_GPU::SlicePos(int iSlice, int nSlice){
-	return (iSlice==0)?eSPFirst:(iSlice<nSlice)?eSPMedium:eSPLast;
+void cMT_Transmission_GPU::f_V0_D2F(sGP &GP, double *&V0_i, float *&Ve_o){
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);	
+	k_V0_D2F<<<Bnxny, Tnxny>>>(GP, V0_i, Trans_o);
 }
 
-void cMT_Transmission_GPU::EfectivePotential(int iSlice, double fPot, float *&Vpe){
-	ProjectedPotential(iSlice);  // Projected potential
+double2* cMT_Transmission_GPU::Transmission(int iSlice){
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
 
-	switch (MT_MGP_CPU->MulOrder)
-	{
-		case 1:
-			f_Potential1(GP, fPot, V0, Vpe);
-			break;
-		case 2:
-			f_Potential2(GP, fPot, V0, V1, V2, SlicePos(iSlice, nSlice), Vpe);
-			break;
+	double2 *Trans_o = Trans0;
+	if(iSlice<nSliceM){
+		if(SliceMTyp==1) 
+			Trans_o = Trans[iSlice];
+		else
+			k_Transmission<float><<<Bnxny, Tnxny>>>(GP, ApproxModel, fPot, Vpe[iSlice], Trans_o);
+	}else{
+		ProjectedPotential(iSlice);
+		k_Transmission<double><<<Bnxny, Tnxny>>>(GP, ApproxModel, fPot, V0, Trans_o);
 	}
+	f_BandwidthLimit2D(PlanTrans, GP, Trans_o);		// AntiAliasing
+}
+
+void cMT_Transmission_GPU::Transmission(double fPot, float *&V0_i, double2 *&Trans_o){
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);	
+	k_Transmission<float><<<Bnxny, Tnxny>>>(GP, ApproxModel, fPot, V0_i, Trans_o);		// Transmission
+	f_BandwidthLimit2D(PlanTrans, GP, Trans_o);											// AntiAliasing
 }
 
 void cMT_Transmission_GPU::Transmission(int iSlice, double fPot, double2 *&Trans){
-	ProjectedPotential(iSlice);  // Projected potential
+	ProjectedPotential(iSlice); // Projected potential
 
-	switch (MT_MGP_CPU->MulOrder)
-	{
-		case 1:
-			if(MT_MGP_CPU->ApproxModel==4) 
-				f_TransmissionWPO(PlanTrans, GP, fPot, V0, Trans);
-			else 
-				f_Transmission1(PlanTrans, GP, fPot, V0, Trans);
-			break;
-		case 2:
-			f_Transmission2(PlanTrans, GP, fPot, V0, V1, V2, SlicePos(iSlice, nSlice), Trans);
-			break;
-	}
+	Transmission(PlanTrans, GP, MT_MGP_CPU->ApproxModel, fPot, V0, Trans);
 }
 
 void cMT_Transmission_GPU::Cal_Trans_Vpe(){
@@ -150,6 +182,9 @@ void cMT_Transmission_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_
 	double Gamma = f_getGamma(MT_MGP_CPU->E0);
 	double Lambda = f_getLambda(MT_MGP_CPU->E0);
 	fPot = Gamma*Lambda/(cPotf*cos(MT_MGP_CPU->theta));
+
+	nSliceM = MIN(nSliceM0, nSlice);
+	if((MT_MGP_CPU->MulOrder==2)&&(nSliceM0>nSlice)) nSliceM++;
 
 	int nSliceSigma = ((MT_MGP_CPU->ApproxModel>1)||(MT_MGP_CPU->DimFP%10==0))?0:(int)ceil(6*sigma_max/MT_MGP_CPU->dz);
 	int nSliceMax = nSlice + nSliceSigma;

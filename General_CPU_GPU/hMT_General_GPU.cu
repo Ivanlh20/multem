@@ -20,6 +20,7 @@
 #include "hQuadrature.h"
 #include "hMT_General_CPU.h"
 #include "hMT_General_GPU.h"
+
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_functions.h>
@@ -1090,111 +1091,6 @@ __global__ void k_PhaseMul(sGP GP, const sACD ExpR_x_i, const sACD ExpR_y_i, dou
 	}
 }
 
-// Calculated transmission function
-__global__ void k_TransmissionWPO(sGP GP, double f, const double * __restrict V0_i, double2 * __restrict Trans_o){
-	int iy = threadIdx.x + blockIdx.x*blockDim.x;
-	int ix = threadIdx.y + blockIdx.y*blockDim.y;
-
-	if ((ix < GP.nx)&&(iy < GP.ny)){
-		int ixy = ix*GP.ny+iy;
-		double theta = f*V0_i[ixy], x = 1.0, y = theta;
-		Trans_o[ixy].x = x;
-		Trans_o[ixy].y = y;
-	}
-}
-
-// Calculated transmission function
-__global__ void k_Transmission1(sGP GP, double f, const double * __restrict V0_i, double2 * __restrict Trans_o){
-	int iy = threadIdx.x + blockIdx.x*blockDim.x;
-	int ix = threadIdx.y + blockIdx.y*blockDim.y;
-
-	if ((ix < GP.nx)&&(iy < GP.ny)){
-		int ixy = ix*GP.ny+iy;
-		double theta = f*V0_i[ixy], x, y;
-		sincos(theta, &y , &x);
-		Trans_o[ixy].x = x;
-		Trans_o[ixy].y = y;
-	}
-}
-
-// Calculated transmission function
-__global__ void k_Transmission2(sGP GP, eSlicePos SlicePo, double f, const double * __restrict V0_i, const double * __restrict V1_i, double * __restrict V1o_io, double2 * __restrict Trans_o){
-	int iy = threadIdx.x + blockIdx.x*blockDim.x;
-	int ix = threadIdx.y + blockIdx.y*blockDim.y;
-
-	if ((ix < GP.nx)&&(iy < GP.ny)){
-		int ixy = ix*GP.ny+iy;
-		double V0 = V0_i[ixy], V1 = V1_i[ixy];
-		double theta, x, y;
-		switch (SlicePo){
-			case eSPFirst: // initial slice
-				theta = V0 = f*(V0-V1);
-				V1o_io[ixy] = V1;
-				break;
-			case eSPMedium: // intermediate slice
-				theta = V0 = f*(V0-V1+V1o_io[ixy]);
-				V1o_io[ixy] = V1;
-				break;
-			case eSPLast: // last slice
-				theta = V0 = f*V1o_io[ixy];
-				break;
-		}
-		sincos(theta, &y , &x);
-		Trans_o[ixy].x = x;
-		Trans_o[ixy].y = y;
-	}
-}
-
-// Calculated projected potential
-__global__ void k_Potential1(sGP GP, double f, const double * __restrict V0_i, float * __restrict Ve_o){
-	int iy = threadIdx.x + blockIdx.x*blockDim.x;
-	int ix = threadIdx.y + blockIdx.y*blockDim.y;
-
-	if ((ix < GP.nx)&&(iy < GP.ny)){
-		int ixy = ix*GP.ny+iy;
-		double V0 = f*V0_i[ixy];
-		Ve_o[ixy] = V0;
-	}
-}
-
-// Calculated effective potential
-__global__ void k_Potential2(sGP GP, eSlicePos SlicePo, double f, const double * __restrict V0_i, const double * __restrict V1_i, double * __restrict V1o_io, float * __restrict Ve_o){
-	int iy = threadIdx.x + blockIdx.x*blockDim.x;
-	int ix = threadIdx.y + blockIdx.y*blockDim.y;
-
-	if ((ix < GP.nx)&&(iy < GP.ny)){
-		int ixy = ix*GP.ny+iy;
-		double V0 = V0_i[ixy], V1 = V1_i[ixy];
-		switch (SlicePo){
-			case eSPFirst: // initial slice
-				Ve_o[ixy] = V0 = f*(V0-V1);
-				V1o_io[ixy] = V1;
-				break;
-			case eSPMedium: // intermediate slice
-				Ve_o[ixy] = V0 = f*(V0-V1+V1o_io[ixy]);
-				V1o_io[ixy] = V1;
-				break;
-			case eSPLast: // last slice
-				Ve_o[ixy] = V0 = f*V1o_io[ixy];
-				break;
-		}
-	}
-}
-
-// Calculated transmission function
-__global__ void k_Transmission_1_2(sGP GP, const float * __restrict Ve_i, double2 * __restrict Trans_o){
-	int iy = threadIdx.x + blockIdx.x*blockDim.x;
-	int ix = threadIdx.y + blockIdx.y*blockDim.y;
-
-	if ((ix < GP.nx)&&(iy < GP.ny)){
-		int ixy = ix*GP.ny+iy;
-		double theta = Ve_i[ixy], x, y;
-		sincos(theta, &y , &x);
-		Trans_o[ixy].x = x;
-		Trans_o[ixy].y = y;
-	}
-}
-
 // Anti-Aliasing, scale with cut-off (2/3)gmax
 __global__ void k_BandwidthLimit2D(sGP GP, double2 * __restrict M_io){
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
@@ -1464,46 +1360,6 @@ void f_BandwidthLimit2D(cufftHandle &PlanPsi, sGP &GP, double2 *&MC_io){
 	k_BandwidthLimit2D<<<Bnxny, Tnxny>>>(GP, MC_io);		
 	// Backward fft2
 	cufftExecZ2Z(PlanPsi, MC_io, MC_io, CUFFT_INVERSE);
-}
-
-void f_TransmissionWPO(cufftHandle &PlanPsi, sGP &GP, double fPot, double *&V0_i, double2 *&Trans_o){
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);	
-	k_TransmissionWPO<<<Bnxny, Tnxny>>>(GP, fPot, V0_i, Trans_o);	// Transmission
-	f_BandwidthLimit2D(PlanPsi, GP, Trans_o);						// AntiAliasing
-}
-
-void f_Transmission1(cufftHandle &PlanPsi, sGP &GP, double fPot, double *&V0_i, double2 *&Trans_o){	
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);	
-	k_Transmission1<<<Bnxny, Tnxny>>>(GP, fPot, V0_i, Trans_o);		// Transmission
-	f_BandwidthLimit2D(PlanPsi, GP, Trans_o);						// AntiAliasing
-}
-
-void f_Transmission2(cufftHandle &PlanPsi, sGP &GP, double fPot, double *&V0_i, double *&V1_i, double *&V1o_io, eSlicePos SlicePos, double2 *&Trans_o){
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);	
-	k_Transmission2<<<Bnxny, Tnxny>>>(GP, SlicePos, fPot, V0_i, V1_i, V1o_io, Trans_o);	// Transmission
-	f_BandwidthLimit2D(PlanPsi, GP, Trans_o);											// AntiAliasing
-}
-
-void f_Potential1(sGP &GP, double fPot, double *&V0_i, float *&Ve_o){
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);	
-	k_Potential1<<<Bnxny, Tnxny>>>(GP, fPot, V0_i, Ve_o);	// Transmission
-}
-
-void f_Potential2(sGP &GP, double fPot, double *&V0_i, double *&V1_i, double *&V1o_io, eSlicePos SlicePos, float *&Ve_o){
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);	
-	k_Potential2<<<Bnxny, Tnxny>>>(GP, SlicePos, fPot, V0_i, V1_i, V1o_io, Ve_o);	// Transmission
-}
-
-void f_Transmission_1_2(cufftHandle &PlanPsi, sGP &GP, float *&Ve_i, double2 *&Trans_o){
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);	
-	k_Transmission_1_2<<<Bnxny, Tnxny>>>(GP, Ve_i, Trans_o);	// Transmission
-	f_BandwidthLimit2D(PlanPsi, GP, Trans_o);						// AntiAliasing
 }
 
 void f_Transmit(sGP &GP, double2 *&Trans_i, double2 *&Psi_io){

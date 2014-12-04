@@ -493,35 +493,32 @@ __global__ void k_evalCubicPoly(sGP GP, scVp cVp, double * __restrict V0g, doubl
 	}
 }
 
-/***************************************************************************/
-/***************************************************************************/
+//get Effective Potential
+__global__ void k_getV0(sGP GP, eSlicePos SlicePo, double * __restrict V0_io, double * __restrict V1_io, double * __restrict V1o_io){
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-void cMT_Potential_GPU::SetPotPar(int PotParh){
-	cudaMemcpyToSymbol(PotPar, &PotParh, cSizeofI);
-}
-
-void cMT_Potential_GPU::getCubicPoly(dim3 BPot, dim3 TPot, dim3 BCoef, dim3 TCoef){
-	if(MT_MGP_CPU->ApproxModel>1) return;
-
-	switch(MT_MGP_CPU->MulOrder){
-		case 1:
-			k_LinearProjAtomicPotentialGPU<1><<<BPot, TPot>>>(Qz);
-			k_getCubicPolyCoef<1><<<BCoef, TCoef>>>();
-			break;
-		case 2:
-			k_LinearProjAtomicPotentialGPU<2><<<BPot, TPot>>>(Qz);
-			k_getCubicPolyCoef<2><<<BCoef, TCoef>>>();
-			break;
-	}	
-}
-
-void cMT_Potential_GPU::evalCubicPoly(int nsatom, double *&V0g, double *&V1g){
-	dim3 BEval, TEval(thrnxny, thrnxny); 
-	for(int isatom=0; isatom<nsatom; isatom++){
-		BEval.x = (cVph[isatom].bny.n+thrnxny-1)/thrnxny; BEval.y = (cVph[isatom].bnx.n+thrnxny-1)/thrnxny;
-		k_evalCubicPoly<<<BEval, TEval>>>(GP, cVph[isatom], V0g, V1g);
+	if ((ix < GP.nx)&&(iy < GP.ny)){
+		int ixy = ix*GP.ny+iy;
+		double V0 = V0_io[ixy], V1 = V1_io[ixy]/GP.dz;
+		switch (SlicePo){
+			case eSPFirst: // initial slice
+				V0_io[ixy] = V0 = V0-V1;
+				V1o_io[ixy] = V1;
+				break;
+			case eSPMedium: // intermediate slice
+				V0_io[ixy] = V0 = V0-V1+V1o_io[ixy];
+				V1o_io[ixy] = V1;
+				break;
+			case eSPLast: // last slice
+				V0_io[ixy] = V0 = V1o_io[ixy];
+				break;
+		}
 	}
 }
+
+/***************************************************************************/
+/***************************************************************************/
 
 void cMT_Potential_GPU::freeMemory(){
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
@@ -543,7 +540,7 @@ void cMT_Potential_GPU::freeMemory(){
 
 	cudaFreen(V0);
 	cudaFreen(V1);
-	cudaFreen(V2);
+	cudaFreen(V1o);
 }
 
 cMT_Potential_GPU::cMT_Potential_GPU(){
@@ -564,11 +561,15 @@ cMT_Potential_GPU::cMT_Potential_GPU(){
 
 	V0 = 0;
 	V1 = 0;
-	V2 = 0;
+	V1o = 0;
 }
 
 cMT_Potential_GPU::~cMT_Potential_GPU(){
 	freeMemory();
+}
+
+eSlicePos cMT_Potential_GPU::SlicePos(int iSlice, int nSlice){
+	return (iSlice==0)?eSPFirst:(iSlice<nSlice)?eSPMedium:eSPLast;
 }
 
 int cMT_Potential_GPU::CheckGridLimits(int i, int n){
@@ -624,6 +625,44 @@ void cMT_Potential_GPU::setcVp(int iSlice, int iatom, int nsatom, dim3 &BPot, di
 	BCoef.x = nsatom; BCoef.y = 1; BCoef.z = 1;
 }
 
+void cMT_Potential_GPU::SetPotPar(int PotParh){
+	cudaMemcpyToSymbol(PotPar, &PotParh, cSizeofI);
+}
+
+void cMT_Potential_GPU::getCubicPoly(dim3 BPot, dim3 TPot, dim3 BCoef, dim3 TCoef){
+	if(MT_MGP_CPU->ApproxModel>1) return;
+
+	switch(MT_MGP_CPU->MulOrder){
+		case 1:
+			k_LinearProjAtomicPotentialGPU<1><<<BPot, TPot>>>(Qz);
+			k_getCubicPolyCoef<1><<<BCoef, TCoef>>>();
+			break;
+		case 2:
+			k_LinearProjAtomicPotentialGPU<2><<<BPot, TPot>>>(Qz);
+			k_getCubicPolyCoef<2><<<BCoef, TCoef>>>();
+			break;
+	}	
+}
+
+void cMT_Potential_GPU::evalCubicPoly(int nsatom, double *&V0g, double *&V1g){
+	dim3 BEval, TEval(thrnxny, thrnxny); 
+	for(int isatom=0; isatom<nsatom; isatom++){
+		BEval.x = (cVph[isatom].bny.n+thrnxny-1)/thrnxny; BEval.y = (cVph[isatom].bnx.n+thrnxny-1)/thrnxny;
+		k_evalCubicPoly<<<BEval, TEval>>>(GP, cVph[isatom], V0g, V1g);
+	}
+}
+
+void cMT_Potential_GPU::getV0(int iSlice, double *&V0, int typ){
+	if(MT_MGP_CPU->MulOrder==1) return;
+
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	if(typ==1)
+		k_getV0<<<Bnxny, Tnxny>>>(GP, SlicePos(iSlice, nSlice), V0, V1, V1o);
+	else
+		f_Scale_MD(GP, get_dz(iSlice), V1);
+}
+
 void cMT_Potential_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i){
 	freeMemory();
 
@@ -644,15 +683,21 @@ void cMT_Potential_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, 
 
 	cudaMalloc((void**)&V0, GP.nxy*cSizeofRD);
 	cudaMalloc((void**)&V1, GP.nxy*cSizeofRD);
-	cudaMalloc((void**)&V2, GP.nxy*cSizeofRD);
+	cudaMalloc((void**)&V1o, GP.nxy*cSizeofRD);
 }
 
 // Projected potential calculation: iSlice = slice position
-void cMT_Potential_GPU::ProjectedPotential(int iSlice){	
+void cMT_Potential_GPU::ProjectedPotential(int iSlice, int typ){
+	if(iSlice==nSlice){
+		getV0(iSlice, V0);
+		return;
+	}
+
 	int iatom0 = Slice[iSlice].z0i_id;
 	int iatome = Slice[iSlice].zei_id;
+	f_Set_MD(GP, 0.0, V0, V1);
 
-	if((iatome<iatom0)||(iSlice>=nSlice)) return;
+	if((iatome<iatom0)) return;
 
 	dim3 BPot, TPot, BCoef, TCoef;
 	int iatom = iatom0, nsatom;
@@ -666,6 +711,5 @@ void cMT_Potential_GPU::ProjectedPotential(int iSlice){
 		iatom += nsatom;
 	}
 
-	if(MT_MGP_CPU->MulOrder==2)
-		f_Scale_MD(GP, 1.0/get_dz(iSlice), V1);
+	getV0(iSlice, V0, typ);
 }

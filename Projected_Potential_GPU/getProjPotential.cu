@@ -59,7 +59,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	cMT_Potential_GPU MT_Potential_GPU;	
 	MT_Potential_GPU.SetInputData(&MT_MGP_CPU, nAtomsM, AtomsM);
 	MT_Potential_GPU.MoveAtoms(iConfFP);
-	MT_Potential_GPU.ProjectedPotential(iSlice);
+	MT_Potential_GPU.ProjectedPotential(iSlice, 2);
 
 	f_fft2Shift_MD(MT_Potential_GPU.GP, MT_Potential_GPU.V0, MT_Potential_GPU.V1);
 	cudaMemcpy(V0h, MT_Potential_GPU.V0, MT_Potential_GPU.GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
