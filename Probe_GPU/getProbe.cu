@@ -75,19 +75,10 @@ cProbe::cProbe(){
 void cProbe::SetInputData(sInProbe &InProbe){
 	freeMemory();
 
-	MT_MGP_CPU.gpu = InProbe.gpu;
-	MT_MGP_CPU.E0 = InProbe.E0;	
-	MT_MGP_CPU.theta = InProbe.theta;	
-	MT_MGP_CPU.phi = InProbe.phi;
-	MT_MGP_CPU.lx = InProbe.lx;
-	MT_MGP_CPU.ly = InProbe.ly;
-	MT_MGP_CPU.nx = InProbe.nx;
-	MT_MGP_CPU.ny = InProbe.ny;
-	MT_MGP_CPU.BWL = true;
-
+	MT_MGP_CPU.SetInputData(InProbe);
 	cudaSetDevice(MT_MGP_CPU.gpu);
 
-	f_sGP_Cal(MT_MGP_CPU.nx, MT_MGP_CPU.ny, MT_MGP_CPU.lx, MT_MGP_CPU.ly, MT_MGP_CPU.dz, MT_MGP_CPU.PBC_xy, MT_MGP_CPU.BWL, GP);
+	f_sGP_SetInputData(&MT_MGP_CPU, GP);
 
 	Lens.m = InProbe.m;
 	Lens.f = InProbe.f;
@@ -130,8 +121,6 @@ void cProbe::getProbe(sComplex &Psih){
 /**********************read input Probe*************************/
 void f_Matlab2InProbe(const mxArray *mxInProbe, sInProbe &InProbe){
 	InProbe.gpu = ReadValuemxField<int>(mxInProbe, 0, "gpu");						// gpu device
-	
-	/**************************Multislice*************************/
 	InProbe.E0 = ReadValuemxField<double>(mxInProbe, 0, "E0");						// Acceleration voltage
 	InProbe.theta = ReadValuemxField<double>(mxInProbe, 0, "theta", deg2rad);		// incident tilt (in spherical coordinates) (degrees-->rad)
 	InProbe.phi = ReadValuemxField<double>(mxInProbe, 0, "phi", deg2rad);			// incident tilt (in spherical coordinates) (degrees-->rad)
@@ -140,10 +129,10 @@ void f_Matlab2InProbe(const mxArray *mxInProbe, sInProbe &InProbe){
 	InProbe.lx = ReadValuemxField<double>(mxInProbe, 0, "lx");						// distance in x direction(Angstroms)
 	InProbe.ly = ReadValuemxField<double>(mxInProbe, 0, "ly");						// distance in y direction(Angstroms)
 
-	InProbe.x0 = ReadValuemxField<double>(mxInProbe, 0, "x0");	// 
-	InProbe.y0 = ReadValuemxField<double>(mxInProbe, 0, "y0");	//
+	InProbe.x0 = ReadValuemxField<double>(mxInProbe, 0, "x0");						// 
+	InProbe.y0 = ReadValuemxField<double>(mxInProbe, 0, "y0");						//
 
-	InProbe.m =ReadValuemxField<int>(mxInProbe, 0, "m");						// momentum of the vortex
+	InProbe.m =ReadValuemxField<int>(mxInProbe, 0, "m");							// momentum of the vortex
 	InProbe.f = ReadValuemxField<double>(mxInProbe, 0, "f");						// defocus(Angstrom)
 	InProbe.Cs3 = ReadValuemxField<double>(mxInProbe, 0, "Cs3", mm2Ags);			// spherical aberration(mm-->Angstrom)
 	InProbe.Cs5 = ReadValuemxField<double>(mxInProbe, 0, "Cs5", mm2Ags);			// spherical aberration(mm-->Angstrom)

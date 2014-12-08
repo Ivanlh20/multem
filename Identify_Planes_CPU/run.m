@@ -1,5 +1,5 @@
 clear all; clc;
-na = 5; nb = 5; nc = 10; ncu = 2; PotPar = 6; DWAu3D = 0.6373; rmsAu3D = sqrt(DWAu3D/(8*pi^2)); sigma = sqrt(rmsAu3D^2/3);
+na = 5; nb = 5; nc = 5; ncu = 4; PotPar = 6; DWAu3D = 0.6373; rmsAu3D = sqrt(DWAu3D/(8*pi^2)); sigma = sqrt(rmsAu3D^2/3);
 [Atomsi, lx, ly, lz, a, b, c, dz] = Au001Crystal(na, nb, nc, ncu, sigma);   
 
 Dim = 111; Seed = 1983; iConfFP = 0;

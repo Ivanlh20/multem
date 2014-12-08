@@ -20,7 +20,7 @@
 #include "hConstTypes.h"
 #include "hMT_AtomTypes_CPU.h"
 #include "hMT_MGP_CPU.h"
-#include "hMT_inMulSli_CPU.h"
+#include "hMT_InMulSli_CPU.h"
 #include "hMT_General_CPU.h"
 
 // Input: E0(keV), Output: lambda (electron wave)
@@ -49,6 +49,17 @@ double f_getGamma(double E0){
 
 	double gamma = (1.0 + E0/emass);
 	return gamma;
+}
+
+// Input: E0(keV), Output: gamma*lambda/cPotf
+double f_getfPot(double E0, double theta){
+	double emass = 510.99906;		// electron rest mass in keV
+	double hc = 12.3984244;			// Planck's const x speed of light
+		
+	double lambda = hc/sqrt(E0*(2.0*emass + E0));
+	double gamma = (1.0 + E0/emass);
+	double fPot = gamma*lambda/(cPotf*cos(theta));
+	return fPot;
 }
 
 // get index (with typ=0: bottom index for equal values and typ=1: upper index for equal values)
@@ -104,7 +115,7 @@ void f_get2DRadDist(int nR, double *R, double *fR, int nRl, double *Rl, double *
 }
 
 // Set Atoms
-void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms, double &sigma_min, double &sigma_max){
+void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, int PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms, double &sigma_min, double &sigma_max){
 	double x, y, dl = 1e-03;
 	double lxb = lxi-dl, lyb = lyi-dl;
 	double sigma;
@@ -114,7 +125,7 @@ void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, d
 	for (int i=0; i<nAtomsM_i; i++){		
 		x = AtomsM_i[0*nAtomsM_i + i];								// x-position
 		y = AtomsM_i[1*nAtomsM_i + i];								// y-position
-		if(!PBC_xyi||((x<lxb)&&(y<lyb))){
+		if((PBC_xyi==2)||((x<lxb)&&(y<lyb))){
 			Atoms[nAtoms].x = x;									// x-position
 			Atoms[nAtoms].y = y;									// y-position
 			Atoms[nAtoms].z = AtomsM_i[2*nAtomsM_i + i];			// z-position
@@ -154,8 +165,8 @@ void f_sGP_Init(sGP &GP){
 	GP.lx = 0;
 	GP.ly = 0;
 	GP.dz = 0;
-	GP.PBC_xy = true;
-	GP.BWL = true;
+	GP.PBC_xy = 1;
+	GP.BWL = 1;
 	GP.dRx = 0;
 	GP.dRy = 0;
 	GP.dRmin = 0;
@@ -169,7 +180,7 @@ void f_sGP_Init(sGP &GP){
 }
 
 // Set input data Grid's parameter
-void f_sGP_Cal(int nx, int ny, double lx, double ly, double dz, bool PBC_xy, bool BWL, sGP &GP){
+void f_sGP_Cal(int nx, int ny, double lx, double ly, double dz, int BWL, int PBC_xy, sGP &GP){
 	GP.nx = nx;
 	GP.ny = ny;
 	GP.nxh = nx/2;
@@ -179,8 +190,8 @@ void f_sGP_Cal(int nx, int ny, double lx, double ly, double dz, bool PBC_xy, boo
 	GP.lx = lx;
 	GP.ly = ly;
 	GP.dz = dz;
-	GP.PBC_xy = PBC_xy;
 	GP.BWL = BWL;
+	GP.PBC_xy = PBC_xy;
 	GP.dRx = (GP.nx==0)?0.0:(GP.lx/double(GP.nx));
 	GP.dRy = (GP.ny==0)?0.0:(GP.ly/double(GP.ny));
 	GP.dRmin = MIN(GP.dRx, GP.dRy);
@@ -195,7 +206,7 @@ void f_sGP_Cal(int nx, int ny, double lx, double ly, double dz, bool PBC_xy, boo
 
 // Grid's parameter calculation
 void f_sGP_SetInputData(cMT_MGP_CPU *MT_MGP_CPU, sGP &GP){
-	f_sGP_Cal(MT_MGP_CPU->nx, MT_MGP_CPU->ny, MT_MGP_CPU->lx, MT_MGP_CPU->ly, MT_MGP_CPU->dz, MT_MGP_CPU->PBC_xy, MT_MGP_CPU->BWL, GP);
+	f_sGP_Cal(MT_MGP_CPU->nx, MT_MGP_CPU->ny, MT_MGP_CPU->lx, MT_MGP_CPU->ly, MT_MGP_CPU->dz, MT_MGP_CPU->BWL, MT_MGP_CPU->PBC_xy, GP);
 }
 
 /***************************************************************************/

@@ -25,20 +25,24 @@
 class cMT_InMulSli_CPU{
 	public:
 		int gpu;					// gpu device
-		int SimType;				// 1: STEM, 2: CBED, 3: HRTEM, 4: ED, 5: PED, 6: HCI, ... 10: EW real, 11: EW Fourier
+		int SimType;				// 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
+		int MulOrder;				// 1: First order, 2: Second order
 		int nConfFP;				// Number of frozen phonon configurations
 		int DimFP;					// Dimensions phonon configurations
+		int DistFP;					// 1: Gaussian (Phonon distribution)
 		int SeedFP;					// Random seed(frozen phonon)
 		int PotPar;					// Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 		int MEffect;				// 1: Partial coherente mode, 2: Transmission cross coefficient
 		int STEffect;				// 1: Spatial and temporal, 2: Temporal, 3: Spatial
 		int ZeroDefTyp;				// 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
 		double ZeroDefPlane;		// Zero defocus plane
-		int ApproxModel;			// 1: MS, 2: PA, 3: POA, 4:WPOA
-		int BandwidthLimit;			// 1: true, 2: false
-		int ThicknessTyp;			// 1: Whole specimen, 2: Throught thickness, 3: Through planes
-		int nThickness;				// Number of thickness
-		double* Thickness;			// Array of thicknesses
+		int ApproxModel;			// 1: Mulstilice, 2: Projection approximation, 3: Phase object approximation, 4: Weak phase object approximation
+		int BWL;					// 1: true, 2: false (bandwidth limited)
+		int FastCal;				// 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
+		int PBC_xy;					// 1: true, 2: false (Peridic boundary contions)
+		int ThkTyp;					// 1: Whole specimen, 2: Throught thickness, 3: Through planes
+		int nThk;					// Number of thickness
+		double *Thk;				// Array of thicknesses
 
 		double E0;					// Acceleration volatage in KeV
 		double theta;				// incident tilt (in spherical coordinates) (rad)
@@ -68,7 +72,6 @@ class cMT_InMulSli_CPU{
 		double *AtomsM;				// Atoms in a matrix form
 
 		int STEM_line;				// 0: Area, 1: Line
-		bool STEM_FastCal;			// 0: normal mode(low memory consumption), 1: fast calculation(high memory consumption)
 		int STEM_ns;				// Sampling points
 		double STEM_x1u;			// Initial scanning position in x
 		double STEM_y1u;			// Initial scanning in y
@@ -107,10 +110,11 @@ inline void cMT_InMulSli_CPU::freeMemory(){
 	ZeroDefTyp = 0;
 	ZeroDefPlane = 0;
 	ApproxModel = 0;
-	BandwidthLimit = 0;
-	ThicknessTyp = 0;
-	nThickness = 0;
-	delete [] Thickness; Thickness = 0;
+	BWL = 1;
+	FastCal = 0;
+	ThkTyp = 0;
+	nThk = 0;
+	delete [] Thk; Thk = 0;
 
 	E0 = 0;
 	theta = 0;
@@ -140,7 +144,6 @@ inline void cMT_InMulSli_CPU::freeMemory(){
 	AtomsM = 0;
 
 	STEM_line = 0;
-	STEM_FastCal = false;
 	STEM_ns = 0;
 	STEM_x1u = 0;
 	STEM_y1u = 0;
@@ -175,10 +178,11 @@ inline cMT_InMulSli_CPU::cMT_InMulSli_CPU(){
 	ZeroDefTyp = 0;
 	ZeroDefPlane = 0;
 	ApproxModel = 0;
-	BandwidthLimit = 0;
-	ThicknessTyp = 0;
-	nThickness = 0;
-	Thickness = 0;
+	BWL = 0;
+	FastCal = 0;
+	ThkTyp = 0;
+	nThk = 0;
+	Thk = 0;
 
 	E0 = 0;
 	theta = 0;
@@ -208,7 +212,6 @@ inline cMT_InMulSli_CPU::cMT_InMulSli_CPU(){
 	AtomsM = 0;
 
 	STEM_line = 0;
-	STEM_FastCal = false;
 	STEM_ns = 0;
 	STEM_x1u = 0;
 	STEM_y1u = 0;

@@ -502,15 +502,15 @@ __global__ void k_getV0(sGP GP, eSlicePos SlicePo, double * __restrict V0_io, do
 		int ixy = ix*GP.ny+iy;
 		double V0 = V0_io[ixy], V1 = V1_io[ixy]/GP.dz;
 		switch (SlicePo){
-			case eSPFirst: // initial slice
+			case eSPFirst: // initial Slice
 				V0_io[ixy] = V0 = V0-V1;
 				V1o_io[ixy] = V1;
 				break;
-			case eSPMedium: // intermediate slice
+			case eSPMedium: // intermediate Slice
 				V0_io[ixy] = V0 = V0-V1+V1o_io[ixy];
 				V1o_io[ixy] = V1;
 				break;
-			case eSPLast: // last slice
+			case eSPLast: // last Slice
 				V0_io[ixy] = V0 = V1o_io[ixy];
 				break;
 		}
@@ -541,6 +541,11 @@ void cMT_Potential_GPU::freeMemory(){
 	cudaFreen(V0);
 	cudaFreen(V1);
 	cudaFreen(V1o);
+}
+
+void cMT_Potential_GPU::freeMemoryReset(){
+	freeMemory();
+	cudaDeviceReset();
 }
 
 cMT_Potential_GPU::cMT_Potential_GPU(){
@@ -582,7 +587,7 @@ void cMT_Potential_GPU::getbn(sGP &GP, double x, double y, double Rmax, sbn &bnx
 	int ix0 = (int)floor(x0/GP.dRx), ixe = (int)ceil(xe/GP.dRx);
 	int iy0 = (int)floor(y0/GP.dRy), iye = (int)ceil(ye/GP.dRy);
 
-	if(!GP.PBC_xy){
+	if(GP.PBC_xy==2){
 		ix0 = CheckGridLimits(ix0, GP.nx);
 		ixe = CheckGridLimits(ixe, GP.nx);
 		iy0 = CheckGridLimits(iy0, GP.ny);
@@ -686,7 +691,7 @@ void cMT_Potential_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, 
 	cudaMalloc((void**)&V1o, GP.nxy*cSizeofRD);
 }
 
-// Projected potential calculation: iSlice = slice position
+// Projected potential calculation: iSlice = Slice position
 void cMT_Potential_GPU::ProjectedPotential(int iSlice, int typ){
 	if(iSlice==nSlice){
 		getV0(iSlice, V0);

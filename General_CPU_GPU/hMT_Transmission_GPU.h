@@ -39,34 +39,27 @@ class cMT_Transmission_GPU: public cMT_Potential_GPU{
 
 		double fPot;
 
-		int SliceMTyp;
-
-		int nSliceM;
-		int nSliceM0;
+		int SliceMemTyp;
+		int nSliceMem;
+		int nSliceMem0;
 
 		double2 *Trans0;
 		double2 **Trans;
 		float **Vpe;
 
 		cufftHandle PlanTrans;
-
-		void f_V0_D2F(sGP &GP, double *&V0_i, float *&Ve_o);
-		void Transmission(cufftHandle &PlanPsi, sGP &GP, int ApproxModel, double fPot, double *&V0_i, double2 *&Trans_o);	
-		void Transmission(cufftHandle &PlanPsi, sGP &GP, int ApproxModel, double fPot, float *&V0_i, double2 *&Trans_o);
-
-		void Cal_Trans_Vpe();
-		void Transmission_Transmit(int iSlice, double2 *&Psi);
-
-		void EfectivePotential(int iSlice, double fPot, float *&Vpe);
-		double2* Transmission(int iSlice);
+		void Cal_Trans_or_Vpe();
 	public:
 
 		void freeMemory();
+		void freeMemoryReset();
+
 		cMT_Transmission_GPU();
 		~cMT_Transmission_GPU();
 
-		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i);
-		double2* getTrans(int iSlice);
+		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, cufftHandle &PlanFT_i, int nAtomsM_i, double *AtomsM_i);
+		double2* getTrans(int iSlice, int typ=1);
+		void MoveAtoms(int iConf);
 };
 
 #endif

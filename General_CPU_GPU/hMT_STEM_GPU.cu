@@ -79,18 +79,18 @@ void cMT_STEM_GPU::freeMemory(){
 	delete [] yst; yst = 0;
 
 	if(nSliceM>0)
-		if(SliceMTyp==1){
-			for(int iSliceM=0; iSliceM<nSliceM; iSliceM++)
-				cudaFreen(Trans[iSliceM]);
+		if(SliceMemTyp==1){
+			for(int iSliceMem=0; iSliceMem<nSliceM; iSliceMem++)
+				cudaFreen(Trans[iSliceMem]);
 			delete [] Trans; Trans = 0;
 		}else{
-			for(int iSliceM=0; iSliceM<nSliceM; iSliceM++)
-				cudaFreen(Vpe[iSliceM]);
+			for(int iSliceMem=0; iSliceMem<nSliceM; iSliceMem++)
+				cudaFreen(Vpe[iSliceMem]);
 			delete [] Vpe; Vpe = 0;
 		}
 
 	nSliceM = 0;
-	SliceMTyp = 0;
+	SliceMemTyp = 0;
 }
 
 cMT_STEM_GPU::cMT_STEM_GPU()
@@ -131,7 +131,7 @@ cMT_STEM_GPU::cMT_STEM_GPU()
 	Vpe = 0;
 
 	nSliceM = 0;
-	SliceMTyp = 0;
+	SliceMemTyp = 0;
 }
 
 cMT_STEM_GPU::~cMT_STEM_GPU(){
@@ -170,14 +170,14 @@ void cMT_STEM_GPU::Potential_Efective(int iSlice, double fPot, float *&Vpe){
 
 void cMT_STEM_GPU::Cal_Trans_Vpe(){
 	int nSlice = MT_Specimen_CPU->nSlice;
-	int iSliceM, nSliceMm = MIN(nSliceM, nSlice);
+	int iSliceMem, nSliceMm = MIN(nSliceM, nSlice);
 	if((MT_MGP_CPU.MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
 
-	for (iSliceM=0; iSliceM<nSliceMm; iSliceM++){
-		if(SliceMTyp==1)
-			MT_MulSli_GPU->Transmission(iSliceM, Trans[iSliceM]);
+	for (iSliceMem=0; iSliceMem<nSliceMm; iSliceMem++){
+		if(SliceMemTyp==1)
+			MT_MulSli_GPU->Transmission(iSliceMem, Trans[iSliceMem]);
 		else
-			Potential_Efective(iSliceM, MT_MulSli_GPU->fPot, Vpe[iSliceM]);
+			Potential_Efective(iSliceMem, MT_MulSli_GPU->fPot, Vpe[iSliceMem]);
 	}
 	cudaDeviceSynchronize();
 }
@@ -188,10 +188,10 @@ void cMT_STEM_GPU::Transmission_Transmit(int iSlice, double2 *&Psi){
 	if((MT_MGP_CPU.MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
 
 	double2 *Transt;
-	Transt = (SliceMTyp==1)?Trans[iSlice]:MT_MulSli_GPU->Trans;
+	Transt = (SliceMemTyp==1)?Trans[iSlice]:MT_MulSli_GPU->Trans;
 
 	if(iSlice<nSliceMm){
-		if(SliceMTyp==2)
+		if(SliceMemTyp==2)
 			f_Transmission_1_2(MT_MulSli_GPU->PlanPsi, GP, Vpe[iSlice], Transt);
 		MT_MulSli_GPU->Transmit(Transt, Psi);
 	}else
@@ -307,7 +307,7 @@ void cMT_STEM_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, cMT_MulSli_GP
 	nThk = MT_MGP_CPU.nThk;
 	if(nThk>0){
 		Thk = new double[nThk];
-		memcpy(Thk, MT_InMulSli_CPU.Thickness, nThk*cSizeofRD);
+		memcpy(Thk, MT_InMulSli_CPU.Thk, nThk*cSizeofRD);
 	}
 
 	nDet = MT_InMulSli_CPU.STEM_nDet;
@@ -364,23 +364,23 @@ void cMT_STEM_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, cMT_MulSli_GP
 	int nSliceMt;
 
 	if(SizeFreeM/(GP.nxy*cSizeofCD)>=nSliceMax){
-		SliceMTyp = 1;
+		SliceMemTyp = 1;
 		nSliceMt = SizeFreeM/(GP.nxy*cSizeofCD);
 	}else{
-		SliceMTyp = 2;
+		SliceMemTyp = 2;
 		nSliceMt = SizeFreeM/(GP.nxy*cSizeofRF);
 	}
 
 	if((FastCal)&&(nSliceMt>0)&&(MT_MGP_CPU.SimType==1)&&(MT_MGP_CPU.ApproxModel<=2)){
 		nSliceM = MIN(nSliceMt, nSliceMax);
-		if(SliceMTyp==1){
+		if(SliceMemTyp==1){
 			Trans = new double2*[nSliceM];
-			for(int iSliceM=0; iSliceM<nSliceM; iSliceM++)
-				cudaMalloc((void**)&Trans[iSliceM], GP.nxy*cSizeofCD);
+			for(int iSliceMem=0; iSliceMem<nSliceM; iSliceMem++)
+				cudaMalloc((void**)&Trans[iSliceMem], GP.nxy*cSizeofCD);
 		}else{
 			Vpe = new float*[nSliceM];
-			for(int iSliceM=0; iSliceM<nSliceM; iSliceM++)
-				cudaMalloc((void**)&Vpe[iSliceM], GP.nxy*cSizeofRF);
+			for(int iSliceMem=0; iSliceMem<nSliceM; iSliceMem++)
+				cudaMalloc((void**)&Vpe[iSliceMem], GP.nxy*cSizeofRF);
 		}
 	}
 }

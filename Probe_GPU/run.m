@@ -3,12 +3,12 @@ clear all; clc;
 Probe.gpu = 0;            % Gpu card
 Probe.E0 = 300;
 Probe.theta = 0.0; Probe.phi = 0; % Till ilumination (degrees)
-Probe.lx = 10; Probe.ly = 10;
-Probe.nx = 1024; Probe.ny = 1024;
+Probe.nx = 2048; Probe.ny = 2048;
+Probe.lx = 20; Probe.ly = 20;
 Probe.x0 = 0.5*Probe.lx; Probe.y0 = 0.5*Probe.ly;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Probe.m = 0;        %mm
-Probe.f = 88.7414;   %Angs
+Probe.f = 88.7414;  %Angs
 Probe.Cs3 = 0.04;	%mm
 Probe.Cs5 = 0.00;	%mm
 Probe.mfa2 = 0.0; Probe.afa2 = 0.0; %(Angs, degrees)

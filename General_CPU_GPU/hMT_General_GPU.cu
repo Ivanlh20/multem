@@ -1160,7 +1160,7 @@ __global__ void k_Propagate(sGP GP, const sACD Prop_x_i, const sACD Prop_y_i, do
 		double gy = IsFS(iy,GP.nyh)*GP.dgy;
 		double g2 = gx*gx + gy*gy;
 
-		if (!GP.BWL||(g2 < GP.gmaxl2)){
+		if ((GP.BWL!=1)||(g2 < GP.gmaxl2)){
 			double z1r = Prop_x_i.x[ix], z1i = Prop_x_i.y[ix];
 			double z2r = Prop_y_i.x[iy], z2i = Prop_y_i.y[iy];
 			double z3r = z1r*z2r-z1i*z2i, z3i = z1i*z2r+z1r*z2i;
@@ -1349,7 +1349,7 @@ void f_PhaseMul(sGP &GP, double gxu, double gyu, sACD &ExpRg_x_o, sACD &ExpRg_y_
 }
 
 void f_BandwidthLimit2D(cufftHandle &PlanPsi, sGP &GP, double2 *&MC_io){
-	if(!GP.BWL) return;
+	if(GP.BWL!=1) return;
 
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);

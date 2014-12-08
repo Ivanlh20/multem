@@ -234,9 +234,9 @@ typedef struct sGP{
 
 	double lx;			// **Box size in x direction(Angstroms)
 	double ly;			// **Box size in y direction(Angstroms)
-	double dz;			// **slice thickness
-	bool PBC_xy;		// **Peridic boundary contions
-	bool BWL;			// **Band width limit
+	double dz;			// **Slice thickness
+	int BWL;			// **Band width limit
+	int PBC_xy;			// **Peridic boundary contions
 	double dRx;			// x-sampling in real Space
 	double dRy;			// y-sampling in real Space
 	double dRmin;		// Minimum sampling in real Space
@@ -417,6 +417,56 @@ typedef struct sDetInt{
 typedef struct sImSTEM{
 	sDetInt *DetInt;
 } sImSTEM;
+
+/*************************Input - Projected Potential****************************/
+typedef struct sInProjPotential{
+	int gpu;					// gpu device
+	int MulOrder;				// 1: First order, 2: Second order
+	int iConfFP;				// Frozen phonon configuration
+	int DimFP;					// Dimensions phonon configurations
+	int DistFP;					// 1: Gaussian (Phonon distribution)
+	int SeedFP;					// Random seed(frozen phonon)
+	int PotPar;					// Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
+	int PBC_xy;					// 1: true, 2: false (Peridic boundary contions)
+
+	int nx;						// Number of pixels in x direction
+	int ny;						// Number of pixels in y direction
+	double lx;					// Distance in x direction(Angstroms)
+	double ly;					// Distance in y direction(Angstroms)
+	double dz;					// Slice thickness
+
+	int nAtomsM;				// Number of Atoms
+	double *AtomsM;				// Atoms in a matrix form
+	int iSlice;					// Slice
+} sInProjPotential;
+
+/**********************Input - Transmission**************************/
+typedef struct sInTransmission{
+	int gpu;					// gpu device
+	int MulOrder;				// 1: First order, 2: Second order
+	int iConfFP;				// Frozen phonon configuration
+	int DimFP;					// Dimensions phonon configurations
+	int DistFP;					// 1: Gaussian (Phonon distribution)
+	int SeedFP;					// Random seed(frozen phonon)
+	int PotPar;					// Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
+	int ApproxModel;			// 1: Mulstilice, 2: Projection approximation, 3: Phase object approximation, 4: Weak phase object approximation
+	int BWL;					// 1: true, 2: false (bandwidth limited)
+	int FastCal;				// 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
+	int PBC_xy;					// 1: true, 2: false (Peridic boundary contions)
+
+	double E0;					// Acceleration volatage in KeV
+	double theta;				// incident tilt (in spherical coordinates) (rad)
+	double phi;					// incident tilt (in spherical coordinates) (rad)
+	int nx;						// Number of pixels in x direction
+	int ny;						// Number of pixels in y direction
+	double lx;					// Distance in x direction(Angstroms)
+	double ly;					// Distance in y direction(Angstroms)
+	double dz;					// Slice thickness
+
+	int nAtomsM;				// Number of Atoms
+	double *AtomsM;				// Atoms in a matrix form
+	int iSlice;					// Slice
+} sInTransmission;
 
 /***********************Input - TEM-Image***********************/
 typedef struct sInTEMIm{

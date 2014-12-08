@@ -1,7 +1,7 @@
 %Ivan lobato - 26/02/2013-11.04am
 global TEM
 TEM.gpu = 0;                % Gpu card
-TEM.SimType = 51;           % 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
+TEM.SimType = 52;           % 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
 TEM.nConfFP = 0;            % Number of frozen phonon configurations
 TEM.DimFP = 111;            % Dimensions phonon configurations
 TEM.SeedFP = 1983;          % Frozen phonon random seed
@@ -11,9 +11,10 @@ TEM.STEffect = 1;           % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 TEM.ZeroDefTyp = 3;         % 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
 TEM.ZeroDefPlane = 0;       % Zero defocus plane
 TEM.ApproxModel = 1;        % 1: MS, 2: PA, 3:POA, 4:WPOA
-TEM.BandwidthLimit = 1;     % 1: true, 2: false
-TEM.ThicknessTyp = 1;       % 1: Whole specimen, 2: Throught thickness, 3: Through planes
-TEM.Thickness = 0;          % Array of thicknesses
+TEM.BWL = 1;                % 1: true, 2: false
+TEM.FastCal = 1;            % 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
+TEM.ThkTyp = 1;             % 1: Whole specimen, 2: Throught thickness, 3: Through planes
+TEM.Thk = 0;                % Array of thicknesses
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 TEM.E0 = 300;
 TEM.theta = 0.0; TEM.phi = 0.0; % Till ilumination (degrees)
@@ -34,7 +35,6 @@ TEM.MC.beta = 0.2; TEM.MC.nbeta = 10; %(mrad, half number of steps)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 TEM.STEM.line = 0;
-TEM.STEM.FastCal = 0;           % 0: normal mode(low memory consumption), 1: fast calculation(high memory consumption)
 TEM.STEM.ns = 10;
 TEM.STEM.x1u = 0.0; TEM.STEM.y1u = 0.0;
 TEM.STEM.x2u = 1.0; TEM.STEM.y2u = 1.0;

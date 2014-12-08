@@ -37,7 +37,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 
 	/**************************Input data**************************/
 	cMT_Specimen_CPU MT_Specimen_CPU;
-	MT_Specimen_CPU.SetInputData(MT_MGP_CPU, nAtomsM, AtomsM);
+	MT_Specimen_CPU.SetInputData(&MT_MGP_CPU, nAtomsM, AtomsM);
 	MT_Specimen_CPU.MoveAtoms(iConfFP);
 
 	nPlanesu = MT_Specimen_CPU.nPlanesu;

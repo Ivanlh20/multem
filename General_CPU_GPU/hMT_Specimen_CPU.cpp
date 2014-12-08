@@ -230,7 +230,7 @@ void cMT_Specimen_CPU::getnSlice(double z10, double z1i, double z20, double z2i,
 		nSlice--;
 }
 
-// get atoms in the slice (1:Bot, 2: middle, 3: top) - positive found an atom if not it is negative.
+// get atoms in the Slice (1:Bot, 2: middle, 3: top) - positive found an atom if not it is negative.
 int cMT_Specimen_CPU::getAtomsInSlice(double z0, double ze, int nAtoms, sAtoms *&Atoms, int &z0_id, int &ze_id){
 	int i0, ie, im;
 	double za_min = Atoms[0].z, za_max = Atoms[nAtoms-1].z;
@@ -310,11 +310,11 @@ void cMT_Specimen_CPU::Slicing(double Rmax, int nAtoms, sAtoms *&Atoms, int &nSl
 	if(MT_MGP_CPU->ApproxModel>1){
 		nSlice = 1;
 		Slice = new sSlice[nSlice];
-		// Get atom's index in the slice
+		// Get atom's index in the Slice
 		Slice[0].z0 = zmin - Rmax; Slice[0].ze = zmax + Rmax;
-		// Get atom's index in the interaction slice
+		// Get atom's index in the interaction Slice
 		Slice[0].z0i = zmin - Rmax; Slice[0].zei = zmax + Rmax;
-		// Get atom's index in the slice and the interaction slice
+		// Get atom's index in the Slice and the interaction Slice
 		Slice[0].z0_id = 0; Slice[0].ze_id = nAtoms-1;
 		Slice[0].z0i_id = 0; Slice[0].zei_id = nAtoms-1;
 		z_BackProp = 0.0;
@@ -333,13 +333,13 @@ void cMT_Specimen_CPU::Slicing(double Rmax, int nAtoms, sAtoms *&Atoms, int &nSl
 	Slice = new sSlice[nSlice];
 	for(int iSlice = 0; iSlice<nSlice; iSlice++){
 		dz = (iSlice==0)?dz0:(iSlice==nSlice-1)?dze:MT_MGP_CPU->dz;
-		// Get atom's index in the slice
+		// Get atom's index in the Slice
 		Slice[iSlice].z0 = z0; Slice[iSlice].ze = z0 += dz;
-		// Get atom's index in the slice
+		// Get atom's index in the Slice
 		getAtomsInSlice(Slice[iSlice].z0, Slice[iSlice].ze, nAtoms, Atoms, Slice[iSlice].z0_id, Slice[iSlice].ze_id);
 		// Set integration plane
 		zm = 0.5*(Slice[iSlice].z0+Slice[iSlice].ze);
-		// Get atom's index in the interaction slice
+		// Get atom's index in the interaction Slice
 		Slice[iSlice].z0i = zm - Rmax; Slice[iSlice].zei = zm + Rmax;
 		if(Slice[iSlice].z0i>Slice[iSlice].z0) Slice[iSlice].z0i = Slice[iSlice].z0;
 		if(Slice[iSlice].zei<Slice[iSlice].ze) Slice[iSlice].zei = Slice[iSlice].ze;
@@ -357,11 +357,11 @@ void cMT_Specimen_CPU::Slicing(double Rmax, int nSliceu, sSlice *Sliceu, int nAt
 	if(nSliceu==1){
 		nSlice = 1;
 		Slice = new sSlice[nSlice];
-		// Get atom's index in the slice
+		// Get atom's index in the Slice
 		Slice[0].z0 = zmin - Rmax; Slice[0].ze = zmax + Rmax;
-		// Get atom's index in the slice and the interaction slice
+		// Get atom's index in the Slice and the interaction Slice
 		Slice[0].z0_id = 0; Slice[0].ze_id = nAtoms-1;
-		// Get atom's index in the interaction slice
+		// Get atom's index in the interaction Slice
 		Slice[0].z0i = zmin - Rmax; Slice[0].zei = zmax + Rmax;
 		Slice[0].z0i_id = 0; Slice[0].zei_id = nAtoms-1;
 		z_BackProp = 0.0;
@@ -376,13 +376,13 @@ void cMT_Specimen_CPU::Slicing(double Rmax, int nSliceu, sSlice *Sliceu, int nAt
 	Slice = new sSlice[nSlice];
 	for(int iSlice = 0; iSlice<nSlice; iSlice++){
 		dz = (iSlice==0)?dz0:(iSlice==nSlice-1)?dze:MT_MGP_CPU->dz;
-		// Get atom's index in the slice
+		// Get atom's index in the Slice
 		Slice[iSlice].z0 = z0; Slice[iSlice].ze = z0 += dz;
-		// Get atom's index in the slice
+		// Get atom's index in the Slice
 		getAtomsInSlice(Slice[iSlice].z0, Slice[iSlice].ze, nAtoms, Atoms, Slice[iSlice].z0_id, Slice[iSlice].ze_id);
 		// Set integration plane
 		zm = 0.5*(Slice[iSlice].z0+Slice[iSlice].ze);
-		// Get atom's index in the interaction slice
+		// Get atom's index in the interaction Slice
 		Slice[iSlice].z0i = zm - Rmax; Slice[iSlice].zei = zm + Rmax;
 		if(Slice[iSlice].z0i>Slice[iSlice].z0) Slice[iSlice].z0i = Slice[iSlice].z0;
 		if(Slice[iSlice].zei<Slice[iSlice].ze) Slice[iSlice].zei = Slice[iSlice].ze;
@@ -398,12 +398,12 @@ void cMT_Specimen_CPU::Slicing(int nPlanesu, double *Planesu, int nAtoms, sAtoms
 	double dzh;
 	Slice = new sSlice[nPlanesu];
 	for(int iSlice = 0; iSlice<nSlice; iSlice++){
-		// Get atom's index in the slice
+		// Get atom's index in the Slice
 		if(iSlice<nSlice-1){
 			dzh = 0.5*(Planesu[iSlice+1]-Planesu[iSlice]);
 			Slice[iSlice].z0 = Planesu[iSlice]-dzh; Slice[iSlice].ze = Planesu[iSlice]+dzh;
 		}
-		// Get atom's index in the interaction slice
+		// Get atom's index in the interaction Slice
 		Slice[iSlice].z0i = Planesu[iSlice]-0.001; Slice[iSlice].zei = Planesu[iSlice]+0.001;
 		getAtomsInSlice(Slice[iSlice].z0i, Slice[iSlice].zei, nAtoms, Atoms, Slice[iSlice].z0i_id, Slice[iSlice].zei_id);
 		Slice[iSlice].z0_id = Slice[iSlice].z0i_id; Slice[iSlice].ze_id = Slice[iSlice].zei_id;

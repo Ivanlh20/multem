@@ -81,7 +81,7 @@ class cMT_STEM_GPU{
 		double *yst;
 
 		int nSliceM;
-		int SliceMTyp;
+		int SliceMemTyp;
 		double2 **Trans;
 		float **Vpe;
 

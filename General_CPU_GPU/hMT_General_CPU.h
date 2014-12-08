@@ -22,7 +22,7 @@
 #include "hConstTypes.h"
 #include "hMT_AtomTypes_CPU.h"
 #include "hMT_MGP_CPU.h"
-#include "hMT_inMulSli_CPU.h"
+#include "hMT_InMulSli_CPU.h"
 
 // Input: E0(keV), Output: lambda (electron wave)
 double f_getLambda(double E0);
@@ -33,6 +33,9 @@ double f_getSigma(double E0);
 // Input: E0(keV), Output: gamma(relativistic factor)
 double f_getGamma(double E0);
 
+// Input: E0(keV), Output: gamma*lambda/cPotf
+double f_getfPot(double E0, double theta=0.0);
+
 // get index (with typ=0: bottom index for equal values and typ=1: upper index for equal values)
 int f_getIndex(int ixmin, int ixmax, double *x, int typ, double x0);
 
@@ -40,7 +43,7 @@ int f_getIndex(int ixmin, int ixmax, double *x, int typ, double x0);
 void f_get2DRadDist(int nR, double *R, double *fR, int nRl, double *Rl, double *rl, double *frl, double *cfrl, bool reg, int typ=0);
 
 // Set Atoms
-void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, bool PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms, double &sigma_min, double &sigma_max);
+void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, int PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms, double &sigma_min, double &sigma_max);
 
 // get 2D maximum interaction distance
 double f_getRMax(int nAtoms, sAtoms *&Atoms, cMT_AtomTypes_CPU *&MT_AtomTypes_CPU);
@@ -52,7 +55,7 @@ double f_getRMax(int nAtoms, sAtoms *&Atoms, cMT_AtomTypes_CPU *&MT_AtomTypes_CP
 void f_sGP_Init(sGP &GP);
 
 // Grid's parameter calculation
-void f_sGP_Cal(int nx, int ny, double lx, double ly, double dz, bool PBC_xy, bool BWL, sGP &GP);
+void f_sGP_Cal(int nx, int ny, double lx, double ly, double dz, int BWL, int PBC_xy, sGP &GP);
 
 // Grid's parameter calculation
 void f_sGP_SetInputData(cMT_MGP_CPU *MT_MGP_CPU, sGP &GP);

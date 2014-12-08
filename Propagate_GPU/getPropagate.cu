@@ -39,7 +39,7 @@ class cPropagator{
 		void freeMemory();
 		cPropagator();
 		~cPropagator();
-		void SetInputData(int gpu, double E0, int nx, int ny, double lx, double ly, bool BWL, sComplex &Psiih);
+		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sComplex &Psiih);
 		void Propagate(double dz, sComplex &Psih);
 };
 
@@ -70,12 +70,12 @@ cPropagator::cPropagator(){
 	PlanPsi = 0;
 }
 
-void cPropagator::SetInputData(int gpu, double E0, int nx, int ny, double lx, double ly, bool BWL, sComplex &Psiih){
+void cPropagator::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sComplex &Psiih){
 	freeMemory();
 
-	cudaSetDevice(gpu);
-	lambda = f_getLambda(E0);
-	f_sGP_Cal(nx, ny, lx, ly, 0, true, BWL, GP);
+	cudaSetDevice(MT_MGP_CPU_i->gpu);
+	lambda = f_getLambda(MT_MGP_CPU_i->E0);
+	f_sGP_SetInputData(MT_MGP_CPU_i, GP);
 
 	f_sACD_cudaMalloc(GP.nx, Prop_x);
 	f_sACD_cudaMalloc(GP.ny, Prop_y);
@@ -100,29 +100,27 @@ void cPropagator::Propagate(double dz, sComplex &Psih){
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
-	int nx, ny, gpu;
-	double lx, ly, dz, E0;
-	bool BWL;
+	cMT_MGP_CPU MT_MGP_CPU;
 	sComplex Psiih, Psioh;
 	cPropagator Propagator;
 
 	Psiih.real = mxGetPr(prhs[0]);
 	Psiih.imag = mxGetPi(prhs[0]);
-	gpu = (int)mxGetScalar(prhs[1]); 
-	E0 = mxGetScalar(prhs[2]); 
-	nx = (int)mxGetScalar(prhs[3]); 
-	ny = (int)mxGetScalar(prhs[4]);
-	lx = mxGetScalar(prhs[5]); 
-	ly = mxGetScalar(prhs[6]);
-	dz = mxGetScalar(prhs[7]);
-	BWL = ((int)mxGetScalar(prhs[8])==1)?true:false;
+	MT_MGP_CPU.gpu = (int)mxGetScalar(prhs[1]); 
+	MT_MGP_CPU.E0 = mxGetScalar(prhs[2]); 
+	MT_MGP_CPU.nx = (int)mxGetScalar(prhs[3]); 
+	MT_MGP_CPU.ny = (int)mxGetScalar(prhs[4]);
+	MT_MGP_CPU.lx = mxGetScalar(prhs[5]); 
+	MT_MGP_CPU.ly = mxGetScalar(prhs[6]);
+	MT_MGP_CPU.dz = mxGetScalar(prhs[7]);
+	MT_MGP_CPU.BWL = (int)mxGetScalar(prhs[8]);
 	/************************Output data**************************/
-	plhs[0] = mxCreateDoubleMatrix(ny, nx, mxCOMPLEX);
+	plhs[0] = mxCreateDoubleMatrix(MT_MGP_CPU.ny, MT_MGP_CPU.nx, mxCOMPLEX);
 	Psioh.real = mxGetPr(plhs[0]);
 	Psioh.imag = mxGetPi(plhs[0]);
 
-	Propagator.SetInputData(gpu, E0, nx, ny, lx, ly, BWL, Psiih);
-	Propagator.Propagate(dz, Psioh);
+	Propagator.SetInputData(&MT_MGP_CPU, Psiih);
+	Propagator.Propagate(MT_MGP_CPU.dz, Psioh);
 
 	//Propagator.freeMemory();
 	//cudaDeviceReset();

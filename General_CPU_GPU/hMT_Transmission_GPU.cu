@@ -16,7 +16,6 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstring>
 #include "math.h"
 
 #include "hConstTypes.h"
@@ -56,7 +55,7 @@ __global__ void k_Transmission(sGP GP, int ApproxModel, double f, const Type * _
 		int ixy = ix*GP.ny+iy;
 		double V0 = V0_i[ixy];
 		double theta = f*V0, x = 1.0, y = theta;
-		if(ApproxModel~=4) sincos(theta, &y , &x);
+		if(ApproxModel!=4) sincos(theta, &y , &x);
 		Trans_o[ixy].x = x;
 		Trans_o[ixy].y = y;
 	}
@@ -73,20 +72,27 @@ void cMT_Transmission_GPU::freeMemory(){
 
 	cudaFreen(Trans0);
 
-	if(nSliceM>0)
-		if(SliceMTyp==1){
-			for(int iSliceM=0; iSliceM<nSliceM; iSliceM++)
-				cudaFreen(Trans[iSliceM]);
+	if(nSliceMem0>0)
+		if(SliceMemTyp==1){
+			for(int iSliceMem=0; iSliceMem<nSliceMem0; iSliceMem++)
+				cudaFreen(Trans[iSliceMem]);
 			delete [] Trans; Trans = 0;
 		}else{
-			for(int iSliceM=0; iSliceM<nSliceM; iSliceM++)
-				cudaFreen(Vpe[iSliceM]);
+			for(int iSliceMem=0; iSliceMem<nSliceMem0; iSliceMem++)
+				cudaFreen(Vpe[iSliceMem]);
 			delete [] Vpe; Vpe = 0;
 		}
-	nSliceM = 0;
-	SliceMTyp = 0;
+
+	SliceMemTyp = 0;
+	nSliceMem = 0;
+	nSliceMem0 = 0;
 
 	PlanTrans = 0;
+}
+
+void cMT_Transmission_GPU::freeMemoryReset(){
+	freeMemory();
+	cudaDeviceReset();
 }
 
 cMT_Transmission_GPU::cMT_Transmission_GPU()
@@ -94,8 +100,9 @@ cMT_Transmission_GPU::cMT_Transmission_GPU()
 	cSynCPU = ccSynCPU;
 	fPot = 0.0;
 
-	nSliceM = 0;
-	SliceMTyp = 0;
+	SliceMemTyp = 0;
+	nSliceMem = 0;
+	nSliceMem0 = 0;
 
 	Trans0 = 0;
 	Trans = 0;
@@ -108,111 +115,88 @@ cMT_Transmission_GPU::~cMT_Transmission_GPU(){
 	freeMemory();
 }
 
-void cMT_Transmission_GPU::f_V0_D2F(sGP &GP, double *&V0_i, float *&Ve_o){
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);	
-	k_V0_D2F<<<Bnxny, Tnxny>>>(GP, V0_i, Trans_o);
-}
-
-double2* cMT_Transmission_GPU::Transmission(int iSlice){
+void cMT_Transmission_GPU::Cal_Trans_or_Vpe(){
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 
-	double2 *Trans_o = Trans0;
-	if(iSlice<nSliceM){
-		if(SliceMTyp==1) 
-			Trans_o = Trans[iSlice];
+	for (int iSliceMem=0; iSliceMem<nSliceMem; iSliceMem++){
+		ProjectedPotential(iSliceMem);
+		if(SliceMemTyp==1)
+			k_Transmission<double><<<Bnxny, Tnxny>>>(GP, MT_MGP_CPU->ApproxModel, fPot, V0, Trans[iSliceMem]);
 		else
-			k_Transmission<float><<<Bnxny, Tnxny>>>(GP, ApproxModel, fPot, Vpe[iSlice], Trans_o);
-	}else{
-		ProjectedPotential(iSlice);
-		k_Transmission<double><<<Bnxny, Tnxny>>>(GP, ApproxModel, fPot, V0, Trans_o);
-	}
-	f_BandwidthLimit2D(PlanTrans, GP, Trans_o);		// AntiAliasing
-}
-
-void cMT_Transmission_GPU::Transmission(double fPot, float *&V0_i, double2 *&Trans_o){
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);	
-	k_Transmission<float><<<Bnxny, Tnxny>>>(GP, ApproxModel, fPot, V0_i, Trans_o);		// Transmission
-	f_BandwidthLimit2D(PlanTrans, GP, Trans_o);											// AntiAliasing
-}
-
-void cMT_Transmission_GPU::Transmission(int iSlice, double fPot, double2 *&Trans){
-	ProjectedPotential(iSlice); // Projected potential
-
-	Transmission(PlanTrans, GP, MT_MGP_CPU->ApproxModel, fPot, V0, Trans);
-}
-
-void cMT_Transmission_GPU::Cal_Trans_Vpe(){
-	int iSliceM, nSliceMm = MIN(nSliceM, nSlice);
-	if((MT_MGP_CPU->MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
-
-	for (iSliceM=0; iSliceM<nSliceMm; iSliceM++){
-		if(SliceMTyp==1)
-			MT_MulSli_GPU->Transmission(iSliceM, Trans[iSliceM]);
-		else
-			Potential_Efective(iSliceM, MT_MulSli_GPU->fPot, Vpe[iSliceM]);
+			k_V0_D2F<<<Bnxny, Tnxny>>>(GP, V0, Vpe[iSliceMem]);
 	}
 	cudaDeviceSynchronize();
 }
 
-void cMT_Transmission_GPU::Transmission_Transmit(int iSlice, double2 *&Psi){
-	int nSlice = MT_Specimen_CPU->nSlice;
-	int nSliceMm = MIN(nSliceM, nSlice);
-	if((MT_MGP_CPU->MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
-
-	double2 *Transt;
-	Transt = (SliceMTyp==1)?Trans[iSlice]:MT_MulSli_GPU->Trans;
-
-	if(iSlice<nSliceMm){
-		if(SliceMTyp==2)
-			f_Transmission_1_2(MT_MulSli_GPU->PlanTrans, GP, Vpe[iSlice], Transt);
-		MT_MulSli_GPU->Transmit(Transt, Psi);
-	}else
-		MT_MulSli_GPU->Transmission_Transmit(iSlice, Psi);
-}
-
-void cMT_Transmission_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i)
-{
+void cMT_Transmission_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, cufftHandle &PlanFT_i, int nAtomsM_i, double *AtomsM_i){
 	freeMemory();
 
 	cMT_Potential_GPU::SetInputData(MT_MGP_CPU_io, nAtomsM_i, AtomsM_i);
+	PlanTrans = PlanFT_i;
 
-	double Gamma = f_getGamma(MT_MGP_CPU->E0);
-	double Lambda = f_getLambda(MT_MGP_CPU->E0);
-	fPot = Gamma*Lambda/(cPotf*cos(MT_MGP_CPU->theta));
+	cudaMalloc((void**)&Trans0, GP.nxy*cSizeofCD);
 
-	nSliceM = MIN(nSliceM0, nSlice);
-	if((MT_MGP_CPU->MulOrder==2)&&(nSliceM0>nSlice)) nSliceM++;
+	fPot = f_getfPot(MT_MGP_CPU->E0, MT_MGP_CPU->theta);
 
-	int nSliceSigma = ((MT_MGP_CPU->ApproxModel>1)||(MT_MGP_CPU->DimFP%10==0))?0:(int)ceil(6*sigma_max/MT_MGP_CPU->dz);
+	if(MT_MGP_CPU->FastCal==1) return;
+
+	int nSliceSigma = (MT_MGP_CPU->DimFP%10==0)?0:(int)ceil(6*sigma_max/MT_MGP_CPU->dz);
 	int nSliceMax = nSlice + nSliceSigma;
-	nSliceMax = (MT_MGP_CPU->MulOrder==1)?nSliceMax:nSliceMax+1;
+	if(MT_MGP_CPU->MulOrder==2) nSliceMax++;
 
-	size_t SizeFreeM, SizeTotM;
-	cudaMemGetInfo(&SizeFreeM, &SizeTotM);
-	SizeFreeM = SizeFreeM-10*cMb;
-	int nSliceMt;
+	size_t SizeFreeMem, SizeTotMem;
+	cudaMemGetInfo(&SizeFreeMem, &SizeTotMem);
+	SizeFreeMem = SizeFreeMem-10*cMb;
+	int nSliceMemMax = 0;
 
-	if(SizeFreeM/(GP.nxy*cSizeofCD)>=nSliceMax){
-		SliceMTyp = 1;
-		nSliceMt = SizeFreeM/(GP.nxy*cSizeofCD);
+	if(SizeFreeMem/(GP.nxy*cSizeofCD)>=nSliceMax){
+		SliceMemTyp = 1;
+		nSliceMemMax = SizeFreeMem/(GP.nxy*cSizeofCD);
 	}else{
-		SliceMTyp = 2;
-		nSliceMt = SizeFreeM/(GP.nxy*cSizeofRF);
+		SliceMemTyp = 2;
+		nSliceMemMax = SizeFreeMem/(GP.nxy*cSizeofRF);
 	}
 
-	if((nSliceMt>0)&&(MT_MGP_CPU->SimType==1)&&(MT_MGP_CPU->ApproxModel<=2)){
-		nSliceM = MIN(nSliceMt, nSliceMax);
-		if(SliceMTyp==1){
-			Trans = new double2*[nSliceM];
-			for(int iSliceM=0; iSliceM<nSliceM; iSliceM++)
-				cudaMalloc((void**)&Trans[iSliceM], GP.nxy*cSizeofCD);
+	if((nSliceMemMax>0)&&(MT_MGP_CPU->ApproxModel<=2)){
+		nSliceMem0 = MIN(nSliceMemMax, nSliceMax);
+		if(SliceMemTyp==1){
+			Trans = new double2*[nSliceMem0];
+			for(int iSliceMem=0; iSliceMem<nSliceMem0; iSliceMem++)
+				cudaMalloc((void**)&Trans[iSliceMem], GP.nxy*cSizeofCD);
 		}else{
-			Vpe = new float*[nSliceM];
-			for(int iSliceM=0; iSliceM<nSliceM; iSliceM++)
-				cudaMalloc((void**)&Vpe[iSliceM], GP.nxy*cSizeofRF);
+			Vpe = new float*[nSliceMem0];
+			for(int iSliceMem=0; iSliceMem<nSliceMem0; iSliceMem++)
+				cudaMalloc((void**)&Vpe[iSliceMem], GP.nxy*cSizeofRF);
 		}
 	}
+
+	nSliceMem = MIN(nSliceMem0, nSlice);
+	if((MT_MGP_CPU->MulOrder==2)&&(nSliceMem0>nSlice)) nSliceMem++;
+}
+
+void cMT_Transmission_GPU::MoveAtoms(int iConf){
+	cMT_Potential_GPU::MoveAtoms(iConf);
+	int nSliceMem = MIN(nSliceMem0, nSlice);
+	if((MT_MGP_CPU->MulOrder==2)&&(nSliceMem0>nSlice)) nSliceMem++;
+	if(nSliceMem0>0) Cal_Trans_or_Vpe();
+}
+
+double2* cMT_Transmission_GPU::getTrans(int iSlice, int typ){
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+
+	double2 *Trans_o = Trans0;
+	if(iSlice<nSliceMem){
+		if(SliceMemTyp==1) 
+			Trans_o = Trans[iSlice];
+		else
+			k_Transmission<float><<<Bnxny, Tnxny>>>(GP, MT_MGP_CPU->ApproxModel, fPot, Vpe[iSlice], Trans_o);
+	}else{
+		ProjectedPotential(iSlice, typ);
+		k_Transmission<double><<<Bnxny, Tnxny>>>(GP, MT_MGP_CPU->ApproxModel, fPot, V0, Trans_o);
+	}
+	f_BandwidthLimit2D(PlanTrans, GP, Trans_o);		// AntiAliasing
+
+	return Trans_o;
 }

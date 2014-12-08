@@ -51,7 +51,9 @@ class cMT_Potential_GPU: public cMT_Specimen_CPU{
 		double *V1;								// first moment of the potential
 		double *V1o;								// Second moment of the potential
 
-		void freeMemory();	
+		void freeMemory();
+		void freeMemoryReset();
+
 		cMT_Potential_GPU();
 		~cMT_Potential_GPU();
 

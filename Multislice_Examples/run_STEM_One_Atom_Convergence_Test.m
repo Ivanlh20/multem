@@ -14,9 +14,10 @@ TEM.STEffect = 1;           % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 TEM.ZeroDefTyp = 3;         % 1: First atom, 2: middle point, 3: last atom, 4: Fix Plane
 TEM.ZeroDefPlane = 0;       % Zero defocus plane
 TEM.ApproxModel = 1;        % 1: MS, 2: PA, 3:POA, 4:WPOA
-TEM.BandwidthLimit = 1;     % 1: true, 2: false
-TEM.ThicknessTyp = 1;       % 1: Whole specimen, 2: Throught thickness, 3: Through planes
-TEM.Thickness = 0;          % Array of thicknesses
+TEM.BWL = 1;                % 1: true, 2: false
+TEM.FastCal = 1;            % 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
+TEM.ThkTyp = 1;             % 1: Whole specimen, 2: Throught thickness, 3: Through planes
+TEM.Thk = 0;                % Array of thicknesses
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 TEM.E0 = 300;
 TEM.theta = 0.0; TEM.phi = 0; % Till ilumination (degrees)

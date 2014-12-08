@@ -1,23 +1,22 @@
-clear all;
-clc;
-na = 1; nb = 1; nc = 5; pp = 6; ncu = 4; sigma = 0.084; gpu = 0;
-Dim = 110; Seed = 1983; iConfFP = 0; nx = 2048; ny = 2048;
-[Atomsi, lx, ly, lz, a, b, c, dz] = Au001Crystal(na, nb, nc, ncu, sigma);
-% Atomsi = [ 2.0 2.0 0 79 0.084 1.0];
-%  lx = 4; ly = 4.0; dz = 0.5;
-[Atoms, Slice] = getSliceSpecimen(Atomsi, lx, ly, dz, iConfFP, Dim, Seed);
+clear all; clc;
+
+na = 1; nb = 1; nc = 5; pp = 6; ncu = 2; sigma = 0.084;
+InProjPotential.gpu = 0;                % Gpu card
+InProjPotential.iConfFP = 0;            % Frozen phonon configuration
+InProjPotential.DimFP = 110;            % Dimensions phonon configuration
+InProjPotential.SeedFP = 1983;          % Frozen phonon random seed
+InProjPotential.PotPar = 6;             % Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
+InProjPotential.nx = 2048; InProjPotential.ny = 2048;
+[InProjPotential.Atoms, InProjPotential.lx, InProjPotential.ly, lz, a, b, c, InProjPotential.dz] = Au001Crystal(na, nb, nc, ncu, sigma);
+InProjPotential.Atoms = [4.0 4.0 0 79 sigma 1.0];
+InProjPotential.lx = 8.0; InProjPotential.ly = 8.0; InProjPotential.dz = 0.5;
+[Atoms, Slice] = getSliceSpecimen(InProjPotential.Atoms, InProjPotential.lx, InProjPotential.ly, InProjPotential.dz, InProjPotential.iConfFP, InProjPotential.DimFP, InProjPotential.SeedFP);
 [nAtoms,~] = size(Atoms); [nSlice, ~] = size(Slice);
-for iSlice = 2%nSlice
-%     i1 = Slice(iSlice, 3); i2 = Slice(iSlice, 4); ii1 = i1:1:i2;
-%     i1 = Slice(iSlice, 7); i2 = Slice(iSlice, 8); ii2 = i1:1:i2;
-%     subplot(1, 4, 2);
-%     plot3(Atoms(:, 1), Atoms(:, 2), Atoms(:, 3), '*k', Atoms(ii2, 1), Atoms(ii2, 2), Atoms(ii2, 3), '*r', Atoms(ii1, 1), Atoms(ii1, 2), Atoms(ii1, 3), '*b');
-%     view ([1 0 0]);
-%     axis equal;
-    
+for iSlice = 1:nSlice
+    InProjPotential.iSlice = iSlice;
     tic;
     clear getProjPotential;
-    [V0, V1] = getProjPotential(Atomsi, gpu, nx, ny, lx, ly, dz, iConfFP, Dim, Seed, iSlice);
+    [V0, V1] = getProjPotential(InProjPotential);
     toc;
     figure(1);
     subplot(1, 2, 1);    
@@ -28,5 +27,5 @@ for iSlice = 2%nSlice
     imagesc(V1);
     colormap gray;
     axis image;    
-    pause(0.15);
+    pause(0.10);
 end;

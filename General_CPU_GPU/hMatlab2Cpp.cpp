@@ -87,62 +87,64 @@ void f_Matlab2InTEMIm(const mxArray *mxInTEMIm, sInTEMIm &InTEMIm){
 /**********************read input MulSli************************/
 void f_Matlab2InMulSli(const mxArray *mxInMSTEM, cMT_InMulSli_CPU &MT_InMulSli_CPU){
 	MT_InMulSli_CPU.gpu = ReadValuemxField<int>(mxInMSTEM, 0, "gpu");							// gpu device
-	MT_InMulSli_CPU.SimType = ReadValuemxField<int>(mxInMSTEM, 0, "SimType");					// 1: STEM, 2: HRTEM, 3: ED, 4: PED, 5: CBED, 6: HCI, ... 10: EW real, 11: EW Fourier
+	MT_InMulSli_CPU.SimType = ReadValuemxField<int>(mxInMSTEM, 0, "SimType");					// 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
+	MT_InMulSli_CPU.MulOrder = 2;																// 1: First order, 2: Second order
 	MT_InMulSli_CPU.nConfFP = ReadValuemxField<int>(mxInMSTEM, 0, "nConfFP");					// Number of frozen phonon configurations
 	MT_InMulSli_CPU.DimFP = ReadValuemxField<int>(mxInMSTEM, 0, "DimFP");						// Dimensions phonon configurations
+	MT_InMulSli_CPU.DistFP = 1;																	// 1: Gaussian (Phonon distribution)
 	MT_InMulSli_CPU.SeedFP = ReadValuemxField<int>(mxInMSTEM, 0, "SeedFP");						// Random seed(frozen phonon)
 	MT_InMulSli_CPU.PotPar = ReadValuemxField<int>(mxInMSTEM, 0, "PotPar");						// Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 	MT_InMulSli_CPU.MEffect = ReadValuemxField<int>(mxInMSTEM, 0, "MEffect");					// 1: Partial coherente mode, 2: Transmission cross coefficient
 	MT_InMulSli_CPU.STEffect = ReadValuemxField<int>(mxInMSTEM, 0, "STEffect");					// 1: Spatial and temporal, 2: Temporal, 3: Spatial
 	MT_InMulSli_CPU.ZeroDefTyp = ReadValuemxField<int>(mxInMSTEM, 0, "ZeroDefTyp");				// 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
 	MT_InMulSli_CPU.ZeroDefPlane = ReadValuemxField<double>(mxInMSTEM, 0, "ZeroDefPlane");		// Zero defocus plane
-	MT_InMulSli_CPU.ApproxModel = ReadValuemxField<int>(mxInMSTEM, 0, "ApproxModel");			// 1: MS, 2: PA, 3POA, 4:WPOA
-	MT_InMulSli_CPU.BandwidthLimit = ReadValuemxField<int>(mxInMSTEM, 0, "BandwidthLimit");		// 1: true, 2: false
+	MT_InMulSli_CPU.ApproxModel = ReadValuemxField<int>(mxInMSTEM, 0, "ApproxModel");			// 1: Mulstilice, 2: Projection approximation, 3: Phase object approximation, 4: Weak phase object approximation
+	MT_InMulSli_CPU.BWL = ReadValuemxField<int>(mxInMSTEM, 0, "BWL");							// 1: true, 2: false (bandwidth limited)
+	MT_InMulSli_CPU.FastCal = ReadValuemxField<int>(mxInMSTEM, 0, "FastCal");					// 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
+	MT_InMulSli_CPU.PBC_xy = 1;																	// 1: true, 2: false (Peridic boundary contions)
 
-	MT_InMulSli_CPU.ThicknessTyp = ReadValuemxField<int>(mxInMSTEM, 0, "ThicknessTyp");		// 1: Whole specimen, 2: Throught thickness, 3: Through planes
-	mxArray *mxThickness;
-	mxThickness = mxGetField(mxInMSTEM, 0, "Thickness");
-	MT_InMulSli_CPU.nThickness = mxGetM(mxThickness)*mxGetN(mxThickness);						// Number of thickness
-	MT_InMulSli_CPU.Thickness = new double[MT_InMulSli_CPU.nThickness];
-	ReadValuemxField(mxInMSTEM, 0, "Thickness", MT_InMulSli_CPU.nThickness, MT_InMulSli_CPU.Thickness);	// Array of thicknesses
+	MT_InMulSli_CPU.ThkTyp = ReadValuemxField<int>(mxInMSTEM, 0, "ThkTyp");						// 1: Whole specimen, 2: Throught thickness, 3: Through planes
+	mxArray *mxThk; mxThk = mxGetField(mxInMSTEM, 0, "Thk");
+	MT_InMulSli_CPU.nThk = mxGetM(mxThk)*mxGetN(mxThk);											// Number of thickness
+	MT_InMulSli_CPU.Thk = new double[MT_InMulSli_CPU.nThk];
+	ReadValuemxField(mxInMSTEM, 0, "Thk", MT_InMulSli_CPU.nThk, MT_InMulSli_CPU.Thk);			// Array of thicknesses
 
 	/**************************Multislice*************************/
-	MT_InMulSli_CPU.E0 = ReadValuemxField<double>(mxInMSTEM, 0, "E0");					// Acceleration voltage
-	MT_InMulSli_CPU.theta = ReadValuemxField<double>(mxInMSTEM, 0, "theta", deg2rad);	// incident tilt (in spherical coordinates) (degrees-->rad)
-	MT_InMulSli_CPU.phi = ReadValuemxField<double>(mxInMSTEM, 0, "phi", deg2rad);		// incident tilt (in spherical coordinates) (degrees-->rad)
-	MT_InMulSli_CPU.nx = ReadValuemxField<int>(mxInMSTEM, 0, "nx");						// Number of pixels in x direction
-	MT_InMulSli_CPU.ny = ReadValuemxField<int>(mxInMSTEM, 0, "ny");						// Number of pixels in y direction
-	MT_InMulSli_CPU.lx = ReadValuemxField<double>(mxInMSTEM, 0, "lx");					// distance in x direction(Angstroms)
-	MT_InMulSli_CPU.ly = ReadValuemxField<double>(mxInMSTEM, 0, "ly");					// distance in y direction(Angstroms)
-	MT_InMulSli_CPU.dz = ReadValuemxField<double>(mxInMSTEM, 0, "dz");					// slice thickness
+	MT_InMulSli_CPU.E0 = ReadValuemxField<double>(mxInMSTEM, 0, "E0");							// Acceleration voltage
+	MT_InMulSli_CPU.theta = ReadValuemxField<double>(mxInMSTEM, 0, "theta", deg2rad);			// incident tilt (in spherical coordinates) (degrees-->rad)
+	MT_InMulSli_CPU.phi = ReadValuemxField<double>(mxInMSTEM, 0, "phi", deg2rad);				// incident tilt (in spherical coordinates) (degrees-->rad)
+	MT_InMulSli_CPU.nx = ReadValuemxField<int>(mxInMSTEM, 0, "nx");								// Number of pixels in x direction
+	MT_InMulSli_CPU.ny = ReadValuemxField<int>(mxInMSTEM, 0, "ny");								// Number of pixels in y direction
+	MT_InMulSli_CPU.lx = ReadValuemxField<double>(mxInMSTEM, 0, "lx");							// distance in x direction(Angstroms)
+	MT_InMulSli_CPU.ly = ReadValuemxField<double>(mxInMSTEM, 0, "ly");							// distance in y direction(Angstroms)
+	MT_InMulSli_CPU.dz = ReadValuemxField<double>(mxInMSTEM, 0, "dz");							// Slice thickness
 
 	/********************Microscope parameters********************/
 	mxArray *mxMC= mxGetField(mxInMSTEM, 0, "MC");
-	MT_InMulSli_CPU.MC_m =ReadValuemxField<int>(mxMC, 0, "m");						// momentum of the vortex
-	MT_InMulSli_CPU.MC_f = ReadValuemxField<double>(mxMC, 0, "f");						// defocus(Angstrom)
-	MT_InMulSli_CPU.MC_Cs3 = ReadValuemxField<double>(mxMC, 0, "Cs3", mm2Ags);			// spherical aberration(mm-->Angstrom)
-	MT_InMulSli_CPU.MC_Cs5 = ReadValuemxField<double>(mxMC, 0, "Cs5", mm2Ags);			// spherical aberration(mm-->Angstrom)
-	MT_InMulSli_CPU.MC_mfa2 = ReadValuemxField<double>(mxMC, 0, "mfa2");				// magnitude 2-fold astigmatism(Angstrom)
-	MT_InMulSli_CPU.MC_afa2 = ReadValuemxField<double>(mxMC, 0, "afa2", deg2rad);		// angle 2-fold astigmatism(degrees-->rad)
-	MT_InMulSli_CPU.MC_mfa3 = ReadValuemxField<double>(mxMC, 0, "mfa3");				// magnitude 3-fold astigmatism(Angstrom)
-	MT_InMulSli_CPU.MC_afa3 = ReadValuemxField<double>(mxMC, 0, "afa3", deg2rad);		// angle 3-fold astigmatism(degrees-->rad)
-	MT_InMulSli_CPU.MC_aobjl = ReadValuemxField<double>(mxMC, 0, "aobjl", mrad2rad);	// lower objective aperture(mrad-->rad)
-	MT_InMulSli_CPU.MC_aobju = ReadValuemxField<double>(mxMC, 0, "aobju", mrad2rad);	// upper objective aperture(mrad-->rad)
-	MT_InMulSli_CPU.MC_sf = ReadValuemxField<double>(mxMC, 0, "sf");					// defocus spread(Angstrom)
-	MT_InMulSli_CPU.MC_nsf = ReadValuemxField<int>(mxMC, 0, "nsf");						// Number of defocus sampling point
-	MT_InMulSli_CPU.MC_beta = ReadValuemxField<double>(mxMC, 0, "beta", mrad2rad);		// semi-convergence angle(mrad-->rad)
-	MT_InMulSli_CPU.MC_nbeta = ReadValuemxField<int>(mxMC, 0, "nbeta");					// half number sampling points
+	MT_InMulSli_CPU.MC_m =ReadValuemxField<int>(mxMC, 0, "m");									// momentum of the vortex
+	MT_InMulSli_CPU.MC_f = ReadValuemxField<double>(mxMC, 0, "f");								// defocus(Angstrom)
+	MT_InMulSli_CPU.MC_Cs3 = ReadValuemxField<double>(mxMC, 0, "Cs3", mm2Ags);					// spherical aberration(mm-->Angstrom)
+	MT_InMulSli_CPU.MC_Cs5 = ReadValuemxField<double>(mxMC, 0, "Cs5", mm2Ags);					// spherical aberration(mm-->Angstrom)
+	MT_InMulSli_CPU.MC_mfa2 = ReadValuemxField<double>(mxMC, 0, "mfa2");						// magnitude 2-fold astigmatism(Angstrom)
+	MT_InMulSli_CPU.MC_afa2 = ReadValuemxField<double>(mxMC, 0, "afa2", deg2rad);				// angle 2-fold astigmatism(degrees-->rad)
+	MT_InMulSli_CPU.MC_mfa3 = ReadValuemxField<double>(mxMC, 0, "mfa3");						// magnitude 3-fold astigmatism(Angstrom)
+	MT_InMulSli_CPU.MC_afa3 = ReadValuemxField<double>(mxMC, 0, "afa3", deg2rad);				// angle 3-fold astigmatism(degrees-->rad)
+	MT_InMulSli_CPU.MC_aobjl = ReadValuemxField<double>(mxMC, 0, "aobjl", mrad2rad);			// lower objective aperture(mrad-->rad)
+	MT_InMulSli_CPU.MC_aobju = ReadValuemxField<double>(mxMC, 0, "aobju", mrad2rad);			// upper objective aperture(mrad-->rad)
+	MT_InMulSli_CPU.MC_sf = ReadValuemxField<double>(mxMC, 0, "sf");							// defocus spread(Angstrom)
+	MT_InMulSli_CPU.MC_nsf = ReadValuemxField<int>(mxMC, 0, "nsf");								// Number of defocus sampling point
+	MT_InMulSli_CPU.MC_beta = ReadValuemxField<double>(mxMC, 0, "beta", mrad2rad);				// semi-convergence angle(mrad-->rad)
+	MT_InMulSli_CPU.MC_nbeta = ReadValuemxField<int>(mxMC, 0, "nbeta");							// half number sampling points
 
 	mxArray *mxAtomsM = mxGetField(mxInMSTEM, 0, "Atoms");
-	MT_InMulSli_CPU.nAtomsM = (int)mxGetM(mxAtomsM);									// Number of Atoms
-	MT_InMulSli_CPU.AtomsM = mxGetPr(mxAtomsM);											// Atoms in a matrix form
+	MT_InMulSli_CPU.nAtomsM = (int)mxGetM(mxAtomsM);											// Number of Atoms
+	MT_InMulSli_CPU.AtomsM = mxGetPr(mxAtomsM);													// Atoms in a matrix form
 
 	switch (MT_InMulSli_CPU.SimType){
 		case 11:		// STEM
 			mxArray *mxSTEM;	
 			mxSTEM = mxGetField(mxInMSTEM, 0, "STEM");
 			MT_InMulSli_CPU.STEM_line = ReadValuemxField<int>(mxSTEM, 0, "line");
-			MT_InMulSli_CPU.STEM_FastCal = ReadValuemxField<int>(mxSTEM, 0, "FastCal");
 			MT_InMulSli_CPU.STEM_ns = ReadValuemxField<int>(mxSTEM, 0, "ns");
 			MT_InMulSli_CPU.STEM_x1u = ReadValuemxField<double>(mxSTEM, 0, "x1u");
 			MT_InMulSli_CPU.STEM_y1u = ReadValuemxField<double>(mxSTEM, 0, "y1u");
