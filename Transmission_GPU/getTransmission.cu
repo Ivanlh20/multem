@@ -39,6 +39,7 @@ void f_Matlab2InTransmission(const mxArray *mxInTransmission, sInTransmission &I
 	InTransmission.SeedFP = ReadValuemxField<int>(mxInTransmission, 0, "SeedFP");					// Random seed(frozen phonon)
 	InTransmission.PotPar = ReadValuemxField<int>(mxInTransmission, 0, "PotPar");					// Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 	InTransmission.ApproxModel = ReadValuemxField<int>(mxInTransmission, 0, "ApproxModel");			// 1: Mulstilice, 2: Projection approximation, 3: Phase object approximation, 4: Weak phase object approximation
+	if(InTransmission.ApproxModel>2) InTransmission.iConfFP = 0;
 	InTransmission.BWL = ReadValuemxField<int>(mxInTransmission, 0, "BWL");							// 1: true, 2: false (bandwidth limited)
 	InTransmission.FastCal = ReadValuemxField<int>(mxInTransmission, 0, "FastCal");					// 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
 	InTransmission.PBC_xy = 1;																		// 1: true, 2: false (Peridic boundary contions)

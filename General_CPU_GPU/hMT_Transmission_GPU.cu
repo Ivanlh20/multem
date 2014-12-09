@@ -61,6 +61,21 @@ __global__ void k_Transmission(sGP GP, int ApproxModel, double f, const Type * _
 	}
 }
 
+// Element by element multiplication
+__global__ void k_Transmit(sGP GP, const double2 * __restrict Trans_i, double2 * __restrict Psi_io){
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if ((ix < GP.nx)&&(iy < GP.ny)){
+		int ixy = ix*GP.ny+iy;
+		double z1r = Trans_i[ixy].x, z1i = Trans_i[ixy].y;
+		double z2r = Psi_io[ixy].x, z2i = Psi_io[ixy].y;
+		double z3r = z1r*z2r-z1i*z2i, z3i = z1i*z2r+z1r*z2i;
+		Psi_io[ixy].x = z3r;
+		Psi_io[ixy].y = z3i;
+	}
+}
+
 /***************************************************************************/
 /***************************************************************************/
 
@@ -121,25 +136,26 @@ void cMT_Transmission_GPU::Cal_Trans_or_Vpe(){
 
 	for (int iSliceMem=0; iSliceMem<nSliceMem; iSliceMem++){
 		ProjectedPotential(iSliceMem);
-		if(SliceMemTyp==1)
+		if(SliceMemTyp==1){
 			k_Transmission<double><<<Bnxny, Tnxny>>>(GP, MT_MGP_CPU->ApproxModel, fPot, V0, Trans[iSliceMem]);
-		else
+			f_BandwidthLimit2D(PlanTrans, GP, Trans[iSliceMem]);
+		}else
 			k_V0_D2F<<<Bnxny, Tnxny>>>(GP, V0, Vpe[iSliceMem]);
 	}
 	cudaDeviceSynchronize();
 }
 
-void cMT_Transmission_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, cufftHandle &PlanFT_i, int nAtomsM_i, double *AtomsM_i){
+void cMT_Transmission_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, cufftHandle &PlanTrans_i, int nAtomsM_i, double *AtomsM_i){
 	freeMemory();
 
 	cMT_Potential_GPU::SetInputData(MT_MGP_CPU_io, nAtomsM_i, AtomsM_i);
-	PlanTrans = PlanFT_i;
+	PlanTrans = PlanTrans_i;
 
 	cudaMalloc((void**)&Trans0, GP.nxy*cSizeofCD);
 
 	fPot = f_getfPot(MT_MGP_CPU->E0, MT_MGP_CPU->theta);
 
-	if(MT_MGP_CPU->FastCal==1) return;
+	if((MT_MGP_CPU->FastCal==1)||(MT_MGP_CPU->ApproxModel>2)) return;
 
 	int nSliceSigma = (MT_MGP_CPU->DimFP%10==0)?0:(int)ceil(6*sigma_max/MT_MGP_CPU->dz);
 	int nSliceMax = nSlice + nSliceSigma;
@@ -180,23 +196,41 @@ void cMT_Transmission_GPU::MoveAtoms(int iConf){
 	int nSliceMem = MIN(nSliceMem0, nSlice);
 	if((MT_MGP_CPU->MulOrder==2)&&(nSliceMem0>nSlice)) nSliceMem++;
 	if(nSliceMem0>0) Cal_Trans_or_Vpe();
+
+	if(MT_MGP_CPU->ApproxModel>2){
+		dim3 Bnxny, Tnxny;
+		f_get_BTnxny(GP, Bnxny, Tnxny);
+		ProjectedPotential(0);
+		k_Transmission<double><<<Bnxny, Tnxny>>>(GP, MT_MGP_CPU->ApproxModel, fPot, V0, Trans0);
+		f_BandwidthLimit2D(PlanTrans, GP, Trans0);	
+	}
 }
 
 double2* cMT_Transmission_GPU::getTrans(int iSlice, int typ){
+	if(MT_MGP_CPU->ApproxModel>2) return Trans0;
+
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 
 	double2 *Trans_o = Trans0;
 	if(iSlice<nSliceMem){
-		if(SliceMemTyp==1) 
+		if(SliceMemTyp==1)
 			Trans_o = Trans[iSlice];
-		else
+		else{
 			k_Transmission<float><<<Bnxny, Tnxny>>>(GP, MT_MGP_CPU->ApproxModel, fPot, Vpe[iSlice], Trans_o);
+			f_BandwidthLimit2D(PlanTrans, GP, Trans_o);	
+		}
 	}else{
 		ProjectedPotential(iSlice, typ);
 		k_Transmission<double><<<Bnxny, Tnxny>>>(GP, MT_MGP_CPU->ApproxModel, fPot, V0, Trans_o);
+		f_BandwidthLimit2D(PlanTrans, GP, Trans_o);	
 	}
-	f_BandwidthLimit2D(PlanTrans, GP, Trans_o);		// AntiAliasing
-
 	return Trans_o;
+}
+
+void cMT_Transmission_GPU::Transmit(int iSlice, double2 *&Psi_io){
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	double2 *Trans = (MT_MGP_CPU->ApproxModel>2)?Trans0:getTrans(iSlice);
+	k_Transmit<<<Bnxny, Tnxny>>>(GP, Trans, Psi_io);
 }

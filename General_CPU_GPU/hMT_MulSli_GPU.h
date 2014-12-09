@@ -26,8 +26,7 @@
 #include "hMT_General_GPU.h"
 #include "hMT_InMulSli_CPU.h"
 #include "hMT_MGP_CPU.h"
-#include "hMT_Specimen_CPU.h"
-#include "hMT_Potential_GPU.h"
+#include "hMT_Transmission_GPU.h"
 #include "hMT_IncidentWave_GPU.h"
 #include "hMT_MicroscopeEffects_GPU.h"
 #include "hMT_STEM_GPU.h"
@@ -51,14 +50,10 @@ class cMT_MulSli_GPU{
 		double gxu;													// incident beam x-tilt in reciprocal units
 		double gyu;													// incident beam y-tilt in reciprocal units
 
-		double fPot;
-
 		sACD ExpRg_x;												// k_PhaseMul x
 		sACD ExpRg_y;												// k_PhaseMul y
 		sACD Prop_x;												// Propagator x
 		sACD Prop_y;												// Propagator y
-
-		double2 *Trans;												// Transmission function
 
 		double2 *Psi;												// Wave function
 		double2 *aPsi;												// Wave function - temporal
@@ -68,16 +63,12 @@ class cMT_MulSli_GPU{
 
 		cufftHandle PlanPsi;										// Fourier transform's plan
 
-		cMT_Specimen_CPU *MT_Specimen_CPU;
-		cMT_Potential_GPU *MT_Potential_GPU;						// Potential
+		cMT_Transmission_GPU *MT_Transmission_GPU;
 		cMT_IncidentWave_GPU *MT_IncidentWave_GPU;					// Incident wave;
 		cMT_MicroscopeEffects_GPU *MT_MicroscopeEffects_GPU;		// Microscope effects
 
 		void PhaseMul(double gxu, double gyu, double2 *&Psi);
 		void PhaseMul(double2 *&Psi);
-		void Transmission(int iSlice, double2 *&Trans);
-		void Transmit(double2 *&Trans, double2 *&Psi);
-		void Transmission_Transmit(int iSlice, double2 *&Psi);
 		void Propagate(eSpace Space, double gxu, double gyu, double z, double2 *&Psi);
 		void Cal_Wavefunction_POA_WPOA(eSpace Space, double2 *&Psi);
 		void Cal_Wavefunction_MSA(eSpace Space, double2 *&Psi);

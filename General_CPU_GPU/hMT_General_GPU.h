@@ -105,8 +105,6 @@ void f_PhaseMul(sGP &GP, double gxu, double gyu, sACD &ExpRg_x_o, sACD &ExpRg_y_
 
 void f_BandwidthLimit2D(cufftHandle &PlanPsi, sGP &GP, double2 *&MC_io);
 
-void f_Transmit(sGP &GP, double2 *&Trans_i, double2 *&Psi_io);
-
 void f_Propagate(cufftHandle &PlanPsi, sGP &GP, eSpace Space, double gxu, double gyu, double lambda, double z, sACD &Prop_x_o, sACD &Prop_y_o, double2 *&Psi_io);
 
 void f_Probe_FS(sGP &GP, sLens Lens, double x, double y, double2 *&fPsi_o);

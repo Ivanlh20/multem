@@ -42,8 +42,7 @@ void cMT_STEM_GPU::freeMemory(){
 	cSynCPU = ccSynCPU;
 
 	MT_MulSli_GPU = 0;
-	MT_Specimen_CPU = 0;
-	MT_Potential_GPU = 0;
+	MT_Transmission_GPU = 0;
 	MT_IncidentWave_GPU = 0;
 	delete MT_Detector_GPU; MT_Detector_GPU = 0;
 
@@ -77,20 +76,6 @@ void cMT_STEM_GPU::freeMemory(){
 	nst = 0;
 	delete [] xst; xst = 0;
 	delete [] yst; yst = 0;
-
-	if(nSliceM>0)
-		if(SliceMemTyp==1){
-			for(int iSliceMem=0; iSliceMem<nSliceM; iSliceMem++)
-				cudaFreen(Trans[iSliceMem]);
-			delete [] Trans; Trans = 0;
-		}else{
-			for(int iSliceMem=0; iSliceMem<nSliceM; iSliceMem++)
-				cudaFreen(Vpe[iSliceMem]);
-			delete [] Vpe; Vpe = 0;
-		}
-
-	nSliceM = 0;
-	SliceMemTyp = 0;
 }
 
 cMT_STEM_GPU::cMT_STEM_GPU()
@@ -98,8 +83,7 @@ cMT_STEM_GPU::cMT_STEM_GPU()
 	cSynCPU = ccSynCPU;
 
 	MT_MulSli_GPU = 0;
-	MT_Specimen_CPU = 0;
-	MT_Potential_GPU = 0;
+	MT_Transmission_GPU = 0;
 	MT_IncidentWave_GPU = 0;
 	MT_Detector_GPU = 0;
 
@@ -126,12 +110,6 @@ cMT_STEM_GPU::cMT_STEM_GPU()
 	nst = 0;
 	xst = 0;
 	yst = 0;
-
-	Trans = 0;
-	Vpe = 0;
-
-	nSliceM = 0;
-	SliceMemTyp = 0;
 }
 
 cMT_STEM_GPU::~cMT_STEM_GPU(){
@@ -149,55 +127,6 @@ void cMT_STEM_GPU::InitImSTEM()
 			}
 }
 
-void cMT_STEM_GPU::Potential_Efective(int iSlice, double fPot, float *&Vpe){
-	int nSlice = MT_Potential_GPU->MT_Specimen_CPU->nSlice;
-	eSlicePos SlicePos = (iSlice==0)?eSPFirst:(iSlice<nSlice)?eSPMedium:eSPLast;
-
-	// Projected potential
-	if(iSlice<nSlice)
-		MT_Potential_GPU->ProjectedPotential(iSlice);
-
-	switch (MT_MGP_CPU.MulOrder)
-	{
-		case 1:
-			f_Potential1(GP, fPot, MT_Potential_GPU->V0, Vpe);
-			break;
-		case 2:
-			f_Potential2(GP, fPot, MT_Potential_GPU->V0, MT_Potential_GPU->V1, MT_Potential_GPU->V2, SlicePos, Vpe);
-			break;
-	}
-}
-
-void cMT_STEM_GPU::Cal_Trans_Vpe(){
-	int nSlice = MT_Specimen_CPU->nSlice;
-	int iSliceMem, nSliceMm = MIN(nSliceM, nSlice);
-	if((MT_MGP_CPU.MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
-
-	for (iSliceMem=0; iSliceMem<nSliceMm; iSliceMem++){
-		if(SliceMemTyp==1)
-			MT_MulSli_GPU->Transmission(iSliceMem, Trans[iSliceMem]);
-		else
-			Potential_Efective(iSliceMem, MT_MulSli_GPU->fPot, Vpe[iSliceMem]);
-	}
-	cudaDeviceSynchronize();
-}
-
-void cMT_STEM_GPU::Transmission_Transmit(int iSlice, double2 *&Psi){
-	int nSlice = MT_Specimen_CPU->nSlice;
-	int nSliceMm = MIN(nSliceM, nSlice);
-	if((MT_MGP_CPU.MulOrder==2)&&(nSliceM>nSlice)) nSliceMm++;
-
-	double2 *Transt;
-	Transt = (SliceMemTyp==1)?Trans[iSlice]:MT_MulSli_GPU->Trans;
-
-	if(iSlice<nSliceMm){
-		if(SliceMemTyp==2)
-			f_Transmission_1_2(MT_MulSli_GPU->PlanPsi, GP, Vpe[iSlice], Transt);
-		MT_MulSli_GPU->Transmit(Transt, Psi);
-	}else
-		MT_MulSli_GPU->Transmission_Transmit(iSlice, Psi);
-}
-
 void cMT_STEM_GPU::Cal_FAST_STEM_Wavefunction_POA_WPOA(int nConfFP, sDetInt *DetInt){
 	int iSlice = 0;
 	int ist, iThk = 0;
@@ -208,14 +137,12 @@ void cMT_STEM_GPU::Cal_FAST_STEM_Wavefunction_POA_WPOA(int nConfFP, sDetInt *Det
 	InitImSTEM();
 	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
 		// Move atoms
-		MT_Specimen_CPU->MoveAtoms(iConf);
-		// Transmission
-		MT_MulSli_GPU->Transmission(iSlice, MT_MulSli_GPU->Trans);
+		MT_Transmission_GPU->MoveAtoms(iConf);
 		for (ist=0; ist<nst; ist++){
 			// Plane wave ilumination
 			MT_IncidentWave_GPU->Psi0(xst[ist], yst[ist], MT_MulSli_GPU->Psi);
 			// Transmit
-			MT_MulSli_GPU->Transmit(MT_MulSli_GPU->Trans, MT_MulSli_GPU->Psi);
+			MT_Transmission_GPU->Transmit(iSlice, MT_MulSli_GPU->Psi);
 			// Inclined ilumination
 			MT_MulSli_GPU->PhaseMul(MT_MulSli_GPU->Psi);
 			// Backward fft2
@@ -238,23 +165,21 @@ void cMT_STEM_GPU::Cal_FAST_STEM_Wavefunction_MSA(int nConfFP, sDetInt *DetInt){
 	InitImSTEM();
 	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
 		// Move atoms
-		MT_Specimen_CPU->MoveAtoms(iConf);
+		MT_Transmission_GPU->MoveAtoms(iConf);
 
-		//Load Trans or Vpe
-		Cal_Trans_Vpe();
 		for (ist=0; ist<nst; ist++){
 			// Plane wave ilumination
 			MT_IncidentWave_GPU->Psi0(xst[ist], yst[ist], MT_MulSli_GPU->Psi);
-			for (iSlice = 0; iSlice<MT_Specimen_CPU->nSlice; iSlice++){
+			for (iSlice = 0; iSlice<MT_Transmission_GPU->nSlice; iSlice++){
 				// Transmission and Transmit
-				Transmission_Transmit(iSlice, MT_MulSli_GPU->Psi);
+				MT_Transmission_GPU->Transmit(iSlice, MT_MulSli_GPU->Psi);
 				// Propagate
-				MT_MulSli_GPU->Propagate(eSReal, MT_MulSli_GPU->gxu, MT_MulSli_GPU->gyu, MT_Specimen_CPU->get_dz(iSlice), MT_MulSli_GPU->Psi);
+				MT_MulSli_GPU->Propagate(eSReal, MT_MulSli_GPU->gxu, MT_MulSli_GPU->gyu, MT_Transmission_GPU->get_dz(iSlice), MT_MulSli_GPU->Psi);
 				// GPU Synchronize
 				f_GPU_Sync_CPU(iSynCPU, cSynCPU); 
 			}
 			// Last Transmission and Transmit
-			if (MT_MGP_CPU.MulOrder==2) Transmission_Transmit(iSlice, MT_MulSli_GPU->Psi);
+			if (MT_MGP_CPU.MulOrder==2) MT_Transmission_GPU->Transmit(iSlice, MT_MulSli_GPU->Psi);
 			// Inclined ilumination
 			MT_MulSli_GPU->PhaseMul(MT_MulSli_GPU->Psi);
 			// Backward fft2
@@ -267,36 +192,19 @@ void cMT_STEM_GPU::Cal_FAST_STEM_Wavefunction_MSA(int nConfFP, sDetInt *DetInt){
 	}
 }
 
-void cMT_STEM_GPU::Cal_STEM(){
-	int iThk = 0;
-
-	if(!FastCal){
-		for (int ist=0; ist<nst; ist++){
-			MT_MulSli_GPU->Image_Convergence_Wave_Illumination(MT_MGP_CPU.nConfFP, eSReciprocal, xst[ist], yst[ist], MT_MulSli_GPU->aPsi, MT_MulSli_GPU->M2aPsi, MT_MulSli_GPU->aM2Psi);
-			MT_Detector_GPU->getDetectorIntensity(MT_MulSli_GPU->aM2Psi, MT_MulSli_GPU->M2aPsi, ist, ImSTEM[iThk].DetInt);
-		}
-	}else{
-		if(MT_MGP_CPU.ApproxModel<=2)
-			Cal_FAST_STEM_Wavefunction_MSA(MT_MGP_CPU.nConfFP, ImSTEM[iThk].DetInt);
-		else
-			Cal_FAST_STEM_Wavefunction_POA_WPOA(MT_MGP_CPU.nConfFP, ImSTEM[iThk].DetInt);
-	}
-}
-
 void cMT_STEM_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, cMT_MulSli_GPU *MT_MulSli_GPU_i)
 {
 	freeMemory();
 
 	MT_MulSli_GPU = MT_MulSli_GPU_i;
-	MT_Potential_GPU = MT_MulSli_GPU->MT_Potential_GPU;
-	MT_Specimen_CPU = MT_Potential_GPU->MT_Specimen_CPU;
+	MT_Transmission_GPU = MT_MulSli_GPU->MT_Transmission_GPU;
 	MT_IncidentWave_GPU = MT_MulSli_GPU->MT_IncidentWave_GPU;
 	
 	MT_MGP_CPU = MT_MulSli_GPU->MT_MGP_CPU;
 	GP = MT_MulSli_GPU->GP;
 
 	line = MT_InMulSli_CPU.STEM_line;
-	FastCal = MT_InMulSli_CPU.STEM_FastCal;
+	FastCal = MT_InMulSli_CPU.FastCal;
 	ns = MT_InMulSli_CPU.STEM_ns;
 	x1u = MT_InMulSli_CPU.STEM_x1u;	
 	y1u = MT_InMulSli_CPU.STEM_y1u;
@@ -352,35 +260,20 @@ void cMT_STEM_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, cMT_MulSli_GP
 			}
 		}
 	}
+}
 
-	/****************************************************************/
-	int nSliceSigma = ((MT_MGP_CPU.ApproxModel>1)||(MT_MGP_CPU.DimFP%10==0))?0:(int)ceil(6*MT_Specimen_CPU->sigma_max/MT_MGP_CPU.dz);
-	int nSliceMax = MT_Specimen_CPU->nSlice + nSliceSigma;
-	nSliceMax = (MT_MGP_CPU.MulOrder==1)?nSliceMax:nSliceMax+1;
+void cMT_STEM_GPU::Cal_STEM(){
+	int iThk = 0;
 
-	size_t SizeFreeM, SizeTotM;
-	cudaMemGetInfo(&SizeFreeM, &SizeTotM);
-	SizeFreeM = SizeFreeM-10*cMb;
-	int nSliceMt;
-
-	if(SizeFreeM/(GP.nxy*cSizeofCD)>=nSliceMax){
-		SliceMemTyp = 1;
-		nSliceMt = SizeFreeM/(GP.nxy*cSizeofCD);
-	}else{
-		SliceMemTyp = 2;
-		nSliceMt = SizeFreeM/(GP.nxy*cSizeofRF);
-	}
-
-	if((FastCal)&&(nSliceMt>0)&&(MT_MGP_CPU.SimType==1)&&(MT_MGP_CPU.ApproxModel<=2)){
-		nSliceM = MIN(nSliceMt, nSliceMax);
-		if(SliceMemTyp==1){
-			Trans = new double2*[nSliceM];
-			for(int iSliceMem=0; iSliceMem<nSliceM; iSliceMem++)
-				cudaMalloc((void**)&Trans[iSliceMem], GP.nxy*cSizeofCD);
-		}else{
-			Vpe = new float*[nSliceM];
-			for(int iSliceMem=0; iSliceMem<nSliceM; iSliceMem++)
-				cudaMalloc((void**)&Vpe[iSliceMem], GP.nxy*cSizeofRF);
+	if(!FastCal){
+		for (int ist=0; ist<nst; ist++){
+			MT_MulSli_GPU->Image_Convergence_Wave_Illumination(MT_MGP_CPU.nConfFP, eSReciprocal, xst[ist], yst[ist], MT_MulSli_GPU->aPsi, MT_MulSli_GPU->M2aPsi, MT_MulSli_GPU->aM2Psi);
+			MT_Detector_GPU->getDetectorIntensity(MT_MulSli_GPU->aM2Psi, MT_MulSli_GPU->M2aPsi, ist, ImSTEM[iThk].DetInt);
 		}
+	}else{
+		if(MT_MGP_CPU.ApproxModel<=2)
+			Cal_FAST_STEM_Wavefunction_MSA(MT_MGP_CPU.nConfFP, ImSTEM[iThk].DetInt);
+		else
+			Cal_FAST_STEM_Wavefunction_POA_WPOA(MT_MGP_CPU.nConfFP, ImSTEM[iThk].DetInt);
 	}
 }

@@ -307,7 +307,7 @@ void cMT_Specimen_CPU::Slicing(double Rmax, int nAtoms, sAtoms *&Atoms, int &nSl
 	double zmin = Atoms[0].z, zmax = Atoms[nAtoms-1].z;
 	double Lz = zmax - zmin;
 
-	if(MT_MGP_CPU->ApproxModel>1){
+	if(MT_MGP_CPU->ApproxModel>=2){
 		nSlice = 1;
 		Slice = new sSlice[nSlice];
 		// Get atom's index in the Slice
@@ -455,7 +455,7 @@ void cMT_Specimen_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, d
 	getPlanes(nAtomsu, Atomsu, nPlanesu, Planesu);
 
 	// Slicing procedure
-	if(MT_MGP_CPU->ApproxModel==1)
+	if(MT_MGP_CPU->ApproxModel!=2)
 		Slicing(Rmax, nAtomsu, Atomsu, nSliceu, Sliceu, z_BackProp);
 	else
 		Slicing(nPlanesu, Planesu, nAtomsu, Atomsu, nSliceu, Sliceu, z_BackProp);
@@ -482,16 +482,16 @@ void cMT_Specimen_CPU::MoveAtoms(int iConf){
 	// Get dimension components
 	getDimCom(MT_MGP_CPU->DimFP, bx, by, bz);
 	setRandomSeed(MT_MGP_CPU->SeedFP, iConf);
-	for (int iSlice = 0; iSlice<nAtoms; iSlice++){
-		Atoms[iSlice].Z = Atomsu[iSlice].Z;
-		sigmax = sigmay = sigmaz = Atomsu[iSlice].sigma;
-		Atoms[iSlice].x = Atomsu[iSlice].x + bx*sigmax*RandGen.randn();
-		Atoms[iSlice].y = Atomsu[iSlice].y + by*sigmay*RandGen.randn();
-		Atoms[iSlice].z = Atomsu[iSlice].z + bz*sigmaz*RandGen.randn();
-		Atoms[iSlice].sigma = 0.0;
-		Atoms[iSlice].occ = Atomsu[iSlice].occ ;
+	for (int iAtoms = 0; iAtoms<nAtoms; iAtoms++){
+		Atoms[iAtoms].Z = Atomsu[iAtoms].Z;
+		sigmax = sigmay = sigmaz = Atomsu[iAtoms].sigma;
+		Atoms[iAtoms].x = Atomsu[iAtoms].x + bx*sigmax*RandGen.randn();
+		Atoms[iAtoms].y = Atomsu[iAtoms].y + by*sigmay*RandGen.randn();
+		Atoms[iAtoms].z = Atomsu[iAtoms].z + bz*sigmaz*RandGen.randn();
+		Atoms[iAtoms].sigma = 0.0;
+		Atoms[iAtoms].occ = Atomsu[iAtoms].occ ;
 	}
-	if(MT_MGP_CPU->ApproxModel==1){
+	if(MT_MGP_CPU->ApproxModel<=2){
 		// Ascending sort by z
 		QuickSortAtomsAlongz(Atoms, 0, nAtoms-1);	
 		// Slicing procedure

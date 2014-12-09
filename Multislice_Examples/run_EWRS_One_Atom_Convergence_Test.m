@@ -15,7 +15,7 @@ TEM.ZeroDefTyp = 3;         % 1: First atom, 2: middle point, 3: last atom, 4: F
 TEM.ZeroDefPlane = 0;       % Zero defocus plane
 TEM.ApproxModel = 1;        % 1: MS, 2: PA, 3:POA, 4:WPOA
 TEM.BWL = 1;                % 1: true, 2: false
-TEM.FastCal = 1;            % 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
+TEM.FastCal = 2;            % 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
 TEM.ThkTyp = 1;             % 1: Whole specimen, 2: Throught thickness, 3: Through planes
 TEM.Thk = 0;                % Array of thicknesses
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -29,7 +29,7 @@ TEM.Atoms = [TEM.lx/2 TEM.ly/2 0.00 79 sigma 1.0; TEM.lx/2 TEM.ly/2 4.00 79 sigm
     TEM.lx/2 TEM.ly/2 8.00 79 sigma 1.0;TEM.lx/2 TEM.ly/2 12.00 79 sigma 1.0;
     TEM.lx/2 TEM.ly/2 16.00 79 sigma 1.0;TEM.lx/2 TEM.ly/2 20.00 79 sigma 1.0];
 cc = [0 0 0; 0 0 1; 0 1 1; 1 0 1; 1 0 0; 0 1 0; 1 1 0]; 
-     %black, blue,  cyan,  magenta, red, green
+     %black, blue,  cyan,  magenta, red, green, yellow
 adz = [1 1/2 1/4 1/8 1/16 1/32 1/64]*4.0;
 idz = 1;
 figure(1);

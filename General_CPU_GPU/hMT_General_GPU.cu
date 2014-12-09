@@ -1112,21 +1112,6 @@ __global__ void k_BandwidthLimit2D(sGP GP, double2 * __restrict M_io){
 	}
 }
 
-// Element by element multiplication
-__global__ void k_Transmit(sGP GP, const double2 * __restrict Trans_i, double2 * __restrict Psi_io){
-	int iy = threadIdx.x + blockIdx.x*blockDim.x;
-	int ix = threadIdx.y + blockIdx.y*blockDim.y;
-
-	if ((ix < GP.nx)&&(iy < GP.ny)){
-		int ixy = ix*GP.ny+iy;
-		double z1r = Trans_i[ixy].x, z1i = Trans_i[ixy].y;
-		double z2r = Psi_io[ixy].x, z2i = Psi_io[ixy].y;
-		double z3r = z1r*z2r-z1i*z2i, z3i = z1i*z2r+z1r*z2i;
-		Psi_io[ixy].x = z3r;
-		Psi_io[ixy].y = z3i;
-	}
-}
-
 // Build propagator function
 __global__ void k_Propagator(sGP GP, double gxu, double gyu, double scale, sACD Prop_x_o, sACD Prop_y_o){
 	int ix = threadIdx.x + blockIdx.x*blockDim.x, iy = ix;
@@ -1360,12 +1345,6 @@ void f_BandwidthLimit2D(cufftHandle &PlanPsi, sGP &GP, double2 *&MC_io){
 	k_BandwidthLimit2D<<<Bnxny, Tnxny>>>(GP, MC_io);		
 	// Backward fft2
 	cufftExecZ2Z(PlanPsi, MC_io, MC_io, CUFFT_INVERSE);
-}
-
-void f_Transmit(sGP &GP, double2 *&Trans_i, double2 *&Psi_io){
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);	
-	k_Transmit<<<Bnxny, Tnxny>>>(GP, Trans_i, Psi_io);
 }
 
 void f_Propagate(cufftHandle &PlanPsi, sGP &GP, eSpace Space, double gxu, double gyu, double lambda, double z, sACD &Prop_x_o, sACD &Prop_y_o, double2 *&Psi_io){

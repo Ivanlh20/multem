@@ -43,13 +43,13 @@ class cMT_Transmission_GPU: public cMT_Potential_GPU{
 		int nSliceMem;
 		int nSliceMem0;
 
-		double2 *Trans0;
 		double2 **Trans;
 		float **Vpe;
 
 		cufftHandle PlanTrans;
 		void Cal_Trans_or_Vpe();
 	public:
+		double2 *Trans0;
 
 		void freeMemory();
 		void freeMemoryReset();
@@ -57,9 +57,10 @@ class cMT_Transmission_GPU: public cMT_Potential_GPU{
 		cMT_Transmission_GPU();
 		~cMT_Transmission_GPU();
 
-		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, cufftHandle &PlanFT_i, int nAtomsM_i, double *AtomsM_i);
+		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, cufftHandle &PlanTrans_i, int nAtomsM_i, double *AtomsM_i);
+		void MoveAtoms(int iConf);	
 		double2* getTrans(int iSlice, int typ=1);
-		void MoveAtoms(int iConf);
+		void Transmit(int iSlice, double2 *&Psi_io);
 };
 
 #endif

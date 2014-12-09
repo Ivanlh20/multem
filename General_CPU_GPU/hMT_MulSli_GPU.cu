@@ -23,8 +23,7 @@
 #include "hMT_General_GPU.h"
 #include "hMT_InMulSli_CPU.h"
 #include "hMT_MGP_CPU.h"
-#include "hMT_Specimen_CPU.h"
-#include "hMT_Potential_GPU.h"
+#include "hMT_Transmission_GPU.h"
 #include "hMT_IncidentWave_GPU.h"
 #include "hMT_MicroscopeEffects_GPU.h"
 #include "hMT_STEM_GPU.h"
@@ -46,8 +45,6 @@ void cMT_MulSli_GPU::freeMemory(){
 	
 	gxu = 0;
 	gyu = 0;
-
-	fPot = 0;
 
 	/****************************************************************/
 	delete STEM;
@@ -75,8 +72,6 @@ void cMT_MulSli_GPU::freeMemory(){
 	f_sACD_cudaFree(Prop_x);
 	f_sACD_cudaFree(Prop_y);
 
-	cudaFreen(Trans);
-
 	cudaFreen(Psi);
 	cudaFreen(aPsi);
 
@@ -85,8 +80,7 @@ void cMT_MulSli_GPU::freeMemory(){
 
 	cufftDestroyn(PlanPsi);
 
-	MT_Specimen_CPU = 0;
-	delete MT_Potential_GPU; MT_Potential_GPU = 0;
+	delete MT_Transmission_GPU; MT_Transmission_GPU = 0;
 	delete MT_IncidentWave_GPU; MT_IncidentWave_GPU = 0;
 	delete MT_MicroscopeEffects_GPU; MT_MicroscopeEffects_GPU = 0;
 }
@@ -99,8 +93,6 @@ cMT_MulSli_GPU::cMT_MulSli_GPU(){
 	
 	gxu = 0;		
 	gyu = 0;		
-
-	fPot = 0;
 
 	/****************************************************************/
 	STEM = 0;
@@ -128,8 +120,6 @@ cMT_MulSli_GPU::cMT_MulSli_GPU(){
 	f_sACD_cudaInit(Prop_x);
 	f_sACD_cudaInit(Prop_y);
 
-	Trans = 0;
-
 	Psi = 0;
 	aPsi = 0;
 
@@ -138,8 +128,7 @@ cMT_MulSli_GPU::cMT_MulSli_GPU(){
 
 	PlanPsi = 0;
 
-	MT_Specimen_CPU = 0;
-	MT_Potential_GPU = 0;
+	MT_Transmission_GPU = 0;
 	MT_IncidentWave_GPU = 0;
 	MT_MicroscopeEffects_GPU = 0;
 }
@@ -154,7 +143,7 @@ void cMT_MulSli_GPU::GPU2CPU(double2 *&Psid, sComplex &Psih){
 	// fft2shift 
 	f_fft2Shift_MC(GP, Psid);
 	/*********************copy data to host************************/
-	f_Copy_MCd(GP, Psid, MT_Potential_GPU->V0, MT_Potential_GPU->V1, Psih);
+	f_Copy_MCd(GP, Psid, MT_Transmission_GPU->V0, MT_Transmission_GPU->V1, Psih);
 }
 
 // From Device To Host
@@ -162,7 +151,7 @@ void cMT_MulSli_GPU::GPU2CPU(double2 *&Psid, double *&M2Psid, sComplex &Psih, do
 	// fft2shift 
 	f_fft2Shift_MC_MD(GP, Psid, M2Psid);
 	// Copy wave function squared to the host
-	f_Copy_MCd_MDd(GP, Psid, M2Psid, MT_Potential_GPU->V0, MT_Potential_GPU->V1, Psih, M2Psih);
+	f_Copy_MCd_MDd(GP, Psid, M2Psid, MT_Transmission_GPU->V0, MT_Transmission_GPU->V1, Psih, M2Psih);
 }
 
 // From Device To Host
@@ -170,7 +159,7 @@ void cMT_MulSli_GPU::GPU2CPU(double2 *&Psid, double *&M2Psi1d, double *&M2Psi2d,
 	// fft2shift 
 	f_fft2Shift_MC_MD(GP, Psid, M2Psi1d, M2Psi2d);
 	/*********************copy data to host************************/
-	f_Copy_MCd_MDd(GP, Psid, M2Psi1d, M2Psi2d, MT_Potential_GPU->V0, MT_Potential_GPU->V1, Psih, M2Psi1h, M2Psi2h);
+	f_Copy_MCd_MDd(GP, Psid, M2Psi1d, M2Psi2d, MT_Transmission_GPU->V0, MT_Transmission_GPU->V1, Psih, M2Psi1h, M2Psi2h);
 }
 
 void cMT_MulSli_GPU::PhaseMul(double gxu, double gyu, double2 *&Psi){
@@ -183,35 +172,6 @@ void cMT_MulSli_GPU::PhaseMul(double2 *&Psi){
 		f_PhaseMul(GP, gxu, gyu, ExpRg_x, ExpRg_y, Psi);
 }
 
-void cMT_MulSli_GPU::Transmission(int iSlice, double2 *&Trans){
-	int nSlice = MT_Specimen_CPU->nSlice;
-	eSlicePos SlicePos = (iSlice==0)?eSPFirst:(iSlice<nSlice)?eSPMedium:eSPLast;
-
-	// Projected potential
-	if(iSlice<nSlice)
-		MT_Potential_GPU->ProjectedPotential(iSlice); 
-
-	switch (MT_MGP_CPU.MulOrder)
-	{
-		case 1:
-			if(MT_MGP_CPU.ApproxModel==4) f_TransmissionWPO(PlanPsi, GP, fPot, MT_Potential_GPU->V0, Trans);
-			else f_Transmission1(PlanPsi, GP, fPot, MT_Potential_GPU->V0, Trans);
-			break;
-		case 2:
-			f_Transmission2(PlanPsi, GP, fPot, MT_Potential_GPU->V0, MT_Potential_GPU->V1, MT_Potential_GPU->V2, SlicePos, Trans);
-			break;
-	}
-}
-
-void cMT_MulSli_GPU::Transmit(double2 *&Trans, double2 *&Psi){
-	f_Transmit(GP, Trans, Psi);
-}
-
-void cMT_MulSli_GPU::Transmission_Transmit(int iSlice, double2 *&Psi){
-	Transmission(iSlice, Trans);
-	f_Transmit(GP, Trans, Psi);
-}
-
 void cMT_MulSli_GPU::Propagate(eSpace Space, double gxu, double gyu, double z, double2 *&Psi){
 	f_Propagate(PlanPsi, GP, Space, gxu, gyu, Lens.lambda, z, Prop_x, Prop_y, Psi);
 }
@@ -220,7 +180,7 @@ void cMT_MulSli_GPU::Propagate(eSpace Space, double gxu, double gyu, double z, d
 void cMT_MulSli_GPU::Cal_Wavefunction_POA_WPOA(eSpace Space, double2 *&Psi){
 	int iSlice = 0;
 	// get Transmission and Transmit
-	Transmission_Transmit(iSlice, Psi);
+	MT_Transmission_GPU->Transmit(iSlice, Psi);
 	// Inclined ilumination
 	PhaseMul(Psi);
 	// Backward fft2
@@ -234,20 +194,20 @@ void cMT_MulSli_GPU::Cal_Wavefunction_POA_WPOA(eSpace Space, double2 *&Psi){
 void cMT_MulSli_GPU::Cal_Wavefunction_MSA(eSpace Space, double2 *&Psi){
 	int iSlice = 0, iSynCPU = 0;
 
-	for (iSlice = 0; iSlice<MT_Specimen_CPU->nSlice; iSlice++){
+	for (iSlice = 0; iSlice<MT_Transmission_GPU->nSlice; iSlice++){
 		// get Transmission and Transmit
-		Transmission_Transmit(iSlice, Psi);
+		MT_Transmission_GPU->Transmit(iSlice, Psi);
 		// Propagate
-		Propagate(eSReal, gxu, gyu, MT_Specimen_CPU->get_dz(iSlice), Psi);
+		Propagate(eSReal, gxu, gyu, MT_Transmission_GPU->get_dz(iSlice), Psi);
 		// GPU Synchronize
 		f_GPU_Sync_CPU(iSynCPU, cSynCPU); 
 	}
 	// Last Transmission and Transmit
-	if (MT_MGP_CPU.MulOrder==2) Transmission_Transmit(iSlice, Psi);
+	if (MT_MGP_CPU.MulOrder==2) MT_Transmission_GPU->Transmit(iSlice, Psi);;
 	// Inclined ilumination
 	PhaseMul(Psi);
 	// Back propagation to our plane reference
-	Propagate(Space, gxu, gyu, MT_Specimen_CPU->z_BackProp, Psi);
+	Propagate(Space, gxu, gyu, MT_Transmission_GPU->z_BackProp, Psi);
 }
 
 // Exit wave calculation: Space :1 Real and 2 Fourier
@@ -268,7 +228,7 @@ void cMT_MulSli_GPU::Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, in
 
 	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
 		// Move atoms
-		MT_Specimen_CPU->MoveAtoms(iConf);
+		MT_Transmission_GPU->MoveAtoms(iConf);
 		// Plane wave ilumination
 		MT_IncidentWave_GPU->Psi0(Psi);
 		if(MEffect==0){
@@ -314,7 +274,7 @@ void cMT_MulSli_GPU::Image_Convergence_Wave_Illumination(int nConfFP, eSpace Spa
 
 	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
 		// Move atoms
-		MT_Specimen_CPU->MoveAtoms(iConf);
+		MT_Transmission_GPU->MoveAtoms(iConf);
 		// Plane wave ilumination
 		MT_IncidentWave_GPU->Psi0(xi, yi, Psi);
 		// Exit wave
@@ -333,20 +293,16 @@ void cMT_MulSli_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
 
 	cudaSetDevice(MT_MGP_CPU.gpu);
 
-	f_sGP_SetInputData(MT_MGP_CPU, GP);
+	f_sGP_SetInputData(&MT_MGP_CPU, GP);
 	f_sLens_SetInputData(MT_InMulSli_CPU, GP, Lens);
 
 	gxu = sin(MT_MGP_CPU.theta)*cos(MT_MGP_CPU.phi)/Lens.lambda;
 	gyu = sin(MT_MGP_CPU.theta)*sin(MT_MGP_CPU.phi)/Lens.lambda;
 
-	fPot = Lens.gamma*Lens.lambda/(cPotf*cos(MT_MGP_CPU.theta));
-
 	f_sACD_cudaMalloc(GP.nx, ExpRg_x);
 	f_sACD_cudaMalloc(GP.ny, ExpRg_y);
 	f_sACD_cudaMalloc(GP.nx, Prop_x);
 	f_sACD_cudaMalloc(GP.ny, Prop_y);
-
-	cudaMalloc((void**)&Trans, GP.nxy*cSizeofCD);
 
 	cudaMalloc((void**)&Psi, GP.nxy*cSizeofCD);
 	cudaMalloc((void**)&aPsi, GP.nxy*cSizeofCD);
@@ -356,12 +312,9 @@ void cMT_MulSli_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
 
 	cufftPlan2d(&PlanPsi, GP.ny, GP.nx, CUFFT_Z2Z);
 
-	// Potential parameters
-	MT_Potential_GPU = new cMT_Potential_GPU;
-	MT_Potential_GPU->SetInputData(MT_MGP_CPU, GP, MT_InMulSli_CPU.nAtomsM, MT_InMulSli_CPU.AtomsM);
-
-	// Specimen parameters
-	MT_Specimen_CPU = MT_Potential_GPU->MT_Specimen_CPU;
+	// Transmission parameters
+	MT_Transmission_GPU = new cMT_Transmission_GPU ;
+	MT_Transmission_GPU->SetInputData(&MT_MGP_CPU, PlanPsi,  MT_InMulSli_CPU.nAtomsM, MT_InMulSli_CPU.AtomsM);
 
 	// Incident wave parameters
 	MT_IncidentWave_GPU = new cMT_IncidentWave_GPU;
@@ -369,7 +322,7 @@ void cMT_MulSli_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
 
 	// Microscope parameters
 	MT_MicroscopeEffects_GPU = new cMT_MicroscopeEffects_GPU;
-	MT_MicroscopeEffects_GPU->SetInputData(GP, Lens, PlanPsi, Trans);
+	MT_MicroscopeEffects_GPU->SetInputData(GP, Lens, PlanPsi, MT_Transmission_GPU->Trans0);
 
 	/***************************************************************************/
 	/***************************************************************************/
