@@ -1068,7 +1068,7 @@ __global__ void k_Phase(sGP GP, double gxu, double gyu, sACD ExpR_x_o, sACD ExpR
 
 	if (iy < GP.ny){
 		R = IsRS(iy,GP.nyh)*GP.dRy;
-		theta = c2Pi*R*gxu;
+		theta = c2Pi*R*gyu;
 		sincos(theta, &y, &x);
 		ExpR_y_o.x[iy] = x;
 		ExpR_y_o.y[iy] = y;

@@ -106,6 +106,8 @@ class cMT_MulSli_GPU{
 		void Cal_ED(sComplex &aPsih, double *&aM2Psih);
 		void Cal_HRTEM(sComplex &aPsih, double *&M2aPsih, double *&aM2Psih);
 
+		void CAL_HCI(sComplex &aPsih, double *&aM2Psih);
+
 		void Cal_ExitWaveFS(sComplex &aPsih, double *&aM2Psih);
 		void Cal_ExitWaveRS(sComplex &aPsih, double *&aM2Psih);
 };

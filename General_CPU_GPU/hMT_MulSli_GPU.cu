@@ -402,6 +402,38 @@ void cMT_MulSli_GPU::Cal_CBEI(sComplex &aPsih, double *&aM2Psih){
 	GPU2CPU(aPsi, aM2Psi, aPsih, aM2Psih);
 }
 
+// Hollow cone ilumination
+void cMT_MulSli_GPU::CAL_HCI(sComplex &aPsih, double *&aM2Psih){
+	int iSlice = 0, iSynCPU = 0;
+	int irot, iThk = 0;
+	int nConfFP = MT_MGP_CPU.nConfFP, iConf0 = (nConfFP==0)?0:1;
+	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
+	double gu, phi, ecos, esin;
+	double w = inConfFP/double(HCI.nrot);
+
+	f_Set_MD(GP, 0.0, aM2Psi);
+	phi = 2.0*cPi/double(HCI.nrot); gu = sin(HCI.theta)/Lens.lambda;
+	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
+		// Move atoms
+		MT_Transmission_GPU->MoveAtoms(iConf);
+		for (irot=0; irot<HCI.nrot; irot++){
+			sincos(irot*phi, &esin, &ecos); 
+			gxu = -gu*ecos; gyu = -gu*esin;
+			// Plane wave ilumination
+			MT_IncidentWave_GPU->Psi0(Psi);
+			// Exit wave(g)
+			Cal_Wavefunction(eSReciprocal, Psi);
+			// Microscope effects
+			MT_MicroscopeEffects_GPU->ApplyMEffects(MT_MGP_CPU.MEffect, MT_MGP_CPU.STEffect, Psi, M2aPsi);
+			// Backward fft2
+			cufftExecZ2Z(PlanPsi, Psi, Psi, CUFFT_INVERSE);
+			// Add Psi and M2aPsi to aPsi and aM2Psi
+			f_Add_wMC_wMD(true, GP, w, Psi, M2aPsi, aPsi, aM2Psi);
+		}
+	}
+	GPU2CPU(aPsi, aM2Psi, aPsih, aM2Psih);
+}
+
 void cMT_MulSli_GPU::Cal_STEM(){
 
 }

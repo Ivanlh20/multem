@@ -494,13 +494,13 @@ __global__ void k_evalCubicPoly(sGP GP, scVp cVp, double * __restrict V0g, doubl
 }
 
 //get Effective Potential
-__global__ void k_getV0(sGP GP, eSlicePos SlicePo, double * __restrict V0_io, double * __restrict V1_io, double * __restrict V1o_io){
+__global__ void k_getV0(sGP GP, eSlicePos SlicePo, double dz, double * __restrict V0_io, double * __restrict V1_io, double * __restrict V1o_io){
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 	if ((ix < GP.nx)&&(iy < GP.ny)){
 		int ixy = ix*GP.ny+iy;
-		double V0 = V0_io[ixy], V1 = V1_io[ixy]/GP.dz;
+		double V0 = V0_io[ixy], V1 = V1_io[ixy]/dz;
 		switch (SlicePo){
 			case eSPFirst: // initial Slice
 				V0_io[ixy] = V0 = V0-V1;
@@ -662,10 +662,11 @@ void cMT_Potential_GPU::getV0(int iSlice, double *&V0, int typ){
 
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
+	double dz = get_dz(iSlice);
 	if(typ==1)
-		k_getV0<<<Bnxny, Tnxny>>>(GP, SlicePos(iSlice, nSlice), V0, V1, V1o);
+		k_getV0<<<Bnxny, Tnxny>>>(GP, SlicePos(iSlice, nSlice), dz, V0, V1, V1o);
 	else
-		f_Scale_MD(GP, get_dz(iSlice), V1);
+		f_Scale_MD(GP, dz, V1);
 }
 
 void cMT_Potential_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i){

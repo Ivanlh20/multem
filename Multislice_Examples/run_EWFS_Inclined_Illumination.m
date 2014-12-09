@@ -4,7 +4,7 @@ global TEM;
 DefaultValues;% Load default values;
 
 TEM.gpu = 0;                % Gpu card
-TEM.SimType = 52;           % 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
+TEM.SimType = 51;           % 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
 TEM.nConfFP = 0;            % Number of frozen phonon configurations
 TEM.DimFP = 111;            % Dimensions phonon configurations
 TEM.SeedFP = 1983;          % Frozen phonon random seed
@@ -19,32 +19,15 @@ TEM.FastCal = 1;            % 1: normal mode(low memory consumption), 2: fast ca
 TEM.ThkTyp = 1;             % 1: Whole specimen, 2: Throught thickness, 3: Through planes
 TEM.Thk = 0;                % Array of thicknesses
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-TEM.E0 = 300;
-TEM.theta = 0.0; TEM.phi = 0; % Till ilumination (degrees)
+TEM.E0 = 200;
+TEM.theta = 1.0; TEM.phi = 180; % Till ilumination (degrees)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-rmsAu3D = 0.085; sigma = sqrt(rmsAu3D^2/3);
-TEM.lx = 10;  TEM.ly = 10; TEM.dz = 0.10;
-TEM.nx = 2048; TEM.ny = 2048; nxh = TEM.nx/2; nyh = TEM.ny/2;
-TEM.Atoms = [TEM.lx/2 TEM.ly/2 0.00 79 sigma 1.0; TEM.lx/2 TEM.ly/2 4.00 79 sigma 1.0;
-    TEM.lx/2 TEM.ly/2 8.00 79 sigma 1.0;TEM.lx/2 TEM.ly/2 12.00 79 sigma 1.0;
-    TEM.lx/2 TEM.ly/2 16.00 79 sigma 1.0;TEM.lx/2 TEM.ly/2 20.00 79 sigma 1.0];
-cc = [0 0 0; 0 0 1; 0 1 1; 1 0 1; 1 0 0; 0 1 0; 1 1 0]; 
-     %black, blue,  cyan,  magenta, red, green, yellow
-adz = [1 1/2 1/4 1/8 1/16 1/32 1/64]*4.0;
-idz = 1;
-figure(1);
-for dz = adz;
-    TEM.dz = dz;
-    tic;
-    clear MULTEMMat;
-    [aPsi, aM2Psi] = MULTEMMat(TEM);
-    toc; 
-    [sum(aM2Psi(:)), sum(abs(aPsi(:)).^2)]/(TEM.nx*TEM.ny)
-    hold on;
-    plot(abs(aPsi(nyh+1, (nxh+1):(nxh+256))), '-', 'color', cc(idz, :));
-    idz = idz + 1;
-end;
+na = 8; nb = 8; nc = 10; ncu = 4; rmsAu3D = 0.085; sigma = sqrt(rmsAu3D^2/3);
+[TEM.Atoms, TEM.lx, TEM.ly, lz, a, b, c, TEM.dz] = Au001Crystal(na, nb, nc, ncu, sigma);
+TEM.nx = 256*na; TEM.ny = 256*nb; nxh = TEM.nx/2; nyh = TEM.ny/2;
+tic;
+[aPsi, aM2Psi] = MULTEMMat(TEM);
 figure(2);
-imagesc(abs(aPsi));
+imagesc(aM2Psi.^0.25);
+colormap hot;
 axis image;
-colormap gray;
