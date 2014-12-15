@@ -1,2 +1,2 @@
 clc; clear all;
-mexCPU(1, 'getfxegTabData.cpp', 'D:/MULTEM/General_CPU_GPU', 'hfxegTabData.cpp');
+mexCPU(1, 'getfxegTabData.cpp', '../General_CPU_GPU', 'hfxegTabData.cpp');

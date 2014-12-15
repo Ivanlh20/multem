@@ -20,7 +20,7 @@
 #define hConstTypes_H
 
 #include <cstring>
-#include "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v6.5\include\vector_types.h"
+#include <vector_types.h>
 
 #define cHa 27.2113850656389				// Hartree to electron-Volt
 #define ca0 0.52917721077817892				// Bohr radius

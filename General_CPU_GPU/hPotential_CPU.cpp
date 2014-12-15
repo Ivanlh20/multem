@@ -397,11 +397,11 @@ double cPotential_CPU::AtomicRadius_Cutoff(int Dim, double Vrl){
 		rmin = MT_AtomTypes_CPU->rn_c; 
 		rmax = 50.0;
 		Vr(0, Dim, rmin, Vrm, dVrm); 
-		Vrm = abs(Vrm);
-		while (abs(Vrm-Vrl)>eps){
+		Vrm = std::abs(Vrm);
+		while (std::abs(Vrm-Vrl)>eps){
 			rm = 0.5*(rmin+rmax);
 			Vr(0, Dim, rm, Vrm, dVrm);
-			Vrm = abs(Vrm);
+			Vrm = std::abs(Vrm);
 			if (Vrm>Vrl)
 				rmin = rm;
 			else

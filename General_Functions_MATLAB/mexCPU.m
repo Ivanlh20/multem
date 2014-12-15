@@ -5,9 +5,9 @@ for k = 1:nVarargs
 end;
 
 if (opt==1)
-    textcomands = strjoin({'mex -g -largeArrayDims', strcat('-I', path), mfile, strjoin(varargin)});      
+    textcomands = strjoin({'mex -g -largeArrayDims', strcat('-I', path), '-I/opt/cuda/include', mfile, strjoin(varargin)});   
 else
-    textcomands = strjoin({'mex -largeArrayDims', strcat('-I', path), mfile, strjoin(varargin)});    
+    textcomands = strjoin({'mex -largeArrayDims', strcat('-I', path), '-I/opt/cuda/include', mfile, strjoin(varargin)});
 end;
 
 eval(textcomands);
