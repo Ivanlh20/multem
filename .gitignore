@@ -1,4 +1,5 @@
 *.mexw64
+*.mexa64
 *.pdb
 *.ilk
 *.mat

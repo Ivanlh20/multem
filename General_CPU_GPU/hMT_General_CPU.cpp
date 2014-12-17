@@ -16,7 +16,7 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "math.h"
+#include <cmath>
 #include "hConstTypes.h"
 #include "hMT_MGP_CPU.h"
 #include "hMT_InMulSli_CPU.h"
@@ -481,15 +481,15 @@ void f_BuildGrid(int line, int ns, double x0, double y0, double xe, double ye, i
 	}
 
 	int i;
-	double lxs = xe-x0, lys = ye-y0, ld = sqrt(lxs*lxs+lys*lys);
-	double theta = atan(lys/lxs), costheta = cos(theta), sintheta = sin(theta);
+	double lxs = xe-x0, lys = ye-y0, ld = std::sqrt(lxs*lxs+lys*lys);
+	double theta = std::atan(lys/lxs), costheta = std::cos(theta), sintheta = std::sin(theta);
 
 	if (line){
 			nxs = ns;
 			nys = ns;
 	}else{
-		nxs = (abs(lxs)>abs(lys))?ns:(int)ceil(ns*abs(lxs/lys));
-		nys = (abs(lxs)>abs(lys))?(int)ceil(ns*abs(lys/lxs)):ns;
+		nxs = (std::abs(lxs)>std::abs(lys))?ns:(int)std::ceil(ns*std::abs(lxs/lys));
+		nys = (std::abs(lxs)>std::abs(lys))?(int)std::ceil(ns*std::abs(lys/lxs)):ns;
 	}
 
 	xs = new double [nxs];
