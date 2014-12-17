@@ -15,12 +15,13 @@ function [] = mexBlasLapackCPU(opt, mfile, path, varargin)
     blaslib = fullfile(matlabroot, ...
       'extern', 'lib', 'win64', 'microsoft', 'libmwblas.lib');
     blaslib = qt(blaslib);
-
+    
+    CUDA_INC = strcat('-I"', getenv('CUDA_PATH'), filesep, 'include"');
     mfile = qt(mfile);
     if (opt==1)
-        textcomands = strjoin({qt('-g'), qt('-largeArrayDims'), qt(strcat('-I', path)), mfile, strjoin(varargin, ','), blaslib, lapacklib},',');     
+        textcomands = strjoin({qt('-g'), qt('-largeArrayDims'), qt(strcat('-I', path)), qt(CUDA_INC), mfile, strjoin(varargin, ','), blaslib, lapacklib},',');     
     else
-        textcomands = strjoin({qt('-largeArrayDims'), qt(strcat('-I', path)), mfile, strjoin(varargin, ','), blaslib, lapacklib},',');       
+        textcomands = strjoin({qt('-largeArrayDims'), qt(strcat('-I', path)), qt(CUDA_INC), mfile, strjoin(varargin, ','), blaslib, lapacklib},',');       
     end;
     textcomands = strcat('mex(', textcomands, ')');
     eval(textcomands);

@@ -123,15 +123,15 @@ void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, int PBC_xyi, double lxi, do
 	Atoms = new sAtoms[nAtomsM_i];
 	nAtoms = 0;
 	for (int i=0; i<nAtomsM_i; i++){		
-		x = AtomsM_i[0*nAtomsM_i + i];								// x-position
-		y = AtomsM_i[1*nAtomsM_i + i];								// y-position
+		x = AtomsM_i[0*nAtomsM_i + i];									// x-position
+		y = AtomsM_i[1*nAtomsM_i + i];									// y-position
 		if((PBC_xyi==2)||((x<lxb)&&(y<lyb))){
-			Atoms[nAtoms].x = x;									// x-position
-			Atoms[nAtoms].y = y;									// y-position
-			Atoms[nAtoms].z = AtomsM_i[2*nAtomsM_i + i];			// z-position
-			Atoms[nAtoms].Z = (int)AtomsM_i[3*nAtomsM_i + i];		// Atomic number
-			Atoms[nAtoms].sigma = sigma = AtomsM_i[4*nAtomsM_i + i];		// Standard deviation
-			Atoms[nAtoms].occ = AtomsM_i[5*nAtomsM_i + i];			// Occupancy
+			Atoms[nAtoms].x = x;										// x-position
+			Atoms[nAtoms].y = y;										// y-position
+			Atoms[nAtoms].z = AtomsM_i[2*nAtomsM_i + i];				// z-position
+			Atoms[nAtoms].Z = (int)AtomsM_i[3*nAtomsM_i + i];			// Atomic number
+			Atoms[nAtoms].sigma = sigma = AtomsM_i[4*nAtomsM_i + i];	// Standard deviation
+			Atoms[nAtoms].occ = AtomsM_i[5*nAtomsM_i + i];				// Occupancy
 			if(sigma<sigma_min) sigma_min = sigma;
 			if(sigma>sigma_max) sigma_max = sigma;
 			nAtoms++;

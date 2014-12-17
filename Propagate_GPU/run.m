@@ -4,17 +4,20 @@ global TEM;
 DefaultValues;% Load default values;
 
 TEM.gpu = 0;                % Gpu card
-TEM.SimType = 10;           % 1: STEM, 2: CBED, 3: HRTEM, 4: ED, 5: PED, 6: HCI, ... 10: EW real, 11: EW Fourier
+TEM.SimType = 52;           % 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
 TEM.nConfFP = 0;            % Number of frozen phonon configurations
-TEM.DimFP = 110;            % Dimensions phonon configurations
+TEM.DimFP = 111;            % Dimensions phonon configurations
 TEM.SeedFP = 1983;          % Frozen phonon random seed
 TEM.PotPar = 6;             % Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 TEM.MEffect = 1;            % 1: Exit wave Partial coherente mode, 2: Transmission cross coefficient
 TEM.STEffect = 1;           % 1: Spatial and temporal, 2: Temporal, 3: Spatial
-TEM.ZeroDefTyp = 3;         % 1: First atom, 2: middle point, 3: last atom, 4: Fix Plane
+TEM.ZeroDefTyp = 3;         % 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
 TEM.ZeroDefPlane = 0;       % Zero defocus plane
-TEM.ApproxModel = 1;        % 1: MS, 2: PA, 3POA, 4:WPOA
-TEM.BandwidthLimit = 1;     % 1: true, 2: false
+TEM.ApproxModel = 1;        % 1: MS, 2: PA, 3:POA, 4:WPOA
+TEM.BWL = 1;                % 1: true, 2: false
+TEM.FastCal = 1;            % 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
+TEM.ThkTyp = 1;             % 1: Whole specimen, 2: Throught thickness, 3: Through planes
+TEM.Thk = 0;                % Array of thicknesses
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 TEM.E0 = 200;
 TEM.theta = 0.0; TEM.phi = 0; % Till ilumination (degrees)
@@ -27,7 +30,7 @@ TEM.dz = 0.5;
 [aPsi, aM2Psi] = MULTEMMat(TEM);
 zProp = -0.5*lz;
 tic;
-Psip = getPropagate(aPsi, TEM.gpu, TEM.E0, TEM.nx, TEM.ny, TEM.lx, TEM.ly, zProp, TEM.BandwidthLimit);
+Psip = getPropagate(aPsi, TEM.gpu, TEM.E0, TEM.nx, TEM.ny, TEM.lx, TEM.ly, zProp, TEM.BWL);
 toc;
 M2PsipGPU =  abs(Psip).^2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
