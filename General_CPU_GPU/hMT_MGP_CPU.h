@@ -41,8 +41,10 @@ class cMT_MGP_CPU{
 		int FastCal;				// 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
 		int PBC_xy;					// 1: true, 2: false (Peridic boundary contions)
 		int ThkTyp;					// 1: Whole specimen, 2: Throught thickness, 3: Through planes
-		int nThk;					// Number of thickness
-		double *Thk;				// Array of thicknesses
+		int nThk_i;					// Number of thickness
+		double *Thk_i;				// Array of thicknesses
+
+		bool ShiftDP; 				// Shift diffraction pattern
 
 		double E0;					// Acceleration volatage in KeV
 		double theta;				// Tilt (in spherical coordinates) (rad)
@@ -82,9 +84,10 @@ inline void cMT_MGP_CPU::freeMemory(){
 	BWL = 1;
 	FastCal = 1;
 	PBC_xy = 1;
+	ShiftDP = false;
 	ThkTyp = 0;
-	nThk = 0;
-	delete [] Thk; Thk = 0;
+	nThk_i = 0;
+	delete [] Thk_i; Thk_i = 0;
 
 	E0 = 0;
 	theta = 0;
@@ -114,9 +117,10 @@ inline cMT_MGP_CPU::cMT_MGP_CPU(){
 	BWL = 1;
 	FastCal = 1;
 	PBC_xy = 1;
+	ShiftDP = false;
 	ThkTyp = 1;
-	nThk = 0;
-	Thk = 0;
+	nThk_i = 0;
+	Thk_i = 0;
 
 	E0 = 300;
 	theta = 0;	
@@ -152,11 +156,12 @@ inline cMT_MGP_CPU& cMT_MGP_CPU::operator= (const cMT_MGP_CPU &MT_MGP_CPU){
 	BWL = MT_MGP_CPU.BWL;
 	FastCal = MT_MGP_CPU.FastCal;
 	PBC_xy = MT_MGP_CPU.PBC_xy;
+	ShiftDP = MT_MGP_CPU.ShiftDP;
 	ThkTyp = MT_MGP_CPU.ThkTyp;
-	nThk = MT_MGP_CPU.nThk;
-	if(nThk>0){
-		Thk = new double[nThk];
-		memcpy(Thk, MT_MGP_CPU.Thk, nThk*cSizeofRD);
+	nThk_i = MT_MGP_CPU.nThk_i;
+	if(nThk_i>0){
+		Thk_i = new double[nThk_i];
+		memcpy(Thk_i, MT_MGP_CPU.Thk_i, nThk_i*cSizeofRD);
 	}
 
 	E0 = MT_MGP_CPU.E0;
@@ -191,13 +196,14 @@ inline void cMT_MGP_CPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
 	BWL = MT_InMulSli_CPU.BWL;
 	FastCal = MT_InMulSli_CPU.FastCal;
 	PBC_xy = MT_InMulSli_CPU.PBC_xy;
+	ShiftDP = SimType==41;
 	ThkTyp = MT_InMulSli_CPU.ThkTyp;
-	nThk = (ThkTyp==1)?1:MT_InMulSli_CPU.nThk;
-	Thk = new double[nThk];
-	memcpy(Thk, MT_InMulSli_CPU.Thk, nThk*cSizeofRD); // change
+	nThk_i = (ThkTyp==1)?1:MT_InMulSli_CPU.nThk;
+	Thk_i = new double[nThk_i];
+	memcpy(Thk_i, MT_InMulSli_CPU.Thk, nThk_i*cSizeofRD);
 
 	E0 = MT_InMulSli_CPU.E0;	
-	theta = MT_InMulSli_CPU.theta;	
+	theta = (SimType==41)?MT_InMulSli_CPU.PED_theta:(SimType==42)?MT_InMulSli_CPU.HCI_theta:MT_InMulSli_CPU.theta;	
 	phi = MT_InMulSli_CPU.phi;
 	Vrl = stVrl;
 	nx = MT_InMulSli_CPU.nx;
@@ -205,8 +211,10 @@ inline void cMT_MGP_CPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
 	lx = MT_InMulSli_CPU.lx;
 	ly = MT_InMulSli_CPU.ly;
 	dz = MT_InMulSli_CPU.dz;
-	if(ApproxModel>1) MulOrder = 1;
-	if(ApproxModel>2) DimFP = DimFP - DimFP%10;
+	if(ApproxModel>1){
+		MulOrder = 1;
+		DimFP = DimFP - DimFP%10;
+	}
 }
 
 inline void cMT_MGP_CPU::SetInputData(sInTransmission &InTransmission){

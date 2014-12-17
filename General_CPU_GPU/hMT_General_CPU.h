@@ -48,6 +48,12 @@ void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, int PBC_xyi, double lxi, do
 // get 2D maximum interaction distance
 double f_getRMax(int nAtoms, sAtoms *&Atoms, cMT_AtomTypes_CPU *&MT_AtomTypes_CPU);
 
+// Match vector s_i in x
+void f_MatchTwoVectors(int ns_i, double *s_i, int nx, double *x, int &ns_o, double *&s_o);
+
+// Match vector s_i in x
+void f_MatchTwoVectors(int ns_i, double *s_i, int nx, double *x, int &ns_o, double *&s_o, int *&is_o);
+
 /***************************************************************************/
 /***************************************************************************/
 

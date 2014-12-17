@@ -51,7 +51,7 @@ void f_Matlab2InProjPotential(const mxArray *mxInProjPotential, sInProjPotential
 	InProjPotential.nAtomsM = (int)mxGetM(mxAtomsM);												// Number of Atoms
 	InProjPotential.AtomsM = mxGetPr(mxAtomsM);														// Atoms in a matrix form
 	InProjPotential.iSlice = ReadValuemxField<int>(mxInProjPotential, 0, "iSlice")-1;				// Slice
-	if(InProjPotential.iSlice<0) InProjPotential.iSlice = 0;
+	if(InProjPotential.iSlice<0) InProjPotential.iSlice=0;
  }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){

@@ -232,14 +232,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 			MulSliGPU.Cal_HRTEM(aPsih, M2aPsih, aM2Psih);
 			break;
 		case 41:		// PED						
-
+			plhs[0] = mxCreateDoubleMatrix(MT_InMulSli_CPU.ny, MT_InMulSli_CPU.nx, mxCOMPLEX);
+			aPsih.real = mxGetPr(plhs[0]); aPsih.imag = mxGetPi(plhs[0]);
+			plhs[1] = mxCreateDoubleMatrix(MT_InMulSli_CPU.ny, MT_InMulSli_CPU.nx, mxREAL);
+			aM2Psih = mxGetPr(plhs[1]);
+			MulSliGPU.Cal_PED(aPsih, aM2Psih);
 			break;
 		case 42:		// HCI						
 			plhs[0] = mxCreateDoubleMatrix(MT_InMulSli_CPU.ny, MT_InMulSli_CPU.nx, mxCOMPLEX);
 			aPsih.real = mxGetPr(plhs[0]); aPsih.imag = mxGetPi(plhs[0]);
 			plhs[1] = mxCreateDoubleMatrix(MT_InMulSli_CPU.ny, MT_InMulSli_CPU.nx, mxREAL);
-			aM2Psih = mxGetPr(plhs[1]);
-			MulSliGPU.CAL_HCI(aPsih, aM2Psih);
+			M2aPsih = mxGetPr(plhs[1]);
+			plhs[2] = mxCreateDoubleMatrix(MT_InMulSli_CPU.ny, MT_InMulSli_CPU.nx, mxREAL);
+			aM2Psih = mxGetPr(plhs[2]);
+			MulSliGPU.CAL_HCI(aPsih, M2aPsih, aM2Psih);
 			break;
 		case 51:		// EW Fourier				
 			plhs[0] = mxCreateDoubleMatrix(MT_InMulSli_CPU.ny, MT_InMulSli_CPU.nx, mxCOMPLEX);

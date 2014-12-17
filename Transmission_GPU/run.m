@@ -6,7 +6,7 @@ InTransmission.DimFP = 110;         % Dimensions phonon configuration
 InTransmission.SeedFP = 1983;       % Frozen phonon random seed
 InTransmission.PotPar = 6;          % Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 InTransmission.ApproxModel = 1;     % 1: MS, 2: PA, 3:POA, 4:WPOA
-InTransmission.BWL = 1;             % 1: true, 2: false
+InTransmission.BWL = 2;             % 1: true, 2: false
 InTransmission.FastCal = 1;         % 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
 
 InTransmission.E0 = 300;

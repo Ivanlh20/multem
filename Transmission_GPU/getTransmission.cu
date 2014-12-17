@@ -58,7 +58,7 @@ void f_Matlab2InTransmission(const mxArray *mxInTransmission, sInTransmission &I
 	InTransmission.nAtomsM = (int)mxGetM(mxAtomsM);													// Number of Atoms
 	InTransmission.AtomsM = mxGetPr(mxAtomsM);														// Atoms in a matrix form
 	InTransmission.iSlice = ReadValuemxField<int>(mxInTransmission, 0, "iSlice")-1;					// Slice
-	if(InTransmission.iSlice<0) InTransmission.iSlice = 0;
+	if(InTransmission.iSlice<0) InTransmission.iSlice=0;
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
@@ -73,7 +73,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	sComplex Transh;
 	plhs[0] = mxCreateDoubleMatrix(MT_MGP_CPU.ny, MT_MGP_CPU.nx, mxCOMPLEX);
 	Transh.real = mxGetPr(plhs[0]);
-	Transh.imag  = mxGetPi(plhs[0]);
+	Transh.imag = mxGetPi(plhs[0]);
 
 	cudaSetDevice(MT_MGP_CPU.gpu);
 	cufftHandle PlanTrans=0;

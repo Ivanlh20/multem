@@ -107,7 +107,6 @@ cMT_MulSli_GPU::cMT_MulSli_GPU(){
 
 	HCI.nrot = 0;
 	HCI.theta = 0;
-	//HCI.xx
 
 	//EWRS.xx
 
@@ -163,11 +162,8 @@ void cMT_MulSli_GPU::GPU2CPU(double2 *&Psid, double *&M2Psi1d, double *&M2Psi2d,
 }
 
 void cMT_MulSli_GPU::PhaseMul(double gxu, double gyu, double2 *&Psi){
-	if ((gxu != 0.0)||(gyu != 0.0))
-		f_PhaseMul(GP, gxu, gyu, ExpRg_x, ExpRg_y, Psi);
-}
+	if(MT_MGP_CPU.ShiftDP) return;
 
-void cMT_MulSli_GPU::PhaseMul(double2 *&Psi){
 	if ((gxu != 0.0)||(gyu != 0.0))
 		f_PhaseMul(GP, gxu, gyu, ExpRg_x, ExpRg_y, Psi);
 }
@@ -176,56 +172,43 @@ void cMT_MulSli_GPU::Propagate(eSpace Space, double gxu, double gyu, double z, d
 	f_Propagate(PlanPsi, GP, Space, gxu, gyu, Lens.lambda, z, Prop_x, Prop_y, Psi);
 }
 
-// Phase object approximation: Space :1 Real and 2 Fourier
-void cMT_MulSli_GPU::Cal_Wavefunction_POA_WPOA(eSpace Space, double2 *&Psi){
-	int iSlice = 0;
-	// get Transmission and Transmit
-	MT_Transmission_GPU->Transmit(iSlice, Psi);
-	// Inclined ilumination
-	PhaseMul(Psi);
-	// Backward fft2
-	if(Space==eSReciprocal){
-		cufftExecZ2Z(PlanPsi, Psi, Psi, CUFFT_FORWARD);
-		f_Scale_MC(GP, GP.inxy, Psi);
-	}
-}
-
-// Exit wave calculation: Space :1 Real and 2 Fourier
-void cMT_MulSli_GPU::Cal_Wavefunction_MSA(eSpace Space, double2 *&Psi){
-	int iSlice = 0, iSynCPU = 0;
-
-	for (iSlice = 0; iSlice<MT_Transmission_GPU->nSlice; iSlice++){
-		// get Transmission and Transmit
-		MT_Transmission_GPU->Transmit(iSlice, Psi);
-		// Propagate
-		Propagate(eSReal, gxu, gyu, MT_Transmission_GPU->get_dz(iSlice), Psi);
-		// GPU Synchronize
-		f_GPU_Sync_CPU(iSynCPU, cSynCPU); 
-	}
-	// Last Transmission and Transmit
-	if (MT_MGP_CPU.MulOrder==2) MT_Transmission_GPU->Transmit(iSlice, Psi);;
-	// Inclined ilumination
-	PhaseMul(Psi);
-	// Back propagation to our plane reference
-	Propagate(Space, gxu, gyu, MT_Transmission_GPU->z_BackProp, Psi);
-}
-
 // Exit wave calculation: Space :1 Real and 2 Fourier
 void cMT_MulSli_GPU::Cal_Wavefunction(eSpace Space, double2 *&Psi){
-	if(MT_MGP_CPU.ApproxModel<=2)
-		Cal_Wavefunction_MSA(Space, Psi);
-	else
-		Cal_Wavefunction_POA_WPOA(Space, Psi);
+	int iSlice=0, iSynCPU = 0;
+	if(MT_MGP_CPU.ApproxModel<=2){
+		for (iSlice=0; iSlice<MT_Transmission_GPU->nSlice; iSlice++){
+			// get Transmission and Transmit
+			MT_Transmission_GPU->Transmit(iSlice, Psi);
+			// Propagate
+			Propagate(eSReal, gxu, gyu, MT_Transmission_GPU->get_dz(iSlice), Psi);
+			// GPU Synchronize
+			f_GPU_Sync_CPU(iSynCPU, cSynCPU); 
+		}
+		// Last Transmission and Transmit
+		if (MT_MGP_CPU.MulOrder==2) MT_Transmission_GPU->Transmit(iSlice, Psi);
+		// Inclined ilumination
+		PhaseMul(gxu, gyu, Psi);
+		// Back propagation to our plane reference
+		Propagate(Space, gxu, gyu, MT_Transmission_GPU->Thk.zb[0], Psi);
+	}else{
+		// get Transmission and Transmit
+		MT_Transmission_GPU->Transmit(iSlice, Psi);
+		// Inclined ilumination
+		PhaseMul(gxu, gyu, Psi);
+		// Backward fft2
+		if(Space==eSReciprocal){
+			cufftExecZ2Z(PlanPsi, Psi, Psi, CUFFT_FORWARD);
+			f_Scale_MC(GP, GP.inxy, Psi);
+		}
+	}
 }
 
 // Get wave function for Plane wave ilumination
 void cMT_MulSli_GPU::Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, int MEffect, int STEffect, double2 *&aPsi, double *&M2aPsi, double *&aM2Psi){
 	int iConf0 = (nConfFP==0)?0:1;
-	bool IsNotSharp = (nConfFP==0)?false:true;
 	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
 
 	f_Set_MC_MD(GP, 0.0, 0.0, aPsi, 0.0, aM2Psi);
-
 	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
 		// Move atoms
 		MT_Transmission_GPU->MoveAtoms(iConf);
@@ -235,7 +218,7 @@ void cMT_MulSli_GPU::Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, in
 			// Exit wave
 			Cal_Wavefunction(Space, Psi);
 			// Add Psi and M2aPsi to aPsi and aM2Psi
-			f_Add_wMC_wMD(IsNotSharp, GP, inConfFP, Psi, aPsi, aM2Psi);
+			f_Add_wMC_wMD(true, GP, inConfFP, Psi, aPsi, aM2Psi);
 		}else{
 			// Exit wave(g)
 			Cal_Wavefunction(eSReciprocal, Psi);
@@ -244,7 +227,7 @@ void cMT_MulSli_GPU::Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, in
 			// Backward fft2
 			cufftExecZ2Z(PlanPsi, Psi, Psi, CUFFT_INVERSE);
 			// Add Psi and M2aPsi to aPsi and aM2Psi
-			f_Add_wMC_wMD(IsNotSharp, GP, inConfFP, Psi, M2aPsi, aPsi, aM2Psi);
+			f_Add_wMC_wMD(true, GP, inConfFP, Psi, M2aPsi, aPsi, aM2Psi);
 		}
 	}
 
@@ -266,21 +249,18 @@ void cMT_MulSli_GPU::Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, in
 // Get wave function for convergent beam ilumination
 void cMT_MulSli_GPU::Image_Convergence_Wave_Illumination(int nConfFP, eSpace Space, double xi, double yi, double2 *&aPsi, double *&M2aPsi, double *&aM2Psi){
 	int iConf0 = (nConfFP==0)?0:1;
-	bool IsNotSharp = (nConfFP==0)?false:true;
 	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
 
-	if(IsNotSharp)
-		f_Set_MC_MD(GP, 0.0, 0.0, aPsi, 0.0, aM2Psi);
-
+	f_Set_MC_MD(GP, 0.0, 0.0, aPsi, 0.0, aM2Psi);
 	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
 		// Move atoms
 		MT_Transmission_GPU->MoveAtoms(iConf);
-		// Plane wave ilumination
+		// Convergent wave ilumination
 		MT_IncidentWave_GPU->Psi0(xi, yi, Psi);
 		// Exit wave
 		Cal_Wavefunction(Space, Psi);
 		// Add Psi and M2aPsi to aPsi and aM2Psi
-		f_Add_wMC_wMD(IsNotSharp, GP, inConfFP, Psi, aPsi, aM2Psi);
+		f_Add_wMC_wMD(true, GP, inConfFP, Psi, aPsi, aM2Psi);
 	}
 	f_Add_wMC2(false, GP, 1.0, aPsi, M2aPsi);
 }
@@ -314,7 +294,7 @@ void cMT_MulSli_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
 
 	// Transmission parameters
 	MT_Transmission_GPU = new cMT_Transmission_GPU ;
-	MT_Transmission_GPU->SetInputData(&MT_MGP_CPU, PlanPsi,  MT_InMulSli_CPU.nAtomsM, MT_InMulSli_CPU.AtomsM);
+	MT_Transmission_GPU->SetInputData(&MT_MGP_CPU, PlanPsi, MT_InMulSli_CPU.nAtomsM, MT_InMulSli_CPU.AtomsM);
 
 	// Incident wave parameters
 	MT_IncidentWave_GPU = new cMT_IncidentWave_GPU;
@@ -330,7 +310,7 @@ void cMT_MulSli_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
 	switch (MT_InMulSli_CPU.SimType){
 		case 11:		// STEM
 			STEM = new cMT_STEM_GPU;
-			STEM->SetInputData(MT_InMulSli_CPU, this);
+			STEM->SetInputData(&MT_InMulSli_CPU, &MT_MGP_CPU, MT_Transmission_GPU->Thk.n);
 			break;
 		case 12:		// ISTEM
 
@@ -402,16 +382,42 @@ void cMT_MulSli_GPU::Cal_CBEI(sComplex &aPsih, double *&aM2Psih){
 	GPU2CPU(aPsi, aM2Psi, aPsih, aM2Psih);
 }
 
-// Hollow cone ilumination
-void cMT_MulSli_GPU::CAL_HCI(sComplex &aPsih, double *&aM2Psih){
-	int iSlice = 0, iSynCPU = 0;
+void cMT_MulSli_GPU::Cal_PED(sComplex &aPsih, double *&aM2Psih){
+	int iSlice=0, iSynCPU = 0;
+	int irot, iThk = 0;
+	int nConfFP = MT_MGP_CPU.nConfFP, iConf0 = (nConfFP==0)?0:1;
+	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
+	double gu, phi, ecos, esin;
+	double w = inConfFP/double(PED.nrot);
+
+	f_Set_MC_MD(GP, 0.0, 0.0, aPsi, 0.0, aM2Psi);
+	phi = 2.0*cPi/double(PED.nrot); gu = sin(PED.theta)/Lens.lambda;
+	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
+		// Move atoms
+		MT_Transmission_GPU->MoveAtoms(iConf);
+		for (irot=0; irot<PED.nrot; irot++){
+			sincos(irot*phi, &esin, &ecos); 
+			gxu = -gu*ecos; gyu = -gu*esin;
+			// Plane wave ilumination
+			MT_IncidentWave_GPU->Psi0(Psi);
+			// Exit wave(g)
+			Cal_Wavefunction(eSReciprocal, Psi);
+			// Add Psi and M2aPsi to aPsi and aM2Psi
+			f_Add_wMC_wMD(true, GP, w, Psi, aPsi, aM2Psi);
+		}
+	}
+	GPU2CPU(aPsi, aM2Psi, aPsih, aM2Psih);
+}
+
+void cMT_MulSli_GPU::CAL_HCI(sComplex &aPsih, double *&M2aPsih, double *&aM2Psih){
+	int iSlice=0, iSynCPU = 0;
 	int irot, iThk = 0;
 	int nConfFP = MT_MGP_CPU.nConfFP, iConf0 = (nConfFP==0)?0:1;
 	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
 	double gu, phi, ecos, esin;
 	double w = inConfFP/double(HCI.nrot);
 
-	f_Set_MD(GP, 0.0, aM2Psi);
+	f_Set_MC_MD(GP, 0.0, 0.0, aPsi, 0.0, aM2Psi);
 	phi = 2.0*cPi/double(HCI.nrot); gu = sin(HCI.theta)/Lens.lambda;
 	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
 		// Move atoms
@@ -431,12 +437,96 @@ void cMT_MulSli_GPU::CAL_HCI(sComplex &aPsih, double *&aM2Psih){
 			f_Add_wMC_wMD(true, GP, w, Psi, M2aPsi, aPsi, aM2Psi);
 		}
 	}
-	GPU2CPU(aPsi, aM2Psi, aPsih, aM2Psih);
+	// Forward fft2
+	cufftExecZ2Z(PlanPsi, aPsi, aPsi, CUFFT_FORWARD);
+	// Scale vector
+	f_Scale_MC(GP, GP.inxy, aPsi);
+	// Microscope effects
+	MT_MicroscopeEffects_GPU->ApplyMEffects(MT_MGP_CPU.MEffect, MT_MGP_CPU.STEffect, aPsi, M2aPsi);
+	// Backward fft2
+	cufftExecZ2Z(PlanPsi, aPsi, aPsi, CUFFT_INVERSE);
+
+	GPU2CPU(aPsi, M2aPsi, aM2Psi, aPsih, M2aPsih, aM2Psih);
 }
 
 void cMT_MulSli_GPU::Cal_STEM(){
+	int ist, iSlice, iThk = 0, iSynCPU = 0;
+	int nConfFP = MT_MGP_CPU.nConfFP;
+	int iConf0 = (nConfFP==0)?0:1;
+	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
 
+	STEM->InitImSTEM();
+	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
+		// Move atoms
+		MT_Transmission_GPU->MoveAtoms(iConf);
+		for (ist=0; ist<STEM->nst; ist++){
+			// Convergent wave ilumination
+			MT_IncidentWave_GPU->Psi0(STEM->xst[ist], STEM->yst[ist], Psi);
+			// Exit wave
+			for (iSlice=0; iSlice<MT_Transmission_GPU->nSlice; iSlice++){
+				// get Transmission and Transmit
+				MT_Transmission_GPU->Transmit(iSlice, Psi);
+				// Propagate
+				Propagate(eSReciprocal, gxu, gyu, MT_Transmission_GPU->get_dz(iSlice), Psi);
+				/***********************************************************************************/
+				/***********************************************************************************/
+				iThk = MT_Transmission_GPU->IsInThk(iSlice);
+				if(iThk>-1){
+					// Add Psi to aM2Psi
+					f_Add_wMC2(false, GP, inConfFP, Psi, aM2Psi);
+					// Detector integration
+					STEM->MT_Detector_GPU->getDetectorIntensity(aM2Psi, ist, STEM->ImSTEM[iThk].DetInt, true);
+				}
+				/***********************************************************************************/
+				/***********************************************************************************/
+				if(iSlice<MT_Transmission_GPU->nSlice-1)
+					cufftExecZ2Z(PlanPsi, Psi, Psi, CUFFT_INVERSE);
+			}
+		}
+	}
 }
+
+//void cMT_MulSli_GPU::Cal_STEM(){
+//	int ist, iThk = 0;
+//	int nConfFP = MT_MGP_CPU.nConfFP;
+//	int iConf0 = (nConfFP==0)?0:1;
+//	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
+//
+//	STEM->InitImSTEM();
+//	if(MT_MGP_CPU.FastCal==1){
+//		for (ist=0; ist<STEM->nst; ist++){
+//			f_Set_MC_MD(GP, 0.0, 0.0, aPsi, 0.0, aM2Psi);
+//			for (int iConf=iConf0; iConf<=nConfFP; iConf++){
+//				// Move atoms
+//				MT_Transmission_GPU->MoveAtoms(iConf);	
+//				// Convergent wave ilumination
+//				MT_IncidentWave_GPU->Psi0(STEM->xst[ist], STEM->yst[ist], Psi);
+//				// Exit wave
+//				Cal_Wavefunction(eSReciprocal, Psi);
+//				// Add Psi and M2aPsi to aPsi and aM2Psi
+//				f_Add_wMC_wMD(true, GP, inConfFP, Psi, aPsi, aM2Psi);	
+//			}
+//			f_Add_wMC2(false, GP, 1.0, aPsi, M2aPsi);
+//			// Detector integration
+//			STEM->MT_Detector_GPU->getDetectorIntensity(aM2Psi, M2aPsi, ist, STEM->ImSTEM[iThk].DetInt);
+//		}
+//	}else{
+//		for (int iConf=iConf0; iConf<=nConfFP; iConf++){
+//			// Move atoms
+//			MT_Transmission_GPU->MoveAtoms(iConf);
+//			for (ist=0; ist<STEM->nst; ist++){
+//				// Convergent wave ilumination
+//				MT_IncidentWave_GPU->Psi0(STEM->xst[ist], STEM->yst[ist], Psi);
+//				// Exit wave
+//				Cal_Wavefunction(eSReciprocal, Psi);
+//				// Add Psi to aM2Psi
+//				f_Add_wMC2(false, GP, inConfFP, Psi, aM2Psi);
+//				// Detector integration
+//				STEM->MT_Detector_GPU->getDetectorIntensity(aM2Psi, ist, STEM->ImSTEM[iThk].DetInt, true);
+//			}
+//		}
+//	}
+//}
 
 //void cMT_MulSli_GPU::Cal_STEM(){
 //	int ist, iThk = 0;

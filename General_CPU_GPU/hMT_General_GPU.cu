@@ -1348,8 +1348,16 @@ void f_BandwidthLimit2D(cufftHandle &PlanPsi, sGP &GP, double2 *&MC_io){
 }
 
 void f_Propagate(cufftHandle &PlanPsi, sGP &GP, eSpace Space, double gxu, double gyu, double lambda, double z, sACD &Prop_x_o, sACD &Prop_y_o, double2 *&Psi_io){
-	// Forward fft2
-	cufftExecZ2Z(PlanPsi, Psi_io, Psi_io, CUFFT_FORWARD);
+	if(z==0){
+		if(Space==eSReal) return;
+		else{
+			cufftExecZ2Z(PlanPsi, Psi_io, Psi_io, CUFFT_FORWARD);	// Forward fft2
+			f_Scale_MC(GP, GP.inxy, Psi_io);
+			return;
+		}
+	}
+
+	cufftExecZ2Z(PlanPsi, Psi_io, Psi_io, CUFFT_FORWARD);	// Forward fft2
 
 	dim3 Bmnxny, Tmnxny;
 	f_get_BTmnxny(GP, Bmnxny, Tmnxny);	

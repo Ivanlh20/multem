@@ -192,12 +192,21 @@ typedef struct sAtDa{
 	double ra;
 } sAtDa;
 
-/************************Quadrature*************************/
+/***********************distribution*************************/
 typedef struct sHt{
 	int n;
 	int *c;
 	double *v;
 }sHt;
+
+/***********************Thickness*************************/
+typedef struct sThk{
+	int n;			// Number of thickness
+	double *h;		// Array of thicknesses
+	double *zb;		// z-Back propagation
+	int *iSlice;	// Array of thicknes indexes
+	int *iAtom;		// Array of thicknes indexes
+}sThk;
 
 /************************Quadrature*************************/
 typedef struct sQ1{

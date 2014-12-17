@@ -29,7 +29,6 @@
 #include "hMT_IncidentWave_GPU.h"
 #include "hMT_Detector_CPU.h"
 #include "hMT_Detector_GPU.h"
-#include "hMT_MulSli_GPU.h"
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -39,15 +38,9 @@
 void cMT_STEM_GPU::freeMemory(){
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
-	cSynCPU = ccSynCPU;
-
-	MT_MulSli_GPU = 0;
-	MT_Transmission_GPU = 0;
-	MT_IncidentWave_GPU = 0;
 	delete MT_Detector_GPU; MT_Detector_GPU = 0;
 
 	line = 0;
-	FastCal = false;
 	ns = 0;	
 	x1u = 0;
 	y1u = 0;		
@@ -64,9 +57,7 @@ void cMT_STEM_GPU::freeMemory(){
 	}
 	delete [] ImSTEM; ImSTEM = 0;
 	nDet = 0;
-
 	nThk = 0;
-	delete [] Thk; Thk = 0;
 
 	nxs = 0;
 	nys = 0;
@@ -78,17 +69,10 @@ void cMT_STEM_GPU::freeMemory(){
 	delete [] yst; yst = 0;
 }
 
-cMT_STEM_GPU::cMT_STEM_GPU()
-{
-	cSynCPU = ccSynCPU;
-
-	MT_MulSli_GPU = 0;
-	MT_Transmission_GPU = 0;
-	MT_IncidentWave_GPU = 0;
+cMT_STEM_GPU::cMT_STEM_GPU(){
 	MT_Detector_GPU = 0;
 
 	line = 0;
-	FastCal = false;
 	ns = 0;
 	x1u = 0;
 	y1u = 0;		
@@ -100,7 +84,6 @@ cMT_STEM_GPU::cMT_STEM_GPU()
 	nDet = 0;
 
 	nThk = 0;
-	Thk = 0;
 
 	nxs = 0;
 	nys = 0;
@@ -127,105 +110,27 @@ void cMT_STEM_GPU::InitImSTEM()
 			}
 }
 
-void cMT_STEM_GPU::Cal_FAST_STEM_Wavefunction_POA_WPOA(int nConfFP, sDetInt *DetInt){
-	int iSlice = 0;
-	int ist, iThk = 0;
-	int iConf0 = (nConfFP==0)?0:1;
-	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
-	double nxy2 = pow(double(GP.nxy), 2);
-
-	InitImSTEM();
-	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
-		// Move atoms
-		MT_Transmission_GPU->MoveAtoms(iConf);
-		for (ist=0; ist<nst; ist++){
-			// Plane wave ilumination
-			MT_IncidentWave_GPU->Psi0(xst[ist], yst[ist], MT_MulSli_GPU->Psi);
-			// Transmit
-			MT_Transmission_GPU->Transmit(iSlice, MT_MulSli_GPU->Psi);
-			// Inclined ilumination
-			MT_MulSli_GPU->PhaseMul(MT_MulSli_GPU->Psi);
-			// Backward fft2
-			cufftExecZ2Z(MT_MulSli_GPU->PlanPsi, MT_MulSli_GPU->Psi, MT_MulSli_GPU->Psi, CUFFT_FORWARD);
-			// Add Psi to aM2Psi
-			f_Add_wMC2(false, GP, inConfFP/nxy2, MT_MulSli_GPU->Psi, MT_MulSli_GPU->aM2Psi);
-			// Detector integration
-			MT_Detector_GPU->getDetectorIntensity(MT_MulSli_GPU->aM2Psi, ist, ImSTEM[iThk].DetInt, true);
-		}
-	}
-}
-
-void cMT_STEM_GPU::Cal_FAST_STEM_Wavefunction_MSA(int nConfFP, sDetInt *DetInt){
-	int iSlice = 0, iSynCPU = 0;
-	int ist, iThk = 0;
-	int iConf0 = (nConfFP==0)?0:1;
-	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
-	double nxy2 = pow(double(GP.nxy), 2);
-
-	InitImSTEM();
-	for (int iConf=iConf0; iConf<=nConfFP; iConf++){
-		// Move atoms
-		MT_Transmission_GPU->MoveAtoms(iConf);
-
-		for (ist=0; ist<nst; ist++){
-			// Plane wave ilumination
-			MT_IncidentWave_GPU->Psi0(xst[ist], yst[ist], MT_MulSli_GPU->Psi);
-			for (iSlice = 0; iSlice<MT_Transmission_GPU->nSlice; iSlice++){
-				// Transmission and Transmit
-				MT_Transmission_GPU->Transmit(iSlice, MT_MulSli_GPU->Psi);
-				// Propagate
-				MT_MulSli_GPU->Propagate(eSReal, MT_MulSli_GPU->gxu, MT_MulSli_GPU->gyu, MT_Transmission_GPU->get_dz(iSlice), MT_MulSli_GPU->Psi);
-				// GPU Synchronize
-				f_GPU_Sync_CPU(iSynCPU, cSynCPU); 
-			}
-			// Last Transmission and Transmit
-			if (MT_MGP_CPU.MulOrder==2) MT_Transmission_GPU->Transmit(iSlice, MT_MulSli_GPU->Psi);
-			// Inclined ilumination
-			MT_MulSli_GPU->PhaseMul(MT_MulSli_GPU->Psi);
-			// Backward fft2
-			cufftExecZ2Z(MT_MulSli_GPU->PlanPsi, MT_MulSli_GPU->Psi, MT_MulSli_GPU->Psi, CUFFT_FORWARD);
-			// Add Psi to aM2Psi
-			f_Add_wMC2(false, GP, inConfFP/nxy2, MT_MulSli_GPU->Psi, MT_MulSli_GPU->aM2Psi);
-			// Detector integration
-			MT_Detector_GPU->getDetectorIntensity(MT_MulSli_GPU->aM2Psi, ist, ImSTEM[iThk].DetInt, true);
-		}
-	}
-}
-
-void cMT_STEM_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, cMT_MulSli_GPU *MT_MulSli_GPU_i)
-{
+void cMT_STEM_GPU::SetInputData(cMT_InMulSli_CPU *MT_InMulSli_CPU_i, cMT_MGP_CPU *MT_MGP_CPU_i, int nThk_i){
 	freeMemory();
 
-	MT_MulSli_GPU = MT_MulSli_GPU_i;
-	MT_Transmission_GPU = MT_MulSli_GPU->MT_Transmission_GPU;
-	MT_IncidentWave_GPU = MT_MulSli_GPU->MT_IncidentWave_GPU;
-	
-	MT_MGP_CPU = MT_MulSli_GPU->MT_MGP_CPU;
-	GP = MT_MulSli_GPU->GP;
-
-	line = MT_InMulSli_CPU.STEM_line;
-	FastCal = MT_InMulSli_CPU.FastCal;
-	ns = MT_InMulSli_CPU.STEM_ns;
-	x1u = MT_InMulSli_CPU.STEM_x1u;	
-	y1u = MT_InMulSli_CPU.STEM_y1u;
-	x2u = MT_InMulSli_CPU.STEM_x2u;
-	y2u = MT_InMulSli_CPU.STEM_y2u;
+	line = MT_InMulSli_CPU_i->STEM_line;
+	ns = MT_InMulSli_CPU_i->STEM_ns;
+	x1u = MT_InMulSli_CPU_i->STEM_x1u;	
+	y1u = MT_InMulSli_CPU_i->STEM_y1u;
+	x2u = MT_InMulSli_CPU_i->STEM_x2u;
+	y2u = MT_InMulSli_CPU_i->STEM_y2u;
 	f_BuildGrid(line, ns, x1u, y1u, x2u, y2u, nxs, nys, xs, ys);
 
-	nThk = MT_MGP_CPU.nThk;
-	if(nThk>0){
-		Thk = new double[nThk];
-		memcpy(Thk, MT_InMulSli_CPU.Thk, nThk*cSizeofRD);
-	}
-
-	nDet = MT_InMulSli_CPU.STEM_nDet;
-	double lambda = f_getLambda(MT_InMulSli_CPU.E0);
+	nDet = MT_InMulSli_CPU_i->STEM_nDet;
+	double lambda = f_getLambda(MT_MGP_CPU_i->E0);
 	f_sDetCir_Malloc(nDet, DetCir);
 	for (int iDet=0; iDet<nDet; iDet++){
-		DetCir.g2min[iDet] = pow(MT_InMulSli_CPU.STEM_DetCir[iDet].InnerAng/lambda, 2);
-		DetCir.g2max[iDet] = pow(MT_InMulSli_CPU.STEM_DetCir[iDet].OuterAng/lambda, 2);
+		DetCir.g2min[iDet] = pow(MT_InMulSli_CPU_i->STEM_DetCir[iDet].InnerAng/lambda, 2);
+		DetCir.g2max[iDet] = pow(MT_InMulSli_CPU_i->STEM_DetCir[iDet].OuterAng/lambda, 2);
 	}
 
+	sGP GP;
+	f_sGP_SetInputData(MT_MGP_CPU_i, GP);
 	MT_Detector_GPU = new cMT_Detector_GPU;
 	MT_Detector_GPU->SetInputData(GP, nDet, DetCir);
 
@@ -247,6 +152,8 @@ void cMT_STEM_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, cMT_MulSli_GP
 			}
 	}
 
+	nThk = nThk_i;
+	//nThk = 81;
 	int iThk, iDet, ist;
 	ImSTEM = new sImSTEM[nThk];
 	for (iThk = 0; iThk<nThk; iThk++){
@@ -259,21 +166,5 @@ void cMT_STEM_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, cMT_MulSli_GP
 				ImSTEM[iThk].DetInt[iDet].Tot[ist] = 0.0;
 			}
 		}
-	}
-}
-
-void cMT_STEM_GPU::Cal_STEM(){
-	int iThk = 0;
-
-	if(!FastCal){
-		for (int ist=0; ist<nst; ist++){
-			MT_MulSli_GPU->Image_Convergence_Wave_Illumination(MT_MGP_CPU.nConfFP, eSReciprocal, xst[ist], yst[ist], MT_MulSli_GPU->aPsi, MT_MulSli_GPU->M2aPsi, MT_MulSli_GPU->aM2Psi);
-			MT_Detector_GPU->getDetectorIntensity(MT_MulSli_GPU->aM2Psi, MT_MulSli_GPU->M2aPsi, ist, ImSTEM[iThk].DetInt);
-		}
-	}else{
-		if(MT_MGP_CPU.ApproxModel<=2)
-			Cal_FAST_STEM_Wavefunction_MSA(MT_MGP_CPU.nConfFP, ImSTEM[iThk].DetInt);
-		else
-			Cal_FAST_STEM_Wavefunction_POA_WPOA(MT_MGP_CPU.nConfFP, ImSTEM[iThk].DetInt);
 	}
 }

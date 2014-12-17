@@ -23,9 +23,7 @@
 #include "hMT_General_CPU.h"
 #include "hMT_General_GPU.h"
 #include "hMT_MGP_CPU.h"
-#include "hMT_Specimen_CPU.h"
 #include "hMT_AtomTypes_GPU.h"
-#include "hMT_Potential_GPU.h"
 #include "hMT_Transmission_GPU.h"
 
 #include <cuda.h>

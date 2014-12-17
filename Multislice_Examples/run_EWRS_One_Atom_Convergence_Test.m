@@ -17,7 +17,7 @@ TEM.ApproxModel = 1;        % 1: MS, 2: PA, 3:POA, 4:WPOA
 TEM.BWL = 1;                % 1: true, 2: false
 TEM.FastCal = 1;            % 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
 TEM.ThkTyp = 1;             % 1: Whole specimen, 2: Throught thickness, 3: Through planes
-TEM.Thk = 0;                % Array of thicknesses
+TEM.Thk = (0:1:8)*4;        % Array of thicknesses
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 TEM.E0 = 300;
 TEM.theta = 0.0; TEM.phi = 0; % Till ilumination (degrees)
@@ -28,23 +28,25 @@ TEM.nx = 2048; TEM.ny = 2048; nxh = TEM.nx/2; nyh = TEM.ny/2;
 TEM.Atoms = [TEM.lx/2 TEM.ly/2 0.00 79 sigma 1.0; TEM.lx/2 TEM.ly/2 4.00 79 sigma 1.0;
     TEM.lx/2 TEM.ly/2 8.00 79 sigma 1.0;TEM.lx/2 TEM.ly/2 12.00 79 sigma 1.0;
     TEM.lx/2 TEM.ly/2 16.00 79 sigma 1.0;TEM.lx/2 TEM.ly/2 20.00 79 sigma 1.0];
+% TEM.Atoms = [TEM.lx/2 TEM.ly/2 0.00 79 sigma 1.0];
 cc = [0 0 0; 0 0 1; 0 1 1; 1 0 1; 1 0 0; 0 1 0; 1 1 0]; 
      %black, blue,  cyan,  magenta, red, green, yellow
 adz = [1 1/2 1/4 1/8 1/16 1/32 1/64]*4.0;
 idz = 1;
-figure(1);
+% close all;
 for dz = adz;
     TEM.dz = dz;
     tic;
     clear MULTEMMat;
     [aPsi, aM2Psi] = MULTEMMat(TEM);
-    toc; 
+    toc;
     [sum(aM2Psi(:)), sum(abs(aPsi(:)).^2)]/(TEM.nx*TEM.ny)
+    figure(1);
     hold on;
     plot(abs(aPsi(nyh+1, (nxh+1):(nxh+256))), '-', 'color', cc(idz, :));
     idz = idz + 1;
+    figure(2);
+    imagesc(abs(aPsi));
+    axis image;
+    colormap gray;    
 end;
-figure(2);
-imagesc(abs(aPsi));
-axis image;
-colormap gray;

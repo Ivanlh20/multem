@@ -1,9 +1,10 @@
 clear all;
 clc;
-na = 10; nb = 10; nc = 10; PotPar = 6; ncu = 4; sigma = 0.085;
-[Atomsi, lx, ly, lz, a, b, c, dz] = Au001Crystal(na, nb, nc, ncu, sigma);
-
-Dim = 110; Seed = 1983; iConfFP = 2;
+na = 10; nb = 10; nc = 5; PotPar = 6; ncu = 4; sigma = 0.085;
+% [Atomsi, lx, ly, lz, a, b, c, dz] = Au001Crystal(na, nb, nc, ncu, sigma);
+Atomsi = [5.0 5.0 0 79 sigma 1.0];
+lx = 10; ly = 10; dz = 0.25;
+Dim = 111; Seed = 1983; iConfFP = 1;
 tic;
 % get specimen slicing
 [Atoms, Slice] = getSliceSpecimen(Atomsi, lx, ly, dz, iConfFP, Dim, Seed);
@@ -24,11 +25,11 @@ plot([-1 1], [ze ze], '-k','LineWidth',2);
 for i = 1:nSlice
     hold on;
     plot([-1 1], [Slice(i, 1) Slice(i, 1)], '-r');
+    set(gca,'FontSize',12,'LineWidth',1,'PlotBoxAspectRatio',[0.75 1 1]);
+    title('Atomic positions');
+    ylabel('z','FontSize',14);
+    xlabel('x','FontSize',12);
 end;
 hold on;
 plot([-1 1], [Slice(i, 2) Slice(i, 2)], '-r');
-set(gca,'FontSize',12,'LineWidth',1,'PlotBoxAspectRatio',[0.75 1 1]);
-title('Atomic positions');
-ylabel('z','FontSize',14);
-xlabel('x','FontSize',12);
 

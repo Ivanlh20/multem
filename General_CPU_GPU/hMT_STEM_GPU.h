@@ -35,23 +35,7 @@
 #include <cufft.h>
 
 /*****************************STEM********************************/
-class cMT_MulSli_GPU;
-
 class cMT_STEM_GPU{
-	private:
-		int cSynCPU;
-
-		cMT_MGP_CPU MT_MGP_CPU;			// Multislice general parameters
-		sGP GP;							// xy-Grid properties
-
-		cMT_MulSli_GPU *MT_MulSli_GPU;
-		cMT_Transmission_GPU *MT_Transmission_GPU;
-		cMT_IncidentWave_GPU *MT_IncidentWave_GPU;
-		cMT_Detector_GPU *MT_Detector_GPU;
-
-		void InitImSTEM();
-		void Cal_FAST_STEM_Wavefunction_POA_WPOA(int nConfFP, sDetInt *DetInt);
-		void Cal_FAST_STEM_Wavefunction_MSA(int nConfFP, sDetInt *DetInt);
 	public:
 		int line;						// 0: Area, 1: Line
 		int ns;							// Sampling points
@@ -60,12 +44,10 @@ class cMT_STEM_GPU{
 		double x2u;						// final scanning position in x
 		double y2u;						// final scanning position in y
 		int nThk;
-		double *Thk;
 
 		int nDet;						// Number of circular detectors
 		sDetCir DetCir;					// Circular detectors
 		sImSTEM *ImSTEM;
-		bool FastCal;					// 0: normal mode(low memory consumption), 1: fast calculation(high memory consumption)
 		int nxs;
 		int nys;
 		double *xs;
@@ -75,12 +57,14 @@ class cMT_STEM_GPU{
 		double *xst;
 		double *yst;
 
+		cMT_Detector_GPU *MT_Detector_GPU;
+
 		void freeMemory();
 		cMT_STEM_GPU();
 		~cMT_STEM_GPU();
 
-		void SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU, cMT_MulSli_GPU *MT_MulSli_GPU_i);
-		void Cal_STEM();
+		void SetInputData(cMT_InMulSli_CPU *MT_InMulSli_CPU_i, cMT_MGP_CPU *MT_MGP_CPU_i, int nThk_i);
+		void InitImSTEM();
 
 };
 

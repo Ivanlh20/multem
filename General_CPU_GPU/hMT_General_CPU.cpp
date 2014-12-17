@@ -18,9 +18,9 @@
 
 #include "math.h"
 #include "hConstTypes.h"
-#include "hMT_AtomTypes_CPU.h"
 #include "hMT_MGP_CPU.h"
 #include "hMT_InMulSli_CPU.h"
+#include "hMT_AtomTypes_CPU.h"
 #include "hMT_General_CPU.h"
 
 // Input: E0(keV), Output: lambda (electron wave)
@@ -150,6 +150,69 @@ double f_getRMax(int nAtoms, sAtoms *&Atoms, cMT_AtomTypes_CPU *&MT_AtomTypes_CP
 	}
 	return Rmax;
 }
+
+// Match vector s_i in x
+void f_MatchTwoVectors(int ns_i, double *s_i, int nx, double *x, int &ns_o, double *&s_o){
+	int *xc;
+	xc = new int[nx];
+	for(int ix=0; ix<nx; ix++) xc[ix] = 0;
+
+	int i, j, ix, imin;
+	double dmin, d;
+
+	delete [] s_o; s_o = new double[ns_i];
+	ns_o = 0;
+	for(i=0; i<ns_i; i++){
+		dmin = 1e+10;
+		imin = -1;
+		for(ix=0; ix<nx; ix++){
+			d = abs(s_i[i]-x[ix]);
+			if(d<dmin){
+				dmin = d;
+				imin = ix;
+			}
+		}
+		if((imin>=0)&&(xc[imin]==0)){
+			xc[imin] = 1;
+			s_o[ns_o] = x[imin];
+			ns_o++;
+		}
+	}
+	delete [] xc; xc = 0;
+}
+
+// Match vector s_i in x
+void f_MatchTwoVectors(int ns_i, double *s_i, int nx, double *x, int &ns_o, double *&s_o, int *&is_o){
+	int *xc;
+	xc = new int[nx];
+	for(int ix=0; ix<nx; ix++) xc[ix] = 0;
+
+	int i, j, ix, imin;
+	double dmin, d;
+
+	delete [] s_o; s_o = new double[ns_i];
+	delete [] is_o; is_o = new int[ns_i];
+	ns_o = 0;
+	for(i=0; i<ns_i; i++){
+		dmin = 1e+10;
+		imin = -1;
+		for(ix=0; ix<nx; ix++){
+			d = abs(s_i[i]-x[ix]);
+			if(d<dmin){
+				dmin = d;
+				imin = ix;
+			}
+		}
+		if((imin>=0)&&(xc[imin]==0)){
+			xc[imin] = 1;
+			s_o[ns_o] = x[imin];
+			is_o[ns_o] = imin;
+			ns_o++;
+		}
+	}
+	delete [] xc; xc = 0;
+}
+
 
 /***************************************************************************/
 /***************************************************************************/

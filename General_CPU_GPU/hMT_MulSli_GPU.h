@@ -68,15 +68,12 @@ class cMT_MulSli_GPU{
 		cMT_MicroscopeEffects_GPU *MT_MicroscopeEffects_GPU;		// Microscope effects
 
 		void PhaseMul(double gxu, double gyu, double2 *&Psi);
-		void PhaseMul(double2 *&Psi);
 		void Propagate(eSpace Space, double gxu, double gyu, double z, double2 *&Psi);
-		void Cal_Wavefunction_POA_WPOA(eSpace Space, double2 *&Psi);
-		void Cal_Wavefunction_MSA(eSpace Space, double2 *&Psi);
 		void Cal_Wavefunction(eSpace Space, double2 *&Psi);
 
 		void Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, int MEffect, int STEffect, double2 *&aPsi, double *&M2aPsi, double *&aM2Psi);
 		void Image_Convergence_Wave_Illumination(int nConfFP, eSpace Space, double xi, double yi, double2 *&aPsi, double *&M2aPsi, double *&aM2Psi);
-		
+
 		void GPU2CPU(double2 *&Psid, sComplex &Psih);
 		void GPU2CPU(double2 *&Psid, double *&M2Psid, sComplex &Psih, double *&M2Psih);
 		void GPU2CPU(double2 *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h);
@@ -106,7 +103,8 @@ class cMT_MulSli_GPU{
 		void Cal_ED(sComplex &aPsih, double *&aM2Psih);
 		void Cal_HRTEM(sComplex &aPsih, double *&M2aPsih, double *&aM2Psih);
 
-		void CAL_HCI(sComplex &aPsih, double *&aM2Psih);
+		void Cal_PED(sComplex &aPsih, double *&aM2Psih);
+		void CAL_HCI(sComplex &aPsih, double *&M2aPsih, double *&aM2Psih);
 
 		void Cal_ExitWaveFS(sComplex &aPsih, double *&aM2Psih);
 		void Cal_ExitWaveRS(sComplex &aPsih, double *&aM2Psih);
