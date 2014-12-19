@@ -46,6 +46,12 @@ void f_Matlab2InMulSli(const mxArray *mxInMSTEM, cMT_InMulSli_CPU &MT_InMulSli_C
 	MT_InMulSli_CPU.BWL = ReadValuemxField<int>(mxInMSTEM, 0, "BWL");							// 1: true, 2: false (bandwidth limited)
 	MT_InMulSli_CPU.FastCal = ReadValuemxField<int>(mxInMSTEM, 0, "FastCal");					// 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
 	MT_InMulSli_CPU.PBC_xy = 1;																	// 1: true, 2: false (Peridic boundary contions)
+	MT_InMulSli_CPU.Psi0Typ = ReadValuemxField<int>(mxInMSTEM, 0, "Psi0Typ");					// 1: Automatic, 2: User define
+	if(MT_InMulSli_CPU.Psi0Typ!=1){
+		mxArray *mxPsi0 = mxGetField(mxInMSTEM, 0, "Psi0");										// Psi
+		MT_InMulSli_CPU.Psi0.real = mxGetPr(mxPsi0);
+		MT_InMulSli_CPU.Psi0.imag = mxGetPi(mxPsi0);
+	}
 
 	MT_InMulSli_CPU.ThkTyp = ReadValuemxField<int>(mxInMSTEM, 0, "ThkTyp");						// 1: Whole specimen, 2: Throught thickness, 3: Through planes
 	mxArray *mxThk; mxThk = mxGetField(mxInMSTEM, 0, "Thk");

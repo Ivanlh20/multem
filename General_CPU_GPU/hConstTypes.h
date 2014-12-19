@@ -19,7 +19,6 @@
 #ifndef hConstTypes_H
 #define hConstTypes_H
 
-#include <cstring>
 #include <vector_types.h>
 
 #define cHa 27.2113850656389				// Hartree to electron-Volt
@@ -32,7 +31,7 @@
 #define cC 2.99792458e+8					// Velocity of light - m s^-1 
 #define cQe 1.602176462e-19					// Elementary charge
 #define cme 9.10938291e-31					// Electron rest mass [kg]
-#define cmp 1.672621637e-27					// Proton rest mass [kg]
+//#define cmp 1.672621637e-27					// Proton rest mass [kg]
 #define cKB 1.3806504e-23					// Boltzmann's constant - J K^-1
 #define cNa 6.0221415e+23					// Avogadro's Number - mol^-1
 
@@ -304,57 +303,57 @@ const int cSizeofcVp = sizeof(scVp);
 
 /************************Atomic type************************/
 class cMT_AtomTypes{
-	public:
-		int Z;			// Atomic number
-		double m;		// Atomic mass
-		int A;			// Mass number
-		double rn_e;	// Experimental Nuclear radius
-		double rn_c;	// Calculated Nuclear radius 
-		double ra_e;	// Experimental atomic radius
-		double ra_c;	// Calculated atomic radius
-		double Rmin;	// Minimum interaction radius
-		double Rmax;	// Maximum interaction radius
-		double Rmin2;	// Minimum interaction radius squared
-		double Rmax2;	// Maximum interaction radius squared
+    public:
+        int Z;			// Atomic number
+        double m;		// Atomic mass
+        int A;			// Mass number
+        double rn_e;	// Experimental Nuclear radius
+        double rn_c;	// Calculated Nuclear radius
+        double ra_e;	// Experimental atomic radius
+        double ra_c;	// Calculated atomic radius
+        double Rmin;	// Minimum interaction radius
+        double Rmax;	// Maximum interaction radius
+        double Rmin2;	// Minimum interaction radius squared
+        double Rmax2;	// Maximum interaction radius squared
 
-		sCoefPar cfeg;	// Electron scattering factor coefficients
-		sCoefPar cfxg;	// X-ray scattering factor coefficients
-		sCoefPar cPr;	// Potential coefficients
-		sCoefPar cVr;	// Potential coefficients
-		sCoefPar cVR;	// Projected potential coefficients
+        sCoefPar cfeg;	// Electron scattering factor coefficients
+        sCoefPar cfxg;	// X-ray scattering factor coefficients
+        sCoefPar cPr;	// Potential coefficients
+        sCoefPar cVr;	// Potential coefficients
+        sCoefPar cVR;	// Projected potential coefficients
 
-		int nR;			// Number of grid points
-		double *R;		// R Grid
-		double *R2;		// R2 Grid
-		sciVn ciVR;		// Look up table - Projected potential coefficients
+        int nR;			// Number of grid points
+        double *R;		// R Grid
+        double *R2;		// R2 Grid
+        sciVn ciVR;		// Look up table - Projected potential coefficients
 
-		virtual void freeMemory()=0;
+        virtual void freeMemory()=0;
 
-		cMT_AtomTypes(){
-			Z = 0;
-			m = 0;
-			A = 0;
-			rn_e = 0;
-			rn_c = 0;
-			ra_e = 0;
-			ra_c = 0;
-			Rmin = 0;
-			Rmax = 0;
-			Rmin2 = 0;
-			Rmax2 = 0;
+        cMT_AtomTypes(){
+            Z = 0;
+            m = 0;
+            A = 0;
+            rn_e = 0;
+            rn_c = 0;
+            ra_e = 0;
+            ra_c = 0;
+            Rmin = 0;
+            Rmax = 0;
+            Rmin2 = 0;
+            Rmax2 = 0;
 
-			cfeg.cl = cfeg.cnl = 0;
-			cfxg.cl = cfxg.cnl = 0;
-			cPr.cl = cPr.cnl = 0;
-			cVr.cl = cVr.cnl = 0;
-			cVR.cl = cVR.cnl = 0;
+            cfeg.cl = cfeg.cnl = 0;
+            cfxg.cl = cfxg.cnl = 0;
+            cPr.cl = cPr.cnl = 0;
+            cVr.cl = cVr.cnl = 0;
+            cVR.cl = cVR.cnl = 0;
 
-			nR = 0;
-			R = 0;
-			R2 = 0;
-			ciVR.c0 = ciVR.c1 = 0;
-			ciVR.c2 = ciVR.c3 = 0;
-		}
+            nR = 0;
+            R = 0;
+            R2 = 0;
+            ciVR.c0 = ciVR.c1 = 0;
+            ciVR.c2 = ciVR.c3 = 0;
+        }
 };
 
 /****************************Lens*******************************/
@@ -538,7 +537,6 @@ typedef struct sInProbe{
 	int nsf;				// Number of defocus sampling points
 	double beta;			// semi-convergence angle
 	int nbeta;				// half number sampling points
-
 } sInProbe;
 
 /*****************Radial Schrodinger equation*******************/

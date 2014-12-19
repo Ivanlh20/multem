@@ -1173,8 +1173,7 @@ __global__ void k_Probe_FS(sGP GP, sLens Lens, double x, double y, double2 * __r
 			double chi = x*gx + y*gy + g2*(Lens.cCs5*g2*g2+Lens.cCs3*g2+Lens.cf);
 			if ((Lens.m!=0)||(Lens.cmfa2!=0)||(Lens.cmfa3!=0)){
 				double g = sqrt(g2);
-				double phi = (g==0)?0:acos(gy/g);
-				phi = (gy<0)?cPi+phi:phi;
+				double phi = atan2(gy, gx);
 				chi += Lens.m*phi + Lens.cmfa2*g2*sin(2*(phi-Lens.afa2)) + Lens.cmfa3*g*g2*sin(3*(phi-Lens.afa3));				
 			}
 			double chix, chiy;
@@ -1405,6 +1404,17 @@ void f_Apply_PCTF(sGP &GP, sLens &Lens, double2 *&fPsi_i, double2 *&fPsi_o){
 
 /***************************************************************************/
 /***************************************************************************/
+// From Host To Device
+void f_Copy_MCh(sGP &GP, sComplex &MC_h_i, double *&MCr_d_i, double *&MCi_d_i, double2 *&MC_d_o){	
+	sComplex MC_d;
+	MC_d.real = MCr_d_i; MC_d.imag = MCi_d_i;
+	// Copy real part of the wave function to the host
+	cudaMemcpy(MC_d.real, MC_h_i.real, GP.nxy*cSizeofRD, cudaMemcpyHostToDevice);
+	// Copy imaginary part of the wave function to the host
+	cudaMemcpy(MC_d.imag, MC_h_i.imag, GP.nxy*cSizeofRD, cudaMemcpyHostToDevice);
+	// Set Real and Imaginary part to complex matrix
+	f_Set_MC(GP, MC_d, MC_d_o);
+}
 
 // From Device To Host
 void f_Copy_MCd(sGP &GP, double2 *&MC_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o){	

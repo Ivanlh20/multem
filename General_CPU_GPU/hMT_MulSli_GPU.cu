@@ -296,13 +296,13 @@ void cMT_MulSli_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
 	MT_Transmission_GPU = new cMT_Transmission_GPU ;
 	MT_Transmission_GPU->SetInputData(&MT_MGP_CPU, PlanPsi, MT_InMulSli_CPU.nAtomsM, MT_InMulSli_CPU.AtomsM);
 
-	// Incident wave parameters
-	MT_IncidentWave_GPU = new cMT_IncidentWave_GPU;
-	MT_IncidentWave_GPU->SetInputData(GP, Lens, PlanPsi);
-
 	// Microscope parameters
 	MT_MicroscopeEffects_GPU = new cMT_MicroscopeEffects_GPU;
 	MT_MicroscopeEffects_GPU->SetInputData(GP, Lens, PlanPsi, MT_Transmission_GPU->Trans0);
+
+	// Incident wave parameters
+	MT_IncidentWave_GPU = new cMT_IncidentWave_GPU;
+	MT_IncidentWave_GPU->SetInputData(&MT_MGP_CPU, Lens, PlanPsi, MT_Transmission_GPU->V0, MT_Transmission_GPU->V1);
 
 	/***************************************************************************/
 	/***************************************************************************/

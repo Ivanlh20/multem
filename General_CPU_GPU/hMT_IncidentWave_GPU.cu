@@ -24,40 +24,64 @@
 #include <cuda_runtime.h>
 #include <cufft.h>
 
-
 void cMT_IncidentWave_GPU::freeMemory(){
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
+	MT_MGP_CPU = 0;
 	f_sGP_Init(GP);
 	f_sLens_Init(Lens);
 
 	cudaFreen(Mp_d);
 	PlanPsi = 0;
+	Psir = 0;
+	Psii = 0;
 }
 
 cMT_IncidentWave_GPU::cMT_IncidentWave_GPU(){
+	MT_MGP_CPU = 0;
 	f_sGP_Init(GP);
 	f_sLens_Init(Lens);
 
 	Mp_d = 0;
 	PlanPsi = 0;
+	Psir = 0;
+	Psii = 0;
 }
 
 cMT_IncidentWave_GPU::~cMT_IncidentWave_GPU(){
 	freeMemory();
 }
 
-void cMT_IncidentWave_GPU::SetInputData(sGP &GP_i, sLens &Lens_i, cufftHandle &PlanPsi_i){
+void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, cufftHandle &PlanPsi_i, double *&Psir_i, double *&Psii_i){
 	freeMemory();
-
-	GP = GP_i;
+	MT_MGP_CPU = MT_MGP_CPU_i;
+	f_sGP_SetInputData(MT_MGP_CPU, GP);
 	Lens = Lens_i;
 	PlanPsi = PlanPsi_i;
+	Psir = Psir_i;
+	Psii = Psii_i;
+	cudaMalloc((void**)&Mp_d, 32*32*cSizeofRD);
+}
+
+void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, cufftHandle &PlanPsi_i){
+	freeMemory();
+	MT_MGP_CPU = MT_MGP_CPU_i;
+	f_sGP_SetInputData(MT_MGP_CPU, GP);
+	Lens = Lens_i;
+	PlanPsi = PlanPsi_i;
+	Psir = 0;
+	Psii = 0;
 	cudaMalloc((void**)&Mp_d, 32*32*cSizeofRD);
 }
 
 void cMT_IncidentWave_GPU::Psi0(double2 *&Psi0){
-	f_Set_MC(GP, 1.0, 0.0, Psi0);
+	if(GP, MT_MGP_CPU->Psi0Typ==1)
+		f_Set_MC(GP, 1.0, 0.0, Psi0);
+	else{
+		f_Copy_MCh(GP, MT_MGP_CPU->Psi0, Psir, Psii, Psi0);
+		// fft2shift 
+		f_fft2Shift_MC(GP, Psi0);	
+	}
 }
 
 void cMT_IncidentWave_GPU::Psi0(double x, double y, double2 *&Psi0){

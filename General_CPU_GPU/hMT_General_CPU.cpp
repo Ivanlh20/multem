@@ -157,7 +157,7 @@ void f_MatchTwoVectors(int ns_i, double *s_i, int nx, double *x, int &ns_o, doub
 	xc = new int[nx];
 	for(int ix=0; ix<nx; ix++) xc[ix] = 0;
 
-	int i, j, ix, imin;
+    int i, ix, imin;
 	double dmin, d;
 
 	delete [] s_o; s_o = new double[ns_i];
@@ -187,7 +187,7 @@ void f_MatchTwoVectors(int ns_i, double *s_i, int nx, double *x, int &ns_o, doub
 	xc = new int[nx];
 	for(int ix=0; ix<nx; ix++) xc[ix] = 0;
 
-	int i, j, ix, imin;
+    int i, ix, imin;
 	double dmin, d;
 
 	delete [] s_o; s_o = new double[ns_i];

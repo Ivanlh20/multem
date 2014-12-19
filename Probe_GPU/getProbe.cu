@@ -107,7 +107,7 @@ void cProbe::SetInputData(sInProbe &InProbe){
 	cudaMalloc((void**)&Psi, GP.nxy*cSizeofCD);
 	cufftPlan2d(&PlanPsi, GP.nx, GP.ny, CUFFT_Z2Z);
 
-	MT_IncidentWave_GPU.SetInputData(GP, Lens, PlanPsi);
+	MT_IncidentWave_GPU.SetInputData(&MT_MGP_CPU, Lens, PlanPsi);
 }
 
 void cProbe::getProbe(sComplex &Psih){

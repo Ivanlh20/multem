@@ -43,6 +43,8 @@ class cMT_InMulSli_CPU{
 		int ThkTyp;					// 1: Whole specimen, 2: Throught thickness, 3: Through planes
 		int nThk;					// Number of thickness
 		double *Thk;				// Array of thicknesses
+		int Psi0Typ;				// 1: Automatic, 2: User define
+		sComplex Psi0;              // Input wave
 
 		double E0;					// Acceleration volatage in KeV
 		double theta;				// incident tilt (in spherical coordinates) (rad)
@@ -115,6 +117,9 @@ inline void cMT_InMulSli_CPU::freeMemory(){
 	ThkTyp = 0;
 	nThk = 0;
 	delete [] Thk; Thk = 0;
+	Psi0Typ = 0;
+	Psi0.real = 0;
+	Psi0.imag = 0;
 
 	E0 = 0;
 	theta = 0;
@@ -183,6 +188,9 @@ inline cMT_InMulSli_CPU::cMT_InMulSli_CPU(){
 	ThkTyp = 0;
 	nThk = 0;
 	Thk = 0;
+	Psi0Typ = 0;
+	Psi0.real = 0;
+	Psi0.imag = 0;
 
 	E0 = 0;
 	theta = 0;

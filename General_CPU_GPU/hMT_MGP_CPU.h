@@ -43,6 +43,8 @@ class cMT_MGP_CPU{
 		int ThkTyp;					// 1: Whole specimen, 2: Throught thickness, 3: Through planes
 		int nThk_i;					// Number of thickness
 		double *Thk_i;				// Array of thicknesses
+		int Psi0Typ;				// 1: Automatic, 2: User define
+		sComplex Psi0;              // Input wave
 
 		bool ShiftDP; 				// Shift diffraction pattern
 
@@ -88,6 +90,9 @@ inline void cMT_MGP_CPU::freeMemory(){
 	ThkTyp = 0;
 	nThk_i = 0;
 	delete [] Thk_i; Thk_i = 0;
+	Psi0Typ = 0;
+	Psi0.real = 0;
+	Psi0.imag = 0;
 
 	E0 = 0;
 	theta = 0;
@@ -121,6 +126,9 @@ inline cMT_MGP_CPU::cMT_MGP_CPU(){
 	ThkTyp = 1;
 	nThk_i = 0;
 	Thk_i = 0;
+	Psi0Typ = 0;
+	Psi0.real = 0;
+	Psi0.imag = 0;
 
 	E0 = 300;
 	theta = 0;	
@@ -163,6 +171,9 @@ inline cMT_MGP_CPU& cMT_MGP_CPU::operator= (const cMT_MGP_CPU &MT_MGP_CPU){
 		Thk_i = new double[nThk_i];
 		memcpy(Thk_i, MT_MGP_CPU.Thk_i, nThk_i*cSizeofRD);
 	}
+	Psi0Typ = MT_MGP_CPU.Psi0Typ;
+	Psi0.real = MT_MGP_CPU.Psi0.real;
+	Psi0.imag = MT_MGP_CPU.Psi0.imag;
 
 	E0 = MT_MGP_CPU.E0;
 	theta = MT_MGP_CPU.theta;	
@@ -201,6 +212,9 @@ inline void cMT_MGP_CPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
 	nThk_i = (ThkTyp==1)?1:MT_InMulSli_CPU.nThk;
 	Thk_i = new double[nThk_i];
 	memcpy(Thk_i, MT_InMulSli_CPU.Thk, nThk_i*cSizeofRD);
+	Psi0Typ = MT_InMulSli_CPU.Psi0Typ;
+	Psi0.real = MT_InMulSli_CPU.Psi0.real;
+	Psi0.imag = MT_InMulSli_CPU.Psi0.imag;
 
 	E0 = MT_InMulSli_CPU.E0;	
 	theta = (SimType==41)?MT_InMulSli_CPU.PED_theta:(SimType==42)?MT_InMulSli_CPU.HCI_theta:MT_InMulSli_CPU.theta;	

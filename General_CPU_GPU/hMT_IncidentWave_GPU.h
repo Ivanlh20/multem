@@ -26,17 +26,21 @@
 /*************************Incident wave*************************/
 class cMT_IncidentWave_GPU{
 	private:
+		cMT_MGP_CPU *MT_MGP_CPU;
 		sGP GP;
 		sLens Lens;
 		double *Mp_d;
-	public:
 		cufftHandle PlanPsi;
-
+		double *Psir;
+		double *Psii;
+	public:
 		void freeMemory();
 		cMT_IncidentWave_GPU();
 		~cMT_IncidentWave_GPU();
 
-		void SetInputData(sGP &GP_i, sLens &Lens_i, cufftHandle &PlanPsi_i);
+
+		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, cufftHandle &PlanPsi_i);
+		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, cufftHandle &PlanPsi_i, double *&Psir_i, double *&Psii_i);
 		void Psi0(double2 *&Psi0);
 		void Psi0(double x, double y, double2 *&Psi0);	
 };

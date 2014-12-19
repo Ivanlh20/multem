@@ -244,7 +244,6 @@ void cMT_Slicing_CPU::getAtomsInSlice(double z0, double ze, int nAtoms, sAtoms *
 
 // get dzh between planes
 void cMT_Slicing_CPU::get_dzh_Planes(int nPlane, double *Plane, int iPlane, double &dzhd, double &dzhu){
-	double dzh;
 	if(nPlane==1){
 		dzhd = dzhu = 0.0;
 		return;

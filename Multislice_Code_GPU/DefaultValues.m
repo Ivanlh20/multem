@@ -15,6 +15,8 @@ TEM.BWL = 1;                % 1: true, 2: false
 TEM.FastCal = 1;            % 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
 TEM.ThkTyp = 1;             % 1: Whole specimen, 2: Throught thickness, 3: Through planes
 TEM.Thk = 0;                % Array of thicknesses
+TEM.Psi0Typ = 1;            % 1: Automatic, 2: User define
+TEM.Psi0 = 0;               % Input wave
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 TEM.E0 = 300;
 TEM.theta = 0.0; TEM.phi = 0.0; % Till ilumination (degrees)
@@ -41,6 +43,7 @@ TEM.STEM.x2u = 1.0; TEM.STEM.y2u = 1.0;
 TEM.STEM.nDet = 1;
 TEM.STEM.DetCir(1).InnerAng = 60; TEM.STEM.DetCir(1).OuterAng = 180; % Inner angle(mrad) and Outer angle(mrad)
 TEM.STEM.DetCir(2).InnerAng = 80; TEM.STEM.DetCir(2).OuterAng = 120; % Inner angle(mrad) and Outer angle(mrad)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CBED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 TEM.CBED.x0 = 0.0;      % x position 
 TEM.CBED.y0 = 0.0;      % y position
