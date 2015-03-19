@@ -354,8 +354,8 @@ void cMT_Potential_CPU::freeMemory()
 
 	f_sGP_Init(GP);
 
-	f_sciVn_Free(ciV0);
-	f_sciVn_Free(ciV1);
+	f_sciVn_Free_CPU(ciV0);
+	f_sciVn_Free_CPU(ciV1);
 
 	f_scVp_Init(cVp);
 
@@ -375,8 +375,8 @@ cMT_Potential_CPU::cMT_Potential_CPU()
 
 	f_sGP_Init(GP);
 
-	f_sciVn_Init(ciV0);
-	f_sciVn_Init(ciV1);
+	f_sciVn_Init_CPU(ciV0);
+	f_sciVn_Init_CPU(ciV1);
 
 	f_scVp_Init(cVp);
 
@@ -477,8 +477,8 @@ void cMT_Potential_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, 
 	PotPar = MT_MGP_CPU->PotPar;			// Set Potential parameterization
 	f_ReadQuadratureCPU(0, stnQz, Qz);		// TanhSinh
 
-	f_sciVn_Malloc(stnR, ciV0);
-	f_sciVn_Malloc(stnR, ciV1);
+	f_sciVn_Malloc_CPU(stnR, ciV0);
+	f_sciVn_Malloc_CPU(stnR, ciV1);
 
 	cVp.ciV0.c0 = ciV0.c0;
 	cVp.ciV0.c1 = ciV0.c1;

@@ -19,6 +19,7 @@
 #include <cstring>
 #include "hmathCPU.h"
 #include "hConstTypes.h"
+#include "hMT_AtomTypes_CPU.h"
 #include "hMT_General_CPU.h"
 #include "hrhor_CPU.h"
 

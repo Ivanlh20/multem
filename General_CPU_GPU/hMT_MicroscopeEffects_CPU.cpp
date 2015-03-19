@@ -41,6 +41,9 @@ void cMT_MicroscopeEffects_CPU::freeMemory()
 	delete [] Qs.w; Qs.w = 0;
 
 	Psit = 0;
+
+	PlanForward = 0;
+	PlanBackward = 0;
 }
 
 cMT_MicroscopeEffects_CPU::cMT_MicroscopeEffects_CPU()
@@ -59,6 +62,9 @@ cMT_MicroscopeEffects_CPU::cMT_MicroscopeEffects_CPU()
 	Qs.w = 0;
 
 	Psit = 0;
+
+	PlanForward = 0;
+	PlanBackward = 0;
 }
 
 cMT_MicroscopeEffects_CPU::~cMT_MicroscopeEffects_CPU()

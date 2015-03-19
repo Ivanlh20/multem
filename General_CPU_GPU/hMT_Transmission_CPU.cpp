@@ -77,9 +77,13 @@ void cMT_Transmission_CPU::freeMemory()
 		}
 	}
 
+	PlanForward = 0;
+	PlanBackward = 0;
+
 	SliceMemTyp = 0;
 	nSliceMem = 0;
 	nSliceMem0 = 0;
+
 }
 
 cMT_Transmission_CPU::cMT_Transmission_CPU()
@@ -88,13 +92,17 @@ cMT_Transmission_CPU::cMT_Transmission_CPU()
 
 	fPot = 0.0;
 
+	Trans0 = 0;
+	Trans = 0;
+	Vpe = 0;
+
+	PlanForward = 0;
+	PlanBackward = 0;
+
 	SliceMemTyp = 0;
 	nSliceMem = 0;
 	nSliceMem0 = 0;
 
-	Trans0 = 0;
-	Trans = 0;
-	Vpe = 0;
 }
 
 cMT_Transmission_CPU::~cMT_Transmission_CPU()

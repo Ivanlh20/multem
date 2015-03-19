@@ -47,8 +47,8 @@ void cPropagator::freeMemory()
 {
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 	f_sGP_Init(GP);
-	f_sACD_cudaFree(Prop_x);
-	f_sACD_cudaFree(Prop_y);
+	f_sACD_Free_GPU(Prop_x);
+	f_sACD_Free_GPU(Prop_y);
 	lambda = 0;
 	cudaFreen(Psii.real);
 	cudaFreen(Psii.imag);
@@ -64,8 +64,8 @@ cPropagator::~cPropagator()
 cPropagator::cPropagator()
 {
 	f_sGP_Init(GP);
-	f_sACD_cudaInit(Prop_x);
-	f_sACD_cudaInit(Prop_y);
+	f_sACD_Init_GPU(Prop_x);
+	f_sACD_Init_GPU(Prop_y);
 	lambda = 0;
 	Psii.real = 0;
 	Psii.imag = 0;
@@ -81,8 +81,8 @@ void cPropagator::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sComplex &Psiih)
 	lambda = f_getLambda(MT_MGP_CPU_i->E0);
 	f_sGP_SetInputData(MT_MGP_CPU_i, GP);
 
-	f_sACD_cudaMalloc(GP.nx, Prop_x);
-	f_sACD_cudaMalloc(GP.ny, Prop_y);
+	f_sACD_Malloc_GPU(GP.nx, Prop_x);
+	f_sACD_Malloc_GPU(GP.ny, Prop_y);
 	cudaMalloc((void**)&(Psii.real), GP.nxy*cSizeofRD);
 	cudaMalloc((void**)&(Psii.imag), GP.nxy*cSizeofRD);
 	cudaMalloc((void**)&Psi, GP.nxy*cSizeofCD);

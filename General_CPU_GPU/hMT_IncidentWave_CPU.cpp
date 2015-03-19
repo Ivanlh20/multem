@@ -30,6 +30,9 @@ void cMT_IncidentWave_CPU::freeMemory()
 	MT_MGP_CPU = 0;
 	f_sGP_Init(GP);
 	f_sLens_Init(Lens);
+
+	PlanForward = 0;
+	PlanBackward = 0;
 }
 
 cMT_IncidentWave_CPU::cMT_IncidentWave_CPU()
@@ -39,6 +42,9 @@ cMT_IncidentWave_CPU::cMT_IncidentWave_CPU()
 	MT_MGP_CPU = 0;
 	f_sGP_Init(GP);
 	f_sLens_Init(Lens);
+
+	PlanForward = 0;
+	PlanBackward = 0;
 }
 
 cMT_IncidentWave_CPU::~cMT_IncidentWave_CPU()
@@ -50,9 +56,11 @@ cMT_IncidentWave_CPU::~cMT_IncidentWave_CPU()
 void cMT_IncidentWave_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, fftw_plan &PlanForward_i, fftw_plan &PlanBackward_i)
 {
 	freeMemory();
+
 	MT_MGP_CPU = MT_MGP_CPU_i;
 	f_sGP_SetInputData(MT_MGP_CPU, GP);
 	Lens = Lens_i;
+
 	PlanForward = PlanForward_i;
 	PlanBackward = PlanBackward_i;
 }

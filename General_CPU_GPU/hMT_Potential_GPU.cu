@@ -66,7 +66,7 @@ __device__ inline double bessi0GPU(double x)
 	 else
 	 {
 		 y=3.75/ax;
-		 ans=(exp(ax)/sqrt(ax))*(0.39894228+y*(0.1328592e-1
+		 ans= (exp(ax)/sqrt(ax))*(0.39894228+y*(0.1328592e-1
 		 +y*(0.225319e-2+y*(-0.157565e-2+y*(0.916281e-2
 		 +y*(-0.2057706e-1+y*(0.2635537e-1+y*(-0.1647633e-1
 		 +y*0.392377e-2))))))));
@@ -110,14 +110,14 @@ __device__ inline double bessk0GPU(double x)
 	 if (x <= 2.0)
 	 {
 		 y=x*x/4.0;
-		 ans=(-log(x/2.0)*bessi0GPU(x))+(-0.57721566+y*(0.42278420
+		 ans= (-log(x/2.0)*bessi0GPU(x))+(-0.57721566+y*(0.42278420
 		 +y*(0.23069756+y*(0.3488590e-1+y*(0.262698e-2
 		 +y*(0.10750e-3+y*0.74e-5))))));
 	 }
 	 else
 	 {
 		 y=2.0/x;
-		 ans=(exp(-x)/sqrt(x))*(1.25331414+y*(-0.7832358e-1
+		 ans= (exp(-x)/sqrt(x))*(1.25331414+y*(-0.7832358e-1
 		 +y*(0.2189568e-1+y*(-0.1062446e-1+y*(0.587872e-2
 		 +y*(-0.251540e-2+y*0.53208e-3))))));
 	 }
@@ -134,14 +134,14 @@ __device__ inline double bessk1GPU(double x)
 	 if (x <= 2.0)
 	 {
 		 y=x*x/4.0;
-		 ans=(log(x/2.0)*bessi1GPU(x))+(1.0/x)*(1.0+y*(0.15443144
+		 ans= (log(x/2.0)*bessi1GPU(x))+(1.0/x)*(1.0+y*(0.15443144
 		 +y*(-0.67278579+y*(-0.18156897+y*(-0.1919402e-1
 		 +y*(-0.110404e-2+y*(-0.4686e-4)))))));
 	 }
 	 else
 	 {
 		 y=2.0/x;
-		 ans=(exp(-x)/sqrt(x))*(1.25331414+y*(0.23498619
+		 ans= (exp(-x)/sqrt(x))*(1.25331414+y*(0.23498619
 		 +y*(-0.3655620e-1+y*(0.1504268e-1+y*(-0.780353e-2
 		 +y*(0.325614e-2+y*(-0.68245e-3)))))));
 	 }
@@ -557,8 +557,8 @@ void cMT_Potential_GPU::freeMemory()
 
 	for(int icVp=0; icVp<stncVp; icVp++)
 	{
-		f_sciVn_cudaFree(ciV0[icVp]);
-		f_sciVn_cudaFree(ciV1[icVp]);
+		f_sciVn_Free_GPU(ciV0[icVp]);
+		f_sciVn_Free_GPU(ciV1[icVp]);
 	}
 
 	f_scVp_Init(stncVp, cVph);
@@ -589,8 +589,8 @@ cMT_Potential_GPU::cMT_Potential_GPU()
 
 	for(int icVp=0; icVp<stncVp; icVp++)
 	{
-		f_sciVn_cudaInit(ciV0[icVp]);
-		f_sciVn_cudaInit(ciV1[icVp]);
+		f_sciVn_Init_GPU(ciV0[icVp]);
+		f_sciVn_Init_GPU(ciV1[icVp]);
 	}
 
 	f_scVp_Init(stncVp, cVph);
@@ -727,8 +727,8 @@ void cMT_Potential_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, 
 
 	for(int icVp=0; icVp<stncVp; icVp++)
 	{
-		f_sciVn_cudaMalloc(stnR, ciV0[icVp]);
-		f_sciVn_cudaMalloc(stnR, ciV1[icVp]);
+		f_sciVn_Malloc_GPU(stnR, ciV0[icVp]);
+		f_sciVn_Malloc_GPU(stnR, ciV1[icVp]);
 
 		cVph[icVp].ciV0.c0 = ciV0[icVp].c0;
 		cVph[icVp].ciV0.c1 = ciV0[icVp].c1;

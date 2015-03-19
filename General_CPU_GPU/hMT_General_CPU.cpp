@@ -192,19 +192,19 @@ void f_ReadQuadratureCPU(int typ, int nQCPU, sQ1 &QCPU)
 /***************************************************************************/
 /***************************************************************************/
 
-void f_sCoefPar_Free(sCoefPar &CoefPar)
+void f_sCoefPar_Free_CPU(sCoefPar &CoefPar)
 {
 	delete [] CoefPar.cl; CoefPar.cl = 0;
 	delete [] CoefPar.cnl; CoefPar.cnl = 0;
 }
 
-void f_sCoefPar_Init(sCoefPar &CoefPar)
+void f_sCoefPar_Init_CPU(sCoefPar &CoefPar)
 {
 	CoefPar.cl = 0;
 	CoefPar.cnl = 0;
 }
 
-void f_sCoefPar_Malloc(int nCoefPar, sCoefPar &CoefPar)
+void f_sCoefPar_Malloc_CPU(int nCoefPar, sCoefPar &CoefPar)
 {
 	if(nCoefPar<=0)
 	{
@@ -218,7 +218,7 @@ void f_sCoefPar_Malloc(int nCoefPar, sCoefPar &CoefPar)
 /***************************************************************************/
 /***************************************************************************/
 
-void f_sciVn_Free(sciVn &ciVn)
+void f_sciVn_Free_CPU(sciVn &ciVn)
 {
 	delete [] ciVn.c0; ciVn.c0 = 0;
 	delete [] ciVn.c1; ciVn.c1 = 0;
@@ -226,7 +226,7 @@ void f_sciVn_Free(sciVn &ciVn)
 	delete [] ciVn.c3; ciVn.c3 = 0;
 }
 
-void f_sciVn_Init(sciVn &ciVn)
+void f_sciVn_Init_CPU(sciVn &ciVn)
 {
 	ciVn.c0 = 0;
 	ciVn.c1 = 0;
@@ -234,7 +234,7 @@ void f_sciVn_Init(sciVn &ciVn)
 	ciVn.c3 = 0;
 }
 
-void f_sciVn_Malloc(int nciVn, sciVn &ciVn)
+void f_sciVn_Malloc_CPU(int nciVn, sciVn &ciVn)
 {
 	if(nciVn<=0)
 	{
@@ -250,19 +250,19 @@ void f_sciVn_Malloc(int nciVn, sciVn &ciVn)
 /***************************************************************************/
 /***************************************************************************/
 
-void f_sDetCir_Free(sDetCir &DetCir)
+void f_sDetCir_Free_CPU(sDetCir &DetCir)
 {
 	delete [] DetCir.g2min; DetCir.g2min = 0;
 	delete [] DetCir.g2max; DetCir.g2max = 0;
 }
 
-void f_sDetCir_Init(sDetCir &DetCir)
+void f_sDetCir_Init_CPU(sDetCir &DetCir)
 {
 	DetCir.g2min = 0;
 	DetCir.g2max = 0;
 }
 
-void f_sDetCir_Malloc(int nDetCir, sDetCir &DetCir)
+void f_sDetCir_Malloc_CPU(int nDetCir, sDetCir &DetCir)
 {
 	if(nDetCir<=0)
 	{
@@ -271,6 +271,32 @@ void f_sDetCir_Malloc(int nDetCir, sDetCir &DetCir)
 
 	DetCir.g2min = new double[nDetCir];
 	DetCir.g2max = new double[nDetCir];
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sACD_Free_CPU(sACD &ACD)
+{
+	delete [] ACD.x; ACD.x = 0;
+	delete [] ACD.y; ACD.y = 0;
+}
+
+void f_sACD_Init_CPU(sACD &ACD)
+{
+	ACD.x = 0;
+	ACD.y = 0;
+}
+
+void f_sACD_Malloc_CPU(int nACD, sACD &ACD)
+{
+	if(nACD<=0)
+	{
+		return;
+	}
+
+	ACD.x = new double[nACD];
+	ACD.x = new double[nACD];
 }
 
 /***************************************************************************/
@@ -287,13 +313,13 @@ void f_scVp_Init(scVp &cVp)
 	cVp.Rmin2 = 0;
 	cVp.Rmax2 = 0;
 	cVp.R2 = 0;
-	f_sCoefPar_Init(cVp.cVr);
+	f_sCoefPar_Init_CPU(cVp.cVr);
 	cVp.bnx.i = 0;
 	cVp.bnx.n = 0;
 	cVp.bny.i = 0;
 	cVp.bny.n = 0;
-	f_sciVn_Init(cVp.ciV0);
-	f_sciVn_Init(cVp.ciV1);
+	f_sciVn_Init_CPU(cVp.ciV0);
+	f_sciVn_Init_CPU(cVp.ciV1);
 }
 
 void f_scVp_Init(int ncVp, scVp *cVp)
@@ -1399,23 +1425,23 @@ void f_Apply_PCTF_CPU(sGP &GP, sLens &Lens, fftw_complex *fPsi_i, fftw_complex *
 /***************************************************************************/
 /***************************************************************************/
 
-void f_Row_2_Column_Format_CPU(sGP &GP, double *&MC_i, double *&MC_o)
+void f_fftw_double_2_double_CPU(sGP &GP, double *&M_i, double *&M_o)
 {	
 	int ix, iy, ixyi, ixyo;
 	for(iy=0; iy<GP.ny; iy++)
 		for(ix=0; ix<GP.nx; ix++)
 		{
-			MC_o[ix*GP.ny+iy] = MC_i[iy*GP.nx+ix];
+			M_o[ix*GP.ny+iy] = M_i[iy*GP.nx+ix];
 		}
 }
 
-void f_Column_2_Row_Format_CPU(sGP &GP, double *&MC_i, double *&MC_o)
+void f_double_2_fftw_double_CPU(sGP &GP, double *&M_i, double *&M_o)
 {	
 	int ix, iy, ixyi, ixyo;
 	for(iy=0; iy<GP.ny; iy++)
 		for(ix=0; ix<GP.nx; ix++)
 		{
-			MC_o[iy*GP.nx+ix] = MC_i[ix*GP.ny+iy];
+			M_o[iy*GP.nx+ix] = M_i[ix*GP.ny+iy];
 		}
 }
 

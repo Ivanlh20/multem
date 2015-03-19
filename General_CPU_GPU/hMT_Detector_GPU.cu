@@ -35,7 +35,7 @@ void cMT_Detector_GPU::freeMemory()
 	f_sGP_Init(GP);
 
 	nDet = 0;
-	f_sDetCir_Free(DetCirh);
+	f_sDetCir_Free_CPU(DetCirh);
 
 	delete [] Tot_h; Tot_h = 0;
 	delete [] Coh_h; Coh_h = 0;
@@ -54,7 +54,7 @@ cMT_Detector_GPU::cMT_Detector_GPU()
 	f_sGP_Init(GP);
 
 	nDet = 0;
-	f_sDetCir_Init(DetCirh);
+	f_sDetCir_Init_CPU(DetCirh);
 
 	Tot_h = 0;
 	Coh_h = 0;
@@ -80,7 +80,7 @@ void cMT_Detector_GPU::SetInputData(sGP &GP_i, int nDeti, sDetCir &DetCirhi)
 	GP = GP_i;
 
 	nDet = nDeti;
-	f_sDetCir_Malloc(nDet, DetCirh);
+	f_sDetCir_Malloc_CPU(nDet, DetCirh);
 	memcpy(DetCirh.g2min, DetCirhi.g2min, nDet*cSizeofRD);
 	memcpy(DetCirh.g2max, DetCirhi.g2max, nDet*cSizeofRD);
 

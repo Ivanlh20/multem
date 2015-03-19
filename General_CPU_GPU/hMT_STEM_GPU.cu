@@ -47,7 +47,7 @@ void cMT_STEM_GPU::freeMemory()
 	x2u = 0;	
 	y2u = 0;	
 
-	f_sDetCir_Free(DetCir);
+	f_sDetCir_Free_CPU(DetCir);
 	for(int iThk = 0; iThk<nThk; iThk++)
 	{
 		for(int iDet=0; iDet<nDet; iDet++)
@@ -83,7 +83,7 @@ cMT_STEM_GPU::cMT_STEM_GPU()
 	x2u = 0;	
 	y2u = 0;	
 
-	f_sDetCir_Init(DetCir);
+	f_sDetCir_Init_CPU(DetCir);
 	ImSTEM = 0;
 	nDet = 0;
 
@@ -132,7 +132,7 @@ void cMT_STEM_GPU::SetInputData(cMT_InMulSli_CPU *MT_InMulSli_CPU_i, cMT_MGP_CPU
 
 	nDet = MT_InMulSli_CPU_i->STEM_nDet;
 	double lambda = f_getLambda(MT_MGP_CPU_i->E0);
-	f_sDetCir_Malloc(nDet, DetCir);
+	f_sDetCir_Malloc_CPU(nDet, DetCir);
 	for(int iDet=0; iDet<nDet; iDet++)
 	{
 		DetCir.g2min[iDet] = pow(MT_InMulSli_CPU_i->STEM_DetCir[iDet].InnerAng/lambda, 2);

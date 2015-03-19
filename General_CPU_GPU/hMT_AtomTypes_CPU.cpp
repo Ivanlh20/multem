@@ -44,16 +44,16 @@ void cMT_AtomTypes_CPU::freeMemory()
 	Rmin2 = 0;
 	Rmax2 = 0;
 
-	f_sCoefPar_Free(cfeg);
-	f_sCoefPar_Free(cfxg);
-	f_sCoefPar_Free(cPr);
-	f_sCoefPar_Free(cVr);
-	f_sCoefPar_Free(cVR);
+	f_sCoefPar_Free_CPU(cfeg);
+	f_sCoefPar_Free_CPU(cfxg);
+	f_sCoefPar_Free_CPU(cPr);
+	f_sCoefPar_Free_CPU(cVr);
+	f_sCoefPar_Free_CPU(cVR);
 	
 	nR = 0;
 	delete [] R; R = 0;
 	delete [] R2; R2 = 0;
-	f_sciVn_Free(ciVR);
+	f_sciVn_Free_CPU(ciVR);
 }
 
 // Set Atom type
@@ -62,14 +62,14 @@ void cMT_AtomTypes_CPU::SetAtomTypes(int Z_i, int PotPar_i, double Vrl_i, int nR
 	freeMemory();	// clean CPU memory
 	IdCall++;
 
-	f_sCoefPar_Malloc(6, cfeg);
-	f_sCoefPar_Malloc(6, cfxg);
-	f_sCoefPar_Malloc(6, cPr);
-	f_sCoefPar_Malloc(6, cVr);
-	f_sCoefPar_Malloc(6, cVR);
+	f_sCoefPar_Malloc_CPU(6, cfeg);
+	f_sCoefPar_Malloc_CPU(6, cfxg);
+	f_sCoefPar_Malloc_CPU(6, cPr);
+	f_sCoefPar_Malloc_CPU(6, cVr);
+	f_sCoefPar_Malloc_CPU(6, cVR);
 	R = new double [nR_i];
 	R2 = new double [nR_i];
-	f_sciVn_Malloc(nR_i, ciVR);
+	f_sciVn_Malloc_CPU(nR_i, ciVR);
 
 	cMT_AtomicData_CPU MT_AtomicData_CPU(PotPar_i);
 	MT_AtomicData_CPU.To_MT_AtomTypes_CPU(Z_i, Vrl_i, nR_i, Rmin_i, this);

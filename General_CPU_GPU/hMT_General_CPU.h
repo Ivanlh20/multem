@@ -24,6 +24,9 @@
 #include "hMT_MGP_CPU.h"
 #include "hMT_InMulSli_CPU.h"
 
+/***************************************************************************/
+/***************************************************************************/
+
 // Grid's parameter initialization
 void f_sGP_Init(sGP &GP);
 
@@ -53,32 +56,42 @@ void f_ReadQuadratureCPU(int typ, int nQCPU, sQ1 &QCPU);
 /***************************************************************************/
 /***************************************************************************/
 
-void f_sCoefPar_Free(sCoefPar &CoefPar);
+void f_sCoefPar_Free_CPU(sCoefPar &CoefPar);
 
-void f_sCoefPar_Init(sCoefPar &CoefPar);
+void f_sCoefPar_Init_CPU(sCoefPar &CoefPar);
 
-void f_sCoefPar_Malloc(int nCoefPar, sCoefPar &CoefPar);
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sciVn_Free(sciVn &ciVn);
-
-void f_sciVn_Init(sciVn &ciVn);
-
-void f_sciVn_Malloc(int nciVn, sciVn &ciVn);
+void f_sCoefPar_Malloc_CPU(int nCoefPar, sCoefPar &CoefPar);
 
 /***************************************************************************/
 /***************************************************************************/
 
-void f_sDetCir_Free(sDetCir &DetCir);
+void f_sciVn_Free_CPU(sciVn &ciVn);
 
-void f_sDetCir_Init(sDetCir &DetCir);
+void f_sciVn_Init_CPU(sciVn &ciVn);
 
-void f_sDetCir_Malloc(int nDetCir, sDetCir &DetCir);
+void f_sciVn_Malloc_CPU(int nciVn, sciVn &ciVn);
 
 /***************************************************************************/
 /***************************************************************************/
+
+void f_sDetCir_Free_CPU(sDetCir &DetCir);
+
+void f_sDetCir_Init_CPU(sDetCir &DetCir);
+
+void f_sDetCir_Malloc_CPU(int nDetCir, sDetCir &DetCir);
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sACD_Free_CPU(sACD &ACD);
+
+void f_sACD_Init_CPU(sACD &ACD);
+
+void f_sACD_Malloc_CPU(int nACD, sACD &ACD);
+
+/***************************************************************************/
+/***************************************************************************/
+
 void f_scVp_Init(scVp &cVp);
 
 void f_scVp_Init(int ncVp, scVp *cVp);
@@ -249,9 +262,9 @@ void f_Apply_PCTF_CPU(sGP &GP, sLens &Lens, fftw_complex *fPsi_i, fftw_complex *
 /***************************************************************************/
 /***************************************************************************/
 
-void f_Row_2_Column_Format_CPU(sGP &GP, double *&MC_i, double *&MC_o);
+void f_fftw_double_2_double_CPU(sGP &GP, double *&M_i, double *&M_o);
 
-void f_Column_2_Row_Format_CPU(sGP &GP, double *&MC_i, double *&MC_o);
+void f_double_2_fftw_double_CPU(sGP &GP, double *&M_i, double *&M_o);
 
 void f_fftw_complex_2_sComplex_CPU(sGP &GP, fftw_complex *&MC_i, sComplex &MC_o);
 

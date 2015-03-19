@@ -48,16 +48,16 @@ void cMT_AtomTypes_GPU::freeMemory()
 	Rmin2 = 0;
 	Rmax2 = 0;
 
-	f_sCoefPar_cudaFree(cfeg);
-	f_sCoefPar_cudaFree(cfxg);
-	f_sCoefPar_cudaFree(cPr);
-	f_sCoefPar_cudaFree(cVr);
-	f_sCoefPar_cudaFree(cVR);
+	f_sCoefPar_Free_GPU(cfeg);
+	f_sCoefPar_Free_GPU(cfxg);
+	f_sCoefPar_Free_GPU(cPr);
+	f_sCoefPar_Free_GPU(cVr);
+	f_sCoefPar_Free_GPU(cVR);
 
 	nR = 0;
 	cudaFreen(R);
 	cudaFreen(R2);
-	f_sciVn_cudaFree(ciVR);
+	f_sciVn_Free_GPU(ciVR);
 };
 
 // Set Atom type
@@ -78,23 +78,23 @@ void cMT_AtomTypes_GPU::SetAtomTypes(cMT_AtomTypes_CPU &MT_AtomTypes_CPU_i)
 	Rmax = MT_AtomTypes_CPU_i.Rmax;
 	Rmax2 = MT_AtomTypes_CPU_i.Rmax2;
 
-	f_sCoefPar_cudaMalloc(6, cfeg);
+	f_sCoefPar_Malloc_GPU(6, cfeg);
 	cudaMemcpy(cfeg.cl, MT_AtomTypes_CPU_i.cfeg.cl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 	cudaMemcpy(cfeg.cnl, MT_AtomTypes_CPU_i.cfeg.cnl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 
-	f_sCoefPar_cudaMalloc(6, cfxg);
+	f_sCoefPar_Malloc_GPU(6, cfxg);
 	cudaMemcpy(cfxg.cl, MT_AtomTypes_CPU_i.cfxg.cl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 	cudaMemcpy(cfxg.cnl, MT_AtomTypes_CPU_i.cfxg.cnl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 
-	f_sCoefPar_cudaMalloc(6, cPr);
+	f_sCoefPar_Malloc_GPU(6, cPr);
 	cudaMemcpy(cPr.cl, MT_AtomTypes_CPU_i.cPr.cl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 	cudaMemcpy(cPr.cnl, MT_AtomTypes_CPU_i.cPr.cnl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 
-	f_sCoefPar_cudaMalloc(6, cVr);
+	f_sCoefPar_Malloc_GPU(6, cVr);
 	cudaMemcpy(cVr.cl, MT_AtomTypes_CPU_i.cVr.cl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 	cudaMemcpy(cVr.cnl, MT_AtomTypes_CPU_i.cVr.cnl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 
-	f_sCoefPar_cudaMalloc(6, cVR);
+	f_sCoefPar_Malloc_GPU(6, cVR);
 	cudaMemcpy(cVR.cl, MT_AtomTypes_CPU_i.cVR.cl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 	cudaMemcpy(cVR.cnl, MT_AtomTypes_CPU_i.cVR.cnl, 6*cSizeofRD, cudaMemcpyHostToDevice);
 
@@ -106,7 +106,7 @@ void cMT_AtomTypes_GPU::SetAtomTypes(cMT_AtomTypes_CPU &MT_AtomTypes_CPU_i)
 	cudaMalloc((void**)&R2, nR*cSizeofRD);
 	cudaMemcpy(R2, MT_AtomTypes_CPU_i.R2, nR*cSizeofRD, cudaMemcpyHostToDevice);
 
-	f_sciVn_cudaMalloc(nR, ciVR);
+	f_sciVn_Malloc_GPU(nR, ciVR);
 	cudaMemcpy(ciVR.c0, MT_AtomTypes_CPU_i.ciVR.c0, nR*cSizeofRD, cudaMemcpyHostToDevice);
 	cudaMemcpy(ciVR.c1, MT_AtomTypes_CPU_i.ciVR.c1, nR*cSizeofRD, cudaMemcpyHostToDevice);
 	cudaMemcpy(ciVR.c2, MT_AtomTypes_CPU_i.ciVR.c2, nR*cSizeofRD, cudaMemcpyHostToDevice);

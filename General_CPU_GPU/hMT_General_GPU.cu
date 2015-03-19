@@ -29,147 +29,6 @@
 /***************************************************************************/
 /***************************************************************************/
 
-void f_ReadQuadratureGPU(int typ, int nQGPU, sQ1 &QGPU)
-{
-	if(nQGPU<=0) return;
-
-	sQ1 QCPU;
-	QCPU.x = new double[nQGPU]; 
-	QCPU.w = new double[nQGPU];
-	cQuadrature Quad;
-	Quad.ReadQuadrature(typ, nQGPU, QCPU);
-	cudaMalloc((void**)&(QGPU.x), nQGPU*cSizeofRD);
-	cudaMemcpy(QGPU.x, QCPU.x, nQGPU*cSizeofRD, cudaMemcpyHostToDevice);
-	cudaMalloc((void**)&(QGPU.w), nQGPU*cSizeofRD);
-	cudaMemcpy(QGPU.w, QCPU.w, nQGPU*cSizeofRD, cudaMemcpyHostToDevice);
-	delete [] QCPU.x;
-	delete [] QCPU.w;
-}
-
-void f_ReadQuadratureCPUGPU(int typ, int nQ, sQ1 &QCPU, sQ1 &QGPU)
-{
-	if(nQ<=0) return;
-
-	QCPU.x = new double[nQ]; 
-	QCPU.w = new double[nQ];
-	cQuadrature Quad;
-	Quad.ReadQuadrature(typ, nQ, QCPU);
-	cudaMalloc((void**)&(QGPU.x), nQ*cSizeofRD);
-	cudaMemcpy(QGPU.x, QCPU.x, nQ*cSizeofRD, cudaMemcpyHostToDevice);
-	cudaMalloc((void**)&(QGPU.w), nQ*cSizeofRD);
-	cudaMemcpy(QGPU.w, QCPU.w, nQ*cSizeofRD, cudaMemcpyHostToDevice);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sCoefPar_cudaFree(sCoefPar &CoefPar)
-{
-	cudaFreen(CoefPar.cl);
-	cudaFreen(CoefPar.cnl);
-}
-
-void f_sCoefPar_cudaInit(sCoefPar &CoefPar)
-{
-	CoefPar.cl = 0;
-	CoefPar.cnl = 0;
-}
-
-void f_sCoefPar_cudaMalloc(int nCoefPar, sCoefPar &CoefPar)
-{
-	if(nCoefPar<=0)
-	{
-		return;
-	}
-
-	cudaMalloc((void**)&(CoefPar.cl), nCoefPar*cSizeofRD);
-	cudaMalloc((void**)&(CoefPar.cnl), nCoefPar*cSizeofRD);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sciVn_cudaFree(sciVn &ciVn)
-{
-	cudaFreen(ciVn.c0);
-	cudaFreen(ciVn.c1);
-	cudaFreen(ciVn.c2);
-	cudaFreen(ciVn.c3);
-}
-
-void f_sciVn_cudaInit(sciVn &ciVn)
-{
-	ciVn.c0 = 0;
-	ciVn.c1 = 0;
-	ciVn.c2 = 0;
-	ciVn.c3 = 0;
-}
-
-void f_sciVn_cudaMalloc(int nciVn, sciVn &ciVn)
-{
-	if(nciVn<=0)
-	{
-		return;
-	}
-
-	cudaMalloc((void**)&(ciVn.c0), nciVn*cSizeofRD);
-	cudaMalloc((void**)&(ciVn.c1), nciVn*cSizeofRD);
-	cudaMalloc((void**)&(ciVn.c2), nciVn*cSizeofRD);
-	cudaMalloc((void**)&(ciVn.c3), nciVn*cSizeofRD);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sDetCir_cudaFree(sDetCir &DetCir)
-{
-	cudaFreen(DetCir.g2min);
-	cudaFreen(DetCir.g2max);
-}
-
-void f_sDetCir_cudaInit(sDetCir &DetCir)
-{
-	DetCir.g2min = 0;
-	DetCir.g2max = 0;
-}
-
-void f_sDetCir_cudaMalloc(int nDetCir, sDetCir &DetCir)
-{
-	if(nDetCir<=0)
-	{
-		return;
-	}
-
-	cudaMalloc((void**)&(DetCir.g2min), nDetCir*cSizeofRD);
-	cudaMalloc((void**)&(DetCir.g2max), nDetCir*cSizeofRD);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sACD_cudaFree(sACD &ACD)
-{
-	cudaFreen(ACD.x);
-	cudaFreen(ACD.y);
-}
-
-void f_sACD_cudaInit(sACD &ACD)
-{
-	ACD.x = 0;
-	ACD.y = 0;
-}
-
-void f_sACD_cudaMalloc(int nACD, sACD &ACD)
-{
-	if(nACD<=0) return;
-
-	cudaMalloc((void**)&(ACD.x), nACD*cSizeofRD);
-	cudaMalloc((void**)&(ACD.y), nACD*cSizeofRD);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-
 void f_GPU_Sync_CPU(int &iSynCPU, int &cSynCPU)
 {
 	if(cSynCPU<0) cSynCPU = ccSynCPU;
@@ -204,6 +63,150 @@ void f_get_BTnxy(sGP &GP, dim3 &B, dim3 &T)
 {
 	B.x = MIN(64, (GP.nxy+thrnxy-1)/thrnxy); B.y = 1; B.z = 1;
 	T.x = thrnxy; T.y = 1; T.z = 1;
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_ReadQuadratureGPU(int typ, int nQGPU, sQ1 &QGPU)
+{
+	if(nQGPU<=0) return;
+
+	sQ1 QCPU;
+	QCPU.x = new double[nQGPU]; 
+	QCPU.w = new double[nQGPU];
+	cQuadrature Quad;
+	Quad.ReadQuadrature(typ, nQGPU, QCPU);
+	cudaMalloc((void**)&(QGPU.x), nQGPU*cSizeofRD);
+	cudaMemcpy(QGPU.x, QCPU.x, nQGPU*cSizeofRD, cudaMemcpyHostToDevice);
+	cudaMalloc((void**)&(QGPU.w), nQGPU*cSizeofRD);
+	cudaMemcpy(QGPU.w, QCPU.w, nQGPU*cSizeofRD, cudaMemcpyHostToDevice);
+	delete [] QCPU.x;
+	delete [] QCPU.w;
+}
+
+void f_ReadQuadratureCPUGPU(int typ, int nQ, sQ1 &QCPU, sQ1 &QGPU)
+{
+	if(nQ<=0) return;
+
+	QCPU.x = new double[nQ]; 
+	QCPU.w = new double[nQ];
+	cQuadrature Quad;
+	Quad.ReadQuadrature(typ, nQ, QCPU);
+	cudaMalloc((void**)&(QGPU.x), nQ*cSizeofRD);
+	cudaMemcpy(QGPU.x, QCPU.x, nQ*cSizeofRD, cudaMemcpyHostToDevice);
+	cudaMalloc((void**)&(QGPU.w), nQ*cSizeofRD);
+	cudaMemcpy(QGPU.w, QCPU.w, nQ*cSizeofRD, cudaMemcpyHostToDevice);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sCoefPar_Free_GPU(sCoefPar &CoefPar)
+{
+	cudaFreen(CoefPar.cl);
+	cudaFreen(CoefPar.cnl);
+}
+
+void f_sCoefPar_Init_GPU(sCoefPar &CoefPar)
+{
+	CoefPar.cl = 0;
+	CoefPar.cnl = 0;
+}
+
+void f_sCoefPar_Malloc_GPU(int nCoefPar, sCoefPar &CoefPar)
+{
+	if(nCoefPar<=0)
+	{
+		return;
+	}
+
+	cudaMalloc((void**)&(CoefPar.cl), nCoefPar*cSizeofRD);
+	cudaMalloc((void**)&(CoefPar.cnl), nCoefPar*cSizeofRD);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sciVn_Free_GPU(sciVn &ciVn)
+{
+	cudaFreen(ciVn.c0);
+	cudaFreen(ciVn.c1);
+	cudaFreen(ciVn.c2);
+	cudaFreen(ciVn.c3);
+}
+
+void f_sciVn_Init_GPU(sciVn &ciVn)
+{
+	ciVn.c0 = 0;
+	ciVn.c1 = 0;
+	ciVn.c2 = 0;
+	ciVn.c3 = 0;
+}
+
+void f_sciVn_Malloc_GPU(int nciVn, sciVn &ciVn)
+{
+	if(nciVn<=0)
+	{
+		return;
+	}
+
+	cudaMalloc((void**)&(ciVn.c0), nciVn*cSizeofRD);
+	cudaMalloc((void**)&(ciVn.c1), nciVn*cSizeofRD);
+	cudaMalloc((void**)&(ciVn.c2), nciVn*cSizeofRD);
+	cudaMalloc((void**)&(ciVn.c3), nciVn*cSizeofRD);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sDetCir_Free_GPU(sDetCir &DetCir)
+{
+	cudaFreen(DetCir.g2min);
+	cudaFreen(DetCir.g2max);
+}
+
+void f_sDetCir_Init_GPU(sDetCir &DetCir)
+{
+	DetCir.g2min = 0;
+	DetCir.g2max = 0;
+}
+
+void f_sDetCir_Malloc_GPU(int nDetCir, sDetCir &DetCir)
+{
+	if(nDetCir<=0)
+	{
+		return;
+	}
+
+	cudaMalloc((void**)&(DetCir.g2min), nDetCir*cSizeofRD);
+	cudaMalloc((void**)&(DetCir.g2max), nDetCir*cSizeofRD);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sACD_Free_GPU(sACD &ACD)
+{
+	cudaFreen(ACD.x);
+	cudaFreen(ACD.y);
+}
+
+void f_sACD_Init_GPU(sACD &ACD)
+{
+	ACD.x = 0;
+	ACD.y = 0;
+}
+
+void f_sACD_Malloc_GPU(int nACD, sACD &ACD)
+{
+	if(nACD<=0)
+	{
+		return;
+	}
+
+	cudaMalloc((void**)&(ACD.x), nACD*cSizeofRD);
+	cudaMalloc((void**)&(ACD.y), nACD*cSizeofRD);
 }
 
 /***************************************************************************/

@@ -67,9 +67,9 @@ class cMT_MulSli_CPU{
 		void Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, int MEffect, int STEffect, fftw_complex *&aPsi, double *&M2aPsi, double *&aM2Psi);
 		void Image_Convergence_Wave_Illumination(int nConfFP, eSpace Space, double xi, double yi, fftw_complex *&aPsi, double *&M2aPsi, double *&aM2Psi);
 
-		void GPU2CPU(fftw_complex *&Psid, sComplex &Psih);
-		void GPU2CPU(fftw_complex *&Psid, double *&M2Psid, sComplex &Psih, double *&M2Psih);
-		void GPU2CPU(fftw_complex *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h);
+		void Gather(fftw_complex *&Psid, sComplex &Psih);
+		void Gather(fftw_complex *&Psid, double *&M2Psid, sComplex &Psih, double *&M2Psih);
+		void Gather(fftw_complex *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h);
 
 		cMT_MGP_CPU MT_MGP_CPU;
 		cMT_STEM_CPU *STEM;

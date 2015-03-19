@@ -26,51 +26,7 @@
 /***************************************************************************/
 /***************************************************************************/
 
-void f_ReadQuadratureGPU(int typ, int nQGPU, sQ1 &QGPU);
-
-void f_ReadQuadratureCPUGPU(int typ, int nQ, sQ1 &QCPU, sQ1 &QGPU);
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sCoefPar_cudaFree(sCoefPar &CoefPar);
-
-void f_sCoefPar_cudaInit(sCoefPar &CoefPar);
-
-void f_sCoefPar_cudaMalloc(int nCoefPar, sCoefPar &CoefPar);
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sciVn_cudaFree(sciVn &ciVn);
-
-void f_sciVn_cudaInit(sciVn &ciVn);
-
-void f_sciVn_cudaMalloc(int nciVn, sciVn &ciVn);
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sDetCir_cudaFree(sDetCir &DetCir);
-
-void f_sDetCir_cudaInit(sDetCir &DetCir);
-
-void f_sDetCir_cudaMalloc(int nDetCir, sDetCir &DetCir);
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sACD_cudaFree(sACD &ACD);
-
-void f_sACD_cudaInit(sACD &ACD);
-
-void f_sACD_cudaMalloc(int nACD, sACD &ACD);
-
-/***************************************************************************/
-/***************************************************************************/
-
 void f_GPU_Sync_CPU(int &iSynCPU, int &cSynCPU);
-
 
 /***************************************************************************/
 /***************************************************************************/
@@ -82,6 +38,49 @@ void f_get_BTnxhnyh(sGP &GP, dim3 &B, dim3 &T);
 void f_get_BTmnxny(sGP &GP, dim3 &B, dim3 &T);
 
 void f_get_BTnxy(sGP &GP, dim3 &B, dim3 &T);
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_ReadQuadratureGPU(int typ, int nQGPU, sQ1 &QGPU);
+
+void f_ReadQuadratureCPUGPU(int typ, int nQ, sQ1 &QCPU, sQ1 &QGPU);
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sCoefPar_Free_GPU(sCoefPar &CoefPar);
+
+void f_sCoefPar_Init_GPU(sCoefPar &CoefPar);
+
+void f_sCoefPar_Malloc_GPU(int nCoefPar, sCoefPar &CoefPar);
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sciVn_Free_GPU(sciVn &ciVn);
+
+void f_sciVn_Init_GPU(sciVn &ciVn);
+
+void f_sciVn_Malloc_GPU(int nciVn, sciVn &ciVn);
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sDetCir_Free_GPU(sDetCir &DetCir);
+
+void f_sDetCir_Init_GPU(sDetCir &DetCir);
+
+void f_sDetCir_Malloc_GPU(int nDetCir, sDetCir &DetCir);
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sACD_Free_GPU(sACD &ACD);
+
+void f_sACD_Init_GPU(sACD &ACD);
+
+void f_sACD_Malloc_GPU(int nACD, sACD &ACD);
 
 /***************************************************************************/
 /***************************************************************************/

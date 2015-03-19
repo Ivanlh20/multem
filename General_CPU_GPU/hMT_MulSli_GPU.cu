@@ -63,11 +63,11 @@ void cMT_MulSli_GPU::freeMemory()
 	EWFS.xx = 0;
 	/****************************************************************/
 
-	f_sACD_cudaFree(ExpRg_x);
-	f_sACD_cudaFree(ExpRg_y);
+	f_sACD_Free_GPU(ExpRg_x);
+	f_sACD_Free_GPU(ExpRg_y);
 
-	f_sACD_cudaFree(Prop_x);
-	f_sACD_cudaFree(Prop_y);
+	f_sACD_Free_GPU(Prop_x);
+	f_sACD_Free_GPU(Prop_y);
 
 	cudaFreen(Psi);
 	cudaFreen(aPsi);
@@ -116,11 +116,11 @@ cMT_MulSli_GPU::cMT_MulSli_GPU()
 	EWFS.xx = 0;
 	/****************************************************************/
 
-	f_sACD_cudaInit(ExpRg_x);
-	f_sACD_cudaInit(ExpRg_y);
+	f_sACD_Init_GPU(ExpRg_x);
+	f_sACD_Init_GPU(ExpRg_y);
 
-	f_sACD_cudaInit(Prop_x);
-	f_sACD_cudaInit(Prop_y);
+	f_sACD_Init_GPU(Prop_x);
+	f_sACD_Init_GPU(Prop_y);
 
 	Psi = 0;
 	aPsi = 0;
@@ -143,7 +143,7 @@ cMT_MulSli_GPU::~cMT_MulSli_GPU()
 }
 
 // From Device To Host
-void cMT_MulSli_GPU::GPU2CPU(double2 *&Psid, sComplex &Psih)
+void cMT_MulSli_GPU::Gather(double2 *&Psid, sComplex &Psih)
 {	
 	// fft2shift 
 	f_fft2Shift_MC_GPU(GP, Psid);
@@ -152,7 +152,7 @@ void cMT_MulSli_GPU::GPU2CPU(double2 *&Psid, sComplex &Psih)
 }
 
 // From Device To Host
-void cMT_MulSli_GPU::GPU2CPU(double2 *&Psid, double *&M2Psid, sComplex &Psih, double *&M2Psih)
+void cMT_MulSli_GPU::Gather(double2 *&Psid, double *&M2Psid, sComplex &Psih, double *&M2Psih)
 {
 	// fft2shift 
 	f_fft2Shift_MC_MD_GPU(GP, Psid, M2Psid);
@@ -161,7 +161,7 @@ void cMT_MulSli_GPU::GPU2CPU(double2 *&Psid, double *&M2Psid, sComplex &Psih, do
 }
 
 // From Device To Host
-void cMT_MulSli_GPU::GPU2CPU(double2 *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h)
+void cMT_MulSli_GPU::Gather(double2 *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h)
 {
 	// fft2shift 
 	f_fft2Shift_MC_MD_GPU(GP, Psid, M2Psi1d, M2Psi2d);
@@ -213,7 +213,7 @@ void cMT_MulSli_GPU::Cal_Wavefunction(eSpace Space, double2 *&Psi)
 		MT_Transmission_GPU->Transmit(iSlice, Psi);
 		// Inclined ilumination
 		PhaseMul(gxu, gyu, Psi);
-		// Backward fft2
+
 		if(Space==eSReciprocal)
 		{
 			cufftExecZ2Z(PlanPsi, Psi, Psi, CUFFT_FORWARD);
@@ -310,10 +310,10 @@ void cMT_MulSli_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU)
 	gxu = sin(MT_MGP_CPU.theta)*cos(MT_MGP_CPU.phi)/Lens.lambda;
 	gyu = sin(MT_MGP_CPU.theta)*sin(MT_MGP_CPU.phi)/Lens.lambda;
 
-	f_sACD_cudaMalloc(GP.nx, ExpRg_x);
-	f_sACD_cudaMalloc(GP.ny, ExpRg_y);
-	f_sACD_cudaMalloc(GP.nx, Prop_x);
-	f_sACD_cudaMalloc(GP.ny, Prop_y);
+	f_sACD_Malloc_GPU(GP.nx, ExpRg_x);
+	f_sACD_Malloc_GPU(GP.ny, ExpRg_y);
+	f_sACD_Malloc_GPU(GP.nx, Prop_x);
+	f_sACD_Malloc_GPU(GP.ny, Prop_y);
 
 	cudaMalloc((void**)&Psi, GP.nxy*cSizeofCD);
 	cudaMalloc((void**)&aPsi, GP.nxy*cSizeofCD);
@@ -382,7 +382,7 @@ void cMT_MulSli_GPU::Cal_ExitWaveRS(sComplex &aPsih, double *&aM2Psih)
 	int MEffect = 0, STEffect = 0;
 	eSpace Space = eSReal;
 	Image_Plane_Wave_Illumination(MT_MGP_CPU.nConfFP, Space, MEffect, STEffect, aPsi, M2aPsi, aM2Psi);
-	GPU2CPU(aPsi, aM2Psi, aPsih, aM2Psih);
+	Gather(aPsi, aM2Psi, aPsih, aM2Psih);
 }
 
 void cMT_MulSli_GPU::Cal_ExitWaveFS(sComplex &aPsih, double *&aM2Psih)
@@ -390,7 +390,7 @@ void cMT_MulSli_GPU::Cal_ExitWaveFS(sComplex &aPsih, double *&aM2Psih)
 	int MEffect = 0, STEffect = 0;
 	eSpace Space = eSReciprocal;
 	Image_Plane_Wave_Illumination(MT_MGP_CPU.nConfFP, Space, MEffect, STEffect, aPsi, M2aPsi, aM2Psi);
-	GPU2CPU(aPsi, aM2Psi, aPsih, aM2Psih);
+	Gather(aPsi, aM2Psi, aPsih, aM2Psih);
 }
 
 void cMT_MulSli_GPU::Cal_ED(sComplex &aPsih, double *&aM2Psih)
@@ -398,26 +398,26 @@ void cMT_MulSli_GPU::Cal_ED(sComplex &aPsih, double *&aM2Psih)
 	int MEffect = 0, STEffect = 0;
 	eSpace Space = eSReciprocal;
 	Image_Plane_Wave_Illumination(MT_MGP_CPU.nConfFP, Space, MEffect, STEffect, aPsi, M2aPsi, aM2Psi);
-	GPU2CPU(aPsi, aM2Psi, aPsih, aM2Psih);
+	Gather(aPsi, aM2Psi, aPsih, aM2Psih);
 }
 
 void cMT_MulSli_GPU::Cal_HRTEM(sComplex &aPsih, double *&M2aPsih, double *&aM2Psih)
 {
 	eSpace Space = eSReal;
 	Image_Plane_Wave_Illumination(MT_MGP_CPU.nConfFP, Space, MT_MGP_CPU.MEffect, MT_MGP_CPU.STEffect, aPsi, M2aPsi, aM2Psi);
-	GPU2CPU(aPsi, M2aPsi, aM2Psi, aPsih, M2aPsih, aM2Psih);
+	Gather(aPsi, M2aPsi, aM2Psi, aPsih, M2aPsih, aM2Psih);
 }
 
 void cMT_MulSli_GPU::Cal_CBED(sComplex &aPsih, double *&aM2Psih)
 {
 	Image_Convergence_Wave_Illumination(MT_MGP_CPU.nConfFP, eSReciprocal, CBED.x0, CBED.y0, aPsi, M2aPsi, aM2Psi);
-	GPU2CPU(aPsi, aM2Psi, aPsih, aM2Psih);
+	Gather(aPsi, aM2Psi, aPsih, aM2Psih);
 }
 
 void cMT_MulSli_GPU::Cal_CBEI(sComplex &aPsih, double *&aM2Psih)
 {
 	Image_Convergence_Wave_Illumination(MT_MGP_CPU.nConfFP, eSReal, CBEI.x0, CBEI.y0, aPsi, M2aPsi, aM2Psi);
-	GPU2CPU(aPsi, aM2Psi, aPsih, aM2Psih);
+	Gather(aPsi, aM2Psi, aPsih, aM2Psih);
 }
 
 void cMT_MulSli_GPU::Cal_PED(sComplex &aPsih, double *&aM2Psih)
@@ -447,7 +447,7 @@ void cMT_MulSli_GPU::Cal_PED(sComplex &aPsih, double *&aM2Psih)
 			f_Add_wMC_wMD_GPU(GP, w, Psi, aPsi, aM2Psi);
 		}
 	}
-	GPU2CPU(aPsi, aM2Psi, aPsih, aM2Psih);
+	Gather(aPsi, aM2Psi, aPsih, aM2Psih);
 }
 
 void cMT_MulSli_GPU::CAL_HCI(sComplex &aPsih, double *&M2aPsih, double *&aM2Psih)
@@ -490,7 +490,7 @@ void cMT_MulSli_GPU::CAL_HCI(sComplex &aPsih, double *&M2aPsih, double *&aM2Psih
 	// Backward fft2
 	cufftExecZ2Z(PlanPsi, aPsi, aPsi, CUFFT_INVERSE);
 
-	GPU2CPU(aPsi, M2aPsi, aM2Psi, aPsih, M2aPsih, aM2Psih);
+	Gather(aPsi, M2aPsi, aM2Psi, aPsih, M2aPsih, aM2Psih);
 }
 
 void cMT_MulSli_GPU::Cal_STEM()

@@ -61,7 +61,7 @@ figure(1);
 imshow(M2Psis, [0 Imaxs]);
 % imshow(aM2Psi);
 axis square;
-colormap gray;
+colormap hot;
 axis image;
 
 % a = aM2Psi((1024-5):(1024+5),(1024-5):(1024+5));

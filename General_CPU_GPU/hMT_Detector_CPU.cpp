@@ -29,7 +29,7 @@ void cMT_Detector_CPU::freeMemory()
 	f_sGP_Init(GP);
 
 	nDet = 0;
-	f_sDetCir_Free(DetCir);
+	f_sDetCir_Free_CPU(DetCir);
 
 	delete [] Tot; Tot = 0;
 	delete [] Coh; Coh = 0;
@@ -48,7 +48,7 @@ cMT_Detector_CPU::cMT_Detector_CPU()
 	f_sGP_Init(GP);
 
 	nDet = 0;
-	f_sDetCir_Init(DetCir);
+	f_sDetCir_Init_CPU(DetCir);
 
 	Tot = 0;
 	Coh = 0;
@@ -64,7 +64,7 @@ void cMT_Detector_CPU::SetInputData(sGP &GP_i, int nDeti, sDetCir &DetCiri)
 
 	GP = GP_i;
 	nDet = nDeti;
-	f_sDetCir_Malloc(nDet, DetCir);
+	f_sDetCir_Malloc_CPU(nDet, DetCir);
 	memcpy(DetCir.g2min, DetCiri.g2min, nDet*cSizeofRD);
 	memcpy(DetCir.g2max, DetCiri.g2max, nDet*cSizeofRD);
 
