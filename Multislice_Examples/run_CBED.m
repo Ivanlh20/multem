@@ -46,7 +46,7 @@ num2str([TEM.lx, TEM.ly], 8)
 TEM.CBED.x0 = 0.0;      % x position 
 TEM.CBED.y0 = 0.0;      % y position
 tic;
-[aPsi, aM2Psi] = MULTEMMat(TEM);
+[aPsi, aM2Psi] = MULTEM_CPU(TEM);
 toc;
 a = aM2Psi((1024-5):(1024+5),(1024-5):(1024+5));
 % num2str(a, 10)

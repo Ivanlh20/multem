@@ -43,7 +43,7 @@ TEM.MEffect = 1;            % 1: Exit wave Partial coherente mode, 2: Transmissi
 TEM.STEffect = 1;           % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 tic;
 clear MULTEMMat;
-[aPsi, M2aPsi, aM2Psi0] = MULTEMMat(TEM);
+[aPsi, M2aPsi, aM2Psi0] = MULTEM_GPU(TEM);
 toc;
 subplot(2, 2, 1);
 imagesc(abs(aPsi).^2);

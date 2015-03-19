@@ -423,7 +423,7 @@ void cMT_MulSli_CPU::Cal_PED(sComplex &aPsih, double *&aM2Psih)
 	int irot, iThk = 0;
 	int nConfFP = MT_MGP_CPU.nConfFP, iConf0 = (nConfFP==0)?0:1;
 	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
-	double gu, phi, ecos, esin;
+	double gu, phi;
 	double w = inConfFP/double(PED.nrot);
 
 	f_Set_MC_MD_CPU(GP, 0.0, 0.0, aPsi, 0.0, aM2Psi);
@@ -452,7 +452,7 @@ void cMT_MulSli_CPU::CAL_HCI(sComplex &aPsih, double *&M2aPsih, double *&aM2Psih
 	int irot, iThk = 0;
 	int nConfFP = MT_MGP_CPU.nConfFP, iConf0 = (nConfFP==0)?0:1;
 	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
-	double gu, phi, ecos, esin;
+	double gu, phi;
 	double w = inConfFP/double(HCI.nrot);
 
 	f_Set_MC_MD_CPU(GP, 0.0, 0.0, aPsi, 0.0, aM2Psi);
@@ -516,7 +516,7 @@ void cMT_MulSli_CPU::Cal_STEM()
 				iThk = MT_Transmission_CPU->IsInThk(iSlice);
 				if(iThk>-1) // Detector integration
 				{
-					STEM->MT_Detector_CPU->getDetectorIntensity(inConfFP, Psi, ist, STEM->ImSTEM[iThk].DetInt, true);
+					//STEM->MT_Detector_CPU->getDetectorIntensity(inConfFP, Psi, ist, STEM->ImSTEM[iThk].DetInt, true);
 				}
 				/***********************************************************************************/
 				/***********************************************************************************/

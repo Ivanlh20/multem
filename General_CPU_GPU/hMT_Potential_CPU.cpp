@@ -270,7 +270,7 @@ void cMT_Potential_CPU::evalCubicPoly(sGP &GP, scVp &cVp, double * __restrict V0
 {
 	int ix0, iy0, ix, iy, ixy;
 	double Rx, Ry, R2;
-	double dx, dx2, dx3, V;
+	double dx, dx2, dx3;
 
 	for(iy0=0; iy0<cVp.bny.n; iy0++)
 	{
@@ -457,8 +457,6 @@ void cMT_Potential_CPU::getV0(int iSlice, double *&V0, int typ)
 {
 	if(MT_MGP_CPU->MulOrder==1) return;
 
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);
 	 double dz = get_dz(iSlice);
 	if(typ==1)
 		getV0(GP, SlicePos(iSlice, nSlice), dz, V0, V1, V1o);
