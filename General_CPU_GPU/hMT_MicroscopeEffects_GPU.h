@@ -33,6 +33,7 @@
 /*************************Incident wave*************************/
 class cMT_MicroscopeEffects_GPU{
 	private:
+		int IdCall;
 		int cSynCPU;
 
 		sQ1 Qt;
@@ -43,6 +44,7 @@ class cMT_MicroscopeEffects_GPU{
 		cufftHandle PlanPsi;
 		double2 *Psit;
 
+		void ReadTemporalQuadrature(sLens &Lens, sQ1 &Qt);
 		void ReadSpatialQuadrature(sLens &Lens, int &nQs, sQ2 &Qs);
 		void PCTCCTEM(int STEffect, double2 *&fPsi, double *&M2PsiM);
 		void PCLIMWPOTEM(int STEffect, double2 *&fPsi, double *&M2PsiM);

@@ -24,7 +24,10 @@
 #include <cuda_runtime.h>
 #include <cufft.h>
 
-void cMT_IncidentWave_GPU::freeMemory(){
+void cMT_IncidentWave_GPU::freeMemory()
+{
+	if(IdCall==0) return;
+
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
 	MT_MGP_CPU = 0;
@@ -37,7 +40,10 @@ void cMT_IncidentWave_GPU::freeMemory(){
 	Psii = 0;
 }
 
-cMT_IncidentWave_GPU::cMT_IncidentWave_GPU(){
+cMT_IncidentWave_GPU::cMT_IncidentWave_GPU()
+{
+	IdCall = 0;
+
 	MT_MGP_CPU = 0;
 	f_sGP_Init(GP);
 	f_sLens_Init(Lens);
@@ -48,12 +54,17 @@ cMT_IncidentWave_GPU::cMT_IncidentWave_GPU(){
 	Psii = 0;
 }
 
-cMT_IncidentWave_GPU::~cMT_IncidentWave_GPU(){
+cMT_IncidentWave_GPU::~cMT_IncidentWave_GPU()
+{
 	freeMemory();
+	IdCall = 0;
 }
 
-void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, cufftHandle &PlanPsi_i, double *&Psir_i, double *&Psii_i){
+void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, cufftHandle &PlanPsi_i, double *&Psir_i, double *&Psii_i)
+{
 	freeMemory();
+	IdCall++;
+
 	MT_MGP_CPU = MT_MGP_CPU_i;
 	f_sGP_SetInputData(MT_MGP_CPU, GP);
 	Lens = Lens_i;
@@ -63,7 +74,8 @@ void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i
 	cudaMalloc((void**)&Mp_d, 32*32*cSizeofRD);
 }
 
-void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, cufftHandle &PlanPsi_i){
+void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, cufftHandle &PlanPsi_i)
+{
 	freeMemory();
 	MT_MGP_CPU = MT_MGP_CPU_i;
 	f_sGP_SetInputData(MT_MGP_CPU, GP);
@@ -74,19 +86,24 @@ void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i
 	cudaMalloc((void**)&Mp_d, 32*32*cSizeofRD);
 }
 
-void cMT_IncidentWave_GPU::Psi0(double2 *&Psi0){
-	if(GP, MT_MGP_CPU->Psi0Typ==1)
-		f_Set_MC(GP, 1.0, 0.0, Psi0);
-	else{
+void cMT_IncidentWave_GPU::Psi0(double2 *&Psi0)
+{
+	if(MT_MGP_CPU->Psi0Typ==1)
+	{
+		f_Set_MC_GPU(GP, 1.0, 0.0, Psi0);
+	}
+	else
+	{
 		f_Copy_MCh(GP, MT_MGP_CPU->Psi0, Psir, Psii, Psi0);
 		// fft2shift 
-		f_fft2Shift_MC(GP, Psi0);	
+		f_fft2Shift_MC_GPU(GP, Psi0);	
 	}
 }
 
-void cMT_IncidentWave_GPU::Psi0(double x, double y, double2 *&Psi0){
-	f_Probe_FS(GP, Lens, c2Pi*(0.5*GP.lx-x), c2Pi*(0.5*GP.ly-y), Psi0);
+void cMT_IncidentWave_GPU::Psi0(double x, double y, double2 *&Psi0)
+{
+	f_Probe_FS_GPU(GP, Lens, c2Pi*(0.5*GP.lx-x), c2Pi*(0.5*GP.ly-y), Psi0);
 	cufftExecZ2Z(PlanPsi, Psi0, Psi0, CUFFT_INVERSE);
-	double Totalsum = f_Sum_MC2(GP, Psi0, Mp_d);
-	f_Scale_MC(GP, sqrt(double(GP.nxy)/Totalsum), Psi0);
+	double Totalsum = f_Sum_MC2_GPU(GP, 1.0, Psi0, Mp_d);
+	f_Scale_MC_GPU(GP, sqrt(double(GP.nxy)/Totalsum), Psi0);
 }

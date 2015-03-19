@@ -21,7 +21,8 @@
 #include "hrhor_CPU.h"
 #include <mex.h>
 
-void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[]){
+void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
 	double *r, *Pr, *dPr;
 	int Z, m, n, nr, PotPar;
 

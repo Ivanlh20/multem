@@ -43,7 +43,7 @@ class cTEMIm{
 		double lambda;		// wavelenght
 
 		sGP GP;				// Grid variables
-		sBT BT;				// Blocks and Threads
+		//sBT BT;				// Blocks and Threads
 		sLens Lens;			// Aberration parameters
 
 		/**********************************************************/

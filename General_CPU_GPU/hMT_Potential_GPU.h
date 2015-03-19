@@ -34,11 +34,12 @@
 
 class cMT_Potential_GPU: public cMT_Specimen_CPU{
 	private:
+		int IdCall;
 		sQ1 Qz;
-
+		sciVn ciV0[stncVp];
+		sciVn ciV1[stncVp];
 		void SetPotPar(int PotParh);
-		void getCubicPoly(dim3 BPot, dim3 TPot, dim3 BCoef, dim3 TCoef);
-		void evalCubicPoly(int nsatom, double *&V0g, double *&V1g);
+		void addAtomicProjectedPotential(dim3 BPot, dim3 TPot, dim3 BCoef, dim3 TCoef, int nsatom, double *&V0g, double *&V1g);
 		void getV0(int iSlice, double *&V0, int typ=1);
 		int CheckGridLimits(int i, int n);
 		void getbn(sGP &GP, double x, double y, double Rmax, sbn &bnx, sbn &bny);
@@ -49,7 +50,7 @@ class cMT_Potential_GPU: public cMT_Specimen_CPU{
 
 		double *V0;								// Zero moment of the potential
 		double *V1;								// first moment of the potential
-		double *V1o;								// Second moment of the potential
+		double *V1o;							// Second moment of the potential
 
 		void freeMemory();
 		void freeMemoryReset();

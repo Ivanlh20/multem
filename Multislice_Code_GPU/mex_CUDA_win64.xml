@@ -35,7 +35,7 @@
           CMDLINE300="del $OBJ $EXP $LIB $MANIFEST $ILK"
           
           COMPILER="nvcc"
-          COMPFLAGS="-gencode=arch=compute_20,code=sm_20 -gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_30,code=compute_30 -gencode=arch=compute_35,code=sm_35 -gencode=arch=compute_35,code=compute_35 --compiler-options=/c,/GR,/W3,/EHs,/nologo,/MD"
+          COMPFLAGS="-gencode=arch=compute_35,code=sm_35 -gencode=arch=compute_35,code=compute_35 --compiler-options=/c,/GR,/W3,/EHs,/nologo,/MD"
           COMPDEFINES="--compiler-options=/D_CRT_SECURE_NO_DEPRECATE,/D_SCL_SECURE_NO_DEPRECATE,/D_SECURE_SCL=0,$MATLABMEX"
           MATLABMEX="/DMATLAB_MEX_FILE"
           OPTIMFLAGS="--compiler-options=/O2,/Oy-,/DNDEBUG"
@@ -63,20 +63,20 @@
     <locationFinder>
         <VSROOT>
             <and>
-                <envVarExists name="VS100COMNTOOLS" />
+                <envVarExists name="VS120COMNTOOLS" />
                 <fileExists name="$$\..\..\VC\bin\amd64\cl.exe" />
                 <dirExists name="$$\..\..\.." />
             </and>
         </VSROOT>
         <SDKROOT>
             <or>
-                <hklmExists path="SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.0A" name="InstallationFolder" />
-                <hkcuExists path="SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.0A" name="InstallationFolder" />
+                <hklmExists path="SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.1A" name="InstallationFolder" />
+                <hkcuExists path="SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.1A" name="InstallationFolder" />
             </or>
         </SDKROOT>
         <PROF_ENV>
             <and>
-                <envVarExists name="VS100COMNTOOLS" />
+                <envVarExists name="VS120COMNTOOLS" />
                 <fileExists name="$$\..\IDE\devenv.exe" />
                 <not>
                     <fileExists name="$$\..\IDE\VCExpress.exe" />
@@ -85,7 +85,7 @@
         </PROF_ENV>
         <VCVARSALLDIR>
             <and>
-                <envVarExists name="VS100COMNTOOLS" />
+                <envVarExists name="VS120COMNTOOLS" />
                 <fileExists name="$$\..\..\VC\vcvarsall.bat" />
                 <dirExists name="$$"/>
             </and>
@@ -102,6 +102,11 @@
                 <fileExists name="$$\lib\x64\cudart.lib" />
                 <dirExists name="$$" />
               </and>
+               <and>
+                <envVarExists name="CUDA_PATH"/>
+                <fileExists name="$$\lib\x64\cufft.lib" />
+                <dirExists name="$$" />
+              </and>             
             </or>
         </CUDA_LIB_PATH>
         <CUDA_BIN_PATH>
@@ -131,7 +136,7 @@
     <env
         PATH="$CUDA_BIN_PATH;$VSROOT\VC\Bin\amd64;$VSROOT\VC\Bin\VCPackages;$VSROOT\Common7\IDE;$VSROOT\Common7\Tools;$VSROOT\Common7\Tools\bin;$SDKROOT\Bin\x64;$SDKROOT\Bin\win64\x64;$SDKROOT\Bin;$PATH"
         INCLUDE="$VSROOT\VC\ATLMFC\INCLUDE;$VSROOT\VC\INCLUDE;$SDKROOT\include;$MATLABROOT\extern\include;$MATLABROOT\toolbox\distcomp\gpu\extern\include"
-        LIB="$VSROOT\VC\ATLMFC\LIB\amd64;$VSROOT\VC\Lib\amd64;$SDKROOT\Lib\X64;$MATLABROOT\lib\$ARCH;$CUDA_LIB_PATH"
-        LIBPATH="&quot;$VSROOT\VC\Lib\amd64&quot;"
+        LIB="$VSROOT\VC\ATLMFC\LIB\amd64;$VSROOT\VC\Lib\amd64;$SDKROOT\Lib\X64;$MATLABROOT\lib\$ARCH;$CUDA_LIB_PATH;"
+        LIBPATH="$VSROOT\VC\Lib\amd64;"
     />
 </config>

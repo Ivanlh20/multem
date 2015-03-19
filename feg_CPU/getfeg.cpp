@@ -22,7 +22,8 @@
 
 #include <mex.h>
 	
-void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[]){
+void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
 	int PotPar, Z;
 	double *g, *feg, *dfeg;
 	int m, n, ng;

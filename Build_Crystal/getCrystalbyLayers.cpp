@@ -21,7 +21,8 @@
 #include <mex.h>
 
 /*******************Matlab to layer unit cell*********************/
-void f_Matlab2uLayer(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, int &nuLayer, sAtomsGroup *&uLayer){
+void f_Matlab2uLayer(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, int &nuLayer, sAtomsGroup *&uLayer)
+{
 int i, j, nAtoms;
 	double *AtomsM;
 
@@ -39,12 +40,14 @@ int i, j, nAtoms;
 	mexuLayer = mxGetField(mxCrystal, 0, "uLayer");
 	
 	uLayer = new sAtomsGroup[nuLayer];
-	for (i=0; i<nuLayer; i++){
+	for(i=0; i<nuLayer; i++)
+	{
 		mexAtoms = mxGetField(mexuLayer, i, "Atoms");
 		AtomsM = mxGetPr(mexAtoms);
 		uLayer[i].nAtoms = nAtoms = (int)mxGetM(mexAtoms);
 		uLayer[i].Atoms = new sAtoms[nAtoms];
-		for(j=0; j<nAtoms; j++){
+		for(j=0; j<nAtoms; j++)
+		{
 			uLayer[i].Atoms[j].x = a*AtomsM[0*nAtoms+j];
 			uLayer[i].Atoms[j].y = b*AtomsM[1*nAtoms+j];
 			uLayer[i].Atoms[j].z = c*AtomsM[2*nAtoms+j];
@@ -55,8 +58,9 @@ int i, j, nAtoms;
 	}
 }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-int na, nb, nc;
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
+	int na, nb, nc;
 	double a, b, c;
 	int nuLayer;
 	sAtomsGroup *uLayer;
@@ -70,7 +74,8 @@ int na, nb, nc;
 	AtomsM = mxGetPr(plhs[0]);
 	CrystalCPU.Create3DCrystal(nAtomsM, AtomsM);
 
-	for (int i=0; i<nuLayer; i++){
+	for(int i=0; i<nuLayer; i++)
+	{
 		uLayer[i].nAtoms = 0;
 		delete [] uLayer[i].Atoms; uLayer[i].Atoms = 0;
 	}

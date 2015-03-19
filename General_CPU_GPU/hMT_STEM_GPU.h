@@ -20,22 +20,14 @@
 #define hMT_STEM_GPU_H
 
 #include "hConstTypes.h"
-#include "hMT_General_CPU.h"
-#include "hMT_General_GPU.h"
-#include "hMT_Specimen_CPU.h"
-#include "hMT_Potential_GPU.h"
-#include "hMT_IncidentWave_GPU.h"
-#include "hMT_Detector_CPU.h"
+#include "hMT_InMulSli_CPU.h"
+#include "hMT_InMulSli_CPU.h"
 #include "hMT_Detector_GPU.h"
-#include "hMT_MulSli_GPU.h"
-
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <device_functions.h>
-#include <cufft.h>
 
 /*****************************STEM********************************/
 class cMT_STEM_GPU{
+	private:
+		int IdCall;
 	public:
 		int line;						// 0: Area, 1: Line
 		int ns;							// Sampling points

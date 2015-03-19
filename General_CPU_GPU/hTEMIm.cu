@@ -26,7 +26,8 @@
 #include <device_functions.h>
 #include <cufft.h>
 
-cTEMIm::cTEMIm(){
+cTEMIm::cTEMIm()
+{
 	gpu = 0;
 	MEffect = 0;
 	Psirh = 0;
@@ -45,7 +46,8 @@ cTEMIm::cTEMIm(){
 	PlanPsi = 0;
 }
 
-void cTEMIm::freeMemory(){
+void cTEMIm::freeMemory()
+{
 	gpu = 0;
 	MEffect = 0;
 	Psirh = 0;
@@ -66,7 +68,8 @@ void cTEMIm::freeMemory(){
 	MT_MicroscopeEffects_GPU.freeMemory();
 }
 
-void cTEMIm::GenerateParameters(){
+void cTEMIm::GenerateParameters()
+{
 	GP.nx = nx;
 	GP.ny = ny;
 	GP.nxh = GP.nx/2;
@@ -86,7 +89,7 @@ void cTEMIm::GenerateParameters(){
 	lambda = f_getLambda(E0);
 
 	f_sLens_Cal(lambda, GP, Lens);	// Lens coefficients
-	f_sBT_Cal(GP, BT);				// Blocks and threads
+	//f_sBT_Cal(GP, BT);			// Blocks and threads
 
 	cudaFreen(fPsi);
 	cudaMalloc((void**)&fPsi, GP.nxy*cSizeofCD);
@@ -105,7 +108,8 @@ void cTEMIm::GenerateParameters(){
 	//MT_MicroscopeEffects_GPU.SetInputData(BT, GP, Lens, PlanPsi, fPsi, Psia, M2Psit);
 }
 
-void cTEMIm::SetInputData(sInTEMIm &InTEMIm){
+void cTEMIm::SetInputData(sInTEMIm &InTEMIm)
+{
 	gpu = InTEMIm.gpu; 
 	MEffect = InTEMIm.MEffect;
 	Psirh= InTEMIm.Psirh;
@@ -138,7 +142,8 @@ void cTEMIm::SetInputData(sInTEMIm &InTEMIm){
  }
 
 // Partially coherent transfer function and Transmission cross coefficient
-void cTEMIm::TEMImage(double *Psir_hi, double *Psii_hi, double *M2Psi_ho){
+void cTEMIm::TEMImage(double *Psir_hi, double *Psii_hi, double *M2Psi_ho)
+{
 	sComplex Psi;
 	Psi.real = M2Psis, Psi.imag = M2Psit;
 	// Copy real part of Psi
@@ -146,20 +151,20 @@ void cTEMIm::TEMImage(double *Psir_hi, double *Psii_hi, double *M2Psi_ho){
 	// Copy imaginary part of Psi
 	cudaMemcpy(Psi.imag, Psii_hi, GP.nxy*cSizeofRD, cudaMemcpyHostToDevice);
 	// Set real and imaginary part to Psi
-	f_Set_MC(BT.Bnxy, BT.Tnxy, GP.nxy, Psi, fPsi);
+	//f_Set_MC_GPU(BT.Bnxy, BT.Tnxy, GP.nxy, Psi, fPsi);
 	// fft2shift
-	f_fft2Shift_MC(BT.Bhnxny, BT.Thnxny, GP.nxh, GP.nyh, fPsi);
+	//f_fft2Shift_MC_GPU(BT.Bhnxny, BT.Thnxny, GP.nxh, GP.nyh, fPsi);
 	// Forward fft2
 	cufftExecZ2Z(PlanPsi, fPsi, fPsi, CUFFT_FORWARD);
 
 	/*********************Microscope effects**********************/
-	//if (MEffect==0)
+	//if(MEffect==0)
 	//	MT_MicroscopeEffects_GPU.PCLIMWPOTEM(M2Psis);	
 	//else
 	//	MT_MicroscopeEffects_GPU.PCTCCTEM(M2Psis);
 	/************************************************************/
 	// fft2shift
-	f_fft2Shift_MD(BT.Bhnxny, BT.Thnxny, GP.nxh, GP.nyh, M2Psis);
+	//f_fft2Shift_MD_GPU(BT.Bhnxny, BT.Thnxny, GP.nxh, GP.nyh, M2Psis);
 	// copy M2Psi to the host
 	cudaMemcpy(M2Psi_ho, M2Psis, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
 }

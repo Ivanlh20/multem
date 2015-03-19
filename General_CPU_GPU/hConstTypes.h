@@ -65,7 +65,7 @@
 
 #define ccSynCPU 5;
 
-#define NE 103
+#define stNAE 103
 #define stncVp 16
 #define stnQz 128
 #define stnR 128
@@ -90,12 +90,14 @@
 #define IsFS(i,nh)	((i<nh)?i:i-2*nh)
 #define IsRS(i,nh)	((i<nh)?i+nh:i-nh)
 
-#define cudaFreen(x)	if(x != 0){\
+#define cudaFreen(x)	if(x != 0)\
+						{\
 							cudaFree(x);\
 							x = 0;\
 						}
 
-#define cufftDestroyn(x)	if(x != 0){\
+#define cufftDestroyn(x)	if(x != 0)\
+							{\
 								cufftDestroy(x);\
 								x = 0;\
 							}
@@ -103,11 +105,23 @@
 const int cSizeofI = sizeof(int);
 const int cSizeofRD = sizeof(double);
 const int cSizeofRF = sizeof(float);
-const int cSizeofCD = sizeof(double2);
-const int cMb = 1024*1024;
+const int cSizeofCD = 2*cSizeofRD;
+const size_t cMb = 1024*1024;
+const size_t cGb = 1024*1024*1024;
 
 enum eMULTEMType{
 	eMTT_FLOAT=1, eMTT_DOUBLE=2
+};
+
+/******************************Input File***********************************/
+enum eInputFile{
+ eIFtxt = 1, eIFpdb = 2
+};
+
+
+/******************************Color map***********************************/
+enum eColorMap{
+ eCMgray = 1, eCMhot = 2, eCMcool = 3, eCMjet = 4, eCMcopper = 5, eCMsummer = 6, eCMautumn = 7, eCMwinter = 8
 };
 
 /*************************Real or Fourier space****************************/
@@ -126,24 +140,12 @@ typedef struct sComplex{
 
 } sComplex;
 
-/************Scattering factors parameterization************/
-typedef struct sCoefCPU{
-	// Lineal coefficients fep
-	double cl[6];
-	// Non-Lineal coefficients fep
-	double cnl[6];
-} sCoefCPU;
-
 typedef struct sCoefPar{
 	// Lineal coefficients fep
 	double *cl;
 	// Non-Lineal coefficients fep
 	double *cnl;
 } sCoefPar;
-
-typedef struct sfep{	
-	sCoefCPU Par[6];
-} sfep;
 
 /*****************Atom inside the specimen******************/
 typedef struct sAtoms {
@@ -178,7 +180,7 @@ typedef struct sSlice{
 const int cSizeofSlice = sizeof(sSlice);
 
 /***********************Atomic data*************************/
-typedef struct sAtDa{
+typedef struct sAtomicData{
 	// atomic number
 	int Z;
 	// atomic mass
@@ -189,7 +191,7 @@ typedef struct sAtDa{
 	double rn;
 	// atomic radius
 	double ra;
-} sAtDa;
+} sAtomicData;
 
 /***********************distribution*************************/
 typedef struct sHt{
@@ -303,57 +305,62 @@ const int cSizeofcVp = sizeof(scVp);
 
 /************************Atomic type************************/
 class cMT_AtomTypes{
-    public:
-        int Z;			// Atomic number
-        double m;		// Atomic mass
-        int A;			// Mass number
-        double rn_e;	// Experimental Nuclear radius
-        double rn_c;	// Calculated Nuclear radius
-        double ra_e;	// Experimental atomic radius
-        double ra_c;	// Calculated atomic radius
-        double Rmin;	// Minimum interaction radius
-        double Rmax;	// Maximum interaction radius
-        double Rmin2;	// Minimum interaction radius squared
-        double Rmax2;	// Maximum interaction radius squared
+public:
+	int IdCall;
+	int Z;			// Atomic number
+	double m;		// Atomic mass
+	int A;			// Mass number
+	double rn_e;	// Experimental Nuclear radius
+	double rn_c;	// Calculated Nuclear radius
+	double ra_e;	// Experimental atomic radius
+	double ra_c;	// Calculated atomic radius
+	double Rmin;	// Minimum interaction radius
+	double Rmax;	// Maximum interaction radius
+	double Rmin2;	// Minimum interaction radius squared
+	double Rmax2;	// Maximum interaction radius squared
 
-        sCoefPar cfeg;	// Electron scattering factor coefficients
-        sCoefPar cfxg;	// X-ray scattering factor coefficients
-        sCoefPar cPr;	// Potential coefficients
-        sCoefPar cVr;	// Potential coefficients
-        sCoefPar cVR;	// Projected potential coefficients
+	sCoefPar cfeg;	// Electron scattering factor coefficients
+	sCoefPar cfxg;	// X-ray scattering factor coefficients
+	sCoefPar cPr;	// Potential coefficients
+	sCoefPar cVr;	// Potential coefficients
+	sCoefPar cVR;	// Projected potential coefficients
 
-        int nR;			// Number of grid points
-        double *R;		// R Grid
-        double *R2;		// R2 Grid
-        sciVn ciVR;		// Look up table - Projected potential coefficients
+	int nR;			// Number of grid points
+	double *R;		// R Grid
+	double *R2;		// R2 Grid
+	sciVn ciVR;		// Look up table - Projected potential coefficients
 
-        virtual void freeMemory()=0;
+	virtual void freeMemory()=0;
 
-        cMT_AtomTypes(){
-            Z = 0;
-            m = 0;
-            A = 0;
-            rn_e = 0;
-            rn_c = 0;
-            ra_e = 0;
-            ra_c = 0;
-            Rmin = 0;
-            Rmax = 0;
-            Rmin2 = 0;
-            Rmax2 = 0;
+	 cMT_AtomTypes()
+	 {
+		IdCall = 0;
 
-            cfeg.cl = cfeg.cnl = 0;
-            cfxg.cl = cfxg.cnl = 0;
-            cPr.cl = cPr.cnl = 0;
-            cVr.cl = cVr.cnl = 0;
-            cVR.cl = cVR.cnl = 0;
+		Z = 0;
+		m = 0;
+		A = 0;
+		rn_e = 0;
+		rn_c = 0;
+		ra_e = 0;
+		ra_c = 0;
+		Rmin = 0;
+		Rmax = 0;
+		Rmin2 = 0;
+		Rmax2 = 0;
 
-            nR = 0;
-            R = 0;
-            R2 = 0;
-            ciVR.c0 = ciVR.c1 = 0;
-            ciVR.c2 = ciVR.c3 = 0;
-        }
+		cfeg.cl = cfeg.cnl = 0;
+		cfxg.cl = cfxg.cnl = 0;
+		cPr.cl = cPr.cnl = 0;
+		cVr.cl = cVr.cnl = 0;
+		cVR.cl = cVR.cnl = 0;
+
+		nR = 0;
+		R = 0;
+		R2 = 0;
+		ciVR.c0 = ciVR.c1 = 0;
+		ciVR.c2 = ciVR.c3 = 0;
+	 }
+
 };
 
 /****************************Lens*******************************/

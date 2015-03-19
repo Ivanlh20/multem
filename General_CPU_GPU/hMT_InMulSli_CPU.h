@@ -44,7 +44,7 @@ class cMT_InMulSli_CPU{
 		int nThk;					// Number of thickness
 		double *Thk;				// Array of thicknesses
 		int Psi0Typ;				// 1: Automatic, 2: User define
-		sComplex Psi0;              // Input wave
+		sComplex Psi0; // Input wave
 
 		double E0;					// Acceleration volatage in KeV
 		double theta;				// incident tilt (in spherical coordinates) (rad)
@@ -96,11 +96,13 @@ class cMT_InMulSli_CPU{
 
 
 		void freeMemory();
+		void Default_Values();
 		cMT_InMulSli_CPU();
 		~cMT_InMulSli_CPU();
 };
 
-inline void cMT_InMulSli_CPU::freeMemory(){
+inline void cMT_InMulSli_CPU::freeMemory()
+{
 	gpu = 0;
 	SimType = 0;
 	nConfFP = 0;
@@ -117,7 +119,7 @@ inline void cMT_InMulSli_CPU::freeMemory(){
 	ThkTyp = 0;
 	nThk = 0;
 	delete [] Thk; Thk = 0;
-	Psi0Typ = 0;
+	Psi0Typ = 1;
 	Psi0.real = 0;
 	Psi0.imag = 0;
 
@@ -171,9 +173,11 @@ inline void cMT_InMulSli_CPU::freeMemory(){
 	HCI_theta = 0;
 }
 
-inline cMT_InMulSli_CPU::cMT_InMulSli_CPU(){
+inline cMT_InMulSli_CPU::cMT_InMulSli_CPU()
+{
 	gpu = 0;
 	SimType = 0;
+	MulOrder = 2;
 	nConfFP = 0;
 	DimFP = 0;
 	SeedFP = 0;
@@ -185,10 +189,11 @@ inline cMT_InMulSli_CPU::cMT_InMulSli_CPU(){
 	ApproxModel = 0;
 	BWL = 0;
 	FastCal = 0;
+	PBC_xy = 0;
 	ThkTyp = 0;
 	nThk = 0;
 	Thk = 0;
-	Psi0Typ = 0;
+	Psi0Typ = 1;
 	Psi0.real = 0;
 	Psi0.imag = 0;
 
@@ -242,8 +247,84 @@ inline cMT_InMulSli_CPU::cMT_InMulSli_CPU(){
 	HCI_theta = 0;
 }
 
-inline cMT_InMulSli_CPU::~cMT_InMulSli_CPU(){
+inline cMT_InMulSli_CPU::~cMT_InMulSli_CPU()
+{
 	freeMemory();
+}
+
+inline void cMT_InMulSli_CPU::Default_Values()
+{
+	gpu = 0;
+ SimType = 32;
+	MulOrder = 2;	
+	nConfFP = 0;
+	DimFP = 111;
+	DistFP = 1;
+	SeedFP = 1983;
+	PotPar = 6;
+	MEffect = 1;		
+	STEffect = 1;	
+	ZeroDefTyp = 3;
+	ZeroDefPlane = 0;
+	ApproxModel = 2;
+	BWL = 1;
+	FastCal = 1;
+	PBC_xy = 1;
+	ThkTyp = 1;
+	nThk = 1;
+	Thk = new double[nThk];
+	Psi0Typ = 1;
+	Psi0.real = 0;
+	Psi0.imag = 0;
+
+	E0 = 200;
+	theta = 0;
+	phi = 0;
+	nx = 2048;
+	ny = 2048;
+	lx = 54.307;
+	ly = 54.307;
+	dz = 1.0195;
+
+	MC_m = 0;
+	MC_f = 1110;
+	MC_Cs3 = 1.0*mm2Ags;
+	MC_Cs5 = 0;
+	MC_mfa2 = 0;
+	MC_afa2 = 0;
+	MC_mfa3 = 0;
+	MC_afa3 = 0;
+	MC_aobjl = 0;
+	MC_aobju = 1000*mrad2rad;
+	MC_sf = 88;
+	MC_nsf = 10;
+	MC_beta = 0.2;
+	MC_nbeta = 10;
+
+	nAtomsM = 0;
+	AtomsM = 0;
+
+	STEM_line = 1;
+	STEM_ns = 10;
+	STEM_x1u = 0;
+	STEM_y1u = 0;
+	STEM_x2u = 1.0;
+	STEM_y2u = 1.0;
+	
+	STEM_nDet = 1;
+	STEM_DetCir = 0;
+
+	CBED_x0 = 0;
+	CBED_y0 = 0;
+
+	CBEI_x0 = 0;
+	CBEI_y0 = 0;
+
+	PED_nrot = 0;
+	PED_theta = 0;
+
+	HCI_nrot = 0;
+	HCI_theta = 0;
 }
 
 #endif

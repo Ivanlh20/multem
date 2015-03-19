@@ -22,22 +22,24 @@
 #include "hPotential_CPU.h"
 #include <mex.h>
 
-void GetAtomicRadius(int PotPar, int Dim, double Vrl, double *r){
+void GetAtomicRadius(int PotPar, int Dim, double Vrl, double *r)
+{
 	int nMT_AtomTypes;
 	cMT_AtomTypes_CPU *MT_AtomTypes_CPU;
 
-	nMT_AtomTypes = NE;
+	nMT_AtomTypes = stNAE;
 	MT_AtomTypes_CPU = new cMT_AtomTypes_CPU[nMT_AtomTypes];
 	for(int i=0; i<nMT_AtomTypes; i++)
 		MT_AtomTypes_CPU[i].SetAtomTypes(i+1, PotPar, Vrl, stnR, 0);
 
 	cPotential_CPU Potential_CPU;
-	for (int i=0; i<NE; i++){	
+	for(int i=0; i<stNAE; i++)
+	{	
 		Potential_CPU.SetAtomTypes(PotPar, &(MT_AtomTypes_CPU[i]));
 		Potential_CPU.SetSigma(0.0);
 		r[i] = Potential_CPU.AtomicRadius_rms(Dim);
-		r[i+NE] = Potential_CPU.AtomicRadius_Cutoff(Dim, Vrl);
-		r[i+2*NE] = MT_AtomTypes_CPU[i].ra_e;
+		r[i+stNAE] = Potential_CPU.AtomicRadius_Cutoff(Dim, Vrl);
+		r[i+2*stNAE] = MT_AtomTypes_CPU[i].ra_e;
 	}
 
 	delete [] MT_AtomTypes_CPU; MT_AtomTypes_CPU = 0;
@@ -51,7 +53,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	Dim = (int)mxGetScalar(prhs[1]);
 	Vrl = mxGetScalar(prhs[2]);
 
-	plhs[0] = mxCreateDoubleMatrix(NE, 3, mxREAL);
+	plhs[0] = mxCreateDoubleMatrix(stNAE, 3, mxREAL);
 	r = mxGetPr(plhs[0]);
 
 	GetAtomicRadius(PotPar, Dim, Vrl, r);

@@ -22,7 +22,8 @@
 #include <mex.h>
 
 // From MT_AtomTypes_CPU to Matlab structure 
-void f_AtomTypesCPU2Matlab(int nAtomTypesCPU, cMT_AtomTypes_CPU *&MT_AtomTypes_CPU, mxArray *&mxAtomTypesCPU){
+void f_AtomTypesCPU2Matlab(int nAtomTypesCPU, cMT_AtomTypes_CPU *&MT_AtomTypes_CPU, mxArray *&mxAtomTypesCPU)
+{
 	const char *field_names[] = {"Z", "m", "A", "rn_e", "rn_c", "ra_e", "ra_c", "Rmin", "Rmax", "cfeg", "cfxg", "cPr", "cVr", "cVR", "R2", "ciVR"};
 	int number_of_fields = 16;
 	mwSize dims[2] = {nAtomTypesCPU, 1};
@@ -40,7 +41,8 @@ void f_AtomTypesCPU2Matlab(int nAtomTypesCPU, cMT_AtomTypes_CPU *&MT_AtomTypes_C
 	int i, j;
 
 	mxAtomTypesCPU = mxCreateStructArray(2, dims, number_of_fields, field_names);
-	for (i=0; i<nAtomTypesCPU; i++){
+	for(i=0; i<nAtomTypesCPU; i++)
+	{
 		CreateSetValue2mxField(mxAtomTypesCPU, i, "Z", MT_AtomTypes_CPU[i].Z);
 		CreateSetValue2mxField(mxAtomTypesCPU, i, "m", MT_AtomTypes_CPU[i].m);
 		CreateSetValue2mxField(mxAtomTypesCPU, i, "A", MT_AtomTypes_CPU[i].A);
@@ -92,13 +94,14 @@ void f_AtomTypesCPU2Matlab(int nAtomTypesCPU, cMT_AtomTypes_CPU *&MT_AtomTypes_C
 	}
 }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
 	int nMT_AtomTypes;
 	cMT_AtomTypes_CPU *MT_AtomTypes_CPU;
 
 	int PotPar = (int)mxGetScalar(prhs[0]);
 
-	nMT_AtomTypes = NE;
+	nMT_AtomTypes = stNAE;
 	MT_AtomTypes_CPU = new cMT_AtomTypes_CPU[nMT_AtomTypes];
 
 	for(int i=0; i<nMT_AtomTypes; i++)

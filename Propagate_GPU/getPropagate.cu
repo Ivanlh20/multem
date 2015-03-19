@@ -43,7 +43,8 @@ class cPropagator{
 		void Propagate(double dz, sComplex &Psih);
 };
 
-void cPropagator::freeMemory(){
+void cPropagator::freeMemory()
+{
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 	f_sGP_Init(GP);
 	f_sACD_cudaFree(Prop_x);
@@ -55,11 +56,13 @@ void cPropagator::freeMemory(){
 	cufftDestroyn(PlanPsi);
 }
 
-cPropagator::~cPropagator(){
+cPropagator::~cPropagator()
+{
 	freeMemory();
 }
 
-cPropagator::cPropagator(){
+cPropagator::cPropagator()
+{
 	f_sGP_Init(GP);
 	f_sACD_cudaInit(Prop_x);
 	f_sACD_cudaInit(Prop_y);
@@ -70,7 +73,8 @@ cPropagator::cPropagator(){
 	PlanPsi = 0;
 }
 
-void cPropagator::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sComplex &Psiih){
+void cPropagator::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sComplex &Psiih)
+{
 	freeMemory();
 
 	cudaSetDevice(MT_MGP_CPU_i->gpu);
@@ -86,20 +90,22 @@ void cPropagator::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sComplex &Psiih){
 
 	cudaMemcpy(Psii.real, Psiih.real, GP.nxy*cSizeofRD, cudaMemcpyHostToDevice);
 	cudaMemcpy(Psii.imag, Psiih.imag, GP.nxy*cSizeofRD, cudaMemcpyHostToDevice);
-	f_fft2Shift_MC(GP, Psii);
+	f_fft2Shift_MC_GPU(GP, Psii);
 }
 
-void cPropagator::Propagate(double dz, sComplex &Psih){
+void cPropagator::Propagate(double dz, sComplex &Psih)
+{
 	double gxu = 0, gyu = 0;
-	f_Set_MC(GP, Psii, Psi);
-	f_Propagate(PlanPsi, GP, eSReal, gxu, gyu, lambda, dz, Prop_x, Prop_y, Psi);
+	f_Set_MC_GPU(GP, Psii, Psi);
+	f_Propagate_GPU(PlanPsi, GP, eSReal, gxu, gyu, lambda, dz, Prop_x, Prop_y, Psi);
 	// fft2shift 
-	f_fft2Shift_MC(GP, Psi);
+	f_fft2Shift_MC_GPU(GP, Psi);
 	/*********************copy data to host************************/
 	f_Copy_MCd(GP, Psi, Psii.real, Psii.imag, Psih);
 }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
 	cMT_MGP_CPU MT_MGP_CPU;
 	sComplex Psiih, Psioh;
 	cPropagator Propagator;

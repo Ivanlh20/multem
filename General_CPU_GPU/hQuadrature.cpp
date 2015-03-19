@@ -16,27 +16,31 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstring>
 #include "hmathCPU.h"
-#include <memory.h>
 #include "hConstTypes.h"
 #include "hQuadrature.h"
 
-cQuadrature::cQuadrature(){
+cQuadrature::cQuadrature()
+{
 	Q.x = 0;
 	Q.w = 0;
 }
 
-cQuadrature::~cQuadrature(){
+cQuadrature::~cQuadrature()
+{
 	delete [] Q.x; Q.x = 0;
 	delete [] Q.w; Q.w = 0;
 }
 
-void cQuadrature::ReadQuadrature(int qii, int nqi, sQ1 &Qo, double tai){
+void cQuadrature::ReadQuadrature(int qii, int nqi, sQ1 &Qo, double tai)
+{
 	double xmin, xmax, rmax = 225;
 	delete [] Q.x; Q.x = new double [nqi];
 	delete [] Q.w; Q.w = new double [nqi];
 
-	switch (qii){
+	switch(qii)
+	{
 		case 0:
 			xmin = -1+1e-14; xmax = 1-1e-14;
 			CoefTanhSinh(nqi, xmin, xmax);
@@ -80,13 +84,15 @@ void cQuadrature::ReadQuadrature(int qii, int nqi, sQ1 &Qo, double tai){
 }
 
 // 0: int_-1^1 f(x) dx
-void cQuadrature::CoefTanhSinh(int n, double xmin, double xmax){
+void cQuadrature::CoefTanhSinh(int n, double xmin, double xmax)
+{
 	double t, tt;
 	double tmin = asinhCPU(atanhCPU(xmin)/ci2Pi);
 	double tmax = asinhCPU(atanhCPU(xmax)/ci2Pi);
 	double h = (tmax-tmin)/(n-1);
 
-	for (int i=0; i<n; i++){
+	for(int i=0; i<n; i++)
+	{
 		t = tmin + i*h;
 		tt = ci2Pi*sinh(t);
 		Q.x[i] = tanh(tt);
@@ -95,13 +101,15 @@ void cQuadrature::CoefTanhSinh(int n, double xmin, double xmax){
 }
 
 // 1: int_0^infty f(x) dx
-void cQuadrature::CoefExpSinh(int n, double xmin, double xmax){
+void cQuadrature::CoefExpSinh(int n, double xmin, double xmax)
+{
 	double t;
 	double tmin = asinhCPU(log(xmin)/ci2Pi);
 	double tmax = asinhCPU(log(xmax)/ci2Pi);
 	double h = (tmax-tmin)/(n-1);
 
-	for (int i=0; i<n; i++){
+	for(int i=0; i<n; i++)
+	{
 		t = tmin + i*h;
 		Q.x[i] = exp(ci2Pi*sinh(t));
 		Q.w[i] = h*ci2Pi*cosh(t)*Q.x[i];
@@ -109,7 +117,8 @@ void cQuadrature::CoefExpSinh(int n, double xmin, double xmax){
 }
 
 // 2: int_0^infty f(x)exp(-x) dx
-void cQuadrature::CoefExpExp(int n, double xmin, double xmax){
+void cQuadrature::CoefExpExp(int n, double xmin, double xmax)
+{
 	double t;
 	double tmin = -log(-log(xmin));
 	tmin = tmin - (tmin-exp(-tmin)-log(xmin))/(1.0+exp(-tmin));
@@ -121,7 +130,8 @@ void cQuadrature::CoefExpExp(int n, double xmin, double xmax){
 
 	double h = (tmax-tmin)/(n-1);
 
-	for (int i=0; i<n; i++){
+	for(int i=0; i<n; i++)
+	{
 		t = tmin + i*h;
 		Q.x[i] = exp(t-exp(-t));
 		Q.w[i] = h*Q.x[i]*(1.0+exp(-t));
@@ -129,13 +139,15 @@ void cQuadrature::CoefExpExp(int n, double xmin, double xmax){
 }
 
 // 3: int_-infty^infty f(x) dx
-void cQuadrature::CoefSinhSinh(int n, double xmin, double xmax){
+void cQuadrature::CoefSinhSinh(int n, double xmin, double xmax)
+{
 	double t, tt;
 	double tmin = asinhCPU(asin(xmin)/ci2Pi);
 	double tmax = asinhCPU(asin(xmax)/ci2Pi);
 	double h = (tmax-tmin)/(n-1);
 
-	for (i=0; i<n; i++){
+	for(i=0; i<n; i++)
+	{
 		t = tmin + i*h;
 		tt = ci2Pi*sinh(t);
 		Q.x[i] = sinh(tt);
@@ -144,19 +156,24 @@ void cQuadrature::CoefSinhSinh(int n, double xmin, double xmax){
 }
 
 // 4: int_0^infty f(x)sin(wx) dx
-void cQuadrature::CoefFourierTypeSin(int n, double ta){
+void cQuadrature::CoefFourierTypeSin(int n, double ta)
+{
 	double M, h, k;
 	double t, ut, phi, dphi;
 
 	h = 2.0*ta/n; 
 	M = cPi/h; k = 6;
 
-	for (int i=0; i<n; i++){
+	for(int i=0; i<n; i++)
+	{
 		t = -ta + (i+1)*h;
-		if (t==0){
+		if(t==0)
+		{
 			phi = 1.0/k; dphi = 0.5;
-			Q.x[i] = M*phi; Q.w[i]= cPi*dphi*sin(M*phi);
-		}else{
+			Q.x[i] = M*phi; Q.w[i] = cPi*dphi*sin(M*phi);
+		}
+		else
+		{
 			ut = 1.0-exp(-k*sinh(t));
 			phi = t/ut; dphi = (1.0+(1.0+k*t*cosh(t))*(ut-1))/(ut*ut);
 			Q.x[i] = M*phi; Q.w[i] = cPi*dphi*sin(M*phi);
@@ -165,19 +182,24 @@ void cQuadrature::CoefFourierTypeSin(int n, double ta){
 }
 
 // 5: int_0^infty f(x)Cos(wx) dx
-void cQuadrature::CoefFourierTypeCos(int n, double ta){
+void cQuadrature::CoefFourierTypeCos(int n, double ta)
+{
 	double M, h, k;
 	double t, ut, phi, dphi;
 
 	h = 2.0*ta/n; 
 	M = cPi/h; k = 6.0;
 
-	for (int i=0; i<n; i++){
+	for(int i=0; i<n; i++)
+	{
 		t = -ta + (i+0.5)*h;
-		if (t==0){
+		if(t==0)
+		{
 			phi = 1.0/k; dphi = 0.5;
-			Q.x[i] = M*phi; Q.w[i]= cPi*dphi*cos(M*phi);
-		}else{
+			Q.x[i] = M*phi; Q.w[i] = cPi*dphi*cos(M*phi);
+		}
+		else
+		{
 			ut = 1.0-exp(-k*sinh(t));
 			phi = t/ut; dphi = (1.0+(1.0+k*t*cosh(t))*(ut-1))/(ut*ut);
 			Q.x[i] = M*phi; Q.w[i] = cPi*dphi*cos(M*phi);
@@ -185,8 +207,10 @@ void cQuadrature::CoefFourierTypeCos(int n, double ta){
 	}
 }
 
-void cQuadrature::CoefGaussLegrendre(int n){
-	switch (n){
+void cQuadrature::CoefGaussLegrendre(int n)
+{
+	switch(n)
+	{
 		case 2:
 			Q.x[0] = 5.7735026918962576e-1;		 Q.w[0] = 1.0000000000000000e0;
 			Q.x[1] = -5.7735026918962576e-1;		 Q.w[1] = 1.0000000000000000e0;
@@ -1320,8 +1344,10 @@ void cQuadrature::CoefGaussLegrendre(int n){
 	}
 }
 
-void cQuadrature::CoefGaussHermitezero2pinfty(int n){
-	switch (n){
+void cQuadrature::CoefGaussHermitezero2pinfty(int n)
+{
+	switch(n)
+	{
 		case 2:
 			Q.x[0] = 3.0019393106083942e-1;		 Q.w[0] = 6.4052917968437860e-1;
 			Q.x[1] = 1.2524210453337172e0;		 Q.w[1] = 2.4569774576837941e-1;
@@ -2455,8 +2481,10 @@ void cQuadrature::CoefGaussHermitezero2pinfty(int n){
 	}
 }
 
-void cQuadrature::CoefGaussHermiteninfty2pinfty(int n){
-	switch (n){
+void cQuadrature::CoefGaussHermiteninfty2pinfty(int n)
+{
+	switch(n)
+	{
 		case 2:
 			 Q.x[0] = 7.0710678118654752e-1;		 Q.w[0] = 8.8622692545275801e-1;
 			 Q.x[1] = -7.0710678118654752e-1;		 Q.w[1] = 8.8622692545275801e-1;
@@ -10969,8 +10997,10 @@ void cQuadrature::CoefGaussHermiteninfty2pinfty(int n){
 	}
 }
 
-void cQuadrature::CoefGaussLaguerrex0zero2pinfty(int n){
-	switch (n){
+void cQuadrature::CoefGaussLaguerrex0zero2pinfty(int n)
+{
+	switch(n)
+	{
 		case 2:
 			Q.x[0] = 5.8578643762690495e-1;		 Q.w[0] = 8.5355339059327376e-1;
 			Q.x[1] = 3.4142135623730950e0;		 Q.w[1] = 1.4644660940672624e-1;
@@ -12104,8 +12134,10 @@ void cQuadrature::CoefGaussLaguerrex0zero2pinfty(int n){
 	}
 }
 
-void cQuadrature::CoefGaussLaguerrexnhzero2pinfty(int n){
-	switch (n){
+void cQuadrature::CoefGaussLaguerrexnhzero2pinfty(int n)
+{
+	switch(n)
+	{
 		case 2:
 			Q.x[0] = 2.7525512860841095e-1;		 Q.w[0] = 1.6098281800110257e0;
 			Q.x[1] = 2.7247448713915890e0;		 Q.w[1] = 1.6262567089449035e-1;

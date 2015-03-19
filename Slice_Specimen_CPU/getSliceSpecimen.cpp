@@ -22,7 +22,8 @@
 #include "hMT_Specimen_CPU.h"
 #include <mex.h>
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
 	int nAtomsM, iConfFP, nAtoms;
 	double *AtomsM;
 	cMT_MGP_CPU MT_MGP_CPU;
@@ -50,7 +51,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	plhs[1] = mxCreateDoubleMatrix(nSlice, 8, mxREAL);
 	double *Slice = mxGetPr(plhs[1]);
 
-	for (int i=0; i<nAtoms; i++){
+	for(int i=0; i<nAtoms; i++)
+	{
 		Atoms[0*nAtoms+i] = MT_Specimen_CPU.Atoms[i].x;
 		Atoms[1*nAtoms+i] = MT_Specimen_CPU.Atoms[i].y;
 		Atoms[2*nAtoms+i] = MT_Specimen_CPU.Atoms[i].z;
@@ -59,7 +61,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 		Atoms[5*nAtoms+i] = MT_Specimen_CPU.Atoms[i].occ;
 	}
 
-	for (int i=0; i<nSlice; i++){
+	for(int i=0; i<nSlice; i++)
+	{
 		Slice[0*nSlice+i] = MT_Specimen_CPU.Slice[i].z0;
 		Slice[1*nSlice+i] = MT_Specimen_CPU.Slice[i].ze;
 		Slice[2*nSlice+i] = MT_Specimen_CPU.Slice[i].z0_id+1;

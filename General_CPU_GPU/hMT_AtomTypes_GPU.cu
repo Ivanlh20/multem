@@ -27,7 +27,13 @@
 #include <device_functions.h>
 
 // free memory
-void cMT_AtomTypes_GPU::freeMemory(){
+void cMT_AtomTypes_GPU::freeMemory()
+{
+	if(IdCall==0)
+	{
+		return;
+	}
+
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
 	Z = 0;
@@ -55,8 +61,10 @@ void cMT_AtomTypes_GPU::freeMemory(){
 };
 
 // Set Atom type
-void cMT_AtomTypes_GPU::SetAtomTypes(cMT_AtomTypes_CPU &MT_AtomTypes_CPU_i){
+void cMT_AtomTypes_GPU::SetAtomTypes(cMT_AtomTypes_CPU &MT_AtomTypes_CPU_i)
+{
 	freeMemory(); // clean GPU memory
+	IdCall++;
 
 	Z = MT_AtomTypes_CPU_i.Z;
 	m = MT_AtomTypes_CPU_i.m;

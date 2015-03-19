@@ -20,7 +20,8 @@
 #include "hfxegTabData.h"
 #include <mex.h>
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
 	int Z, ng, typ;
 	double g[1024], g2[1024], fxg[1024], feg[1024];
 	cfxegTabData fxegTabData;

@@ -21,7 +21,8 @@
 #include "hPotential_CPU.h"
 #include <mex.h>
 	
-void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[]){
+void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
 	int Z, PotPar, IntType, Dim;
 	double sigma, *r, *Vr, *dVr;
 	int m, n, nr;

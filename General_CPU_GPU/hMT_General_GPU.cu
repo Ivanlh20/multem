@@ -26,18 +26,206 @@
 #include <device_functions.h>
 #include <cufft.h>
 
+/***************************************************************************/
+/***************************************************************************/
+
+void f_ReadQuadratureGPU(int typ, int nQGPU, sQ1 &QGPU)
+{
+	if(nQGPU<=0) return;
+
+	sQ1 QCPU;
+	QCPU.x = new double[nQGPU]; 
+	QCPU.w = new double[nQGPU];
+	cQuadrature Quad;
+	Quad.ReadQuadrature(typ, nQGPU, QCPU);
+	cudaMalloc((void**)&(QGPU.x), nQGPU*cSizeofRD);
+	cudaMemcpy(QGPU.x, QCPU.x, nQGPU*cSizeofRD, cudaMemcpyHostToDevice);
+	cudaMalloc((void**)&(QGPU.w), nQGPU*cSizeofRD);
+	cudaMemcpy(QGPU.w, QCPU.w, nQGPU*cSizeofRD, cudaMemcpyHostToDevice);
+	delete [] QCPU.x;
+	delete [] QCPU.w;
+}
+
+void f_ReadQuadratureCPUGPU(int typ, int nQ, sQ1 &QCPU, sQ1 &QGPU)
+{
+	if(nQ<=0) return;
+
+	QCPU.x = new double[nQ]; 
+	QCPU.w = new double[nQ];
+	cQuadrature Quad;
+	Quad.ReadQuadrature(typ, nQ, QCPU);
+	cudaMalloc((void**)&(QGPU.x), nQ*cSizeofRD);
+	cudaMemcpy(QGPU.x, QCPU.x, nQ*cSizeofRD, cudaMemcpyHostToDevice);
+	cudaMalloc((void**)&(QGPU.w), nQ*cSizeofRD);
+	cudaMemcpy(QGPU.w, QCPU.w, nQ*cSizeofRD, cudaMemcpyHostToDevice);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sCoefPar_cudaFree(sCoefPar &CoefPar)
+{
+	cudaFreen(CoefPar.cl);
+	cudaFreen(CoefPar.cnl);
+}
+
+void f_sCoefPar_cudaInit(sCoefPar &CoefPar)
+{
+	CoefPar.cl = 0;
+	CoefPar.cnl = 0;
+}
+
+void f_sCoefPar_cudaMalloc(int nCoefPar, sCoefPar &CoefPar)
+{
+	if(nCoefPar<=0)
+	{
+		return;
+	}
+
+	cudaMalloc((void**)&(CoefPar.cl), nCoefPar*cSizeofRD);
+	cudaMalloc((void**)&(CoefPar.cnl), nCoefPar*cSizeofRD);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sciVn_cudaFree(sciVn &ciVn)
+{
+	cudaFreen(ciVn.c0);
+	cudaFreen(ciVn.c1);
+	cudaFreen(ciVn.c2);
+	cudaFreen(ciVn.c3);
+}
+
+void f_sciVn_cudaInit(sciVn &ciVn)
+{
+	ciVn.c0 = 0;
+	ciVn.c1 = 0;
+	ciVn.c2 = 0;
+	ciVn.c3 = 0;
+}
+
+void f_sciVn_cudaMalloc(int nciVn, sciVn &ciVn)
+{
+	if(nciVn<=0)
+	{
+		return;
+	}
+
+	cudaMalloc((void**)&(ciVn.c0), nciVn*cSizeofRD);
+	cudaMalloc((void**)&(ciVn.c1), nciVn*cSizeofRD);
+	cudaMalloc((void**)&(ciVn.c2), nciVn*cSizeofRD);
+	cudaMalloc((void**)&(ciVn.c3), nciVn*cSizeofRD);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sDetCir_cudaFree(sDetCir &DetCir)
+{
+	cudaFreen(DetCir.g2min);
+	cudaFreen(DetCir.g2max);
+}
+
+void f_sDetCir_cudaInit(sDetCir &DetCir)
+{
+	DetCir.g2min = 0;
+	DetCir.g2max = 0;
+}
+
+void f_sDetCir_cudaMalloc(int nDetCir, sDetCir &DetCir)
+{
+	if(nDetCir<=0)
+	{
+		return;
+	}
+
+	cudaMalloc((void**)&(DetCir.g2min), nDetCir*cSizeofRD);
+	cudaMalloc((void**)&(DetCir.g2max), nDetCir*cSizeofRD);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_sACD_cudaFree(sACD &ACD)
+{
+	cudaFreen(ACD.x);
+	cudaFreen(ACD.y);
+}
+
+void f_sACD_cudaInit(sACD &ACD)
+{
+	ACD.x = 0;
+	ACD.y = 0;
+}
+
+void f_sACD_cudaMalloc(int nACD, sACD &ACD)
+{
+	if(nACD<=0) return;
+
+	cudaMalloc((void**)&(ACD.x), nACD*cSizeofRD);
+	cudaMalloc((void**)&(ACD.y), nACD*cSizeofRD);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_GPU_Sync_CPU(int &iSynCPU, int &cSynCPU)
+{
+	if(cSynCPU<0) cSynCPU = ccSynCPU;
+
+	iSynCPU++;
+	if(iSynCPU%cSynCPU==0)
+		cudaDeviceSynchronize();
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+void f_get_BTnxny(sGP &GP, dim3 &B, dim3 &T)
+{
+	B.x = (GP.ny+thrnxny-1)/thrnxny; B.y = (GP.nx+thrnxny-1)/thrnxny; B.z = 1;
+	T.x = thrnxny; T.y = thrnxny; T.z = 1;
+}
+
+void f_get_BTnxhnyh(sGP &GP, dim3 &B, dim3 &T)
+{
+	B.x = (GP.nyh+thrnxny-1)/thrnxny; B.y = (GP.nxh+thrnxny-1)/thrnxny; B.z = 1;
+	T.x = thrnxny; T.y = thrnxny; T.z = 1;
+}
+
+void f_get_BTmnxny(sGP &GP, dim3 &B, dim3 &T)
+{
+	B.x = (MAX(GP.nx, GP.ny)+thrnxy-1)/thrnxy; B.y = 1; B.z = 1;
+	T.x = thrnxy; T.y = 1; T.z = 1;
+}
+
+void f_get_BTnxy(sGP &GP, dim3 &B, dim3 &T)
+{
+	B.x = MIN(64, (GP.nxy+thrnxy-1)/thrnxy); B.y = 1; B.z = 1;
+	T.x = thrnxy; T.y = 1; T.z = 1;
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
 // reduction double
 __device__ inline void k_reduceBlockDouble256(volatile double *M, int tid)
 {
-	if (tid < 128)
+	if(tid < 128)
+	{
 		M[tid] += M[tid + 128];
+	}
 	__syncthreads();
 
-	if (tid < 64)
+	if(tid < 64)
+	{
 		M[tid] += M[tid + 64];
+	}
 	__syncthreads();
 
-	if (tid < 32){
+	if(tid < 32)
+	{
 		M[tid] += M[tid + 32];
 		M[tid] += M[tid + 16];
 		M[tid] += M[tid + 8];
@@ -50,19 +238,22 @@ __device__ inline void k_reduceBlockDouble256(volatile double *M, int tid)
 // reduction double
 __device__ inline void k_reduceBlockDouble256(volatile double *M1, volatile double *M2, int tid)
 {
-	if (tid < 128){
+	if(tid < 128)
+	{
 		M1[tid] += M1[tid + 128];
 		M2[tid] += M2[tid + 128];
 	}
 	__syncthreads();
 
-	if (tid < 64){
+	if(tid < 64)
+	{
 		M1[tid] += M1[tid + 64];
 		M2[tid] += M2[tid + 64];
 	}
 	__syncthreads();
 
-	if (tid < 32){
+	if(tid < 32)
+	{
 		M1[tid] += M1[tid + 32];
 		M2[tid] += M2[tid + 32];
 		M1[tid] += M1[tid + 16];
@@ -81,19 +272,22 @@ __device__ inline void k_reduceBlockDouble256(volatile double *M1, volatile doub
 // reduction complex
 __device__ inline void k_reduceBlockComplex256(volatile double2 *M, int tid)
 {
-	if (tid < 128){
+	if(tid < 128)
+	{
 		M[tid].x += M[tid + 128].x;
 		M[tid].y += M[tid + 128].y;
 	}
 	__syncthreads();
 
-	if (tid < 64){
+	if(tid < 64)
+	{
 		M[tid].x += M[tid + 64].x;
 		M[tid].y += M[tid + 64].y;
 	}
 	__syncthreads();
 
-	if (tid < 32){
+	if(tid < 32)
+	{
 		M[tid].x += M[tid + 32].x;
 		M[tid].y += M[tid + 32].y;
 		M[tid].x += M[tid + 16].x;
@@ -112,7 +306,8 @@ __device__ inline void k_reduceBlockComplex256(volatile double2 *M, int tid)
 // reduction complex
 __device__ inline void k_reduceBlockComplex256(volatile double2 *M1, volatile double2 *M2, int tid)
 {
-	if (tid < 128){
+	if(tid < 128)
+	{
 		M1[tid].x += M1[tid + 128].x;
 		M1[tid].y += M1[tid + 128].y;
 		M2[tid].x += M2[tid + 128].x;
@@ -120,7 +315,8 @@ __device__ inline void k_reduceBlockComplex256(volatile double2 *M1, volatile do
 	}
 	__syncthreads();
 
-	if (tid < 64){
+	if(tid < 64)
+	{
 		M1[tid].x += M1[tid + 64].x;
 		M1[tid].y += M1[tid + 64].y;
 		M2[tid].x += M2[tid + 64].x;
@@ -128,7 +324,8 @@ __device__ inline void k_reduceBlockComplex256(volatile double2 *M1, volatile do
 	}
 	__syncthreads();
 
-	if (tid < 32){
+	if(tid < 32)
+	{
 		M1[tid].x += M1[tid + 32].x;
 		M1[tid].y += M1[tid + 32].y;
 		M2[tid].x += M2[tid + 32].x;
@@ -159,12 +356,193 @@ __device__ inline void k_reduceBlockComplex256(volatile double2 *M1, volatile do
 /***************************************************************************/
 /***************************************************************************/
 
+// Hadamard product
+__global__ void k_Hadamard_Product(sGP GP, double * __restrict A_i, double * __restrict B_io)
+{
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
+		int ixy = ix*GP.ny+iy;
+		B_io[ixy] = A_i[ixy]*B_io[ixy];
+	}
+}
+
+// Hadamard product
+__global__ void k_Hadamard_Product(sGP GP, double * __restrict A_i, double * __restrict B_i, double * __restrict C_o)
+{
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
+		int ixy = ix*GP.ny+iy;
+		C_o[ixy] = A_i[ixy]*B_i[ixy];
+	}
+}
+
+// Hadamard product
+__global__ void k_Hadamard_Product(sGP GP, double2 * __restrict A_i, double2 * __restrict B_io)
+{
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
+		int ixy = ix*GP.ny+iy;
+		double z1r = A_i[ixy].x, z1i = A_i[ixy].y;
+		double z2r = B_io[ixy].x, z2i = B_io[ixy].y;
+		double z3r = z1r*z2r-z1i*z2i, z3i = z1i*z2r+z1r*z2i;
+		B_io[ixy].x = z3r;
+		B_io[ixy].y = z3i;
+	}
+}
+
+// Hadamard product
+__global__ void k_Hadamard_Product(sGP GP, double2 * __restrict A_i, double2 * __restrict B_i, double2 * __restrict C_o)
+{
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
+		int ixy = ix*GP.ny+iy;
+		double z1r = A_i[ixy].x, z1i = A_i[ixy].y;
+		double z2r = B_i[ixy].x, z2i = B_i[ixy].y;
+		double z3r = z1r*z2r-z1i*z2i, z3i = z1i*z2r+z1r*z2i;
+		C_o[ixy].x = z3r;
+		C_o[ixy].y = z3i;
+	}
+}
+
+// Hadamard product
+void f_Hadamard_Product_GPU(sGP &GP, double *&A_i, double *&B_io)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Hadamard_Product<<<Bnxny, Tnxny>>>(GP, A_i, B_io);
+}
+
+// Hadamard product
+void f_Hadamard_Product_GPU(sGP &GP, double *&A_i, double *&B_i, double *&C_o)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Hadamard_Product<<<Bnxny, Tnxny>>>(GP, A_i, B_i, C_o);
+}
+
+// Hadamard product
+void f_Hadamard_Product_GPU(sGP &GP, double2 *&A_i, double2 *&B_io)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Hadamard_Product<<<Bnxny, Tnxny>>>(GP, A_i, B_io);
+}
+
+// Hadamard product
+void f_Hadamard_Product_GPU(sGP &GP, double2 *&A_i, double2 *&B_i, double2 *&C_o)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Hadamard_Product<<<Bnxny, Tnxny>>>(GP, A_i, B_i, C_o);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
+// From double to float
+__global__ void k_Double_2_Float(sGP GP, double * __restrict V_i, float * __restrict V_o)
+{
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
+		int ixy = ix*GP.ny+iy;
+		V_o[ixy] = static_cast<float>(V_i[ixy]);
+	}
+}
+
+// From double to float
+__global__ void k_Double_2_Float(sGP GP, double * __restrict V1_i, double * __restrict V2_i, float * __restrict V1_o, float * __restrict V2_o)
+{
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
+		int ixy = ix*GP.ny+iy;
+		V1_o[ixy] = static_cast<float>(V1_i[ixy]);
+		V2_o[ixy] = static_cast<float>(V2_i[ixy]);
+	}
+}
+
+// From float to double
+__global__ void k_Float_2_Double(sGP GP, float * __restrict V_i, double * __restrict V_o)
+{
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
+		int ixy = ix*GP.ny+iy;
+		V_o[ixy] = static_cast<double>(V_i[ixy]);
+	}
+}
+
+// From float to double
+__global__ void k_Float_2_Double(sGP GP, float * __restrict V1_i, float * __restrict V2_i, double * __restrict V1_o, double * __restrict V2_o)
+{
+	int iy = threadIdx.x + blockIdx.x*blockDim.x;
+	int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
+		int ixy = ix*GP.ny+iy;
+		V1_o[ixy] = static_cast<double>(V1_i[ixy]);
+		V2_o[ixy] = static_cast<double>(V2_i[ixy]);
+	}
+}
+
+void f_Double_2_Float_GPU(sGP &GP, double *&V_i, float *&V_o)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Double_2_Float<<<Bnxny, Tnxny>>>(GP, V_i, V_o);
+}
+
+void f_Double_2_Float_GPU(sGP &GP, double *&V1_i, double *&V2_i, float *&V1_o, float *&V2_o)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Double_2_Float<<<Bnxny, Tnxny>>>(GP, V1_i, V2_i, V1_o, V2_o);
+}
+
+void f_Float_2_Double_GPU(sGP &GP, float *&V_i, double *&V_o)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Float_2_Double<<<Bnxny, Tnxny>>>(GP, V_i, V_o);
+}
+
+void f_Float_2_Double_GPU(sGP &GP, float *&V1_i, float *&V2_i, double *&V1_o, double *&V2_o)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Float_2_Double<<<Bnxny, Tnxny>>>(GP, V1_i, V2_i, V1_o, V2_o);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+
 __global__ void k_Scale_MD(sGP GP, double w, double * __restrict MD_io)
 {
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		MD_io[ixy] *= w;
 	}
@@ -175,7 +553,8 @@ __global__ void k_Scale_MD(sGP GP, double w, double * __restrict MD1_io, double 
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		MD1_io[ixy] *= w;
 		MD2_io[ixy] *= w;
@@ -187,7 +566,8 @@ __global__ void k_Scale_MC(sGP GP, double w, double2 * __restrict MC_io)
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		MC_io[ixy].x *= w;
 		MC_io[ixy].y *= w;
@@ -199,7 +579,8 @@ __global__ void k_Scale_MC(sGP GP, double w, double2 * __restrict MC1_io, double
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		MC1_io[ixy].x *= w;
 		MC1_io[ixy].y *= w;
@@ -208,25 +589,29 @@ __global__ void k_Scale_MC(sGP GP, double w, double2 * __restrict MC1_io, double
 	}
 }
 
-void f_Scale_MD(sGP &GP, double w, double *&MD_io){
+void f_Scale_MD_GPU(sGP &GP, double w, double *&MD_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Scale_MD<<<Bnxny, Tnxny>>>(GP, w, MD_io);
 }
 
-void f_Scale_MD(sGP &GP, double w, double *&MD1_io, double *&MD2_io){
+void f_Scale_MD_GPU(sGP &GP, double w, double *&MD1_io, double *&MD2_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Scale_MD<<<Bnxny, Tnxny>>>(GP, w, MD1_io, MD2_io);
 }
 
-void f_Scale_MC(sGP &GP, double w, double2 *&MC_io){
+void f_Scale_MC_GPU(sGP &GP, double w, double2 *&MC_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Scale_MC<<<Bnxny, Tnxny>>>(GP, w, MC_io);
 }
 
-void f_Scale_MC(sGP &GP, double w, double2 *&MC1_io, double2 *&MC2_io){
+void f_Scale_MC_GPU(sGP &GP, double w, double2 *&MC1_io, double2 *&MC2_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Scale_MC<<<Bnxny, Tnxny>>>(GP, w, MC1_io, MC2_io);
@@ -241,7 +626,8 @@ __global__ void k_Set_MD(sGP GP, double M, double * __restrict MD_o)
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		MD_o[ixy] = M;
 	}
@@ -253,7 +639,8 @@ __global__ void k_Set_MD(sGP GP, double M, double * __restrict MD1_o, double * _
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		MD1_o[ixy] = M;
 		MD2_o[ixy] = M;
@@ -266,20 +653,22 @@ __global__ void k_Set_MC(sGP GP, double Mr, double Mi, double2 * __restrict MC_o
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		MC_o[ixy].x = Mr;
 		MC_o[ixy].y = Mi;
 	}
 }
 
-// Set value to 2 Double vector:
+// Set value to 2 Double complex vector:
 __global__ void k_Set_MC(sGP GP, double Mr, double Mi, double2 * __restrict MC1_o, double2 * __restrict MC2_o)
 {
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		MC1_o[ixy].x = Mr;
 		MC1_o[ixy].y = Mi;
@@ -294,7 +683,8 @@ __global__ void k_Set_MC_MD(sGP GP, double Mr, double Mi, double2 * __restrict M
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		MC_o[ixy].x = Mr;
 		MC_o[ixy].y = Mi;
@@ -308,7 +698,8 @@ __global__ void k_Set_MC(sGP GP, const sComplex MC_i, double2 * __restrict MC_o)
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		MC_o[ixy].x = MC_i.real[ixy];
 		MC_o[ixy].y = MC_i.imag[ixy];
@@ -321,50 +712,58 @@ __global__ void k_Get_MC(sGP GP, const double2 * __restrict MC_i, sComplex MC_o)
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		MC_o.real[ixy] = MC_i[ixy].x;
 		MC_o.imag[ixy] = MC_i[ixy].y;
 	}
 }
 
-void f_Set_MD(sGP &GP, double M, double *&MD_o){
+void f_Set_MD_GPU(sGP &GP, double M, double *&MD_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Set_MD<<<Bnxny, Tnxny>>>(GP, M, MD_o);
 }
 
-void f_Set_MD(sGP &GP, double M, double *&MD1_o, double *&MD2_o){
+void f_Set_MD_GPU(sGP &GP, double M, double *&MD1_o, double *&MD2_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Set_MD<<<Bnxny, Tnxny>>>(GP, M, MD1_o, MD2_o);
 }
 
-void f_Set_MC(sGP &GP, double Mr, double Mi, double2 *&MC_o){
+void f_Set_MC_GPU(sGP &GP, double Mr, double Mi, double2 *&MC_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Set_MC<<<Bnxny, Tnxny>>>(GP, Mr, Mi, MC_o);
 }
 
-void f_Set_MC(sGP &GP, double Mr, double Mi, double2 *&MC1_o, double2 *&MC2_o){
+void f_Set_MC_GPU(sGP &GP, double Mr, double Mi, double2 *&MC1_o, double2 *&MC2_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Set_MC<<<Bnxny, Tnxny>>>(GP, Mr, Mi, MC1_o, MC2_o);
 }
 
-void f_Set_MC_MD(sGP &GP, double Mr, double Mi, double2 *&MC_o, double M, double *&MD_o){
+void f_Set_MC_MD_GPU(sGP &GP, double Mr, double Mi, double2 *&MC_o, double M, double *&MD_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Set_MC_MD<<<Bnxny, Tnxny>>>(GP, Mr, Mi, MC_o, M, MD_o);
 }
 
-void f_Set_MC(sGP &GP, sComplex &MC_i, double2 *&MC_o){
+void f_Set_MC_GPU(sGP &GP, sComplex &MC_i, double2 *&MC_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Set_MC<<<Bnxny, Tnxny>>>(GP, MC_i, MC_o);
 }
 
-void f_Get_MC(sGP &GP, double2 *&MC_i, sComplex &MC_o){
+void f_Get_MC_GPU(sGP &GP, double2 *&MC_i, sComplex &MC_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Get_MC<<<Bnxny, Tnxny>>>(GP, MC_i, MC_o);
@@ -374,34 +773,43 @@ void f_Get_MC(sGP &GP, double2 *&MC_i, sComplex &MC_o){
 /***************************************************************************/
 
 template <bool add>
-__global__ void k_Add_wMD(sGP GP, double w, const double * __restrict MD_i, double * __restrict MD_io)
+__global__ void k_Add_Set_wMD(sGP GP, double w, const double * __restrict MD_i, double * __restrict MD_io)
 {
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double x = MD_i[ixy];
-		if (add)
+		if(add)
+		{
 			MD_io[ixy] += x = w*x;
+		}
 		else
+		{
 			MD_io[ixy] = x = w*x;
+		}
 	}
 }
 
 template <bool add>
-__global__ void k_Add_wMD(sGP GP, double w, const double * __restrict MD1_i, const double * __restrict MD2_i, double * __restrict MD1_io, double * __restrict MD2_io)
+__global__ void k_Add_Set_wMD(sGP GP, double w, const double * __restrict MD1_i, const double * __restrict MD2_i, double * __restrict MD1_io, double * __restrict MD2_io)
 {
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double x1 = MD1_i[ixy], x2 = MD2_i[ixy];
-		if (add){
+		if(add)
+		{
 			MD1_io[ixy] += x1 = w*x1;
 			MD2_io[ixy] += x2 = w*x2;
-		}else{
+		}
+		else
+		{
 			MD1_io[ixy] = x1 = w*x1;
 			MD2_io[ixy] = x2 = w*x2;
 		}
@@ -409,18 +817,22 @@ __global__ void k_Add_wMD(sGP GP, double w, const double * __restrict MD1_i, con
 }
 
 template <bool add>
-__global__ void k_Add_wMC(sGP GP, double w, const double2 * __restrict MC_i, double2 * __restrict MC_io)
+__global__ void k_Add_Set_wMC(sGP GP, double w, const double2 * __restrict MC_i, double2 * __restrict MC_io)
 {
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double x = MC_i[ixy].x, y = MC_i[ixy].y;
-		if (add){
+		if(add)
+		{
 			MC_io[ixy].x += x = w*x;
 			MC_io[ixy].y += y = w*y;
-		}else{
+		}
+		else
+		{
 			MC_io[ixy].x = x = w*x;
 			MC_io[ixy].y = y = w*y;
 		}
@@ -428,21 +840,25 @@ __global__ void k_Add_wMC(sGP GP, double w, const double2 * __restrict MC_i, dou
 }
 
 template <bool add>
-__global__ void k_Add_wMC(sGP GP, double w, const double2 * __restrict MC1_i, const double2 * __restrict MC2_i, double2 * __restrict MC1_io, double2 * __restrict MC2_io)
+__global__ void k_Add_Set_wMC(sGP GP, double w, const double2 * __restrict MC1_i, const double2 * __restrict MC2_i, double2 * __restrict MC1_io, double2 * __restrict MC2_io)
 {
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double x1 = MC1_i[ixy].x, y1 = MC1_i[ixy].y;
 		double x2 = MC2_i[ixy].x, y2 = MC2_i[ixy].y;
-		if (add){
+		if(add)
+		{
 			MC1_io[ixy].x += x1 = w*x1;
 			MC1_io[ixy].y += y1 = w*y1;
 			MC2_io[ixy].x += x2 = w*x2;
 			MC2_io[ixy].y += y2 = w*y2;
-		}else{
+		}
+		else
+		{
 			MC1_io[ixy].x = x1 = w*x1;
 			MC1_io[ixy].y = y1 = w*y1;
 			MC2_io[ixy].x = x2 = w*x2;
@@ -452,35 +868,44 @@ __global__ void k_Add_wMC(sGP GP, double w, const double2 * __restrict MC1_i, co
 }
 
 template <bool add>
-__global__ void k_Add_wMC2(sGP GP, double w, const double2 * __restrict MC_i, double * __restrict MD_io)
+__global__ void k_Add_Set_wMC2(sGP GP, double w, const double2 * __restrict MC_i, double * __restrict MD_io)
 {
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double x = MC_i[ixy].x, y = MC_i[ixy].y, z = x*x+y*y;
-		if (add)
+		if(add)
+		{
 			MD_io[ixy] += z = w*z;
+		}
 		else
+		{
 			MD_io[ixy] = z = w*z;
+		}
 	}
 }
 
 template <bool add>
-__global__ void k_Add_wMC_wMD(sGP GP, double w, const double2 * __restrict MC_i, double2 * __restrict MC_io, double * __restrict MD_io)
+__global__ void k_Add_Set_wMC_wMD(sGP GP, double w, const double2 * __restrict MC_i, double2 * __restrict MC_io, double * __restrict MD_io)
 {
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double x = MC_i[ixy].x, y = MC_i[ixy].y, z = x*x+y*y;
-		if (add){
+		if(add)
+		{
 			MC_io[ixy].x += x = w*x; 
 			MC_io[ixy].y += y = w*y;
 			MD_io[ixy] += z = w*z;
-		}else{
+		}
+		else
+		{
 			MC_io[ixy].x = x = w*x; 
 			MC_io[ixy].y = y = w*y;
 			MD_io[ixy] = z = w*z;
@@ -489,19 +914,23 @@ __global__ void k_Add_wMC_wMD(sGP GP, double w, const double2 * __restrict MC_i,
 }
 
 template <bool add>
-__global__ void k_Add_wMC_wMD(sGP GP, double w, const double2 * __restrict MC_i, const double * __restrict MD_i, double2 * __restrict MC_io, double * __restrict MD_io)
+__global__ void k_Add_Set_wMC_wMD(sGP GP, double w, const double2 * __restrict MC_i, const double * __restrict MD_i, double2 * __restrict MC_io, double * __restrict MD_io)
 {
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double x = MC_i[ixy].x, y = MC_i[ixy].y, z = MD_i[ixy];
-		if (add){
+		if(add)
+		{
 			MC_io[ixy].x += x = w*x; 
 			MC_io[ixy].y += y = w*y;
 			MD_io[ixy] += z = w*z;
-		}else{
+		}
+		else
+		{
 			MC_io[ixy].x = x = w*x; 
 			MC_io[ixy].y = y = w*y;
 			MD_io[ixy] = z = w*z;
@@ -509,67 +938,104 @@ __global__ void k_Add_wMC_wMD(sGP GP, double w, const double2 * __restrict MC_i,
 	}
 }
 
-void f_Add_wMD(bool add, sGP &GP, double w, double *&MD_i, double *&MD_io){
+
+void f_Set_wMD_GPU(sGP &GP, double w, double *&MD_i, double *&MD_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
-	if(add)
-		k_Add_wMD<true><<<Bnxny, Tnxny>>>(GP, w, MD_i, MD_io);
-	else
-		k_Add_wMD<false><<<Bnxny, Tnxny>>>(GP, w, MD_i, MD_io);
+	k_Add_Set_wMD<false><<<Bnxny, Tnxny>>>(GP, w, MD_i, MD_io);
 }
 
-void f_Add_wMD(bool add, sGP &GP, double w, double *&MD1_i, double *&MD2_i, double *&MD1_io, double *&MD2_io){
+void f_Set_wMD_GPU(sGP &GP, double w, double *&MD1_i, double *&MD2_i, double *&MD1_io, double *&MD2_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
-	if(add)
-		k_Add_wMD<true><<<Bnxny, Tnxny>>>(GP, w, MD1_i, MD2_i, MD1_io, MD2_io);
-	else
-		k_Add_wMD<false><<<Bnxny, Tnxny>>>(GP, w, MD1_i, MD2_i, MD1_io, MD2_io);
+	k_Add_Set_wMD<false><<<Bnxny, Tnxny>>>(GP, w, MD1_i, MD2_i, MD1_io, MD2_io);
 }
 
-void f_Add_wMC(bool add, sGP &GP, double w, double2 *&MC_i, double2 *&MC_io){
+void f_Set_wMC_GPU(sGP &GP, double w, double2 *&MC_i, double2 *&MC_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
-	if(add)
-		k_Add_wMC<true><<<Bnxny, Tnxny>>>(GP, w, MC_i, MC_io);
-	else
-		k_Add_wMC<false><<<Bnxny, Tnxny>>>(GP, w, MC_i, MC_io);
+	k_Add_Set_wMC<false><<<Bnxny, Tnxny>>>(GP, w, MC_i, MC_io);
 }
 
-void f_Add_wMC(bool add, sGP &GP, double w, double2 *&MC1_i, double2 *&MC2_i, double2 *&MC1_io, double2 *&MC2_io){
+void f_Set_wMC_GPU(sGP &GP, double w, double2 *&MC1_i, double2 *&MC2_i, double2 *&MC1_io, double2 *&MC2_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
-	if(add)
-		k_Add_wMC<true><<<Bnxny, Tnxny>>>(GP, w, MC1_i, MC2_i, MC1_io, MC2_io);
-	else
-		k_Add_wMC<false><<<Bnxny, Tnxny>>>(GP, w, MC1_i, MC2_i, MC1_io, MC2_io);
+	k_Add_Set_wMC<false><<<Bnxny, Tnxny>>>(GP, w, MC1_i, MC2_i, MC1_io, MC2_io);
 }
 
-void f_Add_wMC2(bool add, sGP &GP, double w, double2 *&MC_i, double *&MD_io){
+void f_Set_wMC2_GPU(sGP &GP, double w, double2 *&MC_i, double *&MD_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
-	if(add)
-		k_Add_wMC2<true><<<Bnxny, Tnxny>>>(GP, w, MC_i, MD_io);
-	else
-		k_Add_wMC2<false><<<Bnxny, Tnxny>>>(GP, w, MC_i, MD_io);
+	k_Add_Set_wMC2<false><<<Bnxny, Tnxny>>>(GP, w, MC_i, MD_io);
 }
 
-void f_Add_wMC_wMD(bool add, sGP &GP, double w, double2 *&MC_i, double2 *&MC_io, double *&MD_io){
+void f_Set_wMC_wMD_GPU(sGP &GP, double w, double2 *&MC_i, double2 *&MC_io, double *&MD_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
-	if(add)
-		k_Add_wMC_wMD<true><<<Bnxny, Tnxny>>>(GP, w, MC_i, MC_io, MD_io);
-	else
-		k_Add_wMC_wMD<false><<<Bnxny, Tnxny>>>(GP, w, MC_i, MC_io, MD_io);
+	k_Add_Set_wMC_wMD<false><<<Bnxny, Tnxny>>>(GP, w, MC_i, MC_io, MD_io);
 }
 
-void f_Add_wMC_wMD(bool add, sGP &GP, double w, double2 *&MC_i, double *&MD_i, double2 *&MC_io, double *&MD_io){
+void f_Set_wMC_wMD_GPU(sGP &GP, double w, double2 *&MC_i, double *&MD_i, double2 *&MC_io, double *&MD_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
-	if(add)
-		k_Add_wMC_wMD<true><<<Bnxny, Tnxny>>>(GP, w, MC_i, MD_i, MC_io, MD_io);
-	else
-		k_Add_wMC_wMD<false><<<Bnxny, Tnxny>>>(GP, w, MC_i, MD_i, MC_io, MD_io);
+	k_Add_Set_wMC_wMD<false><<<Bnxny, Tnxny>>>(GP, w, MC_i, MD_i, MC_io, MD_io);
+}
+
+
+void f_Add_wMD_GPU(sGP &GP, double w, double *&MD_i, double *&MD_io)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Add_Set_wMD<true><<<Bnxny, Tnxny>>>(GP, w, MD_i, MD_io);
+}
+
+void f_Add_wMD_GPU(sGP &GP, double w, double *&MD1_i, double *&MD2_i, double *&MD1_io, double *&MD2_io)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Add_Set_wMD<true><<<Bnxny, Tnxny>>>(GP, w, MD1_i, MD2_i, MD1_io, MD2_io);
+}
+
+void f_Add_wMC_GPU(sGP &GP, double w, double2 *&MC_i, double2 *&MC_io)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Add_Set_wMC<true><<<Bnxny, Tnxny>>>(GP, w, MC_i, MC_io);
+}
+
+void f_Add_wMC_GPU(sGP &GP, double w, double2 *&MC1_i, double2 *&MC2_i, double2 *&MC1_io, double2 *&MC2_io)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Add_Set_wMC<true><<<Bnxny, Tnxny>>>(GP, w, MC1_i, MC2_i, MC1_io, MC2_io);
+}
+
+void f_Add_wMC2_GPU(sGP &GP, double w, double2 *&MC_i, double *&MD_io)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Add_Set_wMC2<true><<<Bnxny, Tnxny>>>(GP, w, MC_i, MD_io);
+}
+
+void f_Add_wMC_wMD_GPU(sGP &GP, double w, double2 *&MC_i, double2 *&MC_io, double *&MD_io)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Add_Set_wMC_wMD<true><<<Bnxny, Tnxny>>>(GP, w, MC_i, MC_io, MD_io);
+}
+
+void f_Add_wMC_wMD_GPU(sGP &GP, double w, double2 *&MC_i, double *&MD_i, double2 *&MC_io, double *&MD_io)
+{
+	dim3 Bnxny, Tnxny;
+	f_get_BTnxny(GP, Bnxny, Tnxny);
+	k_Add_Set_wMC_wMD<true><<<Bnxny, Tnxny>>>(GP, w, MC_i, MD_i, MC_io, MD_io);
 }
 
 /***************************************************************************/
@@ -594,7 +1060,8 @@ __global__ void k_fft2Shift_MD(sGP GP, double * __restrict MD_io)
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nxh)&&(iy < GP.nyh)){
+	if((ix < GP.nxh)&&(iy < GP.nyh))
+	{
 		int ixy, ixys;
 
 		ixy = ix*GP.ny + iy; ixys = (GP.nxh+ix)*GP.ny+(GP.nyh+iy);
@@ -611,7 +1078,8 @@ __global__ void k_fft2Shift_MD(sGP GP, double * __restrict MD1_io, double * __re
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nxh)&&(iy < GP.nyh)){
+	if((ix < GP.nxh)&&(iy < GP.nyh))
+	{
 		int ixy, ixys;
 
 		ixy = ix*GP.ny + iy; ixys = (GP.nxh+ix)*GP.ny+(GP.nyh+iy);
@@ -630,7 +1098,8 @@ __global__ void k_fft2Shift_MC(sGP GP, double2 * __restrict MC_io)
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nxh)&&(iy < GP.nyh)){
+	if((ix < GP.nxh)&&(iy < GP.nyh))
+	{
 		int ixy, ixys;
 
 		ixy = ix*GP.ny + iy; ixys = (GP.nxh+ix)*GP.ny+(GP.nyh+iy);
@@ -647,7 +1116,8 @@ __global__ void k_fft2Shift_MC(sGP GP, double2 * __restrict MC1_io, double2 * __
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nxh)&&(iy < GP.nyh)){
+	if((ix < GP.nxh)&&(iy < GP.nyh))
+	{
 		int ixy, ixys;
 
 		ixy = ix*GP.ny + iy; ixys = (GP.nxh+ix)*GP.ny+(GP.nyh+iy);
@@ -666,7 +1136,8 @@ __global__ void k_fft2Shift_MC_MD(sGP GP, double2 * __restrict MC_io, double * _
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nxh)&&(iy < GP.nyh)){
+	if((ix < GP.nxh)&&(iy < GP.nyh))
+	{
 		int ixy, ixys;
 
 		ixy = ix*GP.ny + iy; ixys = (GP.nxh+ix)*GP.ny+(GP.nyh+iy);
@@ -685,7 +1156,8 @@ __global__ void k_fft2Shift_MC_MD(sGP GP, double2 * __restrict MC_io, double * _
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nxh)&&(iy < GP.nyh)){
+	if((ix < GP.nxh)&&(iy < GP.nyh))
+	{
 		int ixy, ixys;
 
 		ixy = ix*GP.ny + iy; ixys = (GP.nxh+ix)*GP.ny+(GP.nyh+iy);
@@ -706,7 +1178,8 @@ __global__ void k_fft2Shift_MC(sGP GP, sComplex MC_io)
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nxh)&&(iy < GP.nyh)){
+	if((ix < GP.nxh)&&(iy < GP.nyh))
+	{
 		int ixy, ixys;
 		double zr, zi;
 
@@ -722,43 +1195,50 @@ __global__ void k_fft2Shift_MC(sGP GP, sComplex MC_io)
 	}
 }
 
-void f_fft2Shift_MD(sGP &GP, double *&MD_io){
+void f_fft2Shift_MD_GPU(sGP &GP, double *&MD_io)
+{
 	dim3 Bnxhnyh, Tnxhnyh;
 	f_get_BTnxhnyh(GP, Bnxhnyh, Tnxhnyh);
 	k_fft2Shift_MD<<<Bnxhnyh, Tnxhnyh>>>(GP, MD_io);
 }
 
-void f_fft2Shift_MD(sGP &GP, double *&MD1_io, double *&MD2_io){
+void f_fft2Shift_MD_GPU(sGP &GP, double *&MD1_io, double *&MD2_io)
+{
 	dim3 Bnxhnyh, Tnxhnyh;
 	f_get_BTnxhnyh(GP, Bnxhnyh, Tnxhnyh);
 	k_fft2Shift_MD<<<Bnxhnyh, Tnxhnyh>>>(GP, MD1_io, MD2_io);
 }
 
-void f_fft2Shift_MC(sGP &GP, double2 *&MC_io){
+void f_fft2Shift_MC_GPU(sGP &GP, double2 *&MC_io)
+{
 	dim3 Bnxhnyh, Tnxhnyh;
 	f_get_BTnxhnyh(GP, Bnxhnyh, Tnxhnyh);
 	k_fft2Shift_MC<<<Bnxhnyh, Tnxhnyh>>>(GP, MC_io);
 }
 
-void f_fft2Shift_MC(sGP &GP, double2 *&MC1_io, double2 *&MC2_io){
+void f_fft2Shift_MC_GPU(sGP &GP, double2 *&MC1_io, double2 *&MC2_io)
+{
 	dim3 Bnxhnyh, Tnxhnyh;
 	f_get_BTnxhnyh(GP, Bnxhnyh, Tnxhnyh);
 	k_fft2Shift_MC<<<Bnxhnyh, Tnxhnyh>>>(GP, MC1_io, MC2_io);
 }
 
-void f_fft2Shift_MC_MD(sGP &GP, double2 *&MC_io, double *&MD_io){
+void f_fft2Shift_MC_MD_GPU(sGP &GP, double2 *&MC_io, double *&MD_io)
+{
 	dim3 Bnxhnyh, Tnxhnyh;
 	f_get_BTnxhnyh(GP, Bnxhnyh, Tnxhnyh);
 	k_fft2Shift_MC_MD<<<Bnxhnyh, Tnxhnyh>>>(GP, MC_io, MD_io);
 }
 
-void f_fft2Shift_MC_MD(sGP &GP, double2 *&MC_io, double *&MD1_io, double *&MD2_io){
+void f_fft2Shift_MC_MD_GPU(sGP &GP, double2 *&MC_io, double *&MD1_io, double *&MD2_io)
+{
 	dim3 Bnxhnyh, Tnxhnyh;
 	f_get_BTnxhnyh(GP, Bnxhnyh, Tnxhnyh);
 	k_fft2Shift_MC_MD<<<Bnxhnyh, Tnxhnyh>>>(GP, MC_io, MD1_io, MD2_io);
 }
 
-void f_fft2Shift_MC(sGP &GP, sComplex &MC_io){
+void f_fft2Shift_MC_GPU(sGP &GP, sComplex &MC_io)
+{
 	dim3 Bnxhnyh, Tnxhnyh;
 	f_get_BTnxhnyh(GP, Bnxhnyh, Tnxhnyh);
 	k_fft2Shift_MC<<<Bnxhnyh, Tnxhnyh>>>(GP, MC_io);
@@ -768,7 +1248,8 @@ void f_fft2Shift_MC(sGP &GP, sComplex &MC_io){
 /***************************************************************************/
 
 // Sum module square over all the elements
-__global__ void k_Sum_MD(sGP GP, const double * __restrict MD_i, double * __restrict MDp_o){ 
+__global__ void k_Sum_MD(sGP GP, double w_i, const double * __restrict MD_i, double * __restrict MDp_o)
+{ 
 	__shared__ double Ms[thrnxny*thrnxny];
 
 	int tid = threadIdx.x + threadIdx.y*blockDim.x;
@@ -781,9 +1262,11 @@ __global__ void k_Sum_MD(sGP GP, const double * __restrict MD_i, double * __rest
 	double SumT=0;
 
 	ix = ix0;
-	while (ix < GP.nx){
+	while (ix < GP.nx)
+	{
 		iy = iy0;
-		while (iy < GP.ny){
+		while (iy < GP.ny)
+		{
 			ixy = ix*GP.ny+iy;	
 			SumT += MD_i[ixy];
 			iy += gridSizey;
@@ -791,16 +1274,20 @@ __global__ void k_Sum_MD(sGP GP, const double * __restrict MD_i, double * __rest
 		ix += gridSizex;
 	}
 	Ms[tid] = SumT;
+
 	__syncthreads();
 
 	k_reduceBlockDouble256(Ms, tid);
 
-	if (tid==0)
-		MDp_o[bid] = Ms[0];
+	if(tid==0)
+	{
+		MDp_o[bid] = w_i*Ms[0];
+	}
 }
 
 // Sum module square over all the elements
-__global__ void k_Sum_MC2(sGP GP, const double2 * __restrict MC_i, double * __restrict MDp_o){ 
+__global__ void k_Sum_MC2(sGP GP, double w_i, const double2 * __restrict MC_i, double * __restrict MDp_o)
+{ 
 	__shared__ double Ms[thrnxny*thrnxny];
 
 	int tid = threadIdx.x + threadIdx.y*blockDim.x;
@@ -814,9 +1301,11 @@ __global__ void k_Sum_MC2(sGP GP, const double2 * __restrict MC_i, double * __re
 	double SumT=0;
 
 	ix = ix0;
-	while (ix < GP.nx){
+	while (ix < GP.nx)
+	{
 		iy = iy0;
-		while (iy < GP.ny){
+		while (iy < GP.ny)
+		{
 			ixy = ix*GP.ny+iy;	
 			x = MC_i[ixy].x; 
 			y = MC_i[ixy].y;
@@ -826,16 +1315,20 @@ __global__ void k_Sum_MC2(sGP GP, const double2 * __restrict MC_i, double * __re
 		ix += gridSizex;
 	}
 	Ms[tid] = SumT;
+
 	__syncthreads();
 
 	k_reduceBlockDouble256(Ms, tid);
 
-	if (tid==0)
-		MDp_o[bid] = Ms[0];
+	if(tid==0)
+	{
+		MDp_o[bid] = w_i*Ms[0];
+	}
 }
 
 // Sum over the detector
-__global__ void k_Sum_MD_Det(sGP GP, const double * __restrict MD_i, double gmin2, double gmax2, double * __restrict MDp_o){ 
+__global__ void k_Sum_MD_Det(sGP GP, double w_i, const double * __restrict MD_i, double gmin2, double gmax2, double * __restrict MDp_o)
+{ 
 	__shared__ double Ms[thrnxny*thrnxny];
 
 	int tid = threadIdx.x + threadIdx.y*blockDim.x;
@@ -849,30 +1342,38 @@ __global__ void k_Sum_MD_Det(sGP GP, const double * __restrict MD_i, double gmin
 	double SumT=0;
 
 	ix = ix0;
-	while (ix < GP.nx){
+	while (ix < GP.nx)
+	{
 		iy = iy0;
 		gx = IsFS(ix,GP.nxh)*GP.dgx;
-		while (iy < GP.ny){
+		while (iy < GP.ny)
+		{
 			ixy = ix*GP.ny+iy;	
 			gy = IsFS(iy,GP.nyh)*GP.dgy;
 			g2 = gx*gx + gy*gy;
 			if((gmin2<=g2)&&(g2<=gmax2))
+			{
 				SumT += MD_i[ixy];
+			}
 			iy += gridSizey;
 		}
 		ix += gridSizex;
 	}
 	Ms[tid] = SumT;
+
 	__syncthreads();
 
 	k_reduceBlockDouble256(Ms, tid);
 
-	if (tid==0)
-		MDp_o[bid] = Ms[0];
+	if(tid==0)
+	{
+		MDp_o[bid] = w_i*Ms[0];
+	}
 }
 
 // Sum over the detector
-__global__ void k_Sum_MD_Det(sGP GP, const double * __restrict MD1_i, const double * __restrict MD2_i, double gmin2, double gmax2, double * __restrict MD1p_o, double * __restrict MD2p_o){ 
+__global__ void k_Sum_MD_Det(sGP GP, double w_i, const double * __restrict MD1_i, const double * __restrict MD2_i, double gmin2, double gmax2, double * __restrict MD1p_o, double * __restrict MD2p_o)
+{ 
 	__shared__ double Ms1[thrnxny*thrnxny];
 	__shared__ double Ms2[thrnxny*thrnxny];
 
@@ -887,14 +1388,17 @@ __global__ void k_Sum_MD_Det(sGP GP, const double * __restrict MD1_i, const doub
 	double SumT1=0, SumT2=0;
 
 	ix = ix0;
-	while (ix < GP.nx){
+	while (ix < GP.nx)
+	{
 		iy = iy0;
 		gx = IsFS(ix,GP.nxh)*GP.dgx;
-		while (iy < GP.ny){
+		while (iy < GP.ny)
+		{
 			ixy = ix*GP.ny+iy;	
 			gy = IsFS(iy,GP.nyh)*GP.dgy;
 			g2 = gx*gx + gy*gy;
-			if((gmin2<=g2)&&(g2<=gmax2)){
+			if((gmin2<=g2)&&(g2<=gmax2))
+			{
 				SumT1 += MD1_i[ixy];
 				SumT2 += MD2_i[ixy];
 			}
@@ -904,18 +1408,21 @@ __global__ void k_Sum_MD_Det(sGP GP, const double * __restrict MD1_i, const doub
 	}
 	Ms1[tid] = SumT1;
 	Ms2[tid] = SumT2;
+
 	__syncthreads();
 
 	k_reduceBlockDouble256(Ms1, Ms2, tid);
 
-	if (tid==0){
-		MD1p_o[bid] = Ms1[0];
-		MD2p_o[bid] = Ms2[0];
+	if(tid==0)
+	{
+		MD1p_o[bid] = w_i*Ms1[0];
+		MD2p_o[bid] = w_i*Ms2[0];
 	}
 }
 
 // Sum over the detector
-__global__ void k_Sum_MC_Det(sGP GP, const double2 * __restrict MC_i, double gmin2, double gmax2, double * __restrict MDp_o){ 
+__global__ void k_Sum_MC_Det(sGP GP, double w_i, const double2 * __restrict MC_i, double gmin2, double gmax2, double * __restrict MDp_o)
+{ 
 	__shared__ double Ms[thrnxny*thrnxny];
 
 	int tid = threadIdx.x + threadIdx.y*blockDim.x;
@@ -930,14 +1437,17 @@ __global__ void k_Sum_MC_Det(sGP GP, const double2 * __restrict MC_i, double gmi
 	double SumT=0;
 
 	ix = ix0;
-	while (ix < GP.nx){
+	while (ix < GP.nx)
+	{
 		iy = iy0;
 		gx = IsFS(ix,GP.nxh)*GP.dgx;
-		while (iy < GP.ny){
+		while (iy < GP.ny)
+		{
 			ixy = ix*GP.ny+iy;	
 			gy = IsFS(iy,GP.nyh)*GP.dgy;
 			g2 = gx*gx + gy*gy;
-			if((gmin2<=g2)&&(g2<=gmax2)){
+			if((gmin2<=g2)&&(g2<=gmax2))
+			{
 				x = MC_i[ixy].x; 
 				y = MC_i[ixy].y;
 				SumT += x*x+y*y;
@@ -947,16 +1457,20 @@ __global__ void k_Sum_MC_Det(sGP GP, const double2 * __restrict MC_i, double gmi
 		ix += gridSizex;
 	}
 	Ms[tid] = SumT;
+
 	__syncthreads();
 
 	k_reduceBlockDouble256(Ms, tid);
 
-	if (tid==0)
-		MDp_o[bid] = Ms[0];
+	if(tid==0)
+	{
+		MDp_o[bid] = w_i*Ms[0];
+	}
 }
 
 // Sum module square over all the elements
-__global__ void k_Sum_MDp(int n, double * MDp_i, int iSum, double * Sum_MD_o){ 
+__global__ void k_Sum_MDp(int n, double * MDp_i, int iSum, double * Sum_MD_o)
+{ 
 	__shared__ double Ms[thrnxy];
 
 	int tid = threadIdx.x;
@@ -964,21 +1478,26 @@ __global__ void k_Sum_MDp(int n, double * MDp_i, int iSum, double * Sum_MD_o){
 	int gridSizex = blockDim.x*gridDim.x;
 	double SumT=0;
 
-	while (ix < n){
+	while (ix < n)
+	{
 		SumT += MDp_i[ix];
 		ix += gridSizex;
 	}
 	Ms[tid] = SumT;
+
 	__syncthreads();
 
 	k_reduceBlockDouble256(Ms, tid);
 
-	if (tid==0)
+	if(tid==0)
+	{
 		Sum_MD_o[iSum] = Ms[0];
+	}
 }
 
 // Sum module square over all the elements
-__global__ void k_Sum_MDp(int n, double * MD1p_i, const double * MD2p_i, int iSum, double * Sum_MD1_o, double * Sum_MD2_o){ 
+__global__ void k_Sum_MDp(int n, double * MD1p_i, const double * MD2p_i, int iSum, double * Sum_MD1_o, double * Sum_MD2_o)
+{ 
 	__shared__ double Ms1[thrnxy];
 	__shared__ double Ms2[thrnxy];
 
@@ -987,66 +1506,74 @@ __global__ void k_Sum_MDp(int n, double * MD1p_i, const double * MD2p_i, int iSu
 	int gridSizex = blockDim.x*gridDim.x;
 	double SumT1=0, SumT2=0;
 
-	while (ix < n){
+	while (ix < n)
+	{
 		SumT1 += MD1p_i[ix];
 		SumT2 += MD2p_i[ix];
 		ix += gridSizex;
 	}
 	Ms1[tid] = SumT1;
 	Ms2[tid] = SumT2;
+
 	__syncthreads();
 
 	k_reduceBlockDouble256(Ms1, Ms2, tid);
 
-	if (tid==0){
+	if(tid==0)
+	{
 		Sum_MD1_o[iSum] = Ms1[0];
 		Sum_MD2_o[iSum] = Ms2[0];
 	}
 }
 
-double f_Sum_MD(sGP &GP, double *&MD_i, double *&MDp_i){
+double f_Sum_MD_GPU(sGP &GP, double w_i, double *&MD_i, double *&MDp_i)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	Bnxny.x = MIN(Bnxny.x, 32); Bnxny.y = MIN(Bnxny.y, 32);
-	k_Sum_MD<<<Bnxny, Tnxny>>>(GP, MD_i, MDp_i);
+	k_Sum_MD<<<Bnxny, Tnxny>>>(GP, w_i, MD_i, MDp_i);
 	k_Sum_MDp<<<1, thrnxy>>>(Bnxny.x*Bnxny.y, MDp_i, 0, MDp_i);
 	double sum;
 	cudaMemcpy(&sum, MDp_i, cSizeofRD, cudaMemcpyDeviceToHost);
 	return sum;
 }
 
-double f_Sum_MC2(sGP &GP, double2 *&MC_i, double *&MDp_i){
+double f_Sum_MC2_GPU(sGP &GP, double w_i, double2 *&MC_i, double *&MDp_i)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	Bnxny.x = MIN(Bnxny.x, 32); Bnxny.y = MIN(Bnxny.y, 32);
-	k_Sum_MC2<<<Bnxny, Tnxny>>>(GP, MC_i, MDp_i);
+	k_Sum_MC2<<<Bnxny, Tnxny>>>(GP, w_i, MC_i, MDp_i);
 	k_Sum_MDp<<<1, thrnxy>>>(Bnxny.x*Bnxny.y, MDp_i, 0, MDp_i);
 	double sum;
 	cudaMemcpy(&sum, MDp_i, cSizeofRD, cudaMemcpyDeviceToHost);
 	return sum;
 }
 
-void f_Sum_MD_Det(sGP &GP, double *&MD_i, double gmin2, double gmax2, double *&MDp_i, int iSum, double *&Sum_MD_o){
+void f_Sum_MD_Det_GPU(sGP &GP, double w_i, double *&MD_i, double gmin2, double gmax2, double *&MDp_i, int iSum, double *&Sum_MD_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	Bnxny.x = MIN(Bnxny.x, 32); Bnxny.y = MIN(Bnxny.y, 32);
-	k_Sum_MD_Det<<<Bnxny, Tnxny>>>(GP, MD_i, gmin2, gmax2, MDp_i);
+	k_Sum_MD_Det<<<Bnxny, Tnxny>>>(GP, w_i, MD_i, gmin2, gmax2, MDp_i);
 	k_Sum_MDp<<<1, thrnxy>>>(Bnxny.x*Bnxny.y, MDp_i, iSum, Sum_MD_o);
 }
 
-void f_Sum_MD_Det(sGP &GP, double *&MD1_i, double *&MD2_i, double gmin2, double gmax2, double *&MD1p_i, double *&MD2p_i, int iSum, double *&Sum_MD1_o, double *&Sum_MD2_o){
+void f_Sum_MD_Det_GPU(sGP &GP, double w_i, double *&MD1_i, double *&MD2_i, double gmin2, double gmax2, double *&MD1p_i, double *&MD2p_i, int iSum, double *&Sum_MD1_o, double *&Sum_MD2_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	Bnxny.x = MIN(Bnxny.x, 32); Bnxny.y = MIN(Bnxny.y, 32);	
-	k_Sum_MD_Det<<<Bnxny, Tnxny>>>(GP, MD1_i, MD2_i, gmin2, gmax2, MD1p_i, MD2p_i);
+	k_Sum_MD_Det<<<Bnxny, Tnxny>>>(GP, w_i, MD1_i, MD2_i, gmin2, gmax2, MD1p_i, MD2p_i);
 	k_Sum_MDp<<<1, thrnxy>>>(Bnxny.x*Bnxny.y, MD1p_i, MD2p_i, iSum, Sum_MD1_o, Sum_MD2_o);
 }
 
-void f_Sum_MC_Det(sGP &GP, double2 *&MC_i, double gmin2, double gmax2, double *&MDp_i, int iSum, double *&Sum_MD_o){
+void f_Sum_MC_Det_GPU(sGP &GP, double w_i, double2 *&MC_i, double gmin2, double gmax2, double *&MDp_i, int iSum, double *&Sum_MD_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	Bnxny.x = MIN(Bnxny.x, 32); Bnxny.y = MIN(Bnxny.y, 32);
-	k_Sum_MC_Det<<<Bnxny, Tnxny>>>(GP, MC_i, gmin2, gmax2, MDp_i);
+	k_Sum_MC_Det<<<Bnxny, Tnxny>>>(GP, w_i, MC_i, gmin2, gmax2, MDp_i);
 	k_Sum_MDp<<<1, thrnxy>>>(Bnxny.x*Bnxny.y, MDp_i, iSum, Sum_MD_o);
 }
 
@@ -1054,11 +1581,13 @@ void f_Sum_MC_Det(sGP &GP, double2 *&MC_i, double gmin2, double gmax2, double *&
 /***************************************************************************/
 
 // Phase
-__global__ void k_Phase(sGP GP, double gxu, double gyu, sACD ExpR_x_o, sACD ExpR_y_o){
+__global__ void k_Phase(sGP GP, double gxu, double gyu, sACD ExpR_x_o, sACD ExpR_y_o)
+{
 	int ix = threadIdx.x + blockIdx.x*blockDim.x, iy = ix;
 	double theta, R, x, y;
 
-	if (ix < GP.nx){
+	if(ix < GP.nx)
+	{
 		R = IsRS(ix,GP.nxh)*GP.dRx;
 		theta = c2Pi*R*gxu;
 		sincos(theta, &y, &x);
@@ -1066,7 +1595,8 @@ __global__ void k_Phase(sGP GP, double gxu, double gyu, sACD ExpR_x_o, sACD ExpR
 		ExpR_x_o.y[ix] = y;
 	}
 
-	if (iy < GP.ny){
+	if(iy < GP.ny)
+	{
 		R = IsRS(iy,GP.nyh)*GP.dRy;
 		theta = c2Pi*R*gyu;
 		sincos(theta, &y, &x);
@@ -1076,11 +1606,13 @@ __global__ void k_Phase(sGP GP, double gxu, double gyu, sACD ExpR_x_o, sACD ExpR
 }
 
 // Phase multiplication
-__global__ void k_PhaseMul(sGP GP, const sACD ExpR_x_i, const sACD ExpR_y_i, double2 * __restrict Psi_io){
+__global__ void k_PhaseMul(sGP GP, const sACD ExpR_x_i, const sACD ExpR_y_i, double2 * __restrict Psi_io)
+{
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double z1r = ExpR_x_i.x[ix], z1i = ExpR_x_i.y[ix];
 		double z2r = ExpR_y_i.x[iy], z2i = ExpR_y_i.y[iy];
@@ -1092,20 +1624,25 @@ __global__ void k_PhaseMul(sGP GP, const sACD ExpR_x_i, const sACD ExpR_y_i, dou
 }
 
 // Anti-Aliasing, scale with cut-off (2/3)gmax
-__global__ void k_BandwidthLimit2D(sGP GP, double2 * __restrict M_io){
+__global__ void k_BandwidthLimit2D(sGP GP, double2 * __restrict M_io)
+{
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double gx = IsFS(ix,GP.nxh)*GP.dgx;
 		double gy = IsFS(iy,GP.nyh)*GP.dgy;
 		double g2 = gx*gx + gy*gy;
 
-		if (g2 < GP.gmaxl2){
+		if(g2 < GP.gmaxl2)
+		{
 			M_io[ixy].x *= GP.inxy; 
 			M_io[ixy].y *= GP.inxy; 
-		}else{
+		}
+		else
+		{
  			M_io[ixy].x = 0.0; 
 			M_io[ixy].y = 0.0; 
 		}
@@ -1113,11 +1650,13 @@ __global__ void k_BandwidthLimit2D(sGP GP, double2 * __restrict M_io){
 }
 
 // Build propagator function
-__global__ void k_Propagator(sGP GP, double gxu, double gyu, double scale, sACD Prop_x_o, sACD Prop_y_o){
+__global__ void k_Propagator(sGP GP, double gxu, double gyu, double scale, sACD Prop_x_o, sACD Prop_y_o)
+{
 	int ix = threadIdx.x + blockIdx.x*blockDim.x, iy = ix;
 	double theta, gx, gy, x, y;
 
-	if (ix < GP.nx){
+	if(ix < GP.nx)
+	{
 		gx = IsFS(ix,GP.nxh)*GP.dgx;
 		theta = scale*(gx+gxu)*(gx+gxu);
 		sincos(theta, &y, &x);
@@ -1125,7 +1664,8 @@ __global__ void k_Propagator(sGP GP, double gxu, double gyu, double scale, sACD 
 		Prop_x_o.y[ix] = y;
 	}
 
-	if (iy < GP.ny){
+	if(iy < GP.ny)
+	{
 		gy = IsFS(iy,GP.nyh)*GP.dgy;
 		theta = scale*(gy+gyu)*(gy+gyu);
 		sincos(theta, &y, &x);
@@ -1135,24 +1675,29 @@ __global__ void k_Propagator(sGP GP, double gxu, double gyu, double scale, sACD 
 }
 
 // Propagate, scale with cut-off (2/3)gmax
-__global__ void k_Propagate(sGP GP, const sACD Prop_x_i, const sACD Prop_y_i, double2 * __restrict Psi_io){
+__global__ void k_Propagate(sGP GP, const sACD Prop_x_i, const sACD Prop_y_i, double2 * __restrict Psi_io)
+{
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double gx = IsFS(ix,GP.nxh)*GP.dgx;
 		double gy = IsFS(iy,GP.nyh)*GP.dgy;
 		double g2 = gx*gx + gy*gy;
 
-		if ((GP.BWL!=1)||(g2 < GP.gmaxl2)){
+		if((GP.BWL!=1)||(g2 < GP.gmaxl2))
+		{
 			double z1r = Prop_x_i.x[ix], z1i = Prop_x_i.y[ix];
 			double z2r = Prop_y_i.x[iy], z2i = Prop_y_i.y[iy];
 			double z3r = z1r*z2r-z1i*z2i, z3i = z1i*z2r+z1r*z2i;
 			z2r = Psi_io[ixy].x;		z2i = Psi_io[ixy].y; 
 			Psi_io[ixy].x = z1r = (z3r*z2r-z3i*z2i)*GP.inxy;
 			Psi_io[ixy].y = z1i = (z3i*z2r+z3r*z2i)*GP.inxy; 
-		}else{
+		}
+		else
+		{
  			Psi_io[ixy].x = 0.0; 
 			Psi_io[ixy].y = 0.0; 
 		}
@@ -1160,18 +1705,22 @@ __global__ void k_Propagate(sGP GP, const sACD Prop_x_i, const sACD Prop_y_i, do
 }
 
 // Probe in Fourier space
-__global__ void k_Probe_FS(sGP GP, sLens Lens, double x, double y, double2 * __restrict fPsi_o){
+__global__ void k_Probe_FS(sGP GP, sLens Lens, double x, double y, double2 * __restrict fPsi_o)
+{
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){	
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{	
 		int ixy = ix*GP.ny+iy;
 		double gx = IsFS(ix,GP.nxh)*GP.dgx;
 		double gy = IsFS(iy,GP.nyh)*GP.dgy;
 		double g2 = gx*gx + gy*gy;
-		if ((Lens.gmin2 <= g2)&&(g2 < Lens.gmax2)){
+		if((Lens.gmin2 <= g2)&&(g2 < Lens.gmax2))
+		{
 			double chi = x*gx + y*gy + g2*(Lens.cCs5*g2*g2+Lens.cCs3*g2+Lens.cf);
-			if ((Lens.m!=0)||(Lens.cmfa2!=0)||(Lens.cmfa3!=0)){
+			if((Lens.m!=0)||(Lens.cmfa2!=0)||(Lens.cmfa3!=0))
+			{
 				double g = sqrt(g2);
 				double phi = atan2(gy, gx);
 				chi += Lens.m*phi + Lens.cmfa2*g2*sin(2*(phi-Lens.afa2)) + Lens.cmfa3*g*g2*sin(3*(phi-Lens.afa3));				
@@ -1180,7 +1729,9 @@ __global__ void k_Probe_FS(sGP GP, sLens Lens, double x, double y, double2 * __r
 			sincos(chi, &chiy, &chix);		
 			fPsi_o[ixy].x = chix; 
 			fPsi_o[ixy].y = chiy;	
-		}else{
+		}
+		else
+		{
  			fPsi_o[ixy].x = 0.0; 
 			fPsi_o[ixy].y = 0.0; 
 		}
@@ -1188,22 +1739,25 @@ __global__ void k_Probe_FS(sGP GP, sLens Lens, double x, double y, double2 * __r
 }
 
 // Apply Coherent transfer function
-__global__ void k_Apply_CTF(sGP GP, sLens Lens, double gxu, double gyu, double2 * __restrict fPsi_io){
+__global__ void k_Apply_CTF(sGP GP, sLens Lens, double gxu, double gyu, double2 * __restrict fPsi_io)
+{
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{	
 		int ixy = ix*GP.ny+iy;
 		double gx = IsFS(ix,GP.nxh)*GP.dgx;
 		double gy = IsFS(iy,GP.nyh)*GP.dgy;
 		double g2 = gx*gx + gy*gy;
-		if ((Lens.gmin2 <= g2)&&(g2 <= Lens.gmax2)){
+		if((Lens.gmin2 <= g2)&&(g2 < Lens.gmax2))
+		{
 			g2 = (gx-gxu)*(gx-gxu) + (gy-gyu)*(gy-gyu);
 			double chi = g2*(Lens.cCs5*g2*g2+Lens.cCs3*g2+Lens.cf);
-			if ((Lens.cmfa2!=0)||(Lens.cmfa3!=0)){
+			if((Lens.cmfa2!=0)||(Lens.cmfa3!=0))
+			{
 				double g = sqrt(g2);
-				double phi = (g==0)?0:acos(gy/g);
-				phi = (gy<0)?cPi+phi:phi;
+				double phi = atan2(gy, gx);
 				chi += Lens.cmfa2*g2*sin(2*(phi-Lens.afa2)) + Lens.cmfa3*g*g2*sin(3*(phi-Lens.afa3));				
 			}
 			double Psix = fPsi_io[ixy].x, Psiy = fPsi_io[ixy].y; 
@@ -1212,7 +1766,8 @@ __global__ void k_Apply_CTF(sGP GP, sLens Lens, double gxu, double gyu, double2 
 			fPsi_io[ixy].x = gx = chix*Psix-chiy*Psiy; 
 			fPsi_io[ixy].y = gy = chix*Psiy+chiy*Psix;
 		}
-		else{
+		else
+		{
  			fPsi_io[ixy].x = 0.0; 
 			fPsi_io[ixy].y = 0.0; 
 		}
@@ -1220,22 +1775,25 @@ __global__ void k_Apply_CTF(sGP GP, sLens Lens, double gxu, double gyu, double2 
 }
 
 // Apply Coherent transfer function
-__global__ void k_Apply_CTF(sGP GP, sLens Lens, double gxu, double gyu, const double2 * __restrict fPsi_i, double2 * __restrict fPsi_o){
+__global__ void k_Apply_CTF(sGP GP, sLens Lens, double gxu, double gyu, const double2 * __restrict fPsi_i, double2 * __restrict fPsi_o)
+{
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{	
 		int ixy = ix*GP.ny+iy;
-		double gx = ((ix<GP.nxh)?ix:(ix-GP.nx))*GP.dgx;
-		double gy = ((iy<GP.nyh)?iy:(iy-GP.ny))*GP.dgy;
+		double gx = IsFS(ix,GP.nxh)*GP.dgx;
+		double gy = IsFS(iy,GP.nyh)*GP.dgy;
 		double g2 = gx*gx + gy*gy;
-		if ((Lens.gmin2 <= g2)&&(g2 <= Lens.gmax2)){
+		if((Lens.gmin2 <= g2)&&(g2 < Lens.gmax2))
+		{
 			g2 = (gx-gxu)*(gx-gxu) + (gy-gyu)*(gy-gyu);
 			double chi = g2*(Lens.cCs5*g2*g2+Lens.cCs3*g2+Lens.cf);
-			if ((Lens.cmfa2!=0)||(Lens.cmfa3!=0)){
+			if((Lens.cmfa2!=0)||(Lens.cmfa3!=0))
+			{
 				double g = sqrt(g2);
-				double phi = (g==0)?0:acos(gy/g);
-				phi = (gy<0)?cPi+phi:phi;
+				double phi = atan2(gy, gx);
 				chi += Lens.cmfa2*g2*sin(2*(phi-Lens.afa2)) + Lens.cmfa3*g*g2*sin(3*(phi-Lens.afa3));				
 			}
 			double Psix = fPsi_i[ixy].x, Psiy = fPsi_i[ixy].y; 
@@ -1244,7 +1802,8 @@ __global__ void k_Apply_CTF(sGP GP, sLens Lens, double gxu, double gyu, const do
 			fPsi_o[ixy].x = gx = chix*Psix-chiy*Psiy; 
 			fPsi_o[ixy].y = gy = chix*Psiy+chiy*Psix;
 		}
-		else{
+		else
+		{
  			fPsi_o[ixy].x = 0.0; 
 			fPsi_o[ixy].y = 0.0; 
 		}
@@ -1252,17 +1811,20 @@ __global__ void k_Apply_CTF(sGP GP, sLens Lens, double gxu, double gyu, const do
 }
 
 // Partially coherent transfer function, linear image model and weak phase object
-__global__ void k_Apply_PCTF(sGP GP, sLens Lens, double2 * __restrict fPsi_io){
+__global__ void k_Apply_PCTF(sGP GP, sLens Lens, double2 * __restrict fPsi_io)
+{
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double gx = IsFS(ix,GP.nxh)*GP.dgx;
 		double gy = IsFS(iy,GP.nyh)*GP.dgy;
 		double g2 = gx*gx + gy*gy;
 
-		if ((Lens.gmin2 <= g2)&&(g2 <= Lens.gmax2)){			
+		if((Lens.gmin2 <= g2)&&(g2 < Lens.gmax2))
+		{			
 			double chi = g2*(Lens.cCs3*g2+Lens.cf);
 			double c = cPi*Lens.beta*Lens.sf;
 			double u = 1.0 + c*c*g2;
@@ -1279,7 +1841,9 @@ __global__ void k_Apply_PCTF(sGP GP, sLens Lens, double2 * __restrict fPsi_io){
 
 			fPsi_io[ixy].x = gx = sti*(chix*Psix-chiy*Psiy); 
 			fPsi_io[ixy].y = gy = sti*(chix*Psiy+chiy*Psix);
-		}else{
+		}
+		else
+		{
  			fPsi_io[ixy].x = 0.0; 
 			fPsi_io[ixy].y = 0.0; 
 		}
@@ -1287,17 +1851,20 @@ __global__ void k_Apply_PCTF(sGP GP, sLens Lens, double2 * __restrict fPsi_io){
 }
 
 // Partially coherent transfer function, linear image model and weak phase object
-__global__ void k_Apply_PCTF(sGP GP, sLens Lens, double2 * __restrict fPsi_i, double2 * __restrict fPsi_o){
+__global__ void k_Apply_PCTF(sGP GP, sLens Lens, double2 * __restrict fPsi_i, double2 * __restrict fPsi_o)
+{
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double gx = IsFS(ix,GP.nxh)*GP.dgx;
 		double gy = IsFS(iy,GP.nyh)*GP.dgy;
 		double g2 = gx*gx + gy*gy;
 
-		if ((Lens.gmin2 <= g2)&&(g2 <= Lens.gmax2)){			
+		if((Lens.gmin2 <= g2)&&(g2 < Lens.gmax2))
+		{			
 			double chi = g2*(Lens.cCs3*g2+Lens.cf);
 			double c = cPi*Lens.beta*Lens.sf;
 			double u = 1.0 + c*c*g2;
@@ -1314,14 +1881,17 @@ __global__ void k_Apply_PCTF(sGP GP, sLens Lens, double2 * __restrict fPsi_i, do
 
 			fPsi_o[ixy].x = gx = sti*(chix*Psix-chiy*Psiy); 
 			fPsi_o[ixy].y = gy = sti*(chix*Psiy+chiy*Psix);
-		}else{
+		}
+		else
+		{
  			fPsi_o[ixy].x = 0.0; 
 			fPsi_o[ixy].y = 0.0; 
 		}
 	}
 }
 
-void f_PhaseMul(sGP &GP, double gxu, double gyu, sACD &ExpRg_x_o, sACD &ExpRg_y_o, double2 *&Psi_io){
+void f_PhaseMul_GPU(sGP &GP, double gxu, double gyu, sACD &ExpRg_x_o, sACD &ExpRg_y_o, double2 *&Psi_io)
+{
 	dim3 Bmnxny, Tmnxny;
 	f_get_BTmnxny(GP, Bmnxny, Tmnxny);	
 	// exp(2*1i*pi(rx*gxu+ry*gyu)
@@ -1332,7 +1902,8 @@ void f_PhaseMul(sGP &GP, double gxu, double gyu, sACD &ExpRg_x_o, sACD &ExpRg_y_
 	k_PhaseMul<<<Bnxny, Tnxny>>>(GP, ExpRg_x_o, ExpRg_y_o, Psi_io);
 }
 
-void f_BandwidthLimit2D(cufftHandle &PlanPsi, sGP &GP, double2 *&MC_io){
+void f_BandwidthLimit2D_GPU(cufftHandle &PlanPsi, sGP &GP, double2 *&MC_io)
+{
 	if(GP.BWL!=1) return;
 
 	dim3 Bnxny, Tnxny;
@@ -1346,12 +1917,18 @@ void f_BandwidthLimit2D(cufftHandle &PlanPsi, sGP &GP, double2 *&MC_io){
 	cufftExecZ2Z(PlanPsi, MC_io, MC_io, CUFFT_INVERSE);
 }
 
-void f_Propagate(cufftHandle &PlanPsi, sGP &GP, eSpace Space, double gxu, double gyu, double lambda, double z, sACD &Prop_x_o, sACD &Prop_y_o, double2 *&Psi_io){
-	if(z==0){
-		if(Space==eSReal) return;
-		else{
+void f_Propagate_GPU(cufftHandle &PlanPsi, sGP &GP, eSpace Space, double gxu, double gyu, double lambda, double z, sACD &Prop_x_o, sACD &Prop_y_o, double2 *&Psi_io)
+{
+	if(z==0)
+	{
+		if(Space==eSReal)
+		{
+			return;
+		}
+		else
+		{
 			cufftExecZ2Z(PlanPsi, Psi_io, Psi_io, CUFFT_FORWARD);	// Forward fft2
-			f_Scale_MC(GP, GP.inxy, Psi_io);
+			f_Scale_MC_GPU(GP, GP.inxy, Psi_io);
 			return;
 		}
 	}
@@ -1369,34 +1946,41 @@ void f_Propagate(cufftHandle &PlanPsi, sGP &GP, eSpace Space, double gxu, double
 
 	// Backward fft2
 	if(Space==eSReal)
+	{
 		cufftExecZ2Z(PlanPsi, Psi_io, Psi_io, CUFFT_INVERSE);
+	}
 }
 
-void f_Probe_FS(sGP &GP, sLens Lens, double x, double y, double2 *&fPsi_o){
+void f_Probe_FS_GPU(sGP &GP, sLens Lens, double x, double y, double2 *&fPsi_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Probe_FS<<<Bnxny, Tnxny>>>(GP, Lens, x, y, fPsi_o);
 }
 
-void f_Apply_CTF(sGP &GP, sLens &Lens, double gxu, double gyu, double2 *&fPsi_io){
+void f_Apply_CTF_GPU(sGP &GP, sLens &Lens, double gxu, double gyu, double2 *&fPsi_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Apply_CTF<<<Bnxny, Tnxny>>>(GP, Lens, gxu, gyu, fPsi_io);
 }
 
-void f_Apply_CTF(sGP &GP, sLens &Lens, double gxu, double gyu, double2 *&fPsi_i, double2 *&fPsi_o){
+void f_Apply_CTF_GPU(sGP &GP, sLens &Lens, double gxu, double gyu, double2 *&fPsi_i, double2 *&fPsi_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Apply_CTF<<<Bnxny, Tnxny>>>(GP, Lens, gxu, gyu, fPsi_i, fPsi_o);
 }
 
-void f_Apply_PCTF(sGP &GP, sLens &Lens, double2 *&fPsi_io){
+void f_Apply_PCTF_GPU(sGP &GP, sLens &Lens, double2 *&fPsi_io)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Apply_PCTF<<<Bnxny, Tnxny>>>(GP, Lens, fPsi_io);
 }
 
-void f_Apply_PCTF(sGP &GP, sLens &Lens, double2 *&fPsi_i, double2 *&fPsi_o){
+void f_Apply_PCTF_GPU(sGP &GP, sLens &Lens, double2 *&fPsi_i, double2 *&fPsi_o)
+{
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	k_Apply_PCTF<<<Bnxny, Tnxny>>>(GP, Lens, fPsi_i, fPsi_o);
@@ -1405,7 +1989,8 @@ void f_Apply_PCTF(sGP &GP, sLens &Lens, double2 *&fPsi_i, double2 *&fPsi_o){
 /***************************************************************************/
 /***************************************************************************/
 // From Host To Device
-void f_Copy_MCh(sGP &GP, sComplex &MC_h_i, double *&MCr_d_i, double *&MCi_d_i, double2 *&MC_d_o){	
+void f_Copy_MCh(sGP &GP, sComplex &MC_h_i, double *&MCr_d_i, double *&MCi_d_i, double2 *&MC_d_o)
+{	
 	sComplex MC_d;
 	MC_d.real = MCr_d_i; MC_d.imag = MCi_d_i;
 	// Copy real part of the wave function to the host
@@ -1413,15 +1998,16 @@ void f_Copy_MCh(sGP &GP, sComplex &MC_h_i, double *&MCr_d_i, double *&MCi_d_i, d
 	// Copy imaginary part of the wave function to the host
 	cudaMemcpy(MC_d.imag, MC_h_i.imag, GP.nxy*cSizeofRD, cudaMemcpyHostToDevice);
 	// Set Real and Imaginary part to complex matrix
-	f_Set_MC(GP, MC_d, MC_d_o);
+	f_Set_MC_GPU(GP, MC_d, MC_d_o);
 }
 
 // From Device To Host
-void f_Copy_MCd(sGP &GP, double2 *&MC_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o){	
+void f_Copy_MCd(sGP &GP, double2 *&MC_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o)
+{	
 	sComplex MC_d;
 	MC_d.real = MCr_d_i; MC_d.imag = MCi_d_i;
 	// Get Real and Imaginary part to complex matrix
-	f_Get_MC(GP, MC_d_i, MC_d);
+	f_Get_MC_GPU(GP, MC_d_i, MC_d);
 	// Copy real part of the wave function to the host
 	cudaMemcpy(MC_h_o.real, MC_d.real, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
 	// Copy imaginary part of the wave function to the host
@@ -1429,145 +2015,18 @@ void f_Copy_MCd(sGP &GP, double2 *&MC_d_i, double *&MCr_d_i, double *&MCi_d_i, s
 }
 
 // From Device To Host
-void f_Copy_MCd_MDd(sGP &GP, double2 *&MC_d_i, double *&MD_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o, double *&MD_h_o){
+void f_Copy_MCd_MDd(sGP &GP, double2 *&MC_d_i, double *&MD_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o, double *&MD_h_o)
+{
 	f_Copy_MCd(GP, MC_d_i, MCr_d_i, MCi_d_i, MC_h_o);
 	// Copy wave function squared to the host
 	cudaMemcpy(MD_h_o, MD_d_i, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
 }
 
 // From Device To Host
-void f_Copy_MCd_MDd(sGP &GP, double2 *&MC_d_i, double *&MD1_d_i, double *&MD2_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o, double *&MD1_h_o, double *&MD2_h_o){	
+void f_Copy_MCd_MDd(sGP &GP, double2 *&MC_d_i, double *&MD1_d_i, double *&MD2_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o, double *&MD1_h_o, double *&MD2_h_o)
+{	
 	f_Copy_MCd(GP, MC_d_i, MCr_d_i, MCi_d_i, MC_h_o);
 	// Copy wave function squared to the host
 	cudaMemcpy(MD1_h_o, MD1_d_i, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
 	cudaMemcpy(MD2_h_o, MD2_d_i, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_ReadQuadratureGPU(int typ, int nQGPU, sQ1 &QGPU){
-	if(nQGPU<=0) return;
-
-	sQ1 QCPU;
-	QCPU.x = new double[nQGPU]; 
-	QCPU.w = new double[nQGPU];
-	cQuadrature Quad;
-	Quad.ReadQuadrature(typ, nQGPU, QCPU);
-	cudaMalloc((void**)&(QGPU.x), nQGPU*cSizeofRD);
-	cudaMemcpy(QGPU.x, QCPU.x, nQGPU*cSizeofRD, cudaMemcpyHostToDevice);
-	cudaMalloc((void**)&(QGPU.w), nQGPU*cSizeofRD);
-	cudaMemcpy(QGPU.w, QCPU.w, nQGPU*cSizeofRD, cudaMemcpyHostToDevice);
-	delete [] QCPU.x;
-	delete [] QCPU.w;
-}
-
-void f_ReadQuadratureCPUGPU(int typ, int nQ, sQ1 &QCPU, sQ1 &QGPU){
-	if(nQ<=0) return;
-
-	QCPU.x = new double[nQ]; 
-	QCPU.w = new double[nQ];
-	cQuadrature Quad;
-	Quad.ReadQuadrature(typ, nQ, QCPU);
-	cudaMalloc((void**)&(QGPU.x), nQ*cSizeofRD);
-	cudaMemcpy(QGPU.x, QCPU.x, nQ*cSizeofRD, cudaMemcpyHostToDevice);
-	cudaMalloc((void**)&(QGPU.w), nQ*cSizeofRD);
-	cudaMemcpy(QGPU.w, QCPU.w, nQ*cSizeofRD, cudaMemcpyHostToDevice);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sCoefPar_cudaFree(sCoefPar &CoefPar){
-	cudaFreen(CoefPar.cl);
-	cudaFreen(CoefPar.cnl);
-}
-
-void f_sCoefPar_cudaInit(sCoefPar &CoefPar){
-	CoefPar.cl = 0;
-	CoefPar.cnl = 0;
-}
-
-void f_sCoefPar_cudaMalloc(int nCoefPar, sCoefPar &CoefPar){
-	if(nCoefPar<=0) return;
-
-	cudaMalloc((void**)&(CoefPar.cl), nCoefPar*cSizeofRD);
-	cudaMalloc((void**)&(CoefPar.cnl), nCoefPar*cSizeofRD);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sciVn_cudaFree(sciVn &ciVn){
-	cudaFreen(ciVn.c0);
-	cudaFreen(ciVn.c1);
-	cudaFreen(ciVn.c2);
-	cudaFreen(ciVn.c3);
-}
-
-void f_sciVn_cudaInit(sciVn &ciVn){
-	ciVn.c0 = 0;
-	ciVn.c1 = 0;
-	ciVn.c2 = 0;
-	ciVn.c3 = 0;
-}
-
-void f_sciVn_cudaMalloc(int nciVn, sciVn &ciVn){
-	if(nciVn<=0) return;
-
-	cudaMalloc((void**)&(ciVn.c0), nciVn*cSizeofRD);
-	cudaMalloc((void**)&(ciVn.c1), nciVn*cSizeofRD);
-	cudaMalloc((void**)&(ciVn.c2), nciVn*cSizeofRD);
-	cudaMalloc((void**)&(ciVn.c3), nciVn*cSizeofRD);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sDetCir_cudaFree(sDetCir &DetCir){
-	cudaFreen(DetCir.g2min);
-	cudaFreen(DetCir.g2max);
-}
-
-void f_sDetCir_cudaInit(sDetCir &DetCir){
-	DetCir.g2min = 0;
-	DetCir.g2max = 0;
-}
-
-void f_sDetCir_cudaMalloc(int nDetCir, sDetCir &DetCir){
-	if(nDetCir<=0) return;
-
-	cudaMalloc((void**)&(DetCir.g2min), nDetCir*cSizeofRD);
-	cudaMalloc((void**)&(DetCir.g2max), nDetCir*cSizeofRD);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_sACD_cudaFree(sACD &ACD){
-	cudaFreen(ACD.x);
-	cudaFreen(ACD.y);
-}
-
-void f_sACD_cudaInit(sACD &ACD){
-	ACD.x = 0;
-	ACD.y = 0;
-}
-
-void f_sACD_cudaMalloc(int nACD, sACD &ACD){
-	if(nACD<=0) return;
-
-	cudaMalloc((void**)&(ACD.x), nACD*cSizeofRD);
-	cudaMalloc((void**)&(ACD.y), nACD*cSizeofRD);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_GPU_Sync_CPU(int &iSynCPU, int &cSynCPU){
-	if(cSynCPU<0) cSynCPU = ccSynCPU;
-
-	iSynCPU++;
-	if(iSynCPU%cSynCPU==0)
-		cudaDeviceSynchronize();
 }

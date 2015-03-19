@@ -29,7 +29,8 @@
 
 
 /**********************read input TEMim*************************/
-void f_Matlab2InTEMIm(const mxArray *mxInTEMIm, sInTEMIm &InTEMIm){
+void f_Matlab2InTEMIm(const mxArray *mxInTEMIm, sInTEMIm &InTEMIm)
+{
 	InTEMIm.gpu = ReadValuemxField<int>(mxInTEMIm, 0, "gpu");
 	InTEMIm.MEffect = ReadValuemxField<int>(mxInTEMIm, 0, "MEffect");				// 1: Exit wave Partial coherente mode, 2: Transmission cross coefficient
 	InTEMIm.STEffect = ReadValuemxField<int>(mxInTEMIm, 0, "STEffect");				// 1: Spatial and temporal, 2: Temporal, 3: Spatial

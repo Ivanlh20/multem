@@ -20,13 +20,10 @@
 #define hMT_Detector_GPU_H
 
 #include "hConstTypes.h"
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <device_functions.h>
 
-/*************************STEM*************************/
 class cMT_Detector_GPU{
 	private:
+		int IdCall;
 		sGP GP;
 
 		double *M1p_d;
@@ -46,9 +43,9 @@ class cMT_Detector_GPU{
 		~cMT_Detector_GPU();
 
 		void SetInputData(sGP &GP_i, int nDeti, sDetCir &DetCirhi);
-		void getDetectorIntensity(double *&aM2Psi, double *&M2aPsi, int ixys, sDetInt *DetInth);
-		void getDetectorIntensity(double *&aM2Psi, int ixys, sDetInt *DetInth, bool add=false);
-		void getDetectorIntensity(double2 *&aPsi, int ixys, sDetInt *DetInth, bool add=false);
+		void getDetectorIntensity(double w_i, double *&aM2Psi, double *&M2aPsi, int ixys, sDetInt *DetInth);
+		void getDetectorIntensity(double w_i, double *&aM2Psi, int ixys, sDetInt *DetInth, bool add=false);
+		void getDetectorIntensity(double w_i, double2 *&aPsi, int ixys, sDetInt *DetInth, bool add=false);
 };
 
 #endif

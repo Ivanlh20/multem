@@ -20,12 +20,15 @@
 #include "hRandGen.h"
 #include <mex.h>
 
-void Random(int tp, int n, double *r){
+void Random(int tp, int n, double *r)
+{
 	cRandGen RandGen;	
 	RandGen.reset();
 
-		for (int i=0; i<n; i++){
-			switch (tp){
+		for(int i=0; i<n; i++)
+		{
+			switch(tp)
+			{
 				case 0:
 					r[i] = RandGen.randu();
 					break;
@@ -36,7 +39,8 @@ void Random(int tp, int n, double *r){
 		}
 }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]){
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
+{
 	int tp, m, n;
 	double *r;
 

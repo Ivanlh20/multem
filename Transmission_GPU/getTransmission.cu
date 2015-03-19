@@ -29,7 +29,8 @@
 #include <mex.h>
 
 /**********************read input Probe*************************/
-void f_Matlab2InTransmission(const mxArray *mxInTransmission, sInTransmission &InTransmission){
+void f_Matlab2InTransmission(const mxArray *mxInTransmission, sInTransmission &InTransmission)
+{
 	InTransmission.gpu = ReadValuemxField<int>(mxInTransmission, 0, "gpu");							// gpu device
 	InTransmission.MulOrder = 2;																	// 1: First order, 2: Second order
 	InTransmission.iConfFP = ReadValuemxField<int>(mxInTransmission, 0, "iConfFP");					// Frozen phonon configuration
@@ -58,10 +59,15 @@ void f_Matlab2InTransmission(const mxArray *mxInTransmission, sInTransmission &I
 	InTransmission.nAtomsM = (int)mxGetM(mxAtomsM);													// Number of Atoms
 	InTransmission.AtomsM = mxGetPr(mxAtomsM);														// Atoms in a matrix form
 	InTransmission.iSlice = ReadValuemxField<int>(mxInTransmission, 0, "iSlice")-1;					// Slice
-	if(InTransmission.iSlice<0) InTransmission.iSlice=0;
+
+	if(InTransmission.iSlice<0)
+	{
+		InTransmission.iSlice=0;
+	}
 }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
 	sInTransmission InTransmission;
 
 	f_Matlab2InTransmission(prhs[0], InTransmission);
@@ -85,7 +91,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	double2 *Trans;
 	Trans = MT_Transmission_GPU.getTrans(InTransmission.iSlice, 2);
 
-	f_fft2Shift_MC(MT_Transmission_GPU.GP, Trans);
+	f_fft2Shift_MC_GPU(MT_Transmission_GPU.GP, Trans);
 	/*********************copy data to host************************/
 	f_Copy_MCd(MT_Transmission_GPU.GP, Trans, MT_Transmission_GPU.V0, MT_Transmission_GPU.V1, Transh);
 

@@ -47,7 +47,8 @@ class cProbe{
 		void getProbe(sComplex &Psih);
 };
 
-void cProbe::freeMemory(){
+void cProbe::freeMemory()
+{
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
 	f_sGP_Init(GP);
@@ -59,11 +60,13 @@ void cProbe::freeMemory(){
 	cufftDestroyn(PlanPsi);
 }
 
-cProbe::~cProbe(){
+cProbe::~cProbe()
+{
 	freeMemory();
 }
 
-cProbe::cProbe(){
+cProbe::cProbe()
+{
 	f_sGP_Init(GP);
 	f_sLens_Init(Lens);
 	Psii.real = 0;
@@ -72,7 +75,8 @@ cProbe::cProbe(){
 	PlanPsi = 0;
 }
 
-void cProbe::SetInputData(sInProbe &InProbe){
+void cProbe::SetInputData(sInProbe &InProbe)
+{
 	freeMemory();
 
 	MT_MGP_CPU.SetInputData(InProbe);
@@ -110,16 +114,18 @@ void cProbe::SetInputData(sInProbe &InProbe){
 	MT_IncidentWave_GPU.SetInputData(&MT_MGP_CPU, Lens, PlanPsi);
 }
 
-void cProbe::getProbe(sComplex &Psih){
+void cProbe::getProbe(sComplex &Psih)
+{
 	MT_IncidentWave_GPU.Psi0(x0, y0, Psi);
 	// fft2shift 
-	f_fft2Shift_MC(GP, Psi);
+	f_fft2Shift_MC_GPU(GP, Psi);
 	/*********************copy data to host************************/
 	f_Copy_MCd(GP, Psi, Psii.real, Psii.imag, Psih);
 }
 
 /**********************read input Probe*************************/
-void f_Matlab2InProbe(const mxArray *mxInProbe, sInProbe &InProbe){
+void f_Matlab2InProbe(const mxArray *mxInProbe, sInProbe &InProbe)
+{
 	InProbe.gpu = ReadValuemxField<int>(mxInProbe, 0, "gpu");						// gpu device
 	InProbe.E0 = ReadValuemxField<double>(mxInProbe, 0, "E0");						// Acceleration voltage
 	InProbe.theta = ReadValuemxField<double>(mxInProbe, 0, "theta", deg2rad);		// incident tilt (in spherical coordinates) (degrees-->rad)
@@ -148,7 +154,8 @@ void f_Matlab2InProbe(const mxArray *mxInProbe, sInProbe &InProbe){
 	InProbe.nbeta = ReadValuemxField<int>(mxInProbe, 0, "nbeta");					// half number sampling points
  }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
 	sInProbe InProbe;
 	sComplex Psih;
 	cProbe Probe;

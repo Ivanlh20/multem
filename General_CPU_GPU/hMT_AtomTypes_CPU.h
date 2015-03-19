@@ -24,7 +24,10 @@
 class cMT_AtomTypes_CPU: public cMT_AtomTypes{
 	public:
 		void freeMemory();
-		~cMT_AtomTypes_CPU(){ freeMemory(); }
+		~cMT_AtomTypes_CPU()
+		{ 
+			freeMemory(); IdCall = 0;
+		}
 		void SetAtomTypes(int Z_i, int PotPar_i, double Vrl_i, int nR_i, double Rmin_i);
 };
 

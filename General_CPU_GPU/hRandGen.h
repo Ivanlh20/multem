@@ -44,7 +44,8 @@ class cRandGen {
 	inline double randn(void);
 };
 
-inline cRandGen::cRandGen(){
+inline cRandGen::cRandGen()
+{
 	unsigned int t;
 	mag01[0] = 0x0UL;
 	mag01[1] = 0x9908b0dfUL;
@@ -55,7 +56,8 @@ inline cRandGen::cRandGen(){
 	bn = true;
 }
 
-inline void cRandGen::reset(){
+inline void cRandGen::reset()
+{
 	unsigned int t;
 	mag01[0] = 0x0UL;
 	mag01[1] = 0x9908b0dfUL;
@@ -66,25 +68,31 @@ inline void cRandGen::reset(){
 	bn = true;
 }
 
-inline void cRandGen::seed(unsigned long s){
-	mt[0]= s & 0xffffffffUL;
-	for (mti=1; mti<N; mti++){
+inline void cRandGen::seed(unsigned long s)
+{
+	mt[0] = s & 0xffffffffUL;
+	for(mti=1; mti<N; mti++)
+	{
 		mt[mti] = (1812433253UL*(mt[mti-1] ^ (mt[mti-1] >> 30)) + mti); 
 		mt[mti] &= 0xffffffffUL;
 	}
 	bn = true;
 }
 
-inline double cRandGen::randu(void){
-	if (mti >= N){ /* generate N words at one time */
-		if (mti == N+1) /* if init_genrand() has not been called, */
+inline double cRandGen::randu(void)
+{
+	if(mti >= N)
+	{ /* generate N words at one time */
+		if(mti == N+1) /* if init_genrand() has not been called, */
 		seed(5489UL); /* a default initial seed is used */
 
-		for (kk=0;kk<N-M;kk++){
+		for(kk=0;kk<N-M;kk++)
+		{
 			y = (mt[kk]&0x80000000UL)|(mt[kk+1]&0x7fffffffUL);
 			mt[kk] = mt[kk+M] ^ (y >> 1) ^ mag01[y & 0x1UL];
 		}
-		for (;kk<N-1;kk++){
+		for(;kk<N-1;kk++)
+		{
 			y = (mt[kk]&0x80000000UL)|(mt[kk+1]&0x7fffffffUL);
 			mt[kk] = mt[kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
 		}
@@ -105,16 +113,20 @@ inline double cRandGen::randu(void){
 	return ((double(y) + 0.5)/4294967296.0); 
 }
 
-inline int cRandGen::randiu(void){
-	 if (mti >= N){ /* generate N words at one time */
-		 if (mti == N+1) /* if init_genrand() has not been called, */
+inline int cRandGen::randiu(void)
+{
+	 if(mti >= N) /* generate N words at one time */
+	 {
+		 if(mti == N+1) /* if init_genrand() has not been called, */
 		 seed(5489UL); /* a default initial seed is used */
 
-		 for (kk=0;kk<N-M;kk++){
+		 for(kk=0;kk<N-M;kk++)
+		 {
 			 y = (mt[kk]&0x80000000UL)|(mt[kk+1]&0x7fffffffUL);
 			 mt[kk] = mt[kk+M] ^ (y >> 1) ^ mag01[y & 0x1UL];
 		 }
-		 for (;kk<N-1;kk++){
+		 for(;kk<N-1;kk++)
+		 {
 			 y = (mt[kk]&0x80000000UL)|(mt[kk+1]&0x7fffffffUL);
 			 mt[kk] = mt[kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
 		 }
@@ -135,9 +147,11 @@ inline int cRandGen::randiu(void){
 	return y%2147483647; 
 }
 
-inline double cRandGen::randn(void){
+inline double cRandGen::randn(void)
+{
 	double u, v, s, r;
-	if (bn){
+	if(bn)
+	{
 		do{
 			u = 2.0*randu()-1.0;
 			v = 2.0*randu()-1.0;
@@ -146,7 +160,9 @@ inline double cRandGen::randn(void){
 		s = sqrt(-2.0*log(s)/s);
 		r = u*s; rnt = v*s;
 		bn = false;
-	}else{
+	}
+	else
+	{
 		r = rnt;
 		bn = true;
 	}

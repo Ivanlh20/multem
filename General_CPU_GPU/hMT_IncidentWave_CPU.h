@@ -16,23 +16,29 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef hAtomicData_H
-#define hAtomicData_H
+#ifndef hMT_IncidentWave_CPU_H
+#define hMT_IncidentWave_CPU_H
 
+#include "fftw3.h"
 #include "hConstTypes.h"
-#include "hPotential_CPU.h"
-#include "hMT_AtomTypes_CPU.h"
 
-class cAtomicData{
+/*************************Incident wave*************************/
+class cMT_IncidentWave_CPU{
 	private:
-		cPotential_CPU Potential_CPU;
-		sAtDa AtDa[NE];
-		sfep fep[NE];
-		void AtomicData();
-		void AtomicParameterization();	
+		int IdCall;
+		cMT_MGP_CPU *MT_MGP_CPU;
+		sGP GP;
+		sLens Lens;
+		fftw_plan PlanForward;
+		fftw_plan PlanBackward;
 	public:
-		cAtomicData();
-		void ReadAtomicData(int Z_i, int PotPar_i, double Vrl_i, int nR_i, double Rmin_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU);
+		void freeMemory();
+		cMT_IncidentWave_CPU();
+		~cMT_IncidentWave_CPU();
+
+		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, fftw_plan &PlanForward_i, fftw_plan &PlanBackward_i);
+		void Psi0(fftw_complex *&Psi0);
+		void Psi0(double x, double y, fftw_complex *&Psi0);	
 };
 
 #endif

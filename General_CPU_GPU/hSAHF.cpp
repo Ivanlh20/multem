@@ -38,7 +38,8 @@
 #define dgelsd dgelsd_
 #endif
 
-void cSAHF::freeMemory(){
+void cSAHF::freeMemory()
+{
 	/*****************************************/
 	delete [] M; M = 0;
 	delete [] Mt; Mt = 0;
@@ -63,23 +64,27 @@ void cSAHF::freeMemory(){
 	delete [] Sv; Sv = 0;
 	delete [] ipiv; ipiv = 0;
 	/*****************************************/
-	for(int i=0; i<nhmax; i++){
+	for(int i=0; i<nhmax; i++)
+	{
 		clmin[i] = clmax[i] = cnlmin[i] = cnlmax[i] = cnll[i] = cnld[i] = 0;
 		srcnl[i] = icnl[i] = cnl2[i] = gamma[i] = 0;
 		clfx[i] = cnlfx[i] = clPr[i] = cnlPr[i] = clVr[i] = cnlVr[i] = 0;
 	}
 
-	for(int i=0; i<i; i++){
+	for(int i=0; i<i; i++)
+	{
 		g[i] = g2[i] = fxg[i] = feg[i] = 0;
 		wxg[i] = fxgw[i] = weg[i] = fegw[i] = rb[i] = 0;
 	}
 }
 
-cSAHF::~cSAHF(){
+cSAHF::~cSAHF()
+{
 	freeMemory();
 }
 
-cSAHF::cSAHF(){
+cSAHF::cSAHF()
+{
 	/*****************************************/
 	M = 0;
 	Mt = 0;
@@ -104,19 +109,22 @@ cSAHF::cSAHF(){
 	Sv = 0;
 	ipiv = 0;
 	/*****************************************/
-	for(int i=0; i<nhmax; i++){
+	for(int i=0; i<nhmax; i++)
+	{
 		clmin[i] = clmax[i] = cnlmin[i] = cnlmax[i] = cnll[i] = cnld[i] = 0;
 		srcnl[i] = icnl[i] = cnl2[i] = gamma[i] = 0;
 		clfx[i] = cnlfx[i] = clPr[i] = cnlPr[i] = clVr[i] = cnlVr[i] = 0;
 	}
 
-	for(int i=0; i<i; i++){
+	for(int i=0; i<i; i++)
+	{
 		g[i] = g2[i] = fxg[i] = feg[i] = 0;
 		wxg[i] = fxgw[i] = weg[i] = fegw[i] = rb[i] = 0;
 	}
 }
 
-void cSAHF::SetInputData(int Zi, int typi, int nhti, int nhbi, int dgi, double *cnlmini, double *cnlmaxi){	
+void cSAHF::SetInputData(int Zi, int typi, int nhti, int nhbi, int dgi, double *cnlmini, double *cnlmaxi)
+{	
 	freeMemory();
 
 	Z = Zi;
@@ -134,7 +142,8 @@ void cSAHF::SetInputData(int Zi, int typi, int nhti, int nhbi, int dgi, double *
 
 	// weight and fegw
 	double t;
-	for (int i=0; i<ng; i++){	
+	for(int i=0; i<ng; i++)
+	{	
 		t = (double)Z/fxg[i]-1.0;
 		weg[i] = sqrt((1.0 + t*t)/(2.0*ng*feg[0]*feg[0]));
 		fegw[i] = weg[i]*feg[i];
@@ -146,7 +155,7 @@ void cSAHF::SetInputData(int Zi, int typi, int nhti, int nhbi, int dgi, double *
 	MT_AtomTypes_CPU.SetAtomTypes(Z, 6, stVrl, stnR, 0);
 	double rmin = MT_AtomTypes_CPU.rn_c, rmax = 20;	
 	double dlnr = log(rmax/rmin)/(nrb-1);
-	for (int i=0; i<nrb; i++)
+	for(int i=0; i<nrb; i++)
 		rb[i] = rmin*exp(i*dlnr);
 
 	Zk = (double)Z/ca0;
@@ -179,34 +188,43 @@ void cSAHF::SetInputData(int Zi, int typi, int nhti, int nhbi, int dgi, double *
 	oned = 1.0;
 }
 
-void cSAHF::RandGenPReset(){
+void cSAHF::RandGenPReset()
+{
 	RandGenP.reset();
 }
 
-void cSAHF::RandGenPSetLimits(){
-	for (int i=0; i<nht; i++){
+void cSAHF::RandGenPSetLimits()
+{
+	for(int i=0; i<nht; i++)
+	{
 		cnll[i] = cnlmin[i];	
-		cnld[i]= cnlmax[i]-cnlmin[i];
+		cnld[i] = cnlmax[i]-cnlmin[i];
 	}
 }
 
-void cSAHF::RandGenPSetLimits(double *cnli, double dn){
+void cSAHF::RandGenPSetLimits(double *cnli, double dn)
+{
 	double di;
-	for (int i=0; i<nht; i++){
+	for(int i=0; i<nht; i++)
+	{
 		di = (cnlmax[i]-cnlmin[i])*dn;
 		cnll[i] = MAX(cnlmin[i], cnli[i]-di);	
-		cnld[i]= MIN(cnlmax[i], cnli[i]+di) - cnll[i];
+		cnld[i] = MIN(cnlmax[i], cnli[i]+di) - cnll[i];
 	}
 }
 
-void cSAHF::RandGenPNext(double *cnlo){
+void cSAHF::RandGenPNext(double *cnlo)
+{
 	bool Ind;
-	do{
+	do
+	{
 		Ind = false;
 		cnlo[0] = cnll[0] + cnld[0]*RandGenP.randu();
-		for (int i=1; i<nht; i++){
+		for(int i=1; i<nht; i++)
+		{
 			cnlo[i] = cnll[i] + cnld[i]*RandGenP.randu();
-			if (cnlo[i-1] < cnlo[i]){
+			if(cnlo[i-1] < cnlo[i])
+			{
 				Ind = true;
 				break;
 			}
@@ -214,14 +232,16 @@ void cSAHF::RandGenPNext(double *cnlo){
 	} while (Ind);
 }
 
-bool cSAHF::BoundaryConditions(double *cl, double *cnl){
+bool cSAHF::BoundaryConditions(double *cl, double *cnl)
+{
 	int i, j;
 	bool bc = true;
 	double texp;
 	double rho, rhob;
 	double Vr, Vrb;
 
-	for (j=0; j<nht; j++){
+	for(j=0; j<nht; j++)
+	{
 		clfx[j] = cl[j]*icnl[j];
 		cnlfx[j] = cnl[j];
 
@@ -233,18 +253,23 @@ bool cSAHF::BoundaryConditions(double *cl, double *cnl){
 	}
 
 	Vrb = rhob = 1e+20;
-	for (i=0; i<nrb; i++){
+	for(i=0; i<nrb; i++)
+	{
 		rho = Vr = 0;
-		for (j=0; j<nht; j++){
+		for(j=0; j<nht; j++)
+		{
 			texp = exp(-cnlPr[j]*rb[i]);
 			rho += clPr[j]*texp;
 			Vr += clVr[j]*(2.0/(cnlVr[j]*rb[i]) + 1.0)*texp;
 		}
 
-		if ((Vr < 0)||(Vr > Vrb)||(rho < 0)||(rho > rhob)){
+		if((Vr < 0)||(Vr > Vrb)||(rho < 0)||(rho > rhob))
+		{
 			bc = false;
 			break;
-		}else{
+		}
+		else
+		{
 			Vrb = Vr;
 			rhob = rho;
 		}
@@ -253,19 +278,23 @@ bool cSAHF::BoundaryConditions(double *cl, double *cnl){
 	return bc;
 }
 
-void cSAHF::GetLinealCoeff(double *cnl, double *cl, bool &bc){
+void cSAHF::GetLinealCoeff(double *cnl, double *cl, bool &bc)
+{
 	int i, j;
 	double t;
 
-	for (j=0; j<nht; j++){
+	for(j=0; j<nht; j++)
+	{
 		cnl2[j] = cnl[j]*cnl[j];
 		srcnl[j] = sqrt(cnl[j]);
 		icnl[j] = 1.0/cnl[j];
 	}
 
-	for (i=0; i<nhb; i++)
-		for (j=0; j<nht; j++){
-			switch (i){
+	for(i=0; i<nhb; i++)
+		for(j=0; j<nht; j++)
+		{
+			switch(i)
+			{
 				case 0:
 					t = icnl[j];
 					break;
@@ -277,40 +306,50 @@ void cSAHF::GetLinealCoeff(double *cnl, double *cl, bool &bc){
 					break;
 			}
 			if(j<nhb)
+			{
 				M[j*nhb+i] = Mt[i*nhb+j] = t;
+			}
 			else
+			{
 				N[(j-nhb)*nhb+i] = Nt[i*nhbc+j-nhb] = -t;
+			}
 		}
 
-	for (j=0; j<ng; j++)
-		for (i=0; i<nht; i++){
+	for(j=0; j<ng; j++)
+		for(i=0; i<nht; i++)
+		{
 			t = 1.0/(1.0 + cnl[i]*g2[j]);
 			t = weg[j]*(t + t*t);
 			if(i<nhb)
+			{
 				St[j*nhb+i] = t;
+			}
 			else
+			{
 				Rmt[j*nhbc+i-nhb] = t;
+			}
 		}	
 	/************************************************************/	
 	dgesv(&nhb, &ng, Mt, &nhb, ipiv, St, &nhb, &info);
 	/************************************************************/	
 	dgemm(cTn, cTn, &nhbc, &ng, &nhb, &oned, Nt, &nhbc, St, &nhb, &oned, Rmt, &nhbc);
 	/************************************************************/
-	for (j=0; j<ng; j++){
+	for(j=0; j<ng; j++)
+	{
 		t = 0;
-		for (i=0; i<nhb; i++)
+		for(i=0; i<nhb; i++)
 			t += gamma[i]*St[j*nhb+i];
 
 		Fm[j] = fegw[j] - t;
 
-		for (i=0; i<nhbc; i++)
+		for(i=0; i<nhbc; i++)
 			Rm[i*ng+j] = Rmt[j*nhbc+i];
 	}
 	/************************************************************/		
 	dgelsd(&ng, &nhbc, &onei, Rm, &ng, Fm, &ng, Sv, &rcond, &rank, work, &lwork, iwork, &info); 
 	/************************************************************/	
 
-	for (i=0; i<nht; i++)
+	for(i=0; i<nht; i++)
 		cl[i] = (i<nhb)?gamma[i]:Fm[i-nhb];
 
 	/************************************************************/	
@@ -322,7 +361,8 @@ void cSAHF::GetLinealCoeff(double *cnl, double *cl, bool &bc){
 	bc = BoundaryConditions(cl, cnl);
 }
 
-void cSAHF::NextCoeff(double *clo, double *cnlo){
+void cSAHF::NextCoeff(double *clo, double *cnlo)
+{
 	bool bc;
 	do {
 		RandGenPNext(cnlo);		
@@ -330,15 +370,18 @@ void cSAHF::NextCoeff(double *clo, double *cnlo){
 	} while (!bc);
 }
 
-void cSAHF::CostFun(double *cli, double *cnli, double &ee, double &sigx, double &sige){
+void cSAHF::CostFun(double *cli, double *cnli, double &ee, double &sigx, double &sige)
+{
 	int i, j;
 	double t, tx, te;
 	double fxa, fea;
 
 	sigx = sige = ee = 0;
-	for (i=0; i<ng; i++){
+	for(i=0; i<ng; i++)
+	{
 		fea = fxa = 0;
-		for (j=0; j<nht; j++){
+		for(j=0; j<nht; j++)
+		{
 			t = 1.0/(1.0 + cnli[j]*g2[i]);
 			fxa += c2Pi2a0*cli[j]*t*t/cnli[j];
 			fea += cli[j]*(t + t*t);
@@ -349,8 +392,10 @@ void cSAHF::CostFun(double *cli, double *cnli, double &ee, double &sigx, double 
 	}
 }
 
-void cSAHF::GetCfegVr(double *cli, double *cnli, double *clfego, double *cnlfego, double *clVro, double *cnlVro){
-	for (int i=0; i<nht; i++){			
+void cSAHF::GetCfegVr(double *cli, double *cnli, double *clfego, double *cnlfego, double *clVro, double *cnlVro)
+{
+	for(int i=0; i<nht; i++)
+	{			
 		clfego[i] = cli[i];
 		cnlfego[i] = cnli[i];	
 		clVro[i] = cPotf*cPi2*cli[i]/pow(cnli[i], 1.5);
@@ -358,13 +403,15 @@ void cSAHF::GetCfegVr(double *cli, double *cnli, double *clfego, double *cnlfego
 	}
 }
 
-void cSAHF::CopyData(int n, double eei, double *cli, double *cnli, double &eeo, double *clo, double *cnlo){
+void cSAHF::CopyData(int n, double eei, double *cli, double *cnli, double &eeo, double *clo, double *cnlo)
+{
 	eeo = eei;
 	memcpy(clo, cli, n*cSizeofRD);
 	memcpy(cnlo, cnli, n*cSizeofRD);
 }
 
-void cSAHF::CopyData(int n, double eei, double sigxi, double sigei, double *cli, double *cnli, double &eeo, double &sigxo, double &sigeo, double *clo, double *cnlo){
+void cSAHF::CopyData(int n, double eei, double sigxi, double sigei, double *cli, double *cnli, double &eeo, double &sigxo, double &sigeo, double *clo, double *cnlo)
+{
 	eeo = eei;
 	sigxo = sigxi;
 	sigeo = sigei;
@@ -372,12 +419,14 @@ void cSAHF::CopyData(int n, double eei, double sigxi, double sigei, double *cli,
 	memcpy(cnlo, cnli, n*cSizeofRD);
 }
 
-void cSAHF::GetIniPoint(int ni, double *clfego, double *cnlfego, double *clVro, double *cnlVro, double *eeo, double *sigxo, double *sigeo){
+void cSAHF::GetIniPoint(int ni, double *clfego, double *cnlfego, double *clVro, double *cnlVro, double *eeo, double *sigxo, double *sigeo)
+{
 	double cln[nhmax], cnln[nhmax];
 	double een, sigxn, sigen;
 	RandGenPReset();
 	RandGenPSetLimits();
-	for (int i=0; i<ni; i++){
+	for(int i=0; i<ni; i++)
+	{
 		NextCoeff(cln, cnln);	
 		CostFun(cln, cnln, een, sigxn, sigen);
 		eeo[i] = een;
@@ -387,7 +436,8 @@ void cSAHF::GetIniPoint(int ni, double *clfego, double *cnlfego, double *clVro, 
 	}
 }
 
-void cSAHF::GetIniPoint(int ni, double *clo, double *cnlo, double &eeo, double &sigxo, double &sigeo, double &To){
+void cSAHF::GetIniPoint(int ni, double *clo, double *cnlo, double &eeo, double &sigxo, double &sigeo, double &To)
+{
 	int i, j;
 	double cln[nhmax], cnln[nhmax];
 	double een, sigxn, sigen;
@@ -397,26 +447,36 @@ void cSAHF::GetIniPoint(int ni, double *clo, double *cnlo, double &eeo, double &
 	eeo = eem = 1e+200;
 	RandGenPReset();
 	RandGenPSetLimits();
-	for (i=0; i<ni; i++){
+	for(i=0; i<ni; i++)
+	{
 		NextCoeff(cln, cnln);	
 		CostFun(cln, cnln, een, sigxn, sigen);
 
-		if (een < eeo)
+		if(een < eeo)
+		{
 			CopyData(nht, een, sigxn, sigen, cln, cnln, eeo, sigxo, sigeo, clo, cnlo);
+		}
 
 		eet[i] = een;
 		if(een<eem)
+		{
 			eem = een;
+		}
 	}
 
 	// Sort by energy
 	for(i=0; i<ni; i++)
-		for (j=i+1; j<ni; j++)
-			if (eet[j] < eet[i]){
+	{
+		for(j=i+1; j<ni; j++)
+		{
+			if(eet[j] < eet[i])
+			{
 				eea = eet[i];
 				eet[i] = eet[j];
 				eet[j] = eea;
 			}
+		}
+	}
 	
 	eea = eet[ni/2];
 	
@@ -425,26 +485,35 @@ void cSAHF::GetIniPoint(int ni, double *clo, double *cnlo, double &eeo, double &
 	delete [] eet;
 }
 
-double cSAHF::dfactor(double p){
+double cSAHF::dfactor(double p)
+{
 	double df, c = 2.0, p1 = 0.6, p2 = 0.4;
-	if (p>p1)
+	if(p>p1)
+	{
 		df = 1.0 + c*(p-p1)/p2;
+	}
 	else if(p<p2)
+	{
 		df = 1.0/(1.0 + c*(p2-p)/p2);
+	}
 	else
+	{
 		df = 1;
+	}
 	return df;
 }
 
 void cSAHF::SimulatedAnnealing(int Z, int nht, int nhb, int dgi, double *cnlmini, double *cnlmaxi, int N, 
-double *clfego, double *cnlfego, double *clVro, double *cnlVro, double *eeo, double *sigxo, double *sigeo){
+double *clfego, double *cnlfego, double *clVro, double *cnlVro, double *eeo, double *sigxo, double *sigeo)
+{
 	int typ = 2;
 	SetInputData(Z, typ, nht, nhb, dgi, cnlmini, cnlmaxi);
 	GetIniPoint(N, clfego, cnlfego, clVro, cnlVro, eeo, sigxo, sigeo);
 }
 
 void cSAHF::SimulatedAnnealing(int Z, int nht, int nhb, int dgi, double *cnlmini, double *cnlmaxi, int Nt, int Ns, double rT1, 
-	double rT2, double *clfego, double *cnlfego, double *clVro, double *cnlVro, double *eeo, double *sigxo, double *sigeo){
+	double rT2, double *clfego, double *cnlfego, double *clVro, double *cnlVro, double *eeo, double *sigxo, double *sigeo)
+{
 	int i, j, typ = 2;
 	double T0, Tmin, T, rT;
 	double dn, dmax, p;
@@ -467,30 +536,40 @@ void cSAHF::SimulatedAnnealing(int Z, int nht, int nhb, int dgi, double *cnlmini
 	T = T0; Tmin = 1e-10;
 	dmax = dn = 1.0;
 
-	while ((T>Tmin)&&(dn>1e-8)){
+	while ((T>Tmin)&&(dn>1e-8))
+	{
 		RandGenPReset();
-		for (i=0; i<Nt; i++){
+		for(i=0; i<Nt; i++)
+		{
 			p = 0;		
 			RandGenPSetLimits(cnla, dn);
-			for (j=0; j<Ns; j++){
+			for(j=0; j<Ns; j++)
+			{
 				NextCoeff(cln, cnln);
 				CostFun(cln, cnln, een, sigxn, sigen);
-				if (een < eea){
+				if(een < eea)
+				{
 					p = p + 1;
 					CopyData(nht, een, sigxn, sigen, cln, cnln, eea, sigxa, sigea, cla, cnla);
 					RandGenPSetLimits(cnla, dn);					
-					if (een < eeopt)
+					if(een < eeopt)
+					{
 						CopyData(nht, een, sigxn, sigen, cln, cnln, eeopt, sigxopt, sigeopt, clopt, cnlopt);
+					}
 					
-				}else if (exp(-(een-eea)/T) > RandGenT.randu()){
+				}
+				else if(exp(-(een-eea)/T) > RandGenT.randu())
+				{
 					p = p + 1;
 					CopyData(nht, een, sigxn, sigen, cln, cnln, eea, sigxa, sigea, cla, cnla);
 					RandGenPSetLimits(cnla, dn);					
 				}
 			}	
 			dn = MIN(dn*dfactor(p/Ns), dmax);
-			if (dn==0)
+			if(dn==0)
+			{
 				dn = MIN(T, dmax);
+			}
 		}
 
 		rT = (dn==dmax)?rT1:rT2;

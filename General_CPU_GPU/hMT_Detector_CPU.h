@@ -21,10 +21,9 @@
 
 #include "hConstTypes.h"
 
-
-/*************************STEM*************************/
 class cMT_Detector_CPU{
 	private:
+		int IdCall;
 		sGP GP;
 
 		int nDet;			// number of Detectors

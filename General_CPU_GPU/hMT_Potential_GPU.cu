@@ -41,7 +41,8 @@ __device__ inline void atomicAdd(double *address, double val)
 {
 	unsigned long long int* address_as_ull = (unsigned long long int*)address;
 	unsigned long long int old = *address_as_ull, assumed;
-	do {
+	do
+	{
 		assumed = old;
 		old = atomicCAS(address_as_ull, assumed,__double_as_longlong(val +
 		 __longlong_as_double(assumed)));
@@ -56,11 +57,14 @@ __device__ inline double bessi0GPU(double x)
 	 double ax,ans;
 	 double y;
 
-	 if ((ax=fabs(x)) < 3.75){
+	 if ((ax=fabs(x)) < 3.75)
+	 {
 		 y=x/3.75,y=y*y;
 		 ans=1.0+y*(3.5156229+y*(3.0899424+y*(1.2067492
 		 +y*(0.2659732+y*(0.360768e-1+y*0.45813e-2)))));
-	 }else{
+	 }
+	 else
+	 {
 		 y=3.75/ax;
 		 ans=(exp(ax)/sqrt(ax))*(0.39894228+y*(0.1328592e-1
 		 +y*(0.225319e-2+y*(-0.157565e-2+y*(0.916281e-2
@@ -78,11 +82,14 @@ __device__ inline double bessi1GPU(double x)
 	 double ax,ans;
 	 double y;
 
-	 if ((ax=fabs(x)) < 3.75){
+	 if ((ax=fabs(x)) < 3.75)
+	 {
 		 y=x/3.75,y=y*y;
 		 ans=ax*(0.5+y*(0.87890594+y*(0.51498869+y*(0.15084934
 		 +y*(0.2658733e-1+y*(0.301532e-2+y*0.32411e-3))))));
-	 }else{
+	 }
+	 else
+	 {
 		 y=3.75/ax;
 		 ans=0.2282967e-1+y*(-0.2895312e-1+y*(0.1787654e-1
 		 -y*0.420059e-2));
@@ -100,12 +107,15 @@ __device__ inline double bessk0GPU(double x)
 {
 	 double y,ans;
 
-	 if (x <= 2.0){
+	 if (x <= 2.0)
+	 {
 		 y=x*x/4.0;
 		 ans=(-log(x/2.0)*bessi0GPU(x))+(-0.57721566+y*(0.42278420
 		 +y*(0.23069756+y*(0.3488590e-1+y*(0.262698e-2
 		 +y*(0.10750e-3+y*0.74e-5))))));
-	 }else{
+	 }
+	 else
+	 {
 		 y=2.0/x;
 		 ans=(exp(-x)/sqrt(x))*(1.25331414+y*(-0.7832358e-1
 		 +y*(0.2189568e-1+y*(-0.1062446e-1+y*(0.587872e-2
@@ -121,12 +131,15 @@ __device__ inline double bessk1GPU(double x)
 {
 	 double y,ans;
 
-	 if (x <= 2.0){
+	 if (x <= 2.0)
+	 {
 		 y=x*x/4.0;
 		 ans=(log(x/2.0)*bessi1GPU(x))+(1.0/x)*(1.0+y*(0.15443144
 		 +y*(-0.67278579+y*(-0.18156897+y*(-0.1919402e-1
 		 +y*(-0.110404e-2+y*(-0.4686e-4)))))));
-	 }else{
+	 }
+	 else
+	 {
 		 y=2.0/x;
 		 ans=(exp(-x)/sqrt(x))*(1.25331414+y*(0.23498619
 		 +y*(-0.3655620e-1+y*(0.1504268e-1+y*(-0.780353e-2
@@ -136,11 +149,13 @@ __device__ inline double bessk1GPU(double x)
 }
 
 // Potential Evaluation (VR, dVRiR)
-__device__ inline void Pot2Da(double &R, volatile double *cl, volatile double *cnl, volatile double *icnl, double f, double &VR, double &dVRiR){
+__device__ inline void Pot2Da(double &R, volatile double *cl, volatile double *cnl, volatile double *icnl, double f, double &VR, double &dVRiR)
+{
 	double R2;
 	double VR0, VR1, VR2, VR3, VR4, VR5;
 
-	switch (PotPar){
+	switch(PotPar)
+	{
 		case 1:
 			// 1: doyle and turner parameterization - 4 gaussians - [0, 4]
 			R2 = R*R;
@@ -204,11 +219,13 @@ __device__ inline void Pot2Da(double &R, volatile double *cl, volatile double *c
 }
 
 // Potential Evaluation (Vr, dVrir)
-__device__ inline void Pot3Da(double &r, volatile double *cl, volatile double *cnl, volatile double *icnl, double f, double &Vr, double &dVrir){
+__device__ inline void Pot3Da(double &r, volatile double *cl, volatile double *cnl, volatile double *icnl, double f, double &Vr, double &dVrir)
+{
 	double ir, r2;
 	double Vr0, Vr1, Vr2, Vr3, Vr4, Vr5;
 
-	switch (PotPar){
+	switch(PotPar)
+	{
 		case 1:
 			// 1: doyle and turner parameterization - 4 gaussians - [0, 4]
 			r2 = r*r;
@@ -273,7 +290,8 @@ __device__ inline void Pot3Da(double &r, volatile double *cl, volatile double *c
 	}
 }
 
-__device__ inline int unrolledBinarySearch128(double x0, const double * __restrict x){
+__device__ inline int unrolledBinarySearch128(double x0, const double * __restrict x)
+{
 	int i0 = 0, ie = stnR-1;
 	int im = (i0 + ie)>>1;	// divide by 2
 	if(x0 < x[im]) ie = im; else i0 = im; //64
@@ -295,13 +313,15 @@ __device__ inline int unrolledBinarySearch128(double x0, const double * __restri
 
 __device__ inline void reduceBlockDouble128(volatile double *M1, volatile double *M2, int tid)
 { 
-	if (tid < 64){
+	if (tid < 64)
+	{
 		M1[tid] += M1[tid + 64];
 		M2[tid] += M2[tid + 64];
 	}
 	__syncthreads();
 
-	if (tid < 32){
+	if (tid < 32)
+	{
 		M1[tid] += M1[tid + 32];
 		M2[tid] += M2[tid + 32];
 
@@ -324,7 +344,8 @@ __device__ inline void reduceBlockDouble128(volatile double *M1, volatile double
 
 __device__ inline void reduceBlockDouble128(volatile double *M1, volatile double *M2, volatile double *M3, volatile double *M4, int tid)
 { 
-	if (tid < 64){
+	if (tid < 64)
+	{
 		M1[tid] += M1[tid + 64];
 		M2[tid] += M2[tid + 64];
 		M3[tid] += M3[tid + 64];
@@ -332,7 +353,8 @@ __device__ inline void reduceBlockDouble128(volatile double *M1, volatile double
 	}
 	__syncthreads();
 
-	if (tid < 32){
+	if (tid < 32)
+	{
 		M1[tid] += M1[tid + 32];
 		M2[tid] += M2[tid + 32];
 		M3[tid] += M3[tid + 32];
@@ -369,8 +391,8 @@ __device__ inline void reduceBlockDouble128(volatile double *M1, volatile double
 /***************************************************************************/
 
 // Linear projected potential: V and zV
-template <int MulOrder>
-__global__ void k_LinearProjAtomicPotentialGPU(sQ1 Qz){	
+__global__ void k_LinearProjAtomicPotentialGPU(sQ1 Qz)
+{	
 	__shared__ double V0s[stnQz];
 	__shared__ double dV0s[stnQz];
 	__shared__ double V1s[stnQz];
@@ -387,7 +409,8 @@ __global__ void k_LinearProjAtomicPotentialGPU(sQ1 Qz){
 	double z = a*x + b, r = sqrt(z*z + R2), zm = 0.5*(cVp[isatom].ze+cVp[isatom].z0);
 	double V, dVir;
 
-	if (ix < 6){
+	if (ix < 6)
+	{
 		 cls[ix] = cVp[isatom].cVr.cl[ix];
 		 cnls[ix] = cVp[isatom].cVr.cnl[ix];
 		 icnls[ix] = (cnls[ix]>0)?1.0/cnls[ix]:0.0;
@@ -396,48 +419,37 @@ __global__ void k_LinearProjAtomicPotentialGPU(sQ1 Qz){
 
 	Pot3Da(r, cls, cnls, icnls, a*w, V, dVir);
 	V0s[ix] = V; dV0s[ix] = dVir;
-	if(MulOrder>=2){
-		z = z-zm; V1s[ix] = z*V; dV1s[ix] = z*dVir;
-	}
+	z = z-zm; V1s[ix] = z*V; dV1s[ix] = z*dVir;
 
-	if (cVp[isatom].split){
+	if (cVp[isatom].split)
+	{
 		a = b = 0.5*cVp[isatom].ze;
 		z = a*x + b; r = sqrt(z*z + R2);
 		Pot3Da(r, cls, cnls, icnls, a*w, V, dVir);
 		V0s[ix] += V; dV0s[ix] += dVir;
-		if(MulOrder>=2){
-			z = z-zm; V1s[ix] += z*V; dV1s[ix] += z*dVir;
-		}
+		z = z-zm; V1s[ix] += z*V; dV1s[ix] += z*dVir;
 	}
 
 	__syncthreads();
 
-	switch(MulOrder){
-		case 1:
-			reduceBlockDouble128(V0s, dV0s, ix);
-			break;
-		case 2:
-			reduceBlockDouble128(V0s, dV0s, V1s, dV1s, ix);
-			break;
-	}
+	reduceBlockDouble128(V0s, dV0s, V1s, dV1s, ix);
 		
-
-	if(ix==0){
+	if(ix==0)
+	{
 		cVp[isatom].ciV0.c0[iR] = V0s[0];			// V0
 		cVp[isatom].ciV0.c1[iR] = 0.5*dV0s[0];		// dR2V0
-		if(MulOrder>=2){
-			cVp[isatom].ciV1.c0[iR] = V1s[0];			// V1
-			cVp[isatom].ciV1.c1[iR] = 0.5*dV1s[0];		// dR2V1
-		}
+		cVp[isatom].ciV1.c0[iR] = V1s[0];			// V1
+		cVp[isatom].ciV1.c1[iR] = 0.5*dV1s[0];		// dR2V1
 	}
 }
 
 // Get Local interpolation coefficients
-template <int MulOrder>
-__global__ void k_getCubicPolyCoef(void){
+__global__ void k_getCubicPolyCoef(void)
+{
 	int iR = threadIdx.x, isatom = blockIdx.x;
 
-	if (iR < stnR-1){
+	if (iR < stnR-1)
+	{
 		double dx = 1.0/(cVp[isatom].R2[iR+1]-cVp[isatom].R2[iR]), dx2 = dx*dx;
 		double V, Vn, dV, dVn, m, n;
 		/********************************************************/
@@ -448,32 +460,36 @@ __global__ void k_getCubicPolyCoef(void){
 		cVp[isatom].ciV0.c2[iR] = (3.0*m-n-dV)*dx;
 		cVp[isatom].ciV0.c3[iR] = (n-2.0*m)*dx2;
 		/********************************************************/
-		if(MulOrder>=2){
-			V = cVp[isatom].ciV1.c0[iR]; Vn = cVp[isatom].ciV1.c0[iR+1];
-			dV = cVp[isatom].ciV1.c1[iR]; dVn = cVp[isatom].ciV1.c1[iR+1];
-			m = (Vn-V)*dx; n = dV+dVn;
-			cVp[isatom].ciV1.c0[iR] = V-cVp[isatom].ciV1.c0[stnR-1];
-			cVp[isatom].ciV1.c2[iR] = (3.0*m-n-dV)*dx;
-			cVp[isatom].ciV1.c3[iR] = (n-2.0*m)*dx2;
-		}
+		V = cVp[isatom].ciV1.c0[iR]; Vn = cVp[isatom].ciV1.c0[iR+1];
+		dV = cVp[isatom].ciV1.c1[iR]; dVn = cVp[isatom].ciV1.c1[iR+1];
+		m = (Vn-V)*dx; n = dV+dVn;
+		cVp[isatom].ciV1.c0[iR] = V-cVp[isatom].ciV1.c0[stnR-1];
+		cVp[isatom].ciV1.c2[iR] = (3.0*m-n-dV)*dx;
+		cVp[isatom].ciV1.c3[iR] = (n-2.0*m)*dx2;
 	}
 }
 
 // Cubic polynomial evaluation
-__global__ void k_evalCubicPoly(sGP GP, scVp cVp, double * __restrict V0g, double * __restrict V1g){
+__global__ void k_evalCubicPoly(sGP GP, scVp cVp, double * __restrict V0g, double * __restrict V1g)
+{
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < cVp.bnx.n)&&(iy < cVp.bny.n)){
+	if ((ix < cVp.bnx.n)&&(iy < cVp.bny.n))
+	{
 		ix += cVp.bnx.i;
 		iy += cVp.bny.i;
 
 		double Rx = ix*GP.dRx - cVp.x;
 		double Ry = iy*GP.dRy - cVp.y;
 		double R2 = Rx*Rx + Ry*Ry;
-		if (R2 < cVp.Rmax2){
+		if (R2 < cVp.Rmax2)
+		{
 			double dx, dx2, dx3, V;
-			if(R2 < cVp.Rmin2) R2 = cVp.Rmin2;
+			if(R2 < cVp.Rmin2)
+			{
+				R2 = cVp.Rmin2;
+			}
 
 			ix = ix-(int)floor(ix*GP.dRx/GP.lx)*GP.nx;
 			iy = iy-(int)floor(iy*GP.dRy/GP.ly)*GP.ny;
@@ -494,14 +510,17 @@ __global__ void k_evalCubicPoly(sGP GP, scVp cVp, double * __restrict V0g, doubl
 }
 
 //get Effective Potential
-__global__ void k_getV0(sGP GP, eSlicePos SlicePo, double dz, double * __restrict V0_io, double * __restrict V1_io, double * __restrict V1o_io){
+__global__ void k_getV0(sGP GP, eSlicePos SlicePo, double dz, double * __restrict V0_io, double * __restrict V1_io, double * __restrict V1o_io)
+{
 	int iy = threadIdx.x + blockIdx.x*blockDim.x;
 	int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-	if ((ix < GP.nx)&&(iy < GP.ny)){
+	if ((ix < GP.nx)&&(iy < GP.ny))
+	{
 		int ixy = ix*GP.ny+iy;
 		double V0 = V0_io[ixy], V1 = V1_io[ixy]/dz;
-		switch (SlicePo){
+		switch(SlicePo)
+		{
 			case eSPFirst: // initial Slice
 				V0_io[ixy] = V0 = V0-V1;
 				V1o_io[ixy] = V1;
@@ -520,7 +539,13 @@ __global__ void k_getV0(sGP GP, eSlicePos SlicePo, double dz, double * __restric
 /***************************************************************************/
 /***************************************************************************/
 
-void cMT_Potential_GPU::freeMemory(){
+void cMT_Potential_GPU::freeMemory()
+{
+	if(IdCall==0)
+	{
+		return;
+	}
+
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
 	SetPotPar(0);
@@ -530,11 +555,13 @@ void cMT_Potential_GPU::freeMemory(){
 
 	f_sGP_Init(GP);
 
-	f_scVp_Init(stncVp, cVph);
-	for(int icVp=0; icVp<stncVp; icVp++){
-		f_sciVn_cudaFree(cVph[icVp].ciV0);
-		f_sciVn_cudaFree(cVph[icVp].ciV1);
+	for(int icVp=0; icVp<stncVp; icVp++)
+	{
+		f_sciVn_cudaFree(ciV0[icVp]);
+		f_sciVn_cudaFree(ciV1[icVp]);
 	}
+
+	f_scVp_Init(stncVp, cVph);
 
 	delete [] MT_AtomTypes_GPU; MT_AtomTypes_GPU = 0;
 
@@ -543,12 +570,16 @@ void cMT_Potential_GPU::freeMemory(){
 	cudaFreen(V1o);
 }
 
-void cMT_Potential_GPU::freeMemoryReset(){
+void cMT_Potential_GPU::freeMemoryReset()
+{
 	freeMemory();
+	IdCall = 0;
 	cudaDeviceReset();
 }
 
-cMT_Potential_GPU::cMT_Potential_GPU(){
+cMT_Potential_GPU::cMT_Potential_GPU()
+{
+	IdCall = 0;
 	SetPotPar(0);
 
 	Qz.x = 0;
@@ -556,11 +587,13 @@ cMT_Potential_GPU::cMT_Potential_GPU(){
 
 	f_sGP_Init(GP);
 
-	f_scVp_Init(stncVp, cVph);
-	for(int icVp=0; icVp<stncVp; icVp++){
-		f_sciVn_cudaInit(cVph[icVp].ciV0);
-		f_sciVn_cudaInit(cVph[icVp].ciV1);
+	for(int icVp=0; icVp<stncVp; icVp++)
+	{
+		f_sciVn_cudaInit(ciV0[icVp]);
+		f_sciVn_cudaInit(ciV1[icVp]);
 	}
+
+	f_scVp_Init(stncVp, cVph);
 
 	MT_AtomTypes_GPU = 0;
 
@@ -569,25 +602,31 @@ cMT_Potential_GPU::cMT_Potential_GPU(){
 	V1o = 0;
 }
 
-cMT_Potential_GPU::~cMT_Potential_GPU(){
+cMT_Potential_GPU::~cMT_Potential_GPU()
+{
 	freeMemory();
+	IdCall = 0;
 }
 
-eSlicePos cMT_Potential_GPU::SlicePos(int iSlice, int nSlice){
+eSlicePos cMT_Potential_GPU::SlicePos(int iSlice, int nSlice)
+{
 	return (iSlice==0)?eSPFirst:(iSlice<nSlice)?eSPMedium:eSPLast;
 }
 
-int cMT_Potential_GPU::CheckGridLimits(int i, int n){
+int cMT_Potential_GPU::CheckGridLimits(int i, int n)
+{
 	return (i<0)?0:((i>=n)?n-1:i);
 }
 
-void cMT_Potential_GPU::getbn(sGP &GP, double x, double y, double Rmax, sbn &bnx, sbn &bny){
+void cMT_Potential_GPU::getbn(sGP &GP, double x, double y, double Rmax, sbn &bnx, sbn &bny)
+{
 	double x0 = x-Rmax, xe = x+Rmax;
 	double y0 = y-Rmax, ye = y+Rmax;
 	int ix0 = (int)floor(x0/GP.dRx), ixe = (int)ceil(xe/GP.dRx);
 	int iy0 = (int)floor(y0/GP.dRy), iye = (int)ceil(ye/GP.dRy);
 
-	if(GP.PBC_xy==2){
+	if(GP.PBC_xy==2)
+	{
 		ix0 = CheckGridLimits(ix0, GP.nx);
 		ixe = CheckGridLimits(ixe, GP.nx);
 		iy0 = CheckGridLimits(iy0, GP.ny);
@@ -597,10 +636,12 @@ void cMT_Potential_GPU::getbn(sGP &GP, double x, double y, double Rmax, sbn &bnx
 	bny.i = iy0; bny.n = (iy0==iye)?0:iye-iy0+1;
 };
 
-void cMT_Potential_GPU::setcVp(int iSlice, int iatom, int nsatom, dim3 &BPot, dim3 &TPot, dim3 &BCoef, dim3 &TCoef){
+void cMT_Potential_GPU::setcVp(int iSlice, int iatom, int nsatom, dim3 &BPot, dim3 &TPot, dim3 &BCoef, dim3 &TCoef)
+{
 	int iZ;
 
-	for(int i=0; i<nsatom; i++){
+	for(int i=0; i<nsatom; i++)
+	{
 		iZ = Atoms[iatom+i].Z-1;
 		cVph[i].x = Atoms[iatom+i].x;
 		cVph[i].y = Atoms[iatom+i].y;
@@ -614,7 +655,8 @@ void cMT_Potential_GPU::setcVp(int iSlice, int iatom, int nsatom, dim3 &BPot, di
 		cVph[i].cVr.cnl = MT_AtomTypes_GPU[iZ].cVr.cnl;
 		cVph[i].R2 = MT_AtomTypes_GPU[iZ].R2;
 		getbn(GP, cVph[i].x, cVph[i].y, MT_AtomTypes_GPU[iZ].Rmax, cVph[i].bnx, cVph[i].bny);
-		if(MT_MGP_CPU->ApproxModel>1){
+		if(MT_MGP_CPU->ApproxModel>1)
+		{
 			cudaMemcpyAsync(cVph[i].ciV0.c0, MT_AtomTypes_GPU[iZ].ciVR.c0, stnR*cSizeofRD, cudaMemcpyDeviceToDevice);
 			cudaMemcpyAsync(cVph[i].ciV0.c1, MT_AtomTypes_GPU[iZ].ciVR.c1, stnR*cSizeofRD, cudaMemcpyDeviceToDevice);
 			cudaMemcpyAsync(cVph[i].ciV0.c2, MT_AtomTypes_GPU[iZ].ciVR.c2, stnR*cSizeofRD, cudaMemcpyDeviceToDevice);
@@ -630,47 +672,52 @@ void cMT_Potential_GPU::setcVp(int iSlice, int iatom, int nsatom, dim3 &BPot, di
 	BCoef.x = nsatom; BCoef.y = 1; BCoef.z = 1;
 }
 
-void cMT_Potential_GPU::SetPotPar(int PotParh){
+void cMT_Potential_GPU::SetPotPar(int PotParh)
+{
 	cudaMemcpyToSymbol(PotPar, &PotParh, cSizeofI);
 }
 
-void cMT_Potential_GPU::getCubicPoly(dim3 BPot, dim3 TPot, dim3 BCoef, dim3 TCoef){
-	if(MT_MGP_CPU->ApproxModel>1) return;
+void cMT_Potential_GPU::addAtomicProjectedPotential(dim3 BPot, dim3 TPot, dim3 BCoef, dim3 TCoef, int nsatom, double *&V0g, double *&V1g)
+{
 
-	switch(MT_MGP_CPU->MulOrder){
-		case 1:
-			k_LinearProjAtomicPotentialGPU<1><<<BPot, TPot>>>(Qz);
-			k_getCubicPolyCoef<1><<<BCoef, TCoef>>>();
-			break;
-		case 2:
-			k_LinearProjAtomicPotentialGPU<2><<<BPot, TPot>>>(Qz);
-			k_getCubicPolyCoef<2><<<BCoef, TCoef>>>();
-			break;
-	}	
-}
+	if(MT_MGP_CPU->ApproxModel==1)
+	{
+		k_LinearProjAtomicPotentialGPU<<<BPot, TPot>>>(Qz);
+		k_getCubicPolyCoef<<<BCoef, TCoef>>>();
+	}
 
-void cMT_Potential_GPU::evalCubicPoly(int nsatom, double *&V0g, double *&V1g){
 	dim3 BEval, TEval(thrnxny, thrnxny); 
-	for(int isatom=0; isatom<nsatom; isatom++){
+	for(int isatom=0; isatom<nsatom; isatom++)
+	{
 		BEval.x = (cVph[isatom].bny.n+thrnxny-1)/thrnxny; BEval.y = (cVph[isatom].bnx.n+thrnxny-1)/thrnxny;
 		k_evalCubicPoly<<<BEval, TEval>>>(GP, cVph[isatom], V0g, V1g);
 	}
 }
 
-void cMT_Potential_GPU::getV0(int iSlice, double *&V0, int typ){
-	if(MT_MGP_CPU->MulOrder==1) return;
+void cMT_Potential_GPU::getV0(int iSlice, double *&V0, int typ)
+{
+	if(MT_MGP_CPU->MulOrder==1)
+	{
+		return;
+	}
 
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
 	double dz = get_dz(iSlice);
 	if(typ==1)
+	{
 		k_getV0<<<Bnxny, Tnxny>>>(GP, SlicePos(iSlice, nSlice), dz, V0, V1, V1o);
+	}
 	else
-		f_Scale_MD(GP, dz, V1);
+	{
+		f_Scale_MD_GPU(GP, dz, V1);
+	}
 }
 
-void cMT_Potential_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i){
+void cMT_Potential_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i)
+{
 	freeMemory();
+	IdCall++;
 
 	f_sGP_SetInputData(MT_MGP_CPU_io, GP);
 	cMT_Specimen_CPU::SetInputData(MT_MGP_CPU_io, nAtomsM_i, AtomsM_i, GP.dRmin);
@@ -678,13 +725,24 @@ void cMT_Potential_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, 
 	SetPotPar(MT_MGP_CPU->PotPar);			// Set Potential parameterization
 	f_ReadQuadratureGPU(0, stnQz, Qz);		// TanhSinh
 
-	for(int icVp=0; icVp<stncVp; icVp++){
-		f_sciVn_cudaMalloc(stnR, cVph[icVp].ciV0);
-		f_sciVn_cudaMalloc(stnR, cVph[icVp].ciV1);
+	for(int icVp=0; icVp<stncVp; icVp++)
+	{
+		f_sciVn_cudaMalloc(stnR, ciV0[icVp]);
+		f_sciVn_cudaMalloc(stnR, ciV1[icVp]);
+
+		cVph[icVp].ciV0.c0 = ciV0[icVp].c0;
+		cVph[icVp].ciV0.c1 = ciV0[icVp].c1;
+		cVph[icVp].ciV0.c2 = ciV0[icVp].c2;
+		cVph[icVp].ciV0.c3 = ciV0[icVp].c3;
+
+		cVph[icVp].ciV1.c0 = ciV1[icVp].c0;
+		cVph[icVp].ciV1.c1 = ciV1[icVp].c1;
+		cVph[icVp].ciV1.c2 = ciV1[icVp].c2;
+		cVph[icVp].ciV1.c3 = ciV1[icVp].c3;
 	}
 
 	MT_AtomTypes_GPU = new cMT_AtomTypes_GPU[nMT_AtomTypes];
-	for (int i=0; i<nMT_AtomTypes; i++)
+	for(int i=0; i<nMT_AtomTypes; i++)
 		MT_AtomTypes_GPU[i].SetAtomTypes(MT_AtomTypes_CPU[i]);
 
 	cudaMalloc((void**)&V0, GP.nxy*cSizeofRD);
@@ -693,27 +751,32 @@ void cMT_Potential_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, 
 }
 
 // Projected potential calculation: iSlice = Slice position
-void cMT_Potential_GPU::ProjectedPotential(int iSlice, int typ){
-	if(iSlice==nSlice){
+void cMT_Potential_GPU::ProjectedPotential(int iSlice, int typ)
+{
+	if(iSlice==nSlice)
+	{
 		getV0(iSlice, V0);
 		return;
 	}
 
 	int iatom0 = Slice[iSlice].z0i_id;
 	int iatome = Slice[iSlice].zei_id;
-	f_Set_MD(GP, 0.0, V0, V1);
+	f_Set_MD_GPU(GP, 0.0, V0, V1);
 
-	if((iatome<iatom0)) return;
+	if(iatome<iatom0)
+	{
+		return;
+	}
 
 	dim3 BPot, TPot, BCoef, TCoef;
 	int iatom = iatom0, nsatom;
-	f_Set_MD(GP, 0.0, V0, V1);
+	f_Set_MD_GPU(GP, 0.0, V0, V1);
 
-	while (iatom<=iatome){
+	while (iatom<=iatome)
+	{
 		nsatom = MIN(stncVp, iatome-iatom+1);
 		setcVp(iSlice, iatom, nsatom, BPot, TPot, BCoef, TCoef);
-		getCubicPoly(BPot, TPot, BCoef, TCoef);
-		evalCubicPoly(nsatom, V0, V1);
+		addAtomicProjectedPotential(BPot, TPot, BCoef, TCoef, nsatom, V0, V1);
 		iatom += nsatom;
 	}
 

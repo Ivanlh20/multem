@@ -54,7 +54,8 @@ void cMT_Slicing_CPU::freeMemory()
 }
 
 // Constructor
-cMT_Slicing_CPU::cMT_Slicing_CPU(){
+cMT_Slicing_CPU::cMT_Slicing_CPU()
+{
 	MT_MGP_CPU = 0;
 
 	Rmax = 0;
@@ -82,35 +83,52 @@ cMT_Slicing_CPU::cMT_Slicing_CPU(){
 }
 
 // Destructor
-cMT_Slicing_CPU::~cMT_Slicing_CPU(){
+cMT_Slicing_CPU::~cMT_Slicing_CPU()
+{
 	freeMemory();
 }
 
 // typ 1: bottom, 2: top
-int cMT_Slicing_CPU::binary_search(double z0, int iAtom0, int iAtome, sAtoms *&Atoms, int typ){
+int cMT_Slicing_CPU::binary_search(double z0, int iAtom0, int iAtome, sAtoms *&Atoms, int typ)
+{
 	int i0, ie, im;
 	double eps = 1e-12;
 	double z0s = (typ==1)?z0-eps:z0+eps;
 
 	if(z0 < Atoms[iAtom0].z) 
+	{
 		i0 = iAtom0;
+	}
 	else if(Atoms[iAtome].z<z0)
+	{
 		i0 = iAtome;
-	else{ 
+	}
+	else
+	{ 
 		i0 = iAtom0; ie = iAtome;
-		do{
+		do
+		{
 			im = (i0 + ie)>>1;		// divide by 2
 			if(z0s < Atoms[im].z)
+			{
 				ie = im;
+			}
 			else
+			{
 				i0 = im;
+			}
 		}while ((ie-i0)>1);
 
-        if(i0>0){
+		if(i0>0)
+		{
 			if(typ==1)
+			{
 				i0++;
+			}
 			else if(z0==Atoms[ie].z) 
+			{
 				i0++;
+			}
 		}
 	}
 
@@ -118,8 +136,10 @@ int cMT_Slicing_CPU::binary_search(double z0, int iAtom0, int iAtome, sAtoms *&A
 }
 
 // get thickness
-void cMT_Slicing_CPU::getThk(int nAtoms, sAtoms *Atoms, int nSlice, sSlice *Slice, sThk &Thk){
-	if((nSlice==1)||(MT_MGP_CPU->ThkTyp==1)){
+void cMT_Slicing_CPU::getThk(int nAtoms, sAtoms *Atoms, int nSlice, sSlice *Slice, sThk &Thk)
+{
+	if((nSlice==1)||(MT_MGP_CPU->ThkTyp==1))
+	{
 		Thk.n = 1;
 		delete [] Thk.h; Thk.h = new double[Thk.n];
 		delete [] Thk.zb; Thk.zb = new double[Thk.n];
@@ -136,9 +156,12 @@ void cMT_Slicing_CPU::getThk(int nAtoms, sAtoms *Atoms, int nSlice, sSlice *Slic
 	int nz_i, nz;
 	double *z_i = 0, *z = 0;
 
-	if(MT_MGP_CPU->ThkTyp==3){ 
+	if(MT_MGP_CPU->ThkTyp==3)
+	{ 
 		f_MatchTwoVectors(MT_MGP_CPU->nThk_i, MT_MGP_CPU->Thk_i, nPlanesu, Planesu, nz_i, z_i);
-	}else{
+	}
+	else
+	{
 		nz_i = MT_MGP_CPU->nThk_i;
 		z_i = new double [nz_i];
 		memcpy(z_i, MT_MGP_CPU->Thk_i, nz_i*cSizeofRD); 
@@ -155,14 +178,16 @@ void cMT_Slicing_CPU::getThk(int nAtoms, sAtoms *Atoms, int nSlice, sSlice *Slic
 
 	delete [] Thk.zb; Thk.zb = new double[Thk.n];
 	delete [] Thk.iAtom; Thk.iAtom = new int[Thk.n];
-	for(int iThk=0; iThk<Thk.n; iThk++){
+	for(int iThk=0; iThk<Thk.n; iThk++)
+	{
 		Thk.iAtom[iThk] = binary_search(Thk.h[iThk], 0, nAtoms-1, Atoms, 2);
 		Thk.zb[iThk] = MT_MGP_CPU->ZeroDefPlane - (Atoms[Thk.iAtom[iThk]].z+Rmax);
 	}
 }
 
 // get planes
-void cMT_Slicing_CPU::getPlanes(int nAtoms, sAtoms *&Atoms, int &nPlanesu, double *&Planesu){
+void cMT_Slicing_CPU::getPlanes(int nAtoms, sAtoms *&Atoms, int &nPlanesu, double *&Planesu)
+{
 	delete [] Planesu; Planesu = 0;
 
 	double zmin = Atoms[0].z, zmax = Atoms[nAtoms-1].z;
@@ -177,9 +202,11 @@ void cMT_Slicing_CPU::getPlanes(int nAtoms, sAtoms *&Atoms, int &nPlanesu, doubl
 	for(izp=0; izp<Ht.n; izp++)
 		Ht.v[izp] = Ht.c[izp] = 0;
 
-	for(iAtoms=0; iAtoms<nAtoms; iAtoms++){
+	for(iAtoms=0; iAtoms<nAtoms; iAtoms++)
+	{
 		izp = (int)floor((Atoms[iAtoms].z-zmin)/dzp+0.5);
-		if(izp<Ht.n){
+		if(izp<Ht.n)
+		{
 			Ht.c[izp]++;
 			Ht.v[izp] += Atoms[iAtoms].z;
 		}
@@ -187,8 +214,10 @@ void cMT_Slicing_CPU::getPlanes(int nAtoms, sAtoms *&Atoms, int &nPlanesu, doubl
 
 	nPlanesu = 0;
 	for(izp=0; izp<Ht.n-1; izp++)
-		if(Ht.c[izp]>0){	
-			if(Ht.c[izp+1]>0){
+		if(Ht.c[izp]>0)
+		{	
+			if(Ht.c[izp+1]>0)
+			{
 				Ht.c[izp] += Ht.c[izp+1];
 				Ht.v[izp] += Ht.v[izp+1];
 				Ht.v[izp+1] = Ht.c[izp+1] = 0;
@@ -208,7 +237,8 @@ void cMT_Slicing_CPU::getPlanes(int nAtoms, sAtoms *&Atoms, int &nPlanesu, doubl
 }
 
 // get border
-void cMT_Slicing_CPU::get_nSlice(double z10, double z1i, double z20, double z2i, double dzi, int &nSlice, double &dz0, double &dze){
+void cMT_Slicing_CPU::get_nSlice(double z10, double z1i, double z20, double z2i, double dzi, int &nSlice, double &dz0, double &dze)
+{
 	double z0 = z1i, ze = z2i;
 	double Lzt = z2i-z1i;
 
@@ -224,7 +254,8 @@ void cMT_Slicing_CPU::get_nSlice(double z10, double z1i, double z20, double z2i,
 	/*********************************************************/
 	nSlice=1;
 	double z=z0+dz0;
-	while((z<ze+eed)&&(z-dzi+dze<ze+eed)){
+	while((z<ze+eed)&&(z-dzi+dze<ze+eed))
+	{
 		nSlice++;
 		z+=dzi;
 	}
@@ -233,34 +264,44 @@ void cMT_Slicing_CPU::get_nSlice(double z10, double z1i, double z20, double z2i,
 }
 
 // get atoms in the Slice (1:Bot, 2: middle, 3: top) - positive found an atom if not it is negative.
-void cMT_Slicing_CPU::getAtomsInSlice(double z0, double ze, int nAtoms, sAtoms *&Atoms, int &z0_id, int &ze_id){
+void cMT_Slicing_CPU::getAtomsInSlice(double z0, double ze, int nAtoms, sAtoms *&Atoms, int &z0_id, int &ze_id)
+{
 	z0_id = binary_search(z0, 0, nAtoms-1, Atoms, 1);
 	ze_id = binary_search(ze, z0_id, nAtoms-1, Atoms, 2);
 
-	 if((Atoms[z0_id].z<z0)||(ze<Atoms[ze_id].z)){
+	 if((Atoms[z0_id].z<z0)||(ze<Atoms[ze_id].z))
+	 {
 		z0_id = 1;	ze_id = 0;
 	 }
 }
 
 // get dzh between planes
-void cMT_Slicing_CPU::get_dzh_Planes(int nPlane, double *Plane, int iPlane, double &dzhd, double &dzhu){
-	if(nPlane==1){
+void cMT_Slicing_CPU::get_dzh_Planes(int nPlane, double *Plane, int iPlane, double &dzhd, double &dzhu)
+{
+	if(nPlane==1)
+	{
 		dzhd = dzhu = 0.0;
 		return;
 	}
 
-	if(iPlane==0){
+	if(iPlane==0)
+	{
 		dzhd = dzhu = 0.5*(Plane[iPlane+1]-Plane[iPlane]);
-	}else if(iPlane==nPlane-1){
+	}
+	else if(iPlane==nPlane-1)
+	{
 		dzhd = dzhu = 0.5*(Plane[nPlane-1]-Plane[nPlane-2]);
-	}else{
+	}
+	else
+	{
 		dzhd = 0.5*(Plane[iPlane]-Plane[iPlane-1]);
 		dzhu = 0.5*(Plane[iPlane+1]-Plane[iPlane]);
 	}
 }
 
 // Set input data
-void cMT_Slicing_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, int nAtomsu_i, sAtoms *Atomsu_i, int nAtoms_i, sAtoms *Atoms_i, double Rmax_i){
+void cMT_Slicing_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, int nAtomsu_i, sAtoms *Atomsu_i, int nAtoms_i, sAtoms *Atoms_i, double Rmax_i)
+{
 	freeMemory();
 
 	MT_MGP_CPU = MT_MGP_CPU_i;
@@ -278,9 +319,13 @@ void cMT_Slicing_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, int nAtomsu_i, sAt
 
 	// Slicing procedure
 	if(MT_MGP_CPU->ApproxModel!=2)
+	{
 		Slicing_u(nAtomsu, Atomsu, nSliceu, Sliceu, Thk);
+	}
 	else
+	{
 		Slicing_by_Planes(nPlanesu, Planesu, nAtomsu, Atomsu, nSliceu, Sliceu, Thk);
+	}
 
 	// Copy Atomsu to Atoms
 	nSlice = nSliceu;
@@ -289,12 +334,14 @@ void cMT_Slicing_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, int nAtomsu_i, sAt
 }
 
 // Select atoms respect to z-coordinate
-void cMT_Slicing_CPU::Slicing_u(int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, sThk &Thk){
+void cMT_Slicing_CPU::Slicing_u(int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, sThk &Thk)
+{
 	delete [] Slice; Slice = 0;
 	double zmin = Atoms[0].z, zmax = Atoms[nAtoms-1].z;
 	double Lz = zmax - zmin;
 
-	if(MT_MGP_CPU->ApproxModel>2){
+	if(MT_MGP_CPU->ApproxModel>2)
+	{
 		nSlice = 1;
 		Slice = new sSlice[nSlice];
 		// Get atom's index in the Slice
@@ -311,16 +358,22 @@ void cMT_Slicing_CPU::Slicing_u(int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice 
 	}
 
 	nSlice = (int)ceil(Lz/MT_MGP_CPU->dz);
-	if(nSlice*MT_MGP_CPU->dz<=Lz) nSlice++;
+	if(nSlice*MT_MGP_CPU->dz<=Lz)
+	{
+		nSlice++;
+	}
 
 	double dz0, dze;
 	double z10 = zmin-0.5*(nSlice*MT_MGP_CPU->dz-Lz)+MT_MGP_CPU->dz, z20 = zmax+0.5*(nSlice*MT_MGP_CPU->dz-Lz)-MT_MGP_CPU->dz;
 	get_nSlice(z10, zmin-Rmax, z20, zmax+Rmax, MT_MGP_CPU->dz, nSlice, dz0, dze);
-	if(nSlice==1) dz0 = dze = 2.0*Rmax;
+	if(nSlice==1) {
+		dz0 = dze = 2.0*Rmax;
+	}
 
 	double dz, zm, z0 = zmin-Rmax;
 	Slice = new sSlice[nSlice];
-	for(int iSlice=0; iSlice<nSlice; iSlice++){
+	for(int iSlice=0; iSlice<nSlice; iSlice++)
+	{
 		dz = (iSlice==0)?dz0:(iSlice==nSlice-1)?dze:MT_MGP_CPU->dz;
 		// Get atom's index in the Slice
 		Slice[iSlice].z0 = z0; Slice[iSlice].ze = z0 += dz;
@@ -339,11 +392,13 @@ void cMT_Slicing_CPU::Slicing_u(int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice 
 }
 
 // Select atoms respect to z-coordinate
-void cMT_Slicing_CPU::Slicing_d(int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, sThk &Thk){
+void cMT_Slicing_CPU::Slicing_d(int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, sThk &Thk)
+{
 	delete [] Slice; Slice = 0;
 	double zmin = Atoms[0].z, zmax = Atoms[nAtoms-1].z;
 
-	if(nSliceu==1){
+	if(nSliceu==1)
+	{
 		nSlice = 1;
 		Slice = new sSlice[nSlice];
 		// Get atom's index in the Slice
@@ -364,7 +419,8 @@ void cMT_Slicing_CPU::Slicing_d(int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms 
 
 	double dz, zm, z0 = zmin-Rmax;
 	Slice = new sSlice[nSlice];
-	for(int iSlice=0; iSlice<nSlice; iSlice++){
+	for(int iSlice=0; iSlice<nSlice; iSlice++)
+	{
 		dz = (iSlice==0)?dz0:(iSlice==nSlice-1)?dze:MT_MGP_CPU->dz;
 		// Get atom's index in the Slice
 		Slice[iSlice].z0 = z0; Slice[iSlice].ze = z0 += dz;
@@ -383,12 +439,14 @@ void cMT_Slicing_CPU::Slicing_d(int nSliceu, sSlice *Sliceu, int nAtoms, sAtoms 
 }
 
 // Select atoms respect to z-coordinate
-void cMT_Slicing_CPU::Slicing_by_Planes(int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, sThk &Thk){	
+void cMT_Slicing_CPU::Slicing_by_Planes(int nPlanesu, double *Planesu, int nAtoms, sAtoms *&Atoms, int &nSlice, sSlice *&Slice, sThk &Thk)
+{	
 	nSlice = nPlanesu;
 	delete [] Slice; Slice = 0;
 	Slice = new sSlice[nSlice];
 
-	if(nSlice==1){
+	if(nSlice==1)
+	{
 		Slice = new sSlice[nSlice];
 		// Get atom's index in the Slice
 		Slice[0].z0 = Planesu[0] - Rmax; Slice[0].ze = Planesu[0] + Rmax;
@@ -403,7 +461,8 @@ void cMT_Slicing_CPU::Slicing_by_Planes(int nPlanesu, double *Planesu, int nAtom
 	}
 
 	double dzhu, dzhd, dz;
-	for(int iSlice=0; iSlice<nSlice; iSlice++){
+	for(int iSlice=0; iSlice<nSlice; iSlice++)
+	{
 		dz = (iSlice<iSlice-1)?Planesu[iSlice+1]-Planesu[iSlice]:Planesu[nSlice-1]-Planesu[nSlice-2];
 		Slice[iSlice].z0 = Planesu[iSlice]-0.5*dz; Slice[iSlice].ze = Planesu[iSlice]+0.5*dz;
 		get_dzh_Planes(nPlanesu, Planesu, iSlice, dzhd, dzhu);
@@ -416,10 +475,13 @@ void cMT_Slicing_CPU::Slicing_by_Planes(int nPlanesu, double *Planesu, int nAtom
 	getThk(nAtoms, Atoms, nSlice, Slice, Thk);
 }
 
-int cMT_Slicing_CPU::IsInThk(int iSlice){
+int cMT_Slicing_CPU::IsInThk(int iSlice)
+{
 	int iThk = -1;
-	for(int i=0; i<Thk.n; i++){
-		if(Thk.iSlice[i]==iSlice){
+	for(int i=0; i<Thk.n; i++)
+	{
+		if(Thk.iSlice[i] ==iSlice)
+		{
 			iThk = i;
 			break;
 		}

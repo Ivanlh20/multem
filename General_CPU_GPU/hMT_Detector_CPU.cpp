@@ -22,7 +22,10 @@
 #include "hMT_General_CPU.h"
 #include "hMT_Detector_CPU.h"
 
-void cMT_Detector_CPU::freeMemory(){
+void cMT_Detector_CPU::freeMemory()
+{
+	if(IdCall==0) return;
+
 	f_sGP_Init(GP);
 
 	nDet = 0;
@@ -32,11 +35,16 @@ void cMT_Detector_CPU::freeMemory(){
 	delete [] Coh; Coh = 0;
 }
 
-cMT_Detector_CPU::~cMT_Detector_CPU(){
+cMT_Detector_CPU::~cMT_Detector_CPU()
+{
 	freeMemory();
+	IdCall = 0;
 }
 
-cMT_Detector_CPU::cMT_Detector_CPU(){
+cMT_Detector_CPU::cMT_Detector_CPU()
+{
+	IdCall = 0;
+
 	f_sGP_Init(GP);
 
 	nDet = 0;
@@ -49,8 +57,10 @@ cMT_Detector_CPU::cMT_Detector_CPU(){
 /*****************************************************************************/
 /*****************************************************************************/
 
-void cMT_Detector_CPU::SetInputData(sGP &GP_i, int nDeti, sDetCir &DetCiri){
+void cMT_Detector_CPU::SetInputData(sGP &GP_i, int nDeti, sDetCir &DetCiri)
+{
 	freeMemory();
+	IdCall++;
 
 	GP = GP_i;
 	nDet = nDeti;
@@ -62,12 +72,13 @@ void cMT_Detector_CPU::SetInputData(sGP &GP_i, int nDeti, sDetCir &DetCiri){
 	Coh = new double[nDet];
 }
 
-void cMT_Detector_CPU::getDetectorIntensity(double *&Toth, double *&Cohh, int ixys, sDetInt *DetInth){
+void cMT_Detector_CPU::getDetectorIntensity(double *&Toth, double *&Cohh, int ixys, sDetInt *DetInth)
+{
 	int iDet, ix, iy, ixy;
 	double gx, gy, g2;
 
 	for(iDet = 0; iDet<nDet; iDet++)
-		Tot[iDet]= Coh[iDet] = 0.0;
+		Tot[iDet] = Coh[iDet] = 0.0;
 
 	for(ix = 0; ix<GP.nx; ix++)
 	{
@@ -78,15 +89,18 @@ void cMT_Detector_CPU::getDetectorIntensity(double *&Toth, double *&Cohh, int ix
 			gy = IsFS(iy,GP.nyh)*GP.dgy;
 			g2 = gx*gx + gy*gy;
 			for(iDet = 0; iDet<nDet; iDet++)
+			{
 				if((DetCir.g2min[iDet]<=g2)&&(g2<=DetCir.g2max[iDet]))
 				{
 					Tot[iDet] += Toth[ixy];
 					Coh[iDet] += Cohh[ixy];
 				}
+			}
 		}
 	}
 
-	for(iDet = 0; iDet<nDet; iDet++){
+	for(iDet = 0; iDet<nDet; iDet++)
+	{
 		DetInth[iDet].Tot[ixys] = Tot[iDet];
 		DetInth[iDet].Coh[ixys] = Coh[iDet];
 	}

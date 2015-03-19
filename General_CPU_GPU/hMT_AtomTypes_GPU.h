@@ -24,7 +24,11 @@
 class cMT_AtomTypes_GPU: public cMT_AtomTypes{
 	public:
 		void freeMemory();
-		~cMT_AtomTypes_GPU(){ freeMemory(); }
+		~cMT_AtomTypes_GPU()
+		{ 
+			freeMemory(); 
+			IdCall = 0;
+		}
 		void SetAtomTypes(cMT_AtomTypes_CPU &MT_AtomTypes_CPU_i);
 };
 

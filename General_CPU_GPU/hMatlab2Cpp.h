@@ -19,22 +19,26 @@
 #ifndef hMatlab2Cpp_H
 #define hMatlab2Cpp_H
 
+#include <cstring>
 #include <mex.h>
 
-inline void CreateSetValue2mxField(mxArray *mxB, int p, const char *field_name, double field_value){
+inline void CreateSetValue2mxField(mxArray *mxB, int p, const char *field_name, double field_value)
+{
 	mxArray *mxfield = mxCreateDoubleMatrix(1, 1, mxREAL);
 	*mxGetPr(mxfield) = field_value;
 	mxSetField(mxB, p, field_name, mxfield);
 }
 
-inline void CreateSetValue2mxField(mxArray *mxB, int p, const char *field_name, int n, double *field_value){
+inline void CreateSetValue2mxField(mxArray *mxB, int p, const char *field_name, int n, double *field_value)
+{
 	mxArray *mxfield = mxCreateDoubleMatrix(1, n, mxREAL);
 	double *pfield = mxGetPr(mxfield); 
 	memcpy(pfield, field_value, n*cSizeofRD);
 	mxSetField(mxB, p, field_name, mxfield);
 }
 
-inline void CreateSetValue2mxField(mxArray *mxB, int p, const char *field_name, int nx, int ny, double *field_value){
+inline void CreateSetValue2mxField(mxArray *mxB, int p, const char *field_name, int nx, int ny, double *field_value)
+{
 	mxArray *mxfield = mxCreateDoubleMatrix(ny, nx, mxREAL);
 	double *pfield = mxGetPr(mxfield); 
 	memcpy(pfield, field_value, ny*nx*cSizeofRD);
@@ -42,12 +46,14 @@ inline void CreateSetValue2mxField(mxArray *mxB, int p, const char *field_name, 
 }
 
 template <class Type>
-inline Type ReadValuemxField(const mxArray *mxB, int p, const char *field_name, double factor=1){
+inline Type ReadValuemxField(const mxArray *mxB, int p, const char *field_name, double factor=1)
+{
 	double val =factor*mxGetScalar(mxGetField(mxB, p, field_name));
 	return (Type)val;
 }
 
-inline void ReadValuemxField(const mxArray *mxB, int p, const char *field_name, int n, double *field_value, double factor=1){
+inline void ReadValuemxField(const mxArray *mxB, int p, const char *field_name, int n, double *field_value, double factor=1)
+{
 	double *pfield = mxGetPr(mxGetField(mxB, p, field_name));
 	memcpy(field_value, pfield, n*cSizeofRD);
 	for(int i=0; i<n; i++)

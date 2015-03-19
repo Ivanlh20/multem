@@ -26,6 +26,7 @@
 /*************************Incident wave*************************/
 class cMT_IncidentWave_GPU{
 	private:
+		int IdCall;
 		cMT_MGP_CPU *MT_MGP_CPU;
 		sGP GP;
 		sLens Lens;

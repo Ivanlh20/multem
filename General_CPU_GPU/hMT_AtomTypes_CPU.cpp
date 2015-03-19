@@ -20,12 +20,18 @@
 #include <cstring>
 
 #include "hConstTypes.h"
-#include "hAtomicData.h"
+#include "hMT_AtomicData_CPU.h"
 #include "hMT_General_CPU.h"
 #include "hMT_AtomTypes_CPU.h"
 
 // free memory
-void cMT_AtomTypes_CPU::freeMemory(){
+void cMT_AtomTypes_CPU::freeMemory()
+{
+	if(IdCall==0)
+	{
+		return;
+	}
+
 	Z = 0;
 	m = 0;
 	A = 0;
@@ -48,11 +54,13 @@ void cMT_AtomTypes_CPU::freeMemory(){
 	delete [] R; R = 0;
 	delete [] R2; R2 = 0;
 	f_sciVn_Free(ciVR);
-};
+}
 
 // Set Atom type
-void cMT_AtomTypes_CPU::SetAtomTypes(int Z_i, int PotPar_i, double Vrl_i, int nR_i, double Rmin_i){
+void cMT_AtomTypes_CPU::SetAtomTypes(int Z_i, int PotPar_i, double Vrl_i, int nR_i, double Rmin_i)
+{
 	freeMemory();	// clean CPU memory
+	IdCall++;
 
 	f_sCoefPar_Malloc(6, cfeg);
 	f_sCoefPar_Malloc(6, cfxg);
@@ -63,6 +71,6 @@ void cMT_AtomTypes_CPU::SetAtomTypes(int Z_i, int PotPar_i, double Vrl_i, int nR
 	R2 = new double [nR_i];
 	f_sciVn_Malloc(nR_i, ciVR);
 
-	cAtomicData AtomicData;
-	AtomicData.ReadAtomicData(Z_i, PotPar_i, Vrl_i, nR_i, Rmin_i, this);
+	cMT_AtomicData_CPU MT_AtomicData_CPU(PotPar_i);
+	MT_AtomicData_CPU.To_MT_AtomTypes_CPU(Z_i, Vrl_i, nR_i, Rmin_i, this);
 }

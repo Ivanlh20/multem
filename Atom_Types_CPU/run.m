@@ -2,7 +2,7 @@
 clear all;
 clc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-PotPar = 6;
+PotPar = 3;
 tic;
 S = getAtomTypes(PotPar);
 toc;

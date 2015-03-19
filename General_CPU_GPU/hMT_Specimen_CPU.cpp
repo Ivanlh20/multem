@@ -69,33 +69,45 @@ cMT_Specimen_CPU::cMT_Specimen_CPU()
 }
 
 // Destructor
-cMT_Specimen_CPU::~cMT_Specimen_CPU(){
+cMT_Specimen_CPU::~cMT_Specimen_CPU()
+{
 	freeMemory();
 }
 
 // random number generator Seed
-void cMT_Specimen_CPU::setRandomSeed(unsigned long s, int iConf){	
+void cMT_Specimen_CPU::setRandomSeed(unsigned long s, int iConf)
+{	
 	int randiu;
 	RandGen.seed(s);
 	for(int iSlice=0; iSlice<iConf; iSlice++)
+	{
 		randiu = RandGen.randiu();
+	}
 	RandGen.seed(randiu);
 }
 
 // Sort atoms along z-axis
-void cMT_Specimen_CPU::QuickSortAtomsAlongz(sAtoms *&Atoms, int left, int right){
+void cMT_Specimen_CPU::QuickSortAtomsAlongz(sAtoms *&Atoms, int left, int right)
+{
 	int iSlice = left, j = right;
 	double pivot = Atoms[(left + right)>>1].z;
 	sAtoms Atomst;
 
 	/* partition */
-	while (iSlice <= j){
+	while (iSlice <= j)
+	{
 		while (Atoms[iSlice].z < pivot)
-		iSlice++;
-		while (Atoms[j].z > pivot)
-		j--;
+		{
+			iSlice++;
+		}
 
-		if (iSlice <= j){
+		while (Atoms[j].z > pivot)
+		{
+			j--;
+		}
+
+		if(iSlice <= j)
+		{
 			memcpy(&Atomst, &Atoms[iSlice], cSizeofAtoms);
 			memcpy(&Atoms[iSlice], &Atoms[j], cSizeofAtoms);
 			memcpy(&Atoms[j], &Atomst, cSizeofAtoms);
@@ -105,16 +117,23 @@ void cMT_Specimen_CPU::QuickSortAtomsAlongz(sAtoms *&Atoms, int left, int right)
 	};
 
 	/* recursion */
-	if (left < j)
+	if(left < j)
+	{
 		QuickSortAtomsAlongz(Atoms, left, j);
-	if (iSlice < right)
+	}
+
+	if(iSlice < right)
+	{
 		QuickSortAtomsAlongz(Atoms, iSlice, right);
+	}
 }
 
 // get dimension components
-void cMT_Specimen_CPU::getDimCom(int Dim, double &bx, double &by, double &bz){
+void cMT_Specimen_CPU::getDimCom(int Dim, double &bx, double &by, double &bz)
+{
 	bx = by = bz = 0.0;
-	switch (Dim){
+	switch(Dim)
+	{
 		case 111:
 			bx = 1.0; by = 1.0; bz = 1.0;
 			break;
@@ -140,11 +159,12 @@ void cMT_Specimen_CPU::getDimCom(int Dim, double &bx, double &by, double &bz){
 }
 
 // Set atoms: Copy input Atoms to the new format Atoms, count number of atoms, Ascending sort by z, Set relative atomic number position, Get maximum interaction distance
-void cMT_Specimen_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i, double dRmin){
+void cMT_Specimen_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i, double dRmin)
+{
 	freeMemory();
 
 	MT_MGP_CPU = MT_MGP_CPU_io;
-	nMT_AtomTypes = NE;
+	nMT_AtomTypes = stNAE;
 	MT_AtomTypes_CPU = new cMT_AtomTypes_CPU[nMT_AtomTypes];
 	for(int i=0; i<nMT_AtomTypes; i++)
 		MT_AtomTypes_CPU[i].SetAtomTypes(i+1, MT_MGP_CPU->PotPar, MT_MGP_CPU->Vrl, stnR, dRmin);
@@ -157,14 +177,16 @@ void cMT_Specimen_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, d
 	Lztu = Lzu + 2.0*Rmax;
 	if(Lzu==0) Lzu = Lztu;
 
-	if(Lzu<MT_MGP_CPU->dz){
+	if(Lzu<MT_MGP_CPU->dz)
+	{
 		MT_MGP_CPU->MulOrder = 1;
 		MT_MGP_CPU->dz = Lzu;
 		if(MT_MGP_CPU->ApproxModel==1)
 			MT_MGP_CPU->ApproxModel = 3;
 	}
 	// get Zero defocus plane
-	switch(MT_MGP_CPU->ZeroDefTyp){
+	switch(MT_MGP_CPU->ZeroDefTyp)
+	{
 		case 1:
 			MT_MGP_CPU->ZeroDefPlane = Atomsu[0].z;
 			break;
@@ -185,8 +207,9 @@ void cMT_Specimen_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, d
 }
 
 // Move atoms (ramdom distribution will be included in the future)
-void cMT_Specimen_CPU::MoveAtoms(int iConf){
-	if (iConf<=0) return;
+void cMT_Specimen_CPU::MoveAtoms(int iConf)
+{
+	if(iConf<=0) return;
 
 	double sigmax, sigmay, sigmaz;
 	double bx, by, bz;
@@ -194,7 +217,8 @@ void cMT_Specimen_CPU::MoveAtoms(int iConf){
 	// Get dimension components
 	getDimCom(MT_MGP_CPU->DimFP, bx, by, bz);
 	setRandomSeed(MT_MGP_CPU->SeedFP, iConf);
-	for (int iAtoms = 0; iAtoms<nAtoms; iAtoms++){
+	for(int iAtoms = 0; iAtoms<nAtoms; iAtoms++)
+	{
 		Atoms[iAtoms].Z = Atomsu[iAtoms].Z;
 		sigmax = sigmay = sigmaz = Atomsu[iAtoms].sigma;
 		Atoms[iAtoms].x = Atomsu[iAtoms].x + bx*sigmax*RandGen.randn();
@@ -203,7 +227,8 @@ void cMT_Specimen_CPU::MoveAtoms(int iConf){
 		Atoms[iAtoms].sigma = 0.0;
 		Atoms[iAtoms].occ = Atomsu[iAtoms].occ ;
 	}
-	if(MT_MGP_CPU->ApproxModel==1){
+	if(MT_MGP_CPU->ApproxModel==1)
+	{
 		// Ascending sort by z
 		QuickSortAtomsAlongz(Atoms, 0, nAtoms-1);	
 		// Slicing procedure
@@ -212,7 +237,8 @@ void cMT_Specimen_CPU::MoveAtoms(int iConf){
 }
 
 // Get dz
-double cMT_Specimen_CPU::get_dz(int iSlice){
+double cMT_Specimen_CPU::get_dz(int iSlice)
+{
 	double dz;
 	if(nSlice==1)
 		dz = Rmax;

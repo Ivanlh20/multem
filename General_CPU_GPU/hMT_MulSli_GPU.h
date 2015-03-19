@@ -41,9 +41,10 @@
 class cMT_STEM_GPU;
 
 class cMT_MulSli_GPU{
+	private:
+		int IdCall;
 	public:
 		int cSynCPU;
-
 		sLens Lens;													// Aberration parameters
 		sGP GP;														// Grid variables
 
@@ -79,7 +80,6 @@ class cMT_MulSli_GPU{
 		void GPU2CPU(double2 *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h);
 
 		cMT_MGP_CPU MT_MGP_CPU;
-
 		cMT_STEM_GPU *STEM;
 		sCBED CBED;
 		sCBEI CBEI;

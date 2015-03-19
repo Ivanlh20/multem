@@ -85,8 +85,10 @@ inline double besskCPU(int n, double x);
 
 /*********************************************************************/
 
-inline int __isnanCPU(double a){
-	volatile union {
+inline int __isnanCPU(double a)
+{
+	volatile union
+	{
 		double d;
 		unsigned long long int l;
 	} cvt;
@@ -96,8 +98,10 @@ inline int __isnanCPU(double a){
 	return cvt.l << 1 > 0xffe0000000000000ull;
 }
 
-inline int __isinfCPU(double a){
-	volatile union {
+inline int __isinfCPU(double a)
+{
+	volatile union 
+	{
 		double d;
 		unsigned long long int l;
 	} cvt;
@@ -107,7 +111,8 @@ inline int __isinfCPU(double a){
 	return cvt.l << 1 == 0xffe0000000000000ull;
 }
 
-inline int __signbitCPU(double a){
+inline int __signbitCPU(double a)
+{
 	volatile union {
 		double d;
 		signed long long int l;
@@ -117,8 +122,10 @@ inline int __signbitCPU(double a){
 	return cvt.l < 0ll;
 }
 
-inline double copysignCPU(double a, double b){
-	volatile union {
+inline double copysignCPU(double a, double b)
+{
+	volatile union
+	{
 		double d;
 		unsigned long long int l;
 	} cvta, cvtb;
@@ -129,45 +136,55 @@ inline double copysignCPU(double a, double b){
 	return cvta.d;
 }
 
-inline double rintCPU(double a){
+inline double rintCPU(double a)
+{
 	double fa = fabs(a);
 	double CUDART_TWO_TO_52 = 4503599627370496.0;
 	double u = CUDART_TWO_TO_52 + fa;
-	if (fa >= CUDART_TWO_TO_52){
+	if(fa >= CUDART_TWO_TO_52)
+	{
 	
-	}else{
+	}
+	else
+	{
 		u = u - CUDART_TWO_TO_52;
 		u = copysignCPU (u, a);
 	}
 	return u; 
 }
 
-inline double rsqrtCPU(double a){
+inline double rsqrtCPU(double a)
+{
 	return 1.0/sqrt(a);
 }
 
-inline double rcbrtCPU(double a){
+inline double rcbrtCPU(double a)
+{
 	double s, t;
 
-	if (__isnanCPU(a))
+	if(__isnanCPU(a))
 	{
 		return a + a;
 	}
-	if (a == 0.0 || __isinfCPU(a))
+
+	if(a == 0.0 || __isinfCPU(a))
 	{
 		return 1.0 / a;
-	} 
+	}
+
 	s = fabs(a);
 	t = exp2CPU(-3.3333333333333333e-1*log2CPU(s));			/* initial approximation */
 	t = ((t*t)*(-s*t)+1.0)*(3.3333333333333333e-1*t) + t;		/* refine approximation */
-	if (__signbitCPU(a))
+	if(__signbitCPU(a))
 	{
 		t = -t;
 	}
+
 	return t;
 }
 
-inline double erfinvCPU(double a){
+inline double erfinvCPU(double a)
+{
 	double p, q, t, fa;
 	volatile union {
 		double d;
@@ -175,13 +192,17 @@ inline double erfinvCPU(double a){
 	} cvt;
 
 	fa = fabs(a);
-	if (fa >= 1.0){
+	if(fa >= 1.0)
+	{
 		cvt.l = 0xfff8000000000000ull;
 		t = cvt.d; /* INDEFINITE */
-		if (fa == 1.0){
+		if(fa == 1.0)
+		{
 			t = a * exp(1000.0); /* Infinity */
 		}
-	}else if (fa >= 0.9375){
+	}
+	else if(fa >= 0.9375)
+	{
 		/* Based on: J.M. Blair, C.A. Edwards, J.H. Johnson: Rational Chebyshev
 		Approximations for the Inverse of the Error Function. Mathematics of
 		Computation, Vol. 30, No. 136 (Oct. 1976), PotPar. 827-830. Table 59
@@ -210,8 +231,10 @@ inline double erfinvCPU(double a){
 		q = q * t + 1.3858762165532246059e-4;
 		q = q * t + 1.1738313872397777529e-6;
 		t = p / (q * t);
-		if (a < 0.0) t = -t;
-	} else if (fa >= 0.75){
+		if(a < 0.0) t = -t;
+	}
+	else if(fa >= 0.75)
+	{
 		/* Based on: J.M. Blair, C.A. Edwards, J.H. Johnson: Rational Chebyshev
 		Approximations for the Inverse of the Error Function. Mathematics of
 		Computation, Vol. 30, No. 136 (Oct. 1976), PotPar. 827-830. Table 39
@@ -236,7 +259,9 @@ inline double erfinvCPU(double a){
 		q = q * t + .67544512778850945940e-2;
 		p = p / q;
 		t = a*p;
-	}else{
+	}
+	else
+	{
 		/* Based on: J.M. Blair, C.A. Edwards, J.H. Johnson: Rational Chebyshev
 		Approximations for the Inverse of the Error Function. Mathematics of
 		Computation, Vol. 30, No. 136 (Oct. 1976), PotPar. 827-830. Table 18
@@ -262,27 +287,33 @@ inline double erfinvCPU(double a){
 	return t;
 }
 
-inline double erfcinvCPU(double a){
+inline double erfcinvCPU(double a)
+{
 	double t;
 	volatile union{
 		double d;
 		unsigned long long int l;
 	} cvt;
 
-	if (__isnanCPU(a)){
+	if(__isnanCPU(a))
+	{
 		return a + a;
 	}
-	if (a <= 0.0){
+	if(a <= 0.0)
+	{
 		cvt.l = 0xfff8000000000000ull;
 		t = cvt.d; /* INDEFINITE */
-		if (a == 0.0){
-		t = (1.0 - a) * exp(1000.0); /* Infinity */
+		if(a == 0.0)
+		{
+			t = (1.0 - a) * exp(1000.0); /* Infinity */
 		}
-	} 
-	else if (a >= 0.0625){
+	}
+	else if(a >= 0.0625)
+	{
 		t = erfinvCPU (1.0 - a);
 	}
-	else if (a >= 1e-100){
+	else if(a >= 1e-100)
+	{
 		/* Based on: J.M. Blair, C.A. Edwards, J.H. Johnson: Rational Chebyshev
 		Approximations for the Inverse of the Error Function. Mathematics of
 		Computation, Vol. 30, No. 136 (Oct. 1976), PotPar. 827-830. Table 59
@@ -313,7 +344,8 @@ inline double erfcinvCPU(double a){
 		q = q * t + 1.1738313872397777529e-6;
 		t = p / (q * t);
 	}
-	else {
+	else 
+	{
 		/* Based on: J.M. Blair, C.A. Edwards, J.H. Johnson: Rational Chebyshev
 		Approximations for the Inverse of the Error Function. Mathematics of
 		Computation, Vol. 30, No. 136 (Oct. 1976), PotPar. 827-830. Table 82
@@ -344,14 +376,17 @@ inline double erfcinvCPU(double a){
 	return t;
 }
 
-inline double erfcxCPU(double a){
+inline double erfcxCPU(double a)
+{
 	double x, t1, t2, t3;
 
-	if (__isnanCPU(a)){
+	if(__isnanCPU(a))
+	{
 		return a + a;
 	}
 	x = fabs(a); 
-	if (x < 32.0){
+	if(x < 32.0)
+	{
 		/* 
 		* This implementation of erfcxCPU() is based on the algorithm in: M. M. 
 		* Shepherd and J. G. Laframboise, "Chebyshev Approximation of (1 + 2x)
@@ -394,7 +429,9 @@ inline double erfcxCPU(double a){
 		/* (1+2*x)*exp(x*x)*erfcCPU(x) / (1+2*x) = exp(x*x)*erfcCPU(x) */ 
 		t2 = 2.0 * x + 1.0; 
 		t1 = t1 / t2;
-	}else{
+	}
+	else
+	{
 		/* asymptotic expansion for large aguments */
 		t2 = 1.0 / x;
 		t3 = t2 * t2;
@@ -406,29 +443,36 @@ inline double erfcxCPU(double a){
 		t1 = t1 * t3 + 1.0;
 		t2 = t2 * 5.6418958354775628e-001;
 		t1 = t1 * t2;
-		}
-		if (a < 0.0){
-		/* erfcxCPU(x) = 2*exp(x^2) - erfcxCPU(|x|) */
-		t2 = ((int)(x * 16.0)) * 0.0625;
-		t3 = (x - t2) * (x + t2);
-		t3 = exp(t2 * t2) * exp(t3);
-		t3 = t3 + t3;
-		t1 = t3 - t1;
+	}
+
+	if(a < 0.0)
+	{
+			/* erfcxCPU(x) = 2*exp(x^2) - erfcxCPU(|x|) */
+			t2 = ((int)(x * 16.0)) * 0.0625;
+			t3 = (x - t2) * (x + t2);
+			t3 = exp(t2 * t2) * exp(t3);
+			t3 = t3 + t3;
+			t1 = t3 - t1;
 	}
 	return t1;
 }
 
-inline double log1pCPU(double a){
+inline double log1pCPU(double a)
+{
 	volatile double u, m;
 
 	u = 1.0 + a;
-	if (u == 1.0){
+	if(u == 1.0)
+	{
 		/* a very close to zero */
 		u = a;
-	}else{
+	}
+	else
+	{
 		m = u - 1.0;
 		u = log(u);
-		if (a < 1.0){
+		if(a < 1.0)
+		{
 			/* a somewhat close to zero */
 			u = a * u;
 			u = u / m;
@@ -437,34 +481,44 @@ inline double log1pCPU(double a){
 	return u;
 }
 
-inline double log2CPU(double a){
+inline double log2CPU(double a)
+{
 	return log(a)/log(2.0);
 }
 
-inline double exp2CPU(double a){
+inline double exp2CPU(double a)
+{
 	return pow(2.0, a);
 }
 
-inline double acoshCPU(double a){
+inline double acoshCPU(double a)
+{
 	double s, t;
 
 	t = a - 1.0;
-	if (t == a){
+	if(t == a)
+	{
 		return log(2.0) + log(a);
-	}else{
+	}
+	else
+	{
 		s = a + 1.0;
 		t = t + sqrt(s * t);
 		return log1pCPU(t);
 	}
 }
 
-inline double asinhCPU(double a){
+inline double asinhCPU(double a)
+{
 	double fa, oofa, t;
 
 	fa = fabs(a);
-	if (fa > 1e18){
+	if(fa > 1e18)
+	{
 		t = log(2.0) + log(fa);
-	}else{
+	}
+	else
+	{
 		oofa = 1.0 / fa;
 		t = fa + fa / (oofa + sqrt(1.0 + oofa * oofa));
 		t = log1pCPU(t);
@@ -473,23 +527,27 @@ inline double asinhCPU(double a){
 	return t;
 }
 
-inline double atanhCPU(double a){
+inline double atanhCPU(double a)
+{
 	double fa, t;
 
 	fa = fabs(a);
 	t = (2.0*fa)/(1.0 - fa);
 	t = 0.5 * log1pCPU(t);
-	if (__isnanCPU(t) || !__signbitCPU(a)){
+	if(__isnanCPU(t) || !__signbitCPU(a))
+	{
 		return t;
 	}
 		return -t;
 }
 
-inline double erfCPU(double a){
+inline double erfCPU(double a)
+{
 	double t, r, q;
 
 	t = fabs(a);
-	if (t >= 1.0){
+	if(t >= 1.0)
+	{
 		r = -1.28836351230756500E-019;
 		r = r * t + 1.30597472161093370E-017;
 		r = r * t - 6.33924401259620500E-016;
@@ -520,11 +578,14 @@ inline double erfCPU(double a){
 		r = r * t + 9.99998988715182450E-001;
 		q = exp (-t * t);
 		r = 1.0 - r * q;
-		if (t >= 6.5){
+		if(t >= 6.5)
+		{
 			r = 1.0;
-		} 
+		}
 		a = copysignCPU(r, a);
-	}else{
+	}
+	else
+	{
 		q = a * a;
 		r = -7.77946848895991420E-010;
 		r = r * q + 1.37109803980285950E-008;
@@ -543,16 +604,20 @@ inline double erfCPU(double a){
 	return a;
 }
 
-inline double erfcCPU(double a){
+inline double erfcCPU(double a)
+{
 	double p, q, h, l;
 
-	if (a < 0.75){
+	if(a < 0.75)
+	{
 		return 1.0 - erfCPU(a);
-	} 
-		if (a > 27.3){
+	}
+	if(a > 27.3)
+	{
 		return 0.0;
 	}
-	if (a < 5.0){
+	if(a < 5.0)
+	{
 		double t;
 		t = 1.0/a;
 		p = 1.9759923722227928E-008;
@@ -580,7 +645,9 @@ inline double erfcCPU(double a){
 		q = q * 0.5;
 		p = p * q + q;
 		p = p * t;
-	}else{
+	}
+	else
+	{
 		double ooa, ooasq;
 
 		ooa = 1.0/a;
@@ -607,7 +674,8 @@ inline double erfcCPU(double a){
 	return p;
 }
 
-inline double gammaCPU(double a){
+inline double gammaCPU(double a)
+{
 	// Split the function domain into three intervals:
 	// (0, 0.001), [0.001, 12), and (12, infinity)
 
@@ -620,13 +688,15 @@ inline double gammaCPU(double a){
 
 	const double gamma = 0.577215664901532860606512090; // Euler's gamma constant
 
-	if (a < 0.001)
-	return 1.0/(a*(1.0 + gamma*a));
+	if(a < 0.001)
+	{
+		return 1.0/(a*(1.0 + gamma*a));
+	}
 
 	///
 	// Second interval: [0.001, 12)
  
-	if (a < 12.0)
+	if(a < 12.0)
 	{
 		// The algorithm directly approximates gamma over (1,2) and uses
 		// reduction identities to reduce other arguments to this interval.
@@ -637,7 +707,7 @@ inline double gammaCPU(double a){
 
 		// Add or subtract integers as necessary to bring y into (1,2)
 		// Will correct for this below
-		if (arg_was_less_than_one)
+		if(arg_was_less_than_one)
 		{
 			y += 1.0;
 		}
@@ -678,7 +748,7 @@ inline double gammaCPU(double a){
 		int i;
 
 		double z = y - 1;
-		for (i = 0; i < 8; i++)
+		for(i = 0; i < 8; i++)
 		{
 			num = (num + p[i])*z;
 			den = den*z + q[i];
@@ -686,7 +756,7 @@ inline double gammaCPU(double a){
 		double result = num/den + 1.0;
 
 		// Apply correction if argument was not initially in (1,2)
-		if (arg_was_less_than_one)
+		if(arg_was_less_than_one)
 		{
 			// Use identity gamma(z) = gamma(z+1)/z
 			// The variable "result" now holds gamma of the original y + 1
@@ -696,7 +766,7 @@ inline double gammaCPU(double a){
 		else
 		{
 			// Use the identity gamma(z+n) = z*(z+1)* ... *(z+n-1)*gamma(z)
-			for (i = 0; i < n; i++)
+			for(i = 0; i < n; i++)
 				result *= y++;
 		}
 
@@ -706,7 +776,7 @@ inline double gammaCPU(double a){
 	///
 	// Third interval: [12, infinity)
 
-	if (a > 171.624)
+	if(a > 171.624)
 	{
 		// Correct answer too large to display. Force +infinity.
 		double temp = 1.7976931348623157e+308;
@@ -716,19 +786,23 @@ inline double gammaCPU(double a){
 	return exp(lgammaCPU(a));
 }
 
-inline double lgammaCPU(double a){
+inline double lgammaCPU(double a)
+{
 	double s;
 	double t;
 	double i;
 	double fa;
 	double sum;
 	long long int quot;
-	if (__isnanCPU(a) || __isinfCPU(a)){
-	return a * a;
+	if(__isnanCPU(a) || __isinfCPU(a))
+	{
+		return a * a;
 	}
 	fa = fabs(a);
-	if (fa >= 3.0){
-		if (fa >= 8.0){
+	if(fa >= 3.0)
+	{
+		if(fa >= 8.0)
+		{
 			/* Stirling approximation; coefficients from Hart et al, "Computer 
 			* Approximations", Wiley 1968. Approximation 5404. 
 			*/
@@ -747,7 +821,9 @@ inline double lgammaCPU(double a){
 			t = s - fa;
 			s = s + sum;
 			t = t + s;
-		}else{
+		}
+		else
+		{
 			i = fa - 3.0;
 			s = -4.02412642744125560E+003;
 			s = s * i - 2.97693796998962000E+005;
@@ -767,7 +843,9 @@ inline double lgammaCPU(double a){
 			t = s / t;
 			t = t + i;
 		}
-	} else if (fa >= 1.5){
+	}
+	else if(fa >= 1.5)
+	{
 		i = fa - 2.0;
 		t = 9.84839283076310610E-009;
 		t = t * i - 6.69743850483466500E-008;
@@ -790,7 +868,9 @@ inline double lgammaCPU(double a){
 		t = t * i + 3.22467033424113040E-001;
 		t = t * i + 4.22784335098467190E-001;
 		t = t * i;
-	} else if (fa >= 0.7){
+	}
+	else if(fa >= 0.7)
+	{
 		i = 1.0 - fa;
 		t = 1.17786911519331130E-002; 
 		t = t * i + 3.89046747413522300E-002;
@@ -815,7 +895,9 @@ inline double lgammaCPU(double a){
 		t = t * i + 8.22467033424113540E-001;
 		t = t * i + 5.77215664901532870E-001;
 		t = t * i;
-	}else{
+	}
+	else
+	{
 		t = -9.04051686831357990E-008;
 		t = t * fa + 7.06814224969349250E-007;
 		t = t * fa - 3.80702154637902830E-007;
@@ -834,17 +916,29 @@ inline double lgammaCPU(double a){
 		t = t * fa + fa;
 		t = -log (t);
 	}
-	if (a >= 0.0) return t;
-	if (fa < 1e-19) return -log(fa);
+	if(a >= 0.0)
+	{
+		return t;
+	}
+	if(fa < 1e-19)
+	{
+		return -log(fa);
+	}
 	i = floor(fa); 
-	if (fa == i) return 1.0 / (fa - i); /* a is an integer: return infinity */
+	if(fa == i)
+	{
+		return 1.0 / (fa - i); /* a is an integer: return infinity */
+	}
 	i = rintCPU (2.0 * fa);
 	quot = (long long int)i;
 	i = fa - 0.5 * i;
 	i = i * cPi;
-	if (quot & 1){
+	if(quot & 1)
+	{
 		i = cos(i);
-	}else{
+	}
+	else
+	{
 		i = sin(i);
 	}
 	i = fabs(i);
@@ -865,14 +959,17 @@ inline double bessj0CPU(double x)
 	double ax,z;
 	double xx,y,ans,ans1,ans2;
 
-	if ((ax=fabs(x)) < 8.0){
+	if((ax=fabs(x)) < 8.0)
+	{
 		y=x*x;
 		ans1=57568490574.0+y*(-13362590354.0+y*(651619640.7
 		+y*(-11214424.18+y*(77392.33017+y*(-184.9052456)))));
 		ans2=57568490411.0+y*(1029532985.0+y*(9494680.718
 		+y*(59272.64853+y*(267.8532712+y*1.0))));
 		ans=ans1/ans2;
-	}else{
+	}
+	else
+	{
 		z=8.0/ax;
 		y=z*z;
 		xx=ax-0.785398164;
@@ -895,14 +992,17 @@ inline double bessj1CPU(double x)
 	double ax,z;
 	double xx,y,ans,ans1,ans2;
 
-	if ((ax=fabs(x)) < 8.0){
+	if((ax=fabs(x)) < 8.0)
+	{
 		y=x*x;
 		ans1=x*(72362614232.0+y*(-7895059235.0+y*(242396853.1
 		+y*(-2972611.439+y*(15704.48260+y*(-30.16036606))))));
 		ans2=144725228442.0+y*(2300535178.0+y*(18583304.74
 		+y*(99447.43394+y*(376.9991397+y*1.0))));
 		ans=ans1/ans2;
-	}else{
+	}
+	else
+	{
 		z=8.0/ax;
 		y=z*z;
 		xx=ax-2.356194491;
@@ -912,7 +1012,10 @@ inline double bessj1CPU(double x)
 		+y*(0.8449199096e-5+y*(-0.88228987e-6
 		+y*0.105787412e-6)));
 		ans=sqrt(0.636619772/ax)*(cos(xx)*ans1-z*sin(xx)*ans2);
-		if (x < 0.0) ans = -ans;
+		if(x < 0.0)
+		{
+			ans = -ans;
+		}
 	}
 	return ans;
 }
@@ -927,50 +1030,67 @@ inline double bessjCPU(int n, double x)
 	int j, jsum, m;
 	double ax, bj, bjm, bjp, sum, tox, ans;
 
-	//if (n < 0)
+	//if(n < 0)
 	//{
 	// double dblank;
 	// setdblank_c( &dblank );
 	// return( dblank );
 	//}
 	ax=fabs(x);
-	if (n == 0)
+	if(n == 0)
+	{
 		return( bessj0CPU(ax) );
-	if (n == 1)
+	}
+	if(n == 1)
+	{
 		return( bessj1CPU(ax) );
- 
+	}
 
-	if (ax == 0.0)
+	if(ax == 0.0)
+	{
 		return 0.0;
-	else if (ax > (double) n){
+	}
+	else if(ax > (double) n)
+	{
 		tox=2.0/ax;
 		bjm=bessj0CPU(ax);
 		bj=bessj1CPU(ax);
-		for (j=1;j<n;j++){
-		bjp=j*tox*bj-bjm;
-		bjm=bj;
-		bj=bjp;
+		for(j=1;j<n;j++)
+		{
+			bjp=j*tox*bj-bjm;
+			bjm=bj;
+			bj=bjp;
 		}
 		ans=bj;
-	}else{
+	}
+	else
+	{
 		tox=2.0/ax;
 		m=2*((n+(int)sqrt(ACC*n))/2);
 		jsum=0;
 		bjp=ans=sum=0.0;
 		bj=1.0;
-		for (j=m;j>0;j--){
+		for(j=m;j>0;j--)
+		{
 			bjm=j*tox*bj-bjp;
 			bjp=bj;
 			bj=bjm;
-			if (fabs(bj) > BIGNO){
+			if(fabs(bj) > BIGNO)
+			{
 				bj *= BIGNI;
 				bjp *= BIGNI;
 				ans *= BIGNI;
 				sum *= BIGNI;
 			}
-			if (jsum) sum += bj;
+			if(jsum)
+			{
+				sum += bj;
+			}
 			jsum=!jsum;
-			if (j == n) ans=bjp;
+			if(j == n)
+			{
+				ans=bjp;
+			}
 		}
 		sum=2.0*sum-bj;
 		ans /= sum;
@@ -987,14 +1107,17 @@ inline double bessy0CPU(double x)
 	double z;
 	double xx,y,ans,ans1,ans2;
 
-	if (x < 8.0){
+	if(x < 8.0)
+	{
 		y=x*x;
 		ans1 = -2957821389.0+y*(7062834065.0+y*(-512359803.6
 		+y*(10879881.29+y*(-86327.92757+y*228.4622733))));
 		ans2=40076544269.0+y*(745249964.8+y*(7189466.438
 		+y*(47447.26470+y*(226.1030244+y*1.0))));
 		ans=(ans1/ans2)+0.636619772*bessj0CPU(x)*log(x);
-	}else{
+	}
+	else
+	{
 		z=8.0/x;
 		y=z*z;
 		xx=x-0.785398164;
@@ -1017,7 +1140,8 @@ inline double bessy1CPU(double x)
 	double z;
 	double xx,y,ans,ans1,ans2;
 
-	if (x < 8.0){
+	if(x < 8.0)
+	{
 		y=x*x;
 		ans1=x*(-0.4900604943e13+y*(0.1275274390e13
 		+y*(-0.5153438139e11+y*(0.7349264551e9
@@ -1026,7 +1150,9 @@ inline double bessy1CPU(double x)
 		+y*(0.3733650367e10+y*(0.2245904002e8
 		+y*(0.1020426050e6+y*(0.3549632885e3+y)))));
 		ans=(ans1/ans2)+0.636619772*(bessj1CPU(x)*log(x)-1.0/x);
-	}else{
+	}
+	else
+	{
 		z=8.0/x;
 		y=z*z;
 		xx=x-2.356194491;
@@ -1051,21 +1177,26 @@ inline double bessyCPU(int n, double x)
 	int j;
 	double by,bym,byp,tox;
 
-	//if (n < 0 || x == 0.0)
+	//if(n < 0 || x == 0.0)
 	//{
 	// double dblank;
 	// setdblank_c( &dblank );
 	// return( dblank );
 	//}
-	if (n == 0)
+	if(n == 0)
+	{
 		return( bessy0CPU(x) );
-	if (n == 1)
+	}
+	if(n == 1)
+	{
 		return( bessy1CPU(x) );
+	}
 
 	tox=2.0/x;
 	by=bessy1CPU(x);
 	bym=bessy0CPU(x);
-	for (j=1;j<n;j++){
+	for(j=1;j<n;j++)
+	{
 		byp=j*tox*by-bym;
 		bym=by;
 		by=byp;
@@ -1081,11 +1212,14 @@ inline double bessi0CPU(double x)
 	double ax,ans;
 	double y;
 
-	if ((ax=fabs(x)) < 3.75){
+	if((ax=fabs(x)) < 3.75)
+	{
 		y=x/3.75,y=y*y;
 		ans=1.0+y*(3.5156229+y*(3.0899424+y*(1.2067492
 		+y*(0.2659732+y*(0.360768e-1+y*0.45813e-2)))));
-	}else{
+	}
+	else
+	{
 		y=3.75/ax;
 		ans=(exp(ax)/sqrt(ax))*(0.39894228+y*(0.1328592e-1
 		+y*(0.225319e-2+y*(-0.157565e-2+y*(0.916281e-2
@@ -1103,11 +1237,14 @@ inline double bessi1CPU(double x)
 	double ax,ans;
 	double y;
 
-	if ((ax=fabs(x)) < 3.75){
+	if((ax=fabs(x)) < 3.75)
+	{
 		y=x/3.75,y=y*y;
 		ans=ax*(0.5+y*(0.87890594+y*(0.51498869+y*(0.15084934
 		+y*(0.2658733e-1+y*(0.301532e-2+y*0.32411e-3))))));
-	}else{
+	}
+	else
+	{
 		y=3.75/ax;
 		ans=0.2282967e-1+y*(-0.2895312e-1+y*(0.1787654e-1
 		-y*0.420059e-2));
@@ -1126,34 +1263,45 @@ inline double bessiCPU(int n, double x)
 	int j;
 	double bi,bim,bip,tox,ans;
 
-	//if (n < 0)
+	//if(n < 0)
 	//{
 	// double dblank;
 	// setdblank_c( &dblank );
 	// return( dblank );
 	//}
-	if (n == 0)
+	if(n == 0)
+	{
 		return( bessi0CPU(x) );
-	if (n == 1)
+	}
+	if(n == 1)
+	{
 		return( bessi1CPU(x) );
+	}
 
-
-	if (x == 0.0)
+	if(x == 0.0)
+	{
 		return 0.0;
-	else {
+	}
+	else
+	{
 		tox=2.0/fabs(x);
 		bip=ans=0.0;
 		bi=1.0;
-		for (j=2*(n+(int) sqrt(ACC*n));j>0;j--){
+		for(j=2*(n+(int) sqrt(ACC*n));j>0;j--)
+		{
 			bim=bip+j*tox*bi;
 			bip=bi;
 			bi=bim;
-			if (fabs(bi) > BIGNO){
+			if(fabs(bi) > BIGNO)
+			{
 				ans *= BIGNI;
 				bi *= BIGNI;
 				bip *= BIGNI;
 			}
-			if (j == n) ans=bip;
+			if(j == n)
+			{
+				ans=bip;
+			}
 		}
 		ans *= bessi0CPU(x)/bi;
 		return x < 0.0 && n%2 == 1 ? -ans : ans;
@@ -1167,12 +1315,15 @@ inline double bessk0CPU(double x)
 {
 	double y,ans;
 
-	if (x <= 2.0){
+	if(x <= 2.0)
+	{
 		y=x*x/4.0;
 		ans=(-log(x/2.0)*bessi0CPU(x))+(-0.57721566+y*(0.42278420
 		+y*(0.23069756+y*(0.3488590e-1+y*(0.262698e-2
 		+y*(0.10750e-3+y*0.74e-5))))));
-	}else{
+	}
+	else
+	{
 		y=2.0/x;
 		ans=(exp(-x)/sqrt(x))*(1.25331414+y*(-0.7832358e-1
 		+y*(0.2189568e-1+y*(-0.1062446e-1+y*(0.587872e-2
@@ -1188,12 +1339,15 @@ inline double bessk1CPU(double x)
 {
 	double y,ans;
 
-	if (x <= 2.0){
+	if(x <= 2.0)
+	{
 		y=x*x/4.0;
 		ans=(log(x/2.0)*bessi1CPU(x))+(1.0/x)*(1.0+y*(0.15443144
 		+y*(-0.67278579+y*(-0.18156897+y*(-0.1919402e-1
 		+y*(-0.110404e-2+y*(-0.4686e-4)))))));
-	}else{
+	}
+	else
+	{
 		y=2.0/x;
 		ans=(exp(-x)/sqrt(x))*(1.25331414+y*(0.23498619
 		+y*(-0.3655620e-1+y*(0.1504268e-1+y*(-0.780353e-2
@@ -1212,21 +1366,26 @@ inline double besskCPU(int n, double x)
 	int j;
 	double bk,bkm,bkp,tox;
 
-	//if (n < 0 || x == 0.0)
+	//if(n < 0 || x == 0.0)
 	//{
 	// double dblank;
 	// setdblank_c( &dblank );
 	// return( dblank );
 	//}
-	if (n == 0)
+	if(n == 0)
+	{
 		return( bessk0CPU(x) );
-	if (n == 1)
+	}
+	if(n == 1)
+	{
 		return( bessk1CPU(x) );
+	}
 
 	tox=2.0/x;
 	bkm=bessk0CPU(x);
 	bk=bessk1CPU(x);
-	for (j=1;j<n;j++){
+	for(j=1;j<n;j++)
+	{
 		bkp=bkm+j*tox*bk;
 		bkm=bk;
 		bk=bkp;

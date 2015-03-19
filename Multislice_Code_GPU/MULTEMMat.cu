@@ -29,7 +29,8 @@
 #include <mex.h>
 
 /**********************read input MulSli************************/
-void f_Matlab2InMulSli(const mxArray *mxInMSTEM, cMT_InMulSli_CPU &MT_InMulSli_CPU){
+void f_Matlab2InMulSli(const mxArray *mxInMSTEM, cMT_InMulSli_CPU &MT_InMulSli_CPU)
+{
 	MT_InMulSli_CPU.gpu = ReadValuemxField<int>(mxInMSTEM, 0, "gpu");							// gpu device
 	MT_InMulSli_CPU.SimType = ReadValuemxField<int>(mxInMSTEM, 0, "SimType");					// 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
 	MT_InMulSli_CPU.MulOrder = 2;																// 1: First order, 2: Second order
@@ -47,7 +48,8 @@ void f_Matlab2InMulSli(const mxArray *mxInMSTEM, cMT_InMulSli_CPU &MT_InMulSli_C
 	MT_InMulSli_CPU.FastCal = ReadValuemxField<int>(mxInMSTEM, 0, "FastCal");					// 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
 	MT_InMulSli_CPU.PBC_xy = 1;																	// 1: true, 2: false (Peridic boundary contions)
 	MT_InMulSli_CPU.Psi0Typ = ReadValuemxField<int>(mxInMSTEM, 0, "Psi0Typ");					// 1: Automatic, 2: User define
-	if(MT_InMulSli_CPU.Psi0Typ!=1){
+	if(MT_InMulSli_CPU.Psi0Typ!=1)
+	{
 		mxArray *mxPsi0 = mxGetField(mxInMSTEM, 0, "Psi0");										// Psi
 		MT_InMulSli_CPU.Psi0.real = mxGetPr(mxPsi0);
 		MT_InMulSli_CPU.Psi0.imag = mxGetPi(mxPsi0);
@@ -71,7 +73,7 @@ void f_Matlab2InMulSli(const mxArray *mxInMSTEM, cMT_InMulSli_CPU &MT_InMulSli_C
 
 	/********************Microscope parameters********************/
 	mxArray *mxMC= mxGetField(mxInMSTEM, 0, "MC");
-	MT_InMulSli_CPU.MC_m =ReadValuemxField<int>(mxMC, 0, "m");									// momentum of the vortex
+	MT_InMulSli_CPU.MC_m = ReadValuemxField<int>(mxMC, 0, "m");									// momentum of the vortex
 	MT_InMulSli_CPU.MC_f = ReadValuemxField<double>(mxMC, 0, "f");								// defocus(Angstrom)
 	MT_InMulSli_CPU.MC_Cs3 = ReadValuemxField<double>(mxMC, 0, "Cs3", mm2Ags);					// spherical aberration(mm-->Angstrom)
 	MT_InMulSli_CPU.MC_Cs5 = ReadValuemxField<double>(mxMC, 0, "Cs5", mm2Ags);					// spherical aberration(mm-->Angstrom)
@@ -90,7 +92,8 @@ void f_Matlab2InMulSli(const mxArray *mxInMSTEM, cMT_InMulSli_CPU &MT_InMulSli_C
 	MT_InMulSli_CPU.nAtomsM = (int)mxGetM(mxAtomsM);											// Number of Atoms
 	MT_InMulSli_CPU.AtomsM = mxGetPr(mxAtomsM);													// Atoms in a matrix form
 
-	switch (MT_InMulSli_CPU.SimType){
+	switch(MT_InMulSli_CPU.SimType)
+	{
 		case 11:		// STEM
 			mxArray *mxSTEM;	
 			mxSTEM = mxGetField(mxInMSTEM, 0, "STEM");
@@ -102,11 +105,13 @@ void f_Matlab2InMulSli(const mxArray *mxInMSTEM, cMT_InMulSli_CPU &MT_InMulSli_C
 			MT_InMulSli_CPU.STEM_y2u = ReadValuemxField<double>(mxSTEM, 0, "y2u");
 
 			MT_InMulSli_CPU.STEM_nDet = ReadValuemxField<int>(mxSTEM, 0, "nDet");
-			if(MT_InMulSli_CPU.STEM_nDet>0){
+			if(MT_InMulSli_CPU.STEM_nDet>0)
+			{
 				MT_InMulSli_CPU.STEM_DetCir = new sInDetCir[MT_InMulSli_CPU.STEM_nDet];
 				mxArray *mxDetCir;
 				mxDetCir = mxGetField(mxSTEM, 0, "DetCir");
-				for (int i=0; i<MT_InMulSli_CPU.STEM_nDet; i++){
+				for(int i=0; i<MT_InMulSli_CPU.STEM_nDet; i++)
+				{
 					MT_InMulSli_CPU.STEM_DetCir[i].InnerAng = ReadValuemxField<double>(mxDetCir, i, "InnerAng", mrad2rad);	// Inner angle(mrad-->rad)
 					MT_InMulSli_CPU.STEM_DetCir[i].OuterAng = ReadValuemxField<double>(mxDetCir, i, "OuterAng", mrad2rad);	// Outer angle(mrad-->rad)
 				}
@@ -162,7 +167,8 @@ void f_Matlab2InMulSli(const mxArray *mxInMSTEM, cMT_InMulSli_CPU &MT_InMulSli_C
  }
 
  // From MT_AtomTypes_CPU to Matlab structure 
-void f_ImSTEM2Matlab(int nThk, int nDet, int line, int nxs, int nys, sImSTEM *ImSTEM, mxArray *&mxImSTEM){
+void f_ImSTEM2Matlab(int nThk, int nDet, int line, int nxs, int nys, sImSTEM *ImSTEM, mxArray *&mxImSTEM)
+{
 	const char *field_names_ImSTEM[] = {"DetInt"};
 	int number_of_fields_ImSTEM = 1;
 	mwSize dims_ImSTEM[2] = {nThk, 1};
@@ -173,14 +179,19 @@ void f_ImSTEM2Matlab(int nThk, int nDet, int line, int nxs, int nys, sImSTEM *Im
 
 	mxArray *mxDetInt;
 	mxImSTEM = mxCreateStructArray(2, dims_ImSTEM, number_of_fields_ImSTEM, field_names_ImSTEM);
-	for(int iThk = 0; iThk<nThk; iThk++){
+	for(int iThk = 0; iThk<nThk; iThk++)
+	{
 		mxDetInt = mxCreateStructArray(2, dims_DetInt, number_of_fields_DetInt, field_names_DetInt);
 		mxSetField(mxImSTEM, iThk, "DetInt", mxDetInt);
-		for(int iDet=0; iDet<nDet; iDet++){
-			if(line==1){
+		for(int iDet=0; iDet<nDet; iDet++)
+		{
+			if(line==1)
+			{
 				CreateSetValue2mxField(mxDetInt, iDet, "Tot", nxs, ImSTEM[iThk].DetInt[iDet].Tot);
 				CreateSetValue2mxField(mxDetInt, iDet, "Coh", nxs, ImSTEM[iThk].DetInt[iDet].Coh);
-			}else{
+			}
+			else
+			{
 				CreateSetValue2mxField(mxDetInt, iDet, "Tot", nxs, nys, ImSTEM[iThk].DetInt[iDet].Tot);
 				CreateSetValue2mxField(mxDetInt, iDet, "Coh", nxs, nys, ImSTEM[iThk].DetInt[iDet].Coh);
 			}
@@ -188,7 +199,8 @@ void f_ImSTEM2Matlab(int nThk, int nDet, int line, int nxs, int nys, sImSTEM *Im
 	}
 }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
 	sComplex aPsih ;
 	double *M2aPsih, *aM2Psih;
 
@@ -198,7 +210,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	cMT_MulSli_GPU MulSliGPU;
 	MulSliGPU.SetInputData(MT_InMulSli_CPU);
 
-	switch (MT_InMulSli_CPU.SimType){
+	switch(MT_InMulSli_CPU.SimType)
+	{
 		case 11:		// STEM
 			MulSliGPU.Cal_STEM();
 			f_ImSTEM2Matlab(MulSliGPU.STEM->nThk, MulSliGPU.STEM->nDet, MulSliGPU.STEM->line, MulSliGPU.STEM->nxs, MulSliGPU.STEM->nys, MulSliGPU.STEM->ImSTEM, plhs[0]);

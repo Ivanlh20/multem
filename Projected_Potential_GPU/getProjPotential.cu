@@ -30,7 +30,8 @@
 #include <mex.h>
 
 /**********************read input Probe*************************/
-void f_Matlab2InProjPotential(const mxArray *mxInProjPotential, sInProjPotential &InProjPotential){
+void f_Matlab2InProjPotential(const mxArray *mxInProjPotential, sInProjPotential &InProjPotential)
+{
 	InProjPotential.gpu = ReadValuemxField<int>(mxInProjPotential, 0, "gpu");						// gpu device
 	InProjPotential.MulOrder = 2;																	// 1: First order, 2: Second order
 	InProjPotential.iConfFP = ReadValuemxField<int>(mxInProjPotential, 0, "iConfFP");				// Frozen phonon configuration
@@ -54,7 +55,8 @@ void f_Matlab2InProjPotential(const mxArray *mxInProjPotential, sInProjPotential
 	if(InProjPotential.iSlice<0) InProjPotential.iSlice=0;
  }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+{
 	sInProjPotential InProjPotential;
 
 	f_Matlab2InProjPotential(prhs[0], InProjPotential);
@@ -75,7 +77,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	MT_Potential_GPU.MoveAtoms(InProjPotential.iConfFP);
 	MT_Potential_GPU.ProjectedPotential(InProjPotential.iSlice, 2);
 
-	f_fft2Shift_MD(MT_Potential_GPU.GP, MT_Potential_GPU.V0, MT_Potential_GPU.V1);
+	f_fft2Shift_MD_GPU(MT_Potential_GPU.GP, MT_Potential_GPU.V0, MT_Potential_GPU.V1);
 	cudaMemcpy(V0h, MT_Potential_GPU.V0, MT_Potential_GPU.GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
 	cudaMemcpy(V1h, MT_Potential_GPU.V1, MT_Potential_GPU.GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
 

@@ -25,7 +25,8 @@
 
 
 // Constructor
-cPotential_CPU::cPotential_CPU(){
+cPotential_CPU::cPotential_CPU()
+{
 	PotPar = 0;
 	MT_AtomTypes_CPU = 0;
 	sigma = 0;
@@ -38,7 +39,8 @@ cPotential_CPU::cPotential_CPU(){
 }
 
 // Destructor
-cPotential_CPU::~cPotential_CPU(){
+cPotential_CPU::~cPotential_CPU()
+{
 	PotPar = 0;
 	MT_AtomTypes_CPU = 0;
 	sigma = 0;
@@ -49,63 +51,74 @@ cPotential_CPU::~cPotential_CPU(){
 }
 
 // Set RMS factor (Angstroms)
-void cPotential_CPU::SetSigma(double sigmai){
+void cPotential_CPU::SetSigma(double sigmai)
+{
 	sigma = sigmai;
 }
 
 // Set Atom type
-void cPotential_CPU::SetAtomTypes(int PotPar_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU_i){
+void cPotential_CPU::SetAtomTypes(int PotPar_i, cMT_AtomTypes_CPU *MT_AtomTypes_CPU_i)
+{
 	PotPar = PotPar_i;
 	MT_AtomTypes_CPU = MT_AtomTypes_CPU_i;
 }
 
 /***************************************************************************/
 // 1D Potential calculation (Vx, dVx) where dVx is the first derivative along x
-void cPotential_CPU::Pot1Da(double &r, double *cl, double *cnl, double &f, double &df){
+void cPotential_CPU::Pot1Da(double &r, double *cl, double *cnl, double &f, double &df)
+{
 
 }
 
 // 1D Potential calculation (Vx, dVx) where dVx is the first derivative along x
-void cPotential_CPU::Pot1Dn(double &r, double *cl, double *cnl, double &f, double &df){
+void cPotential_CPU::Pot1Dn(double &r, double *cl, double *cnl, double &f, double &df)
+{
 
 }
 
 /***************************************************************************/
 // 2D Potential calculation (VR, dVR) where dVR is the first derivative along R
-void cPotential_CPU::Pot2Da(double &r, double *cl, double *cnl,double &f, double &df){
+void cPotential_CPU::Pot2Da(double &r, double *cl, double *cnl,double &f, double &df)
+{
 	int i;
 	double icnl;
-	double ir = 1.0/r, r2 = r*r;
+ double r2 = r*r;
 	f = df = 0.0;
-	switch (PotPar){
+	switch(PotPar)
+	{
 		case 1:
 			// 1: Doyle and Turner parameterization - 4 Gaussians - [0, 4]
-			for (i=0; i<4; i++){
+			for(i=0; i<4; i++)
+			{
 				f += ft = cl[i]*exp(-cnl[i]*r2);
 				df += -2.0*cnl[i]*r*ft;
 			}
 			break;
 		case 2:
 			// 2: Peng et al. parameterization - 5 Gaussians - [0, 4]
-			for (i=0; i<5; i++){
+			for(i=0; i<5; i++)
+			{
 				f += ft = cl[i]*exp(-cnl[i]*r2);
 				df += -2.0*cnl[i]*r*ft;
 			}
 			break;
 		case 3:
 			// 3: Peng et al. parameterization - 5 Gaussians - [0, 12]
-			for (i=0; i<5; i++){
+			for(i=0; i<5; i++)
+			{
 				f += ft = cl[i]*exp(-cnl[i]*r2);
 				df += -2.0*cnl[i]*r*ft;
 			}
 			break;
 		case 4:
 			// 4: Kirkland parameterization - 3 Yukawa + 3 Gaussians - [0, 12]			
-			for (i=0; i<3;i++){
+			for(i=0; i<3;i++)
+			{
 				f += cl[i]*besskCPU(0, cnl[i]*r);
 				df += -cl[i]*cnl[i]*besskCPU(1, cnl[i]*r);
 			}	
-			for (i=3; i<6;i++){
+			for(i=3; i<6;i++)
+			{
 				f += ft = cl[i]*exp(-cnl[i]*r2);
 				df += -2.0*cnl[i]*r*ft;
 			}
@@ -116,7 +129,8 @@ void cPotential_CPU::Pot2Da(double &r, double *cl, double *cnl,double &f, double
 			break;
 		case 6:
 			// 6: lobato parameterization - 5 hydrogen fe - [0, 12]
-			for (i=0; i<5; i++){
+			for(i=0; i<5; i++)
+			{
 				k0 = besskCPU(0, cnl[i]*r); k1 = besskCPU(1, cnl[i]*r); icnl = 1.0/cnl[i];
 				f += cl[i]*(2.0*icnl*k0 + r*k1);
 				df += -cl[i]*(cnl[i]*r*k0 + 2.0*k1);
@@ -126,7 +140,8 @@ void cPotential_CPU::Pot2Da(double &r, double *cl, double *cnl,double &f, double
 }
 
 // 2D Potential calculation (VR, dVR) where dVR is the first derivative along R
-void cPotential_CPU::Pot2Dn(double &r, double *cl, double *cnl, double &f, double &df){
+void cPotential_CPU::Pot2Dn(double &r, double *cl, double *cnl, double &f, double &df)
+{
 //	int i, j, nm, np;
 //	double M, h, f, alpha, beta;
 //	double em, ep, t, dt, ut;
@@ -134,7 +149,7 @@ void cPotential_CPU::Pot2Dn(double &r, double *cl, double *cnl, double &f, doubl
 //	double zi, wzi, r, r2, Vr, dVr;
 //
 //	VR = dVR = 0; h = 0.075; beta = 0.25; 
-//	for (j=0; j<nQ1; j++){
+//	for(j=0; j<nQ1; j++){
 //		zi = Q1.x[j]; wzi = Q1.w[j]; r2 = R*R + zi*zi; r = sqrt(r2);
 //
 //		f = c2Pi*r; M = cPi/(f*h); alpha = beta/sqrt(1.0+M*log(1.0+M)/c4Pi);
@@ -146,9 +161,9 @@ void cPotential_CPU::Pot2Dn(double &r, double *cl, double *cnl, double &f, doubl
 //		nm = -1 - (int)(log((2.0*t + log(t) - em)/alpha + 1.0)/h);
 //	
 //		Vr = dVr = 0;
-//		for (i=nm; i<=np; i++){
+//		for(i=nm; i<=np; i++){
 //			t = i*h;
-//			if (t==0){
+//			if(t==0){
 //				ut = 1.0/(2.0+alpha+beta);
 //				gi = M*ut;
 //				wgi = 0.5*M*h*(1.0+(alpha-beta)*ut*ut)*sin(f*gi);
@@ -157,13 +172,13 @@ void cPotential_CPU::Pot2Dn(double &r, double *cl, double *cnl, double &f, doubl
 //				dt = exp(-2*t+em-ep); ut = 1.0/(1.0-dt);
 //				gi = M*t*ut;
 //				wgi = M*h*(1.0-(2.0+alpha+beta+em+ep)*t*(ut-1))*ut;
-//				if (i>5)
+//				if(i>5)
 //					wgi *= sin(((i&1)?-1:1)*f*gi*dt);
 //				else
 //					wgi *= sin(f*gi);
 //			}
 //			fea(gi, Vg, dVg);
-//			if (dw==0){
+//			if(dw==0){
 //				Vr += wgi*gi*Vg;
 //				dVr += -wgi*gi*(3*Vg+gi*dVg);
 //			}else{
@@ -182,56 +197,65 @@ void cPotential_CPU::Pot2Dn(double &r, double *cl, double *cnl, double &f, doubl
 
 /***************************************************************************/
 // 3D Potential calculation (Vr, dVr) where dVr is the first derivative along r
-void cPotential_CPU::Pot3Da(double &r, double *cl, double *cnl, double &f, double &df){
+void cPotential_CPU::Pot3Da(double &r, double *cl, double *cnl, double &f, double &df)
+{
 	int i;
 	double icnl;
 	double ir = 1.0/r, r2 = r*r;
 
 	f = df = 0.0;
-	switch (PotPar){
+	switch(PotPar)
+	{
 		case 1:
 			// 1: Doyle and Turner parameterization - 4 Gaussians - [0, 4]
-			for (i=0; i<4; i++){
+			for(i=0; i<4; i++)
+			{
 				f += ft = cl[i]*exp(-cnl[i]*r2);
 				df += -2.0*cnl[i]*r*ft;
 			}
 			break;
 		case 2:
 			// 2: Peng et al. parameterization - 5 Gaussians - [0, 4]
-			for (i=0; i<5; i++){
+			for(i=0; i<5; i++)
+			{
 				f += ft = cl[i]*exp(-cnl[i]*r2);
 				df += -2.0*cnl[i]*r*ft;
 			}
 			break;
 		case 3:
 			// 3: Peng et al. parameterization - 5 Gaussians - [0, 12]
-			for (i=0; i<5; i++){
+			for(i=0; i<5; i++)
+			{
 				f += ft = cl[i]*exp(-cnl[i]*r2);
 				df += -2.0*cnl[i]*r*ft;
 			}
 			break;
 		case 4:
 			// 4: Kirkland parameterization - 3 Yukawa + 3 Gaussians - [0, 12]			
-			for (i=0; i<3; i++){
+			for(i=0; i<3; i++)
+			{
 				f += ft = cl[i]*exp(-cnl[i]*r)*ir;
 				df += -(cnl[i]+ ir)*ft;
 			}
 
-			for (i=3; i<6; i++){
+			for(i=3; i<6; i++)
+			{
 				f += ft = cl[i]*exp(-cnl[i]*r2);
 				df += -2.0*cnl[i]*r*ft;
 			}
 			break;
 		case 5:
 			// 5: Weickenmeier and H.Kohl - a*(1-exp(-bg^2)/g^2 - [0, 12]
-			for (i=0; i<6; i++){
+			for(i=0; i<6; i++)
+			{
 				f += ft = cl[i]*erfcCPU(cnl[i]*r)*ir;
 				df += (-2.0*cl[i]*cnl[i]*exp(-cnl[i]*cnl[i]*r2)/cPii2-ft)*ir;
 			}
 			break;
 		case 6:
 			// 6: Lobato parameterization - 5 Hydrogen fe - [0, 12]
-			for (i=0; i<5; i++){
+			for(i=0; i<5; i++)
+			{
 				ft = cl[i]*exp(-cnl[i]*r)*ir; icnl = 1.0/cnl[i];
 				f += ft*(2.0*icnl + r);
 				df += -ft*(2.0*icnl*ir + 2.0 + cnl[i]*r);
@@ -241,7 +265,8 @@ void cPotential_CPU::Pot3Da(double &r, double *cl, double *cnl, double &f, doubl
 }
 
 // 3D Potential calculation (Vr, dVr) where dVr is the first derivative along r
-void cPotential_CPU::Pot3Dn(double &r, double *cl, double *cnl, double &f, double &df){
+void cPotential_CPU::Pot3Dn(double &r, double *cl, double *cnl, double &f, double &df)
+{
 //	int i, nm, np;
 //	double M, h, f, alpha, beta;
 //	double em, ep, t, dt, ut;
@@ -257,9 +282,9 @@ void cPotential_CPU::Pot3Dn(double &r, double *cl, double *cnl, double &f, doubl
 //	nm = -1 - (int)(log((2.0*t + log(t) - em)/alpha + 1.0)/h);
 //	
 //	Vr = dVr = 0;
-//	for (i=nm; i<=np; i++){
+//	for(i=nm; i<=np; i++){
 //		t = i*h;
-//		if (t==0){
+//		if(t==0){
 //			ut = 1.0/(2.0+alpha+beta);
 //			gi = M*ut;
 //			wgi = 0.5*(1.0+(alpha-beta)*ut*ut)*sin(f*gi);
@@ -268,14 +293,14 @@ void cPotential_CPU::Pot3Dn(double &r, double *cl, double *cnl, double &f, doubl
 //			dt = exp(-2*t+em-ep); ut = 1.0/(1.0-dt);
 //			gi = M*t*ut;
 //			wgi = (1.0-(2.0+alpha+beta+em+ep)*t*(ut-1))*ut;
-//			if (i>5)
+//			if(i>5)
 //				wgi *= sin(((i&1)?-1:1)*f*gi*dt);
 //			else
 //				wgi *= sin(f*gi);
 //		}
 //		gi2 = gi*gi;
 //		fea(gi, Vg, dVg);
-//		if (dw==0){
+//		if(dw==0){
 //			Vr += wgi*gi*Vg;
 //			dVr += -wgi*gi*(3*Vg+gi*dVg);
 //		}else{
@@ -288,29 +313,43 @@ void cPotential_CPU::Pot3Dn(double &r, double *cl, double *cnl, double &f, doubl
 }
 
 /***************************************************************************/
-void cPotential_CPU::Vr(int IntType, int Dim, double r, double &f, double &df){
-	switch (Dim){
+void cPotential_CPU::Vr(int IntType, int Dim, double r, double &f, double &df)
+{
+	switch(Dim)
+	{
 		case 1:
-			if(~IntType) 
+			if(~IntType)
+			{
 				Pot1Da(r, cl, cnl, f, df);
+			}
 			else
+			{
 				Pot1Dn(r, cl, cnl, f, df);
+			}
 			break;
 		case 2:
 			cl = MT_AtomTypes_CPU->cVR.cl;
 			cnl = MT_AtomTypes_CPU->cVR.cnl;
-			if(~IntType) 
+			if(~IntType)
+			{
 				Pot2Da(r, cl, cnl, f, df);
+			}
 			else
+			{
 				Pot2Dn(r, cl, cnl, f, df);
+			}
 			break;
 		case 3:
 			cl = MT_AtomTypes_CPU->cVr.cl;
 			cnl = MT_AtomTypes_CPU->cVr.cnl;
-			if(~IntType) 
+			if(~IntType)
+			{
 				Pot3Da(r, cl, cnl, f, df);
+			}
 			else
+			{
 				Pot3Dn(r, cl, cnl, f, df);
+			}
 			break;
 	}
 
@@ -318,13 +357,17 @@ void cPotential_CPU::Vr(int IntType, int Dim, double r, double &f, double &df){
 
 /***************************************************************************/
 // 2D Potential calculation (VR, dVR) where dVR is the first derivative along R
-void cPotential_CPU::Vr(int IntType, int Dim, int nr, double *r, double *f, double *df){
-	for (int i=0; i<nr; i++)
+void cPotential_CPU::Vr(int IntType, int Dim, int nr, double *r, double *f, double *df)
+{
+	for(int i=0; i<nr; i++)
+	{
 		Vr(IntType, Dim, r[i], f[i], df[i]);
+	}
 }
 
 // Calculate the total Potential
-void cPotential_CPU::Vr(int PotPar, int nAtoms, sAtoms *Atoms, int nMT_AtomTypes, cMT_AtomTypes_CPU *MT_AtomTypes_CPU, int IntType, int Dim, int nr, double *r, double factor, double *f, double *df){
+void cPotential_CPU::Vr(int PotPar, int nAtoms, sAtoms *Atoms, int nMT_AtomTypes, cMT_AtomTypes_CPU *MT_AtomTypes_CPU, int IntType, int Dim, int nr, double *r, double factor, double *f, double *df)
+{
 	int i, j;
 	double *ft, *dft; 
 	double occ;
@@ -333,22 +376,30 @@ void cPotential_CPU::Vr(int PotPar, int nAtoms, sAtoms *Atoms, int nMT_AtomTypes
 	dft = new double[nr];
 
 	// Initiazed potential
-	for (i=0; i<nr; i++){
+	for(i=0; i<nr; i++)
+	{
 		f[i] = df[i] = 0.0;
-	};
+	}
 
-	for (i=0; i<nMT_AtomTypes; i++){
+	for(i=0; i<nMT_AtomTypes; i++)
+	{
 		occ = 0.0;
-		for (j=0; j<nAtoms; j++)
-			if(Atoms[j].Z==MT_AtomTypes_CPU[i].Z)
+		for(j=0; j<nAtoms; j++)
+		{
+			if(Atoms[j].Z==MT_AtomTypes_CPU[i].Z)		
+			{
 				occ += Atoms[j].occ;
+			}
+		}
 
-		if(occ>0){
+		if(occ>0)
+		{
 			SetAtomTypes(PotPar, &(MT_AtomTypes_CPU[i]));
 			SetSigma(0.0);
 			Vr(IntType, Dim, nr, r, ft, dft);
 			// Add potential
-			for (j=0; j<nr; j++){
+			for(j=0; j<nr; j++)
+			{
 				f[j] += occ*factor*ft[j];
 				df[j] += occ*factor*dft[j];
 			}
@@ -360,21 +411,26 @@ void cPotential_CPU::Vr(int PotPar, int nAtoms, sAtoms *Atoms, int nMT_AtomTypes
 }
 
 /***************************************************************************/
-double cPotential_CPU::AtomicRadius_rms(int Dim){
+double cPotential_CPU::AtomicRadius_rms(int Dim)
+{
 	double iVr, iVrn, Vrt;
 	double ri, wi, Vri, dVri;
 	double ra, rmin;
 
-	if (MT_AtomTypes_CPU->cVr.cl[0]==0)
+	if(MT_AtomTypes_CPU->cVr.cl[0]==0)
+	{
 		ra = 0.0;
-	else{
+	}
+	else
+	{
 		rmin = MT_AtomTypes_CPU->rn_c;
 		Vr(0, Dim, rmin, Vri, dVri);
 
 		iVr = Vri*pow(rmin, Dim)/Dim;
 		iVrn = Vri*pow(rmin, Dim+2)/(Dim+2);
 		/************************************************************/
-		for (int i=0; i<nQ1; i++){
+		for(int i=0; i<nQ1; i++)
+		{
 			ri = Q1.x[i] + rmin;
 			wi = Q1.w[i];
 			Vr(0, Dim, ri, Vri, dVri);		
@@ -386,26 +442,35 @@ double cPotential_CPU::AtomicRadius_rms(int Dim){
 	return ra;
 }
 
-double cPotential_CPU::AtomicRadius_Cutoff(int Dim, double Vrl){
+double cPotential_CPU::AtomicRadius_Cutoff(int Dim, double Vrl)
+{
 	double eps = 1e-08;
 	double rmin, rmax;
 	double rm, Vrm, dVrm;
 
-	if ((Vrl==0)||(MT_AtomTypes_CPU->cVr.cl[0]==0))
+	if((Vrl==0)||(MT_AtomTypes_CPU->cVr.cl[0]==0))
+	{
 		rmax = 0;
-	else{
+	}
+	else
+	{
 		rmin = MT_AtomTypes_CPU->rn_c; 
 		rmax = 50.0;
 		Vr(0, Dim, rmin, Vrm, dVrm); 
 		Vrm = std::abs(Vrm);
-		while (std::abs(Vrm-Vrl)>eps){
+		while (std::abs(Vrm-Vrl)>eps)
+		{
 			rm = 0.5*(rmin+rmax);
 			Vr(0, Dim, rm, Vrm, dVrm);
 			Vrm = std::abs(Vrm);
-			if (Vrm>Vrl)
+			if(Vrm>Vrl)			
+			{
 				rmin = rm;
+			}
 			else
+			{
 				rmax = rm;
+			}
 		}
 	}
 	return rmax;

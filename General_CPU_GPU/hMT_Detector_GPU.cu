@@ -26,7 +26,10 @@
 #include <cuda_runtime.h>
 #include <device_functions.h>
 
-void cMT_Detector_GPU::freeMemory(){
+void cMT_Detector_GPU::freeMemory()
+{
+	if(IdCall==0) return;
+
 	cudaDeviceSynchronize(); // wait to finish the work in the GPU
 
 	f_sGP_Init(GP);
@@ -44,7 +47,10 @@ void cMT_Detector_GPU::freeMemory(){
 	cudaFreen(M2p_d);
 }
 
-cMT_Detector_GPU::cMT_Detector_GPU(){
+cMT_Detector_GPU::cMT_Detector_GPU()
+{
+	IdCall = 0;
+
 	f_sGP_Init(GP);
 
 	nDet = 0;
@@ -60,12 +66,16 @@ cMT_Detector_GPU::cMT_Detector_GPU(){
 	M2p_d = 0;
 }
 
-cMT_Detector_GPU::~cMT_Detector_GPU(){
+cMT_Detector_GPU::~cMT_Detector_GPU()
+{
 	freeMemory();
+	IdCall = 0;
 }
 
-void cMT_Detector_GPU::SetInputData(sGP &GP_i, int nDeti, sDetCir &DetCirhi){
+void cMT_Detector_GPU::SetInputData(sGP &GP_i, int nDeti, sDetCir &DetCirhi)
+{
 	freeMemory();
+	IdCall++;
 
 	GP = GP_i;
 
@@ -84,43 +94,57 @@ void cMT_Detector_GPU::SetInputData(sGP &GP_i, int nDeti, sDetCir &DetCirhi){
 	cudaMalloc((void**)&M2p_d, 32*32*cSizeofRD);
 }
 
-void cMT_Detector_GPU::getDetectorIntensity(double *&aM2Psi, double *&M2aPsi, int ixys, sDetInt *DetInth){
+void cMT_Detector_GPU::getDetectorIntensity(double w_i, double *&aM2Psi, double *&M2aPsi, int ixys, sDetInt *DetInth)
+{
 	for(int iDet = 0; iDet<nDet; iDet++)
-		f_Sum_MD_Det(GP, aM2Psi, M2aPsi, DetCirh.g2min[iDet], DetCirh.g2max[iDet], M1p_d, M2p_d, iDet, Tot_d, Coh_d);
+		f_Sum_MD_Det_GPU(GP, w_i, aM2Psi, M2aPsi, DetCirh.g2min[iDet], DetCirh.g2max[iDet], M1p_d, M2p_d, iDet, Tot_d, Coh_d);
 
 	cudaMemcpy(Tot_h, Tot_d, nDet*cSizeofRD, cudaMemcpyDeviceToHost);
 	cudaMemcpy(Coh_h, Coh_d, nDet*cSizeofRD, cudaMemcpyDeviceToHost);
 
-	for(int iDet = 0; iDet<nDet; iDet++){
+	for(int iDet = 0; iDet<nDet; iDet++)
+	{
 		DetInth[iDet].Tot[ixys] = Tot_h[iDet];
 		DetInth[iDet].Coh[ixys] = Coh_h[iDet];
 	}
 }
 
-void cMT_Detector_GPU::getDetectorIntensity(double *&aM2Psi, int ixys, sDetInt *DetInth, bool add){
+void cMT_Detector_GPU::getDetectorIntensity(double w_i, double *&aM2Psi, int ixys, sDetInt *DetInth, bool add)
+{
 	for(int iDet = 0; iDet<nDet; iDet++)
-		f_Sum_MD_Det(GP, aM2Psi, DetCirh.g2min[iDet], DetCirh.g2max[iDet], M1p_d, iDet, Tot_d);
+		f_Sum_MD_Det_GPU(GP, w_i, aM2Psi, DetCirh.g2min[iDet], DetCirh.g2max[iDet], M1p_d, iDet, Tot_d);
 
 	cudaMemcpy(Tot_h, Tot_d, nDet*cSizeofRD, cudaMemcpyDeviceToHost);
 
-	for(int iDet = 0; iDet<nDet; iDet++){
+	for(int iDet = 0; iDet<nDet; iDet++)
+	{
 		if(add)
+		{
 			DetInth[iDet].Tot[ixys] += Tot_h[iDet];
+		}
 		else
+		{
 			DetInth[iDet].Tot[ixys] = Tot_h[iDet];
+		}
 	}
 }
 
-void cMT_Detector_GPU::getDetectorIntensity(double2 *&aPsi, int ixys, sDetInt *DetInth, bool add){
+void cMT_Detector_GPU::getDetectorIntensity(double w_i, double2 *&aPsi, int ixys, sDetInt *DetInth, bool add)
+{
 	for(int iDet = 0; iDet<nDet; iDet++)
-		f_Sum_MC_Det(GP, aPsi, DetCirh.g2min[iDet], DetCirh.g2max[iDet], M1p_d, iDet, Tot_d);
+		f_Sum_MC_Det_GPU(GP, w_i, aPsi, DetCirh.g2min[iDet], DetCirh.g2max[iDet], M1p_d, iDet, Tot_d);
 
 	cudaMemcpy(Tot_h, Tot_d, nDet*cSizeofRD, cudaMemcpyDeviceToHost);
 
-	for(int iDet = 0; iDet<nDet; iDet++){
+	for(int iDet = 0; iDet<nDet; iDet++)
+	{
 		if(add)
+		{
 			DetInth[iDet].Tot[ixys] += Tot_h[iDet];
+		}
 		else
+		{
 			DetInth[iDet].Tot[ixys] = Tot_h[iDet];
+		}
 	}
 }

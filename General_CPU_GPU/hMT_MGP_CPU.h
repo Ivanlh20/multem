@@ -44,7 +44,7 @@ class cMT_MGP_CPU{
 		int nThk_i;					// Number of thickness
 		double *Thk_i;				// Array of thicknesses
 		int Psi0Typ;				// 1: Automatic, 2: User define
-		sComplex Psi0;              // Input wave
+		sComplex Psi0; // Input wave
 
 		bool ShiftDP; 				// Shift diffraction pattern
 
@@ -69,7 +69,8 @@ class cMT_MGP_CPU{
 		void SetInputData(sInProbe &InProbe);
 };
 
-inline void cMT_MGP_CPU::freeMemory(){
+inline void cMT_MGP_CPU::freeMemory()
+{
 	gpu = 0;
 	SimType = 52;
 	MulOrder = 2;
@@ -105,7 +106,8 @@ inline void cMT_MGP_CPU::freeMemory(){
 	dz = 0;
 }
 
-inline cMT_MGP_CPU::cMT_MGP_CPU(){
+inline cMT_MGP_CPU::cMT_MGP_CPU()
+{
 	gpu = 0;
 	SimType = 52;
 	MulOrder = 2;
@@ -141,11 +143,13 @@ inline cMT_MGP_CPU::cMT_MGP_CPU(){
 	dz = 0.25;
 }
 
-inline cMT_MGP_CPU::~cMT_MGP_CPU(){
+inline cMT_MGP_CPU::~cMT_MGP_CPU()
+{
 	freeMemory();
 }
 
-inline cMT_MGP_CPU& cMT_MGP_CPU::operator= (const cMT_MGP_CPU &MT_MGP_CPU){
+inline cMT_MGP_CPU& cMT_MGP_CPU::operator= (const cMT_MGP_CPU &MT_MGP_CPU)
+{
 	freeMemory();
 
 	gpu = MT_MGP_CPU.gpu;
@@ -167,7 +171,8 @@ inline cMT_MGP_CPU& cMT_MGP_CPU::operator= (const cMT_MGP_CPU &MT_MGP_CPU){
 	ShiftDP = MT_MGP_CPU.ShiftDP;
 	ThkTyp = MT_MGP_CPU.ThkTyp;
 	nThk_i = MT_MGP_CPU.nThk_i;
-	if(nThk_i>0){
+	if(nThk_i>0)
+	{
 		Thk_i = new double[nThk_i];
 		memcpy(Thk_i, MT_MGP_CPU.Thk_i, nThk_i*cSizeofRD);
 	}
@@ -188,7 +193,8 @@ inline cMT_MGP_CPU& cMT_MGP_CPU::operator= (const cMT_MGP_CPU &MT_MGP_CPU){
 	return *this;
 }
 
-inline void cMT_MGP_CPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
+inline void cMT_MGP_CPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU)
+{
 	freeMemory();
 
 	gpu = MT_InMulSli_CPU.gpu;
@@ -225,13 +231,15 @@ inline void cMT_MGP_CPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU){
 	lx = MT_InMulSli_CPU.lx;
 	ly = MT_InMulSli_CPU.ly;
 	dz = MT_InMulSli_CPU.dz;
-	if(ApproxModel>1){
+	if(ApproxModel>1)
+	{
 		MulOrder = 1;
 		DimFP = DimFP - DimFP%10;
 	}
 }
 
-inline void cMT_MGP_CPU::SetInputData(sInTransmission &InTransmission){
+inline void cMT_MGP_CPU::SetInputData(sInTransmission &InTransmission)
+{
 	freeMemory();
 
 	gpu = InTransmission.gpu;
@@ -258,7 +266,8 @@ inline void cMT_MGP_CPU::SetInputData(sInTransmission &InTransmission){
 	if(ApproxModel>2) DimFP = DimFP - DimFP%10;
 }
 
-inline void cMT_MGP_CPU::SetInputData(sInProjPotential &InProjPotential){
+inline void cMT_MGP_CPU::SetInputData(sInProjPotential &InProjPotential)
+{
 	freeMemory();
 
 	gpu = InProjPotential.gpu;
@@ -279,7 +288,8 @@ inline void cMT_MGP_CPU::SetInputData(sInProjPotential &InProjPotential){
 	if(ApproxModel>2) DimFP = DimFP - DimFP%10;
 }
 
-inline void cMT_MGP_CPU::SetInputData(sInProbe &InProbe){
+inline void cMT_MGP_CPU::SetInputData(sInProbe &InProbe)
+{
 	freeMemory();
 
 	gpu = InProbe.gpu;

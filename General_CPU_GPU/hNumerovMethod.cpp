@@ -35,7 +35,8 @@ void cNumerov::ReadInputdata(int nri, double *ri, double *Vri)
 	delete [] Vrt;	Vrt = new double [nr]; 
 
 	// Convert2AtomicUnits:	hb = 1, me = 1, qe = 1.
-	 for (int i=0; i<nr; i++){
+	 for(int i=0; i<nr; i++)
+	 {
 		ro[i] = ri[i];
 		r[i] = ri[i]/ca0;
 		sqr[i] = sqrt(r[i]);
@@ -55,10 +56,13 @@ void cNumerov::SolveRadSchEq(int ni, double gamma, int Dim, double *aEner, doubl
 	n = ni;
 	c = 0;
 	memcpy(aPsi, ro, cSizeofRD*nr);
-	for (n=1; n<=ni; n++){
-		for (l=0; l<n; l++){
+	for(n=1; n<=ni; n++)
+	{
+		for(l=0; l<n; l++)
+		{
 			nodes = n-l-1;
-			switch (Dim){
+			switch(Dim)
+			{
 				case 1:
 					/*****************************************/
 					break;
@@ -77,48 +81,54 @@ void cNumerov::SolveRadSchEq(int ni, double gamma, int Dim, double *aEner, doubl
 			}
 			// Set initial lower and upper bounds to the eigenvalue
 			elw = eup = Vr[nr-1];
-			for (i=0; i<nr; i++){
+			for(i=0; i<nr; i++)
+			{
 				Vrt[i] = Vr[i] + lh2/r2[i];
 				elw = MIN(elw, Vrt[i]);
 			}
 			e = 0.5*(elw + eup);
 
-			for (k=0; k<Ni; k++){
+			for(k=0; k<Ni; k++)
+			{
 				icl = -1;
 				f[0] = 2.0*dxf*r2[0]*(e-Vrt[0]);
-				for (i = 1; i < nr; i++){
+				for(i = 1; i < nr; i++)
+				{
 					f[i] = 2.0*dxf*r2[i]*(e-Vrt[i]); 
 
-					if (f[i] == 0.0) 
+					if(f[i] == 0.0) 
 						f[i] = 1e-20; 
 
-					if (f[i] != _copysign(f[i], f[i - 1])) 
+					if(f[i] != _copysign(f[i], f[i - 1])) 
 						icl = i; 
 				}
 
-				if ((icl<0) || (icl>=nr-3)){
+				if((icl<0) || (icl>=nr-3))
+				{
 					eup = e;
 					e = 0.5*(eup+elw);
 					continue;
 				}
 
-				for (i=0; i<nr; i++)
+				for(i=0; i<nr; i++)
 					f[i] = 1.0 + f[i];
 
 				// Outward integration condition
 				y[0] = y0; y[1] = y1;
 				// Outward integration, count number of crossings
 				ncross = 0;
-				for (i=1; i<=icl-1; i++){
+				for(i=1; i<=icl-1; i++)
+				{
 					y[i+1] = ((12.0-10.0*f[i])*y[i]-f[i-1]*y[i-1])/f[i+1];
-					if (y[i] != _copysign(y[i],y[i+1]))
+					if(y[i] != _copysign(y[i],y[i+1]))
 					++ncross;
 				}
 				yicl = y[icl];
 
 				// Check number of crossings
-				if (ncross != nodes){
-					if (ncross > nodes)
+				if(ncross != nodes)
+				{
+					if(ncross > nodes)
 						eup = e;
 					else
 						elw = e;
@@ -131,25 +141,26 @@ void cNumerov::SolveRadSchEq(int ni, double gamma, int Dim, double *aEner, doubl
 				y[nr-1] = dx;
 				y[nr-2] = (12.0-10.0*f[nr-1])*y[nr-1]/f[nr-2];
 				// Inward integration
-				for (i = nr-2; i >= icl+1; i--){
+				for(i = nr-2; i >= icl+1; i--)
+				{
 					y[i-1] = ((12.0-10.0*f[i])*y[i]-f[i+1]*y[i+1])/f[i-1];
-					if (y[i-1] > 1e10)
-						for (j = nr-1; j >= i-1; j--)
+					if(y[i-1] > 1e10)
+						for(j = nr-1; j >= i-1; j--)
 							y[j] /= y[i-1];
 				}
 
 				// Rescale function to match at the classical turning point (icl)
 				yicl /= y[icl];
-				for (i = icl; i < nr; i++)
+				for(i = icl; i < nr; i++)
 					y[i] *= yicl;
 
 				// Normalize on the [-xmax,xmax] segment 
 				norm = 0.;
-				for (i=0; i<nr; i++)
+				for(i=0; i<nr; i++)
 					norm += y[i]*y[i]*r2[i]*dx;
 
 				norm = sqrt(norm);
-				for (i=0; i<nr; i++)
+				for(i=0; i<nr; i++)
 					y[i] /= norm;
 
 				// find the value of the cusp at the matching point (icl)
@@ -159,20 +170,21 @@ void cNumerov::SolveRadSchEq(int ni, double gamma, int Dim, double *aEner, doubl
 
 				// eigenvalue update using perturbation theory
 				de = dfcusp*ycusp*ycusp*def;
-				if (de > 0.0)
+				if(de > 0.0)
 					elw = e;
-				else if (de < 0.0)
+				else if(de < 0.0)
 					eup = e;
 
 				// prevent e to go out of bounds, i.e. e > eup or e < elw (might happen far from convergence)
 				e = MAX(MIN(e+de, eup), elw);
 
 				// convergence not achieved
-				if (ABS(de) < eps)
+				if(ABS(de) < eps)
 					break;
 			}
 			aEner[c++] = e*cHa/gamma;
-			switch (Dim){
+			switch(Dim)
+			{
 				case 1:
 					/*****************************************/
 					break;
@@ -180,7 +192,7 @@ void cNumerov::SolveRadSchEq(int ni, double gamma, int Dim, double *aEner, doubl
 					/*****************************************/
 					break;
 				case 3:
-					for (i=0; i<nr; i++)
+					for(i=0; i<nr; i++)
 						y[i] /= sqr[i];
 					break;
 			}

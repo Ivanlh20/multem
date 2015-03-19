@@ -35,6 +35,7 @@
 
 class cMT_Transmission_GPU: public cMT_Potential_GPU{
 	private:
+		int IdCall;
 		int cSynCPU;
 
 		double fPot;
