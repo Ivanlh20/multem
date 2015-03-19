@@ -16,13 +16,12 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "hmathCPU.h"
 #include <cstring>
+#include "hmathCPU.h"
 #include "hConstTypes.h"
 #include "hMT_AtomTypes_CPU.h"
 #include "hQuadrature.h"
 #include "hPotential_CPU.h"
-
 
 // Constructor
 cPotential_CPU::cPotential_CPU()

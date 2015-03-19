@@ -19,11 +19,8 @@
 #ifndef hMT_Slicing_CPU_H
 #define hMT_Slicing_CPU_H
 
-#include <cstring>
 #include "hConstTypes.h"
 #include "hMT_MGP_CPU.h"
-#include "hRandGen.h"
-#include "hMT_General_CPU.h"
 
 class cMT_Slicing_CPU{
 	private:

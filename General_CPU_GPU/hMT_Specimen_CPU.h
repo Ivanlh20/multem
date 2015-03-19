@@ -19,12 +19,12 @@
 #ifndef hMT_Specimen_CPU_H
 #define hMT_Specimen_CPU_H
 
-#include <cstring>
 #include "hConstTypes.h"
-#include "hMT_MGP_CPU.h"
 #include "hRandGen.h"
-#include "hMT_General_CPU.h"
+#include "hMT_MGP_CPU.h"
+#include "hMT_AtomTypes_CPU.h"
 #include "hMT_Slicing_CPU.h"
+#include "hMT_General_CPU.h"
 
 class cMT_Specimen_CPU: public cMT_Slicing_CPU{
 	private:
@@ -32,11 +32,11 @@ class cMT_Specimen_CPU: public cMT_Slicing_CPU{
 
 		void QuickSortAtomsAlongz(sAtoms *&Atoms, int left, int right);
 		void setRandomSeed(unsigned long s, int iConf);
+		double getRMax(int nAtoms, sAtoms *&Atoms, cMT_AtomTypes_CPU *&MT_AtomTypes_CPU);
 		void getDimCom(int Dim, double &bx, double &by, double &bz);
 	protected:
 		int nAtomsu;
 		sAtoms *Atomsu;							// Undisplaced Atoms
-
 	public:
 		cMT_MGP_CPU *MT_MGP_CPU;				// Multislice general parameters
 

@@ -19,10 +19,11 @@
 #include <cstring>
 #include "hmathCPU.h"
 #include "hConstTypes.h"
-#include "hMT_MGP_CPU.h"
 #include "hRandGen.h"
-#include "hMT_General_CPU.h"
-
+#include "hMT_MGP_CPU.h"
+#include "hGeneral_CPU.h"
+#include "hMT_AtomTypes_CPU.h"
+#include "hMT_Slicing_CPU.h"
 #include "hMT_Specimen_CPU.h"
 
 void cMT_Specimen_CPU::freeMemory()
@@ -84,6 +85,20 @@ void cMT_Specimen_CPU::setRandomSeed(unsigned long s, int iConf)
 		randiu = RandGen.randiu();
 	}
 	RandGen.seed(randiu);
+}
+
+// get 2D maximum interaction distance
+double cMT_Specimen_CPU::getRMax(int nAtoms, sAtoms *&Atoms, cMT_AtomTypes_CPU *&MT_AtomTypes_CPU)
+{
+	double R, Rmax=0;
+
+	for(int iAtoms=0; iAtoms<nAtoms; iAtoms++)
+	{
+		R = MT_AtomTypes_CPU[Atoms[iAtoms].Z-1].Rmax;
+		if(Rmax < R)
+			Rmax = R;
+	}
+	return Rmax;
 }
 
 // Sort atoms along z-axis
@@ -171,7 +186,7 @@ void cMT_Specimen_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, d
 	/*************************************************************************/
 	f_AtomsM2Atoms(nAtomsM_i, AtomsM_i, MT_MGP_CPU->PBC_xy, MT_MGP_CPU->lx, MT_MGP_CPU->ly, nAtomsu, Atomsu, sigma_min, sigma_max);
 	QuickSortAtomsAlongz(Atomsu, 0, nAtomsu-1);	// Ascending sort by z
-	Rmax = f_getRMax(nAtomsu, Atomsu, MT_AtomTypes_CPU); 
+	Rmax = getRMax(nAtomsu, Atomsu, MT_AtomTypes_CPU); 
 	/*************************************************************************/
 	Lzu = Atomsu[nAtomsu-1].z-Atomsu[0].z;
 	Lztu = Lzu + 2.0*Rmax;

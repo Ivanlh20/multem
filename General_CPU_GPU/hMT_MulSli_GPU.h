@@ -63,9 +63,9 @@ class cMT_MulSli_GPU{
 		double *aM2Psi;												// Squared Wave function - temporal
 
 		cufftHandle PlanPsi;										// Fourier transform's plan
-
-		cMT_Transmission_GPU *MT_Transmission_GPU;
+		
 		cMT_IncidentWave_GPU *MT_IncidentWave_GPU;					// Incident wave;
+		cMT_Transmission_GPU *MT_Transmission_GPU;					// Transmission function
 		cMT_MicroscopeEffects_GPU *MT_MicroscopeEffects_GPU;		// Microscope effects
 
 		void PhaseMul(double gxu, double gyu, double2 *&Psi);

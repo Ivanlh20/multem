@@ -1,3 +1,3 @@
 clc; clear all;
 mexCPU(1, 'getPotential.cpp', '../General_CPU_GPU', 'hQuadrature.cpp', 'hMT_AtomicData_CPU.cpp'...
-    , 'hPotential_CPU.cpp', 'hMT_General_CPU.cpp', 'hMT_AtomTypes_CPU.cpp');
+    , 'hPotential_CPU.cpp', 'hGeneral_CPU.cpp', 'hMT_General_CPU.cpp', 'hMT_AtomTypes_CPU.cpp', 'libfftw3-3.lib');

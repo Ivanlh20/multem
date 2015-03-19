@@ -19,10 +19,8 @@
 #include <cstring>
 #include "hmathCPU.h"
 #include "hConstTypes.h"
+#include "hGeneral_CPU.h"
 #include "hMT_MGP_CPU.h"
-#include "hRandGen.h"
-#include "hMT_General_CPU.h"
-
 #include "hMT_Slicing_CPU.h"
 
 void cMT_Slicing_CPU::freeMemory()

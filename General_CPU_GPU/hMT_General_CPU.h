@@ -21,54 +21,8 @@
 
 #include "fftw3.h"
 #include "hConstTypes.h"
-#include "hMT_AtomTypes_CPU.h"
 #include "hMT_MGP_CPU.h"
 #include "hMT_InMulSli_CPU.h"
-
-// Input: E0(keV), Output: lambda (electron wave)
-double f_getLambda(double E0);
-
-// Input: E0(keV), Output: sigma (Interaction parameter)
-double f_getSigma(double E0);
-
-// Input: E0(keV), Output: gamma(relativistic factor)
-double f_getGamma(double E0);
-
-// Input: E0(keV), Output: gamma*lambda/cPotf
-double f_getfPot(double E0, double theta=0.0);
-
-// get index (with typ=0: bottom index for equal values and typ=1: upper index for equal values)
-int f_getIndex(int ixmin, int ixmax, double *x, int typ, double x0);
-
-// get two dimensional Hanning_Filter
-void f_getHanning_Filter_2D(int ny, int nx, double dx, double dy, double k, int shift, double *fI);
-
-// get two dimensional Gaussian_Filter
-void f_getGaussian_Filter_2D(int ny, int nx, double dx, double dy, double Sigma, int shift, double *fI);
-
-// get two dimensional Butterworth_Filter
-void f_getButterworth_Filter_2D(int ny, int nx, double dx, double dy, double Radius, int n, int lpf, int shift, double *fI);
-
-// get two dimensional radial distribution for regular grid
-void f_get2DRadDist(int nR, double *R, double *fR, int nRl, double *Rl, double *rl, double *frl, double *cfrl, bool reg, int typ=0);
-
-// get information limit for regular grid
-double f_getFFT_InformationLimit_2D(int ny, int nx, int shift, double *fI);
-
-// Set Atoms
-void f_AtomsM2Atoms(int nAtomsM_i, double *AtomsM_i, int PBC_xyi, double lxi, double lyi, int &nAtoms, sAtoms *&Atoms, double &sigma_min, double &sigma_max);
-
-// get 2D maximum interaction distance
-double f_getRMax(int nAtoms, sAtoms *&Atoms, cMT_AtomTypes_CPU *&MT_AtomTypes_CPU);
-
-// Match vector s_i in x
-void f_MatchTwoVectors(int ns_i, double *s_i, int nx, double *x, int &ns_o, double *&s_o);
-
-// Match vector s_i in x
-void f_MatchTwoVectors(int ns_i, double *s_i, int nx, double *x, int &ns_o, double *&s_o, int *&is_o);
-
-/***************************************************************************/
-/***************************************************************************/
 
 // Grid's parameter initialization
 void f_sGP_Init(sGP &GP);
@@ -128,11 +82,6 @@ void f_sDetCir_Malloc(int nDetCir, sDetCir &DetCir);
 void f_scVp_Init(scVp &cVp);
 
 void f_scVp_Init(int ncVp, scVp *cVp);
-
-/***************************************************************************/
-/***************************************************************************/
-
-void f_BuildGrid(int line, int ns, double x0, double y0, double xe, double ye, int &nxs, int &nys, double *&xs, double *&ys);
 
 /***************************************************************************/
 /***************************************************************************/

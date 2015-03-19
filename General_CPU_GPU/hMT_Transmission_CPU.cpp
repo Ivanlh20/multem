@@ -21,6 +21,7 @@
 #include <cmath>
 #include "hConstTypes.h"
 #include "hQuadrature.h"
+#include "hGeneral_CPU.h"
 #include "hMT_General_CPU.h"
 #include "hMT_MGP_CPU.h"
 #include "hMT_AtomTypes_CPU.h"

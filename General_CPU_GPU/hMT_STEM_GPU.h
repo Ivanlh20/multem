@@ -21,7 +21,7 @@
 
 #include "hConstTypes.h"
 #include "hMT_InMulSli_CPU.h"
-#include "hMT_InMulSli_CPU.h"
+#include "hMT_MGP_CPU.h"
 #include "hMT_Detector_GPU.h"
 
 /*****************************STEM********************************/

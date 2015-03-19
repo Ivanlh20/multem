@@ -47,28 +47,29 @@ class cMT_MulSli_CPU{
 		sACD Prop_x;												// Propagator x
 		sACD Prop_y;												// Propagator y
 
-		double2 *Psi;												// Wave function
-		double2 *aPsi;												// Wave function - temporal
+		fftw_complex *Psi;											// Wave function
+		fftw_complex *aPsi;											// Wave function - temporal
 
 		double *M2aPsi;												// Squared Wave function
 		double *aM2Psi;												// Squared Wave function - temporal
 
-		cufftHandle PlanPsi;										// Fourier transform's plan
+		fftw_plan PlanForward;										// Fourier transform's plan Forward
+		fftw_plan PlanBackward;										// Fourier transform's plan Backward
 
-		cMT_Transmission_CPU *MT_Transmission_CPU;
 		cMT_IncidentWave_CPU *MT_IncidentWave_CPU;					// Incident wave;
+		cMT_Transmission_CPU *MT_Transmission_CPU;					// Transmission function
 		cMT_MicroscopeEffects_CPU *MT_MicroscopeEffects_CPU;		// Microscope effects
 
-		void PhaseMul(double gxu, double gyu, double2 *&Psi);
-		void Propagate(eSpace Space, double gxu, double gyu, double z, double2 *&Psi);
-		void Cal_Wavefunction(eSpace Space, double2 *&Psi);
+		void PhaseMul(double gxu, double gyu, fftw_complex *&Psi);
+		void Propagate(eSpace Space, double gxu, double gyu, double z, fftw_complex *&Psi);
+		void Cal_Wavefunction(eSpace Space, fftw_complex *&Psi);
 
-		void Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, int MEffect, int STEffect, double2 *&aPsi, double *&M2aPsi, double *&aM2Psi);
-		void Image_Convergence_Wave_Illumination(int nConfFP, eSpace Space, double xi, double yi, double2 *&aPsi, double *&M2aPsi, double *&aM2Psi);
+		void Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, int MEffect, int STEffect, fftw_complex *&aPsi, double *&M2aPsi, double *&aM2Psi);
+		void Image_Convergence_Wave_Illumination(int nConfFP, eSpace Space, double xi, double yi, fftw_complex *&aPsi, double *&M2aPsi, double *&aM2Psi);
 
-		void GPU2CPU(double2 *&Psid, sComplex &Psih);
-		void GPU2CPU(double2 *&Psid, double *&M2Psid, sComplex &Psih, double *&M2Psih);
-		void GPU2CPU(double2 *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h);
+		void GPU2CPU(fftw_complex *&Psid, sComplex &Psih);
+		void GPU2CPU(fftw_complex *&Psid, double *&M2Psid, sComplex &Psih, double *&M2Psih);
+		void GPU2CPU(fftw_complex *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h);
 
 		cMT_MGP_CPU MT_MGP_CPU;
 		cMT_STEM_CPU *STEM;

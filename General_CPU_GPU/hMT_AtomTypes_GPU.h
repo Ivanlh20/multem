@@ -20,6 +20,7 @@
 #define hMT_AtomTypes_GPU_H
 
 #include "hConstTypes.h"
+#include "hMT_AtomTypes_CPU.h"
 
 class cMT_AtomTypes_GPU: public cMT_AtomTypes{
 	public:

@@ -144,7 +144,7 @@ cMT_MulSli_CPU::~cMT_MulSli_CPU()
 }
 
 // From Device To Host
-void cMT_MulSli_CPU::GPU2CPU(double2 *&Psid, sComplex &Psih)
+void cMT_MulSli_CPU::GPU2CPU(fftw_complex *&Psid, sComplex &Psih)
 {	
 	// fft2shift 
 	f_fft2Shift_MC_CPU(GP, Psid);
@@ -153,7 +153,7 @@ void cMT_MulSli_CPU::GPU2CPU(double2 *&Psid, sComplex &Psih)
 }
 
 // From Device To Host
-void cMT_MulSli_CPU::GPU2CPU(double2 *&Psid, double *&M2Psid, sComplex &Psih, double *&M2Psih)
+void cMT_MulSli_CPU::GPU2CPU(fftw_complex *&Psid, double *&M2Psid, sComplex &Psih, double *&M2Psih)
 {
 	// fft2shift 
 	f_fft2Shift_MC_MD_CPU(GP, Psid, M2Psid);
@@ -162,7 +162,7 @@ void cMT_MulSli_CPU::GPU2CPU(double2 *&Psid, double *&M2Psid, sComplex &Psih, do
 }
 
 // From Device To Host
-void cMT_MulSli_CPU::GPU2CPU(double2 *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h)
+void cMT_MulSli_CPU::GPU2CPU(fftw_complex *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h)
 {
 	// fft2shift 
 	f_fft2Shift_MC_MD_CPU(GP, Psid, M2Psi1d, M2Psi2d);
@@ -170,7 +170,7 @@ void cMT_MulSli_CPU::GPU2CPU(double2 *&Psid, double *&M2Psi1d, double *&M2Psi2d,
 	f_Copy_MCd_MDd(GP, Psid, M2Psi1d, M2Psi2d, MT_Transmission_CPU->V0, MT_Transmission_CPU->V1, Psih, M2Psi1h, M2Psi2h);
 }
 
-void cMT_MulSli_CPU::PhaseMul(double gxu, double gyu, double2 *&Psi)
+void cMT_MulSli_CPU::PhaseMul(double gxu, double gyu, fftw_complex *&Psi)
 {
 	if(MT_MGP_CPU.ShiftDP) return;
 
@@ -178,13 +178,13 @@ void cMT_MulSli_CPU::PhaseMul(double gxu, double gyu, double2 *&Psi)
 		f_PhaseMul_CPU(GP, gxu, gyu, ExpRg_x, ExpRg_y, Psi);
 }
 
-void cMT_MulSli_CPU::Propagate(eSpace Space, double gxu, double gyu, double z, double2 *&Psi)
+void cMT_MulSli_CPU::Propagate(eSpace Space, double gxu, double gyu, double z, fftw_complex *&Psi)
 {
 	f_Propagate_CPU(PlanPsi, GP, Space, gxu, gyu, Lens.lambda, z, Prop_x, Prop_y, Psi);
 }
 
 // Exit wave calculation: Space :1 Real and 2 Fourier
-void cMT_MulSli_CPU::Cal_Wavefunction(eSpace Space, double2 *&Psi)
+void cMT_MulSli_CPU::Cal_Wavefunction(eSpace Space, fftw_complex *&Psi)
 {
 	int iSlice=0, iSynCPU = 0;
 	if(MT_MGP_CPU.ApproxModel<=2)
@@ -224,7 +224,7 @@ void cMT_MulSli_CPU::Cal_Wavefunction(eSpace Space, double2 *&Psi)
 }
 
 // Get wave function for Plane wave ilumination
-void cMT_MulSli_CPU::Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, int MEffect, int STEffect, double2 *&aPsi, double *&M2aPsi, double *&aM2Psi)
+void cMT_MulSli_CPU::Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, int MEffect, int STEffect, fftw_complex *&aPsi, double *&M2aPsi, double *&aM2Psi)
 {
 	int iConf0 = (nConfFP==0)?0:1;
 	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);
@@ -275,7 +275,7 @@ void cMT_MulSli_CPU::Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, in
 }
 
 // Get wave function for convergent beam ilumination
-void cMT_MulSli_CPU::Image_Convergence_Wave_Illumination(int nConfFP, eSpace Space, double xi, double yi, double2 *&aPsi, double *&M2aPsi, double *&aM2Psi)
+void cMT_MulSli_CPU::Image_Convergence_Wave_Illumination(int nConfFP, eSpace Space, double xi, double yi, fftw_complex *&aPsi, double *&M2aPsi, double *&aM2Psi)
 {
 	int iConf0 = (nConfFP==0)?0:1;
 	double inConfFP = (nConfFP==0)?1.0:1.0/double(nConfFP);

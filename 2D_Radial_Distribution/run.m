@@ -1,5 +1,5 @@
 clc; clear all;
-L = 20; n = 8192; nh = n/2; dr = L/n; rl = (-nh:1:(nh-1))*dr; typ = 0;
+L = 20; n = 4096; nh = n/2; dr = L/n; rl = (-nh:1:(nh-1))*dr; typ = 0;
 sigma = 2.0; x0 = 0; y0 = 0; rlh = (0:1:(nh-1))*dr;
 alpha = 0.5/sigma^2;
 [Rx, Ry] = meshgrid(rl, rl); R = sqrt(Rx.^2+Ry.^2);

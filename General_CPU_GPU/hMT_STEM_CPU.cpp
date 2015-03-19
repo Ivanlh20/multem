@@ -20,9 +20,10 @@
 #include "math.h"
 
 #include "hConstTypes.h"
+#include "hGeneral_CPU.h"
 #include "hMT_General_CPU.h"
 #include "hMT_InMulSli_CPU.h"
-#include "hMT_InMulSli_CPU.h"
+#include "hMT_MGP_CPU.h"
 #include "hMT_Detector_CPU.h"
 #include "hMT_STEM_CPU.h"
 
