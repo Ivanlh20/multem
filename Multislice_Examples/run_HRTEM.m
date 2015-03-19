@@ -34,8 +34,8 @@ TEM.MC.sf = 88; TEM.MC.nsf = 1024; % (Angs, number of steps)ne
 TEM.MC.beta = 0.0; TEM.MC.nbeta = 10; %(mrad, half number of steps)
 TEM.MC.f = +100;  % Angs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-TEM.nx = 1024; TEM.ny = 1024; nxh = TEM.nx/2; nyh = TEM.ny/2;
-na = 7; nb = 5; nc = 2; ncu = 4; sigma = 0.076;
+TEM.nx = 2048; TEM.ny = 2048; nxh = TEM.nx/2; nyh = TEM.ny/2;
+na = 7; nb = 5; nc = 4; ncu = 4; sigma = 0.076;
 [TEM.Atoms, TEM.lx, TEM.ly, lz, a, b, c, TEM.dz] = Si110Crystal(na, nb, nc, ncu, sigma);
 TEM.Psi0 = complex(ones(TEM.ny, TEM.nx));             % Input wave
 figure(1);
@@ -43,10 +43,10 @@ TEM.MEffect = 1;            % 1: Exit wave Partial coherente mode, 2: Transmissi
 TEM.STEffect = 1;           % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 tic;
 clear MULTEMMat;
-[aPsi, M2aPsi, aM2Psi0] = MULTEM_GPU(TEM);
+[aPsi0, M2aPsi0, aM2Psi0] = MULTEM_GPU(TEM);
 toc;
 subplot(2, 2, 1);
-imagesc(abs(aPsi).^2);
+imagesc(abs(aPsi0).^2);
 colormap gray;
 axis image;
 subplot(2, 2, 2);
@@ -58,7 +58,7 @@ TEM.MEffect = 1;            % 1: Exit wave Partial coherente mode, 2: Transmissi
 TEM.STEffect = 2;           % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 tic;
 clear MULTEMMat;
-[aPsi, M2aPsi, aM2Psi] = MULTEMMat(TEM);
+[aPsi, M2aPsi, aM2Psi] = MULTEM_CPU(TEM);
 toc;
 subplot(2, 2, 3);
 imagesc(abs(aPsi).^2);
@@ -68,4 +68,5 @@ subplot(2, 2, 4);
 imagesc(aM2Psi);
 colormap gray;
 axis image;
-sum(abs(aM2Psi(:)-aM2Psi0(:)))
+sum(abs(aPsi0(:)-aPsi(:)))
+sum(abs(aM2Psi0(:)-aM2Psi(:)))

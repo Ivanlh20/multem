@@ -270,20 +270,24 @@ void cMT_Potential_CPU::evalCubicPoly(sGP &GP, scVp &cVp, double * __restrict V0
 {
 	int ix0, iy0, ix, iy, ixy;
 	double Rx, Ry, R2;
-	double dx, dx2, dx3;
+	double dx, dx2, dx3, V;
 
 	for(iy0=0; iy0<cVp.bny.n; iy0++)
 	{
-		iy = iy0 + cVp.bny.i;
-		Ry = iy*GP.dRy - cVp.y;
 		for(ix0=0; ix0<cVp.bnx.n; ix0++)
 		{
 			ix = ix0 + cVp.bnx.i;
+			iy = iy0 + cVp.bny.i;
+
 			Rx = ix*GP.dRx - cVp.x;
+			Ry = iy*GP.dRy - cVp.y;
 			R2 = Rx*Rx + Ry*Ry;
 			if(R2 < cVp.Rmax2)
 			{
-				if(R2 < cVp.Rmin2) R2 = cVp.Rmin2;
+				if(R2 < cVp.Rmin2)
+				{
+					R2 = cVp.Rmin2;
+				}
 
 				ix = ix-(int)floor(ix*GP.dRx/GP.lx)*GP.nx;
 				iy = iy-(int)floor(iy*GP.dRy/GP.ly)*GP.ny;
@@ -295,8 +299,8 @@ void cMT_Potential_CPU::evalCubicPoly(sGP &GP, scVp &cVp, double * __restrict V0
 				ix = unrolledBinarySearch128(R2, cVp.R2);
 
 				dx = R2 - cVp.R2[ix]; dx2 = dx*dx; dx3 = dx2*dx;
-				V0g[ixy] += cVp.occ*(cVp.ciV0.c0[ix] + cVp.ciV0.c1[ix]*dx + cVp.ciV0.c2[ix]*dx2 + cVp.ciV0.c3[ix]*dx3);
-				V1g[ixy] += cVp.occ*(cVp.ciV1.c0[ix] + cVp.ciV1.c1[ix]*dx + cVp.ciV1.c2[ix]*dx2 + cVp.ciV1.c3[ix]*dx3);	
+				V0g[ixy] += V = cVp.occ*(cVp.ciV0.c0[ix] + cVp.ciV0.c1[ix]*dx + cVp.ciV0.c2[ix]*dx2 + cVp.ciV0.c3[ix]*dx3);
+				V1g[ixy] += V = cVp.occ*(cVp.ciV1.c0[ix] + cVp.ciV1.c1[ix]*dx + cVp.ciV1.c2[ix]*dx2 + cVp.ciV1.c3[ix]*dx3);	
 			}
 		}
 	}
@@ -312,30 +316,36 @@ void cMT_Potential_CPU::getV0(sGP &GP, eSlicePos SlicePo, double dz, double * __
 	{
 		case eSPFirst:		// initial Slice
 			for(iy=0; iy<GP.ny; iy++)
+			{
 				for(ix=0; ix<GP.nx; ix++)
 				{
 					ixy = iy*GP.nx+ix;
-					V0 = V0_io[ixy], V1 = V1_io[ixy]/dz;
+					V0 = V0_io[ixy]; V1 = V1_io[ixy]/dz;
 					V0_io[ixy] = V0 = V0-V1;
 					V1o_io[ixy] = V1;
 				}
+			}
 			break;
 		case eSPMedium:		// intermediate Slice
 			for(iy=0; iy<GP.ny; iy++)
+			{
 				for(ix=0; ix<GP.nx; ix++)
 				{
 					ixy = iy*GP.nx+ix;
-					V0 = V0_io[ixy], V1 = V1_io[ixy]/dz;
+					V0 = V0_io[ixy]; V1 = V1_io[ixy]/dz;
 					V0_io[ixy] = V0 = V0-V1+V1o_io[ixy];
 					V1o_io[ixy] = V1;
 				}
+			}
 			break;
 		case eSPLast:		// last Slice
 			for(iy=0; iy<GP.ny; iy++)
+			{
 				for(ix=0; ix<GP.nx; ix++)
 				{
 					V0_io[ixy] = V0 = V1o_io[ixy];
 				}
+			}
 			break;
 	}
 }
@@ -455,13 +465,20 @@ void cMT_Potential_CPU::addAtomicProjectedPotential(scVp &cVp, double *&V0g, dou
 
 void cMT_Potential_CPU::getV0(int iSlice, double *&V0, int typ)
 {
-	if(MT_MGP_CPU->MulOrder==1) return;
+	if(MT_MGP_CPU->MulOrder==1)
+	{
+		return;
+	}
 
-	 double dz = get_dz(iSlice);
+	double dz = get_dz(iSlice);
 	if(typ==1)
+	{
 		getV0(GP, SlicePos(iSlice, nSlice), dz, V0, V1, V1o);
+	}
 	else
+	{
 		f_Scale_MD_CPU(GP, dz, V1);
+	}
 }
 
 void cMT_Potential_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i)
@@ -506,10 +523,10 @@ void cMT_Potential_CPU::ProjectedPotential(int iSlice, int typ)
 	int iatome = Slice[iSlice].zei_id;
 	f_Set_MD_CPU(GP, 0.0, V0, V1);
 
-	if(iatome<iatom0) return;
-
-	f_Set_MD_CPU(GP, 0.0, V0, V1);
-
+	if(iatome<iatom0)
+	{
+		return;
+	}
 	for(int iatom=iatom0; iatom<=iatome; iatom++)
 	{
 		setcVp(iSlice, iatom, cVp);

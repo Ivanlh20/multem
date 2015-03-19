@@ -27,7 +27,6 @@
 
 #include <mex.h>
 
-
 /**********************read input TEMim*************************/
 void f_Matlab2InTEMIm(const mxArray *mxInTEMIm, sInTEMIm &InTEMIm)
 {

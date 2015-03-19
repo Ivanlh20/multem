@@ -118,7 +118,6 @@ enum eInputFile{
  eIFtxt = 1, eIFpdb = 2
 };
 
-
 /******************************Color map***********************************/
 enum eColorMap{
  eCMgray = 1, eCMhot = 2, eCMcool = 3, eCMjet = 4, eCMcopper = 5, eCMsummer = 6, eCMautumn = 7, eCMwinter = 8

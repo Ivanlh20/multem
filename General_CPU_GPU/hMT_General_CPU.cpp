@@ -296,7 +296,7 @@ void f_sACD_Malloc_CPU(int nACD, sACD &ACD)
 	}
 
 	ACD.x = new double[nACD];
-	ACD.x = new double[nACD];
+	ACD.y = new double[nACD];
 }
 
 /***************************************************************************/

@@ -69,14 +69,16 @@ void cMT_MulSli_CPU::freeMemory()
 	f_sACD_Free_CPU(Prop_x);
 	f_sACD_Free_CPU(Prop_y);
 
+	fftw_destroy_plan(PlanForward);
+	fftw_destroy_plan(PlanBackward);
+
 	fftw_free(Psi);
 	fftw_free(aPsi);
 
-	fftw_free(M2aPsi);
-	fftw_free(aM2Psi);
+	fftw_cleanup();
 
-	fftw_destroy_plan(PlanForward);
-	fftw_destroy_plan(PlanBackward);
+	delete [] M2aPsi; M2aPsi = 0;
+	delete [] aM2Psi; aM2Psi = 0;
 
 	delete MT_Transmission_CPU; MT_Transmission_CPU = 0;
 	delete MT_IncidentWave_CPU; MT_IncidentWave_CPU = 0;

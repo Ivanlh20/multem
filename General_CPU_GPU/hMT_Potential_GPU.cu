@@ -770,7 +770,6 @@ void cMT_Potential_GPU::ProjectedPotential(int iSlice, int typ)
 
 	dim3 BPot, TPot, BCoef, TCoef;
 	int iatom = iatom0, nsatom;
-	f_Set_MD_GPU(GP, 0.0, V0, V1);
 
 	while (iatom<=iatome)
 	{
