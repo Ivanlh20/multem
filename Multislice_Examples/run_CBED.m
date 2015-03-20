@@ -32,11 +32,11 @@ TEM.MC.aobjl = 0.0; TEM.MC.aobju = 7.5; %(mrad, mrad)
 TEM.MC.sf = 32; TEM.MC.nsf = 10; % (Angs, number of steps)
 TEM.MC.beta = 0.2; TEM.MC.nbeta = 10; %(mrad, half number of steps)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-na = 5; nb = 5; nc = 2; ncu = 4; sigma = 0.076;  nxyuc = 512;
+na = 8; nb = 8; nc = 20; ncu = 4; sigma = 0.076;  nxyuc = 512;
 [TEM.Atoms, TEM.lx, TEM.ly, lz, a, b, c, TEM.dz] = Si001Crystal(na, nb, nc, ncu, sigma);
 Atoms = TEM.Atoms;
 Atoms = [TEM.lx, TEM.ly, TEM.dz, 0, 0, 0; Atoms];
-% save('Si001_5x5x5.txt','Atoms','-ascii');
+save('Si001_5x5x2.txt','Atoms','-ascii');
 TEM.nx = 2048; TEM.ny = 2048;
 num2str([TEM.lx, TEM.ly], 8)
 % na = 8; nb = 8; nc = 10; ncu = 8; sigma = 0.076;  nxyuc = 512;
@@ -51,7 +51,7 @@ toc;
 a = aM2Psi((1024-5):(1024+5),(1024-5):(1024+5));
 % num2str(a, 10)
 
-nxh = TEM.nx/2; d = 200; f = 1e+05;
+nxh = TEM.nx/2; d = 200; f = 1e+03;
 rr = (nxh+1-d):1:(nxh+1+d);
 aM2Psi = aM2Psi/max(aM2Psi(:));
 M2Psis = log(1+f*aM2Psi(rr, rr));

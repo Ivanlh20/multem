@@ -3,7 +3,7 @@ clear all; clc;
 global TEM;
 DefaultValues;% Load default values;
 
-TEM.gpu = 0;                % Gpu card
+TEM.gpGPU_Deviceu = 0;                % Gpu card
 TEM.SimType = 11;           % 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
 TEM.nConfFP = 0;            % Number of frozen phonon configurations
 TEM.DimFP = 110;            % Dimensions phonon configurations
@@ -56,8 +56,8 @@ TEM.STEM.DetCir(7).InnerAng = 120; TEM.STEM.DetCir(7).OuterAng = 170;	% Inner an
 for dz = [1/2 1/4 1/8 1/16]*c
     TEM.dz = dz;
     tic;
-    clear MULTEMMat;
-    STEM = MULTEMMat(TEM);
+    clear MULTEM_GPU;
+    STEM = MULTEM_GPU(TEM);
     toc;    
     for i=1:6
         figure(i);%clf;

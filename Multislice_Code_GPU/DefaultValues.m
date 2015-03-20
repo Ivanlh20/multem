@@ -1,6 +1,8 @@
 %Ivan lobato - 26/02/2013-11.04am
 global TEM
-TEM.gpu = 0;                % Gpu card
+TEM.CPU_GPU = 2;            % 1: CPU, 2: GPU
+TEM.nThread_CPU = 1;        % Number of threads CPU
+TEM.GPU_Device = 0;         % Gpu card
 TEM.SimType = 52;           % 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
 TEM.nConfFP = 0;            % Number of frozen phonon configurations
 TEM.DimFP = 111;            % Dimensions phonon configurations

@@ -302,7 +302,7 @@ void cMT_MulSli_GPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU)
 
 	MT_MGP_CPU.SetInputData(MT_InMulSli_CPU);
 
-	cudaSetDevice(MT_MGP_CPU.gpu);
+	cudaSetDevice(MT_MGP_CPU.GPU_Device);
 
 	f_sGP_SetInputData(&MT_MGP_CPU, GP);
 	f_sLens_SetInputData(MT_InMulSli_CPU, GP, Lens);

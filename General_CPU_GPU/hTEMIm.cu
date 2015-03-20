@@ -28,7 +28,7 @@
 
 cTEMIm::cTEMIm()
 {
-	gpu = 0;
+	GPU_Device = 0;
 	MEffect = 0;
 	Psirh = 0;
 	Psiih = 0;
@@ -48,7 +48,7 @@ cTEMIm::cTEMIm()
 
 void cTEMIm::freeMemory()
 {
-	gpu = 0;
+	GPU_Device = 0;
 	MEffect = 0;
 	Psirh = 0;
 	Psiih = 0;
@@ -110,7 +110,7 @@ void cTEMIm::GenerateParameters()
 
 void cTEMIm::SetInputData(sInTEMIm &InTEMIm)
 {
-	gpu = InTEMIm.gpu; 
+	GPU_Device = InTEMIm.GPU_Device; 
 	MEffect = InTEMIm.MEffect;
 	Psirh= InTEMIm.Psirh;
 	Psiih = InTEMIm.Psiih;
@@ -134,7 +134,7 @@ void cTEMIm::SetInputData(sInTEMIm &InTEMIm)
 	Lens.beta = InTEMIm.MC_beta;
 	Lens.nbeta = InTEMIm.MC_nbeta;
 
-	cudaSetDevice(gpu);
+	cudaSetDevice(GPU_Device);
 	cudaDeviceReset();
 
 	GenerateParameters();

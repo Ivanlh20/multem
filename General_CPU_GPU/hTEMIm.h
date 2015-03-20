@@ -29,7 +29,7 @@ class cTEMIm{
 	private:
 		void GenerateParameters();
 	public:
-		int gpu;			// gpu card
+		int GPU_Device;			// GPU_Device card
 		int MEffect;		// 0: Exit wave Partial coherente mode, 1: Transmission cross coefficient
 		double E0;			// Acceleration volatage in KeV
 		double *Psirh;		// Real part of the Wave function

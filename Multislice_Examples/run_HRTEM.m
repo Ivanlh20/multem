@@ -42,9 +42,10 @@ figure(1);
 TEM.MEffect = 1;            % 1: Exit wave Partial coherente mode, 2: Transmission cross coefficient
 TEM.STEffect = 1;           % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 tic;
-clear MULTEMMat;
+clear MULTEM_GPU;
 [aPsi0, M2aPsi0, aM2Psi0] = MULTEM_GPU(TEM);
 toc;
+
 subplot(2, 2, 1);
 imagesc(abs(aPsi0).^2);
 colormap gray;
@@ -55,11 +56,12 @@ colormap gray;
 axis image;
 
 TEM.MEffect = 1;            % 1: Exit wave Partial coherente mode, 2: Transmission cross coefficient
-TEM.STEffect = 2;           % 1: Spatial and temporal, 2: Temporal, 3: Spatial
+TEM.STEffect = 1;           % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 tic;
-clear MULTEMMat;
+clear MULTEM_CPU;
 [aPsi, M2aPsi, aM2Psi] = MULTEM_CPU(TEM);
 toc;
+
 subplot(2, 2, 3);
 imagesc(abs(aPsi).^2);
 colormap gray;

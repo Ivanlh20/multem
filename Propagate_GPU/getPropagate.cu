@@ -77,7 +77,7 @@ void cPropagator::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sComplex &Psiih)
 {
 	freeMemory();
 
-	cudaSetDevice(MT_MGP_CPU_i->gpu);
+	cudaSetDevice(MT_MGP_CPU_i->GPU_Device);
 	lambda = f_getLambda(MT_MGP_CPU_i->E0);
 	f_sGP_SetInputData(MT_MGP_CPU_i, GP);
 
@@ -112,7 +112,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	Psiih.real = mxGetPr(prhs[0]);
 	Psiih.imag = mxGetPi(prhs[0]);
-	MT_MGP_CPU.gpu = (int)mxGetScalar(prhs[1]); 
+	MT_MGP_CPU.GPU_Device = (int)mxGetScalar(prhs[1]); 
 	MT_MGP_CPU.E0 = mxGetScalar(prhs[2]); 
 	MT_MGP_CPU.nx = (int)mxGetScalar(prhs[3]); 
 	MT_MGP_CPU.ny = (int)mxGetScalar(prhs[4]);

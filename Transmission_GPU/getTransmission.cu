@@ -31,7 +31,7 @@
 /**********************read input Probe*************************/
 void f_Matlab2InTransmission(const mxArray *mxInTransmission, sInTransmission &InTransmission)
 {
-	InTransmission.gpu = ReadValuemxField<int>(mxInTransmission, 0, "gpu");							// gpu device
+	InTransmission.GPU_Device = ReadValuemxField<int>(mxInTransmission, 0, "GPU_Device");							// GPU_Device device
 	InTransmission.MulOrder = 2;																	// 1: First order, 2: Second order
 	InTransmission.iConfFP = ReadValuemxField<int>(mxInTransmission, 0, "iConfFP");					// Frozen phonon configuration
 	if(InTransmission.iConfFP<0) InTransmission.iConfFP = 0;
@@ -81,7 +81,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	Transh.real = mxGetPr(plhs[0]);
 	Transh.imag = mxGetPi(plhs[0]);
 
-	cudaSetDevice(MT_MGP_CPU.gpu);
+	cudaSetDevice(MT_MGP_CPU.GPU_Device);
 	cufftHandle PlanTrans=0;
 	cufftPlan2d(&PlanTrans, MT_MGP_CPU.ny, MT_MGP_CPU.nx, CUFFT_Z2Z);
 

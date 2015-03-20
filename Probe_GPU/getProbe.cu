@@ -80,7 +80,7 @@ void cProbe::SetInputData(sInProbe &InProbe)
 	freeMemory();
 
 	MT_MGP_CPU.SetInputData(InProbe);
-	cudaSetDevice(MT_MGP_CPU.gpu);
+	cudaSetDevice(MT_MGP_CPU.GPU_Device);
 
 	f_sGP_SetInputData(&MT_MGP_CPU, GP);
 
@@ -126,7 +126,9 @@ void cProbe::getProbe(sComplex &Psih)
 /**********************read input Probe*************************/
 void f_Matlab2InProbe(const mxArray *mxInProbe, sInProbe &InProbe)
 {
-	InProbe.gpu = ReadValuemxField<int>(mxInProbe, 0, "gpu");						// gpu device
+	InProbe.CPU_GPU = ReadValuemxField<int>(mxInProbe, 0, "CPU_GPU");	
+	InProbe.nThread_CPU = ReadValuemxField<int>(mxInProbe, 0, "nThread_CPU");	
+	InProbe.GPU_Device = ReadValuemxField<int>(mxInProbe, 0, "GPU_Device");			// GPU_Device device
 	InProbe.E0 = ReadValuemxField<double>(mxInProbe, 0, "E0");						// Acceleration voltage
 	InProbe.theta = ReadValuemxField<double>(mxInProbe, 0, "theta", deg2rad);		// incident tilt (in spherical coordinates) (degrees-->rad)
 	InProbe.phi = ReadValuemxField<double>(mxInProbe, 0, "phi", deg2rad);			// incident tilt (in spherical coordinates) (degrees-->rad)

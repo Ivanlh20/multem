@@ -32,7 +32,9 @@
 /**********************read input Probe*************************/
 void f_Matlab2InProjPotential(const mxArray *mxInProjPotential, sInProjPotential &InProjPotential)
 {
-	InProjPotential.gpu = ReadValuemxField<int>(mxInProjPotential, 0, "gpu");						// gpu device
+	InProjPotential.CPU_GPU = ReadValuemxField<int>(mxInProjPotential, 0, "CPU_GPU");	
+	InProjPotential.nThread_CPU = ReadValuemxField<int>(mxInProjPotential, 0, "nThread_CPU");	
+	InProjPotential.GPU_Device = ReadValuemxField<int>(mxInProjPotential, 0, "GPU_Device");			// GPU_Device device
 	InProjPotential.MulOrder = 2;																	// 1: First order, 2: Second order
 	InProjPotential.iConfFP = ReadValuemxField<int>(mxInProjPotential, 0, "iConfFP");				// Frozen phonon configuration
 	if(InProjPotential.iConfFP<0) InProjPotential.iConfFP = 0;
@@ -71,7 +73,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	plhs[1] = mxCreateDoubleMatrix(MT_MGP_CPU.ny, MT_MGP_CPU.nx, mxREAL);
 	double *V1h = mxGetPr(plhs[1]);
 
-	cudaSetDevice(MT_MGP_CPU.gpu);
+	cudaSetDevice(MT_MGP_CPU.GPU_Device);
 	cMT_Potential_GPU MT_Potential_GPU;	
 	MT_Potential_GPU.SetInputData(&MT_MGP_CPU, InProjPotential.nAtomsM, InProjPotential.AtomsM);
 	MT_Potential_GPU.MoveAtoms(InProjPotential.iConfFP);

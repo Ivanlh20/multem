@@ -24,39 +24,41 @@
 
 class cMT_MGP_CPU{
 	public:
-		int gpu;					// gpu device
-		int SimType;				// 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
-		int MulOrder;				// 1: First order, 2: Second order
-		int nConfFP;				// Number of frozen phonon configurations
-		int DimFP;					// Dimensions phonon configurations
-		int DistFP;					// 1: Gaussian (Phonon distribution)
-		int SeedFP;					// Random seed(frozen phonon)
-		int PotPar;					// Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
-		int MEffect;				// 1: Partial coherente mode, 2: Transmission cross coefficient
-		int STEffect;				// 1: Spatial and temporal, 2: Temporal, 3: Spatial
-		int ZeroDefTyp;				// 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
-		double ZeroDefPlane;		// Zero defocus plane
-		int ApproxModel;			// 1: Mulstilice, 2: Projection approximation, 3: Phase object approximation, 4: Weak phase object approximation
-		int BWL;					// 1: true, 2: false (bandwidth limited)
-		int FastCal;				// 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
-		int PBC_xy;					// 1: true, 2: false (Peridic boundary contions)
-		int ThkTyp;					// 1: Whole specimen, 2: Throught thickness, 3: Through planes
-		int nThk_i;					// Number of thickness
-		double *Thk_i;				// Array of thicknesses
-		int Psi0Typ;				// 1: Automatic, 2: User define
-		sComplex Psi0; // Input wave
+		int CPU_GPU;			// 1: CPU, 2: GPU
+		int nThread_CPU;		// Number of threads
+		int GPU_Device;			// GPU_Device device
+		int SimType;			// 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
+		int MulOrder;			// 1: First order, 2: Second order
+		int nConfFP;			// Number of frozen phonon configurations
+		int DimFP;				// Dimensions phonon configurations
+		int DistFP;				// 1: Gaussian (Phonon distribution)
+		int SeedFP;				// Random seed(frozen phonon)
+		int PotPar;				// Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
+		int MEffect;			// 1: Partial coherente mode, 2: Transmission cross coefficient
+		int STEffect;			// 1: Spatial and temporal, 2: Temporal, 3: Spatial
+		int ZeroDefTyp;			// 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
+		double ZeroDefPlane;	// Zero defocus plane
+		int ApproxModel;		// 1: Mulstilice, 2: Projection approximation, 3: Phase object approximation, 4: Weak phase object approximation
+		int BWL;				// 1: true, 2: false (bandwidth limited)
+		int FastCal;			// 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
+		int PBC_xy;				// 1: true, 2: false (Peridic boundary contions)
+		int ThkTyp;				// 1: Whole specimen, 2: Throught thickness, 3: Through planes
+		int nThk_i;				// Number of thickness
+		double *Thk_i;			// Array of thicknesses
+		int Psi0Typ;			// 1: Automatic, 2: User define
+		sComplex Psi0;			// Input wave
 
-		bool ShiftDP; 				// Shift diffraction pattern
+		bool ShiftDP; 			// Shift diffraction pattern
 
-		double E0;					// Acceleration volatage in KeV
-		double theta;				// Tilt (in spherical coordinates) (rad)
-		double phi;					// Tilt (in spherical coordinates) (rad)
-		double Vrl;					// Atomic potential cut-off
-		int nx;						// Number of pixels in x direction
-		int ny;						// Number of pixels in y direction
-		double lx;					// Box size in x direction(Angstroms)
-		double ly;					// Box size in y direction(Angstroms)
-		double dz;					// Slice thickness
+		double E0;				// Acceleration volatage in KeV
+		double theta;			// Tilt (in spherical coordinates) (rad)
+		double phi;				// Tilt (in spherical coordinates) (rad)
+		double Vrl;				// Atomic potential cut-off
+		int nx;					// Number of pixels in x direction
+		int ny;					// Number of pixels in y direction
+		double lx;				// Box size in x direction(Angstroms)
+		double ly;				// Box size in y direction(Angstroms)
+		double dz;				// Slice thickness
 
 		void freeMemory();
 		cMT_MGP_CPU();
@@ -71,7 +73,9 @@ class cMT_MGP_CPU{
 
 inline void cMT_MGP_CPU::freeMemory()
 {
-	gpu = 0;
+	CPU_GPU = 2;
+	nThread_CPU = 1;
+	GPU_Device = 0;
 	SimType = 52;
 	MulOrder = 2;
 	nConfFP = 0;
@@ -108,7 +112,9 @@ inline void cMT_MGP_CPU::freeMemory()
 
 inline cMT_MGP_CPU::cMT_MGP_CPU()
 {
-	gpu = 0;
+	CPU_GPU = 2;
+	nThread_CPU = 1;
+	GPU_Device = 0;
 	SimType = 52;
 	MulOrder = 2;
 	nConfFP = 0;
@@ -152,7 +158,9 @@ inline cMT_MGP_CPU& cMT_MGP_CPU::operator= (const cMT_MGP_CPU &MT_MGP_CPU)
 {
 	freeMemory();
 
-	gpu = MT_MGP_CPU.gpu;
+	CPU_GPU = MT_MGP_CPU.CPU_GPU;
+	nThread_CPU = MT_MGP_CPU.nThread_CPU;
+	GPU_Device = MT_MGP_CPU.GPU_Device;
 	SimType = MT_MGP_CPU.SimType;
 	MulOrder = MT_MGP_CPU.MulOrder;
 	nConfFP = MT_MGP_CPU.nConfFP;
@@ -197,7 +205,9 @@ inline void cMT_MGP_CPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU)
 {
 	freeMemory();
 
-	gpu = MT_InMulSli_CPU.gpu;
+	CPU_GPU = MT_InMulSli_CPU.CPU_GPU;
+	nThread_CPU = MT_InMulSli_CPU.nThread_CPU;
+	GPU_Device = MT_InMulSli_CPU.GPU_Device;
 	SimType = MT_InMulSli_CPU.SimType;	
 	MulOrder = MT_InMulSli_CPU.MulOrder;
 	nConfFP = MT_InMulSli_CPU.nConfFP;		
@@ -242,7 +252,9 @@ inline void cMT_MGP_CPU::SetInputData(sInTransmission &InTransmission)
 {
 	freeMemory();
 
-	gpu = InTransmission.gpu;
+	CPU_GPU = InTransmission.CPU_GPU;
+	nThread_CPU = InTransmission.nThread_CPU;
+	GPU_Device = InTransmission.GPU_Device;
 	MulOrder = InTransmission.MulOrder;		
 	DimFP = InTransmission.DimFP;	
 	DistFP = InTransmission.DistFP;
@@ -270,7 +282,9 @@ inline void cMT_MGP_CPU::SetInputData(sInProjPotential &InProjPotential)
 {
 	freeMemory();
 
-	gpu = InProjPotential.gpu;
+	CPU_GPU = InProjPotential.CPU_GPU;
+	nThread_CPU = InProjPotential.nThread_CPU;
+	GPU_Device = InProjPotential.GPU_Device;
 	MulOrder = InProjPotential.MulOrder;		
 	DimFP = InProjPotential.DimFP;	
 	DistFP = InProjPotential.DistFP;
@@ -292,7 +306,9 @@ inline void cMT_MGP_CPU::SetInputData(sInProbe &InProbe)
 {
 	freeMemory();
 
-	gpu = InProbe.gpu;
+	CPU_GPU = InProbe.CPU_GPU;
+	nThread_CPU = InProbe.nThread_CPU;
+	GPU_Device = InProbe.GPU_Device;
 	E0 = InProbe.E0;	
 	theta = InProbe.theta;	
 	phi = InProbe.phi;

@@ -31,7 +31,9 @@
 /**********************read input MulSli************************/
 void f_Matlab2InMulSli(const mxArray *mxInMSTEM, cMT_InMulSli_CPU &MT_InMulSli_CPU)
 {
-	MT_InMulSli_CPU.gpu = ReadValuemxField<int>(mxInMSTEM, 0, "gpu");							// gpu device
+	MT_InMulSli_CPU.CPU_GPU = ReadValuemxField<int>(mxInMSTEM, 0, "CPU_GPU");	
+	MT_InMulSli_CPU.nThread_CPU = ReadValuemxField<int>(mxInMSTEM, 0, "nThread_CPU");
+	MT_InMulSli_CPU.GPU_Device = ReadValuemxField<int>(mxInMSTEM, 0, "GPU_Device");							// GPU_Device device
 	MT_InMulSli_CPU.SimType = ReadValuemxField<int>(mxInMSTEM, 0, "SimType");					// 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
 	MT_InMulSli_CPU.MulOrder = 2;																// 1: First order, 2: Second order
 	MT_InMulSli_CPU.nConfFP = ReadValuemxField<int>(mxInMSTEM, 0, "nConfFP");					// Number of frozen phonon configurations

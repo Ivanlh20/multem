@@ -434,90 +434,97 @@ typedef struct sImSTEM{
 
 /*************************Input - Projected Potential****************************/
 typedef struct sInProjPotential{
-	int gpu;					// gpu device
-	int MulOrder;				// 1: First order, 2: Second order
-	int iConfFP;				// Frozen phonon configuration
-	int DimFP;					// Dimensions phonon configurations
-	int DistFP;					// 1: Gaussian (Phonon distribution)
-	int SeedFP;					// Random seed(frozen phonon)
-	int PotPar;					// Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
-	int PBC_xy;					// 1: true, 2: false (Peridic boundary contions)
+	int CPU_GPU;		// 1: CPU, 2: GPU
+	int nThread_CPU;	// Number of threads
+	int GPU_Device;		// GPU_Device device
+	int MulOrder;		// 1: First order, 2: Second order
+	int iConfFP;		// Frozen phonon configuration
+	int DimFP;			// Dimensions phonon configurations
+	int DistFP;			// 1: Gaussian (Phonon distribution)
+	int SeedFP;			// Random seed(frozen phonon)
+	int PotPar;			// Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
+	int PBC_xy;			// 1: true, 2: false (Peridic boundary contions)
 
-	int nx;						// Number of pixels in x direction
-	int ny;						// Number of pixels in y direction
-	double lx;					// Distance in x direction(Angstroms)
-	double ly;					// Distance in y direction(Angstroms)
-	double dz;					// Slice thickness
+	int nx;				// Number of pixels in x direction
+	int ny;				// Number of pixels in y direction
+	double lx;			// Distance in x direction(Angstroms)
+	double ly;			// Distance in y direction(Angstroms)
+	double dz;			// Slice thickness
 
-	int nAtomsM;				// Number of Atoms
-	double *AtomsM;				// Atoms in a matrix form
-	int iSlice;					// Slice
+	int nAtomsM;		// Number of Atoms
+	double *AtomsM;		// Atoms in a matrix form
+	int iSlice;			// Slice
 } sInProjPotential;
 
 /**********************Input - Transmission**************************/
 typedef struct sInTransmission{
-	int gpu;					// gpu device
-	int MulOrder;				// 1: First order, 2: Second order
-	int iConfFP;				// Frozen phonon configuration
-	int DimFP;					// Dimensions phonon configurations
-	int DistFP;					// 1: Gaussian (Phonon distribution)
-	int SeedFP;					// Random seed(frozen phonon)
-	int PotPar;					// Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
-	int ApproxModel;			// 1: Mulstilice, 2: Projection approximation, 3: Phase object approximation, 4: Weak phase object approximation
-	int BWL;					// 1: true, 2: false (bandwidth limited)
-	int FastCal;				// 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
-	int PBC_xy;					// 1: true, 2: false (Peridic boundary contions)
+	int CPU_GPU;		// 1: CPU, 2: GPU
+	int nThread_CPU;	// Number of threads
+	int GPU_Device;		// GPU_Device device
+	int MulOrder;		// 1: First order, 2: Second order
+	int iConfFP;		// Frozen phonon configuration
+	int DimFP;			// Dimensions phonon configurations
+	int DistFP;			// 1: Gaussian (Phonon distribution)
+	int SeedFP;			// Random seed(frozen phonon)
+	int PotPar;			// Parameterization of the potential 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
+	int ApproxModel;	// 1: Mulstilice, 2: Projection approximation, 3: Phase object approximation, 4: Weak phase object approximation
+	int BWL;			// 1: true, 2: false (bandwidth limited)
+	int FastCal;		// 1: normal mode(low memory consumption), 2: fast calculation(high memory consumption)
+	int PBC_xy;			// 1: true, 2: false (Peridic boundary contions)
 
-	double E0;					// Acceleration volatage in KeV
-	double theta;				// incident tilt (in spherical coordinates) (rad)
-	double phi;					// incident tilt (in spherical coordinates) (rad)
-	int nx;						// Number of pixels in x direction
-	int ny;						// Number of pixels in y direction
-	double lx;					// Distance in x direction(Angstroms)
-	double ly;					// Distance in y direction(Angstroms)
-	double dz;					// Slice thickness
+	double E0;			// Acceleration volatage in KeV
+	double theta;		// incident tilt (in spherical coordinates) (rad)
+	double phi;			// incident tilt (in spherical coordinates) (rad)
+	int nx;				// Number of pixels in x direction
+	int ny;				// Number of pixels in y direction
+	double lx;			// Distance in x direction(Angstroms)
+	double ly;			// Distance in y direction(Angstroms)
+	double dz;			// Slice thickness
 
-	int nAtomsM;				// Number of Atoms
-	double *AtomsM;				// Atoms in a matrix form
-	int iSlice;					// Slice
+	int nAtomsM;		// Number of Atoms
+	double *AtomsM;		// Atoms in a matrix form
+	int iSlice;			// Slice
 } sInTransmission;
 
 /***********************Input - TEM-Image***********************/
 typedef struct sInTEMIm{
-	int gpu;				// gpu device
+	int CPU_GPU;			// 1: CPU, 2: GPU
+	int nThread_CPU;		// Number of threads
+	int GPU_Device;			// GPU_Device device
 	int MEffect;			// 1: Partial coherente mode, 2: Transmission cross coefficient
 	int STEffect;			// 1: Spatial and temporal, 2: Temporal, 3: Spatial
 	int ZeroDef;			// 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
 	double ZeroDefPlane;	// Zero defocus plane
 
-	double E0;			// Acceleration volatage in KeV
-	double *Psirh;		// Real part of the wavefunction
-	double *Psiih;		// Imaginary part of the wavefunction
-	int nx;				// Number of pixels in x direction
-	int ny;				// Number of pixels in y direction
-	double lx;			// distance in x direction(Angstroms)
-	double ly;			// distance in y direction(Angstroms)
+	double E0;				// Acceleration volatage in KeV
+	double *Psirh;			// Real part of the wavefunction
+	double *Psiih;			// Imaginary part of the wavefunction
+	int nx;					// Number of pixels in x direction
+	int ny;					// Number of pixels in y direction
+	double lx;				// distance in x direction(Angstroms)
+	double ly;				// distance in y direction(Angstroms)
 	
-	int MC_m;			// momentum of the vortex
-	double MC_f;		// defocus(Angstrom)
-	double MC_Cs3;		// spherical aberration(Angstrom)
-	double MC_Cs5;		// spherical aberration(Angstrom)
-	double MC_mfa2;		// magnitude 2-fold astigmatism(Angstrom)
-	double MC_afa2;		// angle 2-fold astigmatism(rad)
-	double MC_mfa3;		// magnitude 3-fold astigmatism(Angstrom)
-	double MC_afa3;		// angle 3-fold astigmatism(rad)
-	double MC_aobjl;	// lower objective aperture(rad)
-	double MC_aobju;	// upper objective aperture(rad)
-	double MC_sf;		// defocus spread(Angstrom)
-	int MC_nsf;			// Number of defocus sampling points
-	double MC_beta;		// semi-convergence angle
+	int MC_m;				// momentum of the vortex
+	double MC_f;			// defocus(Angstrom)
+	double MC_Cs3;			// spherical aberration(Angstrom)
+	double MC_Cs5;			// spherical aberration(Angstrom)
+	double MC_mfa2;			// magnitude 2-fold astigmatism(Angstrom)
+	double MC_afa2;			// angle 2-fold astigmatism(rad)
+	double MC_mfa3;			// magnitude 3-fold astigmatism(Angstrom)
+	double MC_afa3;			// angle 3-fold astigmatism(rad)
+	double MC_aobjl;		// lower objective aperture(rad)
+	double MC_aobju;		// upper objective aperture(rad)
+	double MC_sf;			// defocus spread(Angstrom)
+	int MC_nsf;				// Number of defocus sampling points
+	double MC_beta;			// semi-convergence angle
 	int MC_nbeta;			// half number sampling points
 } sInTEMIm;
 
 /************************Input - TEM****************************/
 typedef struct sInProbe{
-	int gpu;				// gpu device
-
+	int CPU_GPU;			// 1: CPU, 2: GPU
+	int nThread_CPU;		// Number of threads
+	int GPU_Device;			// GPU_Device device
 	double E0;				// Acceleration volatage in KeV
 	double theta;			// incident tilt (in spherical coordinates) (rad)
 	double phi;				// incident tilt (in spherical coordinates) (rad)
