@@ -1,7 +1,7 @@
 clear all; clc;
 
 global TEM;
-DefaultValues;% Load default values;
+MT_DefaultValues;% Load default values;
 
 TEM.gpu = 0;                % Gpu card
 TEM.SimType = 51;           % 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
