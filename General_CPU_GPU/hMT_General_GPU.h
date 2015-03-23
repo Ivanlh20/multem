@@ -132,12 +132,9 @@ void f_Set_MC_GPU(sGP &GP, double Mr, double Mi, double2 *&MC1_o, double2 *&MC2_
 
 void f_Set_MC_MD_GPU(sGP &GP, double Mr, double Mi, double2 *&MC_o, double M, double *&MD_o);
 
-void f_Set_MC_GPU(sGP &GP, sComplex &MC_i, double2 *&MC_o);
-
-void f_Get_MC_GPU(sGP &GP, double2 *&MC_i, sComplex &MC_o);
-
 /***************************************************************************/
 /***************************************************************************/
+
 void f_Set_wMD_GPU(sGP &GP, double w, double *&MD_i, double *&MD_io);
 
 void f_Set_wMD_GPU(sGP &GP, double w, double *&MD1_i, double *&MD2_i, double *&MD1_io, double *&MD2_io);
@@ -218,16 +215,13 @@ void f_Apply_PCTF_GPU(sGP &GP, sLens &Lens, double2 *&fPsi_i, double2 *&fPsi_o);
 
 /***************************************************************************/
 /***************************************************************************/
-// From Host To Device
-void f_Copy_MCh(sGP &GP, sComplex &MC_h_i, double *&MCr_d_i, double *&MCi_d_i, double2 *&MC_d_o);
 
-// From Device To Host
-void f_Copy_MCd(sGP &GP, double2 *&MC_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o);
+void f_cuDouble_2_double_GPU(sGP &GP, double *&MD_d_i, double *&MD_h_o);
 
-// From Device To Host
-void f_Copy_MCd_MDd(sGP &GP, double2 *&MC_d_i, double *&MD_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o, double *&MD_h_o);
+void f_double_2_cuDouble_GPU(sGP &GP, double *&MD_h_i, double *&MD_d_o);
 
-// From Device To Host
-void f_Copy_MCd_MDd(sGP &GP, double2 *&MC_d_i, double *&MD1_d_i, double *&MD2_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o, double *&MD1_h_o, double *&MD2_h_o);
+void f_cuDoubleComplex_2_sComplex_GPU(sGP &GP, double2 *&MC_d_i, double2 *&MC_h_t, sComplex &MC_h_o);
+
+void f_sComplex_2_cuDoubleComplex_GPU(sGP &GP, sComplex &MC_h_i, double2 *&MC_h_t, double2 *&MC_d_o);
 
 #endif

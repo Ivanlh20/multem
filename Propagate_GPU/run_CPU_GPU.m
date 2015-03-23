@@ -25,10 +25,10 @@ n = 2; na = n; nb = n; nc = 3; ncu = 8; rmsAu3D = 0.085; sigma = sqrt(rmsAu3D^2/
 TEM.nx = na*npuc; TEM.ny = nb*npuc; nxh = TEM.nx/2; nyh = TEM.ny/2;
 TEM.dz = 0.5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[Psi, aM2Psi] = MULTEMMat(TEM);
+[Psi, aM2Psi] = MULTEM_GPU(TEM);
 zProp = 4;
 tic;
-PsipGPU = getPropagate(Psi, TEM.gpu, TEM.E0, TEM.nx, TEM.ny, TEM.lx, TEM.ly, zProp, TEM.BandwidthLimit);
+PsipGPU = get_Propagate_GPU(Psi, TEM.gpu, TEM.E0, TEM.nx, TEM.ny, TEM.lx, TEM.ly, zProp, TEM.BandwidthLimit);
 toc;
 M2PsipGPU =  abs(PsipGPU).^2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

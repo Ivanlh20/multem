@@ -37,20 +37,16 @@ class cMT_Potential_GPU: public cMT_Specimen_CPU{
 		int IdCall;
 		sQ1 Qz;
 		sciVn ciV0[stncVp];
-		sciVn ciV1[stncVp];
 		void SetPotPar(int PotParh);
-		void addAtomicProjectedPotential(dim3 BPot, dim3 TPot, dim3 BCoef, dim3 TCoef, int nsatom, double *&V0g, double *&V1g);
-		void getV0(int iSlice, double *&V0, int typ=1);
+		
+		void addAtomicProjectedPotential(dim3 BPot, dim3 TPot, dim3 BCoef, dim3 TCoef, int nsatom, double *&V0g);
 		int CheckGridLimits(int i, int n);
 		void getbn(sGP &GP, double x, double y, double Rmax, sbn &bnx, sbn &bny);
 		void setcVp(int iSlice, int iatom, int nsatom, dim3 &BPot, dim3 &TPot, dim3 &BCoef, dim3 &TCoef);
 	public:
 		sGP GP;									// xy-Grid properties
 		cMT_AtomTypes_GPU *MT_AtomTypes_GPU;	// Atom types
-
 		double *V0;								// Zero moment of the potential
-		double *V1;								// first moment of the potential
-		double *V1o;							// Second moment of the potential
 
 		void freeMemory();
 		void freeMemoryReset();
@@ -58,9 +54,8 @@ class cMT_Potential_GPU: public cMT_Specimen_CPU{
 		cMT_Potential_GPU();
 		~cMT_Potential_GPU();
 
-		eSlicePos SlicePos(int iSlice, int nSlice);
 		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i);
-		void ProjectedPotential(int iSlice, int typ=1);
+		void ProjectedPotential(int iSlice);
 };
 
 #endif

@@ -17,13 +17,13 @@ na = 3; nb = 3; nc = 5; pp = 6; ncu = 4; sigma = 0.084;
 [InTransmission.Atoms, InTransmission.lx, InTransmission.ly, lz, a, b, c, InTransmission.dz] = Au001Crystal(na, nb, nc, ncu, sigma);
 % Atomsi = [ 2.0 2.0 0 79 0.084 1.0];
 %  lx = 4; ly = 4.0; dz = 0.5;
-[Atoms, Slice] = getSliceSpecimen(InTransmission.Atoms, InTransmission.lx, InTransmission.ly, InTransmission.dz, InTransmission.iConfFP, InTransmission.DimFP, InTransmission.SeedFP);
+[Atoms, Slice] = get_SliceSpecimen_CPU(InTransmission.Atoms, InTransmission.lx, InTransmission.ly, InTransmission.dz, InTransmission.iConfFP, InTransmission.DimFP, InTransmission.SeedFP);
 [nAtoms,~] = size(Atoms); [nSlice, ~] = size(Slice);
 for iSlice = 1:nSlice
     InTransmission.iSlice = iSlice;
     tic;
     clear getTransmission;
-    Trans = getTransmission(InTransmission);
+    Trans = get_Transmission_GPU(InTransmission);
     toc;
     figure(1);
     subplot(1, 3, 1);    

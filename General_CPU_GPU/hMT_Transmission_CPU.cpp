@@ -148,10 +148,6 @@ void cMT_Transmission_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, fftw_plan &P
 
 	int nSliceSigma = (MT_MGP_CPU->DimFP%10==0)?0:(int)ceil(6*sigma_max/MT_MGP_CPU->dz);
 	int nSliceMax = nSlice + nSliceSigma;
-	if(MT_MGP_CPU->MulOrder==2)
-	{
-		nSliceMax++;
-	}
 
 	size_t SizeFreeMem = 6*cGb; // find solutions
 	SizeFreeMem = SizeFreeMem-10*cMb;
@@ -190,20 +186,12 @@ void cMT_Transmission_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, fftw_plan &P
 	}
 
 	nSliceMem = MIN(nSliceMem0, nSlice);
-	if((MT_MGP_CPU->MulOrder==2)&&(nSliceMem0>nSlice))
-	{
-		nSliceMem++;
-	}
 }
 
 void cMT_Transmission_CPU::MoveAtoms(int iConf)
 {
 	cMT_Potential_CPU::MoveAtoms(iConf);
 	int nSliceMem = MIN(nSliceMem0, nSlice);
-	if((MT_MGP_CPU->MulOrder==2)&&(nSliceMem0>nSlice))
-	{
-		nSliceMem++;
-	}
 
 	if(nSliceMem0>0)
 	{
@@ -218,7 +206,7 @@ void cMT_Transmission_CPU::MoveAtoms(int iConf)
 	}
 }
 
-fftw_complex* cMT_Transmission_CPU::getTrans(int iSlice, int typ)
+fftw_complex* cMT_Transmission_CPU::getTrans(int iSlice)
 {
 	if(MT_MGP_CPU->ApproxModel>2)
 	{
@@ -240,7 +228,7 @@ fftw_complex* cMT_Transmission_CPU::getTrans(int iSlice, int typ)
 	}
 	else
 	{
-		ProjectedPotential(iSlice, typ);
+		ProjectedPotential(iSlice);
 		t_Transmission<double>(GP, MT_MGP_CPU->ApproxModel, fPot, V0, Trans_o);
 		f_BandwidthLimit2D_CPU(PlanForward, PlanBackward, GP, Trans_o);	
 	}

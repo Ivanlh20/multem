@@ -21,7 +21,6 @@
 
 #include "hConstTypes.h"
 #include "hMT_AtomTypes_CPU.h"
-#include "hMT_General_CPU.h"
 
 class crhor_CPU{
 	private:

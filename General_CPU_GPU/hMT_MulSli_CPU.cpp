@@ -197,11 +197,6 @@ void cMT_MulSli_CPU::Cal_Wavefunction(eSpace Space, fftw_complex *&Psi)
 			// Propagate
 			Propagate(eSReal, gxu, gyu, MT_Transmission_CPU->get_dz(iSlice), Psi);
 		}
-		// Last Transmission and Transmit
-		if(MT_MGP_CPU.MulOrder==2)
-		{
-			MT_Transmission_CPU->Transmit(iSlice, Psi);
-		}
 		// Inclined ilumination
 		PhaseMul(gxu, gyu, Psi);
 		// Back propagation to our plane reference

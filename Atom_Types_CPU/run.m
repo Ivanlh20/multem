@@ -4,7 +4,7 @@ clc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 PotPar = 3;
 tic;
-S = getAtomTypes(PotPar);
+S = get_AtomTypes_CPU(PotPar);
 toc;
 k = 6; cc = '-+r';
 S(k)

@@ -6,12 +6,12 @@ gmin = 0; gmax = 20; ng = 512;
 dg = (gmax-gmin)/(ng-1); 
 g = gmin:dg:gmax;
 
-[f1, df1] = getfxg(1, Z, g);
-[f2, df2] = getfxg(2, Z, g);
-[f3, df3] = getfxg(3, Z, g);
-[f4, df4] = getfxg(4, Z, g);
-[f5, df5] = getfxg(5, Z, g);
-[f6, df6] = getfxg(6, Z, g);
+[f1, df1] = get_fxg_CPU(1, Z, g);
+[f2, df2] = get_fxg_CPU(2, Z, g);
+[f3, df3] = get_fxg_CPU(3, Z, g);
+[f4, df4] = get_fxg_CPU(4, Z, g);
+[f5, df5] = get_fxg_CPU(5, Z, g);
+[f6, df6] = get_fxg_CPU(6, Z, g);
 
 figure(1); clf;
 

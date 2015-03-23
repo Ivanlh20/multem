@@ -56,6 +56,8 @@ class cMT_MulSli_GPU{
 		sACD Prop_x;												// Propagator x
 		sACD Prop_y;												// Propagator y
 
+		double2 *MC_h;												// Host: Complex matrix
+
 		double2 *Psi;												// Wave function
 		double2 *aPsi;												// Wave function - temporal
 
@@ -75,9 +77,9 @@ class cMT_MulSli_GPU{
 		void Image_Plane_Wave_Illumination(int nConfFP, eSpace Space, int MEffect, int STEffect, double2 *&aPsi, double *&M2aPsi, double *&aM2Psi);
 		void Image_Convergence_Wave_Illumination(int nConfFP, eSpace Space, double xi, double yi, double2 *&aPsi, double *&M2aPsi, double *&aM2Psi);
 
-		void Gather(double2 *&Psid, sComplex &Psih);
-		void Gather(double2 *&Psid, double *&M2Psid, sComplex &Psih, double *&M2Psih);
-		void Gather(double2 *&Psid, double *&M2Psi1d, double *&M2Psi2d, sComplex &Psih, double *&M2Psi1h, double *&M2Psi2h);
+		void Gather(double2 *&MC_d_i, sComplex &MC_h_o);
+		void Gather(double2 *&MC_d_i, double *&MD_d_i, sComplex &MC_h_o, double *&MD_h_o);
+		void Gather(double2 *&MC_d_i, double *&MD1_d_i, double *&MD2_d_i, sComplex &MC_h_o, double *&MD1_h_o, double *&MD2_h_o);
 
 		cMT_MGP_CPU MT_MGP_CPU;
 		cMT_STEM_GPU *STEM;

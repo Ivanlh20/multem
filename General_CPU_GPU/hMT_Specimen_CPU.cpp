@@ -129,7 +129,7 @@ void cMT_Specimen_CPU::QuickSortAtomsAlongz(sAtoms *&Atoms, int left, int right)
 			iSlice++;
 			j--;
 		}
-	};
+	}
 
 	/* recursion */
 	if(left < j)
@@ -194,7 +194,6 @@ void cMT_Specimen_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, d
 
 	if(Lzu<MT_MGP_CPU->dz)
 	{
-		MT_MGP_CPU->MulOrder = 1;
 		MT_MGP_CPU->dz = Lzu;
 		if(MT_MGP_CPU->ApproxModel==1)
 			MT_MGP_CPU->ApproxModel = 3;

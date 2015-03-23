@@ -4,12 +4,12 @@ Z = 79;
 rmin = 1e-05; rmax = 0.1; nr = 512;
 dlnr = log(rmax/rmin)/(nr-1); r = rmin*exp((0:1:(nr-1))*dlnr);
 
-[f1, df1] = getrho(1, Z, r); 
-[f2, df2] = getrho(2, Z, r);
-[f3, df3] = getrho(3, Z, r);
-[f4, df4] = getrho(4, Z, r);
-[f5, df5] = getrho(5, Z, r);
-[f6, df6] = getrho(6, Z, r);
+[f1, df1] = get_rho_CPU(1, Z, r); 
+[f2, df2] = get_rho_CPU(2, Z, r);
+[f3, df3] = get_rho_CPU(3, Z, r);
+[f4, df4] = get_rho_CPU(4, Z, r);
+[f5, df5] = get_rho_CPU(5, Z, r);
+[f6, df6] = get_rho_CPU(6, Z, r);
 
 figure(1);
 subplot(1, 2, 1);

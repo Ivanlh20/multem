@@ -1,0 +1,3 @@
+clc; clear all;
+MEX(1, 'get_CrystalbyLayers_CPU.cpp', '../General_CPU_GPU', ...
+       'hMT_Crystal_CPU.cpp');

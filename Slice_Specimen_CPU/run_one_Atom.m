@@ -7,10 +7,10 @@ lx = 10; ly = 10; dz = 0.25;
 Dim = 111; Seed = 1983; iConfFP = 1;
 tic;
 % get specimen slicing
-[Atoms, Slice] = getSliceSpecimen(Atomsi, lx, ly, dz, iConfFP, Dim, Seed);
+[Atoms, Slice] = get_SliceSpecimen_CPU(Atomsi, lx, ly, dz, iConfFP, Dim, Seed);
 toc;
 [nAtoms,~] = size(Atoms); [nSlice, ~] = size(Slice);
-S = getAtomTypes(PotPar);
+S = get_AtomTypes_CPU(PotPar);
 z0 = min(Atoms(:, 3))-S(Atoms(1,4)).Rmax; 
 ze = max(Atoms(:, 3))+S(Atoms(end,4)).Rmax;
 

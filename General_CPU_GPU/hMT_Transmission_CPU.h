@@ -54,7 +54,7 @@ class cMT_Transmission_CPU: public cMT_Potential_CPU{
 
 		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, fftw_plan &PlanForward_i, fftw_plan &PlanBackward_i, int nAtomsM_i, double *AtomsM_i);
 		void MoveAtoms(int iConf);	
-		fftw_complex* getTrans(int iSlice, int typ=1);
+		fftw_complex* getTrans(int iSlice);
 		void Transmit(int iSlice, fftw_complex *&Psi_io);
 };
 

@@ -27,7 +27,7 @@
 #include "hmathCPU.h"
 
 // Potential Evaluation (VR, dVRiR)
-inline void cMT_Potential_CPU::Pot2Da(int PotPar, double &R, double *cl, double *cnl, double *icnl, double f, double &VR, double &dVRiR)
+inline void Pot2Da(int PotPar, double &R, double *cl, double *cnl, double *icnl, double f, double &VR, double &dVRiR)
 {
 	double R2;
 	double VR0, VR1, VR2, VR3, VR4, VR5;
@@ -97,7 +97,7 @@ inline void cMT_Potential_CPU::Pot2Da(int PotPar, double &R, double *cl, double 
 }
 
 // Potential Evaluation (Vr, dVrir)
-inline void cMT_Potential_CPU::Pot3Da(int PotPar, double &r, double *cl, double *cnl, double *icnl, double f, double &Vr, double &dVrir)
+inline void Pot3Da(int PotPar, double &r, double *cl, double *cnl, double *icnl, double f, double &Vr, double &dVrir)
 {
 	double ir, r2;
 	double Vr0, Vr1, Vr2, Vr3, Vr4, Vr5;
@@ -169,7 +169,7 @@ inline void cMT_Potential_CPU::Pot3Da(int PotPar, double &r, double *cl, double 
 }
 
 //Binary search
-inline int cMT_Potential_CPU::unrolledBinarySearch128(double x0, const double * __restrict x)
+inline int unrolledBinarySearch128(double x0, const double * __restrict x)
 {
 	int i0 = 0, ie = stnR-1;
 	int im = (i0 + ie)>>1;	// divide by 2
@@ -191,10 +191,10 @@ inline int cMT_Potential_CPU::unrolledBinarySearch128(double x0, const double * 
 }
 
 // Linear projected potential: V and zV
-void cMT_Potential_CPU::getLinearProjAtomicPotential(int PotPar, sQ1 &Qz, scVp &cVp)
+void getLinearProjAtomicPotential(int PotPar, sQ1 &Qz, scVp &cVp)
 {	
 	double V0, dV0, V1, dV1, V, dVir;
-	double a, b, z, r, zm = 0.5*(cVp.ze+cVp.z0);
+	double a, b, z, r;
 	double *cl, *cnl, icnl[6];
 	int i, iR, iQz;
 
@@ -211,12 +211,9 @@ void cMT_Potential_CPU::getLinearProjAtomicPotential(int PotPar, sQ1 &Qz, scVp &
 			z = a*Qz.x[iQz] + b, r = sqrt(z*z + cVp.R2[iR]);
 			Pot3Da(PotPar, r, cl, cnl, icnl, a*Qz.w[iQz], V, dVir);
 			V0 += V; dV0 += dVir;
-			V1 += (z-zm)*V; dV1 += (z-zm)*dVir;
 		}
 		cVp.ciV0.c0[iR] = V0;			// V0
 		cVp.ciV0.c1[iR] = 0.5*dV0;		// dR2V0
-		cVp.ciV1.c0[iR] = V1;			// V1
-		cVp.ciV1.c1[iR] = 0.5*dV1;		// dR2V1
 	}
 
 	if(cVp.split)
@@ -230,18 +227,15 @@ void cMT_Potential_CPU::getLinearProjAtomicPotential(int PotPar, sQ1 &Qz, scVp &
 				z = a*Qz.x[iQz] + b, r = sqrt(z*z + cVp.R2[iR]);
 				Pot3Da(PotPar, r, cl, cnl, icnl, a*Qz.w[iQz], V, dVir);
 				V0 += V; dV0 += dVir;
-				V1 += (z-zm)*V; dV1 += (z-zm)*dVir;
 			}
 			cVp.ciV0.c0[iR] += V0;			// V0
 			cVp.ciV0.c1[iR] += 0.5*dV0;		// dR2V0
-			cVp.ciV1.c0[iR] += V1;			// V1
-			cVp.ciV1.c1[iR] += 0.5*dV1;		// dR2V1
 		}
 	}
 }
 
 // Get Local interpolation coefficients
-void cMT_Potential_CPU::getCubicPolyCoef(scVp &cVp)
+void getCubicPolyCoef(scVp &cVp)
 {
 	double dx, dx2;
 	double V, Vn, dV, dVn, m, n;
@@ -255,18 +249,11 @@ void cMT_Potential_CPU::getCubicPolyCoef(scVp &cVp)
 		cVp.ciV0.c0[iR] = V-cVp.ciV0.c0[stnR-1];
 		cVp.ciV0.c2[iR] = (3.0*m-n-dV)*dx;
 		cVp.ciV0.c3[iR] = (n-2.0*m)*dx2;
-		/********************************************************/
-		V = cVp.ciV1.c0[iR]; Vn = cVp.ciV1.c0[iR+1];
-		dV = cVp.ciV1.c1[iR]; dVn = cVp.ciV1.c1[iR+1];
-		m = (Vn-V)*dx; n = dV+dVn;
-		cVp.ciV1.c0[iR] = V-cVp.ciV1.c0[stnR-1];
-		cVp.ciV1.c2[iR] = (3.0*m-n-dV)*dx;
-		cVp.ciV1.c3[iR] = (n-2.0*m)*dx2;
 	}
 }
 
 // Cubic polynomial evaluation
-void cMT_Potential_CPU::evalCubicPoly(sGP &GP, scVp &cVp, double * __restrict V0g, double * __restrict V1g)
+void evalCubicPoly(sGP &GP, scVp &cVp, double * __restrict V0g)
 {
 	int ix0, iy0, ix, iy, ixy;
 	double Rx, Ry, R2;
@@ -300,53 +287,8 @@ void cMT_Potential_CPU::evalCubicPoly(sGP &GP, scVp &cVp, double * __restrict V0
 
 				dx = R2 - cVp.R2[ix]; dx2 = dx*dx; dx3 = dx2*dx;
 				V0g[ixy] += V = cVp.occ*(cVp.ciV0.c0[ix] + cVp.ciV0.c1[ix]*dx + cVp.ciV0.c2[ix]*dx2 + cVp.ciV0.c3[ix]*dx3);
-				V1g[ixy] += V = cVp.occ*(cVp.ciV1.c0[ix] + cVp.ciV1.c1[ix]*dx + cVp.ciV1.c2[ix]*dx2 + cVp.ciV1.c3[ix]*dx3);	
 			}
 		}
-	}
-}
-
-//get Effective Potential
-void cMT_Potential_CPU::getV0(sGP &GP, eSlicePos SlicePo, double dz, double * __restrict V0_io, double * __restrict V1_io, double * __restrict V1o_io)
-{
-	int ix, iy, ixy;
-	double V0, V1;
-
-	switch(SlicePo)
-	{
-		case eSPFirst:		// initial Slice
-			for(iy=0; iy<GP.ny; iy++)
-			{
-				for(ix=0; ix<GP.nx; ix++)
-				{
-					ixy = iy*GP.nx+ix;
-					V0 = V0_io[ixy]; V1 = V1_io[ixy]/dz;
-					V0_io[ixy] = V0 = V0-V1;
-					V1o_io[ixy] = V1;
-				}
-			}
-			break;
-		case eSPMedium:		// intermediate Slice
-			for(iy=0; iy<GP.ny; iy++)
-			{
-				for(ix=0; ix<GP.nx; ix++)
-				{
-					ixy = iy*GP.nx+ix;
-					V0 = V0_io[ixy]; V1 = V1_io[ixy]/dz;
-					V0_io[ixy] = V0 = V0-V1+V1o_io[ixy];
-					V1o_io[ixy] = V1;
-				}
-			}
-			break;
-		case eSPLast:		// last Slice
-			for(iy=0; iy<GP.ny; iy++)
-			{
-				for(ix=0; ix<GP.nx; ix++)
-				{
-					V0_io[ixy] = V0 = V1o_io[ixy];
-				}
-			}
-			break;
 	}
 }
 
@@ -365,13 +307,10 @@ void cMT_Potential_CPU::freeMemory()
 	f_sGP_Init(GP);
 
 	f_sciVn_Free_CPU(ciV0);
-	f_sciVn_Free_CPU(ciV1);
 
 	f_scVp_Init(cVp);
 
 	delete [] V0; V0 = 0;
-	delete [] V1; V1 = 0;
-	delete [] V1o; V1o = 0;
 }
 
 cMT_Potential_CPU::cMT_Potential_CPU()
@@ -386,13 +325,10 @@ cMT_Potential_CPU::cMT_Potential_CPU()
 	f_sGP_Init(GP);
 
 	f_sciVn_Init_CPU(ciV0);
-	f_sciVn_Init_CPU(ciV1);
 
 	f_scVp_Init(cVp);
 
 	V0 = 0;
-	V1 = 0;
-	V1o = 0;
 }
 
 cMT_Potential_CPU::~cMT_Potential_CPU()
@@ -401,10 +337,6 @@ cMT_Potential_CPU::~cMT_Potential_CPU()
 	IdCall = 0;
 }
 
-inline eSlicePos cMT_Potential_CPU::SlicePos(int iSlice, int nSlice)
-{
-	return (iSlice==0)?eSPFirst:(iSlice<nSlice)?eSPMedium:eSPLast;
-}
 
 inline int cMT_Potential_CPU::CheckGridLimits(int i, int n)
 {
@@ -453,32 +385,14 @@ void cMT_Potential_CPU::setcVp(int iSlice, int iatom, scVp &cVp)
 	}
 }
 
-void cMT_Potential_CPU::addAtomicProjectedPotential(scVp &cVp, double *&V0g, double *&V1g)
+void cMT_Potential_CPU::addAtomicProjectedPotential(scVp &cVp, double *&V0g)
 {
 	if(MT_MGP_CPU->ApproxModel==1)
 	{
 		getLinearProjAtomicPotential(PotPar, Qz, cVp);
 		getCubicPolyCoef(cVp);
 	}
-	evalCubicPoly(GP, cVp, V0g, V1g);
-}
-
-void cMT_Potential_CPU::getV0(int iSlice, double *&V0, int typ)
-{
-	if(MT_MGP_CPU->MulOrder==1)
-	{
-		return;
-	}
-
-	double dz = get_dz(iSlice);
-	if(typ==1)
-	{
-		getV0(GP, SlicePos(iSlice, nSlice), dz, V0, V1, V1o);
-	}
-	else
-	{
-		f_Scale_MD_CPU(GP, dz, V1);
-	}
+	evalCubicPoly(GP, cVp, V0g);
 }
 
 void cMT_Potential_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, double *AtomsM_i)
@@ -493,45 +407,29 @@ void cMT_Potential_CPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, int nAtomsM_i, 
 	f_ReadQuadratureCPU(0, stnQz, Qz);		// TanhSinh
 
 	f_sciVn_Malloc_CPU(stnR, ciV0);
-	f_sciVn_Malloc_CPU(stnR, ciV1);
 
 	cVp.ciV0.c0 = ciV0.c0;
 	cVp.ciV0.c1 = ciV0.c1;
 	cVp.ciV0.c2 = ciV0.c2;
 	cVp.ciV0.c3 = ciV0.c3;
 
-	cVp.ciV1.c0 = ciV1.c0;
-	cVp.ciV1.c1 = ciV1.c1;
-	cVp.ciV1.c2 = ciV1.c2;
-	cVp.ciV1.c3 = ciV1.c3;
-
 	V0 = new double[GP.nxy];
-	V1 = new double[GP.nxy];
-	V1o = new double[GP.nxy];
 }
 
 // Projected potential calculation: iSlice = Slice position
-void cMT_Potential_CPU::ProjectedPotential(int iSlice, int typ)
+void cMT_Potential_CPU::ProjectedPotential(int iSlice)
 {
-	if(iSlice==nSlice)
-	{
-		getV0(iSlice, V0);
-		return;
-	}
-
-	int iatom0 = Slice[iSlice].z0i_id;
-	int iatome = Slice[iSlice].zei_id;
-	f_Set_MD_CPU(GP, 0.0, V0, V1);
+	int iatom0 = Slice[iSlice].z0i_id, iatome = Slice[iSlice].zei_id;
+	f_Set_MD_CPU(GP, 0.0, V0);
 
 	if(iatome<iatom0)
 	{
 		return;
 	}
+
 	for(int iatom=iatom0; iatom<=iatome; iatom++)
 	{
 		setcVp(iSlice, iatom, cVp);
-		addAtomicProjectedPotential(cVp, V0, V1);
+		addAtomicProjectedPotential(cVp, V0);
 	}
-
-	getV0(iSlice, V0, typ);
 }

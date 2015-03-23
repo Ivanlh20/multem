@@ -5,10 +5,10 @@ na = 5; nb = 5; nc = 5; ncu = 4; PotPar = 6; DWAu3D = 0.6373; rmsAu3D = sqrt(DWA
 Dim = 111; Seed = 1983; iConfFP = 2;
 tic;
 % get specimen slicing
-[Atoms, Slice] = getSliceSpecimen(Atomsi, lx, ly, dz, iConfFP, Dim, Seed);
+[Atoms, Slice] = get_SliceSpecimen_CPU(Atomsi, lx, ly, dz, iConfFP, Dim, Seed);
 toc;
 [nAtoms,~] = size(Atoms); [nSlice, ~] = size(Slice);
-S = getAtomTypes(PotPar);
+S = get_AtomTypes_CPU(PotPar);
 z0 = min(Atoms(:, 3))-S(Atoms(1,4)).Rmax; 
 ze = max(Atoms(:, 3))+S(Atoms(end,4)).Rmax;
 
@@ -34,7 +34,7 @@ hold on;
 plot([-2 ly+2], [Slice(i, 2) Slice(i, 2)], '-r','LineWidth',1);
 
 tic;
-Planes = getPlanes(Atomsi, lx, ly, iConfFP, Dim, Seed);
+Planes = get_Identify_Planes_CPU(Atomsi, lx, ly, iConfFP, Dim, Seed);
 toc;
 [nPlanes, ~] = size(Planes);
 for i = 1:nPlanes

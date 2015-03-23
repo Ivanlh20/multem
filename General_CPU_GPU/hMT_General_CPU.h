@@ -151,12 +151,6 @@ void f_Set_MC_CPU(sGP &GP, double Mr, double Mi, fftw_complex * __restrict MC1_o
 // Set value to Complex vector and Double vector
 void f_Set_MC_MD_CPU(sGP &GP, double Mr, double Mi, fftw_complex * __restrict MC_o, double M, double * __restrict MD_o);
 
-// Set Real and Imaginary part of a Complex vector
-void f_Set_MC_CPU(sGP &GP, sComplex &MC_i, fftw_complex * __restrict MC_o);
-
-// Get Real and Imaginary part of a Complex vector
-void f_Get_MC_CPU(sGP &GP, fftw_complex * __restrict MC_i, sComplex &MC_o);
-
 /***************************************************************************/
 /***************************************************************************/
 

@@ -1,0 +1,3 @@
+clc; clear all;
+MEX(1, 'get_Quadrature_CPU.cpp', '../General_CPU_GPU', ...
+       'hQuadrature.cpp');

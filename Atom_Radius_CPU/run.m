@@ -2,7 +2,7 @@ clear all; clc;
 Dim = 3; Vrl = 0.015; PotPar = 6;
 z = 1:103;
 tic;
-r = getAtomRadius(PotPar, Dim, Vrl);
+r = get_AtomRadius_CPU(PotPar, Dim, Vrl);
 toc;
 
 figure(1); clf;

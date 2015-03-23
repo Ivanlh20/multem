@@ -30,7 +30,7 @@ TEM.dz = 0.5;
 [aPsi, aM2Psi] = MULTEMMat(TEM);
 zProp = -0.5*lz;
 tic;
-Psip = getPropagate(aPsi, TEM.gpu, TEM.E0, TEM.nx, TEM.ny, TEM.lx, TEM.ly, zProp, TEM.BWL);
+Psip = get_Propagate_GPU(aPsi, TEM.gpu, TEM.E0, TEM.nx, TEM.ny, TEM.lx, TEM.ly, zProp, TEM.BWL);
 toc;
 M2PsipGPU =  abs(Psip).^2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -46,7 +46,7 @@ imagesc(aM2Psi);
 colormap gray;
 axis image;
 TEM.ZeroDefTyp = 2;     % 1: First atom, 2: middle point, 3: last atom, 4: Fix Plane
-[aPsi, aM2Psi] = MULTEMMat(TEM);
+[aPsi, aM2Psi] = MULTEM_GPU(TEM);
 subplot(1, 3, 2);
 imagesc(M2PsipGPU);
 colormap gray;

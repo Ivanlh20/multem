@@ -6,12 +6,12 @@ rmin = 1e-02; rmax = 5.0; nr = 128;
 dlnr = log(rmax/rmin)/(nr-1); r = rmin*exp((0:1:(nr-1))*dlnr);
 
 tic;
-[f1, df1] = getPotential(1, Z, sigma, IntTyp, Dim, r);
-[f2, df2] = getPotential(2, Z, sigma, IntTyp, Dim, r);
-[f3, df3] = getPotential(3, Z, sigma, IntTyp, Dim, r);
-[f4, df4] = getPotential(4, Z, sigma, IntTyp, Dim, r);
-[f5, df5] = getPotential(5, Z, sigma, IntTyp, Dim, r);
-[f6, df6] = getPotential(6, Z, sigma, IntTyp, Dim, r);
+[f1, df1] = get_Potential_CPU(1, Z, sigma, IntTyp, Dim, r);
+[f2, df2] = get_Potential_CPU(2, Z, sigma, IntTyp, Dim, r);
+[f3, df3] = get_Potential_CPU(3, Z, sigma, IntTyp, Dim, r);
+[f4, df4] = get_Potential_CPU(4, Z, sigma, IntTyp, Dim, r);
+[f5, df5] = get_Potential_CPU(5, Z, sigma, IntTyp, Dim, r);
+[f6, df6] = get_Potential_CPU(6, Z, sigma, IntTyp, Dim, r);
 toc;
 
 figure(1);

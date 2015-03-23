@@ -163,10 +163,6 @@ void cMT_Transmission_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, cufftHandle 
 
 	int nSliceSigma = (MT_MGP_CPU->DimFP%10==0)?0:(int)ceil(6*sigma_max/MT_MGP_CPU->dz);
 	int nSliceMax = nSlice + nSliceSigma;
-	if(MT_MGP_CPU->MulOrder==2)
-	{
-		nSliceMax++;
-	}
 
 	size_t SizeFreeMem, SizeTotMem;
 	cudaMemGetInfo(&SizeFreeMem, &SizeTotMem);
@@ -206,20 +202,12 @@ void cMT_Transmission_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, cufftHandle 
 	}
 
 	nSliceMem = MIN(nSliceMem0, nSlice);
-	if((MT_MGP_CPU->MulOrder==2)&&(nSliceMem0>nSlice))
-	{
-		nSliceMem++;
-	}
 }
 
 void cMT_Transmission_GPU::MoveAtoms(int iConf)
 {
 	cMT_Potential_GPU::MoveAtoms(iConf);
 	int nSliceMem = MIN(nSliceMem0, nSlice);
-	if((MT_MGP_CPU->MulOrder==2)&&(nSliceMem0>nSlice))
-	{
-		nSliceMem++;
-	}
 
 	if(nSliceMem0>0)
 	{
@@ -236,9 +224,12 @@ void cMT_Transmission_GPU::MoveAtoms(int iConf)
 	}
 }
 
-double2* cMT_Transmission_GPU::getTrans(int iSlice, int typ)
+double2* cMT_Transmission_GPU::getTrans(int iSlice)
 {
-	if(MT_MGP_CPU->ApproxModel>2) return Trans0;
+	if(MT_MGP_CPU->ApproxModel>2)
+	{
+		return Trans0;
+	}
 
 	dim3 Bnxny, Tnxny;
 	f_get_BTnxny(GP, Bnxny, Tnxny);
@@ -258,7 +249,7 @@ double2* cMT_Transmission_GPU::getTrans(int iSlice, int typ)
 	}
 	else
 	{
-		ProjectedPotential(iSlice, typ);
+		ProjectedPotential(iSlice);
 		k_Transmission<double><<<Bnxny, Tnxny>>>(GP, MT_MGP_CPU->ApproxModel, fPot, V0, Trans_o);
 		f_BandwidthLimit2D_GPU(PlanTrans, GP, Trans_o);	
 	}

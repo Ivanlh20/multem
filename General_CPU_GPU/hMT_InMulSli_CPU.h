@@ -28,7 +28,6 @@ class cMT_InMulSli_CPU{
 		int nThread_CPU;		// Number of threads
 		int GPU_Device;			// GPU_Device device
 		int SimType;			// 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
-		int MulOrder;			// 1: First order, 2: Second order
 		int nConfFP;			// Number of frozen phonon configurations
 		int DimFP;				// Dimensions phonon configurations
 		int DistFP;				// 1: Gaussian (Phonon distribution)
@@ -183,7 +182,6 @@ inline cMT_InMulSli_CPU::cMT_InMulSli_CPU()
 	nThread_CPU = 1;
 	GPU_Device = 0;
 	SimType = 0;
-	MulOrder = 2;
 	nConfFP = 0;
 	DimFP = 0;
 	SeedFP = 0;

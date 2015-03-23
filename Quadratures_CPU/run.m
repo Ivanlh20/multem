@@ -15,16 +15,16 @@ clear all; clc;
 QuadType = 1; nQuad = 128;
 
 % Load quadrature
-[xi, wi] = getQuadrature(QuadType, nQuad);
+[xi, wi] = get_Quadrature_CPU(QuadType, nQuad);
 
 Z = 6; PotPar = 6; sigma = 0.0; IntTyp = 0; Dim = 3;
-[rhoi, ~] = getrho(6, Z, xi);
-[Vi, ~] = getPotential(PotPar, Z, sigma, IntTyp, Dim, xi);
+[rhoi, ~] = get_rho_CPU(6, Z, xi);
+[Vi, ~] = get_Potential_CPU(PotPar, Z, sigma, IntTyp, Dim, xi);
 % get volumen
 Volume1 = sum(4*pi*(xi.^2).*Vi.*wi);
 
 %first component of f_e(g)
 cPotf=47.877645145863056; g0 = 0.0;
-Volume2 = getfeg(6, Z, g0);
+Volume2 = get_feg_CPU(6, Z, g0);
 
 num2str([Volume1 cPotf*Volume2], 8)

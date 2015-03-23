@@ -1,0 +1,3 @@
+clc; clear all;
+MEX(1, 'get_Gaussian_Filter_2D_CPU.cpp', '../General_CPU_GPU',...
+    	'hGeneral_CPU.cpp');

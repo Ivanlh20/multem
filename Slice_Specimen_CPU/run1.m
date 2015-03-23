@@ -7,7 +7,7 @@ Dim = 111; Seed = 1983; iConfFP = 0;
 
 tic;
 % get specimen slicing
-[Atoms, Slice] = getSliceSpecimen(Atomsi, lx, ly, dz, iConfFP, Dim, Seed);
+[Atoms, Slice] = get_SliceSpecimen_CPU(Atomsi, lx, ly, dz, iConfFP, Dim, Seed);
 toc;
 [nAtoms,~] = size(Atoms); [nSlice, ~] = size(Slice);
 

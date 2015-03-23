@@ -28,7 +28,6 @@ class cMT_MGP_CPU{
 		int nThread_CPU;		// Number of threads
 		int GPU_Device;			// GPU_Device device
 		int SimType;			// 11: STEM, 12: ISTEM, 21: CBED, 22: CBEI, 31: ED, 32: HRTEM, 41: PED, 42: HCI, ... 51: EW Fourier, 52: EW real
-		int MulOrder;			// 1: First order, 2: Second order
 		int nConfFP;			// Number of frozen phonon configurations
 		int DimFP;				// Dimensions phonon configurations
 		int DistFP;				// 1: Gaussian (Phonon distribution)
@@ -77,7 +76,6 @@ inline void cMT_MGP_CPU::freeMemory()
 	nThread_CPU = 1;
 	GPU_Device = 0;
 	SimType = 52;
-	MulOrder = 2;
 	nConfFP = 0;
 	DimFP = 0;
 	DistFP = 1;
@@ -116,7 +114,6 @@ inline cMT_MGP_CPU::cMT_MGP_CPU()
 	nThread_CPU = 1;
 	GPU_Device = 0;
 	SimType = 52;
-	MulOrder = 2;
 	nConfFP = 0;
 	DimFP = 110;
 	DistFP = 1;
@@ -162,7 +159,6 @@ inline cMT_MGP_CPU& cMT_MGP_CPU::operator= (const cMT_MGP_CPU &MT_MGP_CPU)
 	nThread_CPU = MT_MGP_CPU.nThread_CPU;
 	GPU_Device = MT_MGP_CPU.GPU_Device;
 	SimType = MT_MGP_CPU.SimType;
-	MulOrder = MT_MGP_CPU.MulOrder;
 	nConfFP = MT_MGP_CPU.nConfFP;
 	DimFP = MT_MGP_CPU.DimFP;
 	DistFP = MT_MGP_CPU.DistFP;
@@ -209,7 +205,6 @@ inline void cMT_MGP_CPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU)
 	nThread_CPU = MT_InMulSli_CPU.nThread_CPU;
 	GPU_Device = MT_InMulSli_CPU.GPU_Device;
 	SimType = MT_InMulSli_CPU.SimType;	
-	MulOrder = MT_InMulSli_CPU.MulOrder;
 	nConfFP = MT_InMulSli_CPU.nConfFP;		
 	DimFP = MT_InMulSli_CPU.DimFP;	
 	DistFP = MT_InMulSli_CPU.DistFP;
@@ -243,7 +238,6 @@ inline void cMT_MGP_CPU::SetInputData(cMT_InMulSli_CPU &MT_InMulSli_CPU)
 	dz = MT_InMulSli_CPU.dz;
 	if(ApproxModel>1)
 	{
-		MulOrder = 1;
 		DimFP = DimFP - DimFP%10;
 	}
 }
@@ -255,8 +249,7 @@ inline void cMT_MGP_CPU::SetInputData(sInTransmission &InTransmission)
 	CPU_GPU = InTransmission.CPU_GPU;
 	nThread_CPU = InTransmission.nThread_CPU;
 	GPU_Device = InTransmission.GPU_Device;
-	MulOrder = InTransmission.MulOrder;		
-	DimFP = InTransmission.DimFP;	
+	DimFP = InTransmission.DimFP;
 	DistFP = InTransmission.DistFP;
 	SeedFP = InTransmission.SeedFP;
 	PotPar = InTransmission.PotPar;
@@ -274,8 +267,10 @@ inline void cMT_MGP_CPU::SetInputData(sInTransmission &InTransmission)
 	lx = InTransmission.lx;
 	ly = InTransmission.ly;
 	dz = InTransmission.dz;
-	if(ApproxModel>1) MulOrder = 1;
-	if(ApproxModel>2) DimFP = DimFP - DimFP%10;
+	if(ApproxModel>2)
+	{
+		DimFP = DimFP - DimFP%10;
+	}
 }
 
 inline void cMT_MGP_CPU::SetInputData(sInProjPotential &InProjPotential)
@@ -284,8 +279,7 @@ inline void cMT_MGP_CPU::SetInputData(sInProjPotential &InProjPotential)
 
 	CPU_GPU = InProjPotential.CPU_GPU;
 	nThread_CPU = InProjPotential.nThread_CPU;
-	GPU_Device = InProjPotential.GPU_Device;
-	MulOrder = InProjPotential.MulOrder;		
+	GPU_Device = InProjPotential.GPU_Device;	
 	DimFP = InProjPotential.DimFP;	
 	DistFP = InProjPotential.DistFP;
 	SeedFP = InProjPotential.SeedFP;
@@ -298,8 +292,10 @@ inline void cMT_MGP_CPU::SetInputData(sInProjPotential &InProjPotential)
 	lx = InProjPotential.lx;
 	ly = InProjPotential.ly;
 	dz = InProjPotential.dz;
-	if(ApproxModel>1) MulOrder = 1;
-	if(ApproxModel>2) DimFP = DimFP - DimFP%10;
+	if(ApproxModel>2)
+	{
+		DimFP = DimFP - DimFP%10;
+	}
 }
 
 inline void cMT_MGP_CPU::SetInputData(sInProbe &InProbe)
@@ -317,8 +313,10 @@ inline void cMT_MGP_CPU::SetInputData(sInProbe &InProbe)
 	ny = InProbe.ny;
 	lx = InProbe.lx;
 	ly = InProbe.ly;
-	if(ApproxModel>1) MulOrder = 1;
-	if(ApproxModel>2) DimFP = DimFP - DimFP%10;
+	if(ApproxModel>2)
+	{
+		DimFP = DimFP - DimFP%10;
+	}
 }
 
 #endif

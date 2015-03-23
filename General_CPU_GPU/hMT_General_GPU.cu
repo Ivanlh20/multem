@@ -758,20 +758,6 @@ void f_Set_MC_MD_GPU(sGP &GP, double Mr, double Mi, double2 *&MC_o, double M, do
 	k_Set_MC_MD<<<Bnxny, Tnxny>>>(GP, Mr, Mi, MC_o, M, MD_o);
 }
 
-void f_Set_MC_GPU(sGP &GP, sComplex &MC_i, double2 *&MC_o)
-{
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);
-	k_Set_MC<<<Bnxny, Tnxny>>>(GP, MC_i, MC_o);
-}
-
-void f_Get_MC_GPU(sGP &GP, double2 *&MC_i, sComplex &MC_o)
-{
-	dim3 Bnxny, Tnxny;
-	f_get_BTnxny(GP, Bnxny, Tnxny);
-	k_Get_MC<<<Bnxny, Tnxny>>>(GP, MC_i, MC_o);
-}
-
 /***************************************************************************/
 /***************************************************************************/
 
@@ -1991,45 +1977,49 @@ void f_Apply_PCTF_GPU(sGP &GP, sLens &Lens, double2 *&fPsi_i, double2 *&fPsi_o)
 
 /***************************************************************************/
 /***************************************************************************/
-// From Host To Device
-void f_Copy_MCh(sGP &GP, sComplex &MC_h_i, double *&MCr_d_i, double *&MCi_d_i, double2 *&MC_d_o)
-{	
-	sComplex MC_d;
-	MC_d.real = MCr_d_i; MC_d.imag = MCi_d_i;
-	// Copy real part of the wave function to the host
-	cudaMemcpy(MC_d.real, MC_h_i.real, GP.nxy*cSizeofRD, cudaMemcpyHostToDevice);
-	// Copy imaginary part of the wave function to the host
-	cudaMemcpy(MC_d.imag, MC_h_i.imag, GP.nxy*cSizeofRD, cudaMemcpyHostToDevice);
-	// Set Real and Imaginary part to complex matrix
-	f_Set_MC_GPU(GP, MC_d, MC_d_o);
-}
 
-// From Device To Host
-void f_Copy_MCd(sGP &GP, double2 *&MC_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o)
-{	
-	sComplex MC_d;
-	MC_d.real = MCr_d_i; MC_d.imag = MCi_d_i;
-	// Get Real and Imaginary part to complex matrix
-	f_Get_MC_GPU(GP, MC_d_i, MC_d);
-	// Copy real part of the wave function to the host
-	cudaMemcpy(MC_h_o.real, MC_d.real, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
-	// Copy imaginary part of the wave function to the host
-	cudaMemcpy(MC_h_o.imag, MC_d.imag, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
-}
-
-// From Device To Host
-void f_Copy_MCd_MDd(sGP &GP, double2 *&MC_d_i, double *&MD_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o, double *&MD_h_o)
+void f_sComplex_2_cuDoubleComplex_CPU(sGP &GP, sComplex &MC_h_i, double2 *&MC_h_o)
 {
-	f_Copy_MCd(GP, MC_d_i, MCr_d_i, MCi_d_i, MC_h_o);
-	// Copy wave function squared to the host
+	int ix, iy, ixy;
+	for(ix=0; ix<GP.nx; ix++)
+		for(iy=0; iy<GP.ny; iy++)
+		{
+			ixy = ix*GP.ny+iy;
+			MC_h_o[ixy].x = MC_h_i.real[ixy];
+			MC_h_o[ixy].y = MC_h_i.imag[ixy];
+		}
+}
+
+void f_cuDoubleComplex_2_sComplex_CPU(sGP &GP, double2 *&MC_h_i, sComplex &MC_h_o)
+{
+	int ix, iy, ixy;
+	for(ix=0; ix<GP.nx; ix++)
+		for(iy=0; iy<GP.ny; iy++)
+		{
+			ixy = ix*GP.ny+iy;
+			MC_h_o.real[ixy] = MC_h_i[ixy].x;
+			MC_h_o.imag[ixy] = MC_h_i[ixy].y;
+		}
+}
+
+void f_cuDouble_2_double_GPU(sGP &GP, double *&MD_d_i, double *&MD_h_o)
+{	
 	cudaMemcpy(MD_h_o, MD_d_i, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
 }
 
-// From Device To Host
-void f_Copy_MCd_MDd(sGP &GP, double2 *&MC_d_i, double *&MD1_d_i, double *&MD2_d_i, double *&MCr_d_i, double *&MCi_d_i, sComplex &MC_h_o, double *&MD1_h_o, double *&MD2_h_o)
+void f_double_2_cuDouble_GPU(sGP &GP, double *&MD_h_i, double *&MD_d_o)
 {	
-	f_Copy_MCd(GP, MC_d_i, MCr_d_i, MCi_d_i, MC_h_o);
-	// Copy wave function squared to the host
-	cudaMemcpy(MD1_h_o, MD1_d_i, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
-	cudaMemcpy(MD2_h_o, MD2_d_i, GP.nxy*cSizeofRD, cudaMemcpyDeviceToHost);
+	cudaMemcpy(MD_d_o, MD_h_i, GP.nxy*cSizeofRD, cudaMemcpyHostToDevice);
+}
+
+void f_cuDoubleComplex_2_sComplex_GPU(sGP &GP, double2 *&MC_d_i, double2 *&MC_h_t, sComplex &MC_h_o)
+{	
+	cudaMemcpy(MC_h_t, MC_d_i, GP.nxy*cSizeofCD, cudaMemcpyDeviceToHost);
+	f_cuDoubleComplex_2_sComplex_CPU(GP, MC_h_t, MC_h_o);
+}
+
+void f_sComplex_2_cuDoubleComplex_GPU(sGP &GP, sComplex &MC_h_i, double2 *&MC_h_t, double2 *&MC_d_o)
+{	
+	f_sComplex_2_cuDoubleComplex_CPU(GP, MC_h_i, MC_h_t);
+	cudaMemcpy(MC_d_o, MC_h_t, GP.nxy*cSizeofCD, cudaMemcpyHostToDevice);
 }

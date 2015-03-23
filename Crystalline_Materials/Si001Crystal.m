@@ -14,7 +14,7 @@ CrysPar.uLayer(1).Atoms = [0.00, 0.00, 0.00, 14, sigma, 1; 0.50, 0.50, 0.00, 14,
 CrysPar.uLayer(2).Atoms = [0.25, 0.25, 0.25, 14, sigma, 1; 0.75, 0.75, 0.25, 14, sigma, 1];
 CrysPar.uLayer(3).Atoms = [0.00, 0.50, 0.50, 14, sigma, 1; 0.50, 0.00, 0.50, 14, sigma, 1];
 CrysPar.uLayer(4).Atoms = [0.25, 0.75, 0.75, 14, sigma, 1; 0.75, 0.25, 0.75, 14, sigma, 1];
-Crys3D = getCrystalbyLayers(CrysPar);
+Crys3D = get_CrystalbyLayers_CPU(CrysPar);
 
 dz = CrysPar.c/ncu;
 lx = na*CrysPar.a; ly = nb*CrysPar.b; lz = nc*CrysPar.c;

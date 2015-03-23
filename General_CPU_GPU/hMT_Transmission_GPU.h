@@ -60,7 +60,7 @@ class cMT_Transmission_GPU: public cMT_Potential_GPU{
 
 		void SetInputData(cMT_MGP_CPU *MT_MGP_CPU_io, cufftHandle &PlanTrans_i, int nAtomsM_i, double *AtomsM_i);
 		void MoveAtoms(int iConf);	
-		double2* getTrans(int iSlice, int typ=1);
+		double2* getTrans(int iSlice);
 		void Transmit(int iSlice, double2 *&Psi_io);
 };
 

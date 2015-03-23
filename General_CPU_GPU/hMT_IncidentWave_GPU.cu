@@ -36,8 +36,7 @@ void cMT_IncidentWave_GPU::freeMemory()
 
 	cudaFreen(Mp_d);
 	PlanPsi = 0;
-	Psir = 0;
-	Psii = 0;
+	MC_h = 0;
 }
 
 cMT_IncidentWave_GPU::cMT_IncidentWave_GPU()
@@ -50,8 +49,7 @@ cMT_IncidentWave_GPU::cMT_IncidentWave_GPU()
 
 	Mp_d = 0;
 	PlanPsi = 0;
-	Psir = 0;
-	Psii = 0;
+	MC_h = 0;
 }
 
 cMT_IncidentWave_GPU::~cMT_IncidentWave_GPU()
@@ -60,7 +58,7 @@ cMT_IncidentWave_GPU::~cMT_IncidentWave_GPU()
 	IdCall = 0;
 }
 
-void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, cufftHandle &PlanPsi_i, double *&Psir_i, double *&Psii_i)
+void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, cufftHandle &PlanPsi_i, double2 *MC_h_i)
 {
 	freeMemory();
 	IdCall++;
@@ -69,20 +67,7 @@ void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i
 	f_sGP_SetInputData(MT_MGP_CPU, GP);
 	Lens = Lens_i;
 	PlanPsi = PlanPsi_i;
-	Psir = Psir_i;
-	Psii = Psii_i;
-	cudaMalloc((void**)&Mp_d, 32*32*cSizeofRD);
-}
-
-void cMT_IncidentWave_GPU::SetInputData(cMT_MGP_CPU *MT_MGP_CPU_i, sLens &Lens_i, cufftHandle &PlanPsi_i)
-{
-	freeMemory();
-	MT_MGP_CPU = MT_MGP_CPU_i;
-	f_sGP_SetInputData(MT_MGP_CPU, GP);
-	Lens = Lens_i;
-	PlanPsi = PlanPsi_i;
-	Psir = 0;
-	Psii = 0;
+	MC_h = MC_h_i;
 	cudaMalloc((void**)&Mp_d, 32*32*cSizeofRD);
 }
 
@@ -94,7 +79,7 @@ void cMT_IncidentWave_GPU::Psi0(double2 *&Psi0)
 	}
 	else
 	{
-		f_Copy_MCh(GP, MT_MGP_CPU->Psi0, Psir, Psii, Psi0);
+		f_sComplex_2_cuDoubleComplex_GPU(GP, MT_MGP_CPU->Psi0, MC_h, Psi0);
 		// fft2shift 
 		f_fft2Shift_MC_GPU(GP, Psi0);	
 	}

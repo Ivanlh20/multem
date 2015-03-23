@@ -319,7 +319,6 @@ void f_scVp_Init(scVp &cVp)
 	cVp.bny.i = 0;
 	cVp.bny.n = 0;
 	f_sciVn_Init_CPU(cVp.ciV0);
-	f_sciVn_Init_CPU(cVp.ciV1);
 }
 
 void f_scVp_Init(int ncVp, scVp *cVp)
@@ -563,32 +562,6 @@ void f_Set_MC_MD_CPU(sGP &GP, double Mr, double Mi, fftw_complex * __restrict MC
 			MC_o[ixy][0] = Mr;
 			MC_o[ixy][1] = Mi;
 			MD_o[ixy] = M;
-		}
-}
-
-// Set Real and Imaginary part of a Complex vector
-void f_Set_MC_CPU(sGP &GP, sComplex &MC_i, fftw_complex * __restrict MC_o)
-{
-	int ix, iy, ixy;
-	for(iy=0; iy<GP.ny; iy++)
-		for(ix=0; ix<GP.nx; ix++)
-		{
-			ixy = iy*GP.nx+ix;
-			MC_o[ixy][0] = MC_i.real[ixy];
-			MC_o[ixy][1] = MC_i.imag[ixy];
-		}
-}
-
-// Get Real and Imaginary part of a Complex vector
-void f_Get_MC_CPU(sGP &GP, fftw_complex * __restrict MC_i, sComplex &MC_o)
-{
-	int ix, iy, ixy;
-	for(iy=0; iy<GP.ny; iy++)
-		for(ix=0; ix<GP.nx; ix++)
-		{
-			ixy = iy*GP.nx+ix;
-			MC_o.real[ixy] = MC_i[ixy][0];
-			MC_o.imag[ixy] = MC_i[ixy][1];
 		}
 }
 

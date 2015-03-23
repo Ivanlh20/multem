@@ -1,0 +1,3 @@
+clc; clear all;
+MEX(1, 'get_fxegTabData_CPU.cpp', '../General_CPU_GPU', ...
+       'hfxegTabData.cpp');

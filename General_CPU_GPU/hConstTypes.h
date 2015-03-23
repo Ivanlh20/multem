@@ -295,7 +295,6 @@ struct scVp{
 	double *R2;
 	sCoefPar cVr;
 	sciVn ciV0;
-	sciVn ciV1;
 	sbn bnx;
 	sbn bny;
 };
@@ -437,7 +436,6 @@ typedef struct sInProjPotential{
 	int CPU_GPU;		// 1: CPU, 2: GPU
 	int nThread_CPU;	// Number of threads
 	int GPU_Device;		// GPU_Device device
-	int MulOrder;		// 1: First order, 2: Second order
 	int iConfFP;		// Frozen phonon configuration
 	int DimFP;			// Dimensions phonon configurations
 	int DistFP;			// 1: Gaussian (Phonon distribution)
@@ -461,7 +459,6 @@ typedef struct sInTransmission{
 	int CPU_GPU;		// 1: CPU, 2: GPU
 	int nThread_CPU;	// Number of threads
 	int GPU_Device;		// GPU_Device device
-	int MulOrder;		// 1: First order, 2: Second order
 	int iConfFP;		// Frozen phonon configuration
 	int DimFP;			// Dimensions phonon configurations
 	int DistFP;			// 1: Gaussian (Phonon distribution)

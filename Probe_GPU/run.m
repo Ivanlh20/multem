@@ -18,7 +18,7 @@ Probe.sf = 32; Probe.nsf = 10; % (Angs, number of steps)ne
 Probe.beta = 0.2; Probe.nbeta = 10; %(mrad, half number of steps)
 
 tic;
-Psi0 = getProbe(Probe);
+Psi0 = get_Probe_GPU(Probe);
 toc;
 fPsi0 = fftshift(fft2(ifftshift(Psi0)));
 figure(1);
