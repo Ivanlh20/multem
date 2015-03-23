@@ -243,11 +243,11 @@ void cMT_Slicing_CPU::get_nSlice(double z10, double z1i, double z20, double z2i,
 	z10=-z10; z1i=-z1i;
 
 	dz0 = (z1i-z10)-(int)floor((z1i-z10)/dzi)*dzi;
-	if(abs(dz0)<((dzi>2.0)?0.25:0.5)*dzi)
+	if(std::abs(dz0)<((dzi>2.0)?0.25:0.5)*dzi)
 		dz0 += dzi;
 	/*********************************************************/
 	dze = (z2i-z20)-(int)floor((z2i-z20)/dzi)*dzi;
-	if(abs(dze)<((dzi>2.0)?0.25:0.5)*dzi)
+	if(std::abs(dze)<((dzi>2.0)?0.25:0.5)*dzi)
 		dze += dzi;
 	/*********************************************************/
 	nSlice=1;

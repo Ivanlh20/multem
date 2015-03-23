@@ -20,6 +20,7 @@
 #include "hConstTypes.h"
 #include "hMT_General_CPU.h"
 #include "hMT_General_GPU.h"
+#include "hGeneral_CPU.h"
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include <device_functions.h>

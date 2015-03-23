@@ -16,7 +16,7 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "hMT_General_CPU.h"
+#include "hGeneral_CPU.h"
 #include <mex.h>
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 

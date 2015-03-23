@@ -68,7 +68,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	sInTEMIm InTEMIm;
 	cTEMIm TEMIm;
 
-	Matlab2InTEMIm(prhs[0], InTEMIm);
+	f_Matlab2InTEMIm(prhs[0], InTEMIm);
 	TEMIm.SetInputData(InTEMIm);
 	plhs[0] = mxCreateDoubleMatrix((mwSize)TEMIm.ny, (mwSize)TEMIm.nx, mxREAL);
 	M2Psi_h = mxGetPr(plhs[0]);
