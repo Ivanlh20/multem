@@ -3,11 +3,16 @@ nVarargs = length(varargin);
 for k = 1:nVarargs
   varargin{k} = strcat(path, '/', char(varargin{k}));
 end;
-
-if (opt==1)
-    textcomands = strjoin({'mex -g -largeArrayDims', strcat('-I', path), '-I/opt/cuda/include', mfile, strjoin(varargin)});      
+CUDA_PATH = getenv('CUDA_PATH');
+if(isempty(CUDA_PATH))
+  CUDA_INC='-I/opt/cuda/include';
 else
-    textcomands = strjoin({'mex -largeArrayDims', strcat('-I', path), '-I/opt/cuda/include', mfile, strjoin(varargin)});    
+  CUDA_INC = strcat('-I"', CUDA_PATH, filesep, 'include"');
 end;
-
-eval(textcomands);
+if (opt==1)
+    textcommands = strjoin({'mex -silent -g -largeArrayDims', strcat('-I', path), CUDA_INC, mfile, strjoin(varargin), ['-L' path ' -lfftw3']});      
+else
+    textcommands = strjoin({'mex -silent -largeArrayDims', strcat('-I', path), CUDA_INC, mfile, strjoin(varargin), ['-L' path ' -lfftw3']});    
+end;
+disp(textcommands);
+eval(textcommands);

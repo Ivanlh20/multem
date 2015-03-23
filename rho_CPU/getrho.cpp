@@ -17,7 +17,7 @@
  */
 
 #include "hConstTypes.h"
-#include "hMT_General_CPU.h"
+#include "hGeneral_CPU.h"
 #include "hrhor_CPU.h"
 #include <mex.h>
 

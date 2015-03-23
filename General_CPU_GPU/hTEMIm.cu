@@ -18,6 +18,7 @@
 
 #include "hConstTypes.h"
 #include "hTEMIm.h"
+#include "hGeneral_CPU.h"
 #include "hMT_General_CPU.h"
 #include "hMT_General_GPU.h"
 #include "hMT_MicroscopeEffects_GPU.h"

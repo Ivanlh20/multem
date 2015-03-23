@@ -284,7 +284,7 @@ int f_get_dmaxIndex_Point2Line(double x1, double y1, double x2, double y2, int i
 	for(int i=ix1; i<=ix2; i++)
 	{
 		x0 = x[i]; y0 = y[i];
-		d = abs(c1*x0+c2*y0+c3);
+		d = std::abs(c1*x0+c2*y0+c3);
 		if(d>dmax)
 		{
 			dmax = d;
@@ -438,7 +438,7 @@ void f_MatchTwoVectors(int ns_i, double *s_i, int nx, double *x, int &ns_o, doub
 		imin = -1;
 		for(ix=0; ix<nx; ix++)
 		{
-			d = abs(s_i[i]-x[ix]);
+			d = std::abs(s_i[i]-x[ix]);
 			if(d<dmin)
 			{
 				dmin = d;
@@ -474,7 +474,7 @@ void f_MatchTwoVectors(int ns_i, double *s_i, int nx, double *x, int &ns_o, doub
 		imin = -1;
 		for(ix=0; ix<nx; ix++)
 		{
-			d = abs(s_i[i]-x[ix]);
+			d = std::abs(s_i[i]-x[ix]);
 			if(d<dmin)
 			{
 				dmin = d;
