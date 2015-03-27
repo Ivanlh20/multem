@@ -16,7 +16,7 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "math.h"
+#include <cmath>
 #include "hConstTypes.h"
 #include "hMT_General_GPU.h"
 #include "hMatlab2Cpp.h"
@@ -28,7 +28,7 @@
 #include <mex.h>
 
 /**********************read input TEMim*************************/
-void f_Matlab2InTEMIm(const mxArray *mxInTEMIm, sInTEMIm &InTEMIm)
+void Matlab2InTEMIm(const mxArray *mxInTEMIm, sInTEMIm &InTEMIm)
 {
 	InTEMIm.GPU_Device = ReadValuemxField<int>(mxInTEMIm, 0, "GPU_Device");
 	InTEMIm.MEffect = ReadValuemxField<int>(mxInTEMIm, 0, "MEffect");				// 1: Exit wave Partial coherente mode, 2: Transmission cross coefficient
