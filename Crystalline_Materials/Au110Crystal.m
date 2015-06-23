@@ -10,9 +10,9 @@ CrysPar.b = b;
 CrysPar.c = c;
 CrysPar.nuLayer = 2;
 % x y z Z sigma occupancy
-CrysPar.uLayer(1).Atoms = [0.00, 0.00, 0.00, 79, sigma, 1.0];
-CrysPar.uLayer(2).Atoms = [0.50, 0.50, 0.50, 79, sigma, 1.0];
-Crys3D = get_CrystalbyLayers_CPU(CrysPar);
+CrysPar.uLayer(1).atoms = [79, 0.00, 0.00, 0.00, sigma, 1.0];
+CrysPar.uLayer(2).atoms = [79, 0.50, 0.50, 0.50, sigma, 1.0];
+Crys3D = get_crystal_by_layers(CrysPar);
 
 dz = CrysPar.c/ncu;
 lx = na*CrysPar.a; ly = nb*CrysPar.b; lz = nc*CrysPar.c;
