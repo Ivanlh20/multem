@@ -25,7 +25,6 @@
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
 #include "input_multislice.hpp"
-#include "memory_info.cuh"
 
 namespace multem
 {

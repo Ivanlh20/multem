@@ -270,35 +270,35 @@ void get_simulation(const mxArray *mxB, const TInput_Multislice &input_multislic
 {
 	if(input_multislice.is_float_Host())
 	{
-		get_multislice<float, multem::Host>(mxB, tot, coh);
+		get_multislice<float, multem::e_Host>(mxB, tot, coh);
 	}
 	else if(input_multislice.is_double_Host())
 	{
-		get_multislice<double, multem::Host>(mxB, tot, coh);
+		get_multislice<double, multem::e_Host>(mxB, tot, coh);
 	}
 	if(input_multislice.is_float_Device())
 	{
-		get_multislice<float, multem::Device>(mxB, tot, coh);
+		get_multislice<float, multem::e_Device>(mxB, tot, coh);
 		cudaDeviceReset();
 	}
 	else if(input_multislice.is_double_Device())
 	{
-		get_multislice<double, multem::Device>(mxB, tot, coh);
+		get_multislice<double, multem::e_Device>(mxB, tot, coh);
 		cudaDeviceReset();
 	}
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	multem::Input_Multislice<double, multem::Host> input_multislice;
+	multem::Input_Multislice<double, multem::e_Host> input_multislice;
 	read_input_data(prhs[0], input_multislice, false);
 
 	set_output_data(input_multislice, plhs[0], plhs[1]);
 
 	if(input_multislice.is_STEM())
 	{
-		multem::Det_Int<double, multem::Host> det_int_coh;
-		multem::Det_Int<double, multem::Host> det_int_tot;
+		multem::Det_Int<double, multem::e_Host> det_int_coh;
+		multem::Det_Int<double, multem::e_Host> det_int_tot;
 		det_int_tot.resize(input_multislice.det_cir.size(), input_multislice.scanning.size());
 		if(!input_multislice.fast_cal)
 		{
@@ -329,8 +329,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	{
 		m_matrix_r m2psi_tot = mx_get_matrix<m_matrix_r>(plhs[0]);
 
-		multem::Vector<double, multem::Host> v_m2psi_tot(m2psi_tot.size);
-		multem::Vector<double, multem::Host> v_m2psi_coh;
+		multem::Vector<double, multem::e_Host> v_m2psi_tot(m2psi_tot.size);
+		multem::Vector<double, multem::e_Host> v_m2psi_coh;
 		get_simulation(prhs[0], input_multislice, v_m2psi_tot, v_m2psi_coh);
 
 		std::copy(v_m2psi_tot.begin(), v_m2psi_tot.end(), m2psi_tot.real);

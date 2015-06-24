@@ -56,10 +56,10 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {	
 	/*************************Input data**************************/
-	multem::Input_Multislice<double, multem::Host> input_multislice;
+	multem::Input_Multislice<double, multem::e_Host> input_multislice;
 	read_input_data(prhs[0], input_multislice);
 
-	multem::Specimen<double, multem::Host> specimen;
+	multem::Specimen<double, multem::e_Host> specimen;
 	specimen.set_input_data(&input_multislice);
 	specimen.move_atoms(input_multislice.fp_iconf);
 

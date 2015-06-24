@@ -22,6 +22,9 @@
 #include <Windows.h>
 #include <cstddef>
 
+#include <thread>
+#include <vector>
+#include <algorithm>
 #include "types.hpp"
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -48,26 +51,68 @@ namespace multem
 	}
 
 	template<eDevice dev>
-	void memory_info(double &free, double &total)
+	void memory_info(double &total, double &free){}
+
+	template<>
+	void memory_info<e_Host>(double &total, double &free)
 	{
-		if(dev==Host)
+		MEMORYSTATUSEX status;
+		status.dwLength = sizeof(status);
+		GlobalMemoryStatusEx(&status);
+		free = static_cast<double>(status.ullAvailPhys)/(1048576.0);
+		total = static_cast<double>(status.ullTotalPhys)/(1048576.0);
+	}
+
+	template<>
+	void memory_info<e_Device>(double &total, double &free)
+	{
+		free = total = 0;
+		size_t free_t, total_t;
+		if(cudaSuccess==cudaMemGetInfo(&free_t, &total_t))
 		{
-			MEMORYSTATUSEX status;
-			status.dwLength = sizeof(status);
-			GlobalMemoryStatusEx(&status);
-			free = static_cast<double>(status.ullAvailPhys)/(1048576.0);
-			total = static_cast<double>(status.ullTotalPhys)/(1048576.0);
+			free = static_cast<double>(free_t)/(1048576.0);
+			total = static_cast<double>(total_t)/(1048576.0);
 		}
-		else if(dev==Device)
+	}
+
+	inline
+	void get_device_properties(std::vector<Device_Properties> &device_properties)
+	{
+		device_properties.clear();
+
+		int device_count = 0;
+		cudaError_t error_id = cudaGetDeviceCount(&device_count);
+
+		if ((error_id != cudaSuccess)||(device_count == 0))
 		{
-			free = total = 0;
-			size_t free_t, total_t;
-			if(cudaSuccess==cudaMemGetInfo(&free_t, &total_t))
-			{
-				free = static_cast<double>(free_t)/(1048576.0);
-				total = static_cast<double>(total_t)/(1048576.0);
-			}
+			return;
 		}
+
+		device_properties.resize(device_count);
+		for (auto idev = 0; idev < device_count; idev++)
+		{
+			cudaSetDevice(idev);
+			cudaDeviceProp cuda_device_prop;
+			cudaGetDeviceProperties(&cuda_device_prop, idev);
+
+			device_properties[idev].id = idev;
+			device_properties[idev].name = cuda_device_prop.name;
+			device_properties[idev].compute_capability = 10*cuda_device_prop.major+cuda_device_prop.minor;
+			memory_info<e_Device>(device_properties[idev].total_memory_size, device_properties[idev].free_memory_size);
+		}
+
+		auto compare_fn = [](const Device_Properties &a, const Device_Properties &b)->bool{ return a.compute_capability > b.compute_capability; };
+		std::sort(device_properties.begin(), device_properties.end(), compare_fn);
+	}
+
+	inline
+	void get_host_properties(Host_Properties &host_properties)
+	{
+		SYSTEM_INFO siSysInfo;
+		GetSystemInfo(&siSysInfo);
+		host_properties.nprocessors = siSysInfo.dwNumberOfProcessors;
+		host_properties.nthreads = std::thread::hardware_concurrency();
+		memory_info<e_Host>(host_properties.total_memory_size, host_properties.free_memory_size);
 	}
 
 } // namespace multem

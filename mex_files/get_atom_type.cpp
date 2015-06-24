@@ -102,7 +102,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	multem::Atomic_Data atomic_data;
 	atomic_data.Load_Data(potential_type);
-	host_vector<multem::Atom_Type<double, multem::Host>> atom_type(multem::c_nAtomsTypes);
+	host_vector<multem::Atom_Type<double, multem::e_Host>> atom_type(multem::c_nAtomsTypes);
 
 	for(auto i=0; i<atom_type.size(); i++)
 	{

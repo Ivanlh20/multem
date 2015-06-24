@@ -147,25 +147,25 @@ void get_wave_function(const mxArray *mxB, m_matrix_c &wave)
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	multem::Input_Multislice<double, multem::Host> input_multislice;
+	multem::Input_Multislice<double, multem::e_Host> input_multislice;
 	read_input_data(prhs[0], input_multislice);
 
 	auto wave = mx_create_matrix<m_matrix_c>(input_multislice.grid, plhs[0]);
 
 	if(input_multislice.is_float_Host())
 	{
-		get_wave_function<float, multem::Host>(prhs[0], wave);
+		get_wave_function<float, multem::e_Host>(prhs[0], wave);
 	}
 	else if(input_multislice.is_double_Host())
 	{
-		get_wave_function<double, multem::Host>(prhs[0], wave);
+		get_wave_function<double, multem::e_Host>(prhs[0], wave);
 	}
 	if(input_multislice.is_float_Device())
 	{
-		get_wave_function<float, multem::Device>(prhs[0], wave);
+		get_wave_function<float, multem::e_Device>(prhs[0], wave);
 	}
 	else if(input_multislice.is_double_Device())
 	{
-		get_wave_function<double, multem::Device>(prhs[0], wave);
+		get_wave_function<double, multem::e_Device>(prhs[0], wave);
 	}
 }

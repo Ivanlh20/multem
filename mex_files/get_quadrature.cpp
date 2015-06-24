@@ -33,7 +33,7 @@ void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	nq = mx_get_scalar<int>(prhs[1]);
 
 	/*****************************************************************************/
-	multem::Q1<double, multem::Host> q;
+	multem::Q1<double, multem::e_Host> q;
 	multem::Quadrature quadrature;
 	quadrature.get(q_type, nq, q);
 

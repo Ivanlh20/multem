@@ -97,7 +97,7 @@ namespace multem
 
 			Vector<value_type_r, dev> V0;
 		private:
-			void set_atom_Vp(const int &islice, int iatom, const int &n_stream, Vector<Atom_Vp<value_type_r>, Host> &atom_Vp)
+			void set_atom_Vp(const int &islice, int iatom, const int &n_stream, Vector<Atom_Vp<value_type_r>, e_Host> &atom_Vp)
 			{
 				for(auto istream = 0; istream<n_stream; istream++)
 				{
@@ -138,14 +138,14 @@ namespace multem
 				}
 			}
 			
-			Vector<Atom_Type<value_type_r, dev>, Host> atom_type; // Atom types
+			Vector<Atom_Type<value_type_r, dev>, e_Host> atom_type; // Atom types
 			Stream<value_type_r, dev> *stream;
 
 			Q1<value_type_r, dev> qz;
-			Vector<Vector<int, dev>, Host> iv;
-			Vector<Vector<value_type_r, dev>, Host> v;
-			Vector<CI_Coef<value_type_r, dev>, Host> ciV0;
-			Vector<Atom_Vp<value_type_r>, Host> atom_Vp;
+			Vector<Vector<int, dev>, e_Host> iv;
+			Vector<Vector<value_type_r, dev>, e_Host> v;
+			Vector<CI_Coef<value_type_r, dev>, e_Host> ciV0;
+			Vector<Atom_Vp<value_type_r>, e_Host> atom_Vp;
 	};
 
 } // namespace multem

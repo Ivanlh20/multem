@@ -32,7 +32,6 @@
 namespace multem
 {
 	// get index (with typ=0: bottom index for equal values and typ=1: upper index for equal values)
-	FORCEINLINE 
 	int getIndex(int ixmin, int ixmax, double *x, int typ, double x0)
 	{
 		int ixmid; 
@@ -88,8 +87,8 @@ namespace multem
 		double cx = c_2Pi/(dx*(nx-1));
 		double cy = c_2Pi/(dy*(ny-1));
 
-		Vector<double, Host> fx(nx);
-		Vector<double, Host> fy(ny);
+		Vector<double, e_Host> fx(nx);
+		Vector<double, e_Host> fy(ny);
 
 		for(auto ix = 0; ix < fx.size(); ix++)
 		{
@@ -122,8 +121,8 @@ namespace multem
 		double Rx, Ry;
 		double c = 0.5/(Sigma*Sigma);
 
-		Vector<double, Host> fx(nx);
-		Vector<double, Host> fy(ny);
+		Vector<double, e_Host> fx(nx);
+		Vector<double, e_Host> fy(ny);
 
 		for(auto ix = 0; ix < fx.size(); ix++)
 		{
@@ -200,7 +199,7 @@ namespace multem
 	void getCumRadDist_2D(int ny, int nx, int shift, double *fI, int nr, double *r, double *fIr)
 	{	
 		int idx, nxh = nx/2, nyh = ny/2;
-		Vector<double, Host> cfIr(nr, 0.0);
+		Vector<double, e_Host> cfIr(nr, 0.0);
 		std::fill(fIr, fIr + nr, 0.0);
 
 		double Rx, Ry, R;
@@ -357,15 +356,15 @@ namespace multem
 	}
 
 	// Match A2 in A1 
-	void MatchTwoVectors(Vector<double, Host> &A1_i, Vector<double, Host> &A2_i, Vector<sPair<double>, Host> &A_o)
+	void MatchTwoVectors(Vector<double, e_Host> &A1_i, Vector<double, e_Host> &A2_i, Vector<sPair<double>, e_Host> &A_o)
 	{
-		Vector<bool, Host> A1_c(A1_i.size(), true);
+		Vector<bool, e_Host> A1_c(A1_i.size(), true);
 		A_o.clear();
 		A_o.reserve(A1_i.size());
 
 		double val;
 		std::size_t imin;
-		Vector<double, Host>::iterator it;
+		Vector<double, e_Host>::iterator it;
 		auto findClose = [&val](double &a, double &b)->bool{return fabs(a-val)<fabs(b-val); };
 
 		for(auto i=0; i<A2_i.size(); i++)
@@ -383,6 +382,59 @@ namespace multem
 		A_o.shrink_to_fit();
 	}
 
+	int get_close_Prime(int64_t n)
+	{
+		std::vector<int64_t> p2(18), p3(5), p5(3), p7(2);
+
+		for(auto i=0; i<p2.size(); i++)
+		{
+			p2[i] = std::pow((int64_t)2, i+1);
+
+			if(i < p3.size())
+			{
+				p3[i] = std::pow((int64_t)3, i);
+			}
+			if(i < p5.size())
+			{
+				p5[i] = std::pow((int64_t)5, i);
+			}
+			if(i < p7.size())
+			{
+				p7[i] = std::pow((int64_t)7, i);
+			}
+		}
+
+		int64_t prime, prime_0 = 128, prime_e = std::pow((int64_t)2, 18);
+		int64_t n_c = 64, dn = prime_e, idn;
+
+		for(auto ip7:p7)
+		{
+			for(auto ip5:p5)
+			{
+				for(auto ip3:p3)
+				{
+					for(auto ip2:p2)
+					{
+						prime = ip7*ip5*ip3*ip2;
+						idn = std::abs(n-prime);
+						if((prime_0<=prime)&&(prime<=prime_e)&&(idn<dn))
+						{
+							dn = idn;
+							n_c = prime;
+						}
+					}
+				}
+			}
+		}
+		return n_c;
+	}
+
+	void get_prime_sampling(int &nx, int &ny)
+	{
+		nx = get_close_Prime(nx);
+		ny = get_close_Prime(ny);
+	}
+
 	/***************************************************************************/
 	/***************************************************************************/
 
@@ -390,7 +442,7 @@ namespace multem
 	{
 		// Linear projected potential: V and zV
 		template<ePotential_Type potential_type, class T> 
-		void linear_Vz(const Q1<T, Host> &qz, Atom_Vp<T> &atom_Vp)
+		void linear_Vz(const Q1<T, e_Host> &qz, Atom_Vp<T> &atom_Vp)
 		{	
 			for(auto iR=0; iR < c_nR; iR++)
 			{
@@ -520,7 +572,7 @@ namespace multem
 	} // host_detail
 
 	template<class TQ1>
-	Enable_if_Host<TQ1, void>
+	enable_if_Host<TQ1, void>
 	get_cubic_poly_coef_Vz(ePotential_Type potential_type, TQ1 &qz, 
 	Atom_Vp<Value_type<TQ1>> &atom_Vp)
 	{
@@ -549,9 +601,9 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_r>
-	Enable_if_Host<TVector_r, void>
-	eval_cubic_poly(TGrid &grid, const int &n_stream, Stream<Value_type<TGrid>, Host> &stream, 
-	Vector<Atom_Vp<Value_type<TGrid>>, Host> &atom_Vp, TVector_r &V0)
+	enable_if_Host<TVector_r, void>
+	eval_cubic_poly(TGrid &grid, const int &n_stream, Stream<Value_type<TGrid>, e_Host> &stream, 
+	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V0)
 	{
 		if(n_stream<=0)
 		{
@@ -566,7 +618,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector>
-	Enable_if_Host<TVector, void>
+	enable_if_Host<TVector, void>
 	fft2_shift(TGrid &grid, TVector &M_io)
 	{
 		for(auto iy = 0; iy <grid.nyh; iy++)
@@ -623,7 +675,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector>
-	Enable_if_Host<TVector, Value_type<TVector>>
+	enable_if_Host<TVector, Value_type<TVector>>
 	sum_over_Det(TGrid &grid, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector &M_i)
 	{
 		using value_type_r = Value_type<TGrid>;
@@ -650,7 +702,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_r>
-	Enable_if_Host<TVector_r, Value_type<TGrid>>
+	enable_if_Host<TVector_r, Value_type<TGrid>>
 	sum_square_over_Det(TGrid &grid, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector_r &M_i)
 	{
 		using value_type_r = Value_type<TGrid>;
@@ -676,8 +728,8 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
-	bandwidth_limit(TGrid &grid, FFT2<Value_type<TGrid>, Host> &fft2, TVector_c &M_io)
+	enable_if_Host<TVector_c, void>
+	bandwidth_limit(TGrid &grid, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &M_io)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
@@ -708,7 +760,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
+	enable_if_Host<TVector_c, void>
 	phase_mul(TGrid &grid, TVector_c &exp_x_i, TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
 	{
 		for(auto iy = 0; iy < grid.ny; iy++)
@@ -722,7 +774,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
+	enable_if_Host<TVector_c, void>
 	propagator_mul(TGrid &grid, TVector_c &prop_x_i, TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &Psi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
@@ -748,7 +800,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
+	enable_if_Host<TVector_c, void>
 	probe(TGrid &grid, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> x, Value_type<TGrid> y, TVector_c &fPsi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
@@ -786,7 +838,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
+	enable_if_Host<TVector_c, void>
 	apply_CTF(TGrid &grid, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
@@ -822,7 +874,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
+	enable_if_Host<TVector_c, void>
 	apply_PCTF(TGrid &grid, Lens<Value_type<TGrid>> &lens, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
@@ -858,8 +910,8 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
-	kernel_xyz(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Host> &fft2, TVector_c &k_x, TVector_c &k_y, TVector_c &k_z)
+	enable_if_Host<TVector_c, void>
+	kernel_xyz(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_x, TVector_c &k_y, TVector_c &k_z)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
@@ -898,8 +950,8 @@ namespace multem
 	}
 	
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
-	kernel_x(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Host> &fft2, TVector_c &k_x)
+	enable_if_Host<TVector_c, void>
+	kernel_x(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_x)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
@@ -932,8 +984,8 @@ namespace multem
 	}
 	
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
-	kernel_y(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Host> &fft2, TVector_c &k_y)
+	enable_if_Host<TVector_c, void>
+	kernel_y(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_y)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
@@ -966,8 +1018,8 @@ namespace multem
 	}
 	
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
-	kernel_z(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Host> &fft2, TVector_c &k_z)
+	enable_if_Host<TVector_c, void>
+	kernel_z(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_z)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
@@ -1000,8 +1052,8 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
-	kernel_mn1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Host> &fft2, TVector_c &k_mn1)
+	enable_if_Host<TVector_c, void>
+	kernel_mn1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_mn1)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
@@ -1036,8 +1088,8 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Host<TVector_c, void>
-	kernel_mp1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Host> &fft2, TVector_c &k_mp1)
+	enable_if_Host<TVector_c, void>
+	kernel_mp1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_mp1)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
@@ -1072,7 +1124,7 @@ namespace multem
 	}
 
 	template<class TVector_c>
-	Enable_if_Host<TVector_c, void>
+	enable_if_Host<TVector_c, void>
 	scomplex_to_complex(m_matrix_c &V_i, TVector_c &V_o)
 	{
 		using value_type_c = Value_type<TVector_c>;
@@ -1092,7 +1144,7 @@ namespace multem
 	typename std::enable_if<is_Host<TVector_i>::value && !is_m_matrix_rc<TVector_o>::value, void>::type
 	to_host(TGrid &grid, TVector_i &M_i, TVector_o &M_o)
 	{
-		multem::device_synchronize<multem::Host>();
+		multem::device_synchronize<multem::e_Host>();
 
 		for(auto iy = 0; iy < grid.ny; iy++)
 		{
@@ -1107,7 +1159,7 @@ namespace multem
 	typename std::enable_if<is_Host<TVector>::value && is_m_matrix_r<Tm_matrix_r>::value, void>::type
 	to_host(TGrid &grid, TVector &M_i, Tm_matrix_r &M_o)
 	{
-		multem::device_synchronize<multem::Host>();
+		multem::device_synchronize<multem::e_Host>();
 
 		for(auto iy = 0; iy < grid.ny; iy++)
 		{
@@ -1122,7 +1174,7 @@ namespace multem
 	typename std::enable_if<is_Host<TVector>::value && is_m_matrix_c<Tm_matrix_c>::value, void>::type
 	to_host(TGrid &grid, TVector &M_i, Tm_matrix_c &M_o)
 	{
-		multem::device_synchronize<multem::Host>();
+		multem::device_synchronize<multem::e_Host>();
 
 		for(auto iy = 0; iy < grid.ny; iy++)
 		{

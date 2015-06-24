@@ -83,7 +83,7 @@ namespace multem
 				}
 			}
 
-			Vector<Vector<value_type_c, dev>, Host> kernel;
+			Vector<Vector<value_type_c, dev>, e_Host> kernel;
 		private:
 			Input_Multislice<value_type_r, dev> *input_multislice;
 			FFT2<value_type_r, dev> *fft2;

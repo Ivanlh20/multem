@@ -91,25 +91,25 @@ void get_projected_potential(const mxArray *mxB, m_matrix_r &V0)
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	multem::Input_Multislice<double, multem::Host> input_multislice;
+	multem::Input_Multislice<double, multem::e_Host> input_multislice;
 	read_input_data(prhs[0], input_multislice, false);
 
 	auto V0 = mx_create_matrix<m_matrix_r>(input_multislice.grid, plhs[0]);
 
 	if(input_multislice.is_float_Host())
 	{
-		get_projected_potential<float, multem::Host>(prhs[0], V0);
+		get_projected_potential<float, multem::e_Host>(prhs[0], V0);
 	}
 	else if(input_multislice.is_double_Host())
 	{
-		get_projected_potential<double, multem::Host>(prhs[0], V0);
+		get_projected_potential<double, multem::e_Host>(prhs[0], V0);
 	}
 	if(input_multislice.is_float_Device())
 	{
-		get_projected_potential<float, multem::Device>(prhs[0], V0);
+		get_projected_potential<float, multem::e_Device>(prhs[0], V0);
 	}
 	else if(input_multislice.is_double_Device())
 	{
-		get_projected_potential<double, multem::Device>(prhs[0], V0);
+		get_projected_potential<double, multem::e_Device>(prhs[0], V0);
 	}
 }

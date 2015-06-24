@@ -103,7 +103,7 @@ namespace multem
 				// get atom information
 				atoms.get_Statistic(&atom_type);
 
-				if(input_multislice->interaction_model == eESIM_Mulstilice)
+				if(input_multislice->interaction_model == eESIM_Multislice)
 				{
 					// Ascending sort by z
 					atoms.Sort_by_z();
@@ -122,10 +122,10 @@ namespace multem
 
 			Input_Multislice<T, dev> *input_multislice; 			
 
-			Vector<Atom_Type<T, Host>, Host> atom_type; 	// Atom types
+			Vector<Atom_Type<T, e_Host>, e_Host> atom_type; 	// Atom types
 			Atom_Data<T> atoms; 							// displaced atoms
-			Slice<T, Host> slice; 							// Slicing procedure
-			Thickness<T, Host> thickness; 					// Thicknesses
+			Slice<T, e_Host> slice; 							// Slicing procedure
+			Thickness<T, e_Host> thickness; 					// Thicknesses
 
 		private:
 			void get_z_Slice(const ePotential_Slicing &potential_slicing, T dz_i=0)
@@ -137,7 +137,7 @@ namespace multem
 					return (int)floor(A/B+Epsilon<T>::rel);
 				};
 
-				auto get_Spacing = [](size_type ix, const Vector<float, Host> &x)->float
+				auto get_Spacing = [](size_type ix, const Vector<float, e_Host> &x)->float
 				{
 					ix = (ix <= 0)?1:min(ix, x.size()-1);
 					return (x.size()>1)?x[ix]-x[ix-1]:0.0;
@@ -214,7 +214,7 @@ namespace multem
 			// Slicing
 			void get_Slicing(const eElec_Spec_Int_Model &interaction_model, const ePotential_Slicing &potential_slicing, T dz_i)
 			{
-				if(interaction_model != eESIM_Mulstilice) {
+				if(interaction_model != eESIM_Multislice) {
 					slice.resize(1);
 					slice.z_0[0] = atoms.z_Int_min; 
 					slice.z_e[0] = atoms.z_Int_max; 
@@ -305,7 +305,7 @@ namespace multem
 			// Undisplaced atoms
 			Atom_Data<T> Atoms_u;
 
-			Vector<T, Host> z_Slice;
+			Vector<T, e_Host> z_Slice;
 	};
 
 	//// get thickness

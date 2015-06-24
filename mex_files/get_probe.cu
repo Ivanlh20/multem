@@ -89,25 +89,25 @@ void get_probe(const mxArray *mxB, m_matrix_c &host_probe)
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	multem::Input_Multislice<double, multem::Host> input_multislice;
+	multem::Input_Multislice<double, multem::e_Host> input_multislice;
 	read_input_data(prhs[0], input_multislice);
 
 	auto probe = mx_create_matrix<m_matrix_c>(input_multislice.grid, plhs[0]);
 
 	if(input_multislice.is_float_Host())
 	{
-		get_probe<float, multem::Host>(prhs[0], probe);
+		get_probe<float, multem::e_Host>(prhs[0], probe);
 	}
 	else if(input_multislice.is_double_Host())
 	{
-		get_probe<double, multem::Host>(prhs[0], probe);
+		get_probe<double, multem::e_Host>(prhs[0], probe);
 	}
 	if(input_multislice.is_float_Device())
 	{
-		get_probe<float, multem::Device>(prhs[0], probe);
+		get_probe<float, multem::e_Device>(prhs[0], probe);
 	}
 	else if(input_multislice.is_double_Device())
 	{
-		get_probe<double, multem::Device>(prhs[0], probe);
+		get_probe<double, multem::e_Device>(prhs[0], probe);
 	}
 }

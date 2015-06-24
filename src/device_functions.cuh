@@ -909,7 +909,7 @@ namespace multem
 	} // namespace device_detail
 
 	template<class TQ1>
-	Enable_if_Device<TQ1, void>
+	enable_if_Device<TQ1, void>
 	get_cubic_poly_coef_Vz(ePotential_Type potential_type, TQ1 &qz, 
 	Atom_Vp<Value_type<TQ1>> &atom_Vp)
 	{
@@ -938,9 +938,9 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_r>
-	Enable_if_Device<TVector_r, void>
-	eval_cubic_poly(TGrid &grid, const int &n_stream, Stream<Value_type<TGrid>, Device> &stream, 
-	Vector<Atom_Vp<Value_type<TGrid>>, Host> &atom_Vp, TVector_r &V0)
+	enable_if_Device<TVector_r, void>
+	eval_cubic_poly(TGrid &grid, const int &n_stream, Stream<Value_type<TGrid>, e_Device> &stream, 
+	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V0)
 	{
 		if(n_stream<=0)
 		{
@@ -956,7 +956,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector>
-	Enable_if_Device<TVector, void>
+	enable_if_Device<TVector, void>
 	fft2_shift(TGrid &grid, TVector &M_io)
 	{
 		GridBT gridBT;
@@ -967,7 +967,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector>
-	Enable_if_Device<TVector, Value_type<TVector>>
+	enable_if_Device<TVector, Value_type<TVector>>
 	sum_over_Det(TGrid &grid, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector &M_i)
 	{
 		TVector sum_v(c_thrnxny*c_thrnxny);
@@ -980,7 +980,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_r>
-	Enable_if_Device<TVector_r, Value_type<TGrid>>
+	enable_if_Device<TVector_r, Value_type<TGrid>>
 	sum_square_over_Det(TGrid &grid, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector_r &M_i)
 	{
 		device_vector<Value_type<TGrid>> sum_t(c_thrnxny*c_thrnxny);
@@ -992,8 +992,8 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
-	bandwidth_limit(TGrid &grid, FFT2<Value_type<TGrid>, Device> &fft2, TVector_c &M_io)
+	enable_if_Device<TVector_c, void>
+	bandwidth_limit(TGrid &grid, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &M_io)
 	{
 		if(!grid.bwl) return;
 
@@ -1006,7 +1006,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
+	enable_if_Device<TVector_c, void>
 	phase_mul(TGrid &grid, TVector_c &exp_x_i, TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
@@ -1015,7 +1015,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
+	enable_if_Device<TVector_c, void>
 	propagator_mul(TGrid &grid, TVector_c &prop_x_i, TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &Psi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
@@ -1024,7 +1024,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
+	enable_if_Device<TVector_c, void>
 	probe(TGrid &grid, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> x, Value_type<TGrid> y, TVector_c &fPsi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
@@ -1038,7 +1038,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
+	enable_if_Device<TVector_c, void>
 	apply_CTF(TGrid &grid, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
@@ -1046,7 +1046,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
+	enable_if_Device<TVector_c, void>
 	apply_PCTF(TGrid &grid, Lens<Value_type<TGrid>> &lens, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
@@ -1054,8 +1054,8 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
-	kernel_xyz(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Device> &fft2, TVector_c &k_x, TVector_c &k_y, TVector_c &k_z)
+	enable_if_Device<TVector_c, void>
+	kernel_xyz(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_x, TVector_c &k_y, TVector_c &k_z)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
@@ -1069,8 +1069,8 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
-	kernel_x(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Device> &fft2, TVector_c &k_x)
+	enable_if_Device<TVector_c, void>
+	kernel_x(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_x)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
@@ -1082,8 +1082,8 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
-	kernel_y(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Device> &fft2, TVector_c &k_y)
+	enable_if_Device<TVector_c, void>
+	kernel_y(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_y)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
@@ -1095,8 +1095,8 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
-	kernel_z(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Device> &fft2, TVector_c &k_z)
+	enable_if_Device<TVector_c, void>
+	kernel_z(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_z)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
@@ -1108,8 +1108,8 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
-	kernel_mn1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Device> &fft2, TVector_c &k_mn1)
+	enable_if_Device<TVector_c, void>
+	kernel_mn1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_mn1)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
@@ -1121,8 +1121,8 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	Enable_if_Device<TVector_c, void>
-	kernel_mp1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, Device> &fft2, TVector_c &k_mp1)
+	enable_if_Device<TVector_c, void>
+	kernel_mp1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_mp1)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
@@ -1134,12 +1134,12 @@ namespace multem
 	}
 
 	template<class TVector_c>
-	Enable_if_Device<TVector_c, void>
+	enable_if_Device<TVector_c, void>
 	scomplex_to_complex(m_matrix_c &V_i, TVector_c &V_o)
 	{
 		using value_type_c = Value_type<TVector_c>;
 		
-		Vector<value_type_c, Host> V_h(V_i.size);
+		Vector<value_type_c, e_Host> V_h(V_i.size);
 
 		for(auto ixy = 0; ixy < V_i.size; ixy++)
 		{
@@ -1153,7 +1153,7 @@ namespace multem
 	typename std::enable_if<is_Device<TVector_i>::value && !is_m_matrix_rc<TVector_o>::value, void>::type
 	to_host(TGrid &grid, TVector_i &M_i, TVector_o &M_o)
 	{
-		multem::device_synchronize<multem::Device>();
+		multem::device_synchronize<multem::e_Device>();
 
 		thrust::copy(M_i.begin(), M_i.end(), M_o.begin());
 	}
@@ -1162,7 +1162,7 @@ namespace multem
 	typename std::enable_if<is_Device<TVector>::value && is_m_matrix_r<Tm_matrix_r>::value, void>::type
 	to_host(TGrid &grid, TVector &M_i, Tm_matrix_r &M_o)
 	{
-		multem::device_synchronize<multem::Device>();
+		multem::device_synchronize<multem::e_Device>();
 
 		thrust::copy(M_i.begin(), M_i.end(), M_o.real);
 	}
@@ -1171,7 +1171,7 @@ namespace multem
 	typename std::enable_if<is_Device<TVector>::value && is_m_matrix_c<Tm_matrix_c>::value, void>::type
 	to_host(TGrid &grid, TVector &M_i, Tm_matrix_c &M_o)
 	{
-		multem::device_synchronize<multem::Device>();
+		multem::device_synchronize<multem::e_Device>();
 
 		host_vector<Value_type<TVector>> M_t(M_i.begin(), M_i.end());
 		for(auto i = 0; i<M_t.size(); i++)
@@ -1180,6 +1180,7 @@ namespace multem
 			M_o.imag[i] = M_t[i].imag();
 		}
 	}
+
 } // namespace multem
 
 #endif

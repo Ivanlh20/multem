@@ -42,7 +42,7 @@ namespace multem
 
 			eSimulation_Type simulation_type; 						// 11: Scanning, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
 			ePhonon_Model phonon_model; 							// 1: Still atom model, 2: Absorptive potential model, 3: Frozen phonon
-			eElec_Spec_Int_Model interaction_model; 				// eESIM_Mulstilice = 1, eESIM_Phase_Object= 2, eESIM_Weak_Phase_Object = 3
+			eElec_Spec_Int_Model interaction_model; 				// eESIM_Multislice = 1, eESIM_Phase_Object= 2, eESIM_Weak_Phase_Object = 3
 			ePotential_Slicing potential_slicing; 					// ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 			ePotential_Type potential_type;							// potential type: 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 
@@ -59,7 +59,7 @@ namespace multem
 			T zero_defocus_plane; 									// Zero defocus plane
 			
 			eThickness_Type thickness_type; 						// eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Planes = 3
-			Vector<T, Host> thickness; 							// Array of thicknesses
+			Vector<T, e_Host> thickness; 							// Array of thicknesses
 
 			eInput_Wave_Type input_wave_type; 						// 1: Automatic, 2: User define
 			Vector<complex<T>, dev> psi_0; 						// Input wave
@@ -83,7 +83,7 @@ namespace multem
 
 			Scanning<T> scanning; 										// Scanning
 
-			Det_Cir<T, Host> det_cir; 								// Circular detectors
+			Det_Cir<T, e_Host> det_cir; 								// Circular detectors
 
 			HRTEM<T> hrtem;
 
@@ -101,8 +101,8 @@ namespace multem
 			int nstream;
 			bool dp_Shift; 											// Shift diffraction pattern
 
-			Input_Multislice(): precision(eP_double), device(Host), cpu_ncores(1), cpu_nthread(4), gpu_device(0), gpu_nstream(8), 
-						simulation_type(eST_EWRS), phonon_model(ePM_Still_Atom), interaction_model(eESIM_Mulstilice), 
+			Input_Multislice(): precision(eP_double), device(e_Host), cpu_ncores(1), cpu_nthread(4), gpu_device(0), gpu_nstream(8), 
+						simulation_type(eST_EWRS), phonon_model(ePM_Still_Atom), interaction_model(eESIM_Multislice), 
 						potential_slicing(ePS_Planes), potential_type(ePT_Lobato_0_12), fp_nconf(0), fp_dist(1), 
 						fp_seed(1983), microscope_effect(eME_Partial_Coherent), spatial_temporal_effect(eSTE_Spatial_Temporal), 
 						zero_defocus_type(eZDT_Last), zero_defocus_plane(0), fast_cal(true), thickness_type(eTT_Whole_Specimen), 
@@ -111,13 +111,13 @@ namespace multem
 
 			void validate_parameters()
 			{
-				nstream = (device==Host)?cpu_nthread:gpu_nstream;
+				nstream = (device==e_Host)?cpu_nthread:gpu_nstream;
 
 				if((precision!=eP_float)&&(precision!=eP_double))
 					precision=eP_float;
 
-				if((device!=Host)&&(device!=Device))
-					device=Host;
+				if((device!=e_Host)&&(device!=e_Device))
+					device=e_Host;
 
 				fp_nconf = (is_frozen_phonon())?max(1, fp_nconf):1;
 
@@ -264,7 +264,7 @@ namespace multem
 
 			bool is_multislice() const
 			{
-				return interaction_model == multem::eESIM_Mulstilice;
+				return interaction_model == multem::eESIM_Multislice;
 			}
 
 			bool is_subslicing() const
@@ -384,12 +384,12 @@ namespace multem
 
 			bool is_Host() const
 			{
-				return device==multem::Host;
+				return device==multem::e_Host;
 			}
 
 			bool is_Device() const
 			{
-				return device==multem::Device;
+				return device==multem::e_Device;
 			}
 
 			bool is_float() const

@@ -49,7 +49,7 @@ namespace multem
 
 				trans_0.resize(input_multislice->grid.nxy());
 
-				if((!input_multislice->fast_cal)||(input_multislice->interaction_model!=eESIM_Mulstilice))
+				if((!input_multislice->fast_cal)||(input_multislice->interaction_model!=eESIM_Multislice))
 				{
 					memory_slice.clear();
 					return;
@@ -148,7 +148,7 @@ namespace multem
 				void set_input_data(const int &nSlice_req_i, const int &nxy_i)
 				{
 					n_slice_req = nSlice_req_i;
-					memory_info<dev>(free_memory, total_memory);
+					memory_info<dev>(total_memory, free_memory);
 					free_memory = free_memory - 10.0;
 
 					if(free_memory/sizeMb<value_type_c>(nxy_i) >= n_slice_req)
@@ -191,8 +191,8 @@ namespace multem
 			Memory_Slice memory_slice;
 
 		protected:
-			Vector<Vector<value_type_c, dev>, Host> trans_v;
-			Vector<Vector<value_type_r, dev>, Host> Vp_v;
+			Vector<Vector<value_type_c, dev>, e_Host> trans_v;
+			Vector<Vector<value_type_r, dev>, e_Host> Vp_v;
 
 			FFT2<value_type_r, dev> *fft2;
 	};

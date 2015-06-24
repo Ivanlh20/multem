@@ -24527,10 +24527,10 @@ class fxeg_Tabulated_Data{
 
 		}
 
-		multem::Vector<double, multem::Host> g;
-		multem::Vector<double, multem::Host> g2;
-		multem::Vector<double, multem::Host> feg;
-		multem::Vector<double, multem::Host> fxg;
+		multem::Vector<double, multem::e_Host> g;
+		multem::Vector<double, multem::e_Host> g2;
+		multem::Vector<double, multem::e_Host> feg;
+		multem::Vector<double, multem::e_Host> fxg;
 };
 
 #endif

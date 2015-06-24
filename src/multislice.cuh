@@ -41,7 +41,7 @@ namespace multem
 			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io)
 			{
 				input_multislice = input_multislice_io;
-				if(dev==Device)
+				if(dev==e_Device)
 				{
 					cudaSetDevice(input_multislice->gpu_device);
 				}
@@ -352,8 +352,8 @@ namespace multem
 
 				if(input_multislice->is_STEM())
 				{
-					auto *tot = reinterpret_cast<Det_Int<value_type_1, Host>*>(host_tot);
-					auto *coh = reinterpret_cast<Det_Int<value_type_2, Host>*>(host_coh);
+					auto *tot = reinterpret_cast<Det_Int<value_type_1, e_Host>*>(host_tot);
+					auto *coh = reinterpret_cast<Det_Int<value_type_2, e_Host>*>(host_coh);
 
 					if(input_multislice->fast_cal)
 					{
@@ -407,7 +407,7 @@ namespace multem
 				}
 				else if(input_multislice->is_EELS())
 				{
-					auto *tot = reinterpret_cast<Vector<value_type_1, Host>*>(host_tot);
+					auto *tot = reinterpret_cast<Vector<value_type_1, e_Host>*>(host_tot);
 
 					EELS(*tot);
 				}

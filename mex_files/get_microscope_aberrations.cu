@@ -123,25 +123,25 @@ void get_microscope_aberrations(const mxArray *mxB, m_matrix_r &m2psi_host)
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	multem::Input_Multislice<double, multem::Host> input_multislice;
+	multem::Input_Multislice<double, multem::e_Host> input_multislice;
 	read_input_data(prhs[0], input_multislice, false);
 
 	auto m2psi = mx_create_matrix<m_matrix_r>(input_multislice.grid, plhs[0]);
 
 	if(input_multislice.is_float_Host())
 	{
-		get_microscope_aberrations<float, multem::Host>(prhs[0], m2psi);
+		get_microscope_aberrations<float, multem::e_Host>(prhs[0], m2psi);
 	}
 	else if(input_multislice.is_double_Host())
 	{
-		get_microscope_aberrations<double, multem::Host>(prhs[0], m2psi);
+		get_microscope_aberrations<double, multem::e_Host>(prhs[0], m2psi);
 	}
 	if(input_multislice.is_float_Device())
 	{
-		get_microscope_aberrations<float, multem::Device>(prhs[0], m2psi);
+		get_microscope_aberrations<float, multem::e_Device>(prhs[0], m2psi);
 	}
 	else if(input_multislice.is_double_Device())
 	{
-		get_microscope_aberrations<double, multem::Device>(prhs[0], m2psi);
+		get_microscope_aberrations<double, multem::e_Device>(prhs[0], m2psi);
 	}
 }

@@ -32,6 +32,7 @@
 #include <cfloat>
 #include <type_traits>
 #include <stdio.h>
+#include <string>
 #include <vector>
 #include <thread>
 #include <mutex>
@@ -48,6 +49,7 @@
 #include <device_functions.h>
 #include <cufft.h>
 
+using std::vector;
 using thrust::device_vector;
 using thrust::host_vector;
 using thrust::raw_pointer_cast;
@@ -115,10 +117,10 @@ namespace multem
 	const int cSizeofRF = sizeof(float);
 	const int cSizeofCD = 2*cSizeofRD;
 
-	/******************************Device type******************************/
+	/******************************e_Device type******************************/
 	enum eDevice
 	{
-		Host = 1, Device = 2
+		e_Host = 1, e_Device = 2
 	};
 
 	/******************************Slice memory type******************************/
@@ -197,7 +199,7 @@ namespace multem
 	/******************Electron specimen interaction model**********************/
 	enum eElec_Spec_Int_Model
 	{
-		eESIM_Mulstilice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
+		eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
 	};
 
 	/**************************Potential Slicing Type***************************/
@@ -275,7 +277,7 @@ namespace multem
 
 	/**************************vector**************************/
 	template<class T, eDevice dev>
-	using Vector = typename std::conditional<dev==Host, host_vector<T>, device_vector<T>>::type;
+	using Vector = typename std::conditional<dev==e_Host, host_vector<T>, device_vector<T>>::type;
 
 	template<class T>
 	struct rVector
@@ -370,7 +372,7 @@ namespace multem
 		struct is_Vector<T, dev, typename std::enable_if<std::is_scalar<T>::value>::type>: std::integral_constant<bool, false> {};
 	
 		template<class T, eDevice dev>
-		struct is_Vector<T, dev, typename std::enable_if<!std::is_scalar<T>::value>::type>: std::integral_constant<bool, (dev==Host)?(std::is_same<T, host_vector<Value_type<T>>>::value):(std::is_same<T, device_vector<Value_type<T>>>::value)> {};
+		struct is_Vector<T, dev, typename std::enable_if<!std::is_scalar<T>::value>::type>: std::integral_constant<bool, (dev==e_Host)?(std::is_same<T, host_vector<Value_type<T>>>::value):(std::is_same<T, device_vector<Value_type<T>>>::value)> {};
 
 		template<class T, class Enable = void>
 		struct has_device_member {}; 
@@ -402,91 +404,91 @@ namespace multem
 		struct is_Host_Device<T, dev, typename std::enable_if<!has_device_member<T>::value>::type>: std::integral_constant<bool, is_Vector<T, dev>::value> {};
 
 		template<class T>
-		struct is_Host: std::integral_constant<bool, is_Host_Device<T, Host>::value> {};
+		struct is_Host: std::integral_constant<bool, is_Host_Device<T, e_Host>::value> {};
 
 		template<class T>
-		struct is_Device: std::integral_constant<bool, is_Host_Device<T, Device>::value> {};
+		struct is_Device: std::integral_constant<bool, is_Host_Device<T, e_Device>::value> {};
 
 		template <class T, class U>
-		using Enable_if_Host = typename std::enable_if<is_Host<T>::value, U>::type;
-
-		template <class T, class U=void>
-		using Enable_if_Device = typename std::enable_if<is_Device<T>::value, U>::type;
+		using enable_if_Host = typename std::enable_if<is_Host<T>::value, U>::type;
 
 		template <class T, class U>
-		using Enable_if_float = typename std::enable_if<is_float<T>::value, U>::type;
+		using enable_if_Device = typename std::enable_if<is_Device<T>::value, U>::type;
 
 		template <class T, class U>
-		using Enable_if_double = typename std::enable_if<is_double<T>::value, U>::type;
+		using enable_if_float = typename std::enable_if<is_float<T>::value, U>::type;
 
 		template <class T, class U>
-		using Enable_if_int = typename std::enable_if<is_int<T>::value, U>::type;
+		using enable_if_double = typename std::enable_if<is_double<T>::value, U>::type;
 
 		template <class T, class U>
-		using Enable_if_bool = typename std::enable_if<is_bool<T>::value, U>::type;
+		using enable_if_int = typename std::enable_if<is_int<T>::value, U>::type;
 
 		template <class T, class U>
-		using Enable_if_floating_point = typename std::enable_if<std::is_floating_point<T>::value, U>::type;
+		using enable_if_bool = typename std::enable_if<is_bool<T>::value, U>::type;
+
+		template <class T, class U>
+		using enable_if_floating_point = typename std::enable_if<std::is_floating_point<T>::value, U>::type;
 	
 		template <class T, class U>
-		using Enable_if_enum_bool = typename std::enable_if<is_enum_bool<T>::value, U>::type;
+		using enable_if_enum_bool = typename std::enable_if<is_enum_bool<T>::value, U>::type;
 	
 		template <class T, class U>
-		using Enable_if_int_floating_point = typename std::enable_if<is_int_floating_point<T>::value, U>::type;
+		using enable_if_int_floating_point = typename std::enable_if<is_int_floating_point<T>::value, U>::type;
 		
 		template <class T, class U>
-		using Enable_if_pointer = typename std::enable_if<std::is_pointer<T>::value, U>::type;
+		using enable_if_pointer = typename std::enable_if<std::is_pointer<T>::value, U>::type;
 
 		template <class T, class U>
-		using Enable_if_m_matrix_r = typename std::enable_if<is_m_matrix_r<T>::value, U>::type;
+		using enable_if_m_matrix_r = typename std::enable_if<is_m_matrix_r<T>::value, U>::type;
 
 		template <class T, class U>
-		using Enable_if_m_matrix_c = typename std::enable_if<is_m_matrix_c<T>::value, U>::type;	
+		using enable_if_m_matrix_c = typename std::enable_if<is_m_matrix_c<T>::value, U>::type;	
 
 		template <class T, class U>
-		using Enable_if_m_matrix_rc = typename std::enable_if<is_m_matrix_rc<T>::value, U>::type;	
+		using enable_if_m_matrix_rc = typename std::enable_if<is_m_matrix_rc<T>::value, U>::type;	
 
 		template <int simulation_type, class U>
-		using Enable_if_STEM = typename std::enable_if<simulation_type==multem::eST_STEM, U>::type;
+		using enable_if_STEM = typename std::enable_if<simulation_type==eST_STEM, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_ISTEM = typename std::enable_if<simulation_type==multem::eST_ISTEM, U>::type;
+		using enable_if_ISTEM = typename std::enable_if<simulation_type==eST_ISTEM, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_CBED = typename std::enable_if<simulation_type==multem::eST_CBED, U>::type;
+		using enable_if_CBED = typename std::enable_if<simulation_type==eST_CBED, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_CBEI = typename std::enable_if<simulation_type==multem::eST_CBEI, U>::type;
+		using enable_if_CBEI = typename std::enable_if<simulation_type==eST_CBEI, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_ED = typename std::enable_if<simulation_type==multem::eST_ED, U>::type;
+		using enable_if_ED = typename std::enable_if<simulation_type==eST_ED, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_HRTEM = typename std::enable_if<simulation_type==multem::eST_HRTEM, U>::type;
+		using enable_if_HRTEM = typename std::enable_if<simulation_type==eST_HRTEM, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_PED = typename std::enable_if<simulation_type==multem::eST_PED, U>::type;
+		using enable_if_PED = typename std::enable_if<simulation_type==eST_PED, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_HCI = typename std::enable_if<simulation_type==multem::eST_HCI, U>::type;
+		using enable_if_HCI = typename std::enable_if<simulation_type==eST_HCI, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_EWFS = typename std::enable_if<simulation_type==multem::eST_EWFS, U>::type;
+		using enable_if_EWFS = typename std::enable_if<simulation_type==eST_EWFS, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_EWRS = typename std::enable_if<simulation_type==multem::eST_EWRS, U>::type;
+		using enable_if_EWRS = typename std::enable_if<simulation_type==eST_EWRS, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_EELS = typename std::enable_if<simulation_type==multem::eST_EELS, U>::type;
+		using enable_if_EELS = typename std::enable_if<simulation_type==eST_EELS, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_EFTEM = typename std::enable_if<simulation_type==multem::eST_EFTEM, U>::type;
+		using enable_if_EFTEM = typename std::enable_if<simulation_type==eST_EFTEM, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_ProbeFS = typename std::enable_if<simulation_type==multem::eST_ProbeFS, U>::type;
+		using enable_if_ProbeFS = typename std::enable_if<simulation_type==eST_ProbeFS, U>::type;
 
 		template <int simulation_type, class U>
-		using Enable_if_ProbeRS = typename std::enable_if<simulation_type==multem::eST_ProbeRS, U>::type;
+		using enable_if_ProbeRS = typename std::enable_if<simulation_type==eST_ProbeRS, U>::type;
 	}
 
 	template<class T>
@@ -499,24 +501,33 @@ namespace multem
 	//static member function are not support for the cuda compiler
 	template<class T>
 	DEVICE_CALLABLE FORCEINLINE
-	bool isEqual(const T &a, const T &b)
-	{
-		T eps_abs = 0;
-		T eps_rel = 0;
+	bool isEqual(const T &a, const T &b){}
 
-		if(traits::is_float<T>::value)
-		{
-			eps_abs = 1e-5f;
-			eps_rel = 1e-4f;
-		}
-		else if(traits::is_double<T>::value)
-		{
-			eps_abs = 1e-13;
-			eps_rel = 1e-8;
-		}
+	template<>
+	DEVICE_CALLABLE FORCEINLINE
+	bool isEqual<float>(const float &a, const float &b)
+	{
+		const float eps_abs = 1e-5f;
+		const float eps_rel = 1e-4f;
 
 		// Check if the numbers are really close -- needed when comparing numbers near zero.
-		T diff = abs(a - b);
+		float diff = abs(a - b);
+		if (diff <= eps_abs)
+			return true;
+ 
+		// Otherwise fall back to Knuth's algorithm
+		return diff <= ((abs(a)<abs(b)?abs(b):abs(a))*eps_rel);
+	}
+
+	template<>
+	DEVICE_CALLABLE FORCEINLINE
+	bool isEqual<double>(const double &a, const double &b)
+	{
+		const double eps_abs = 1e-13;
+		const double eps_rel = 1e-8;
+
+		// Check if the numbers are really close -- needed when comparing numbers near zero.
+		double diff = abs(a - b);
 		if (diff <= eps_abs)
 			return true;
  
@@ -1068,7 +1079,7 @@ namespace multem
 			}
 		}
 
-		Vector<Vector<T, dev>, Host> image;
+		Vector<Vector<T, dev>, e_Host> image;
 	};
 
 	/******************************pair<int, val>************************************/
@@ -1381,9 +1392,9 @@ namespace multem
 		inline
 		void set_input_data(T E_0, Grid<T> &grid)
 		{
-			gamma = get_Gamma(E_0);
+			gamma = get_gamma(E_0);
 
-			lambda = get_Lambda(E_0);
+			lambda = get_lambda(E_0);
 			lambda2 = pow(lambda, 2);
 
 			cf = (isZero(f))?0:c_Pi*f*lambda;
@@ -1444,8 +1455,8 @@ namespace multem
 			space = space_i;
 			E_0 = E_0_i;
 			E_loss = E_loss_i;
-			T gamma = get_Gamma(E_0);
-			T lambda = get_Lambda(E_0);
+			T gamma = get_gamma(E_0);
+			T lambda = get_lambda(E_0);
 
 			T theta = get_theta(E_loss, E_0);
 
@@ -1689,12 +1700,12 @@ namespace multem
 	struct Stream {};
 
 	template<class T>
-	struct Stream<T, Host>
+	struct Stream<T, e_Host>
 	{
 		public:
 			using value_type = typename T;
 
-			static const eDevice device = Host;
+			static const eDevice device = e_Host;
 
 			Stream() :nstream(0), stream(nullptr) { }
 
@@ -1748,12 +1759,12 @@ namespace multem
 	};
 
 	template<class T>
-	struct Stream<T, Device>
+	struct Stream<T, e_Device>
 	{
 		public:
 			using value_type = typename T;
 
-			static const eDevice device = Device;
+			static const eDevice device = e_Device;
 
 			~Stream() { destroy(); }
 
@@ -1807,13 +1818,13 @@ namespace multem
 	struct FFT2 {};
 
 	template<>
-	struct FFT2<float, Host>
+	struct FFT2<float, e_Host>
 	{
 		public:
 			using value_type = float;
-			using TVector_c = Vector<complex<float>, Host>;
+			using TVector_c = Vector<complex<float>, e_Host>;
 
-			static const eDevice device = Host;
+			static const eDevice device = e_Host;
 
 			FFT2(): plan_forward(nullptr), plan_backward(nullptr){ fftwf_init_threads(); }
 
@@ -1896,13 +1907,13 @@ namespace multem
 	};
 
 	template<>
-	struct FFT2<double, Host>
+	struct FFT2<double, e_Host>
 	{
 		public:
 			using value_type = double;
-			using TVector_c = Vector<complex<double>, Host>;
+			using TVector_c = Vector<complex<double>, e_Host>;
 
-			static const eDevice device = Host;
+			static const eDevice device = e_Host;
 
 			FFT2(): plan_forward(nullptr), plan_backward(nullptr){ fftw_init_threads(); }
 
@@ -1985,13 +1996,13 @@ namespace multem
 	};
 
 	template<>
-	struct FFT2<float, Device>
+	struct FFT2<float, e_Device>
 	{
 		public:
 			using value_type = float;
-			using TVector_c = Vector<complex<float>, Device>;
+			using TVector_c = Vector<complex<float>, e_Device>;
 
-			static const eDevice device = Device;
+			static const eDevice device = e_Device;
 
 			FFT2(): plan_forward(0), plan_backward(0) {}
 
@@ -2056,13 +2067,13 @@ namespace multem
 	};
 
 	template<>
-	struct FFT2<double, Device>
+	struct FFT2<double, e_Device>
 	{
 		public:
 			using value_type = double;
-			using TVector_c = Vector<complex<double>, Device>;
+			using TVector_c = Vector<complex<double>, e_Device>;
 
-			static const eDevice device = Device;
+			static const eDevice device = e_Device;
 
 			FFT2(): plan_forward(0), plan_backward(0) {}
 
@@ -2334,7 +2345,7 @@ namespace multem
 		T theta; 		// Precession angle in rad
 	};
 
-	/***************************Exit Wave FS/Rs*************************/
+	/***************************Exit Wave FS/RS*************************/
 	template<class T>
 	struct EW_FR
 	{
@@ -2344,6 +2355,31 @@ namespace multem
 		bool convergent_beam;
 		T x0;
 		T y0;
+	};
+
+	/***************************e_Device properties*************************/
+	struct Device_Properties
+	{
+		int id;
+		std::string name;
+		int compute_capability;
+		double total_memory_size;		// Mb
+		double free_memory_size;		// Mb
+
+		Device_Properties():id(0), name(""), compute_capability(0), 
+			total_memory_size(0), free_memory_size(0){}
+	};
+
+	/***************************e_Device properties*************************/
+	struct Host_Properties
+	{
+		int nprocessors;
+		int nthreads;
+		double total_memory_size;		// Mb
+		double free_memory_size;		// Mb
+
+		Host_Properties(): nprocessors(0), nthreads(0), total_memory_size(0), 
+			free_memory_size(0){}
 	};
 } // namespace multem
 

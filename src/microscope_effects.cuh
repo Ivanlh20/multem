@@ -184,8 +184,8 @@ namespace multem
 
 			Vector<value_type_c, dev> psi;
 
-			Q1<value_type_r, Host> qt;
-			Q2<value_type_r, Host> qs;
+			Q1<value_type_r, e_Host> qt;
+			Q2<value_type_r, e_Host> qs;
 	};
 
 } //namespace multem

@@ -101,25 +101,25 @@ void get_transmission_function(const mxArray *mxB, m_matrix_c &trans)
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	multem::Input_Multislice<double, multem::Host> input_multislice;
+	multem::Input_Multislice<double, multem::e_Host> input_multislice;
 	read_input_data(prhs[0], input_multislice, false);
 
 	auto trans = mx_create_matrix<m_matrix_c>(input_multislice.grid, plhs[0]);
 
 	if(input_multislice.is_float_Host())
 	{
-		get_transmission_function<float, multem::Host>(prhs[0], trans);
+		get_transmission_function<float, multem::e_Host>(prhs[0], trans);
 	}
 	else if(input_multislice.is_double_Host())
 	{
-		get_transmission_function<double, multem::Host>(prhs[0], trans);
+		get_transmission_function<double, multem::e_Host>(prhs[0], trans);
 	}
 	if(input_multislice.is_float_Device())
 	{
-		get_transmission_function<float, multem::Device>(prhs[0], trans);
+		get_transmission_function<float, multem::e_Device>(prhs[0], trans);
 	}
 	else if(input_multislice.is_double_Device())
 	{
-		get_transmission_function<double, multem::Device>(prhs[0], trans);
+		get_transmission_function<double, multem::e_Device>(prhs[0], trans);
 	}
 }

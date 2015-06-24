@@ -94,7 +94,7 @@ namespace multem
 			}
 
 			// set atoms
-			void set_Atoms(const Atom_Data<T> &atoms, bool PBC_xy_i=false, Vector<Atom_Type<T, Host>, Host> *atom_type=0)
+			void set_Atoms(const Atom_Data<T> &atoms, bool PBC_xy_i=false, Vector<Atom_Type<T, e_Host>, e_Host> *atom_type=0)
 			{
 				resize(atoms.size());
 
@@ -126,7 +126,7 @@ namespace multem
 			}
 		
 			// get statistic
-			void get_Statistic(Vector<Atom_Type<T, Host>, Host> *atom_type=0)
+			void get_Statistic(Vector<Atom_Type<T, e_Host>, e_Host> *atom_type=0)
 			{
 				if(Z.empty())
 				{
@@ -242,9 +242,9 @@ namespace multem
 			// Sort atoms along z-axis.
 			void Sort_by_z()
 			{
-				Vector<int, Host> idx_sort(size());
-				Vector<int, Host> val_i(size());
-				Vector<T, Host> val_d(size());
+				Vector<int, e_Host> idx_sort(size());
+				Vector<int, e_Host> val_i(size());
+				Vector<T, e_Host> val_d(size());
 
 				// Sort atoms along z-axis.
 				std::iota(idx_sort.begin(), idx_sort.end(), 0);
@@ -329,15 +329,15 @@ namespace multem
 			T l_y; 			// Box size-y
 			T l_z; 			// Box size-z
 
-			Vector<int, Host> Z;
-			Vector<T, Host> x;
-			Vector<T, Host> y;
-			Vector<T, Host> z;
-			Vector<float, Host> sigma;
-			Vector<float, Host> occ;
+			Vector<int, e_Host> Z;
+			Vector<T, e_Host> x;
+			Vector<T, e_Host> y;
+			Vector<T, e_Host> z;
+			Vector<float, e_Host> sigma;
+			Vector<float, e_Host> occ;
 
-			Vector<int, Host> Z_unique;
-			Vector<float, Host> z_layer;
+			Vector<int, e_Host> Z_unique;
+			Vector<float, e_Host> z_layer;
 
 			int Z_min;
 			int Z_max;

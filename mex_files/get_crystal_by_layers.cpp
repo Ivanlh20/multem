@@ -26,7 +26,7 @@
 using multem::m_matrix_r;
 
 /*******************Matlab to layer unit cell*********************/
-void read_input_data(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, multem::Vector<multem::Atom_Data<double>, multem::Host> &uLayer)
+void read_input_data(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, multem::Vector<multem::Atom_Data<double>, multem::e_Host> &uLayer)
 {
 	na = mx_get_scalar_field<int>(mxCrystal, "na"); 
 	nb = mx_get_scalar_field<int>(mxCrystal, "nb");
@@ -53,7 +53,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	int na, nb, nc;
 	double a, b, c;
-	multem::Vector<multem::Atom_Data<double>, multem::Host> uLayer;
+	multem::Vector<multem::Atom_Data<double>, multem::e_Host> uLayer;
 	multem::Atom_Data<double> atoms;
 	multem::Crystal<double> crystal;
 

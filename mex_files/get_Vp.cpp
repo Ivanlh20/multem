@@ -34,7 +34,7 @@ void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	auto VR = mx_create_matrix<m_matrix_r>(R.rows, R.cols, plhs[0]);
 	auto dVR = mx_create_matrix<m_matrix_r>(R.rows, R.cols, plhs[1]);
 
-	multem::Atom_Type<double, multem::Host> atom_type;
+	multem::Atom_Type<double, multem::e_Host> atom_type;
 	multem::Atomic_Data atomic_data;
 	atomic_data.Load_Data(potential_type);
 	atomic_data.To_atom_type_CPU(Z, multem::c_Vrl, multem::c_nR, 0.0, atom_type);

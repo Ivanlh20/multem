@@ -82,7 +82,7 @@ namespace multem
 
 		private:
 			// 0: int_-1^1 f(x) dx
-			void CoefTanhSinh(Q1<double, Host> &cQ, const double &xmin, const double &xmax)
+			void CoefTanhSinh(Q1<double, e_Host> &cQ, const double &xmin, const double &xmax)
 			{
 				auto Aprox = [](double x)->double{return asinh(atanh(x)/c_i2Pi); };
 				double tmin = Aprox(xmin);
@@ -103,7 +103,7 @@ namespace multem
 			}
 
 			// 1: int_0^infty f(x) dx
-			void CoefExpSinh(Q1<double, Host> &cQ, const double &xmin, const double &xmax)
+			void CoefExpSinh(Q1<double, e_Host> &cQ, const double &xmin, const double &xmax)
 			{
 				auto getLimit = [](double x)->double{return asinh(log(x)/c_i2Pi); };
 				double tmin = getLimit(xmin);
@@ -123,7 +123,7 @@ namespace multem
 			}
 
 			// 2: int_0^infty f(x)exp(-x) dx
-			void CoefExpExp(Q1<double, Host> &cQ, const double &xmin, const double &xmax)
+			void CoefExpExp(Q1<double, e_Host> &cQ, const double &xmin, const double &xmax)
 			{
 				auto getLimit = [](double x, double t, int n)->double
 				{
@@ -151,7 +151,7 @@ namespace multem
 			}
 
 			// 3: int_-infty^infty f(x) dx
-			void CoefSinhSinh(Q1<double, Host> &cQ, const double &xmin, const double &xmax)
+			void CoefSinhSinh(Q1<double, e_Host> &cQ, const double &xmin, const double &xmax)
 			{
 				auto getLimit = [](double x)->double{return asinh(asin(x)/c_i2Pi); };
 				double tmin = getLimit(xmin);
@@ -172,7 +172,7 @@ namespace multem
 			}
 
 			// 4: int_0^infty f(x)sin(wx) dx
-			void CoefFourierTypeSin(Q1<double, Host> &cQ, const double &ta)
+			void CoefFourierTypeSin(Q1<double, e_Host> &cQ, const double &ta)
 			{
 				double M, h, k, xi, wi;
 				double ti, ut, phi, dphi;
@@ -203,7 +203,7 @@ namespace multem
 			}
 
 			// 5: int_0^infty f(x)Cos(wx) dx
-			void CoefFourierTypeCos(Q1<double, Host> &cQ, const double &ta)
+			void CoefFourierTypeCos(Q1<double, e_Host> &cQ, const double &ta)
 			{
 				double M, h, k, xi, wi;
 				double ti, ut, phi, dphi;
@@ -235,7 +235,7 @@ namespace multem
 			}
 
 			// 6: int_-1^1 f(x) dx
-			void CoefGaussLegrendre(Q1<double, Host> &cQ)
+			void CoefGaussLegrendre(Q1<double, e_Host> &cQ)
 			{
 				switch(cQ.size())
 				{
@@ -1373,7 +1373,7 @@ namespace multem
 			}
 
 			// 7: int_0^infty f(x) Exp[-x^2] dx
-			void CoefGaussHermitezero2pinfty(Q1<double, Host> &cQ)
+			void CoefGaussHermitezero2pinfty(Q1<double, e_Host> &cQ)
 			{
 				switch(cQ.size())
 				{
@@ -2511,7 +2511,7 @@ namespace multem
 			}
 
 			// 8: int_-infty^infty f(x) Exp[-x^2] dx
-			void CoefGaussHermiteninfty2pinfty(Q1<double, Host> &cQ)
+			void CoefGaussHermiteninfty2pinfty(Q1<double, e_Host> &cQ)
 			{
 				switch(cQ.size())
 				{
@@ -11028,7 +11028,7 @@ namespace multem
 			}
 
 			// 9: int_0^infty f(x) Exp[-x] dx
-			void CoefGaussLaguerrex0zero2pinfty(Q1<double, Host> &cQ)
+			void CoefGaussLaguerrex0zero2pinfty(Q1<double, e_Host> &cQ)
 			{
 				switch(cQ.size())
 				{
@@ -12166,7 +12166,7 @@ namespace multem
 			}
 
 			// 10: int_0^infty f(x) Exp[-x]/Sqrt[x] dx
-			void CoefGaussLaguerrexnhzero2pinfty(Q1<double, Host> &cQ)
+			void CoefGaussLaguerrexnhzero2pinfty(Q1<double, e_Host> &cQ)
 			{
 				switch(cQ.size())
 				{
@@ -13303,7 +13303,7 @@ namespace multem
 				}
 			}
 
-			Q1<double, Host> cQ;
+			Q1<double, e_Host> cQ;
 	};
 
 } // namespace multem

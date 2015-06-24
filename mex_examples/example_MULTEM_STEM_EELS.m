@@ -11,7 +11,7 @@ input_multislice.gpu_nstream = 8;
 
 input_multislice.simulation_type = 61;              % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, eST_EELS=61, eST_EFTEM=62	
 input_multislice.phonon_model = 1;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
-input_multislice.interaction_model = 1;             % eESIM_Mulstilice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
+input_multislice.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
 input_multislice.potential_slicing = 1;             % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
 
@@ -31,7 +31,7 @@ input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
 input_multislice.theta = 0.0;                       % Till ilumination (degrees)
 input_multislice.phi = 0.0;                         % Till ilumination (degrees)
 
-na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
@@ -57,11 +57,11 @@ input_multislice.lens_nbeta = 10;       %(mrad, half number of steps)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.scanning_type = 1; % eST_Line = 1, eST_Area = 2
-input_multislice.scanning_ns = 10;
+input_multislice.scanning_ns = 20;
 input_multislice.scanning_x0 = 2*a; 
-input_multislice.scanning_y0 = 2*b;
+input_multislice.scanning_y0 = 2.5*b;
 input_multislice.scanning_xe = 3*a;
-input_multislice.scanning_ye = 3*b;
+input_multislice.scanning_ye = 2.5*b;
 
 input_multislice.eels_E_loss = 532;           % Energy loss (eV)
 input_multislice.eels_m_selection = 3;        % selection rule

@@ -44,7 +44,7 @@ namespace multem
 	// Input: E_0(keV), Output: lambda (electron wave)
 	template<class T>
 	DEVICE_CALLABLE FORCEINLINE 
-	T get_Lambda(const T &E_0)
+	T get_lambda(const T &E_0)
 	{
 		T emass = 510.99906;
 		T hc = 12.3984244;
@@ -55,19 +55,19 @@ namespace multem
 	// Input: E_0(keV), Output: sigma (Interaction parameter)
 	template<class T>
 	DEVICE_CALLABLE FORCEINLINE 
-	T get_Sigma(const T &E_0)
+	T get_sigma(const T &E_0)
 	{
 		T emass = 510.99906;
 		T c_Pi = 3.141592653589793238463;
 		T x = (emass + E_0)/(2*emass + E_0);
-		T sigma = 2*c_Pi*x/(get_Lambda(E_0)*E_0);
+		T sigma = 2*c_Pi*x/(get_lambda(E_0)*E_0);
 		return sigma;
 	}
 
 	// Input: E_0(keV), Output: gamma(relativistic factor)
 	template<class T>
 	DEVICE_CALLABLE FORCEINLINE 
-	T get_Gamma(const T &E_0)
+	T get_gamma(const T &E_0)
 	{
 		T emass = 510.99906;
 		T gamma = 1 + E_0/emass;
@@ -80,18 +80,42 @@ namespace multem
 	T get_Vr_factor(const T &E_0, const T &theta)
 	{
 		T c_Potf = 47.877645145863056;
-		T fPot = get_Gamma(E_0)*get_Lambda(E_0)/(c_Potf*cos(theta));
+		T fPot = get_gamma(E_0)*get_lambda(E_0)/(c_Potf*cos(theta));
 		return fPot;
+	}
+
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	T get_Scherzer_focus(const T &E_0, const T &Cs3)
+	{
+		T lambda = get_lambda(E0);
+		return sqrt(Cs3*lambda);
+	}
+
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	T get_Scherzer_aperture(const T &E_0, const T &Cs3)
+	{
+		T lambda = get_lambda(E0);
+		return pow(6.0/(Cs3*pow(lambda, 3)), 0.25);
+	}
+
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	void get_Scherzer_conditions(const T &E_0, const T &Cs3, T &defocus, T &aperture)
+	{
+		defocus = get_Scherzer_focus(E_0, Cs3);
+		aperture = get_Scherzer_aperture(E_0, Cs3);
 	}
 
 	template<eDevice dev>
 	void device_synchronize()
 	{
-		if(dev==Host)
+		if(dev==e_Host)
 		{
 
 		}
-		else if(dev==Device)
+		else if(dev==e_Device)
 		{
 			cudaDeviceSynchronize();
 		}

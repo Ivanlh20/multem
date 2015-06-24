@@ -104,25 +104,25 @@ void get_propagate(const mxArray *mxB, m_matrix_c &psi_host)
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	multem::Input_Multislice<double, multem::Host> input_multislice;
+	multem::Input_Multislice<double, multem::e_Host> input_multislice;
 	read_input_data(prhs[0], input_multislice, false);
 
 	auto psi = mx_create_matrix<m_matrix_c>(input_multislice.grid, plhs[0]);
 
 	if(input_multislice.is_float_Host())
 	{
-		get_propagate<float, multem::Host>(prhs[0], psi);
+		get_propagate<float, multem::e_Host>(prhs[0], psi);
 	}
 	else if(input_multislice.is_double_Host())
 	{
-		get_propagate<double, multem::Host>(prhs[0], psi);
+		get_propagate<double, multem::e_Host>(prhs[0], psi);
 	}
 	if(input_multislice.is_float_Device())
 	{
-		get_propagate<float, multem::Device>(prhs[0], psi);
+		get_propagate<float, multem::e_Device>(prhs[0], psi);
 	}
 	else if(input_multislice.is_double_Device())
 	{
-		get_propagate<double, multem::Device>(prhs[0], psi);
+		get_propagate<double, multem::e_Device>(prhs[0], psi);
 	}
 }
