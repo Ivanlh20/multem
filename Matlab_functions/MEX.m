@@ -16,10 +16,10 @@ OUTDIR = strcat('..', filesep, 'Mex_Executables');
 
 if (strcmpi(option, 'debug'))
     textcommands = strjoin({'mex -silent -g -largeArrayDims -outdir', OUTDIR, ADD_INC, CUDA_INC...
-    , mfile, strjoin(varargin), ['-L' path ' -llibfftw3-3'], ['-L' path ' -llibfftw3f-3']});   
+    , mfile, strjoin(varargin), ['-L' path ' -lfftw3'], ['-L' path ' -lfftw3f']});   
 else
     textcommands = strjoin({'mex -silent -largeArrayDims -outdir', OUTDIR, ADD_INC, CUDA_INC...
-    , mfile, strjoin(varargin), ['-L' path ' -llibfftw3-3'], ['-L' path ' -llibfftw3f-3']}); 
+    , mfile, strjoin(varargin), ['-L' path ' -lfftw3'], ['-L' path ' -lfftw3f']}); 
 end;
 disp(textcommands);
 eval(textcommands);

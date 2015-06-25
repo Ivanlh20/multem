@@ -32,7 +32,7 @@ namespace multem
 	class Propagator{
 		public:
 			using value_type_r = T;
-			using value_type_c = typename complex<T>;
+			using value_type_c = complex<T>;
 
 			Propagator():input_multislice(nullptr), fft2(nullptr){ }
 
@@ -70,7 +70,7 @@ namespace multem
 				}
 				else
 				{
-					multem::propagator_components(input_multislice->grid, gxu, gyu, input_multislice->lens.prop_factor(z), prop_x, prop_y);
+					multem::propagator_components<decltype(input_multislice->grid)>(input_multislice->grid, gxu, gyu, input_multislice->lens.prop_factor(z), prop_x, prop_y);
 					multem::propagate(input_multislice->grid, *fft2, space, prop_x, prop_y, psi_i, psi_o);
 				}
 			}

@@ -32,7 +32,7 @@ namespace multem
 	class Probe{
 		public:
 			using value_type_r = T;
-			using value_type_c = typename complex<T>;
+			using value_type_c = complex<T>;
 
 			Probe():input_multislice(nullptr){ }
 

@@ -19,7 +19,17 @@
 #ifndef MEMORY_INFO_H
 #define MEMORY_INFO_H
 
+#ifdef _WIN32
 #include <Windows.h>
+#else
+#include <sys/types.h>
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+#else
+#include <sys/sysinfo.h>
+#include <unistd.h>
+#endif
+#endif
 #include <cstddef>
 
 #include <thread>
@@ -34,36 +44,28 @@
 
 namespace multem
 {
-	// the free and total amount of memory available (Mb)
-	inline
-	void memory_info(double &host_free, double &host_total, double &device_free, double &device_total)
-	{
-		MEMORYSTATUSEX status;
-		status.dwLength = sizeof(status);
-		GlobalMemoryStatusEx(&status);
-		host_free = static_cast<double>(status.ullAvailPhys)/(1048576.0);
-		host_total = static_cast<double>(status.ullTotalPhys)/(1048576.0);
-
-		device_free = device_total = 0;
-		size_t free, total;
-		if(cudaSuccess == cudaMemGetInfo(&free, &total))
-		{
-			device_free = static_cast<double>(free)/(1048576.0);
-			device_total = static_cast<double>(total)/(1048576.0);
-		}
-	}
-
 	template<eDevice dev>
-	void memory_info(double &total, double &free){ }
+	void memory_info(double &total, double &free);
 
 	template<>
 	void memory_info<e_Host>(double &total, double &free)
 	{
+#ifdef _WIN32
 		MEMORYSTATUSEX status;
 		status.dwLength = sizeof(status);
 		GlobalMemoryStatusEx(&status);
 		free = static_cast<double>(status.ullAvailPhys)/(1048576.0);
 		total = static_cast<double>(status.ullTotalPhys)/(1048576.0);
+#else // unix
+		struct sysinfo memInfo;
+		sysinfo (&memInfo);
+		long long totalPhysMem = memInfo.totalram;
+		totalPhysMem *= memInfo.mem_unit;
+		long long physMemFree = memInfo.freeram;
+		physMemFree *= memInfo.mem_unit;
+		free = static_cast<double>(physMemFree); // check if division by 1MB=1048576 is necessary
+		total = static_cast<double>(totalPhysMem); // check if division by 1MB=1048576 is necessary
+#endif
 	}
 
 	template<>
@@ -77,9 +79,18 @@ namespace multem
 			total = static_cast<double>(total_t)/(1048576.0);
 		}
 	}
+    
+    // the free and total amount of memory available (Mb)
+	inline
+	void memory_info(double &host_free, double &host_total, double &device_free, double &device_total)
+	{
+		memory_info<e_Host>(host_total, host_free);
+
+		memory_info<e_Device>(device_total, device_free);
+	}
 
 	template<eDevice dev>
-	double get_free_memory(){ return 0;}
+	double get_free_memory();
 
 	template<>
 	double get_free_memory<e_Host>()
@@ -130,9 +141,18 @@ namespace multem
 	inline
 	void get_host_properties(Host_Properties &host_properties)
 	{
+#ifdef _WIN32
 		SYSTEM_INFO siSysInfo;
 		GetSystemInfo(&siSysInfo);
 		host_properties.nprocessors = siSysInfo.dwNumberOfProcessors;
+#elif __APPLE__
+		int count = 0;
+		size_t count_len = sizeof(count);
+		sysctlbyname("hw.logicalcpu", &count, &count_len, NULL, 0);
+                host_properties.nprocessors = count;
+#else
+		host_properties.nprocessors = sysconf(_SC_NPROCESSORS_ONLN);
+#endif
 		host_properties.nthreads = std::thread::hardware_concurrency();
 		memory_info<e_Host>(host_properties.total_memory_size, host_properties.free_memory_size);
 	}

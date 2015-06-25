@@ -25,6 +25,7 @@
 #include "math.cuh"
 #include "types.hpp"
 #include "atom_data.hpp"
+#include "host_functions.hpp"
 
 namespace multem
 {

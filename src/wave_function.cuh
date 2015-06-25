@@ -33,6 +33,9 @@ namespace multem
 	class Wave_Function: public Transmission<T, dev>
 	{
 		public:
+			using value_type_r = T;
+			using value_type_c = complex<T>;
+
 			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io, Stream<value_type_r, dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
 			{
 				exp_x.resize(input_multislice_io->grid.nx);
@@ -42,7 +45,7 @@ namespace multem
 
 				prog.set_input_data(input_multislice_io, fft2_i);
 
-				Transmission::set_input_data(input_multislice_io, stream_i, fft2_i);
+				Transmission<T, dev>::set_input_data(input_multislice_io, stream_i, fft2_i);
 			}
 
 			void set_plane_wave(Vector<value_type_c, dev> &psi_z)

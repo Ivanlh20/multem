@@ -33,11 +33,13 @@ namespace multem
 	template<class T, eDevice dev>
 	class Potential: public Specimen<T, dev>{
 		public:
-			Potential(): stream(nullptr){ }
+			using value_type_r = T;
+                                            
+			Potential(): stream(nullptr){}
 
 			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io, Stream<value_type_r, dev> *stream_i)
 			{	
-				Specimen::set_input_data(input_multislice_io);
+				Specimen<T, dev>::set_input_data(input_multislice_io);
 				stream = stream_i;
 
 				Quadrature quadrature;
@@ -46,10 +48,10 @@ namespace multem
 				atom_type.resize(c_nAtomsTypes); 
 				for(auto i=0; i<atom_type.size(); i++)
 				{
-					atom_type[i].assign(Specimen::atom_type[i]);
+					atom_type[i].assign(Specimen<T, dev>::atom_type[i]);
 				}
 
-				int nv = max(input_multislice->grid.nx_dRx(atoms.l_x_Int), input_multislice->grid.ny_dRy(atoms.l_y_Int));
+				int nv = max(this->input_multislice->grid.nx_dRx(this->atoms.l_x_Int), this->input_multislice->grid.ny_dRy(this->atoms.l_y_Int));
 
 				iv.resize(stream->size());
 				v.resize(stream->size());
@@ -63,7 +65,7 @@ namespace multem
 
 				atom_Vp.resize(stream->size());
 
-				V0.resize(input_multislice->grid.nxy());
+				V0.resize(this->input_multislice->grid.nxy());
 			}
 
 			void projected_potential(const value_type_r &z_0, const value_type_r &z_e, const int &iatom_0, const int &iatom_e, Vector<value_type_r, dev> &V)
@@ -76,7 +78,7 @@ namespace multem
 					stream->n_act_stream = min(stream->size(), iatom_e-iatom+1);
 					set_atom_Vp(z_0, z_e, iatom, *stream, atom_Vp);
 					get_cubic_poly_coef_Vz(*stream, atom_Vp);
-					multem::eval_cubic_poly(input_multislice->grid, *stream, atom_Vp, V);
+					multem::eval_cubic_poly(this->input_multislice->grid, *stream, atom_Vp, V);
 					iatom += stream->n_act_stream;
 				}
 
@@ -85,12 +87,12 @@ namespace multem
 
 			void projected_potential(const int &islice_0, const int &islice_e, Vector<value_type_r, dev> &V)
 			{
-				if((islice_0<0) || (islice_e>=slice.size()))
+				if((islice_0<0) || (islice_e>=this->slice.size()))
 				{
 					multem::fill(V, 0.0);
 					return;
 				}
-				projected_potential(slice.z_0[islice_0], slice.z_e[islice_e], slice.iatom_0[islice_0], slice.iatom_e[islice_e], V);
+				projected_potential(this->slice.z_0[islice_0], this->slice.z_e[islice_e], this->slice.iatom_0[islice_0], this->slice.iatom_e[islice_e], V);
 			}
 
 			void projected_potential(const int &islice_0, const int &islice_e)
@@ -115,22 +117,22 @@ namespace multem
 			{
 				for(auto istream = 0; istream < stream.n_act_stream; istream++)
 				{
-					int iZ = atoms.Z[iatom]-1;
-					atom_Vp[istream].x = atoms.x[iatom];
-					atom_Vp[istream].y = atoms.y[iatom];
-					atom_Vp[istream].occ = atoms.occ[iatom];
+					int iZ = this->atoms.Z[iatom]-1;
+					atom_Vp[istream].x = this->atoms.x[iatom];
+					atom_Vp[istream].y = this->atoms.y[iatom];
+					atom_Vp[istream].occ = this->atoms.occ[iatom];
 					atom_Vp[istream].R_min2 = atom_type[iZ].R_min2;
 					atom_Vp[istream].R_max2 = atom_type[iZ].R_max2;
 					atom_Vp[istream].R2 = raw_pointer_cast(atom_type[iZ].R2.data());
-					atom_Vp[istream].set_ix0_ixn(input_multislice->grid, atom_type[iZ].R_max);
-					atom_Vp[istream].set_iy0_iyn(input_multislice->grid, atom_type[iZ].R_max);
+					atom_Vp[istream].set_ix0_ixn(this->input_multislice->grid, atom_type[iZ].R_max);
+					atom_Vp[istream].set_iy0_iyn(this->input_multislice->grid, atom_type[iZ].R_max);
 					atom_Vp[istream].iv = raw_pointer_cast(iv[istream].data());
 					atom_Vp[istream].v = raw_pointer_cast(v[istream].data());
 
-					if(input_multislice->is_subslicing())
+					if(this->input_multislice->is_subslicing())
 					{
-						atom_Vp[istream].z0h = 0.5*(z_0 - atoms.z[iatom]); 
-						atom_Vp[istream].zeh = 0.5*(z_e - atoms.z[iatom]);
+						atom_Vp[istream].z0h = 0.5*(z_0 - this->atoms.z[iatom]); 
+						atom_Vp[istream].zeh = 0.5*(z_e - this->atoms.z[iatom]);
 						atom_Vp[istream].split = (atom_Vp[istream].z0h<0)&&(0<atom_Vp[istream].zeh);
 						atom_Vp[istream].cl = raw_pointer_cast(atom_type[iZ].Vr.cl.data());
 						atom_Vp[istream].cnl = raw_pointer_cast(atom_type[iZ].Vr.cnl.data());
@@ -152,9 +154,9 @@ namespace multem
 			
 			void get_cubic_poly_coef_Vz(Stream<value_type_r, dev> &stream, Vector<Atom_Vp<value_type_r>, e_Host> &atom_Vp)
 			{
-				if(input_multislice->is_subslicing())
+				if(this->input_multislice->is_subslicing())
 				{
-					multem::get_cubic_poly_coef_Vz(input_multislice->potential_type, qz, stream, atom_Vp);
+					multem::get_cubic_poly_coef_Vz(this->input_multislice->potential_type, qz, stream, atom_Vp);
 				}
 			}
 
