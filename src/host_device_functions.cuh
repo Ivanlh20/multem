@@ -195,7 +195,7 @@ namespace multem
 			for(auto i = 0; i< rq1.size; i++)
 			{
 				xi = rq1.x[i] + x0;
-				fn(ri, rcoef, yi);
+				fn(xi, rcoef, yi);
 				y += rq1.w[i]*yi;
 			}
 		}
@@ -210,7 +210,7 @@ namespace multem
 			for(auto i = 0; i< rq1.size; i++)
 			{
 				xi = rq1.x[i] + x0;
-				fn(ri, rcoef, y1i, y2i);
+				fn(xi, rcoef, y1i, y2i);
 				y1 += rq1.w[i]*y1i;
 				y2 += rq1.w[i]*y2i;
 			}
