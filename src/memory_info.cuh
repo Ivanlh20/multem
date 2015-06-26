@@ -25,7 +25,10 @@
 #include <thread>
 #include <vector>
 #include <algorithm>
+
 #include "types.hpp"
+#include "device_functions.cuh"
+
 #include <cuda.h>
 #include <cuda_runtime.h>
 
@@ -43,7 +46,7 @@ namespace multem
 
 		device_free = device_total = 0;
 		size_t free, total;
-		if(cudaSuccess==cudaMemGetInfo(&free, &total))
+		if(cudaSuccess == cudaMemGetInfo(&free, &total))
 		{
 			device_free = static_cast<double>(free)/(1048576.0);
 			device_total = static_cast<double>(total)/(1048576.0);
@@ -68,11 +71,30 @@ namespace multem
 	{
 		free = total = 0;
 		size_t free_t, total_t;
-		if(cudaSuccess==cudaMemGetInfo(&free_t, &total_t))
+		if(cudaSuccess == cudaMemGetInfo(&free_t, &total_t))
 		{
 			free = static_cast<double>(free_t)/(1048576.0);
 			total = static_cast<double>(total_t)/(1048576.0);
 		}
+	}
+
+	template<eDevice dev>
+	double get_free_memory(){ return 0;}
+
+	template<>
+	double get_free_memory<e_Host>()
+	{
+		double total, free;
+		memory_info<e_Host>(total, free);
+		return free;
+	}
+
+	template<>
+	double get_free_memory<e_Device>()
+	{
+		double total, free;
+		memory_info<e_Device>(total, free);
+		return free;
 	}
 
 	inline
@@ -80,13 +102,13 @@ namespace multem
 	{
 		device_properties.clear();
 
-		int device_count = 0;
-		cudaError_t error_id = cudaGetDeviceCount(&device_count);
-
-		if ((error_id != cudaSuccess)||(device_count == 0))
+		if (!is_gpu_available())
 		{
 			return;
 		}
+
+		int device_count = 0;
+		cudaGetDeviceCount(&device_count);
 
 		device_properties.resize(device_count);
 		for (auto idev = 0; idev < device_count; idev++)

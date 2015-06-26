@@ -33,7 +33,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	nx = mx_get_scalar<int>(prhs[1]);
 	dy = mx_get_scalar<double>(prhs[2]);
 	dx = mx_get_scalar<double>(prhs[3]);
-	Radius = mxGetScalar(prhs[4]);
+	Radius = mx_get_scalar<double>(prhs[4]);
 	n = mx_get_scalar<int>(prhs[5]);
 	shift = mx_get_scalar<int>(prhs[6]);
 

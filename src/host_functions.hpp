@@ -61,7 +61,7 @@ namespace multem
 			break;
 		}
 
-		if(x0==x[ixmax])
+		if(x0 == x[ixmax])
 			return ixmax;
 		else
 			return ixmin;
@@ -72,7 +72,7 @@ namespace multem
 	int FSC(int i, int nh, int shift=2)
 	{
 		int j;
-		if(shift==1)
+		if(shift == 1)
 			j = (i<nh)?i:i-2*nh;
 		else
 			j = i-nh;
@@ -149,17 +149,16 @@ namespace multem
 	void filter_Butterworth_2D(int ny, int nx, double dx, double dy, double Radius, int n, int lpf, int shift, double *fI)
 	{	
 		int nxh = nx/2, nyh = ny/2;
-		double R2, Rx, Ry;
-		double Radius2 = Radius*Radius;
+		double R02 = pow(Radius, 2);
 
 		for(auto ix = 0; ix < nx; ix++)
 		{
-			Rx = FSC(ix, nxh, shift)*dx; 
 			for(auto iy = 0; iy < ny; iy++)
 			{
-				Ry = FSC(iy, nyh, shift)*dy;
-				R2 = Rx*Rx + Ry*Ry;
-				fI[ix*ny+iy] = (lpf==1)?1.0/(1.0+pow(R2/Radius2, n)):(R2<1e-14)?0.0:1.0/(1.0+pow(Radius2/R2, n));
+				double Rx = FSC(ix, nxh, shift)*dx; 
+				double Ry = FSC(iy, nyh, shift)*dy;
+				double R2 = Rx*Rx + Ry*Ry;
+				fI[ix*ny+iy] = (lpf==1)?1.0/(1.0+pow(R2/R02, n)):(isZero(R2))?0.0:1.0/(1.0+pow(R02/R2, n));
 			}
 		}
 	}
@@ -376,7 +375,7 @@ namespace multem
 			if(A1_c[imin])
 			{
 				A1_c[imin] = false;
-				A_o.push_back({imin, A1_i[imin]});
+				A_o.push_back({int(imin), A1_i[imin]});
 			}
 		}
 		A_o.shrink_to_fit();
@@ -574,43 +573,59 @@ namespace multem
 	template<class TQ1>
 	enable_if_Host<TQ1, void>
 	get_cubic_poly_coef_Vz(ePotential_Type potential_type, TQ1 &qz, 
-	Atom_Vp<Value_type<TQ1>> &atom_Vp)
+	Stream<Value_type<TQ1>, e_Host> &stream, Vector<Atom_Vp<Value_type<TQ1>>, e_Host> &atom_Vp)
 	{
-		switch(potential_type)
-		{
-			case ePT_Doyle_0_4:
-				host_detail::linear_Vz<ePT_Doyle_0_4, Value_type<TQ1>>(qz, atom_Vp);
-				break;
-			case ePT_Peng_0_4:
-				host_detail::linear_Vz<ePT_Peng_0_4, Value_type<TQ1>>(qz, atom_Vp);
-				break;
-			case ePT_Peng_0_12:
-				host_detail::linear_Vz<ePT_Peng_0_12, Value_type<TQ1>>(qz, atom_Vp);
-				break;
-			case ePT_Kirkland_0_12:
-				host_detail::linear_Vz<ePT_Kirkland_0_12, Value_type<TQ1>>(qz, atom_Vp);
-				break;
-			case ePT_Weickenmeier_0_12:
-				host_detail::linear_Vz<ePT_Weickenmeier_0_12, Value_type<TQ1>>(qz, atom_Vp);
-				break;
-			case ePT_Lobato_0_12:
-				host_detail::linear_Vz<ePT_Lobato_0_12, Value_type<TQ1>>(qz, atom_Vp);
-				break;
-		}
-		host_detail::cubic_poly_coef<Value_type<TQ1>>(atom_Vp); 
-	}
+		using value_type_r = Value_type<TQ1>;
 
-	template<class TGrid, class TVector_r>
-	enable_if_Host<TVector_r, void>
-	eval_cubic_poly(TGrid &grid, const int &n_stream, Stream<Value_type<TGrid>, e_Host> &stream, 
-	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V0)
-	{
-		if(n_stream<=0)
+		if(stream.n_act_stream<=0)
 		{
 			return;
 		}
 
-		for(auto istream = 0; istream<n_stream; istream++)
+		auto cubic_poly_coef = [](const ePotential_Type &potential_type, TQ1 &qz, Atom_Vp<value_type_r> &atom_Vp)
+		{
+			switch(potential_type)
+			{
+				case ePT_Doyle_0_4:
+					host_detail::linear_Vz<ePT_Doyle_0_4, Value_type<TQ1>>(qz, atom_Vp);
+					break;
+				case ePT_Peng_0_4:
+					host_detail::linear_Vz<ePT_Peng_0_4, Value_type<TQ1>>(qz, atom_Vp);
+					break;
+				case ePT_Peng_0_12:
+					host_detail::linear_Vz<ePT_Peng_0_12, Value_type<TQ1>>(qz, atom_Vp);
+					break;
+				case ePT_Kirkland_0_12:
+					host_detail::linear_Vz<ePT_Kirkland_0_12, Value_type<TQ1>>(qz, atom_Vp);
+					break;
+				case ePT_Weickenmeier_0_12:
+					host_detail::linear_Vz<ePT_Weickenmeier_0_12, Value_type<TQ1>>(qz, atom_Vp);
+					break;
+				case ePT_Lobato_0_12:
+					host_detail::linear_Vz<ePT_Lobato_0_12, Value_type<TQ1>>(qz, atom_Vp);
+					break;
+			}
+			host_detail::cubic_poly_coef<Value_type<TQ1>>(atom_Vp); 
+		};
+
+		for(auto istream = 0; istream < stream.n_act_stream; istream++)
+		{
+			stream[istream] = std::thread(cubic_poly_coef, potential_type, std::ref(qz), std::ref(atom_Vp[istream]));
+		}
+		stream.synchronize();
+	}
+
+	template<class TGrid, class TVector_r>
+	enable_if_Host<TVector_r, void>
+	eval_cubic_poly(TGrid &grid, Stream<Value_type<TGrid>, e_Host> &stream, 
+	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V0)
+	{
+		if(stream.n_act_stream<=0)
+		{
+			return;
+		}
+
+		for(auto istream = 0; istream < stream.n_act_stream; istream++)
 		{
 			stream[istream] = std::thread(host_detail::eval_cubic_poly<Value_type<TVector_r>>, std::ref(grid), std::ref(atom_Vp[istream]), std::ref(V0));
 		}
@@ -731,7 +746,6 @@ namespace multem
 	enable_if_Host<TVector_c, void>
 	bandwidth_limit(TGrid &grid, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &M_io)
 	{
-		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
 
 		if(!grid.bwl) return;
@@ -743,16 +757,9 @@ namespace multem
 			for(auto ix = 0; ix < grid.nx; ix++)
 			{
 				int ixy = grid.ind_row(ix, iy); 		
-				value_type_r g2 = grid.g2_shift(ix, iy);
-
-				if(g2 < grid.gl2_max)
-				{
-					M_io[ixy] *= static_cast<value_type_c>(grid.inxy);
-				}
-				else
-				{
-					M_io[ixy] = static_cast<value_type_c>(0); 
-				}	
+				value_type_c V = M_io[ixy];
+				value_type_c bwl_factor = static_cast<value_type_c>(grid.bwl_factor_shift(ix, iy));		
+				M_io[ixy] = bwl_factor*V;
 			}
 		}
 

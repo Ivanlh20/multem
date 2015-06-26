@@ -457,24 +457,15 @@ namespace multem
 		template<class TGrid, class T>
 		__global__ void bandwidth_limit(TGrid grid, rVector<T> M_io)
 		{
-			using value_type_r = Value_type<TGrid>;
-
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
 				int ixy = grid.ind_col(ix, iy); 
-				value_type_r g2 = grid.g2_shift(ix, iy);
-
-				if(g2 < grid.gl2_max)
-				{
-					M_io.V[ixy] *= static_cast<T>(grid.inxy);
-				}
-				else
-				{
-					M_io.V[ixy] = static_cast<T>(0); 
-				}
+				T V = M_io.V[ixy];
+				T bwl_factor = static_cast<T>(grid.bwl_factor_shift(ix, iy));		
+				M_io.V[ixy] = bwl_factor*V;
 			}
 		}
 
@@ -910,46 +901,54 @@ namespace multem
 
 	template<class TQ1>
 	enable_if_Device<TQ1, void>
-	get_cubic_poly_coef_Vz(ePotential_Type potential_type, TQ1 &qz, 
-	Atom_Vp<Value_type<TQ1>> &atom_Vp)
+	get_cubic_poly_coef_Vz(ePotential_Type potential_type, TQ1 &qz,
+	Stream<Value_type<TQ1>, e_Device> &stream, Vector<Atom_Vp<Value_type<TQ1>>, e_Host> &atom_Vp)
 	{
-		switch(potential_type)
-		{
-			case ePT_Doyle_0_4:
-				device_detail::linear_Vz<ePT_Doyle_0_4, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz)>>>(qz, atom_Vp);
-				break;
-			case ePT_Peng_0_4:
-				device_detail::linear_Vz<ePT_Peng_0_4, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz)>>>(qz, atom_Vp);
-				break;
-			case ePT_Peng_0_12:
-				device_detail::linear_Vz<ePT_Peng_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz)>>>(qz, atom_Vp);
-				break;
-			case ePT_Kirkland_0_12:
-				device_detail::linear_Vz<ePT_Kirkland_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz)>>>(qz, atom_Vp);
-				break;
-			case ePT_Weickenmeier_0_12:
-				device_detail::linear_Vz<ePT_Weickenmeier_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz)>>>(qz, atom_Vp);
-				break;
-			case ePT_Lobato_0_12:
-				device_detail::linear_Vz<ePT_Lobato_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz)>>>(qz, atom_Vp);
-				break;
-		}
-		device_detail::cubic_poly_coef<TQ1::value_type><<<dim3(1), dim3(c_nR)>>>(atom_Vp); 
-	}
-
-	template<class TGrid, class TVector_r>
-	enable_if_Device<TVector_r, void>
-	eval_cubic_poly(TGrid &grid, const int &n_stream, Stream<Value_type<TGrid>, e_Device> &stream, 
-	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V0)
-	{
-		if(n_stream<=0)
+		if(stream.n_act_stream<=0)
 		{
 			return;
 		}
 
-		for(auto istream = 0; istream<n_stream; istream++)
+		for(auto istream = 0; istream < stream.n_act_stream; istream++)
 		{
-			GridBT gridBT = atom_Vp[istream].get_block_thread();
+			switch(potential_type)
+			{
+				case ePT_Doyle_0_4:
+					device_detail::linear_Vz<ePT_Doyle_0_4, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					break;
+				case ePT_Peng_0_4:
+					device_detail::linear_Vz<ePT_Peng_0_4, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					break;
+				case ePT_Peng_0_12:
+					device_detail::linear_Vz<ePT_Peng_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					break;
+				case ePT_Kirkland_0_12:
+					device_detail::linear_Vz<ePT_Kirkland_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					break;
+				case ePT_Weickenmeier_0_12:
+					device_detail::linear_Vz<ePT_Weickenmeier_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					break;
+				case ePT_Lobato_0_12:
+					device_detail::linear_Vz<ePT_Lobato_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					break;
+			}
+			device_detail::cubic_poly_coef<TQ1::value_type><<<dim3(1), dim3(c_nR), 0, stream[istream]>>>(atom_Vp[istream]);
+		}
+	}
+
+	template<class TGrid, class TVector_r>
+	enable_if_Device<TVector_r, void>
+	eval_cubic_poly(TGrid &grid, Stream<Value_type<TGrid>, e_Device> &stream, 
+	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V0)
+	{
+		if(stream.n_act_stream<=0)
+		{
+			return;
+		}
+
+		for(auto istream = 0; istream < stream.n_act_stream; istream++)
+		{
+			GridBT gridBT = atom_Vp[istream].get_eval_cubic_poly_gridBT();
 
 			device_detail::eval_cubic_poly<TVector_r::value_type><<<gridBT.Blk, gridBT.Thr, 0, stream[istream]>>>(grid, atom_Vp[istream], V0);
 		}
@@ -1173,7 +1172,7 @@ namespace multem
 	{
 		multem::device_synchronize<multem::e_Device>();
 
-		host_vector<Value_type<TVector>> M_t(M_i.begin(), M_i.end());
+		Vector<Value_type<TVector>, e_Host> M_t(M_i.begin(), M_i.end());
 		for(auto i = 0; i<M_t.size(); i++)
 		{
 			M_o.real[i] = M_t[i].real();
@@ -1181,6 +1180,18 @@ namespace multem
 		}
 	}
 
+	inline
+	bool is_gpu_available()
+	{
+		int device_count = 0;
+		cudaError_t error_id = cudaGetDeviceCount(&device_count);
+
+		if ((error_id != cudaSuccess)||(device_count == 0))
+		{
+			return false;
+		}
+		return true;
+	}
 } // namespace multem
 
 #endif

@@ -51,16 +51,15 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.fp_dim.set(mx_get_scalar_field<int>(mx_input_multislice, "fp_dim"));
 	input_multislice.fp_seed = mx_get_scalar_field<int>(mx_input_multislice, "fp_seed");
 	input_multislice.fp_iconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_iconf");
-	input_multislice.fast_cal = mx_get_scalar_field<bool>(mx_input_multislice, "fast_cal");
-
+	
 	input_multislice.islice = mx_get_scalar_field<int>(mx_input_multislice, "islice")-1;
-
-	bool bwl = mx_get_scalar_field<bool>(mx_input_multislice, "bwl");
-	bool pbc_xy = true;
 
 	input_multislice.E_0 = mx_get_scalar_field<value_type>(mx_input_multislice, "E_0");
 	input_multislice.theta = mx_get_scalar_field<value_type>(mx_input_multislice, "theta")*multem::c_deg_2_rad;
 	input_multislice.phi = mx_get_scalar_field<value_type>(mx_input_multislice, "phi")*multem::c_deg_2_rad;
+
+	bool bwl = mx_get_scalar_field<bool>(mx_input_multislice, "bwl");
+	bool pbc_xy = true;
 
 	auto nx = mx_get_scalar_field<int>(mx_input_multislice, "nx");
 	auto ny = mx_get_scalar_field<int>(mx_input_multislice, "ny");

@@ -17,14 +17,13 @@ input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Pen
 
 input_multislice.fp_dim = 110; 
 input_multislice.fp_seed = 1983; 
-input_multislice.fp_nconf = 10;
+input_multislice.fp_nconf = 4;
 input_multislice.fp_iconf = 0;
 
 input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
 input_multislice.zero_defocus_plane = 0;
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;
-input_multislice.fast_cal = 1;
 input_multislice.bwl = 1;
 
 input_multislice.E_0 = 200;                         % Acceleration Voltage (keV)
@@ -57,7 +56,7 @@ input_multislice.lens_nbeta = 10;       %(mrad, half number of steps)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.scanning_type = 2; % eST_Line = 1, eST_Area = 2
-input_multislice.scanning_ns = 20;
+input_multislice.scanning_ns = 10;
 input_multislice.scanning_x0 = 2*a; 
 input_multislice.scanning_y0 = 2*b;
 input_multislice.scanning_xe = 3*a;
@@ -65,21 +64,11 @@ input_multislice.scanning_ye = 3*b;
 
 clear MULTEM;
 tic;
-[m2psi_tot, m2psi_coh] = MULTEM(input_multislice); 
+[m2psi_tot] = MULTEM(input_multislice); 
 toc;
 
-I_min = min([min(m2psi_tot(:)), min(m2psi_coh(:))]);
-I_max = max([max(m2psi_tot(:)), max(m2psi_coh(:))]);
-
 figure(1);
-subplot(1, 2, 1);
 imagesc(m2psi_tot);
 title('Total intensity');
-axis image;
-colormap gray;
-
-subplot(1, 2, 2);
-imagesc(m2psi_coh);
-title('Coherent intensity');
 axis image;
 colormap gray;

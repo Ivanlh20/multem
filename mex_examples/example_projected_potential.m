@@ -18,7 +18,7 @@ input_multislice.fp_dim = 111;
 input_multislice.fp_seed = 1983; 
 input_multislice.fp_iconf = 0;
 
-na = 4; nb = 4; nc = 1; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc = 5; ncu = 4; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...

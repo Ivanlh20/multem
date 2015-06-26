@@ -18,14 +18,13 @@ input_multislice.fp_dim = 111;
 input_multislice.fp_seed = 1983; 
 input_multislice.fp_iconf = 0;
 
-input_multislice.fast_cal = 0;
 input_multislice.bwl = 1;
 
 input_multislice.E_0 = 300;
 input_multislice.theta = 0.0; 
 input_multislice.phi = 0.0;
 
-na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
+na = 2; nb = 2; nc = 10; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
@@ -36,14 +35,14 @@ na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
 % input_multislice.ly = 8.0; 
 % input_multislice.dz = 0.5;
 
-input_multislice.nx = 1024; 
-input_multislice.ny = 1024;
+input_multislice.nx = 256; 
+input_multislice.ny = 256;
 
 clear get_specimen_slicing;
 [atoms, Slice] = get_specimen_slicing(input_multislice);
 
 [natoms,~] = size(atoms); [nslice, ~] = size(Slice);
-for islice = 1:2
+for islice = 3:3
     input_multislice.islice = islice;
     
     input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2

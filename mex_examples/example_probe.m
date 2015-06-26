@@ -17,7 +17,7 @@ input_multislice.ly = 10;
 input_multislice.nx = 1024; 
 input_multislice.ny = 1024;
 
-input_multislice.lens_m = -1;            %mm
+input_multislice.lens_m = 0;            %mm
 input_multislice.lens_f = 88.7414;       %Angs
 input_multislice.lens_Cs3 = 0.04;      %mm
 input_multislice.lens_Cs5 = 0.00;       %mm

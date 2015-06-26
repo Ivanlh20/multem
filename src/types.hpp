@@ -148,9 +148,15 @@ namespace multem
 	};
 
 	/**********************************Input File*********************************/
-	enum eInputFile
+	enum eInput_File
 	{
 		eIF_txt = 1, eIF_pdb = 2
+	};
+
+	/***********************************Operation mode*********************************/
+	enum eOperation_Mode
+	{
+		eOM_Normal = 1, eOM_Advanced = 2
 	};
 
 	/*****************************simulation type*********************************/
@@ -232,6 +238,13 @@ namespace multem
 		eST_Line = 1, eST_Area = 2
 	};
 
+
+	/**********************************Channelling type********************************/
+	enum eChannelling_Type
+	{
+		eCT_Single_Channeling = 1, eCT_Double_Channeling = 2, eCT_Double_Channeling_FOMS = 3, 
+	};
+
 	/*********************************Epsilon***********************************/
 	template <class T>
 	struct Epsilon
@@ -273,35 +286,6 @@ namespace multem
 		dim3 Blk; 	// Blocks
 		dim3 Thr; 	// Threads
 
-	};
-
-	/**************************vector**************************/
-	template<class T, eDevice dev>
-	using Vector = typename std::conditional<dev==e_Host, host_vector<T>, device_vector<T>>::type;
-
-	template<class T>
-	struct rVector
-	{
-		using value_type = typename T;
-
-		int size;
-		T *V;
-
-		rVector(): size(0), V(nullptr) {}
-
-		template<class TVector> 
-		rVector<T>& operator=(TVector &vector)
-		{ 
-			size = vector.size();
-			V = raw_pointer_cast(vector.data());
-			return *this; 
-		}
-
-		template<class TVector>
-		rVector(TVector &vector)
-		{
-			*this = vector;
-		}
 	};
 
 	/*********************matlab double matrix*****************/
@@ -350,6 +334,9 @@ namespace multem
 		struct is_double: std::integral_constant<bool, std::is_same<T, double>::value> {};
 
 		template<class T>
+		struct is_fundamental: std::integral_constant<bool, std::is_fundamental<T>::value || std::is_same<T, complex<float>>::value || std::is_same<T, complex<double>>::value> {};
+
+		template<class T>
 		struct is_m_matrix_r: std::integral_constant<bool, std::is_same<T, m_matrix_r>::value> {};
 
 		template<class T>
@@ -357,10 +344,6 @@ namespace multem
 
 		template<class T>
 		struct is_m_matrix_rc: std::integral_constant<bool, is_m_matrix_r<T>::value || is_m_matrix_c<T>::value> {};
-
-		template<class T>
-		struct is_int_floating_point: std::integral_constant<bool, 
-		is_int<T>::value || std::is_floating_point<T>::value> {};
 
 		template<class T>
 		struct is_enum_bool: std::integral_constant<bool, std::is_enum<T>::value || is_bool<T>::value> {};
@@ -372,7 +355,7 @@ namespace multem
 		struct is_Vector<T, dev, typename std::enable_if<std::is_scalar<T>::value>::type>: std::integral_constant<bool, false> {};
 	
 		template<class T, eDevice dev>
-		struct is_Vector<T, dev, typename std::enable_if<!std::is_scalar<T>::value>::type>: std::integral_constant<bool, (dev==e_Host)?(std::is_same<T, host_vector<Value_type<T>>>::value):(std::is_same<T, device_vector<Value_type<T>>>::value)> {};
+		struct is_Vector<T, dev, typename std::enable_if<!std::is_scalar<T>::value>::type>: std::integral_constant<bool, (dev == e_Host)?(std::is_same<T, host_vector<Value_type<T>>>::value):(std::is_same<T, device_vector<Value_type<T>>>::value)> {};
 
 		template<class T, class Enable = void>
 		struct has_device_member {}; 
@@ -398,7 +381,7 @@ namespace multem
 		struct is_Host_Device{};
 
 		template<class T, eDevice dev>
-		struct is_Host_Device<T, dev, typename std::enable_if<has_device_member<T>::value>::type>: std::integral_constant<bool, is_Vector<T, dev>::value || (T::device==dev)> {};
+		struct is_Host_Device<T, dev, typename std::enable_if<has_device_member<T>::value>::type>: std::integral_constant<bool, is_Vector<T, dev>::value || (T::device == dev)> {};
 
 		template<class T, eDevice dev>
 		struct is_Host_Device<T, dev, typename std::enable_if<!has_device_member<T>::value>::type>: std::integral_constant<bool, is_Vector<T, dev>::value> {};
@@ -432,9 +415,6 @@ namespace multem
 	
 		template <class T, class U>
 		using enable_if_enum_bool = typename std::enable_if<is_enum_bool<T>::value, U>::type;
-	
-		template <class T, class U>
-		using enable_if_int_floating_point = typename std::enable_if<is_int_floating_point<T>::value, U>::type;
 		
 		template <class T, class U>
 		using enable_if_pointer = typename std::enable_if<std::is_pointer<T>::value, U>::type;
@@ -449,47 +429,76 @@ namespace multem
 		using enable_if_m_matrix_rc = typename std::enable_if<is_m_matrix_rc<T>::value, U>::type;	
 
 		template <int simulation_type, class U>
-		using enable_if_STEM = typename std::enable_if<simulation_type==eST_STEM, U>::type;
+		using enable_if_STEM = typename std::enable_if<simulation_type == eST_STEM, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_ISTEM = typename std::enable_if<simulation_type==eST_ISTEM, U>::type;
+		using enable_if_ISTEM = typename std::enable_if<simulation_type == eST_ISTEM, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_CBED = typename std::enable_if<simulation_type==eST_CBED, U>::type;
+		using enable_if_CBED = typename std::enable_if<simulation_type == eST_CBED, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_CBEI = typename std::enable_if<simulation_type==eST_CBEI, U>::type;
+		using enable_if_CBEI = typename std::enable_if<simulation_type == eST_CBEI, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_ED = typename std::enable_if<simulation_type==eST_ED, U>::type;
+		using enable_if_ED = typename std::enable_if<simulation_type == eST_ED, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_HRTEM = typename std::enable_if<simulation_type==eST_HRTEM, U>::type;
+		using enable_if_HRTEM = typename std::enable_if<simulation_type == eST_HRTEM, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_PED = typename std::enable_if<simulation_type==eST_PED, U>::type;
+		using enable_if_PED = typename std::enable_if<simulation_type == eST_PED, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_HCI = typename std::enable_if<simulation_type==eST_HCI, U>::type;
+		using enable_if_HCI = typename std::enable_if<simulation_type == eST_HCI, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_EWFS = typename std::enable_if<simulation_type==eST_EWFS, U>::type;
+		using enable_if_EWFS = typename std::enable_if<simulation_type == eST_EWFS, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_EWRS = typename std::enable_if<simulation_type==eST_EWRS, U>::type;
+		using enable_if_EWRS = typename std::enable_if<simulation_type == eST_EWRS, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_EELS = typename std::enable_if<simulation_type==eST_EELS, U>::type;
+		using enable_if_EELS = typename std::enable_if<simulation_type == eST_EELS, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_EFTEM = typename std::enable_if<simulation_type==eST_EFTEM, U>::type;
+		using enable_if_EFTEM = typename std::enable_if<simulation_type == eST_EFTEM, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_ProbeFS = typename std::enable_if<simulation_type==eST_ProbeFS, U>::type;
+		using enable_if_ProbeFS = typename std::enable_if<simulation_type == eST_ProbeFS, U>::type;
 
 		template <int simulation_type, class U>
-		using enable_if_ProbeRS = typename std::enable_if<simulation_type==eST_ProbeRS, U>::type;
+		using enable_if_ProbeRS = typename std::enable_if<simulation_type == eST_ProbeRS, U>::type;
 	}
+
+	/**************************vector**************************/
+	template<class T, eDevice dev>
+	using Vector = typename std::conditional<dev==e_Host, typename std::conditional<traits::is_fundamental<T>::value, host_vector<T>, vector<T>>::type, device_vector<T>>::type;
+
+	template<class T>
+	struct rVector
+	{
+		using value_type = typename T;
+
+		int size;
+		T *V;
+
+		rVector(): size(0), V(nullptr) {}
+
+		template<class TVector> 
+		rVector<T>& operator=(TVector &vector)
+		{ 
+			size = vector.size();
+			V = raw_pointer_cast(vector.data());
+			return *this; 
+		}
+
+		template<class TVector>
+		rVector(TVector &vector)
+		{
+			*this = vector;
+		}
+	};
 
 	template<class T>
 	DEVICE_CALLABLE FORCEINLINE
@@ -501,7 +510,7 @@ namespace multem
 	//static member function are not support for the cuda compiler
 	template<class T>
 	DEVICE_CALLABLE FORCEINLINE
-	bool isEqual(const T &a, const T &b){}
+	bool isEqual(const T &a, const T &b){ return false;}
 
 	template<>
 	DEVICE_CALLABLE FORCEINLINE
@@ -539,7 +548,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE
 	bool isEqual<int>(const int &a, const int &b)
 	{
-		return a==b;
+		return a == b;
 	}
 
 	template<class T>
@@ -590,6 +599,18 @@ namespace multem
 	{
 		return (x_min <= x)&&(x <= x_max)&&(y_min <= y)&&(y <= y_max);
 	}
+	/*******************forward declarations********************/
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	T get_lambda(const T &E_0);
+
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	T get_sigma(const T &E_0);
+
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	T get_gamma(const T &E_0);
 
 	/************************thickness*************************/
 	template<class T, eDevice dev>
@@ -1019,6 +1040,12 @@ namespace multem
 
 		static const eDevice device = dev;
 
+		inline
+		void set_input_data(value_type E_0)
+		{
+			lambda = get_lambda(E_0);
+		}		
+		
 		size_type size() const
 		{
 			return ang_inner.size();
@@ -1037,18 +1064,19 @@ namespace multem
 			ang_outer.assign(det_cir.ang_outer.begin(), det_cir.ang_outer.end());
 		}
 
-		value_type g_inner(const int & idx, const value_type &lambda) const
+		value_type g_inner(const int & idx) const
 		{
 			return ang_inner[idx]/lambda;
 		}
 
-		value_type g_outer(const int & idx, const value_type &lambda) const
+		value_type g_outer(const int & idx) const
 		{
 			return ang_outer[idx]/lambda;
 		}
 
 		Vector<T, dev> ang_inner; // Inner aperture (rad)
 		Vector<T, dev> ang_outer; // Outer aperture (rad)
+		value_type lambda;	  // lambda
 	};
 
 	/********************STEM Intensity***********************/
@@ -1180,14 +1208,15 @@ namespace multem
 		bool bwl; 				// Band-width limit
 		bool pbc_xy; 			// Peridic boundary contions
 
-		T dRx; 				// x-sampling in real space
-		T dRy; 				// y-sampling in real space
+		T dRx; 					// x-sampling in real space
+		T dRy; 					// y-sampling in real space
 
-		T dgx; 				// x-sampling in reciprocal space
-		T dgy; 				// y-sampling in reciprocal space
+		T dgx; 					// x-sampling in reciprocal space
+		T dgy; 					// y-sampling in reciprocal space
 
 		T gl_max; 				// Maximun limited frequency 
-		T gl2_max; 			// Squared of the maximun limited frequency
+		T gl2_max; 				// Squared of the maximun limited frequency
+		T alpha;
 
 		inline
 		Grid(): nx(0), ny(0), nxh(0), nyh(0), inxy(0), 
@@ -1213,6 +1242,9 @@ namespace multem
 			dgy = multem::Div(1.0, ly);
 			gl_max = 2.0*g_max()/3.0;
 			gl2_max = pow(gl_max, 2);
+
+			T dg0 = 0.02, fg0 = 0.99;
+			alpha = log(1.0/fg0-1.0)/(pow(gl_max-dg0, 2)-gl2_max);
 		}
 	
 		DEVICE_CALLABLE FORCEINLINE
@@ -1224,12 +1256,20 @@ namespace multem
 		DEVICE_CALLABLE FORCEINLINE
 		int nx_ny_max() const { return max(nx, ny); }
 
+		/*********************************************************/
+		DEVICE_CALLABLE FORCEINLINE
+		int lx_ly_min() const { return min(lx, ly); }
+
+		DEVICE_CALLABLE FORCEINLINE
+		int lx_ly_max() const { return max(lx, ly); }
+
 		DEVICE_CALLABLE FORCEINLINE
 		T lxh() const { return 0.5*lx; }
 
 		DEVICE_CALLABLE FORCEINLINE
 		T lyh() const { return 0.5*ly; }
 
+		/*********************************************************/
 		// Maximun frequency
 		DEVICE_CALLABLE FORCEINLINE
 		T g_max() const { return fmin(static_cast<T>(nxh)*dgx, static_cast<T>(nyh)*dgy); }
@@ -1249,6 +1289,7 @@ namespace multem
 
 		DEVICE_CALLABLE FORCEINLINE
 		int ny_dRy(const T &ly) const { return static_cast<int>(ceil(ly/dRy)); }
+
 		/*********************************************************/
 		DEVICE_CALLABLE FORCEINLINE
 		T gx(const int &ix) const { return static_cast<T>(ix-nxh)*dgx; }
@@ -1283,6 +1324,12 @@ namespace multem
 
 		DEVICE_CALLABLE FORCEINLINE
 		T R(const int &ix, const int &iy) const { return sqrt(R2(ix, iy)); }
+
+		DEVICE_CALLABLE FORCEINLINE
+		T bwl_factor(const int &ix, const int &iy) const 
+		{ 
+			return inxy/(1.0+exp(alpha*(g2(ix, iy)-gl2_max)));
+		}
 
 		/*********************************************************/
 		DEVICE_CALLABLE FORCEINLINE
@@ -1331,6 +1378,11 @@ namespace multem
 		DEVICE_CALLABLE FORCEINLINE
 		T R_shift(const int &ix, const int &iy) const { return sqrt(R2_shift(ix, iy)); }
 
+		DEVICE_CALLABLE FORCEINLINE
+		T bwl_factor_shift(const int &ix, const int &iy) const 
+		{ 
+			return inxy/(1.0+exp(alpha*(g2_shift(ix, iy)-gl2_max)));
+		}
 		/*********************************************************/
 		DEVICE_CALLABLE FORCEINLINE
 		int ind_row(const int &ix, const int &iy) const { return iy*nx+ix; }
@@ -1447,10 +1499,10 @@ namespace multem
 
 		inline
 		EELS(): space(eS_Real), E_0(0), E_loss(0), ge(0), ge2(0), gc(0), gc2(0), 
-		m_selection(0), collection_angle(0), factor(0), Z(0), x(0), y(0), occ(0){}
+		m_selection(0), collection_angle(0), channelling_type(eCT_Double_Channeling), factor(0), Z(0), x(0), y(0), occ(0){}
 
 		inline
-		void set_input_data(eSpace space_i, T E_0_i, T E_loss_i, int m_selection_i, T collection_angle_i, int Z_i)
+		void set_input_data(eSpace space_i, T E_0_i, T E_loss_i, int m_selection_i, T collection_angle_i, eChannelling_Type channelling_type_i, int Z_i)
 		{
 			space = space_i;
 			E_0 = E_0_i;
@@ -1468,6 +1520,7 @@ namespace multem
 			m_selection = m_selection_i;
 			collection_angle = collection_angle_i;
 			g_collection = collection_angle/lambda;
+			channelling_type = channelling_type_i;
 
 			Z = Z_i;
 		}
@@ -1485,11 +1538,12 @@ namespace multem
 		T E_0;
 		T E_loss; 				// Energy loss
 		T ge; 					// relativistic corrected effective scattering momentum transfer
-		T ge2; 				// ge square
+		T ge2; 					// ge square
 		T gc; 					// ge cut-off at the Bethe Ridge
-		T gc2; 				// gc square
+		T gc2; 					// gc square
 		int m_selection;		// selection rule
 		T collection_angle; 	// Collection half angle(rad)
+		eChannelling_Type channelling_type;
 
 		T factor;
 		int Z;					// Atomic type
@@ -1668,7 +1722,7 @@ namespace multem
 			}
 
 			inline
-			GridBT get_block_thread()
+			GridBT get_eval_cubic_poly_gridBT()
 			{
 				GridBT gridBT;
 				gridBT.Blk = dim3((iyn+c_thrnxny-1)/c_thrnxny, (ixn+c_thrnxny-1)/c_thrnxny);
@@ -1691,7 +1745,7 @@ namespace multem
 				}
 
 				iR0 = iR_0;
-				iRn = (iR_0==iR_e)?0:iR_e-iR_0+1;
+				iRn = (iR_0 == iR_e)?0:iR_e-iR_0+1;
 			};
 	};
 
@@ -1707,9 +1761,9 @@ namespace multem
 
 			static const eDevice device = e_Host;
 
-			Stream() :nstream(0), stream(nullptr) { }
+			Stream():nstream(0), n_act_stream(0), stream(nullptr) { }
 
-			~Stream() { destroy(); nstream = 0; }
+			~Stream() { destroy(); nstream = 0; n_act_stream = 0; }
 
 			int size() const
 			{
@@ -1735,13 +1789,14 @@ namespace multem
 				stream = new std::thread[nstream];
 			}
 
+			int n_act_stream;
 		private:
 			int nstream;
 			std::thread *stream;
 
 			void destroy()
 			{
-				if(nstream==0)
+				if(nstream == 0)
 				{
 					return;
 				}
@@ -1766,7 +1821,9 @@ namespace multem
 
 			static const eDevice device = e_Device;
 
-			~Stream() { destroy(); }
+			Stream(): n_act_stream(0){ }
+
+			~Stream() { destroy(); n_act_stream = 0;}
 
 			int size() const
 			{
@@ -1794,6 +1851,7 @@ namespace multem
 				cudaDeviceSynchronize();
 			}
 
+			int n_act_stream;
 		private:
 			std::vector<cudaStream_t> stream;
 
@@ -2153,8 +2211,8 @@ namespace multem
 		T xe; 							// final scanning position in x
 		T ye; 							// final scanning position in y
 
-		host_vector<T> x;
-		host_vector<T> y;
+		Vector<T, e_Host> x;
+		Vector<T, e_Host> y;
 
 		size_type size() const
 		{
@@ -2173,7 +2231,7 @@ namespace multem
 			}
 
 			nx = ny = ns;
-			if(type==eST_Area)
+			if(type == eST_Area)
 			{
 				T lx = fabs(xe-x0);
 				T ly = fabs(ye-y0);
@@ -2203,7 +2261,7 @@ namespace multem
 			y.resize(ny);
 			y.shrink_to_fit();
 
-			if(type==eST_Line)
+			if(type == eST_Line)
 			{
 				T xu = xe-x0;
 				T yu = ye-y0;
@@ -2247,50 +2305,13 @@ namespace multem
 
 		bool is_line() const
 		{
-			return type==eST_Line;
+			return type == eST_Line;
 		}
 
 		bool is_area() const
 		{
-			return type==eST_Area;
+			return type == eST_Area;
 		}
-	};
-
-	/***********************Input - TEM-Image***********************/
-	template<class T>
-	struct In_TEM_Im
-	{
-		eDevice device; 				// 1: CPU, 2: GPU
-		int cpu_ncores; 				// Number of Cores CPU
-		int cpu_nthread;				// Number of threads
-		int gpu_device; 				// GPU device
-		int microscope_effect; 			// 1: Partial coherente mode, 2: transmission_fun cross coefficient
-		int spatial_temporal_effect; 	// 1: Spatial and temporal, 2: Temporal, 3: Spatial
-		int ZeroDef; 					// 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
-		T zero_defocus_plane;			// Zero defocus plane
-
-		T E_0; 		// Acceleration volatage in KeV
-		T *Psirh; 		// Real part of the wavefunction
-		T *Psiih; 		// Imaginary part of the wavefunction
-		int nx; 		// Number of pixels in x direction
-		int ny; 		// Number of pixels in y direction
-		T lx; 			// distance in x direction(Angstroms)
-		T ly; 			// distance in y direction(Angstroms)
-	
-		int MC_m; 		// momentum of the vortex
-		T MC_f; 		// defocus(Angstrom)
-		T MC_Cs3; 		// spherical aberration(Angstrom)
-		T MC_Cs5; 		// spherical aberration(Angstrom)
-		T MC_mfa2; 	// magnitude 2-fold astigmatism(Angstrom)
-		T MC_afa2; 	// angle 2-fold astigmatism(rad)
-		T MC_mfa3; 	// magnitude 3-fold astigmatism(Angstrom)
-		T MC_afa3; 	// angle 3-fold astigmatism(rad)
-		T MC_aobjl; 	// lower objective aperture(rad)
-		T MC_aobju; 	// upper objective aperture(rad)
-		T MC_sf; 		// defocus spread(Angstrom)
-		int MC_nsf; 	// Number of defocus sampling points
-		T MC_beta;		// semi-convergence angle
-		int MC_nbeta; 	// half number sampling points
 	};
 
 	/*****************Radial Schrodinger equation*******************/

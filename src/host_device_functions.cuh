@@ -111,11 +111,11 @@ namespace multem
 	template<eDevice dev>
 	void device_synchronize()
 	{
-		if(dev==e_Host)
+		if(dev == e_Host)
 		{
 
 		}
-		else if(dev==e_Device)
+		else if(dev == e_Device)
 		{
 			cudaDeviceSynchronize();
 		}
@@ -1728,19 +1728,19 @@ namespace multem
 		};
 
 		template<class T>
-		struct transmission_fun
+		struct transmission_funtion
 		{
 			const eElec_Spec_Int_Model elec_spec_int_model;
 
 			const T w;
-			transmission_fun(T w_i, eElec_Spec_Int_Model ElecSpecIntModel_i): w(w_i), elec_spec_int_model(ElecSpecIntModel_i) {}
+			transmission_funtion(T w_i, eElec_Spec_Int_Model ElecSpecIntModel_i): w(w_i), elec_spec_int_model(ElecSpecIntModel_i) {}
 
 			template<class U>
 			__host__ __device__
 			complex<T> operator()(const U &x) const 
 			{ 
 				T theta = w*static_cast<T>(x);
-				return (elec_spec_int_model==eESIM_Weak_Phase_Object)?complex<T>(1.0, theta):thrust::euler(theta);
+				return (elec_spec_int_model == eESIM_Weak_Phase_Object)?complex<T>(1.0, theta):thrust::euler(theta);
 			}
 		};
 
@@ -1920,17 +1920,17 @@ namespace multem
 		thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), functor::add_scale_i<value_type>());
 	}
 
-	template<class TVector, class U>
-	void add_square_scale(Value_type<U> w_i, const TVector &M_i, U &M_o)
+	template<class TVector_1, class TVector_2>
+	void add_square_scale(Value_type<TVector_2> w_i, const TVector_1 &M_i, TVector_2 &M_o)
 	{
-		using value_type = Value_type<U>;
+		using value_type = Value_type<TVector_2>;
 		thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), M_o.begin(), functor::add_square_scale<value_type>(w_i));
 	}
 
-	template<class TVector, class U>
-	void add_square_scale(Value_type<TVector> w_i, const TVector &M1_i, const TVector &M2_i, U &M_o)
+	template<class TVector_1, class TVector_2>
+	void add_square_scale(Value_type<TVector_1> w_i, const TVector_1 &M1_i, const TVector_1 &M2_i, TVector_2 &M_o)
 	{
-		using value_type = Value_type<U>;
+		using value_type = Value_type<TVector_2>;
 		thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), functor::add_square_scale_i<value_type>(w_i));
 	}
 
@@ -2000,18 +2000,18 @@ namespace multem
 
 		propagator_mul(grid, prop_x_i, prop_y_i, Psi_o, Psi_o);
 
-		if(space==eS_Real)
+		if(space == eS_Real)
 		{
 			fft2.inverse(Psi_o);
 		}
 	}
 
 	template<class TGrid, class TVector_1, class TVector_2>
-	void transmission_fun(TGrid &grid, eElec_Spec_Int_Model elec_spec_int_model, const Value_type<TGrid> w, TVector_1 V0_i, TVector_2 &Trans_o)
+	void transmission_funtion(TGrid &grid, eElec_Spec_Int_Model elec_spec_int_model, const Value_type<TGrid> w, TVector_1 &V0_i, TVector_2 &Trans_o)
 	{	
 		using value_type_r = Value_type<TGrid>;
 
-		thrust::transform(V0_i.begin(), V0_i.end(), Trans_o.begin(), functor::transmission_fun<value_type_r>(w, elec_spec_int_model));
+		thrust::transform(V0_i.begin(), V0_i.end(), Trans_o.begin(), functor::transmission_funtion<value_type_r>(w, elec_spec_int_model));
 	}
 
 	template<class TGrid, class TVector_i, class TVector_o>

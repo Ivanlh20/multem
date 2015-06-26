@@ -46,15 +46,13 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.simulation_type = multem::eST_HRTEM;
 
 	input_multislice.input_wave_type = mx_get_scalar_field<multem::eInput_Wave_Type>(mx_input_multislice, "input_wave_type");
-	if(input_multislice.input_wave_type==multem::eIWT_User_Define && full)
+	if(input_multislice.is_user_define_wave() && full)
 	{
 		auto psi_0 = mx_get_matrix_field<m_matrix_c>(mx_input_multislice, "psi_0");
 		input_multislice.psi_0.resize(psi_0.size);
 		multem::scomplex_to_complex(psi_0, input_multislice.psi_0);
 		multem::fft2_shift(input_multislice.grid, input_multislice.psi_0);
 	}
-
-	input_multislice.fast_cal = false;
 
 	input_multislice.E_0 = mx_get_scalar_field<value_type>(mx_input_multislice, "E_0");
 	input_multislice.theta = mx_get_scalar_field<value_type>(mx_input_multislice, "theta")*multem::c_deg_2_rad;

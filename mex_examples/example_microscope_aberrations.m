@@ -27,7 +27,7 @@ input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middl
 input_multislice.zero_defocus_plane = 0;
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;
-input_multislice.fast_cal = 0;
+
 input_multislice.bwl = 0;
 
 input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
@@ -61,7 +61,7 @@ input_multislice.lens_nbeta = 10; %(mrad, half number of steps)
 input_multislice.simulation_type = 32;              % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, eST_EELS=61, eST_EFTEM=62
 clear MULTEM;
 tic;
-[m2psi_tot_m0, m2psi_coh] = MULTEM(input_multislice); 
+[m2psi_tot_m0] = MULTEM(input_multislice); 
 toc;
 
 input_multislice.simulation_type = 52;              % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, eST_EELS=61, eST_EFTEM=62

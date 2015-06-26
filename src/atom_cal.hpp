@@ -205,7 +205,7 @@ namespace multem
 					auto f = [&](const T &x)->T
 					{	
 						T V;
-						if(Dim==3) Vr(x, V);
+						if(Dim == 3) Vr(x, V);
 						else VR(x, V);
 						return V;
 					};
@@ -242,7 +242,7 @@ namespace multem
 					auto f = [&](const T &x)->T
 					{	
 						T V;
-						if(Dim==3) Vr(x, V);
+						if(Dim == 3) Vr(x, V);
 						else VR(x, V);
 						return V-Vrl;
 					};

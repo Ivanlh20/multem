@@ -963,7 +963,7 @@ namespace multem
 						}
 					}
 				}
-				else if(potential_type==ePT_Kirkland_0_12)
+				else if(potential_type == ePT_Kirkland_0_12)
 				{
 					// 4: Kirkland parameterization - 3 Yukawa + 3 Gaussians - [0, 12]
 					for(auto i = 0; i < 6; i++)
@@ -1008,7 +1008,7 @@ namespace multem
 						}
 					}
 				}
-				else if(potential_type==ePT_Weickenmeier_0_12)
+				else if(potential_type == ePT_Weickenmeier_0_12)
 				{
 					// 5: Weickenmeier and H.Kohl - a*(1-exp(-bg^2)/g^2 - [0, 12]
 					for(auto i = 0; i < 6; i++)
@@ -1043,7 +1043,7 @@ namespace multem
 						}
 					}
 				}
-				else if(potential_type==ePT_Lobato_0_12)
+				else if(potential_type == ePT_Lobato_0_12)
 				{
 						// 6: Lobato parameterization - Hydrogen functions - [0, 12]
 					for(auto i = 0; i < 6; i++)

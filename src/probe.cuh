@@ -53,7 +53,7 @@ namespace multem
 
 				multem::probe(input_multislice->grid, input_multislice->lens, x, y, probe_0);
 
-				if(space==eS_Real)
+				if(space == eS_Real)
 				{
 					fft2.inverse(probe_0);
 				}

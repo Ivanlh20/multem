@@ -57,10 +57,9 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.zero_defocus_type = mx_get_scalar_field<multem::eZero_Defocus_Type>(mx_input_multislice, "zero_defocus_type");
 	input_multislice.zero_defocus_plane = mx_get_scalar_field<value_type>(mx_input_multislice, "zero_defocus_plane");
 	input_multislice.input_wave_type = mx_get_scalar_field<multem::eInput_Wave_Type>(mx_input_multislice, "input_wave_type");
-	input_multislice.fast_cal = mx_get_scalar_field<bool>(mx_input_multislice, "fast_cal");
-
+	
 	input_multislice.input_wave_type = mx_get_scalar_field<multem::eInput_Wave_Type>(mx_input_multislice, "input_wave_type");
-	if(input_multislice.input_wave_type==multem::eIWT_User_Define && full)
+	if(input_multislice.is_user_define_wave() && full)
 	{
 		auto psi_0 = mx_get_matrix_field<m_matrix_c>(mx_input_multislice, "psi_0");
 		input_multislice.psi_0.resize(psi_0.size);
@@ -68,12 +67,14 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 		multem::fft2_shift(input_multislice.grid, input_multislice.psi_0);
 	}
 
-	bool bwl = mx_get_scalar_field<bool>(mx_input_multislice, "bwl");
-	bool pbc_xy = true;
+	input_multislice.coherent_contribution = true;
 
 	input_multislice.E_0 = mx_get_scalar_field<value_type>(mx_input_multislice, "E_0");
 	input_multislice.theta = mx_get_scalar_field<value_type>(mx_input_multislice, "theta")*multem::c_deg_2_rad;
 	input_multislice.phi = mx_get_scalar_field<value_type>(mx_input_multislice, "phi")*multem::c_deg_2_rad;
+
+	bool bwl = mx_get_scalar_field<bool>(mx_input_multislice, "bwl");
+	bool pbc_xy = true;
 
 	auto nx = mx_get_scalar_field<int>(mx_input_multislice, "nx");
 	auto ny = mx_get_scalar_field<int>(mx_input_multislice, "ny");

@@ -24,6 +24,8 @@
 #include "matlab2cpp.hpp"
 
 using multem::m_matrix_r;
+using multem::e_Host;
+using multem::Atom_Type;
 
 template<class TAtom_Types>
 void set_output_data(TAtom_Types &atom_type, mxArray *&mx_atom_type)
@@ -102,7 +104,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	multem::Atomic_Data atomic_data;
 	atomic_data.Load_Data(potential_type);
-	host_vector<multem::Atom_Type<double, multem::e_Host>> atom_type(multem::c_nAtomsTypes);
+	multem::Vector<Atom_Type<double, e_Host>, e_Host> atom_type(multem::c_nAtomsTypes);
 
 	for(auto i=0; i<atom_type.size(); i++)
 	{

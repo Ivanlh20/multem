@@ -23,7 +23,7 @@ input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middl
 input_multislice.zero_defocus_plane = 0;
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;
-input_multislice.fast_cal = 0;
+
 input_multislice.bwl = 1;
 
 input_multislice.E_0 = 80;
@@ -39,7 +39,7 @@ input_multislice.ewrs_convergent_beam = 0;     % 1: true, 0:false
 input_multislice.ewrs_x0 = 0.0;                % x position 
 input_multislice.ewrs_y0 = 0.0;                % y position
 
-na = 4; nb = 4; nc = 25; ncu = 2; rms3d = 0.085;
+na = 8; nb = 8; nc = 25; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...

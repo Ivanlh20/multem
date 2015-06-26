@@ -73,7 +73,7 @@ namespace multem
 			/* Move atoms (ramdom distribution will be included in the future) */
 			void move_atoms(const int &iconf)
 			{
-				if((input_multislice->phonon_model!=ePM_Frozen_Phonon)||(iconf <= 0))
+				if(!input_multislice->is_frozen_phonon()||(iconf <= 0))
 				{
 					return;
 				}
@@ -103,7 +103,7 @@ namespace multem
 				// get atom information
 				atoms.get_Statistic(&atom_type);
 
-				if(input_multislice->interaction_model == eESIM_Multislice)
+				if(input_multislice->is_multislice())
 				{
 					// Ascending sort by z
 					atoms.Sort_by_z();
@@ -122,8 +122,8 @@ namespace multem
 
 			Input_Multislice<T, dev> *input_multislice; 			
 
-			Vector<Atom_Type<T, e_Host>, e_Host> atom_type; 	// Atom types
-			Atom_Data<T> atoms; 							// displaced atoms
+			Vector<Atom_Type<T, e_Host>, e_Host> atom_type;		// Atom types
+			Atom_Data<T> atoms; 								// displaced atoms
 			Slice<T, e_Host> slice; 							// Slicing procedure
 			Thickness<T, e_Host> thickness; 					// Thicknesses
 
@@ -202,7 +202,7 @@ namespace multem
 						z_Slice[0] = atoms.z_Int_min;
 						for(auto i=1; i<z_Slice.size(); i++)
 						{
-							T dz = (i==1)?dz_Bot:(i==z_Slice.size()-1)?dz_Top:dz_i;
+							T dz = (i == 1)?dz_Bot:(i == z_Slice.size()-1)?dz_Top:dz_i;
 							z_Slice[i] = z_Slice[i-1] + dz;
 						}
 					}
@@ -271,7 +271,7 @@ namespace multem
 					}
 				}
 
-				if((slice.size()==1)||(input_multislice->thickness_type==eTT_Whole_Specimen))
+				if((slice.size() == 1)||(input_multislice->thickness_type == eTT_Whole_Specimen))
 				{
 					thickness.resize(1);
 	
@@ -336,7 +336,7 @@ namespace multem
 	//		return zero_defocus_plane - (atoms.z[thickness.iAtom[iThickness]]+atoms.R_Int_max);
 	//	}
 	//
-	//	if((slice.size()==1)||(thickness_type==eTT_Whole_Specimen))
+	//	if((slice.size() == 1)||(thickness_type == eTT_Whole_Specimen))
 	//	{
 	//		thickness.resize(1);
 	//
@@ -350,7 +350,7 @@ namespace multem
 	//	int nz_i, nz;
 	//	T *z_i = 0, *z = 0;
 	//
-	//	if(input_multislice->thickness_type==3)
+	//	if(input_multislice->thickness_type == 3)
 	//	{ 
 	//		multem::MatchTwoVectors(input_multislice->nThickness_i, input_multislice->Thickness_i, nPlanes_u, Planes_u, nz_i, z_i);
 	//	}
@@ -385,7 +385,7 @@ namespace multem
 	//	int iThickness = -1;
 	//	for(int i=0; i<thickness.n; i++)
 	//	{
-	//		if(thickness.islice[i] ==islice)
+	//		if(thickness.islice[i] == islice)
 	//		{
 	//			iThickness = i;
 	//			break;

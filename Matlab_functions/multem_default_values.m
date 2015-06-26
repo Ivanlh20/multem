@@ -30,11 +30,12 @@ input_multislice.thickness = 0;                     % Array of thicknesses
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;                         % Input wave
 
-input_multislice.fast_cal = 0;                      % 1: fast calculation(high memory consumption), 1 :normal mode(low memory consumption)
 input_multislice.bwl = 0;                           % Band-width limit, 1: true, 0:false
+input_multislice.operation_mode = 1;                % eOM_Normal = 1, eOM_Advanced = 2
+input_multislice.coherent_contribution = 0;         % 1: true, 0:false
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.E_0 = 300;                          % Acceleration Voltage (keV)
+input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
 input_multislice.theta = 0.0;                       % Till ilumination (degrees)
 input_multislice.phi = 0.0;                         % Till ilumination (degrees)
 
@@ -101,19 +102,13 @@ input_multislice.ewrs_y0 = 0.0;                % y position
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EFTEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.eftem_E_loss = 0;              % Energy loss (eV)
 input_multislice.eftem_m_selection = 3;         % selection rule
+input_multislice.eftem_channeling_type = 2;    % eCT_Single_Channeling = 1, eCT_Double_Channeling = 2, eCT_Double_Channeling_FOMS = 3, 
 input_multislice.eftem_Z = 79;                  % atomic type
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EELS %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.eels_E_loss = 0;               % Energy loss (eV)
 input_multislice.eels_m_selection = 3;          % selection rule
 input_multislice.eels_collection_angle = 20;    % Collection half angle (mrad)
+input_multislice.eels_channeling_type = 2;    % eCT_Single_Channeling = 1, eCT_Double_Channeling = 2, eCT_Double_Channeling_FOMS = 3, 
 input_multislice.eels_Z = 79;                   % atomic type
-
-
-
-
-
-
-
-
 
 

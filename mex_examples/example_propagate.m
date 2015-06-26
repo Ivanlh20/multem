@@ -27,7 +27,7 @@ input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middl
 input_multislice.zero_defocus_plane = 0;
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;
-input_multislice.fast_cal = 0;
+
 input_multislice.bwl = 0;
 
 input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)

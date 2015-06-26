@@ -24,7 +24,7 @@ input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middl
 input_multislice.zero_defocus_plane = 0;
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;
-input_multislice.fast_cal = 1;
+
 input_multislice.bwl = 1;
 
 input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
@@ -57,7 +57,7 @@ input_multislice.lens_nbeta = 10;       %(mrad, half number of steps)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.scanning_type = 2; % eST_Line = 1, eST_Area = 2
-input_multislice.scanning_ns = 16;
+input_multislice.scanning_ns = 32;
 input_multislice.scanning_x0 = 2*a; 
 input_multislice.scanning_y0 = 2*b;
 input_multislice.scanning_xe = 3*a;

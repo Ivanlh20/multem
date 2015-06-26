@@ -44,29 +44,33 @@ namespace multem
 			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io, Stream<value_type_r, dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
 			{
 				Potential::set_input_data(input_multislice_io, stream_i);
-
 				fft2 = fft2_i;
 
 				trans_0.resize(input_multislice->grid.nxy());
 
-				if((!input_multislice->fast_cal)||(input_multislice->interaction_model!=eESIM_Multislice))
+				if(!input_multislice->slice_storage)
 				{
 					memory_slice.clear();
 					return;
 				}
 
-				int n_slice_sig = (input_multislice->fp_dim.z)?(int)ceil(3.0*atoms.sigma_max/input_multislice->grid.dz):0;
-				int n_slice_req = slice.size() + 2*n_slice_sig;
+				int n_slice_req = 1;
+
+				if(input_multislice->is_multislice())
+				{
+					int n_slice_sig = (input_multislice->fp_dim.z)?(int)ceil(3.0*atoms.sigma_max/input_multislice->grid.dz):0;
+					n_slice_req = slice.size() + 2*n_slice_sig;
+				}
 
 				memory_slice.set_input_data(n_slice_req, input_multislice->grid.nxy());
 
-				if(memory_slice.slice_mem_type==eSMT_Transmission)
-				{
-					memory_slice.resize_vector(input_multislice->grid.nxy(), trans_v);
-				}
-				else
+				if(memory_slice.is_potential())
 				{
 					memory_slice.resize_vector(input_multislice->grid.nxy(), Vp_v);
+				}
+				else if(memory_slice.is_transmission())
+				{
+					memory_slice.resize_vector(input_multislice->grid.nxy(), trans_v);
 				}
 			}
 
@@ -78,15 +82,15 @@ namespace multem
 
 				for(auto i=0; i< memory_slice.n_slice_cur(slice.size()); i++)
 				{
-					if(memory_slice.slice_mem_type==eSMT_Transmission)
-					{
-						projected_potential(i);
-						transmission_fun(input_multislice->grid, input_multislice->interaction_model, fPot, V0, trans_v[i]);
-						bandwidth_limit(input_multislice->grid, *fft2, trans_v[i]);
-					}
-					else
+					if(memory_slice.is_potential())
 					{
 						projected_potential(i, Vp_v[i]);
+					}
+					else if(memory_slice.is_transmission())
+					{
+						projected_potential(i, V0);
+						multem::transmission_funtion(input_multislice->grid, input_multislice->interaction_model, fPot, V0, trans_v[i]);
+						multem::bandwidth_limit(input_multislice->grid, *fft2, trans_v[i]);
 					}
 				}
 			}
@@ -97,21 +101,21 @@ namespace multem
 
 				if(islice < memory_slice.n_slice_cur(slice.size()))
 				{
-					if(memory_slice.slice_mem_type==eSMT_Transmission)
+					if(memory_slice.is_potential())
 					{
-						trans_0.assign(trans_v[islice].begin(), trans_v[islice].end());
+						multem::transmission_funtion(input_multislice->grid, input_multislice->interaction_model, fPot, Vp_v[islice], trans_0);
+						multem::bandwidth_limit(input_multislice->grid, *fft2, trans_0);
 					}
-					else
+					else if(memory_slice.is_transmission())
 					{
-						transmission_fun(input_multislice->grid, input_multislice->interaction_model, fPot, Vp_v[islice], trans_0);
-						bandwidth_limit(input_multislice->grid, *fft2, trans_0);
+						multem::assign(trans_v[islice], trans_0);
 					}
 				}
 				else
 				{
-					projected_potential(islice);
-					transmission_fun(input_multislice->grid, input_multislice->interaction_model, fPot, V0, trans_0);
-					bandwidth_limit(input_multislice->grid, *fft2, trans_0); 
+					projected_potential(islice, V0);
+					multem::transmission_funtion(input_multislice->grid, input_multislice->interaction_model, fPot, V0, trans_0);
+					multem::bandwidth_limit(input_multislice->grid, *fft2, trans_0); 
 				}
 			}
 
@@ -129,63 +133,74 @@ namespace multem
 		private:
 			struct Memory_Slice
 			{
-				double free_memory;
-				double total_memory;
-				int n_slice_req;
-				int n_slice_Allow;
-				eSlice_Memory_Type slice_mem_type;
+				public:
+					int n_slice_req;
+					int n_slice_Allow;
+					eSlice_Memory_Type slice_mem_type;
 
-				Memory_Slice():free_memory(0), total_memory(0), n_slice_req(0), 
-					n_slice_Allow(0), slice_mem_type(eSMT_none) {}
+					Memory_Slice():n_slice_req(0), n_slice_Allow(0), slice_mem_type(eSMT_none) {}
 
-				void clear()
-				{
-					free_memory = total_memory = 0;
-					n_slice_req = n_slice_Allow = 0;
-					slice_mem_type = eSMT_none;
-				}
-
-				void set_input_data(const int &nSlice_req_i, const int &nxy_i)
-				{
-					n_slice_req = nSlice_req_i;
-					memory_info<dev>(total_memory, free_memory);
-					free_memory = free_memory - 10.0;
-
-					if(free_memory/sizeMb<value_type_c>(nxy_i) >= n_slice_req)
+					void clear()
 					{
-						slice_mem_type = eSMT_Transmission;
-						n_slice_Allow = static_cast<int>(floor(free_memory/sizeMb<value_type_c>(nxy_i)));
-					}
-					else
-					{
-						slice_mem_type = eSMT_Potential;
-						n_slice_Allow = static_cast<int>(floor(free_memory/sizeMb<value_type_r>(nxy_i)));
-					}
-					n_slice_Allow = min(n_slice_Allow, n_slice_req);
-
-					if(n_slice_Allow == 0 )
-					{
+						n_slice_req = n_slice_Allow = 0;
 						slice_mem_type = eSMT_none;
 					}
-				}
 
-				template<class U>
-				void resize_vector(const int &nxy_i, U &vector)
-				{
-					vector.resize(n_slice_Allow);
-					//vector.shrink_to_fit(); //this line produce a error --> thrust library
-					for(auto i=0; i<n_slice_Allow; i++)
+					void set_input_data(const int &nSlice_req_i, const int &nxy_i)
 					{
-						vector[i].resize(nxy_i);
-						vector[i].shrink_to_fit();
+						n_slice_req = nSlice_req_i;
+						double free_memory = get_free_memory<dev>() - 10;
+
+						if(number_slices<value_type_c>(free_memory, nxy_i) >= n_slice_req)
+						{
+							slice_mem_type = eSMT_Transmission;
+							n_slice_Allow = number_slices<value_type_c>(free_memory, nxy_i);
+						}
+						else
+						{
+							slice_mem_type = eSMT_Potential;
+							n_slice_Allow = number_slices<value_type_r>(free_memory, nxy_i);
+						}
+						n_slice_Allow = min(n_slice_Allow, n_slice_req);
+
+						if(n_slice_Allow == 0 )
+						{
+							slice_mem_type = eSMT_none;
+						}
 					}
-				}
 
-				int n_slice_cur(const int &n_slice_i)
-				{
-					return min(n_slice_Allow, n_slice_i);
-				}
+					template<class U>
+					void resize_vector(const int &nxy_i, U &vector)
+					{
+						vector.resize(n_slice_Allow);
+						//vector.shrink_to_fit(); //this line produce a error --> thrust library
+						for(auto i=0; i<n_slice_Allow; i++)
+						{
+							vector[i].resize(nxy_i);
+						}
+					}
 
+					int n_slice_cur(const int &n_slice_i)
+					{
+						return min(n_slice_Allow, n_slice_i);
+					}
+
+					bool is_transmission() const
+					{
+						return slice_mem_type == eSMT_Transmission;
+					}
+
+					bool is_potential() const
+					{
+						return slice_mem_type == eSMT_Potential;
+					}
+
+				private:
+					template<class U>
+					int number_slices(const double &memory, const int &nxy)
+					{
+						return static_cast<int>(floor(memory/sizeMb<U>(nxy)));
+					}
 			};
 
 			Memory_Slice memory_slice;

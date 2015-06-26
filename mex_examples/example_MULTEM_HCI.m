@@ -10,14 +10,14 @@ input_multislice.gpu_device = 0;
 input_multislice.gpu_nstream = 8;
 
 input_multislice.simulation_type = 42;          % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, eST_EELS=61, eST_EFTEM=62	
-input_multislice.phonon_model = 3;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+input_multislice.phonon_model = 5;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multislice.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
 input_multislice.potential_slicing = 1;             % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
 
 input_multislice.fp_dim = 110; 
 input_multislice.fp_seed = 1983; 
-input_multislice.fp_nconf = 10;
+input_multislice.fp_nconf = 5;
 input_multislice.fp_iconf = 0;
 
 input_multislice.microscope_effect = 1;             % 1: Partial coherente mode, 2: transmission_fun cross coefficient
@@ -27,7 +27,6 @@ input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middl
 input_multislice.zero_defocus_plane = 0;
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;
-input_multislice.fast_cal = 1;
 input_multislice.bwl = 0;
 
 input_multislice.E_0 = 300;                          % Acceleration Voltage (keV)
@@ -58,30 +57,16 @@ input_multislice.lens_nsf = 64; % (Angs, number of steps)
 input_multislice.lens_beta = 0.1; 
 input_multislice.lens_nbeta = 10; %(mrad, half number of steps)
 
-input_multislice.hci_nrot = 36;       % number of orientations
+input_multislice.hci_nrot = 180;       % number of orientations
 input_multislice.hci_theta = 3.0;      % Precession angle (degrees)
 
 clear MULTEM;
 tic;
-[m2psi_tot, m2psi_coh] = MULTEM(input_multislice); 
+[m2psi_tot] = MULTEM(input_multislice); 
 toc;
 
-c = 2e6;
-m2psi_tot = log(1+c*m2psi_tot/max(m2psi_tot(:)));
-m2psi_coh = log(1+c*m2psi_coh/max(m2psi_coh(:)));
-
-I_min = min([min(m2psi_tot(:)), min(m2psi_coh(:))]);
-I_max = max([max(m2psi_tot(:)), max(m2psi_coh(:))]);
-
 figure(1);
-subplot(1, 2, 1);
-imagesc(m2psi_tot, [I_min I_max]);
+imagesc(m2psi_tot);
 title('Total intensity');
-axis image;
-colormap gray;
-
-subplot(1, 2, 2);
-imagesc(m2psi_coh, [I_min I_max]);
-title('Coherent intensity');
 axis image;
 colormap gray;

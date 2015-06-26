@@ -45,7 +45,7 @@ namespace multem
 
 				psi.resize(input_multislice->grid.nxy());
 
-				if(input_multislice->microscope_effect==eME_Partial_Coherent)
+				if(input_multislice->microscope_effect == eME_Partial_Coherent)
 				{
 					return;
 				}

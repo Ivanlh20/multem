@@ -106,7 +106,7 @@ namespace multem
 					transmit(0, psi_z);
 					phase_mul(gx_0, gy_0, psi_z);
 
-					if(space==eS_Reciprocal)
+					if(space == eS_Reciprocal)
 					{
 						fft2->forward(psi_z);
 						multem::scale(psi_z, input_multislice->grid.inxy);
@@ -140,7 +140,7 @@ namespace multem
 					transmit(0, psi_z);
 					phase_mul(gx_0, gy_0, psi_z);
 
-					if(space==eS_Reciprocal)
+					if(space == eS_Reciprocal)
 					{
 						fft2->forward(psi_z);
 						multem::scale(psi_z, input_multislice->grid.inxy);

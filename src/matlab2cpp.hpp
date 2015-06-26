@@ -58,7 +58,7 @@ double mx_get_scalar<double>(const mxArray *mxB)
 template <>
 float mx_get_scalar<float>(const mxArray *mxB)
 {
-	return mxGetScalar(mxB);
+	return static_cast<float>(mxGetScalar(mxB));
 }
 /**************************************************************************/
 template <class T>

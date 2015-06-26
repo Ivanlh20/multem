@@ -68,7 +68,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	}
 
 	input_multislice.input_wave_type = mx_get_scalar_field<multem::eInput_Wave_Type>(mx_input_multislice, "input_wave_type");
-	if(input_multislice.input_wave_type==multem::eIWT_User_Define && full)
+	if(input_multislice.is_user_define_wave() && full)
 	{
 		auto psi_0 = mx_get_matrix_field<m_matrix_c>(mx_input_multislice, "psi_0");
 		input_multislice.psi_0.resize(psi_0.size);
@@ -76,7 +76,8 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 		multem::fft2_shift(input_multislice.grid, input_multislice.psi_0);
 	}
 
-	input_multislice.fast_cal = mx_get_scalar_field<bool>(mx_input_multislice, "fast_cal");
+	input_multislice.operation_mode = mx_get_scalar_field<multem::eOperation_Mode>(mx_input_multislice, "operation_mode");
+	input_multislice.coherent_contribution = mx_get_scalar_field<bool>(mx_input_multislice, "coherent_contribution");
 
 	input_multislice.E_0 = mx_get_scalar_field<value_type>(mx_input_multislice, "E_0");
 	input_multislice.theta = mx_get_scalar_field<value_type>(mx_input_multislice, "theta")*multem::c_deg_2_rad;
@@ -127,8 +128,6 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 
 	if(input_multislice.is_STEM())
 	{
-		input_multislice.fast_cal = true;
-
 		mxArray *mx_det_cir = mxGetField(mx_input_multislice, 0, "det_cir");
 		int ndet_cir = mxGetN(mx_det_cir);
 		if(ndet_cir>0)
@@ -181,27 +180,25 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	}
 	else if (input_multislice.is_EELS())
 	{
-		input_multislice.fast_cal = true;
-
 		multem::eSpace space = multem::eS_Reciprocal;
 		value_type E_loss = mx_get_scalar_field<value_type>(mx_input_multislice, "eels_E_loss")*multem::c_meV_2_keV;
 		int m_selection = mx_get_scalar_field<int>(mx_input_multislice, "eels_m_selection");
 		value_type collection_angle = mx_get_scalar_field<int>(mx_input_multislice, "eels_collection_angle")*multem::c_mrad_2_rad;
+		multem::eChannelling_Type channelling_type = mx_get_scalar_field<multem::eChannelling_Type>(mx_input_multislice, "eels_channeling_type");
 		int Z = mx_get_scalar_field<int>(mx_input_multislice, "eels_Z");
 
-		input_multislice.eels_fr.set_input_data(space, input_multislice.E_0, E_loss, m_selection, collection_angle, Z);
+		input_multislice.eels_fr.set_input_data(space, input_multislice.E_0, E_loss, m_selection, collection_angle, channelling_type, Z);
 	}
 	else if (input_multislice.is_EFTEM())
 	{
-		input_multislice.fast_cal = true;
-
 		multem::eSpace space = multem::eS_Real;
 		value_type E_loss = mx_get_scalar_field<value_type>(mx_input_multislice, "eftem_E_loss")*multem::c_meV_2_keV;
 		int m_selection = mx_get_scalar_field<int>(mx_input_multislice, "eftem_m_selection");
 		value_type collection_angle = 0;
+		multem::eChannelling_Type channelling_type = mx_get_scalar_field<multem::eChannelling_Type>(mx_input_multislice, "eftem_channeling_type");
 		int Z = mx_get_scalar_field<int>(mx_input_multislice, "eftem_Z");
 
-		input_multislice.eels_fr.set_input_data(space, input_multislice.E_0, E_loss, m_selection, collection_angle, Z);
+		input_multislice.eels_fr.set_input_data(space, input_multislice.E_0, E_loss, m_selection, collection_angle, channelling_type, Z);
 	}
 
 	input_multislice.validate_parameters();
@@ -210,12 +207,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 template<class TInput_Multislice>
 void set_output_data(const TInput_Multislice &input_multislice, mxArray *&mx_plhs0, mxArray *&mx_plhs1)
 {
-	if(input_multislice.is_EWFS_EWRS())
-	{
-		mx_create_matrix<m_matrix_r>(input_multislice.grid, mx_plhs0);
-		mx_create_matrix<m_matrix_c>(input_multislice.grid, mx_plhs1);
-	}
-	else if(input_multislice.is_STEM())
+	if(input_multislice.is_STEM())
 	{
 		const char *field_names_det_int[] = {"image"};
 		int number_of_fields_det_int = 1;
@@ -223,7 +215,7 @@ void set_output_data(const TInput_Multislice &input_multislice, mxArray *&mx_plh
 
 		mx_plhs0 = mxCreateStructArray(2, dims_det_int, number_of_fields_det_int, field_names_det_int);
 
-		if(!input_multislice.fast_cal)
+		if(input_multislice.coherent_contribution)
 		{
 			mx_plhs1 = mxCreateStructArray(2, dims_det_int, number_of_fields_det_int, field_names_det_int);
 		}
@@ -233,10 +225,18 @@ void set_output_data(const TInput_Multislice &input_multislice, mxArray *&mx_plh
 		for(auto iDet=0; iDet<input_multislice.det_cir.size(); iDet++)
 		{
 			mx_create_matrix_field<m_matrix_r>(mx_plhs0, iDet, "image", rows, input_multislice.scanning.nx);
-			if(!input_multislice.fast_cal)
+			if(input_multislice.coherent_contribution)
 			{
 				mx_create_matrix_field<m_matrix_r>(mx_plhs1, iDet, "image", rows, input_multislice.scanning.nx);
 			}
+		}
+	}
+	else if(input_multislice.is_EWFS_EWRS())
+	{
+		mx_create_matrix<m_matrix_r>(input_multislice.grid, mx_plhs0);
+		if(input_multislice.coherent_contribution)
+		{
+			mx_create_matrix<m_matrix_c>(input_multislice.grid, mx_plhs1);
 		}
 	}
 	else if(input_multislice.is_EELS())
@@ -247,7 +247,10 @@ void set_output_data(const TInput_Multislice &input_multislice, mxArray *&mx_plh
 	else
 	{
 		mx_create_matrix<m_matrix_r>(input_multislice.grid, mx_plhs0);
-		mx_create_matrix<m_matrix_r>(input_multislice.grid, mx_plhs1);
+		if(input_multislice.coherent_contribution)
+		{
+			mx_create_matrix<m_matrix_r>(input_multislice.grid, mx_plhs1);
+		}
 	}
 }
 
@@ -260,7 +263,14 @@ void get_multislice(const mxArray *mxB, TVector_1 &tot, TVector_2 &coh)
 	multem::Multislice<T, dev> multislice;
 	multislice.set_input_data(&input_multislice);
 
-	multislice.output_matlab(&tot, &coh);
+	if(input_multislice.coherent_contribution)
+	{
+		multislice.output_matlab(&tot, &coh);
+	}
+	else
+	{
+		multislice.output_matlab(&tot);
+	}
 
 	multislice.cleanup();
 }
@@ -300,7 +310,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		multem::Det_Int<double, multem::e_Host> det_int_coh;
 		multem::Det_Int<double, multem::e_Host> det_int_tot;
 		det_int_tot.resize(input_multislice.det_cir.size(), input_multislice.scanning.size());
-		if(!input_multislice.fast_cal)
+		if(input_multislice.coherent_contribution)
 		{
 			det_int_coh.resize(input_multislice.det_cir.size(), input_multislice.scanning.size());
 		}
@@ -311,7 +321,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		{
 			m_matrix_r m2psi_tot = mx_get_matrix_field<m_matrix_r>(plhs[0], iDet, "image");
 			std::copy(det_int_tot.image[iDet].begin(), det_int_tot.image[iDet].end(), m2psi_tot.real);
-			if(!input_multislice.fast_cal)
+			if(input_multislice.coherent_contribution)
 			{
 				m_matrix_r m2psi_coh = mx_get_matrix_field<m_matrix_r>(plhs[1], iDet, "image");
 				std::copy(det_int_coh.image[iDet].begin(), det_int_coh.image[iDet].end(), m2psi_coh.real);
@@ -321,7 +331,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	else if(input_multislice.is_EWFS_EWRS())
 	{
 		m_matrix_r m2psi_tot = mx_get_matrix<m_matrix_r>(plhs[0]);
-		m_matrix_c psi_coh = mx_get_matrix<m_matrix_c>(plhs[1]);
+		m_matrix_c psi_coh;
+		if(input_multislice.coherent_contribution)
+		{
+			psi_coh = mx_get_matrix<m_matrix_c>(plhs[1]);
+		}
 
 		get_simulation(prhs[0], input_multislice, m2psi_tot, psi_coh);
 	}
@@ -338,8 +352,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	else
 	{
 		m_matrix_r m2psi_tot = mx_get_matrix<m_matrix_r>(plhs[0]);
-		m_matrix_r m2psi_coh = mx_get_matrix<m_matrix_r>(plhs[1]);
-
+		m_matrix_r m2psi_coh;
+		if(input_multislice.coherent_contribution)
+		{
+			m2psi_coh = mx_get_matrix<m_matrix_r>(plhs[1]);
+		}
 		get_simulation(prhs[0], input_multislice, m2psi_tot, m2psi_coh);
 	}
 }

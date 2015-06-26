@@ -41,7 +41,7 @@ namespace multem
 			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io)
 			{
 				input_multislice = input_multislice_io;
-				if(dev==e_Device)
+				if(dev == e_Device)
 				{
 					cudaSetDevice(input_multislice->gpu_device);
 				}
@@ -68,6 +68,123 @@ namespace multem
 			}
 
 			template<class TVector_Host_r>
+			void STEM(TVector_Host_r &det_int_tot, TVector_Host_r &det_int_coh)
+			{
+				value_type_r w = input_multislice->ifp_nconf();
+
+				for(auto is=0; is < input_multislice->scanning.size(); is++)
+				{
+					input_multislice->set_stem_beam_position(is);
+
+					reset_m2psi_tot_and_psi_coh(m2psi_tot, psi_coh);
+
+					for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
+					{
+						wave_function.move_atoms(iconf);
+						get_total_intensity_and_coherent_wave(w, m2psi_tot, psi_coh);
+					}
+					get_coherent_intensity(psi_coh, m2psi_coh);
+
+					for(auto iDet=0; iDet<input_multislice->det_cir.size(); iDet++)
+					{
+						value_type_r g_inner = input_multislice->det_cir.g_inner(iDet);
+						value_type_r g_outer = input_multislice->det_cir.g_outer(iDet);
+						det_int_tot.image[iDet][is] = w*sum_over_Det(input_multislice->grid, g_inner, g_outer, m2psi_tot);
+						det_int_coh.image[iDet][is] = w*sum_over_Det(input_multislice->grid, g_inner, g_outer, m2psi_coh);
+					}
+				}
+			}
+
+			template<class TVector_Host_r>
+			void ISTEM(TVector_Host_r &host_m2psi_tot, TVector_Host_r &host_m2psi_coh)
+			{
+				value_type_r w = input_multislice->ifp_nconf();
+
+				reset_m2psi_tot_and_psi_coh(m2psi_tot, psi_coh);
+
+				for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
+				{
+					wave_function.move_atoms(iconf);
+					for(auto is=0; is < input_multislice->scanning.size(); is++)
+					{
+						input_multislice->set_stem_beam_position(is);
+						get_total_intensity_and_coherent_wave(w, m2psi_tot, psi_coh);
+					}
+				}
+				get_coherent_intensity(psi_coh, m2psi_coh);
+
+				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
+				if(input_multislice->coherent_contribution)
+				{
+					multem::to_host_shift(input_multislice->grid, m2psi_coh, host_m2psi_coh);
+				}
+			}
+
+			template<class TVector_Host_r>
+			void CBED_CBEI(TVector_Host_r &host_m2psi_tot, TVector_Host_r &host_m2psi_coh)
+			{
+				tot_coh_FS_RS(m2psi_tot, psi_coh);
+				get_coherent_intensity(psi_coh, m2psi_coh);
+
+				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
+				if(input_multislice->coherent_contribution)
+				{
+					multem::to_host_shift(input_multislice->grid, m2psi_coh, host_m2psi_coh);
+				}
+			}
+
+			template<class TVector_Host_r>
+			void ED_HRTEM(TVector_Host_r &host_m2psi_tot, TVector_Host_r &host_m2psi_coh)
+			{
+				tot_coh_FS_RS(m2psi_tot, psi_coh);
+				get_coherent_intensity(psi_coh, m2psi_coh);
+
+				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
+				if(input_multislice->coherent_contribution)
+				{
+					multem::to_host_shift(input_multislice->grid, m2psi_coh, host_m2psi_coh);
+				}
+			}
+
+			template<class TVector_Host_r>
+			void PED_HCI(TVector_Host_r &host_m2psi_tot, TVector_Host_r &host_m2psi_coh)
+			{
+				input_multislice->theta = input_multislice->pe_fr.theta;
+				value_type_r w = input_multislice->pe_fr.weight(input_multislice->fp_nconf);
+
+				reset_m2psi_tot_and_psi_coh(m2psi_tot, psi_coh);
+
+				for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
+				{
+					wave_function.move_atoms(iconf);
+					for(auto irot=0; irot < input_multislice->pe_fr.nrot; irot++)
+					{
+						input_multislice->phi = input_multislice->pe_fr.phi(irot);
+						get_total_intensity_and_coherent_wave(w, m2psi_tot, psi_coh);
+					}
+				}
+				get_coherent_intensity(psi_coh, m2psi_coh);
+				
+				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
+				if(input_multislice->coherent_contribution)
+				{
+					multem::to_host_shift(input_multislice->grid, m2psi_coh, host_m2psi_coh);
+				}
+			}
+
+			template<class TVector_Host_r, class TVector_Host_c>
+			void EWFS_EWRS(TVector_Host_r &host_m2psi_tot, TVector_Host_c &host_psi_coh)
+			{
+				tot_coh_FS_RS(m2psi_tot, psi_coh);
+
+				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
+				if(input_multislice->coherent_contribution)
+				{
+					multem::to_host_shift(input_multislice->grid, psi_coh, host_psi_coh);
+				}
+			}
+
+			template<class TVector_Host_r>
 			void STEM(TVector_Host_r &det_int_tot)
 			{
 				value_type_r w = input_multislice->ifp_nconf();
@@ -89,179 +206,12 @@ namespace multem
 
 						for(auto iDet=0; iDet<input_multislice->det_cir.size(); iDet++)
 						{
-							value_type_r g_inner = input_multislice->det_cir.g_inner(iDet, input_multislice->lens.lambda);
-							value_type_r g_outer = input_multislice->det_cir.g_outer(iDet, input_multislice->lens.lambda);
+							value_type_r g_inner = input_multislice->det_cir.g_inner(iDet);
+							value_type_r g_outer = input_multislice->det_cir.g_outer(iDet);
 							det_int_tot.image[iDet][is] += w*sum_square_over_Det(input_multislice->grid, g_inner, g_outer, wave_function.psi_z);
 						}
 					}
 				}
-			}
-
-			template<class TVector_Host_r>
-			void STEM(TVector_Host_r &det_int_tot, TVector_Host_r &det_int_coh)
-			{
-				value_type_r w = input_multislice->ifp_nconf();
-
-				for(auto is=0; is < input_multislice->scanning.size(); is++)
-				{
-					multem::fill(psi_coh, 0.0);
-					multem::fill(m2psi_tot, 0.0);
-
-					input_multislice->set_stem_beam_position(is);
-
-					for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
-					{
-						wave_function.move_atoms(iconf);
-
-						wave_function.psi_0();
-						wave_function.psi(eS_Reciprocal);
-
-						multem::add_scale(w, wave_function.psi_z, psi_coh);
-						multem::add_square_scale(w, wave_function.psi_z, m2psi_tot);
-					}
-					multem::assign_square(psi_coh, m2psi_coh);
-
-					for(auto iDet=0; iDet<input_multislice->det_cir.size(); iDet++)
-					{
-						value_type_r g_inner = input_multislice->det_cir.g_inner(iDet, input_multislice->lens.lambda);
-						value_type_r g_outer = input_multislice->det_cir.g_outer(iDet, input_multislice->lens.lambda);
-						det_int_coh.image[iDet][is] = w*sum_over_Det(input_multislice->grid, g_inner, g_outer, m2psi_coh);
-						det_int_tot.image[iDet][is] = w*sum_over_Det(input_multislice->grid, g_inner, g_outer, m2psi_tot);
-					}
-				}
-			}
-
-			template<class TVector_Host_r>
-			void ISTEM(TVector_Host_r &host_m2psi_tot, TVector_Host_r &host_m2psi_coh)
-			{
-				value_type_r w = input_multislice->ifp_nconf();
-
-				multem::fill(psi_coh, 0.0);
-				multem::fill(m2psi_tot, 0.0);
-
-				for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
-				{
-					wave_function.move_atoms(iconf);
-					for(auto is=0; is < input_multislice->scanning.size(); is++)
-					{
-						input_multislice->set_stem_beam_position(is);
-
-						wave_function.psi_0();
-						wave_function.psi(eS_Real);
-						multem::add_scale(w, wave_function.psi_z, psi_coh);
-						multem::add_square_scale(w, wave_function.psi_z, m2psi_tot);
-					}
-				}
-				multem::assign_square(psi_coh, m2psi_coh);
-				multem::to_host_shift(input_multislice->grid, m2psi_coh, host_m2psi_coh);
-				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
-			}
-
-			template<class TVector_Host_r>
-			void CBED_CBEI(TVector_Host_r &host_m2psi_tot, TVector_Host_r &host_m2psi_coh)
-			{
-				coh_tot_FS_RS(input_multislice->cbe_fr.space, m2psi_tot, psi_coh);
-
-				multem::assign_square(psi_coh, m2psi_coh);
-				multem::to_host_shift(input_multislice->grid, m2psi_coh, host_m2psi_coh);
-				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
-			}
-
-			template<class TVector_Host_r>
-			void ED_HRTEM(TVector_Host_r &host_m2psi_tot, TVector_Host_r &host_m2psi_coh)
-			{
-				value_type_r w = input_multislice->ifp_nconf();
-
-				multem::fill(psi_coh, 0.0);
-				multem::fill(m2psi_tot, 0.0);
-
-				for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
-				{
-					wave_function.move_atoms(iconf);
-
-					wave_function.psi_0();
-					wave_function.psi(eS_Reciprocal);
-
-					multem::add_scale(w, wave_function.psi_z, psi_coh);
-
-					if(input_multislice->is_ED())
-					{
-						multem::add_square_scale(w, wave_function.psi_z, m2psi_tot);
-					}
-					else
-					{
-						microscope_effects.apply(wave_function.psi_z, m2psi_coh);
-						multem::add_scale(w, m2psi_coh, m2psi_tot);
-					}
-				}
-
-				if(input_multislice->is_ED())
-				{
-					multem::assign_square(psi_coh, m2psi_coh);
-				}
-				else
-				{
-					microscope_effects.apply(psi_coh, m2psi_coh);
-				}
-				
-				multem::to_host_shift(input_multislice->grid, m2psi_coh, host_m2psi_coh);
-				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
-			}
-
-			template<class TVector_Host_r>
-			void PED_HCI(TVector_Host_r &host_m2psi_tot, TVector_Host_r &host_m2psi_coh)
-			{
-				input_multislice->theta = input_multislice->pe_fr.theta;
-				value_type_r w = input_multislice->pe_fr.weight(input_multislice->fp_nconf);
-
-				multem::fill(psi_coh, 0.0);
-				multem::fill(m2psi_tot, 0.0);
-
-				for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
-				{
-					wave_function.move_atoms(iconf);
-					for(auto irot=0; irot < input_multislice->pe_fr.nrot; irot++)
-					{
-						input_multislice->phi = input_multislice->pe_fr.phi(irot);
-
-						wave_function.psi_0();
-						wave_function.psi(multem::eS_Reciprocal);
-
-						multem::add_scale(w, wave_function.psi_z, psi_coh);
-
-						if(input_multislice->is_PED())
-						{
-							multem::add_square_scale(w, wave_function.psi_z, m2psi_tot);
-						}
-						else
-						{
-							microscope_effects.apply(wave_function.psi_z, m2psi_coh);
-							multem::add_scale(w, m2psi_coh, m2psi_tot);
-						}
-						
-					}
-				}
-
-				if(input_multislice->is_PED())
-				{
-					multem::assign_square(psi_coh, m2psi_coh);
-				}
-				else
-				{
-					microscope_effects.apply(psi_coh, m2psi_coh);
-				}
-				
-				multem::to_host_shift(input_multislice->grid, m2psi_coh, host_m2psi_coh);
-				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
-			}
-
-			template<class TVector_Host_r, class TVector_Host_c>
-			void EWFS_EWRS(TVector_Host_r &host_m2psi_tot, TVector_Host_c &host_psi_coh)
-			{
-				coh_tot_FS_RS(input_multislice->ew_fr.space, m2psi_tot, psi_coh);
-
-				multem::to_host_shift(input_multislice->grid, psi_coh, host_psi_coh);
-				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
 			}
 
 			template<class TVector_Host_r>
@@ -282,7 +232,7 @@ namespace multem
 
 						for(auto iatom=wave_function.slice.iatom_0[ithk]; iatom <= wave_function.slice.iatom_e[ithk]; iatom++)
 						{
-							if(wave_function.atoms.Z[iatom]==input_multislice->eels_fr.Z)
+							if(wave_function.atoms.Z[iatom] == input_multislice->eels_fr.Z)
 							{
 								input_multislice->eels_fr.x = -c_2Pi*(wave_function.atoms.x[iatom]-input_multislice->grid.lxh());
 								input_multislice->eels_fr.y = -c_2Pi*(wave_function.atoms.y[iatom]-input_multislice->grid.lyh());
@@ -324,7 +274,7 @@ namespace multem
 
 							for(auto iatom=wave_function.slice.iatom_0[ithk]; iatom <= wave_function.slice.iatom_e[ithk]; iatom++)
 							{
-								if(wave_function.atoms.Z[iatom]==input_multislice->eels_fr.Z)
+								if(wave_function.atoms.Z[iatom] == input_multislice->eels_fr.Z)
 								{
 									input_multislice->eels_fr.x = -c_2Pi*(wave_function.atoms.x[iatom]-input_multislice->grid.lxh());
 									input_multislice->eels_fr.y = -c_2Pi*(wave_function.atoms.y[iatom]-input_multislice->grid.lyh());
@@ -344,6 +294,66 @@ namespace multem
 				}
 			}
 
+			template<class TMatlab_1>
+			void output_matlab(TMatlab_1 *host_tot)
+			{
+				using value_type_1 = multem::traits::Value_type<TMatlab_1>;
+
+				if(input_multislice->is_STEM())
+				{
+					auto *tot = reinterpret_cast<Det_Int<value_type_1, e_Host>*>(host_tot);
+
+					STEM(*tot);
+				}
+				else if(input_multislice->is_ISTEM())
+				{
+					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
+					m_matrix_r coh;
+
+					ISTEM(*tot, coh);
+				}
+				else if(input_multislice->is_CBED_CBEI())
+				{
+					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
+					m_matrix_r coh;
+
+					CBED_CBEI(*tot, coh);
+				}
+				else if(input_multislice->is_ED_HRTEM())
+				{
+					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
+					m_matrix_r coh;
+
+					ED_HRTEM(*tot, coh);
+				}
+				else if(input_multislice->is_PED_HCI())
+				{
+					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
+					m_matrix_r coh;
+
+					PED_HCI(*tot, coh);
+				}
+				else if(input_multislice->is_EWFS_EWRS())
+				{
+					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
+					m_matrix_c coh;
+
+					EWFS_EWRS(*tot, coh);
+				}
+				else if(input_multislice->is_EFTEM())
+				{
+					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
+
+					EFTEM(*tot);
+				}
+				else if(input_multislice->is_EELS())
+				{
+					auto *tot = reinterpret_cast<Vector<value_type_1, e_Host>*>(host_tot);
+
+					EELS(*tot);
+				}
+			}
+
 			template<class TMatlab_1, class TMatlab_2>
 			void output_matlab(TMatlab_1 *host_tot, TMatlab_2 *host_coh)
 			{
@@ -355,16 +365,9 @@ namespace multem
 					auto *tot = reinterpret_cast<Det_Int<value_type_1, e_Host>*>(host_tot);
 					auto *coh = reinterpret_cast<Det_Int<value_type_2, e_Host>*>(host_coh);
 
-					if(input_multislice->fast_cal)
-					{
-						STEM(*tot);
-					}
-					else
-					{
-						STEM(*tot, *coh);
-					}
+					STEM(*tot, *coh);
 				}
-				if(input_multislice->is_ISTEM())
+				else if(input_multislice->is_ISTEM())
 				{
 					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
 					auto *coh = reinterpret_cast<m_matrix_r*>(host_coh);
@@ -399,18 +402,6 @@ namespace multem
 
 					EWFS_EWRS(*tot, *coh);
 				}
-				else if(input_multislice->is_EFTEM())
-				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
-
-					EFTEM(*tot);
-				}
-				else if(input_multislice->is_EELS())
-				{
-					auto *tot = reinterpret_cast<Vector<value_type_1, e_Host>*>(host_tot);
-
-					EELS(*tot);
-				}
 			}
 
 			void cleanup()
@@ -419,22 +410,69 @@ namespace multem
 			}
 
 		private:
-			void coh_tot_FS_RS(const eSpace &space, Vector<value_type_r, dev> &m2psi_tot, Vector<value_type_c, dev> &psi_coh)
+			void reset_m2psi_tot_and_psi_coh(Vector<value_type_r, dev> &m2psi_tot, Vector<value_type_c, dev> &psi_coh)
+			{
+				multem::fill(m2psi_tot, 0.0);
+				if(input_multislice->coherent_contribution)
+				{
+					multem::fill(psi_coh, 0.0);
+				}
+			}
+
+			void get_total_intensity_and_coherent_wave(const value_type_r &w, Vector<value_type_r, dev> &m2psi_tot, Vector<value_type_c, dev> &psi_coh)
+			{
+				wave_function.psi_0();
+							
+				if(input_multislice->is_simulation_type_FS())
+				{
+					wave_function.psi(eS_Reciprocal);
+					multem::add_square_scale(w, wave_function.psi_z, m2psi_tot);
+				}
+				else if(input_multislice->is_HRTEM_HCI_EFTEM())
+				{
+					wave_function.psi(eS_Reciprocal);
+					microscope_effects.apply(wave_function.psi_z, m2psi_coh);
+					multem::add_scale(w, m2psi_coh, m2psi_tot);
+				}
+				else
+				{
+					wave_function.psi(eS_Real);
+					multem::add_square_scale(w, wave_function.psi_z, m2psi_tot);
+				}
+
+				if(input_multislice->coherent_contribution)
+				{
+					multem::add_scale(w, wave_function.psi_z, psi_coh);
+				}
+			}
+
+			void get_coherent_intensity(Vector<value_type_c, dev> &psi_coh, Vector<value_type_r, dev> &m2psi_coh)
+			{
+				if(!input_multislice->coherent_contribution)
+				{
+					return;
+				}
+
+				if(input_multislice->is_HRTEM_HCI_EFTEM())
+				{
+					microscope_effects.apply(psi_coh, m2psi_coh);
+				}
+				else
+				{
+					multem::assign_square(psi_coh, m2psi_coh);
+				}
+			}
+
+			void tot_coh_FS_RS(Vector<value_type_r, dev> &m2psi_tot, Vector<value_type_c, dev> &psi_coh)
 			{
 				value_type_r w = input_multislice->ifp_nconf();
 
-				multem::fill(psi_coh, 0.0);
-				multem::fill(m2psi_tot, 0.0);
+				reset_m2psi_tot_and_psi_coh(m2psi_tot, psi_coh);
 
 				for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
 				{
 					wave_function.move_atoms(iconf);
-
-					wave_function.psi_0();
-					wave_function.psi(space);
-
-					multem::add_scale(w, wave_function.psi_z, psi_coh);
-					multem::add_square_scale(w, wave_function.psi_z, m2psi_tot);
+					get_total_intensity_and_coherent_wave(w, m2psi_tot, psi_coh);
 				}
 			}
 

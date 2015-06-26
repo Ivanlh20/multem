@@ -61,23 +61,23 @@ namespace multem
 				{
 					multem::kernel_xyz(input_multislice->grid, eels, *fft2, kernel[0], kernel[1], kernel[2]);
 				}
-				else if(eels.m_selection==-2)
+				else if(eels.m_selection == -2)
 				{
 					multem::kernel_x(input_multislice->grid, eels, *fft2, kernel[0]);
 				}
-				else if(eels.m_selection==-1)
+				else if(eels.m_selection == -1)
 				{
 					multem::kernel_mn1(input_multislice->grid, eels, *fft2, kernel[0]);
 				}
-				else if(eels.m_selection==0)
+				else if(eels.m_selection == 0)
 				{
 					multem::kernel_z(input_multislice->grid, eels, *fft2, kernel[0]);
 				}
-				else if(eels.m_selection==1)
+				else if(eels.m_selection == 1)
 				{
 					multem::kernel_mp1(input_multislice->grid, eels, *fft2, kernel[0]);
 				}
-				else if(eels.m_selection==2)
+				else if(eels.m_selection == 2)
 				{
 					multem::kernel_y(input_multislice->grid, eels, *fft2, kernel[0]);
 				}

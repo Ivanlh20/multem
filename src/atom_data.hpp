@@ -189,7 +189,7 @@ namespace multem
 					z_std += z[iAtom]*z[iAtom];
 				}
 
-				auto it = std::remove_if(Z_unique.begin(), Z_unique.end(), [](const int &Z){return Z==0;} );
+				auto it = std::remove_if(Z_unique.begin(), Z_unique.end(), [](const int &Z){return Z == 0;} );
 				Z_unique.resize(std::distance(Z_unique.begin(),it));
 
 				T nAtoms = static_cast<T>(size());
