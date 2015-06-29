@@ -49,7 +49,7 @@ namespace multem
 					atom_type[i].assign(Specimen::atom_type[i]);
 				}
 
-				int nv = input_multislice->grid.nx_dRx(atoms.l_x_Int) + input_multislice->grid.ny_dRy(atoms.l_y_Int);
+				int nv = max(input_multislice->grid.nx_dRx(atoms.l_x_Int), input_multislice->grid.ny_dRy(atoms.l_y_Int));
 
 				iv.resize(stream->size());
 				v.resize(stream->size());
@@ -83,24 +83,34 @@ namespace multem
 				stream->synchronize();
 			}
 
-			void projected_potential(const int &islice, Vector<value_type_r, dev> &V)
+			void projected_potential(const int &islice_0, const int &islice_e, Vector<value_type_r, dev> &V)
 			{
-				if(islice>=slice.size())
+				if((islice_0<0) || (islice_e>=slice.size()))
 				{
 					multem::fill(V, 0.0);
 					return;
 				}
+				projected_potential(slice.z_0[islice_0], slice.z_e[islice_e], slice.iatom_0[islice_0], slice.iatom_e[islice_e], V);
+			}
 
-				projected_potential(slice.z_0[islice], slice.z_e[islice], slice.iatom_0[islice], slice.iatom_e[islice], V);
+			void projected_potential(const int &islice_0, const int &islice_e)
+			{
+				projected_potential(islice_0, islice_e, V0);
+			}
+
+			void projected_potential(const int &islice, Vector<value_type_r, dev> &V)
+			{
+				projected_potential(islice, islice, V);
 			}
 
 			void projected_potential(const int &islice)
 			{
-				projected_potential(islice, V0);
+				projected_potential(islice, islice, V0);
 			}
 
 			Vector<value_type_r, dev> V0;
 		private:
+
 			void set_atom_Vp(const value_type_r &z_0, const value_type_r &z_e, int iatom, Stream<value_type_r, dev> &stream, Vector<Atom_Vp<value_type_r>, e_Host> &atom_Vp)
 			{
 				for(auto istream = 0; istream < stream.n_act_stream; istream++)
@@ -155,6 +165,7 @@ namespace multem
 			Vector<Vector<int, dev>, e_Host> iv;
 			Vector<Vector<value_type_r, dev>, e_Host> v;
 			Vector<CI_Coef<value_type_r, dev>, e_Host> ciV0;
+
 			Vector<Atom_Vp<value_type_r>, e_Host> atom_Vp;
 	};
 

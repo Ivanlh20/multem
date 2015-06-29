@@ -64,6 +64,17 @@ namespace multem
 				fft2->inverse(psi_z);
 			}
 
+			void phase_mul(const value_type_r &gxu, const value_type_r &gyu, Vector<value_type_c, dev> &psi_io)
+			{
+				if(input_multislice->dp_Shift || isZero(gxu, gyu))
+				{
+					return;
+				}
+
+				multem::phase_component(input_multislice->grid, gxu, gyu, exp_x, exp_y);
+				multem::phase_mul(input_multislice->grid, exp_x, exp_y, psi_io, psi_io);
+			}
+
 			void psi_0()
 			{
 				switch(input_multislice->beam_type)
@@ -155,22 +166,10 @@ namespace multem
 			}
 
 			Vector<value_type_c, dev> psi_z;
+			Propagator<value_type_r, dev> prog;
 		private:
 			Vector<value_type_c, dev> exp_x;
 			Vector<value_type_c, dev> exp_y;
-
-			Propagator<value_type_r, dev> prog;
-
-			void phase_mul(const value_type_r &gxu, const value_type_r &gyu, Vector<value_type_c, dev> &psi_io)
-			{
-				if(input_multislice->dp_Shift || isZero(gxu, gyu))
-				{
-					return;
-				}
-
-				multem::phase_component(input_multislice->grid, gxu, gyu, exp_x, exp_y);
-				multem::phase_mul(input_multislice->grid, exp_x, exp_y, psi_io, psi_io);
-			}
 	};
 
 } // namespace multem

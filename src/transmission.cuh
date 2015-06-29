@@ -119,6 +119,15 @@ namespace multem
 				}
 			}
 
+			void trans(const int &islice_0, const int &islice_e, Vector<value_type_c, dev> &trans_0)
+			{
+				value_type_r fPot = input_multislice->Vr_factor();
+
+				projected_potential(islice_0, islice_e, V0);
+				multem::transmission_funtion(input_multislice->grid, input_multislice->interaction_model, fPot, V0, trans_0);
+				multem::bandwidth_limit(input_multislice->grid, *fft2, trans_0); 
+			}
+
 			void trans(const int &islice)
 			{
 				trans(islice, trans_0);

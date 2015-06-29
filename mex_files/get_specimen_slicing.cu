@@ -20,6 +20,9 @@
 #include "input_multislice.hpp"
 #include "atom_data.hpp"
 #include "specimen.hpp"
+#include "host_device_functions.cuh"
+#include "host_functions.hpp"
+#include "device_functions.cuh"
 
 #include <mex.h>
 #include "matlab2cpp.hpp"

@@ -21,9 +21,9 @@
 
 #include "fftw3.h"
 #include "types.hpp"
+#include "host_device_functions.cuh"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
-#include "host_device_functions.cuh"
 #include "input_multislice.hpp"
 #include "microscope_effects.cuh"
 #include "energy_loss.cuh"
@@ -57,6 +57,10 @@ namespace multem
 					energy_loss.set_input_data(input_multislice, &fft2);
 					psi_thk.resize(input_multislice->grid.nxy());
 					psi_kn.resize(input_multislice->grid.nxy());
+					if(input_multislice->eels_fr.is_Double_Channelling_POA_SOMS())
+					{
+						trans_thk.resize(input_multislice->grid.nxy());
+					}
 				}
 
 				if(input_multislice->is_HRTEM() || input_multislice->is_HCI())
@@ -229,7 +233,10 @@ namespace multem
 						wave_function.psi_0();
 						wave_function.psi(eS_Real, ithk);
 						multem::assign(wave_function.psi_z, psi_thk);
-
+						if(input_multislice->eels_fr.is_Double_Channelling_POA_SOMS())
+						{
+							wave_function.trans(ithk, wave_function.slice.size()-1, trans_thk);
+						}				
 						for(auto iatom=wave_function.slice.iatom_0[ithk]; iatom <= wave_function.slice.iatom_e[ithk]; iatom++)
 						{
 							if(wave_function.atoms.Z[iatom] == input_multislice->eels_fr.Z)
@@ -242,8 +249,32 @@ namespace multem
 								for(auto ikn=0; ikn < energy_loss.kernel.size(); ikn++)
 								{
 									multem::multiply(energy_loss.kernel[ikn], psi_thk, psi_kn);
-									wave_function.psi(eS_Real, ithk, wave_function.slice.size(), &psi_kn);
-									multem::add_square(wave_function.psi_z, m2psi_tot);
+									if(input_multislice->eels_fr.is_Single_Channelling())
+									{
+										value_type_r dz = wave_function.slice.dz_m(ithk, wave_function.slice.size()-1)/cos(input_multislice->theta);
+										wave_function.prog.propagate(eS_Real, input_multislice->gx_0(), input_multislice->gy_0(), dz, psi_kn);
+										multem::add_square(psi_kn, m2psi_tot);
+									}
+									else if(input_multislice->eels_fr.is_Double_Channelling_FOMS())
+									{
+										value_type_r dz = wave_function.slice.dz_m(ithk, wave_function.slice.size()-1)/cos(input_multislice->theta);
+										multem::multiply(psi_kn, trans_thk, psi_kn);
+										wave_function.prog.propagate(eS_Real, input_multislice->gx_0(), input_multislice->gy_0(), dz, psi_kn);
+										multem::add_square(psi_kn, m2psi_tot);
+									}
+									else if(input_multislice->eels_fr.is_Double_Channelling_SOMS())
+									{
+										value_type_r dz = 0.5*wave_function.slice.dz_m(ithk, wave_function.slice.size()-1)/cos(input_multislice->theta);
+										wave_function.prog.propagate(eS_Real, input_multislice->gx_0(), input_multislice->gy_0(), dz, psi_kn);
+										multem::multiply(psi_kn, trans_thk, psi_kn);
+										wave_function.prog.propagate(eS_Real, input_multislice->gx_0(), input_multislice->gy_0(), dz, psi_kn);
+										multem::add_square(psi_kn, m2psi_tot);
+									}
+									else
+									{
+										wave_function.psi(eS_Real, ithk, wave_function.slice.size(), &psi_kn);
+										multem::add_square(wave_function.psi_z, m2psi_tot);
+									}
 								}
 							}
 						}
@@ -490,6 +521,7 @@ namespace multem
 
 			Vector<value_type_c, dev> psi_thk;
 			Vector<value_type_c, dev> psi_kn;
+			Vector<value_type_c, dev> trans_thk;
 		};
 
 } // namespace multem

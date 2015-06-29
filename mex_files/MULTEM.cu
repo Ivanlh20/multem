@@ -184,7 +184,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 		value_type E_loss = mx_get_scalar_field<value_type>(mx_input_multislice, "eels_E_loss")*multem::c_meV_2_keV;
 		int m_selection = mx_get_scalar_field<int>(mx_input_multislice, "eels_m_selection");
 		value_type collection_angle = mx_get_scalar_field<int>(mx_input_multislice, "eels_collection_angle")*multem::c_mrad_2_rad;
-		multem::eChannelling_Type channelling_type = mx_get_scalar_field<multem::eChannelling_Type>(mx_input_multislice, "eels_channeling_type");
+		multem::eChannelling_Type channelling_type = mx_get_scalar_field<multem::eChannelling_Type>(mx_input_multislice, "eels_channelling_type");
 		int Z = mx_get_scalar_field<int>(mx_input_multislice, "eels_Z");
 
 		input_multislice.eels_fr.set_input_data(space, input_multislice.E_0, E_loss, m_selection, collection_angle, channelling_type, Z);
@@ -195,7 +195,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 		value_type E_loss = mx_get_scalar_field<value_type>(mx_input_multislice, "eftem_E_loss")*multem::c_meV_2_keV;
 		int m_selection = mx_get_scalar_field<int>(mx_input_multislice, "eftem_m_selection");
 		value_type collection_angle = 0;
-		multem::eChannelling_Type channelling_type = mx_get_scalar_field<multem::eChannelling_Type>(mx_input_multislice, "eftem_channeling_type");
+		multem::eChannelling_Type channelling_type = mx_get_scalar_field<multem::eChannelling_Type>(mx_input_multislice, "eftem_channelling_type");
 		int Z = mx_get_scalar_field<int>(mx_input_multislice, "eftem_Z");
 
 		input_multislice.eels_fr.set_input_data(space, input_multislice.E_0, E_loss, m_selection, collection_angle, channelling_type, Z);

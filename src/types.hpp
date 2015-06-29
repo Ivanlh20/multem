@@ -242,7 +242,7 @@ namespace multem
 	/**********************************Channelling type********************************/
 	enum eChannelling_Type
 	{
-		eCT_Single_Channeling = 1, eCT_Double_Channeling = 2, eCT_Double_Channeling_FOMS = 3, 
+		eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_FOMS = 3, eCT_Double_Channelling_SOMS = 4
 	};
 
 	/*********************************Epsilon***********************************/
@@ -738,6 +738,21 @@ namespace multem
 			z_int_e.assign(slice.z_int_e.begin(), slice.z_int_e.end());
 			iatom_0.assign(slice.iatom_0.begin(), slice.iatom_0.end());
 			iatom_e.assign(slice.iatom_e.begin(), slice.iatom_e.end());
+		}
+
+		T dz(const int &islice)
+		{
+			return (islice<size())?(z_e[islice]-z_0[islice]):0.0;
+		}
+
+		T z_m(const int &islice)
+		{
+			return (islice<size())?(0.5*abs(z_e[islice]+z_0[islice])):0.0;
+		}
+
+		T dz_m(const int &islice_0, const int &islice_e)
+		{
+			return abs(z_m(islice_e) - z_m(islice_0));
 		}
 
 		Vector<T, dev> z_0; 		// Initial z-position
@@ -1499,7 +1514,7 @@ namespace multem
 
 		inline
 		EELS(): space(eS_Real), E_0(0), E_loss(0), ge(0), ge2(0), gc(0), gc2(0), 
-		m_selection(0), collection_angle(0), channelling_type(eCT_Double_Channeling), factor(0), Z(0), x(0), y(0), occ(0){}
+		m_selection(0), collection_angle(0), channelling_type(eCT_Double_Channelling), factor(0), Z(0), x(0), y(0), occ(0){}
 
 		inline
 		void set_input_data(eSpace space_i, T E_0_i, T E_loss_i, int m_selection_i, T collection_angle_i, eChannelling_Type channelling_type_i, int Z_i)
@@ -1532,6 +1547,31 @@ namespace multem
 			T emass = 510.99906;
 			T x = (emass + E_0)/(2*emass + E_0);
 			return E_loss*x/E_0;
+		}
+
+		bool is_Single_Channelling() const
+		{
+			return channelling_type==eCT_Single_Channelling;
+		}
+
+		bool is_Double_Channelling() const
+		{
+			return channelling_type==eCT_Double_Channelling;
+		}
+
+		bool is_Double_Channelling_FOMS() const
+		{
+			return channelling_type==eCT_Double_Channelling_FOMS;
+		}
+
+		bool is_Double_Channelling_SOMS() const
+		{
+			return channelling_type==eCT_Double_Channelling_SOMS;
+		}
+
+		bool is_Double_Channelling_POA_SOMS() const
+		{
+			return is_Double_Channelling_FOMS() || is_Double_Channelling_SOMS();
 		}
 
 		eSpace space;

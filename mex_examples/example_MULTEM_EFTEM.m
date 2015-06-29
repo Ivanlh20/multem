@@ -27,7 +27,7 @@ input_multislice.psi_0 = 0;
 
 input_multislice.bwl = 0;
 
-input_multislice.E_0 = 300;                          % Acceleration Voltage (keV)
+input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
 input_multislice.theta = 0.0;                       % Till ilumination (degrees)
 input_multislice.phi = 0.0;                         % Till ilumination (degrees)
 
@@ -37,20 +37,38 @@ na = 4; nb = 4; nc = 25; ncu = 2; rms3d = 0.085;
 , input_multislice.ly, input_multislice.lz...
 , a, b, c, input_multislice.dz] = SrTiO3001Crystal(na, nb, nc, ncu, rms3d);
 
-input_multislice.nx = 1024; 
-input_multislice.ny = 1024;
+input_multislice.nx = 512; 
+input_multislice.ny = 512;
 
 input_multislice.eftem_E_loss = 532;           % Energy loss (eV)
 input_multislice.eftem_m_selection = 3;        % selection rule
+input_multislice.eftem_channelling_type = 2;   % eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_FOMS = 3, eCT_Double_Channelling_SOMS = 4
 input_multislice.eftem_Z = 8;                  % atomic type
 
-clear MULTEM;
-tic;
-[m2psi_tot] = MULTEM(input_multislice); 
-toc;
+% clear MULTEM;
+% tic;
+% [m2psi_tot] = MULTEM(input_multislice); 
+% toc;
+% imagesc(m2psi_tot);
+% title('Total intensity');
+% axis image;
+% colormap gray;
 
+cc = [1 0 1; 1 0 0; 0 0 1; 0 0 0];
 figure(1);
-imagesc(m2psi_tot);
-title('Total intensity');
-axis image;
-colormap gray;
+for i=1:4
+    input_multislice.eftem_channelling_type = i;
+    clear MULTEM;
+    tic;
+    [m2psi_tot] = MULTEM(input_multislice); 
+    toc;
+    subplot(2, 1, 1);
+    hold on;
+    plot(m2psi_tot(65, :), 'color', cc(i, :));
+    subplot(2, 1, 2);
+    hold on;
+    plot(m2psi_tot(129, :), 'color', cc(i, :));  
+%     title('Total intensity');
+%     axis image;
+%     colormap gray;
+end;
