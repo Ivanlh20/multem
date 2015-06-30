@@ -478,7 +478,7 @@ namespace multem
 	template<class T>
 	struct rVector
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		int size;
 		T *V;
@@ -616,7 +616,7 @@ namespace multem
 	template<class T, eDevice dev>
 	struct Thickness
 	{
-		using value_type = typename T;
+		using value_type = T;
 		using size_type = std::size_t;
 
 		static const eDevice device = dev;
@@ -664,7 +664,7 @@ namespace multem
 	template<class T>
 	struct rThickness
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		rThickness(): size(0), islice(nullptr), iatom_e(nullptr), z(nullptr), z_zero_def(nullptr), z_back_prop(nullptr) {}
 
@@ -698,7 +698,7 @@ namespace multem
 	template<class T, eDevice dev>
 	struct Slice
 	{
-		using value_type = typename T;
+		using value_type = T;
 		using size_type = std::size_t;
 
 		static const eDevice device = dev;
@@ -740,9 +740,14 @@ namespace multem
 			iatom_e.assign(slice.iatom_e.begin(), slice.iatom_e.end());
 		}
 
+		T dz(const int &islice_0, const int &islice_e)
+		{
+			return (islice_e<size())?(z_e[islice_e]-z_0[islice_0]):0.0;
+		}
+
 		T dz(const int &islice)
 		{
-			return (islice<size())?(z_e[islice]-z_0[islice]):0.0;
+			return dz(islice, islice);
 		}
 
 		T z_m(const int &islice)
@@ -766,7 +771,7 @@ namespace multem
 	template<class T>
 	struct rSlice
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		rSlice(): size(0), z_0(nullptr), z_e(nullptr), z_int_0(nullptr), z_int_e(nullptr), iatom_0(nullptr), iatom_e(nullptr) {}
 
@@ -802,7 +807,7 @@ namespace multem
 	template<class T, eDevice dev>
 	struct Q1
 	{
-		using value_type = typename T;
+		using value_type = T;
 		using size_type = std::size_t;
 
 		static const eDevice device = dev;
@@ -832,7 +837,7 @@ namespace multem
 	template<class T>
 	struct rQ1
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		rQ1(): size(0), x(nullptr), w(nullptr) {}
 
@@ -860,7 +865,7 @@ namespace multem
 	template<class T, eDevice dev>
 	struct Q2
 	{
-		using value_type = typename T;
+		using value_type = T;
 		using size_type = std::size_t;
 
 		static const eDevice device = dev;
@@ -893,7 +898,7 @@ namespace multem
 	template<class T>
 	struct rQ2
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		rQ2(): size(0), x(nullptr), y(nullptr), w(nullptr) {}
 
@@ -923,7 +928,7 @@ namespace multem
 	template<class T, eDevice dev>
 	struct PP_Coef
 	{	
-		using value_type = typename T;
+		using value_type = T;
 		using size_type = std::size_t;
 
 		static const eDevice device = dev;
@@ -954,7 +959,7 @@ namespace multem
 	template<class T>
 	struct rPP_Coef
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		rPP_Coef(): size(0), cl(nullptr), cnl(nullptr) {}
 
@@ -982,7 +987,7 @@ namespace multem
 	template<class T, eDevice dev>
 	struct CI_Coef
 	{
-		using value_type = typename T;
+		using value_type = T;
 		using size_type = std::size_t;
 
 		static const eDevice device = dev;
@@ -1018,7 +1023,7 @@ namespace multem
 	template<class T>
 	struct rCI_Coef
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		rCI_Coef(): size(0), c0(nullptr), c1(nullptr), c2(nullptr), c3(nullptr) {}
 
@@ -1050,7 +1055,7 @@ namespace multem
 	template<class T, eDevice dev>
 	struct Det_Cir
 	{
-		using value_type = typename T;
+		using value_type = T;
 		using size_type = std::size_t;
 
 		static const eDevice device = dev;
@@ -1091,14 +1096,14 @@ namespace multem
 
 		Vector<T, dev> ang_inner; // Inner aperture (rad)
 		Vector<T, dev> ang_outer; // Outer aperture (rad)
-		value_type lambda;	  // lambda
+		value_type lambda;	 // lambda
 	};
 
 	/********************STEM Intensity***********************/
 	template<class T, eDevice dev>
 	struct Det_Int
 	{
-		using value_type = typename T;
+		using value_type = T;
 		using size_type = std::size_t;
 
 		static const eDevice device = dev;
@@ -1129,7 +1134,7 @@ namespace multem
 	template<class T>
 	struct sPair
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		int idx; 	// index
 		T value; 	// Value
@@ -1206,7 +1211,7 @@ namespace multem
 	template<class T>
 	struct Grid
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		int nx; 				// Number of pixels in x direction
 		int ny; 				// Number of pixels in y direction
@@ -1307,10 +1312,16 @@ namespace multem
 
 		/*********************************************************/
 		DEVICE_CALLABLE FORCEINLINE
-		T gx(const int &ix) const { return static_cast<T>(ix-nxh)*dgx; }
+		int igx(const int &ix) const { return ix-nxh; }
 
 		DEVICE_CALLABLE FORCEINLINE
-		T gy(const int &iy) const { return static_cast<T>(iy-nyh)*dgy; }
+		int igy(const int &iy) const { return iy-nyh; }
+
+		DEVICE_CALLABLE FORCEINLINE
+		T gx(const int &ix) const { return static_cast<T>(igx(ix))*dgx; }
+
+		DEVICE_CALLABLE FORCEINLINE
+		T gy(const int &iy) const { return static_cast<T>(igy(iy))*dgy; }
 
 		DEVICE_CALLABLE FORCEINLINE
 		T g2(const int &ix, const int &iy) const 
@@ -1322,6 +1333,12 @@ namespace multem
 
 		DEVICE_CALLABLE FORCEINLINE
 		T g(const int &ix, const int &iy)const { return sqrt(g2(ix, iy)); }
+
+		DEVICE_CALLABLE FORCEINLINE
+		int iRx(const int &ix) const { return ix; }
+
+		DEVICE_CALLABLE FORCEINLINE
+		int iRy(const int &iy) const { return iy; }
 
 		DEVICE_CALLABLE FORCEINLINE
 		T Rx(const int &ix) const { return static_cast<T>(ix)*dRx; }
@@ -1343,7 +1360,14 @@ namespace multem
 		DEVICE_CALLABLE FORCEINLINE
 		T bwl_factor(const int &ix, const int &iy) const 
 		{ 
-			return inxy/(1.0+exp(alpha*(g2(ix, iy)-gl2_max)));
+			if(bwl)
+			{
+				return inxy/(1.0+exp(alpha*(g2(ix, iy)-gl2_max)));
+			}
+			else
+			{
+				return inxy;
+			}
 		}
 
 		/*********************************************************/
@@ -1396,7 +1420,14 @@ namespace multem
 		DEVICE_CALLABLE FORCEINLINE
 		T bwl_factor_shift(const int &ix, const int &iy) const 
 		{ 
-			return inxy/(1.0+exp(alpha*(g2_shift(ix, iy)-gl2_max)));
+			if(bwl)
+			{
+				return inxy/(1.0+exp(alpha*(g2_shift(ix, iy)-gl2_max)));
+			}
+			else
+			{
+				return inxy;
+			}
 		}
 		/*********************************************************/
 		DEVICE_CALLABLE FORCEINLINE
@@ -1404,13 +1435,14 @@ namespace multem
 
 		DEVICE_CALLABLE FORCEINLINE
 		int ind_col(const int &ix, const int &iy) const { return ix*ny+iy; }
+
 	};
 
 	/****************************lens***************************/
 	template<class T>
 	struct Lens
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		int m; 		// vortex momentum
 		T f; 		// defocus
@@ -1510,7 +1542,7 @@ namespace multem
 	template<class T>
 	struct EELS
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		inline
 		EELS(): space(eS_Real), E_0(0), E_loss(0), ge(0), ge2(0), gc(0), gc2(0), 
@@ -1597,7 +1629,7 @@ namespace multem
 	template<class T, eDevice dev>
 	struct Atom_Type
 	{
-		using value_type = typename T;
+		using value_type = T;
 		using size_type = std::size_t;
 
 		static const eDevice device = dev;
@@ -1658,7 +1690,7 @@ namespace multem
 	template<class T>
 	struct rAtom_Type
 	{
-		using value_type = typename T;
+		using value_type = T;
 
 		int Z; 
 		T m; 
@@ -1724,7 +1756,7 @@ namespace multem
 	struct Atom_Vp
 	{
 		public:
-			using value_type = typename T;
+			using value_type = T;
 
 			T x;
 			T y;
@@ -1797,7 +1829,7 @@ namespace multem
 	struct Stream<T, e_Host>
 	{
 		public:
-			using value_type = typename T;
+			using value_type = T;
 
 			static const eDevice device = e_Host;
 
@@ -1857,7 +1889,7 @@ namespace multem
 	struct Stream<T, e_Device>
 	{
 		public:
-			using value_type = typename T;
+			using value_type = T;
 
 			static const eDevice device = e_Device;
 
@@ -1960,7 +1992,7 @@ namespace multem
 
 				TVector_c M(nx*ny);
 
-				fftwf_complex *V= reinterpret_cast<fftwf_complex*>(M.data());
+				fftwf_complex *V = reinterpret_cast<fftwf_complex*>(M.data());
 
 				plan_forward = fftwf_plan_dft_2d(ny, nx, V, V, FFTW_FORWARD, FFTW_MEASURE);
 				plan_backward = fftwf_plan_dft_2d(ny, nx, V, V, FFTW_BACKWARD, FFTW_MEASURE);
@@ -1982,7 +2014,7 @@ namespace multem
 
 			void forward(TVector_c &M_i, TVector_c &M_o)
 			{
-				if (M_i.data()!=M_o.data())
+				if (M_i.data() != M_o.data())
 				{
 					M_o.assign(M_i.begin(), M_i.end());
 				}
@@ -1992,7 +2024,7 @@ namespace multem
 
 			void inverse(TVector_c &M_i, TVector_c &M_o)
 			{
-				if (M_i.data()!=M_o.data())
+				if (M_i.data() != M_o.data())
 				{
 					M_o.assign(M_i.begin(), M_i.end());
 				}
@@ -2071,7 +2103,7 @@ namespace multem
 
 			void forward(TVector_c &M_i, TVector_c &M_o)
 			{
-				if (M_i.data()!=M_o.data())
+				if (M_i.data() != M_o.data())
 				{
 					M_o.assign(M_i.begin(), M_i.end());
 				}
@@ -2081,7 +2113,7 @@ namespace multem
 
 			void inverse(TVector_c &M_i, TVector_c &M_o)
 			{
-				if (M_i.data()!=M_o.data())
+				if (M_i.data() != M_o.data())
 				{
 					M_o.assign(M_i.begin(), M_i.end());
 				}
@@ -2239,7 +2271,7 @@ namespace multem
 	template<class T>
 	struct Scanning
 	{
-		using value_type = typename T;
+		using value_type = T;
 		using size_type = std::size_t;
 
 		eScanning_Type type;	// 1: Line, 2: Area, 

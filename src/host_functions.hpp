@@ -634,7 +634,7 @@ namespace multem
 
 	template<class TGrid, class TVector>
 	enable_if_Host<TVector, void>
-	fft2_shift(TGrid &grid, TVector &M_io)
+	fft2_shift(const TGrid &grid, TVector &M_io)
 	{
 		for(auto iy = 0; iy <grid.nyh; iy++)
 		{
@@ -652,7 +652,7 @@ namespace multem
 	}
 
 	template<class TGrid>
-	void fft2_shift(TGrid &grid, m_matrix_r &M_io)
+	void fft2_shift(const TGrid &grid, m_matrix_r &M_io)
 	{
 		for(auto iy = 0; iy <grid.nyh; iy++)
 		{
@@ -670,7 +670,7 @@ namespace multem
 	}
 
 	template<class TGrid>
-	void fft2_shift(TGrid &grid, m_matrix_c &M_io)
+	void fft2_shift(const TGrid &grid, m_matrix_c &M_io)
 	{
 		for(auto iy = 0; iy <grid.nyh; iy++)
 		{
@@ -691,7 +691,7 @@ namespace multem
 
 	template<class TGrid, class TVector>
 	enable_if_Host<TVector, Value_type<TVector>>
-	sum_over_Det(TGrid &grid, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector &M_i)
+	sum_over_Det(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, TVector &M_i)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type = Value_type<TVector>;
@@ -718,7 +718,7 @@ namespace multem
 
 	template<class TGrid, class TVector_r>
 	enable_if_Host<TVector_r, Value_type<TGrid>>
-	sum_square_over_Det(TGrid &grid, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector_r &M_i)
+	sum_square_over_Det(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, TVector_r &M_i)
 	{
 		using value_type_r = Value_type<TGrid>;
 
@@ -744,31 +744,36 @@ namespace multem
 
 	template<class TGrid, class TVector_c>
 	enable_if_Host<TVector_c, void>
-	bandwidth_limit(TGrid &grid, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &M_io)
+	bandwidth_limit(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, Value_type<TVector_c> w, TVector_c &M_io)
 	{
+		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
 
-		if(!grid.bwl) return;
-
-		fft2.forward(M_io);
+		value_type_r g2_min = pow(g_min, 2);
+		value_type_r g2_max = pow(g_max, 2);
 
 		for(auto iy = 0; iy < grid.ny; iy++)
 		{
 			for(auto ix = 0; ix < grid.nx; ix++)
 			{
 				int ixy = grid.ind_row(ix, iy); 		
-				value_type_c V = M_io[ixy];
-				value_type_c bwl_factor = static_cast<value_type_c>(grid.bwl_factor_shift(ix, iy));		
-				M_io[ixy] = bwl_factor*V;
+				value_type_r g2 = grid.g2_shift(ix, iy);
+
+				if((g2_min <= g2)&&(g2 <= g2_max))
+				{
+					M_io[ixy] *= w;
+				}
+				else
+				{
+ 					M_io[ixy] = static_cast<value_type_c>(0);
+				}
 			}
 		}
-
-		fft2.inverse(M_io);
 	}
 
 	template<class TGrid, class TVector_c>
 	enable_if_Host<TVector_c, void>
-	phase_mul(TGrid &grid, TVector_c &exp_x_i, TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
+	phase_mul(const TGrid &grid, TVector_c &exp_x_i, TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
 	{
 		for(auto iy = 0; iy < grid.ny; iy++)
 		{
@@ -782,7 +787,7 @@ namespace multem
 
 	template<class TGrid, class TVector_c>
 	enable_if_Host<TVector_c, void>
-	propagator_mul(TGrid &grid, TVector_c &prop_x_i, TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &Psi_o)
+	propagator_mul(const TGrid &grid, TVector_c &prop_x_i, TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &psi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
@@ -796,11 +801,11 @@ namespace multem
 
 				if((!grid.bwl)||(g2 < grid.gl2_max))
 				{
-					Psi_o[ixy] = static_cast<value_type_c>(grid.inxy)*psi_i[ixy]*prop_x_i[ix]*prop_y_i[iy];
+					psi_o[ixy] = static_cast<value_type_c>(grid.inxy)*psi_i[ixy]*prop_x_i[ix]*prop_y_i[iy];
 				}
 				else
 				{
- 					Psi_o[ixy] = static_cast<value_type_c>(0);
+ 					psi_o[ixy] = static_cast<value_type_c>(0);
 				}	
 			}
 		}
@@ -808,7 +813,7 @@ namespace multem
 
 	template<class TGrid, class TVector_c>
 	enable_if_Host<TVector_c, void>
-	probe(TGrid &grid, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> x, Value_type<TGrid> y, TVector_c &fPsi_o)
+	probe(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, Value_type<TGrid> x, Value_type<TGrid> y, TVector_c &fPsi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
@@ -846,7 +851,7 @@ namespace multem
 
 	template<class TGrid, class TVector_c>
 	enable_if_Host<TVector_c, void>
-	apply_CTF(TGrid &grid, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	apply_CTF(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;
@@ -882,7 +887,7 @@ namespace multem
 
 	template<class TGrid, class TVector_c>
 	enable_if_Host<TVector_c, void>
-	apply_PCTF(TGrid &grid, Lens<Value_type<TGrid>> &lens, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	apply_PCTF(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
 		using value_type_c = Value_type<TVector_c>;

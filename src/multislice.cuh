@@ -219,75 +219,11 @@ namespace multem
 			}
 
 			template<class TVector_Host_r>
-			void EFTEM(TVector_Host_r &host_m2psi_tot)
-			{
-				value_type_r w = input_multislice->ifp_nconf();
-
-				multem::fill(m2psi_tot, 0.0);
-
-				for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
-				{
-					wave_function.move_atoms(iconf);
-					for(auto ithk=0; ithk < wave_function.slice.size(); ithk++)
-					{
-						wave_function.psi_0();
-						wave_function.psi(eS_Real, ithk);
-						multem::assign(wave_function.psi_z, psi_thk);
-						if(input_multislice->eels_fr.is_Double_Channelling_POA_SOMS())
-						{
-							wave_function.trans(ithk, wave_function.slice.size()-1, trans_thk);
-						}				
-						for(auto iatom=wave_function.slice.iatom_0[ithk]; iatom <= wave_function.slice.iatom_e[ithk]; iatom++)
-						{
-							if(wave_function.atoms.Z[iatom] == input_multislice->eels_fr.Z)
-							{
-								input_multislice->eels_fr.x = -c_2Pi*(wave_function.atoms.x[iatom]-input_multislice->grid.lxh());
-								input_multislice->eels_fr.y = -c_2Pi*(wave_function.atoms.y[iatom]-input_multislice->grid.lyh());
-								input_multislice->eels_fr.occ = wave_function.atoms.occ[iatom];
-
-								energy_loss.set_atom_type(input_multislice->eels_fr);
-								for(auto ikn=0; ikn < energy_loss.kernel.size(); ikn++)
-								{
-									multem::multiply(energy_loss.kernel[ikn], psi_thk, psi_kn);
-									if(input_multislice->eels_fr.is_Single_Channelling())
-									{
-										value_type_r dz = wave_function.slice.dz_m(ithk, wave_function.slice.size()-1)/cos(input_multislice->theta);
-										wave_function.prog.propagate(eS_Real, input_multislice->gx_0(), input_multislice->gy_0(), dz, psi_kn);
-										multem::add_square(psi_kn, m2psi_tot);
-									}
-									else if(input_multislice->eels_fr.is_Double_Channelling_FOMS())
-									{
-										value_type_r dz = wave_function.slice.dz_m(ithk, wave_function.slice.size()-1)/cos(input_multislice->theta);
-										multem::multiply(psi_kn, trans_thk, psi_kn);
-										wave_function.prog.propagate(eS_Real, input_multislice->gx_0(), input_multislice->gy_0(), dz, psi_kn);
-										multem::add_square(psi_kn, m2psi_tot);
-									}
-									else if(input_multislice->eels_fr.is_Double_Channelling_SOMS())
-									{
-										value_type_r dz = 0.5*wave_function.slice.dz_m(ithk, wave_function.slice.size()-1)/cos(input_multislice->theta);
-										wave_function.prog.propagate(eS_Real, input_multislice->gx_0(), input_multislice->gy_0(), dz, psi_kn);
-										multem::multiply(psi_kn, trans_thk, psi_kn);
-										wave_function.prog.propagate(eS_Real, input_multislice->gx_0(), input_multislice->gy_0(), dz, psi_kn);
-										multem::add_square(psi_kn, m2psi_tot);
-									}
-									else
-									{
-										wave_function.psi(eS_Real, ithk, wave_function.slice.size(), &psi_kn);
-										multem::add_square(wave_function.psi_z, m2psi_tot);
-									}
-								}
-							}
-						}
-					}
-				}
-
-				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
-			}
-
-			template<class TVector_Host_r>
 			void EELS(TVector_Host_r &host_stem_eels)
 			{
 				value_type_r w = input_multislice->ifp_nconf();
+				value_type_r gx_0 = input_multislice->gx_0();
+				value_type_r gy_0 = input_multislice->gy_0();
 
 				multem::fill(host_stem_eels, 0.0);
 
@@ -297,32 +233,123 @@ namespace multem
 					for(auto is=0; is < input_multislice->scanning.size(); is++)
 					{
 						input_multislice->set_stem_beam_position(is);
-						for(auto ithk=0; ithk < wave_function.slice.size(); ithk++)
+						wave_function.psi_0(psi_thk);
+						for(auto islice=0; islice < wave_function.slice.size(); islice++)
 						{
-							wave_function.psi_0();
-							wave_function.psi(eS_Real, ithk);
-							multem::assign(wave_function.psi_z, psi_thk);
-
-							for(auto iatom=wave_function.slice.iatom_0[ithk]; iatom <= wave_function.slice.iatom_e[ithk]; iatom++)
+							if(input_multislice->eels_fr.is_Double_Channelling_POA_SOMS())
+							{
+								wave_function.trans(islice, wave_function.slice.size()-1, trans_thk);
+							}
+							for(auto iatom=wave_function.slice.iatom_0[islice]; iatom <= wave_function.slice.iatom_e[islice]; iatom++)
 							{
 								if(wave_function.atoms.Z[iatom] == input_multislice->eels_fr.Z)
 								{
-									input_multislice->eels_fr.x = -c_2Pi*(wave_function.atoms.x[iatom]-input_multislice->grid.lxh());
-									input_multislice->eels_fr.y = -c_2Pi*(wave_function.atoms.y[iatom]-input_multislice->grid.lyh());
+									input_multislice->eels_fr.x = input_multislice->get_Rx_pos_shift(wave_function.atoms.x[iatom]);
+									input_multislice->eels_fr.y = input_multislice->get_Ry_pos_shift(wave_function.atoms.y[iatom]);
 									input_multislice->eels_fr.occ = wave_function.atoms.occ[iatom];
 
 									energy_loss.set_atom_type(input_multislice->eels_fr);
 									for(auto ikn=0; ikn < energy_loss.kernel.size(); ikn++)
 									{
 										multem::multiply(energy_loss.kernel[ikn], psi_thk, psi_kn);
-										wave_function.psi(eS_Reciprocal, ithk, wave_function.slice.size(), &psi_kn);
-										host_stem_eels[is] += sum_square_over_Det(input_multislice->grid, 0, input_multislice->eels_fr.g_collection, wave_function.psi_z);
+										if(input_multislice->eels_fr.is_Single_Channelling())
+										{
+											value_type_r dz = wave_function.dz_m(islice, wave_function.slice.size()-1);
+											wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
+										}
+										else if(input_multislice->eels_fr.is_Double_Channelling_FOMS())
+										{
+											value_type_r dz = wave_function.dz_m(islice, wave_function.slice.size()-1);
+											multem::multiply(trans_thk, psi_kn);
+											wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
+										}
+										else if(input_multislice->eels_fr.is_Double_Channelling_SOMS())
+										{
+											value_type_r dz = 0.5*wave_function.dz_m(islice, wave_function.slice.size()-1);
+											wave_function.prog.propagate(eS_Real, gx_0, gy_0, dz, psi_kn);
+											multem::multiply(trans_thk, psi_kn);
+											wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
+										}
+										else if(input_multislice->eels_fr.is_Double_Channelling())
+										{
+											wave_function.psi(eS_Reciprocal, islice, wave_function.slice.size(), psi_kn);
+										}
+										host_stem_eels[is] += sum_square_over_Det(input_multislice->grid, 0, input_multislice->eels_fr.g_collection, psi_kn);
 									}
 								}
 							}
+							wave_function.transmit(islice, psi_thk);
+							wave_function.prog.propagate(eS_Real, gx_0, gy_0, wave_function.dz(islice), psi_thk);
 						}
 					}
 				}
+			}
+
+			template<class TVector_Host_r>
+			void EFTEM(TVector_Host_r &host_m2psi_tot)
+			{
+				value_type_r w = input_multislice->ifp_nconf();
+				value_type_r gx_0 = input_multislice->gx_0();
+				value_type_r gy_0 = input_multislice->gy_0();
+
+				multem::fill(m2psi_tot, 0.0);
+
+				for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
+				{
+					wave_function.move_atoms(iconf);
+					wave_function.psi_0(psi_thk);
+					for(auto islice=0; islice < wave_function.slice.size(); islice++)
+					{
+						if(input_multislice->eels_fr.is_Double_Channelling_POA_SOMS())
+						{
+							wave_function.trans(islice, wave_function.slice.size()-1, trans_thk);
+						}				
+						for(auto iatom=wave_function.slice.iatom_0[islice]; iatom <= wave_function.slice.iatom_e[islice]; iatom++)
+						{
+							if(wave_function.atoms.Z[iatom] == input_multislice->eels_fr.Z)
+							{
+								input_multislice->eels_fr.x = input_multislice->get_Rx_pos_shift(wave_function.atoms.x[iatom]);
+								input_multislice->eels_fr.y = input_multislice->get_Ry_pos_shift(wave_function.atoms.y[iatom]);
+								input_multislice->eels_fr.occ = wave_function.atoms.occ[iatom];
+
+								energy_loss.set_atom_type(input_multislice->eels_fr);
+								for(auto ikn=0; ikn < energy_loss.kernel.size(); ikn++)
+								{
+									multem::multiply(energy_loss.kernel[ikn], psi_thk, psi_kn);
+									if(input_multislice->eels_fr.is_Single_Channelling())
+									{
+										value_type_r dz = wave_function.dz_m(islice, wave_function.slice.size()-1);
+										wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
+									}
+									else if(input_multislice->eels_fr.is_Double_Channelling_FOMS())
+									{
+										value_type_r dz = wave_function.dz_m(islice, wave_function.slice.size()-1);
+										multem::multiply(trans_thk, psi_kn);
+										wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
+									}
+									else if(input_multislice->eels_fr.is_Double_Channelling_SOMS())
+									{
+										value_type_r dz = 0.5*wave_function.dz_m(islice, wave_function.slice.size()-1);
+										wave_function.prog.propagate(eS_Real, gx_0, gy_0, dz, psi_kn);
+										multem::multiply(trans_thk, psi_kn);
+										wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
+									}
+									else if(input_multislice->eels_fr.is_Double_Channelling())
+									{
+										wave_function.psi(eS_Reciprocal, islice, wave_function.slice.size(), psi_kn);
+									}
+									multem::bandwidth_limit(input_multislice->grid, 0, input_multislice->eels_fr.g_collection, 1.0, psi_kn);
+									fft2.inverse(psi_kn);
+									multem::add_square(psi_kn, m2psi_tot);
+								}
+							}
+						}
+						wave_function.transmit(islice, psi_thk);
+						wave_function.prog.propagate(eS_Real, gx_0, gy_0, wave_function.dz(islice), psi_thk);
+					}
+				}
+
+				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
 			}
 
 			template<class TMatlab_1>

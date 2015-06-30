@@ -66,12 +66,14 @@ I_max = max([max(m2psi_tot(:)), max(m2psi_coh(:))]);
 figure(1);
 subplot(1, 2, 1);
 imagesc(m2psi_tot, [I_min I_max]);
+
 title('Total intensity');
 axis image;
 colormap gray;
 
 subplot(1, 2, 2);
 imagesc(m2psi_coh, [I_min I_max]);
+
 title('Coherent intensity');
 axis image;
 colormap gray;

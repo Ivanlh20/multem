@@ -25,13 +25,13 @@ input_multislice.zero_defocus_plane = 0;
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;
 
-input_multislice.bwl = 1;                           % Band-width limit, 1: true, 0:false
+input_multislice.bwl = 0;                           % Band-width limit, 1: true, 0:false
 
 input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
 input_multislice.theta = 0.0;                       % Till ilumination (degrees)
 input_multislice.phi = 0.0;                         % Till ilumination (degrees)
 
-na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
@@ -65,13 +65,22 @@ input_multislice.scanning_ye = 2.5*b;
 
 input_multislice.eels_E_loss = 532;           % Energy loss (eV)
 input_multislice.eels_m_selection = 3;        % selection rule
-input_multislice.eels_collection_angle = 100;  % Collection half angle (mrad)
+input_multislice.eels_collection_angle = 100; % Collection half angle (mrad)
 input_multislice.eels_Z = 8;                  % atomic type
 
-clear MULTEM;
-tic;
-[eels] = MULTEM(input_multislice); 
-toc;
+input_multislice.eels_E_loss = 1940;           % Energy loss (eV)
+input_multislice.eels_m_selection = 3;        % selection rule
+input_multislice.eels_collection_angle = 20; % Collection half angle (mrad)
+input_multislice.eels_Z = 38;                  % atomic type
 
-figure(1);
-plot(eels)
+cc = [1 0 1; 1 0 0; 0 0 1; 0 0 0];
+for i=1:4
+    input_multislice.eels_channelling_type = i;
+    clear MULTEM;
+    tic;
+    [eels] = MULTEM(input_multislice); 
+    toc;
+    figure(1);
+    hold on;
+    plot(eels, 'color', cc(i, :));
+end;

@@ -46,10 +46,31 @@ namespace multem
 			}
 
 			void propagate(const eSpace &space, value_type_r gxu, value_type_r gyu, 
-			value_type_r z, Vector<value_type_c, dev> &psi_i, Vector<value_type_c, dev> &Psi_o)
+			value_type_r z, Vector<value_type_c, dev> &psi_i, Vector<value_type_c, dev> &psi_o)
 			{
-				multem::propagator_component(input_multislice->grid, gxu, gyu, input_multislice->lens.prop_factor(z), prop_x, prop_y);
-				multem::propagate(input_multislice->grid, *fft2, space, prop_x, prop_y, psi_i, Psi_o);
+				if(isZero(z))
+				{
+					fft2->forward(psi_i, psi_o); 
+
+					if(input_multislice->grid.bwl)
+					{
+						multem::bandwidth_limit(input_multislice->grid, 0, input_multislice->grid.gl_max, input_multislice->grid.inxy, psi_o);
+					}
+					else
+					{
+						multem::scale(psi_o, input_multislice->grid.inxy);
+					}
+
+					if(space == eS_Real)
+					{
+						fft2->inverse(psi_o);
+					}
+				}
+				else
+				{
+					multem::propagator_components(input_multislice->grid, gxu, gyu, input_multislice->lens.prop_factor(z), prop_x, prop_y);
+					multem::propagate(input_multislice->grid, *fft2, space, prop_x, prop_y, psi_i, psi_o);
+				}
 			}
 
 			void propagate(const eSpace &space, value_type_r gxu, value_type_r gyu, 

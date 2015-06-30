@@ -106,9 +106,14 @@ namespace multem
 				}
 			}
 
-			T get_dz(const int &islice)
+			T dz(const int &islice)
 			{
 				return slice.dz(islice)/cos(input_multislice->theta);
+			}
+
+			T dz_m(const int &islice_0, const int &islice_e)
+			{
+				return slice.dz_m(islice_0, islice_e)/cos(input_multislice->theta);
 			}
 
 			//int IsInThickness(int islice);

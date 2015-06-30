@@ -192,6 +192,7 @@ namespace multem
 				if(is_EELS() || is_EFTEM())
 				{
 					coherent_contribution = false;
+					interaction_model = multem::eESIM_Multislice;
 				}
 
 				if(is_EWFS_EWRS())

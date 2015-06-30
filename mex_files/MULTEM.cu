@@ -60,7 +60,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.zero_defocus_plane = mx_get_scalar_field<value_type>(mx_input_multislice, "zero_defocus_plane");
 
 	input_multislice.thickness_type = mx_get_scalar_field<multem::eThickness_Type>(mx_input_multislice, "thickness_type");
-	if(input_multislice.thickness_type!=multem::eTT_Whole_Specimen && full)
+	if(input_multislice.thickness_type != multem::eTT_Whole_Specimen && full)
 	{
 		auto thickness = mx_get_matrix_field<m_matrix_r>(mx_input_multislice, "thickness");
 		input_multislice.thickness.resize(thickness.size);
@@ -183,7 +183,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 		multem::eSpace space = multem::eS_Reciprocal;
 		value_type E_loss = mx_get_scalar_field<value_type>(mx_input_multislice, "eels_E_loss")*multem::c_meV_2_keV;
 		int m_selection = mx_get_scalar_field<int>(mx_input_multislice, "eels_m_selection");
-		value_type collection_angle = mx_get_scalar_field<int>(mx_input_multislice, "eels_collection_angle")*multem::c_mrad_2_rad;
+		value_type collection_angle = mx_get_scalar_field<double>(mx_input_multislice, "eels_collection_angle")*multem::c_mrad_2_rad;
 		multem::eChannelling_Type channelling_type = mx_get_scalar_field<multem::eChannelling_Type>(mx_input_multislice, "eels_channelling_type");
 		int Z = mx_get_scalar_field<int>(mx_input_multislice, "eels_Z");
 
@@ -194,7 +194,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 		multem::eSpace space = multem::eS_Real;
 		value_type E_loss = mx_get_scalar_field<value_type>(mx_input_multislice, "eftem_E_loss")*multem::c_meV_2_keV;
 		int m_selection = mx_get_scalar_field<int>(mx_input_multislice, "eftem_m_selection");
-		value_type collection_angle = 0;
+		value_type collection_angle = mx_get_scalar_field<double>(mx_input_multislice, "eftem_collection_angle")*multem::c_mrad_2_rad;
 		multem::eChannelling_Type channelling_type = mx_get_scalar_field<multem::eChannelling_Type>(mx_input_multislice, "eftem_channelling_type");
 		int Z = mx_get_scalar_field<int>(mx_input_multislice, "eftem_Z");
 

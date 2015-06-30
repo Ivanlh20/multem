@@ -102,13 +102,14 @@ input_multislice.ewrs_y0 = 0.0;                % y position
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EFTEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.eftem_E_loss = 0;              % Energy loss (eV)
 input_multislice.eftem_m_selection = 3;         % selection rule
+input_multislice.eftem_collection_angle = 100;   % Collection half angle (mrad)
 input_multislice.eftem_channelling_type = 2;    % eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_POA = 3, eCT_Double_Channelling_SOMS = 4
 input_multislice.eftem_Z = 79;                  % atomic type
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EELS %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.eels_E_loss = 0;               % Energy loss (eV)
 input_multislice.eels_m_selection = 3;          % selection rule
-input_multislice.eels_collection_angle = 20;    % Collection half angle (mrad)
-input_multislice.eels_channelling_type = 2;    % eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_POA = 3, eCT_Double_Channelling_SOMS = 4 
+input_multislice.eels_collection_angle = 100;   % Collection half angle (mrad)
+input_multislice.eels_channelling_type = 2;     % eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_POA = 3, eCT_Double_Channelling_SOMS = 4 
 input_multislice.eels_Z = 79;                   % atomic type
 
 

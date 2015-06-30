@@ -52,15 +52,15 @@ namespace multem
 			gridBT.Blk = dim3((grid.ny+c_thrnxny-1)/c_thrnxny, (grid.nx+c_thrnxny-1)/c_thrnxny);
 			gridBT.Thr = dim3(c_thrnxny, c_thrnxny);
 
-			if(Blk_max.x!=0)
+			if(Blk_max.x != 0)
 			{
 				gridBT.Blk.x = min(Blk_max.x, gridBT.Blk.x);
 			}
-			if(Blk_max.y!=0)
+			if(Blk_max.y != 0)
 			{
 				gridBT.Blk.y = min(Blk_max.y, gridBT.Blk.y);
 			}
-			if(Blk_max.z!=0)
+			if(Blk_max.z != 0)
 			{
 				gridBT.Blk.z = min(Blk_max.z, gridBT.Blk.z);
 			}
@@ -455,17 +455,26 @@ namespace multem
 
 		// Anti-Aliasing, scale with cut-off (2/3)g_max
 		template<class TGrid, class T>
-		__global__ void bandwidth_limit(TGrid grid, rVector<T> M_io)
+		__global__ void bandwidth_limit(TGrid grid, Value_type<TGrid> g2_min, Value_type<TGrid> g2_max, T w, rVector<T> M_io)
 		{
+			using value_type_r = Value_type<TGrid>;
+
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
 				int ixy = grid.ind_col(ix, iy); 
-				T V = M_io.V[ixy];
-				T bwl_factor = static_cast<T>(grid.bwl_factor_shift(ix, iy));		
-				M_io.V[ixy] = bwl_factor*V;
+				value_type_r g2 = grid.g2_shift(ix, iy);
+
+				if((g2_min <= g2)&&(g2 <= g2_max))
+				{
+					M_io.V[ixy] *= w;
+				}
+				else
+				{
+ 					M_io.V[ixy] = static_cast<T>(0);
+				}
 			}
 		}
 
@@ -487,7 +496,7 @@ namespace multem
 		// Propagate, scale with cut-off (2/3)g_max
 		template<class TGrid, class T>
 		__global__ void propagator_mul(TGrid grid, rVector<T> V_x_i, 
-		rVector<T> V_y_i, rVector<T> psi_i, rVector<T> Psi_o)
+		rVector<T> V_y_i, rVector<T> psi_i, rVector<T> psi_o)
 		{
 			using value_type_r = Value_type<TGrid>;
 
@@ -501,11 +510,11 @@ namespace multem
 
 				if((!grid.bwl)||(g2 < grid.gl2_max))
 				{
-					Psi_o.V[ixy] = static_cast<T>(grid.inxy)*psi_i.V[ixy]*V_x_i.V[ix]*V_y_i.V[iy];
+					psi_o.V[ixy] = static_cast<T>(grid.inxy)*psi_i.V[ixy]*V_x_i.V[ix]*V_y_i.V[iy];
 				}
 				else
 				{
- 					Psi_o.V[ixy] = static_cast<T>(0);
+ 					psi_o.V[ixy] = static_cast<T>(0);
 				}
 			}
 		}
@@ -581,7 +590,7 @@ namespace multem
 			}
 		}
 
-		// Partially coherent transfer function, linear image model and weak phase_component object
+		// Partially coherent transfer function, linear image model and weak phase_components object
 		template<class TGrid, class T>
 		__global__ void apply_PCTF(TGrid grid, Lens<Value_type<TGrid>> lens, rVector<T> fPsi_i, rVector<T> fPsi_o)
 		{
@@ -956,7 +965,7 @@ namespace multem
 
 	template<class TGrid, class TVector>
 	enable_if_Device<TVector, void>
-	fft2_shift(TGrid &grid, TVector &M_io)
+	fft2_shift(const TGrid &grid, TVector &M_io)
 	{
 		GridBT gridBT;
 		gridBT.Blk = dim3((grid.nyh+c_thrnxny-1)/c_thrnxny, (grid.nxh+c_thrnxny-1)/c_thrnxny);
@@ -967,7 +976,7 @@ namespace multem
 
 	template<class TGrid, class TVector>
 	enable_if_Device<TVector, Value_type<TVector>>
-	sum_over_Det(TGrid &grid, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector &M_i)
+	sum_over_Det(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, TVector &M_i)
 	{
 		TVector sum_v(c_thrnxny*c_thrnxny);
 
@@ -980,7 +989,7 @@ namespace multem
 
 	template<class TGrid, class TVector_r>
 	enable_if_Device<TVector_r, Value_type<TGrid>>
-	sum_square_over_Det(TGrid &grid, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector_r &M_i)
+	sum_square_over_Det(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, TVector_r &M_i)
 	{
 		device_vector<Value_type<TGrid>> sum_t(c_thrnxny*c_thrnxny);
 
@@ -992,21 +1001,15 @@ namespace multem
 
 	template<class TGrid, class TVector_c>
 	enable_if_Device<TVector_c, void>
-	bandwidth_limit(TGrid &grid, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &M_io)
+	bandwidth_limit(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, Value_type<TVector_c> w, TVector_c &M_io)
 	{
-		if(!grid.bwl) return;
-
-		fft2.forward(M_io);
-
 		auto gridBT = device_detail::get_grid_nxny(grid);
-		device_detail::bandwidth_limit<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, M_io); 
-
-		fft2.inverse(M_io);
+		device_detail::bandwidth_limit<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, pow(g_min, 2), pow(g_max, 2), w, M_io); 
 	}
 
 	template<class TGrid, class TVector_c>
 	enable_if_Device<TVector_c, void>
-	phase_mul(TGrid &grid, TVector_c &exp_x_i, TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
+	phase_mul(const TGrid &grid, TVector_c &exp_x_i, TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
@@ -1015,16 +1018,16 @@ namespace multem
 
 	template<class TGrid, class TVector_c>
 	enable_if_Device<TVector_c, void>
-	propagator_mul(TGrid &grid, TVector_c &prop_x_i, TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &Psi_o)
+	propagator_mul(const TGrid &grid, TVector_c &prop_x_i, TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &psi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::propagator_mul<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, prop_x_i, prop_y_i, psi_i, Psi_o);
+		device_detail::propagator_mul<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, prop_x_i, prop_y_i, psi_i, psi_o);
 	}
 
 	template<class TGrid, class TVector_c>
 	enable_if_Device<TVector_c, void>
-	probe(TGrid &grid, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> x, Value_type<TGrid> y, TVector_c &fPsi_o)
+	probe(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, Value_type<TGrid> x, Value_type<TGrid> y, TVector_c &fPsi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
 
@@ -1038,7 +1041,7 @@ namespace multem
 
 	template<class TGrid, class TVector_c>
 	enable_if_Device<TVector_c, void>
-	apply_CTF(TGrid &grid, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	apply_CTF(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
 		device_detail::apply_CTF<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, lens, gxu, gyu, fPsi_i, fPsi_o);
@@ -1046,7 +1049,7 @@ namespace multem
 
 	template<class TGrid, class TVector_c>
 	enable_if_Device<TVector_c, void>
-	apply_PCTF(TGrid &grid, Lens<Value_type<TGrid>> &lens, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	apply_PCTF(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
 		device_detail::apply_PCTF<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, lens, fPsi_i, fPsi_o);

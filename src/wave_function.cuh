@@ -45,17 +45,17 @@ namespace multem
 				Transmission::set_input_data(input_multislice_io, stream_i, fft2_i);
 			}
 
-			void set_plane_wave()
+			void set_plane_wave(Vector<value_type_c, dev> &psi_z)
 			{
 				multem::fill(psi_z, value_type_c(1.0, 0.0));
 			}
 
-			void set_user_input_wave()
+			void set_user_input_wave(Vector<value_type_c, dev> &psi_z)
 			{
 				multem::assign(input_multislice->psi_0, psi_z);
 			}
 
-			void set_conv_beam_wave()
+			void set_conv_beam_wave(Vector<value_type_c, dev> &psi_z)
 			{
 				value_type_r x = input_multislice->get_Rx_pos_shift();
 				value_type_r y = input_multislice->get_Ry_pos_shift();
@@ -64,37 +64,51 @@ namespace multem
 				fft2->inverse(psi_z);
 			}
 
-			void phase_mul(const value_type_r &gxu, const value_type_r &gyu, Vector<value_type_c, dev> &psi_io)
+			void phase_mul(const value_type_r &gxu, const value_type_r &gyu, Vector<value_type_c, dev> &psi_i, Vector<value_type_c, dev> &psi_o)
 			{
 				if(input_multislice->dp_Shift || isZero(gxu, gyu))
 				{
+					if (psi_i.data() != psi_o.data())
+					{
+						psi_o.assign(psi_i.begin(), psi_i.end());
+					}
 					return;
 				}
 
-				multem::phase_component(input_multislice->grid, gxu, gyu, exp_x, exp_y);
-				multem::phase_mul(input_multislice->grid, exp_x, exp_y, psi_io, psi_io);
+				multem::phase_components(input_multislice->grid, gxu, gyu, exp_x, exp_y);
+				multem::phase_mul(input_multislice->grid, exp_x, exp_y, psi_i, psi_o);
+			}	
+
+			void phase_mul(const value_type_r &gxu, const value_type_r &gyu, Vector<value_type_c, dev> &psi_io)
+			{
+				phase_mul(gxu, gyu, psi_io, psi_io);
 			}
 
-			void psi_0()
+			void psi_0(Vector<value_type_c, dev> &psi_z)
 			{
 				switch(input_multislice->beam_type)
 				{
 					case eBT_Plane_Wave:
 					{
-						set_plane_wave();
+						set_plane_wave(psi_z);
 					}
 					break;
 					case eBT_Convergent:
 					{
-						set_conv_beam_wave();
+						set_conv_beam_wave(psi_z);
 					}
 					break;
 					case eBT_User_Define:
 					{
-						set_user_input_wave();
+						set_user_input_wave(psi_z);
 					}
 					break;
 				}
+			}
+
+			void psi_0()
+			{
+				psi_0(psi_z);
 			}
 
 			void psi(const eSpace &space)
@@ -107,7 +121,7 @@ namespace multem
 					for(auto islice=0; islice<slice.size(); islice++)
 					{
 						transmit(islice, psi_z);
-						prog.propagate(eS_Real, gx_0, gy_0, get_dz(islice), psi_z);
+						prog.propagate(eS_Real, gx_0, gy_0, dz(islice), psi_z);
 					}
 					phase_mul(gx_0, gy_0, psi_z);
 					prog.propagate(space, gx_0, gy_0, thickness.z_back_prop[0], psi_z);
@@ -125,14 +139,8 @@ namespace multem
 				}
 			}
 
-			template<class TVector>
-			void psi(const eSpace &space, int islice_0, int islice_e, TVector *psi0=nullptr)
+			void psi(const eSpace &space, int islice_0, int islice_e, Vector<value_type_c, dev> &psi_z)
 			{
-				if(psi0!=nullptr)
-				{
-					multem::assign(*psi0, psi_z);
-				}
-
 				value_type_r gx_0 = input_multislice->gx_0();
 				value_type_r gy_0 = input_multislice->gy_0();
 
@@ -141,7 +149,7 @@ namespace multem
 					for(auto islice=islice_0; islice<islice_e; islice++)
 					{
 						transmit(islice, psi_z);
-						prog.propagate(eS_Real, gx_0, gy_0, get_dz(islice), psi_z);
+						prog.propagate(eS_Real, gx_0, gy_0, dz(islice), psi_z);
 					}
 					phase_mul(gx_0, gy_0, psi_z);
 					prog.propagate(space, gx_0, gy_0, 0, psi_z);
@@ -157,12 +165,6 @@ namespace multem
 						multem::scale(psi_z, input_multislice->grid.inxy);
 					}
 				}
-			}
-
-			void psi(const eSpace &space, const int &islice_e)
-			{
-				decltype(psi_z) *psi_t = nullptr;
-				psi(space, 0, islice_e, psi_t);
 			}
 
 			Vector<value_type_c, dev> psi_z;

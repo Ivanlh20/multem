@@ -1689,41 +1689,65 @@ namespace multem
 
 	namespace functor
 	{
-		template<class T>
-		struct phase_component
+		template<class TGrid>
+		struct phase_components
 		{
-			const T gxu;
-			const int nxh;
-			const T dRx;
-			const T c_2Pi;
-			phase_component(T gxu_i, int nxh_i, T dRx_i): gxu(gxu_i), 
-				nxh(nxh_i), dRx(dRx_i), c_2Pi(multem::c_2Pi) {}
+			using T = Value_type<TGrid>;
 
-			template<class U>
+			const TGrid grid;
+			const T w;
+			const T gxu;
+			const T gyu;
+			phase_components(TGrid grid_i, T w_i, T gxu_i, T gyu_i): grid(grid_i), w(w_i), gxu(gxu_i), gyu(gyu_i) {}
+
+			template<class Ttuple>
 			__host__ __device__
-			complex<T> operator()(const U &ix) const
+			void operator()(Ttuple &t)
 			{
-				T Rx = IsRS(ix, nxh)*dRx;
-				return thrust::euler(c_2Pi*Rx*gxu);
+				int ix = thrust::get<0>(t);
+				if(ix < grid.nx)
+				{
+					T Rx = grid.Rx_shift(ix);
+					thrust::get<1>(t) = thrust::euler(w*Rx*gxu);
+				}
+
+				int iy = ix;
+				if(iy < grid.ny)
+				{
+					T Ry = grid.Ry_shift(iy);
+					thrust::get<2>(t) = thrust::euler(w*Ry*gyu);
+				}
 			}
 		};
 
-		template<class T>
-		struct propagator_component
+		template<class TGrid>
+		struct propagator_components
 		{
-			const T gxu;
-			const int nxh;
-			const T dgx;
-			const T w;
-			propagator_component(T gxu_i, int nxh_i, T dgx_i, T w_i): gxu(gxu_i), 
-				nxh(nxh_i), dgx(dgx_i), w(w_i) {}
+			using T = Value_type<TGrid>;
 
-			template<class U>
+			const TGrid grid;
+			const T w;
+			const T gxu;
+			const T gyu;
+			propagator_components(TGrid grid_i, T w_i, T gxu_i, T gyu_i): grid(grid_i), w(w_i), gxu(gxu_i), gyu(gyu_i) {}
+
+			template<class Ttuple>
 			__host__ __device__
-			complex<T> operator()(const U &ix) const
+			void operator()(Ttuple &t)
 			{
-				T gx = IsFS(ix, nxh)*dgx + gxu;
-				return thrust::euler(w*gx*gx);
+				int ix = thrust::get<0>(t);
+				if(ix < grid.nx)
+				{
+					T gx = grid.gx_shift(ix) + gxu;
+					thrust::get<1>(t) = thrust::euler(w*gx*gx);
+				}
+
+				int iy = ix;
+				if(iy < grid.ny)
+				{
+					T gy = grid.gy_shift(iy) + gyu;
+					thrust::get<2>(t) = thrust::euler(w*gy*gy);
+				}
 			}
 		};
 
@@ -1965,53 +1989,53 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector>
-	void phase_component(TGrid &grid, const Value_type<TGrid> gxu, const Value_type<TGrid> gyu, TVector &V_x, TVector &V_y)
+	void phase_components(TGrid &grid, const Value_type<TGrid> &gxu, const Value_type<TGrid> &gyu, TVector &V_x, TVector &V_y)
 	{
-		using value_type_r = Value_type<TGrid>;
-
 		thrust::counting_iterator<int> first(0);
-		auto last = first + V_x.size();
+		auto last = first + grid.nx_ny_max();
 
-		thrust::transform(first, last, V_x.begin(), functor::phase_component<value_type_r>(gxu, grid.nxh, grid.dRx));
-		
-		last = first + V_y.size();
-		thrust::transform(first, last, V_y.begin(), functor::phase_component<value_type_r>(gyu, grid.nyh, grid.dRy));
+		thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(first, V_x.begin(), V_y.begin())), 
+						 thrust::make_zip_iterator(thrust::make_tuple(last, V_x.end(), V_y.end())), 
+						 functor::phase_components<TGrid>(grid, c_2Pi, gxu, gyu));
 	}
 
 	template<class TGrid, class TVector>
-	void propagator_component(TGrid &grid, Value_type<TGrid> gxu, const Value_type<TGrid> gyu,
-		const Value_type<TGrid> w, TVector &V_x, TVector &V_y)
+	void propagator_components(TGrid &grid, Value_type<TGrid> &gxu, const Value_type<TGrid> &gyu, const Value_type<TGrid> &w, TVector &V_x, TVector &V_y)
 	{
-		using value_type_r = Value_type<TGrid>;
-
 		thrust::counting_iterator<int> first(0);
-		auto last = first + V_x.size();
+		auto last = first + grid.nx_ny_max();
 
-		thrust::transform(first, last, V_x.begin(), functor::propagator_component<value_type_r>(gxu, grid.nxh, grid.dgx, w));
-		
-		last = first + V_y.size();
-		thrust::transform(first, last, V_y.begin(), functor::propagator_component<value_type_r>(gyu, grid.nyh, grid.dgy, w));
+		thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(first, V_x.begin(), V_y.begin())), 
+						 thrust::make_zip_iterator(thrust::make_tuple(last, V_x.end(), V_y.end())), 
+						 functor::propagator_components<TGrid>(grid, w, gxu, gyu));
 	}
 
 	template<class TGrid, class TFFT2, class TVector>
-	void propagate(TGrid &grid, TFFT2 &fft2, eSpace space, TVector &prop_x_i, TVector &prop_y_i, TVector &psi_i, TVector &Psi_o)
+	void propagate(TGrid &grid, TFFT2 &fft2, eSpace space, TVector &prop_x_i, TVector &prop_y_i, TVector &psi_i, TVector &psi_o)
 	{
-		fft2.forward(psi_i, Psi_o); 
+		fft2.forward(psi_i, psi_o); 
 
-		propagator_mul(grid, prop_x_i, prop_y_i, Psi_o, Psi_o);
+		propagator_mul(grid, prop_x_i, prop_y_i, psi_o, psi_o);
 
 		if(space == eS_Real)
 		{
-			fft2.inverse(Psi_o);
+			fft2.inverse(psi_o);
 		}
 	}
 
-	template<class TGrid, class TVector_1, class TVector_2>
-	void transmission_funtion(TGrid &grid, eElec_Spec_Int_Model elec_spec_int_model, const Value_type<TGrid> w, TVector_1 &V0_i, TVector_2 &Trans_o)
+	template<class TGrid, class TFFT2, class TVector_1, class TVector_2>
+	void transmission_funtion(TGrid &grid, TFFT2 &fft2, eElec_Spec_Int_Model elec_spec_int_model, const Value_type<TGrid> w, TVector_1 &V0_i, TVector_2 &Trans_o)
 	{	
 		using value_type_r = Value_type<TGrid>;
 
 		thrust::transform(V0_i.begin(), V0_i.end(), Trans_o.begin(), functor::transmission_funtion<value_type_r>(w, elec_spec_int_model));
+
+		if(grid.bwl)
+		{
+			fft2.forward(Trans_o);
+			bandwidth_limit(grid, 0, grid.gl_max, grid.inxy, Trans_o);
+			fft2.inverse(Trans_o);
+		}
 	}
 
 	template<class TGrid, class TVector_i, class TVector_o>

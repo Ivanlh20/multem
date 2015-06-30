@@ -89,8 +89,7 @@ namespace multem
 					else if(memory_slice.is_transmission())
 					{
 						projected_potential(i, V0);
-						multem::transmission_funtion(input_multislice->grid, input_multislice->interaction_model, fPot, V0, trans_v[i]);
-						multem::bandwidth_limit(input_multislice->grid, *fft2, trans_v[i]);
+						multem::transmission_funtion(input_multislice->grid, *fft2, input_multislice->interaction_model, fPot, V0, trans_v[i]);
 					}
 				}
 			}
@@ -103,8 +102,7 @@ namespace multem
 				{
 					if(memory_slice.is_potential())
 					{
-						multem::transmission_funtion(input_multislice->grid, input_multislice->interaction_model, fPot, Vp_v[islice], trans_0);
-						multem::bandwidth_limit(input_multislice->grid, *fft2, trans_0);
+						multem::transmission_funtion(input_multislice->grid, *fft2, input_multislice->interaction_model, fPot, Vp_v[islice], trans_0);
 					}
 					else if(memory_slice.is_transmission())
 					{
@@ -114,8 +112,7 @@ namespace multem
 				else
 				{
 					projected_potential(islice, V0);
-					multem::transmission_funtion(input_multislice->grid, input_multislice->interaction_model, fPot, V0, trans_0);
-					multem::bandwidth_limit(input_multislice->grid, *fft2, trans_0); 
+					multem::transmission_funtion(input_multislice->grid, *fft2, input_multislice->interaction_model, fPot, V0, trans_0);
 				}
 			}
 
@@ -124,8 +121,7 @@ namespace multem
 				value_type_r fPot = input_multislice->Vr_factor();
 
 				projected_potential(islice_0, islice_e, V0);
-				multem::transmission_funtion(input_multislice->grid, input_multislice->interaction_model, fPot, V0, trans_0);
-				multem::bandwidth_limit(input_multislice->grid, *fft2, trans_0); 
+				multem::transmission_funtion(input_multislice->grid, *fft2, input_multislice->interaction_model, fPot, V0, trans_0);
 			}
 
 			void trans(const int &islice)

@@ -44,7 +44,7 @@ na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
-, a, b, c, input_multislice.dz] = Au001Crystal(na, nb, nc, ncu, rms3d);
+, a, b, c, input_multislice.dz] = Cu001Crystal(na, nb, nc, ncu, rms3d);
 
 input_multislice.nx = 1024; 
 input_multislice.ny = 1024;
@@ -62,12 +62,14 @@ I_max = max([max(m2psi_tot(:)), max(m2psi_coh(:))]);
 figure(1);
 subplot(1, 2, 1);
 imagesc(m2psi_tot, [I_min I_max]);
+
 title('Total intensity');
 axis image;
 colormap gray;
 
 subplot(1, 2, 2);
 imagesc(m2psi_coh, [I_min I_max]);
+
 title('Coherent intensity');
 axis image;
 colormap gray;

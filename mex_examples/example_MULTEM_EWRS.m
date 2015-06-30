@@ -17,7 +17,7 @@ input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Pen
 
 input_multislice.fp_dim = 110; 
 input_multislice.fp_seed = 1983; 
-input_multislice.fp_nconf = 20;
+input_multislice.fp_nconf = 50;
 input_multislice.fp_iconf = 0;
 
 input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
@@ -44,7 +44,7 @@ na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
-, a, b, c, input_multislice.dz] = Au001Crystal(na, nb, nc, ncu, rms3d);
+, a, b, c, input_multislice.dz] = Cu001Crystal(na, nb, nc, ncu, rms3d);
 
 input_multislice.nx = 1024; 
 input_multislice.ny = 1024;
@@ -62,12 +62,14 @@ I_max = max([max(m2psi_tot(:)), max(m2psi_coh(:))]);
 figure(1);
 subplot(1, 2, 1);
 imagesc(m2psi_tot, [I_min I_max]);
+
 title('Total intensity');
 axis image;
 colormap gray;
 
 subplot(1, 2, 2);
 imagesc(m2psi_coh, [I_min I_max]);
+
 title('Coherent intensity');
 axis image;
 colormap gray;
