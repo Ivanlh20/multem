@@ -168,14 +168,14 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	{
 		input_multislice.ew_fr.space = multem::eS_Reciprocal;
 		input_multislice.ew_fr.convergent_beam = mx_get_scalar_field<bool>(mx_input_multislice, "ewfs_convergent_beam");
-		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewfs_x0");
+		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewfs_x0");
 		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewfs_y0");
 	}
 	else if (input_multislice.is_EWRS())
 	{
 		input_multislice.ew_fr.space = multem::eS_Real;
 		input_multislice.ew_fr.convergent_beam = mx_get_scalar_field<bool>(mx_input_multislice, "ewrs_convergent_beam");
-		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewrs_x0");
+		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewrs_x0");
 		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewrs_y0");
 	}
 	else if (input_multislice.is_EELS())

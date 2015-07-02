@@ -1,5 +1,5 @@
 clear all; clc;
-Dim = 3; Vrl = 0.010; PotPar = 6;
+Dim = 3; Vrl = 0.015; PotPar = 6;
 z = 1:103;
 tic;
 r = get_atom_radius(PotPar, Dim, Vrl);

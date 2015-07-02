@@ -54,7 +54,7 @@ namespace multem
 	}
 
 	template<eDevice dev>
-	void memory_info(double &total, double &free){}
+	void memory_info(double &total, double &free){ }
 
 	template<>
 	void memory_info<e_Host>(double &total, double &free)

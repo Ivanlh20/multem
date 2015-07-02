@@ -42,7 +42,7 @@ namespace multem
 				y_std(0), z_std(0), s_x(0), s_y(0),s_z(0),
 				x_Int_min(0), x_Int_max(0), y_Int_min(0),
 				y_Int_max(0), z_Int_min(0), z_Int_max(0),
-				s_x_Int(0), s_y_Int(0), s_z_Int(0) {}
+				s_x_Int(0), s_y_Int(0), s_z_Int(0){ }
 
 			size_type size() const
 			{
@@ -126,14 +126,14 @@ namespace multem
 			}
 		
 			// get statistic
-			void get_Statistic(Vector<Atom_Type<T, e_Host>, e_Host> *atom_type=0)
+			void get_Statistic(Vector<Atom_Type<T, e_Host>, e_Host> *atom_type_ptr=nullptr)
 			{
 				if(Z.empty())
 				{
 					return;
 				}
 
-				bool bAtomTypes = (atom_type == 0)?false:true;
+				bool bAtomTypes = (atom_type_ptr == nullptr)?false:true;
 
 				Z_min = Z_max = Z[0];
 
@@ -144,7 +144,7 @@ namespace multem
 				sigma_min = sigma_max = sigma[0];
 				occ_min = occ_max = occ[0];
 
-				R_Int_min = R_Int_max = (bAtomTypes)?(*atom_type)[Z[0]-1].R_max:2.0;
+				R_Int_min = R_Int_max = (bAtomTypes)?(*atom_type_ptr)[Z[0]-1].R_max:2.5;
 
 				x_mean = y_mean = z_mean = 0.0;
 				x_std = y_std = z_std = 0.0;
@@ -176,8 +176,8 @@ namespace multem
 
 					if(bAtomTypes)
 					{
-						R_Int_min = min((*atom_type)[Z[iAtom]-1].R_max, R_Int_min);
-						R_Int_max = max((*atom_type)[Z[iAtom]-1].R_max, R_Int_max);
+						R_Int_min = min((*atom_type_ptr)[Z[iAtom]-1].R_max, R_Int_min);
+						R_Int_max = max((*atom_type_ptr)[Z[iAtom]-1].R_max, R_Int_max);
 					}
 
 					x_mean += x[iAtom];
@@ -248,24 +248,24 @@ namespace multem
 
 				// Sort atoms along z-axis.
 				std::iota(idx_sort.begin(), idx_sort.end(), 0);
-				std::sort(idx_sort.begin(), idx_sort.end(), [&](int &i, int &j) {return z[i] < z[j]; });
+				std::sort(idx_sort.begin(), idx_sort.end(), [&](int &i, int &j){ return z[i] < z[j]; });
 
-				std::transform(idx_sort.begin(), idx_sort.end(), val_i.begin(), [&](int &i) {return Z[i]; });
+				std::transform(idx_sort.begin(), idx_sort.end(), val_i.begin(), [&](int &i){ return Z[i]; });
 				Z.assign(val_i.begin(), val_i.end());
 
-				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i) {return x[i]; });
+				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i){ return x[i]; });
 				x.assign(val_d.begin(), val_d.end());
 
-				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i) {return y[i]; });
+				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i){ return y[i]; });
 				y.assign(val_d.begin(), val_d.end());
 
-				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i) {return z[i]; });
+				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i){ return z[i]; });
 				z.assign(val_d.begin(), val_d.end());
 
-				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i) {return sigma[i]; });
+				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i){ return sigma[i]; });
 				sigma.assign(val_d.begin(), val_d.end());
 
-				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i) {return occ[i]; });
+				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i){ return occ[i]; });
 				occ.assign(val_d.begin(), val_d.end());
 			}
 
@@ -274,7 +274,7 @@ namespace multem
 			{
 				z_layer.clear();
 
-				if(size() == 0 )
+				if(size() == 0)
 				{
 					return;
 				}
@@ -292,14 +292,98 @@ namespace multem
 					}
 					else
 					{
-						z_layer.push_back(static_cast<float>(zm/zm_c));
+						z_layer.push_back(zm/zm_c);
 						zm = zc;
 						zm_c = 1.0;
 					}
 					zb = zc;
 				} 
-				z_layer.push_back(static_cast<float>(zm/zm_c));
+				z_layer.push_back(zm/zm_c);
 				z_layer.shrink_to_fit();
+			}
+
+			// get z slicing
+			void get_z_slice(const ePotential_Slicing &potential_slicing, T dz_i, Atom_Data<T> &atoms, Vector<T, e_Host> &z_slice)
+			{
+				z_slice.clear();
+
+				auto quot = [&](const T &A, const T &B)->int
+				{
+					return (int)floor(A/B+Epsilon<T>::rel);
+				};
+
+				auto get_Spacing = [](size_type ix, const Vector<T, e_Host> &x)->T
+				{
+					ix = (ix <= 0)?1:min(ix, x.size()-1);
+					return (x.size()>1)?x[ix]-x[ix-1]:0.0;
+				};
+
+				auto get_dz_b = [](const T &z_0, const T &z_e, const T &dz)->T
+				{
+					T dz_b = fmod(abs(z_0-z_e), dz);
+					dz_b += (dz_b<((dz>2.0)?0.25:0.50)*dz)?dz:0.0;
+					return dz_b;
+				};
+
+				switch(potential_slicing)
+				{
+					case ePS_Planes:
+					{
+						T dz_Bot = get_Spacing(0, z_layer);
+						T dz_Top = get_Spacing(z_layer.size() - 1, z_layer);
+						T layer_0 = z_layer.front() - 0.5*dz_Bot;
+						T layer_e = z_layer.back() + 0.5*dz_Top;
+						int nz_Bot = (atoms.z_min<layer_0)?quot(layer_0-atoms.z_min, dz_Bot) + 1:0;
+						int nz_Top = (atoms.z_max>layer_e)?quot(atoms.z_max-layer_e, dz_Top) + 1:0;
+						z_slice.resize(z_layer.size()+nz_Bot+nz_Top+1);
+						int j = 0;
+						for(auto i=0; i <= nz_Bot; i++)
+						{
+							z_slice[j++] = layer_0-(nz_Bot-i)*dz_Bot;
+						}
+						for(auto i=1; i<z_layer.size(); i++)
+						{
+							T dz = get_Spacing(i, z_layer);
+							z_slice[j++] = z_layer[i-1] + 0.5*dz;
+						}
+						for(auto i=0; i <= nz_Top; i++)
+						{
+							z_slice[j++] = layer_e+i*dz_Bot;
+						}
+					}
+					break;
+					case ePS_dz_Proj:
+					{
+						/*******************************************************************/
+						int nz = quot(atoms.s_z, dz_i )+ 1;
+						z_slice.resize(nz + 1);
+						/*******************************************************************/
+						z_slice[0] = atoms.z_min-0.5*(nz*dz_i-atoms.s_z);
+						for(auto i=1; i<z_slice.size(); i++)
+						{
+							z_slice[i] = z_slice[i-1] + dz_i;
+						}
+					}
+					break;
+					case ePS_dz_Sub:
+					{
+						/*******************************************************************/
+						int nz = quot(s_z, dz_i) + 1;
+						T dz_Bot = get_dz_b(atoms.z_Int_min, z_min-0.5*(nz*dz_i-s_z), dz_i);
+						T dz_Top = get_dz_b(atoms.z_Int_max, z_max+0.5*(nz*dz_i-s_z), dz_i);
+
+						z_slice.resize(quot(atoms.s_z_Int-dz_Bot-dz_Top, dz_i) + 3);
+						/*******************************************************************/
+						z_slice[0] = atoms.z_Int_min;
+						for(auto i=1; i<z_slice.size(); i++)
+						{
+							T dz = (i == 1)?dz_Bot:(i == z_slice.size()-1)?dz_Top:dz_i;
+							z_slice[i] = z_slice[i-1] + dz;
+						}
+					}
+					break;
+				}
+				z_slice.shrink_to_fit();
 			}
 
 			// find atoms in slice
@@ -337,7 +421,7 @@ namespace multem
 			Vector<float, e_Host> occ;
 
 			Vector<int, e_Host> Z_unique;
-			Vector<float, e_Host> z_layer;
+			Vector<T, e_Host> z_layer;
 
 			int Z_min;
 			int Z_max;

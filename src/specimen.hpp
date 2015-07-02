@@ -36,7 +36,7 @@ namespace multem
 			using value_type_r = typename T;
 			using size_type = std::size_t;
 
-			Specimen():input_multislice(nullptr) {}
+			Specimen():input_multislice(nullptr){ }
 
 			void set_input_data(Input_Multislice<T, dev> *input_multislice_io)
 			{
@@ -67,7 +67,7 @@ namespace multem
 				atoms.set_Atoms(atoms_u, false , &atom_type);
 
 				/***************************************************************************/
-				get_Slicing(input_multislice->interaction_model, input_multislice->potential_slicing, input_multislice->grid.dz);
+				get_slicing(input_multislice->interaction_model, input_multislice->potential_slicing, input_multislice->grid.dz);
 
 				/***************************************************************************/
 				rand.set_input_data(input_multislice->fp_seed, input_multislice->fp_dim);
@@ -102,7 +102,7 @@ namespace multem
 					// Ascending sort by z
 					atoms.Sort_by_z();
 					// Slicing procedure
-					get_Slicing(input_multislice->interaction_model, input_multislice->potential_slicing, input_multislice->grid.dz);
+					get_slicing(input_multislice->interaction_model, input_multislice->potential_slicing, input_multislice->grid.dz);
 				}
 			}
 
@@ -126,93 +126,11 @@ namespace multem
 			Thickness<T, e_Host> thickness; 					// Thicknesses
 
 		private:
-			void get_z_Slice(const ePotential_Slicing &potential_slicing, T dz_i=0)
-			{
-				z_Slice.clear();
-
-				auto quot = [&](const T &A, const T &B)->int
-				{
-					return (int)floor(A/B+Epsilon<T>::rel);
-				};
-
-				auto get_Spacing = [](size_type ix, const Vector<float, e_Host> &x)->float
-				{
-					ix = (ix <= 0)?1:min(ix, x.size()-1);
-					return (x.size()>1)?x[ix]-x[ix-1]:0.0;
-				};
-
-				auto get_dz_b = [](const T &z_0, const T &z_e, const T &dz)->T
-				{
-					T dz_b = fmod(abs(z_0-z_e), dz);
-					dz_b += (dz_b<((dz>2.0)?0.25:0.50)*dz)?dz:0.0;
-					return dz_b;
-				};
-
-				switch(potential_slicing)
-				{
-					case ePS_Planes:
-					{
-						T dz_Bot = get_Spacing(0, atoms_u.z_layer);
-						T dz_Top = get_Spacing(atoms_u.z_layer.size() - 1, atoms_u.z_layer);
-						float layer_0 = atoms_u.z_layer.front() - 0.5*dz_Bot;
-						float layer_e = atoms_u.z_layer.back() + 0.5*dz_Top;
-						int nz_Bot = (atoms.z_min<layer_0)?quot(layer_0-atoms.z_min, dz_Bot) + 1:0;
-						int nz_Top = (atoms.z_max>layer_e)?quot(atoms.z_max-layer_e, dz_Top) + 1:0;
-						z_Slice.resize(atoms_u.z_layer.size()+nz_Bot+nz_Top+1);
-						int j = 0;
-						for(auto i=0; i <= nz_Bot; i++)
-						{
-							z_Slice[j++] = layer_0-(nz_Bot-i)*dz_Bot;
-						}
-						for(auto i=1; i<atoms_u.z_layer.size(); i++)
-						{
-							T dz = get_Spacing(i, atoms_u.z_layer);
-							z_Slice[j++] = atoms_u.z_layer[i-1] + 0.5*dz;
-						}
-						for(auto i=0; i <= nz_Top; i++)
-						{
-							z_Slice[j++] = layer_e+i*dz_Bot;
-						}
-					}
-					break;
-					case ePS_dz_Proj:
-					{
-						/*******************************************************************/
-						int nz = quot(atoms.s_z, dz_i )+ 1;
-						z_Slice.resize(nz + 1);
-						/*******************************************************************/
-						z_Slice[0] = atoms.z_min-0.5*(nz*dz_i-atoms.s_z);
-						for(auto i=1; i<z_Slice.size(); i++)
-						{
-							z_Slice[i] = z_Slice[i-1] + dz_i;
-						}
-					}
-					break;
-					case ePS_dz_Sub:
-					{
-						/*******************************************************************/
-						int nz = quot(atoms_u.s_z, dz_i) + 1;
-						T dz_Bot = get_dz_b(atoms.z_Int_min, atoms_u.z_min-0.5*(nz*dz_i-atoms_u.s_z), dz_i);
-						T dz_Top = get_dz_b(atoms.z_Int_max, atoms_u.z_max+0.5*(nz*dz_i-atoms_u.s_z), dz_i);
-
-						z_Slice.resize(quot(atoms.s_z_Int-dz_Bot-dz_Top, dz_i) + 3);
-						/*******************************************************************/
-						z_Slice[0] = atoms.z_Int_min;
-						for(auto i=1; i<z_Slice.size(); i++)
-						{
-							T dz = (i == 1)?dz_Bot:(i == z_Slice.size()-1)?dz_Top:dz_i;
-							z_Slice[i] = z_Slice[i-1] + dz;
-						}
-					}
-					break;
-				}
-				z_Slice.shrink_to_fit();
-			}
 
 			// Slicing
-			void get_Slicing(const eElec_Spec_Int_Model &interaction_model, const ePotential_Slicing &potential_slicing, T dz_i)
+			void get_slicing(const eElec_Spec_Int_Model &interaction_model, const ePotential_Slicing &potential_slicing, T dz_i)
 			{
-				if(interaction_model != eESIM_Multislice) {
+				if(interaction_model != eESIM_Multislice){
 					slice.resize(1);
 					slice.z_0[0] = atoms.z_Int_min; 
 					slice.z_e[0] = atoms.z_Int_max; 
@@ -231,13 +149,13 @@ namespace multem
 					return;
 				}
 
-				get_z_Slice(potential_slicing, dz_i);
-				slice.resize(z_Slice.size()-1);
+				atoms_u.get_z_slice(potential_slicing, dz_i, atoms, z_slice);
+				slice.resize(z_slice.size()-1);
 
 				for(auto islice=0; islice<slice.size(); islice++)
 				{
-					slice.z_0[islice] = z_Slice[islice]; 
-					slice.z_e[islice] = z_Slice[islice + 1];
+					slice.z_0[islice] = z_slice[islice]; 
+					slice.z_e[islice] = z_slice[islice + 1];
 					switch(potential_slicing)
 					{
 						case ePS_Planes:
@@ -348,7 +266,7 @@ namespace multem
 			Random rand;
 			// Undisplaced atoms
 			Atom_Data<T> atoms_u;
-			Vector<T, e_Host> z_Slice;
+			Vector<T, e_Host> z_slice;
 	};
 
 	//// get thickness
@@ -395,7 +313,7 @@ namespace multem
 	//
 	//	if(input_multislice->thickness_type == 3)
 	//	{ 
-	//		multem::MatchTwoVectors(input_multislice->nThickness_i, input_multislice->Thickness_i, nPlanes_u, Planes_u, nz_i, z_i);
+	//		multem::match_vectors(input_multislice->nThickness_i, input_multislice->Thickness_i, nPlanes_u, Planes_u, nz_i, z_i);
 	//	}
 	//	else
 	//	{
@@ -409,7 +327,7 @@ namespace multem
 	//	for(int iz=0; iz<nz; iz++) 
 	//		z[iz] = 0.5*(slice[iz].z0+slice[iz].ze);
 	//
-	//	multem::MatchTwoVectors(nz_i, z_i, nz, z, thickness.n, thickness.h, thickness.islice);
+	//	multem::match_vectors(nz_i, z_i, nz, z, thickness.n, thickness.h, thickness.islice);
 	//	nz = 0; delete [] z; z = 0;
 	//	nz_i = 0; delete [] z_i; z_i = 0;
 	//

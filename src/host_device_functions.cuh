@@ -1698,7 +1698,7 @@ namespace multem
 			const T w;
 			const T gxu;
 			const T gyu;
-			phase_components(TGrid grid_i, T w_i, T gxu_i, T gyu_i): grid(grid_i), w(w_i), gxu(gxu_i), gyu(gyu_i) {}
+			phase_components(TGrid grid_i, T w_i, T gxu_i, T gyu_i): grid(grid_i), w(w_i), gxu(gxu_i), gyu(gyu_i){ }
 
 			template<class Ttuple>
 			__host__ __device__
@@ -1729,7 +1729,7 @@ namespace multem
 			const T w;
 			const T gxu;
 			const T gyu;
-			propagator_components(TGrid grid_i, T w_i, T gxu_i, T gyu_i): grid(grid_i), w(w_i), gxu(gxu_i), gyu(gyu_i) {}
+			propagator_components(TGrid grid_i, T w_i, T gxu_i, T gyu_i): grid(grid_i), w(w_i), gxu(gxu_i), gyu(gyu_i){ }
 
 			template<class Ttuple>
 			__host__ __device__
@@ -1757,7 +1757,7 @@ namespace multem
 			const eElec_Spec_Int_Model elec_spec_int_model;
 
 			const T w;
-			transmission_funtion(T w_i, eElec_Spec_Int_Model ElecSpecIntModel_i): w(w_i), elec_spec_int_model(ElecSpecIntModel_i) {}
+			transmission_funtion(T w_i, eElec_Spec_Int_Model ElecSpecIntModel_i): w(w_i), elec_spec_int_model(ElecSpecIntModel_i){ }
 
 			template<class U>
 			__host__ __device__
@@ -1772,7 +1772,7 @@ namespace multem
 		struct scale
 		{
 			const T w;
-			scale(T w_i = T()): w(w_i) {}
+			scale(T w_i = T()): w(w_i){ }
 
 			__host__ __device__
 			T operator()(const T &x) const { return w*x; }
@@ -1790,7 +1790,7 @@ namespace multem
 		struct square_scale
 		{
 			const T w;
-			square_scale(T w_i = T()): w(w_i) {}
+			square_scale(T w_i = T()): w(w_i){ }
 
 			template<class U>
 			__host__ __device__
@@ -1801,7 +1801,7 @@ namespace multem
 		struct add_scale
 		{
 			const T w;
-			add_scale(T w_i = T()): w(w_i) {}
+			add_scale(T w_i = T()): w(w_i){ }
 
 			__host__ __device__
 			T operator()(const T &lhs, const T &rhs) const{ return w*lhs + rhs; }
@@ -1811,7 +1811,7 @@ namespace multem
 		struct add_scale_i
 		{
 			const T w;
-			add_scale_i(T w_i = T()): w(w_i) {}
+			add_scale_i(T w_i = T()): w(w_i){ }
 
 			__host__ __device__
 			T operator()(const T &lhs, const T &rhs) const{ return w*(lhs + rhs); }
@@ -1837,7 +1837,7 @@ namespace multem
 		struct add_square_scale
 		{
 			const T w;
-			add_square_scale(T w_i = T()): w(w_i) {}
+			add_square_scale(T w_i = T()): w(w_i){ }
 
 			template<class U>
 			__host__ __device__
@@ -1848,7 +1848,7 @@ namespace multem
 		struct add_square_scale_i
 		{
 			const T w;
-			add_square_scale_i(T w_i = T()): w(w_i) {}
+			add_square_scale_i(T w_i = T()): w(w_i){ }
 
 			template<class U>
 			__host__ __device__

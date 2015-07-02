@@ -158,7 +158,7 @@ namespace multem
 				double Rx = FSC(ix, nxh, shift)*dx; 
 				double Ry = FSC(iy, nyh, shift)*dy;
 				double R2 = Rx*Rx + Ry*Ry;
-				fI[ix*ny+iy] = (lpf==1)?1.0/(1.0+pow(R2/R02, n)):(isZero(R2))?0.0:1.0/(1.0+pow(R02/R2, n));
+				fI[ix*ny+iy] = (lpf == 1)?1.0/(1.0+pow(R2/R02, n)):(isZero(R2))?0.0:1.0/(1.0+pow(R02/R2, n));
 			}
 		}
 	}
@@ -354,31 +354,59 @@ namespace multem
 		return irm;
 	}
 
-	// Match A2 in A1 
-	void MatchTwoVectors(Vector<double, e_Host> &A1_i, Vector<double, e_Host> &A2_i, Vector<sPair<double>, e_Host> &A_o)
+	template<class TVector>
+	void match_vectors(const TVector &A_base, TVector &A_search)
 	{
-		Vector<bool, e_Host> A1_c(A1_i.size(), true);
-		A_o.clear();
-		A_o.reserve(A1_i.size());
+		using T = Value_type<TVector>;
 
-		double val;
-		std::size_t imin;
-		Vector<double, e_Host>::iterator it;
-		auto findClose = [&val](double &a, double &b)->bool{return fabs(a-val)<fabs(b-val); };
+		Vector<bool, e_Host> A_base_c(A_base.size(), true);
+		int size = min(A_base.size(), A_search.size());
+		TVector A_d;
+		A_d.reserve(size);
 
-		for(auto i=0; i<A2_i.size(); i++)
+		for(auto i=0; i<A_search.size(); i++)
 		{
-			val = A1_i[i];
-			it = std::min_element(A1_i.begin(), A1_i.end(), findClose);
-			imin = it - A1_i.begin();
+			T val = A_search[i];
+			auto it = std::min_element(A_base.begin(), A_base.end(), [&val](const T &a, const T &b)->bool{ return fabs(a-val)<fabs(b-val); });
+			auto imin = static_cast<int>(it - A_base.begin());
 
-			if(A1_c[imin])
+			if(A_base_c[imin])
 			{
-				A1_c[imin] = false;
-				A_o.push_back({int(imin), A1_i[imin]});
+				A_base_c[imin] = false;
+				A_d.push_back(A_base[imin]);
 			}
 		}
-		A_o.shrink_to_fit();
+		A_d.shrink_to_fit();
+		A_search.assign(A_d.begin(), A_d.end());
+	}
+
+	template<class TVector>
+	void match_vectors(const TVector &A_base, const TVector &A_search, Vector<int, e_Host> &A_id, TVector &A_d)
+	{
+		using T = Value_type<TVector>;
+
+		Vector<bool, e_Host> A_base_c(A_base.size(), true);
+		int size = min(A_base.size(), A_search.size());
+		A_id.clear();
+		A_id.reserve(size);
+		A_d.clear();
+		A_d.reserve(size);
+
+		for(auto i=0; i<A_search.size(); i++)
+		{
+			T val = A_search[i];
+			auto it = std::min_element(A_base.begin(), A_base.end(), [&val](const T &a, const T &b)->bool{ return fabs(a-val)<fabs(b-val); });
+			auto imin = static_cast<int>(it - A_base.begin());
+
+			if(A_base_c[imin])
+			{
+				A_base_c[imin] = false;
+				A_id.push_back(imin);
+				A_d.push_back(A_base[imin]);
+			}
+		}
+		A_id.shrink_to_fit();
+		A_d.shrink_to_fit();
 	}
 
 	int get_close_Prime(int64_t n)

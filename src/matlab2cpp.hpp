@@ -62,7 +62,7 @@ float mx_get_scalar<float>(const mxArray *mxB)
 }
 /**************************************************************************/
 template <class T>
-T mx_get_matrix(const mxArray *mxB){};
+T mx_get_matrix(const mxArray *mxB){ };
 
 template <>
 m_matrix_r mx_get_matrix<m_matrix_r>(const mxArray *mxB)
@@ -119,7 +119,7 @@ T mx_get_matrix_field(const mxArray *mxB, const char *field_name)
 
 /**************************************************************************/
 template <class T>
-T mx_create_matrix(const int &rows, const int &cols, mxArray *&mx_M){}
+T mx_create_matrix(const int &rows, const int &cols, mxArray *&mx_M){ }
 
 template <>
 m_matrix_r mx_create_matrix<m_matrix_r>(const int &rows, const int &cols, mxArray *&mx_M)

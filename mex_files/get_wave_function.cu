@@ -56,8 +56,15 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 
 	input_multislice.zero_defocus_type = mx_get_scalar_field<multem::eZero_Defocus_Type>(mx_input_multislice, "zero_defocus_type");
 	input_multislice.zero_defocus_plane = mx_get_scalar_field<value_type>(mx_input_multislice, "zero_defocus_plane");
-	input_multislice.input_wave_type = mx_get_scalar_field<multem::eInput_Wave_Type>(mx_input_multislice, "input_wave_type");
 	
+	input_multislice.thickness_type = mx_get_scalar_field<multem::eThickness_Type>(mx_input_multislice, "thickness_type");
+	if(input_multislice.thickness_type != multem::eTT_Whole_Specimen && full)
+	{
+		auto thickness = mx_get_matrix_field<m_matrix_r>(mx_input_multislice, "thickness");
+		input_multislice.thickness.resize(thickness.size);
+		std::copy(thickness.real, thickness.real + thickness.size, input_multislice.thickness.begin());
+	}
+
 	input_multislice.input_wave_type = mx_get_scalar_field<multem::eInput_Wave_Type>(mx_input_multislice, "input_wave_type");
 	if(input_multislice.is_user_define_wave() && full)
 	{
@@ -109,14 +116,14 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	{
 		input_multislice.ew_fr.space = multem::eS_Reciprocal;
 		input_multislice.ew_fr.convergent_beam = mx_get_scalar_field<bool>(mx_input_multislice, "ewfs_convergent_beam");
-		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewfs_x0");
+		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewfs_x0");
 		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewfs_y0");
 	}
 	else if (input_multislice.is_EWRS())
 	{
 		input_multislice.ew_fr.space = multem::eS_Real;
 		input_multislice.ew_fr.convergent_beam = mx_get_scalar_field<bool>(mx_input_multislice, "ewrs_convergent_beam");
-		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewrs_x0");
+		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewrs_x0");
 		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewrs_y0");
 	}
 

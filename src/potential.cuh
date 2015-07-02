@@ -33,7 +33,7 @@ namespace multem
 	template<class T, eDevice dev>
 	class Potential: public Specimen<T, dev>{
 		public:
-			Potential(): stream(nullptr){}
+			Potential(): stream(nullptr){ }
 
 			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io, Stream<value_type_r, dev> *stream_i)
 			{	

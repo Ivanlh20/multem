@@ -19,6 +19,7 @@
 #ifndef INPUT_MULTISLICE_H
 #define INPUT_MULTISLICE_H
 
+#include <algorithm>
 #include <vector>
 
 #include "math.cuh"
@@ -63,7 +64,7 @@ namespace multem
 			eZero_Defocus_Type zero_defocus_type; 					// 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
 			T zero_defocus_plane; 									// Zero defocus plane
 			
-			eThickness_Type thickness_type; 						// eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Planes = 3
+			eThickness_Type thickness_type; 						// eTT_Whole_Specimen = 1, eTT_Through_Slices = 2, eTT_Through_Planes = 3
 			Vector<T, e_Host> thickness; 							// Array of thicknesses
 
 			eInput_Wave_Type input_wave_type; 						// 1: Automatic, 2: User define
@@ -115,10 +116,37 @@ namespace multem
 						zero_defocus_type(eZDT_Last), zero_defocus_plane(0), operation_mode(eOM_Normal), coherent_contribution(false), 
 						slice_storage(true), thickness_type(eTT_Whole_Specimen), dp_Shift(false), E_0(300), theta(0), phi(0), Vrl(c_Vrl), 
 						nR(c_nR), input_wave_type(eIWT_Automatic), beam_type(eBT_Plane_Wave), conv_beam_wave_x(0), conv_beam_wave_y(0), 
-						fp_iconf(0), islice(0), nstream(cpu_nthread) {};
+						fp_iconf(0), islice(0), nstream(cpu_nthread){ };
 
 			void validate_parameters()
 			{
+				if((thickness_type==eTT_Whole_Specimen) || thickness.empty())
+				{
+					thickness_type=eTT_Whole_Specimen;
+					thickness.resize(1);
+					thickness[0] = atoms.z_max;
+				}
+				else if(thickness_type==eTT_Through_Planes)
+				{
+					std::sort(thickness.begin(), thickness.end());
+
+					atoms.Sort_by_z();
+					atoms.get_z_layer();			
+					match_vectors(atoms.z_layer, thickness);
+				}
+				else if(thickness_type==eTT_Through_Slices)
+				{
+					std::sort(thickness.begin(), thickness.end());
+					Vector<T, e_Host> z_slice;
+
+					atoms.Sort_by_z();
+					atoms.get_z_layer();
+					atoms.get_z_slice(potential_slicing, grid.dz, atoms, z_slice);
+					Vector<T, e_Host>  z_slice_v;
+					z_slice_v.assign(z_slice.begin()+1, z_slice.end());
+					match_vectors(z_slice_v, thickness);
+				}
+
 				nstream = (is_Host())?cpu_nthread:gpu_nstream;
 
 				if(!is_float() && !is_double())
@@ -187,7 +215,28 @@ namespace multem
 				theta = set_incident_angle(theta);
 				pe_fr.theta = set_incident_angle(pe_fr.theta);
 
-				set_beam_type();
+				//Set beam type
+				if(is_user_define_wave())
+				{
+					beam_type = eBT_User_Define;
+				}
+				else if(is_convergent_beam_wave())
+				{
+					beam_type = eBT_Convergent;
+
+					if(is_CBED_CBEI())
+					{
+						set_beam_position(cbe_fr.x0, cbe_fr.y0);
+					}
+					else if(is_EWFS_EWRS())
+					{
+						set_beam_position(ew_fr.x0, ew_fr.y0);
+					}
+				}
+				else if(is_plane_wave())
+				{
+					beam_type = eBT_Plane_Wave;
+				}
 
 				if(is_EELS() || is_EFTEM())
 				{
@@ -205,6 +254,7 @@ namespace multem
 				{
 					slice_storage = false;
 				}
+
 			}
 
 			/**************************************************************************************/
@@ -233,31 +283,6 @@ namespace multem
 			void set_stem_beam_position(const int &idx)
 			{
 				set_beam_position(scanning.x[idx], scanning.y[idx]);
-			}
-
-			void set_beam_type()
-			{
-				if(is_user_define_wave())
-				{
-					beam_type = eBT_User_Define;
-				}
-				else if(is_convergent_beam_wave())
-				{
-					beam_type = eBT_Convergent;
-
-					if(is_CBED_CBEI())
-					{
-						set_beam_position(cbe_fr.x0, cbe_fr.y0);
-					}
-					else if(is_EWFS_EWRS())
-					{
-						set_beam_position(ew_fr.x0, ew_fr.y0);
-					}
-				}
-				else if(is_plane_wave())
-				{
-					beam_type = eBT_Plane_Wave;
-				}
 			}
 
 			T get_Rx_pos_shift(const T &x)
@@ -488,12 +513,12 @@ namespace multem
 
 			bool is_operation_mode_normal() const
 			{
-				return operation_mode==eOM_Normal;
+				return operation_mode == eOM_Normal;
 			}
 
 			bool is_operation_mode_advanced() const
 			{
-				return operation_mode==eOM_Advanced;
+				return operation_mode == eOM_Advanced;
 			}
 	};
 

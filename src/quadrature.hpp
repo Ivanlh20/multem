@@ -84,7 +84,7 @@ namespace multem
 			// 0: int_-1^1 f(x) dx
 			void CoefTanhSinh(Q1<double, e_Host> &cQ, const double &xmin, const double &xmax)
 			{
-				auto Aprox = [](double x)->double{return asinh(atanh(x)/c_i2Pi); };
+				auto Aprox = [](double x)->double{ return asinh(atanh(x)/c_i2Pi); };
 				double tmin = Aprox(xmin);
 				double tmax = Aprox(xmax);
 
@@ -105,7 +105,7 @@ namespace multem
 			// 1: int_0^infty f(x) dx
 			void CoefExpSinh(Q1<double, e_Host> &cQ, const double &xmin, const double &xmax)
 			{
-				auto getLimit = [](double x)->double{return asinh(log(x)/c_i2Pi); };
+				auto getLimit = [](double x)->double{ return asinh(log(x)/c_i2Pi); };
 				double tmin = getLimit(xmin);
 				double tmax = getLimit(xmax);
 
@@ -153,7 +153,7 @@ namespace multem
 			// 3: int_-infty^infty f(x) dx
 			void CoefSinhSinh(Q1<double, e_Host> &cQ, const double &xmin, const double &xmax)
 			{
-				auto getLimit = [](double x)->double{return asinh(asin(x)/c_i2Pi); };
+				auto getLimit = [](double x)->double{ return asinh(asin(x)/c_i2Pi); };
 				double tmin = getLimit(xmin);
 				double tmax = getLimit(xmax);
 

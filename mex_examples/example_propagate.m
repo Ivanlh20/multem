@@ -23,7 +23,7 @@ input_multislice.fp_iconf = 0;
 input_multislice.microscope_effect = 1;             % 1: Partial coherente mode, 2: transmission_fun cross coefficient
 input_multislice.spatial_temporal_effect = 1;       % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
-input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
+input_multislice.zero_defocus_type = 4;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
 input_multislice.zero_defocus_plane = 0;
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;

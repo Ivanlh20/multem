@@ -24,7 +24,7 @@ input_multislice.spatial_temporal_effect = 2;       % 1: Spatial and temporal, 2
 input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
 input_multislice.zero_defocus_plane = 0;            % Zero defocus plane
 
-input_multislice.thickness_type = 1;                % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Planes = 3
+input_multislice.thickness_type = 1;                % eTT_Whole_Specimen = 1, eTT_Through_Slices = 2, eTT_Through_Planes = 3
 input_multislice.thickness = 0;                     % Array of thicknesses
 
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2

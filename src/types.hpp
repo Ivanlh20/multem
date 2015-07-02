@@ -217,7 +217,7 @@ namespace multem
 	/******************************thickness Type*******************************/
 	enum eThickness_Type
 	{
-		eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Planes = 3
+		eTT_Whole_Specimen = 1, eTT_Through_Slices = 2, eTT_Through_Planes = 3
 	};
 
 	/***************************Input wave function*****************************/
@@ -297,7 +297,7 @@ namespace multem
 		int rows;
 		int cols;
 		double *real;
-		m_matrix_r(): size(0), rows(0), cols(0), real(nullptr){}
+		m_matrix_r(): size(0), rows(0), cols(0), real(nullptr){ }
 	};
 
 	/*********************matlab complex matrix****************/
@@ -310,7 +310,7 @@ namespace multem
 		int cols;
 		double *real;
 		double *imag;
-		m_matrix_c(): size(0), rows(0), cols(0), real(nullptr), imag(nullptr) {}
+		m_matrix_c(): size(0), rows(0), cols(0), real(nullptr), imag(nullptr){ }
 	};
 
 	namespace traits
@@ -322,52 +322,52 @@ namespace multem
 		using Size_type = typename TVector::size_type;
 
 		template<class T>
-		struct is_bool: std::integral_constant<bool, std::is_same<T, bool>::value> {};
+		struct is_bool: std::integral_constant<bool, std::is_same<T, bool>::value> { };
 
 		template<class T>
-		struct is_int: std::integral_constant<bool, std::is_same<T, int>::value || std::is_same<T, unsigned int>::value> {};
+		struct is_int: std::integral_constant<bool, std::is_same<T, int>::value || std::is_same<T, unsigned int>::value> { };
 
 		template<class T>
-		struct is_float: std::integral_constant<bool, std::is_same<T, float>::value> {};
+		struct is_float: std::integral_constant<bool, std::is_same<T, float>::value> { };
 
 		template<class T>
-		struct is_double: std::integral_constant<bool, std::is_same<T, double>::value> {};
+		struct is_double: std::integral_constant<bool, std::is_same<T, double>::value> { };
 
 		template<class T>
-		struct is_fundamental: std::integral_constant<bool, std::is_fundamental<T>::value || std::is_same<T, complex<float>>::value || std::is_same<T, complex<double>>::value> {};
+		struct is_fundamental: std::integral_constant<bool, std::is_fundamental<T>::value || std::is_same<T, complex<float>>::value || std::is_same<T, complex<double>>::value> { };
 
 		template<class T>
-		struct is_m_matrix_r: std::integral_constant<bool, std::is_same<T, m_matrix_r>::value> {};
+		struct is_m_matrix_r: std::integral_constant<bool, std::is_same<T, m_matrix_r>::value> { };
 
 		template<class T>
-		struct is_m_matrix_c: std::integral_constant<bool, std::is_same<T, m_matrix_c>::value> {};
+		struct is_m_matrix_c: std::integral_constant<bool, std::is_same<T, m_matrix_c>::value> { };
 
 		template<class T>
-		struct is_m_matrix_rc: std::integral_constant<bool, is_m_matrix_r<T>::value || is_m_matrix_c<T>::value> {};
+		struct is_m_matrix_rc: std::integral_constant<bool, is_m_matrix_r<T>::value || is_m_matrix_c<T>::value> { };
 
 		template<class T>
-		struct is_enum_bool: std::integral_constant<bool, std::is_enum<T>::value || is_bool<T>::value> {};
+		struct is_enum_bool: std::integral_constant<bool, std::is_enum<T>::value || is_bool<T>::value> { };
 
 		template<class T, eDevice dev, class Enable = void>
-		struct is_Vector {};
+		struct is_Vector { };
 
 		template<class T, eDevice dev>
-		struct is_Vector<T, dev, typename std::enable_if<std::is_scalar<T>::value>::type>: std::integral_constant<bool, false> {};
+		struct is_Vector<T, dev, typename std::enable_if<std::is_scalar<T>::value>::type>: std::integral_constant<bool, false> { };
 	
 		template<class T, eDevice dev>
-		struct is_Vector<T, dev, typename std::enable_if<!std::is_scalar<T>::value>::type>: std::integral_constant<bool, (dev == e_Host)?(std::is_same<T, host_vector<Value_type<T>>>::value):(std::is_same<T, device_vector<Value_type<T>>>::value)> {};
+		struct is_Vector<T, dev, typename std::enable_if<!std::is_scalar<T>::value>::type>: std::integral_constant<bool, (dev == e_Host)?(std::is_same<T, host_vector<Value_type<T>>>::value):(std::is_same<T, device_vector<Value_type<T>>>::value)> { };
 
 		template<class T, class Enable = void>
-		struct has_device_member {}; 
+		struct has_device_member { }; 
 
 		template<class T>
-		struct has_device_member<T, typename std::enable_if<std::is_scalar<T>::value>::type>: std::integral_constant<bool, false> {};
+		struct has_device_member<T, typename std::enable_if<std::is_scalar<T>::value>::type>: std::integral_constant<bool, false> { };
 	
 		template<class T>
 		struct has_device_member<T, typename std::enable_if<!std::is_scalar<T>::value>::type>
 		{
 			struct Fallback { int device; };
-			struct Derived: T, Fallback {};
+			struct Derived: T, Fallback { };
 
 			template<typename C, C> struct ChT; 
 
@@ -378,19 +378,19 @@ namespace multem
 		}; 
 
 		template<class T, eDevice dev, class Enable = void>
-		struct is_Host_Device{};
+		struct is_Host_Device{ };
 
 		template<class T, eDevice dev>
-		struct is_Host_Device<T, dev, typename std::enable_if<has_device_member<T>::value>::type>: std::integral_constant<bool, is_Vector<T, dev>::value || (T::device == dev)> {};
+		struct is_Host_Device<T, dev, typename std::enable_if<has_device_member<T>::value>::type>: std::integral_constant<bool, is_Vector<T, dev>::value || (T::device == dev)> { };
 
 		template<class T, eDevice dev>
-		struct is_Host_Device<T, dev, typename std::enable_if<!has_device_member<T>::value>::type>: std::integral_constant<bool, is_Vector<T, dev>::value> {};
+		struct is_Host_Device<T, dev, typename std::enable_if<!has_device_member<T>::value>::type>: std::integral_constant<bool, is_Vector<T, dev>::value> { };
 
 		template<class T>
-		struct is_Host: std::integral_constant<bool, is_Host_Device<T, e_Host>::value> {};
+		struct is_Host: std::integral_constant<bool, is_Host_Device<T, e_Host>::value> { };
 
 		template<class T>
-		struct is_Device: std::integral_constant<bool, is_Host_Device<T, e_Device>::value> {};
+		struct is_Device: std::integral_constant<bool, is_Host_Device<T, e_Device>::value> { };
 
 		template <class T, class U>
 		using enable_if_Host = typename std::enable_if<is_Host<T>::value, U>::type;
@@ -473,7 +473,7 @@ namespace multem
 
 	/**************************vector**************************/
 	template<class T, eDevice dev>
-	using Vector = typename std::conditional<dev==e_Host, typename std::conditional<traits::is_fundamental<T>::value, host_vector<T>, vector<T>>::type, device_vector<T>>::type;
+	using Vector = typename std::conditional<dev == e_Host, typename std::conditional<traits::is_fundamental<T>::value, host_vector<T>, vector<T>>::type, device_vector<T>>::type;
 
 	template<class T>
 	struct rVector
@@ -483,7 +483,7 @@ namespace multem
 		int size;
 		T *V;
 
-		rVector(): size(0), V(nullptr) {}
+		rVector(): size(0), V(nullptr){ }
 
 		template<class TVector> 
 		rVector<T>& operator=(TVector &vector)
@@ -666,7 +666,7 @@ namespace multem
 	{
 		using value_type = T;
 
-		rThickness(): size(0), islice(nullptr), iatom_e(nullptr), z(nullptr), z_zero_def(nullptr), z_back_prop(nullptr) {}
+		rThickness(): size(0), islice(nullptr), iatom_e(nullptr), z(nullptr), z_zero_def(nullptr), z_back_prop(nullptr){ }
 
 		template<class TThickness> 
 		rThickness<T>& operator=(TThickness &thickness)
@@ -773,7 +773,7 @@ namespace multem
 	{
 		using value_type = T;
 
-		rSlice(): size(0), z_0(nullptr), z_e(nullptr), z_int_0(nullptr), z_int_e(nullptr), iatom_0(nullptr), iatom_e(nullptr) {}
+		rSlice(): size(0), z_0(nullptr), z_e(nullptr), z_int_0(nullptr), z_int_e(nullptr), iatom_0(nullptr), iatom_e(nullptr){ }
 
 		template<class TSlice> 
 		rSlice<T>& operator=(TSlice &slice)
@@ -839,7 +839,7 @@ namespace multem
 	{
 		using value_type = T;
 
-		rQ1(): size(0), x(nullptr), w(nullptr) {}
+		rQ1(): size(0), x(nullptr), w(nullptr){ }
 
 		template<class TQ1> 
 		rQ1<T>& operator=(TQ1 &q1)
@@ -900,7 +900,7 @@ namespace multem
 	{
 		using value_type = T;
 
-		rQ2(): size(0), x(nullptr), y(nullptr), w(nullptr) {}
+		rQ2(): size(0), x(nullptr), y(nullptr), w(nullptr){ }
 
 		template<class TQ2> 
 		rQ2<T>& operator=(TQ2 &q2)
@@ -961,7 +961,7 @@ namespace multem
 	{
 		using value_type = T;
 
-		rPP_Coef(): size(0), cl(nullptr), cnl(nullptr) {}
+		rPP_Coef(): size(0), cl(nullptr), cnl(nullptr){ }
 
 		template<class TPP_Coef> 
 		rPP_Coef<T>& operator=(TPP_Coef &rhs)
@@ -1025,7 +1025,7 @@ namespace multem
 	{
 		using value_type = T;
 
-		rCI_Coef(): size(0), c0(nullptr), c1(nullptr), c2(nullptr), c3(nullptr) {}
+		rCI_Coef(): size(0), c0(nullptr), c1(nullptr), c2(nullptr), c3(nullptr){ }
 
 		template<class TCI_Coef> 
 		rCI_Coef<T>& operator=(TCI_Coef &ci_coef)
@@ -1148,7 +1148,7 @@ namespace multem
 		bool y;
 		bool z;
 
-		FP_Dim(): x(true), y(true), z(false) {}
+		FP_Dim(): x(true), y(true), z(false){ }
 
 		void set(const int &Dim)
 		{
@@ -1241,7 +1241,7 @@ namespace multem
 		inline
 		Grid(): nx(0), ny(0), nxh(0), nyh(0), inxy(0), 
 			lx(0), ly(0), dz(0), pbc_xy(true), bwl(true), 
-			dRx(0), dRy(0), dgx(0), dgy(0), gl_max(0), gl2_max(0) {}
+			dRx(0), dRy(0), dgx(0), dgy(0), gl_max(0), gl2_max(0){ }
 
 		inline
 		void set_input_data(int nx_i, int ny_i, T lx_i, T ly_i, T dz_i, bool BWL_i, bool PBC_xy_i)
@@ -1486,7 +1486,7 @@ namespace multem
 				aobju(0), sf(0), nsf(0), beta(0), nbeta(0),
 				lambda2(0), cf(0), cCs3(0),	cCs5(0), cmfa2(0),
 				cmfa3(0), g2_min(0), g2_max(0), sggs(0), ngxs(0),
-				ngys(0), dgxs(0), dgys(0), g2_maxs(0) {}
+				ngys(0), dgxs(0), dgys(0), g2_maxs(0){ }
 
 		inline
 		void set_input_data(T E_0, Grid<T> &grid)
@@ -1546,7 +1546,7 @@ namespace multem
 
 		inline
 		EELS(): space(eS_Real), E_0(0), E_loss(0), ge(0), ge2(0), gc(0), gc2(0), 
-		m_selection(0), collection_angle(0), channelling_type(eCT_Double_Channelling), factor(0), Z(0), x(0), y(0), occ(0){}
+		m_selection(0), collection_angle(0), channelling_type(eCT_Double_Channelling), factor(0), Z(0), x(0), y(0), occ(0){ }
 
 		inline
 		void set_input_data(eSpace space_i, T E_0_i, T E_loss_i, int m_selection_i, T collection_angle_i, eChannelling_Type channelling_type_i, int Z_i)
@@ -1583,22 +1583,22 @@ namespace multem
 
 		bool is_Single_Channelling() const
 		{
-			return channelling_type==eCT_Single_Channelling;
+			return channelling_type == eCT_Single_Channelling;
 		}
 
 		bool is_Double_Channelling() const
 		{
-			return channelling_type==eCT_Double_Channelling;
+			return channelling_type == eCT_Double_Channelling;
 		}
 
 		bool is_Double_Channelling_FOMS() const
 		{
-			return channelling_type==eCT_Double_Channelling_FOMS;
+			return channelling_type == eCT_Double_Channelling_FOMS;
 		}
 
 		bool is_Double_Channelling_SOMS() const
 		{
-			return channelling_type==eCT_Double_Channelling_SOMS;
+			return channelling_type == eCT_Double_Channelling_SOMS;
 		}
 
 		bool is_Double_Channelling_POA_SOMS() const
@@ -1635,7 +1635,7 @@ namespace multem
 		static const eDevice device = dev;
 
 		Atom_Type(): Z(0), A(0), rn_e(0), rn_c(0), ra_e(0), ra_c(0), 
-						R_min(0), R_max(0), R_min2(0), R_max2(0) {}
+						R_min(0), R_max(0), R_min2(0), R_max2(0){ }
 
 		template<class TAtom_Type> 
 		void assign(TAtom_Type &atom_type)
@@ -1715,7 +1715,7 @@ namespace multem
 		rCI_Coef<T> ciVR;
 
 		rAtom_Type(): Z(0), A(0), rn_e(0), rn_c(0), ra_e(0), ra_c(0), 
-						R_min(0), R_max(0), R_min2(0), R_max2(0) {}
+						R_min(0), R_max(0), R_min2(0), R_max2(0){ }
 
 		template<class TAtom_Type> 
 		rAtom_Type<T>& operator=(TAtom_Type &atom_type)
@@ -1823,7 +1823,7 @@ namespace multem
 
 	/******************************Streams************************/
 	template<class T, eDevice dev>
-	struct Stream {};
+	struct Stream { };
 
 	template<class T>
 	struct Stream<T, e_Host>
@@ -1833,9 +1833,9 @@ namespace multem
 
 			static const eDevice device = e_Host;
 
-			Stream():nstream(0), n_act_stream(0), stream(nullptr) { }
+			Stream():nstream(0), n_act_stream(0), stream(nullptr){ }
 
-			~Stream() { destroy(); nstream = 0; n_act_stream = 0; }
+			~Stream(){ destroy(); nstream = 0; n_act_stream = 0; }
 
 			int size() const
 			{
@@ -1850,7 +1850,7 @@ namespace multem
 				stream = new std::thread[nstream];
 			}
 
-			std::thread& operator[](const int i) { return stream[i]; }
+			std::thread& operator[](const int i){ return stream[i]; }
 
 			const std::thread& operator[](const int i) const { return stream[i]; }
 
@@ -1895,7 +1895,7 @@ namespace multem
 
 			Stream(): n_act_stream(0){ }
 
-			~Stream() { destroy(); n_act_stream = 0;}
+			~Stream(){ destroy(); n_act_stream = 0;}
 
 			int size() const
 			{
@@ -1914,7 +1914,7 @@ namespace multem
 				}
 			}
 
-			cudaStream_t& operator[](const int i) { return stream[i]; }
+			cudaStream_t& operator[](const int i){ return stream[i]; }
 
 			const cudaStream_t& operator[](const int i) const { return stream[i]; }
 
@@ -1945,7 +1945,7 @@ namespace multem
 
 	/******************************FFT2************************/
 	template<class T, eDevice dev>
-	struct FFT2 {};
+	struct FFT2 { };
 
 	template<>
 	struct FFT2<float, e_Host>
@@ -2134,7 +2134,7 @@ namespace multem
 
 			static const eDevice device = e_Device;
 
-			FFT2(): plan_forward(0), plan_backward(0) {}
+			FFT2(): plan_forward(0), plan_backward(0){ }
 
 			~FFT2()
 			{
@@ -2205,7 +2205,7 @@ namespace multem
 
 			static const eDevice device = e_Device;
 
-			FFT2(): plan_forward(0), plan_backward(0) {}
+			FFT2(): plan_forward(0), plan_backward(0){ }
 
 			~FFT2()
 			{
@@ -2292,7 +2292,7 @@ namespace multem
 		}
 
 		Scanning():type(eST_Line), ns(0), nx(0), 
-			ny(0), x0(0), y0(0), xe(0), ye(0) {};
+			ny(0), x0(0), y0(0), xe(0), ye(0){ };
 
 		void get_grid_dim()
 		{
@@ -2403,14 +2403,14 @@ namespace multem
 	struct HRTEM
 	{
 		int xx;
-		HRTEM():xx(0) {};
+		HRTEM():xx(0){ };
 	};
 
 	/*****************************CBED/CBEI*****************************/
 	template<class T>
 	struct CBE_FR
 	{
-		CBE_FR(): space(eS_Real), x0(0), y0(0) {};
+		CBE_FR(): space(eS_Real), x0(0), y0(0){ };
 
 		eSpace space;
 		T x0;
@@ -2421,7 +2421,7 @@ namespace multem
 	template<class T>
 	struct PE_FR
 	{
-		PE_FR():space(eS_Real), nrot(0), theta(0) {};
+		PE_FR():space(eS_Real), nrot(0), theta(0){ };
 
 		inline T phi(const int &irot) const 
 		{ 
@@ -2442,7 +2442,7 @@ namespace multem
 	template<class T>
 	struct EW_FR
 	{
-		EW_FR():space(eS_Real), convergent_beam(false), x0(0), y0(0){};
+		EW_FR():space(eS_Real), convergent_beam(false), x0(0), y0(0){ };
 
 		eSpace space;
 		bool convergent_beam;
@@ -2460,7 +2460,7 @@ namespace multem
 		double free_memory_size;		// Mb
 
 		Device_Properties():id(0), name(""), compute_capability(0), 
-			total_memory_size(0), free_memory_size(0){}
+			total_memory_size(0), free_memory_size(0){ }
 	};
 
 	/***************************e_Device properties*************************/
@@ -2472,7 +2472,7 @@ namespace multem
 		double free_memory_size;		// Mb
 
 		Host_Properties(): nprocessors(0), nthreads(0), total_memory_size(0), 
-			free_memory_size(0){}
+			free_memory_size(0){ }
 	};
 } // namespace multem
 

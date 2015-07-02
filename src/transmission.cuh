@@ -39,7 +39,7 @@ namespace multem
 
 			Vector<value_type_c, dev> trans_0;
 
-			Transmission():fft2(nullptr) {}
+			Transmission():fft2(nullptr){ }
 
 			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io, Stream<value_type_r, dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
 			{
@@ -143,7 +143,7 @@ namespace multem
 					int n_slice_Allow;
 					eSlice_Memory_Type slice_mem_type;
 
-					Memory_Slice():n_slice_req(0), n_slice_Allow(0), slice_mem_type(eSMT_none) {}
+					Memory_Slice():n_slice_req(0), n_slice_Allow(0), slice_mem_type(eSMT_none){ }
 
 					void clear()
 					{

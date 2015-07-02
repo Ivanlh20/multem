@@ -34,7 +34,7 @@ namespace multem
 			using value_type_r = typename T;
 			using value_type_c = typename complex<T>;
 
-			Probe():input_multislice(nullptr){}
+			Probe():input_multislice(nullptr){ }
 
 			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io)
 			{
