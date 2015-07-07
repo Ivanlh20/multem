@@ -31,7 +31,7 @@ namespace multem
 	template<class T, eDevice dev>
 	class Propagator{
 		public:
-			using value_type_r = typename T;
+			using value_type_r = T;
 			using value_type_c = typename complex<T>;
 
 			Propagator():input_multislice(nullptr), fft2(nullptr){ }
@@ -50,20 +50,22 @@ namespace multem
 			{
 				if(isZero(z))
 				{
-					fft2->forward(psi_i, psi_o); 
-
 					if(input_multislice->grid.bwl)
 					{
+						fft2->forward(psi_i, psi_o); 
 						multem::bandwidth_limit(input_multislice->grid, 0, input_multislice->grid.gl_max, input_multislice->grid.inxy, psi_o);
+						if(space == eS_Real)
+						{
+							fft2->inverse(psi_o);
+						}
 					}
 					else
 					{
-						multem::scale(psi_o, input_multislice->grid.inxy);
-					}
-
-					if(space == eS_Real)
-					{
-						fft2->inverse(psi_o);
+						if(space == eS_Reciprocal)
+						{
+							fft2->forward(psi_i, psi_o); 
+							multem::scale(psi_o, input_multislice->grid.inxy);
+						}
 					}
 				}
 				else

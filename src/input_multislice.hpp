@@ -34,64 +34,68 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	T get_Vr_factor(const T &E_0, const T &theta);
 
+	template<class InputIterator, class TVector>
+	void match_vectors(InputIterator A_base_first, InputIterator A_base_last, TVector &A_search);
+
 	template<class T, eDevice dev>
 	class Input_Multislice{
 		public:
-			using value_type = typename T;
+			using value_type = T;
 
 			ePrecision precision;
-			eDevice device; 										// eP_float = 1, eP_double = 2
-			int cpu_ncores; 										// Number of Cores CPU
-			int cpu_nthread; 										// Number of threads
-			int gpu_device; 										// GPU device
-			int gpu_nstream; 										// Number of streams
+			eDevice device; 									// eP_float = 1, eP_double = 2
+			int cpu_ncores; 									// Number of Cores CPU
+			int cpu_nthread; 									// Number of threads
+			int gpu_device; 									// GPU device
+			int gpu_nstream; 									// Number of streams
 
-			eSimulation_Type simulation_type; 						// 11: Scanning, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
-			ePhonon_Model phonon_model; 							// 1: Still atom model, 2: Absorptive potential model, 3: Frozen phonon
-			eElec_Spec_Int_Model interaction_model; 				// eESIM_Multislice = 1, eESIM_Phase_Object= 2, eESIM_Weak_Phase_Object = 3
-			ePotential_Slicing potential_slicing; 					// ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
-			ePotential_Type potential_type;							// potential type: 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
+			eSimulation_Type simulation_type; 					// 11: Scanning, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
+			ePhonon_Model phonon_model; 						// 1: Still atom model, 2: Absorptive potential model, 3: Frozen phonon
+			eElec_Spec_Int_Model interaction_model; 			// eESIM_Multislice = 1, eESIM_Phase_Object= 2, eESIM_Weak_Phase_Object = 3
+			ePotential_Slicing potential_slicing; 				// ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
+			ePotential_Type potential_type;						// potential type: 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 
-			int fp_nconf; 											// Number of frozen phonon configurations
-			FP_Dim fp_dim; 											// Phonon dimensions
-			int fp_dist; 											// 1: Gaussian (Phonon distribution)
-			int fp_seed; 											// Random seed(frozen phonon)
+			int fp_nconf; 										// Number of frozen phonon configurations
+			FP_Dim fp_dim; 										// Phonon dimensions
+			int fp_dist; 										// 1: Gaussian (Phonon distribution)
+			int fp_seed; 										// Random seed(frozen phonon)
 			int fp_iconf;
 
-			eMicroscope_Effect microscope_effect; 					// 1: Partial coherente mode, 2: transmission cross coefficient
-			eSpatial_Temporal_Effect spatial_temporal_effect; 		// 1: Spatial and temporal, 2: Temporal, 3: Spatial
+			eMicroscope_Effect microscope_effect; 				// 1: Partial coherente mode, 2: transmission cross coefficient
+			eSpatial_Temporal_Effect spatial_temporal_effect; 	// 1: Spatial and temporal, 2: Temporal, 3: Spatial
 			
-			eZero_Defocus_Type zero_defocus_type; 					// 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
-			T zero_defocus_plane; 									// Zero defocus plane
+			eZero_Defocus_Type zero_defocus_type; 				// 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
+			T zero_defocus_plane; 								// Zero defocus plane
 			
-			eThickness_Type thickness_type; 						// eTT_Whole_Specimen = 1, eTT_Through_Slices = 2, eTT_Through_Planes = 3
-			Vector<T, e_Host> thickness; 							// Array of thicknesses
+			eThickness_Type thickness_type; 					// eTT_Whole_Specimen = 1, eTT_Through_Slices = 2, eTT_Through_Planes = 3
+			Vector<T, e_Host> thickness; 						// Array of thicknesses
 
-			eInput_Wave_Type input_wave_type; 						// 1: Automatic, 2: User define
-			Vector<complex<T>, dev> psi_0; 							// Input wave
+			eInput_Wave_Type input_wave_type; 					// 1: Automatic, 2: User define
+			Vector<complex<T>, dev> psi_0; 						// Input wave
 
-			eOperation_Mode operation_mode;							// eOM_Normal = 1, eOM_Advanced = 2
-			bool coherent_contribution;								// true , false
-			bool slice_storage;										// true , false
+			eOperation_Mode operation_mode;						// eOM_Normal = 1, eOM_Advanced = 2
+			bool coherent_contribution;							// true , false
+			bool slice_storage;									// true , false
 
-			T E_0; 													// Acceleration volatage in KeV
-			T theta; 												// incident tilt (in spherical coordinates) (rad)
-			T phi; 													// incident tilt (in spherical coordinates) (rad)
+			T E_0; 												// Acceleration volatage in KeV
+			T theta; 											// incident tilt (in spherical coordinates) (rad)
+			T phi; 												// incident tilt (in spherical coordinates) (rad)
 
-			Grid<T> grid; 											// gridBT information
+			Grid<T> grid; 										// gridBT information
 
-			T Vrl; 													// Atomic potential cut-off
-			int nR; 												// Number of gridBT points
+			T Vrl; 												// Atomic potential cut-off
+			int nR; 											// Number of gridBT points
 
-			Lens<T> lens; 											// Aberrations
+			Lens<T> lens; 										// Aberrations
 
-			Atom_Data<T> atoms; 									// atoms
+			bool is_crystal;
+			Atom_Data<T> atoms; 								// atoms
 
-			EELS<T> eels_fr; 										// EELS
+			EELS<T> eels_fr; 									// EELS
 
-			Scanning<T> scanning; 									// Scanning
+			Scanning<T> scanning; 								// Scanning
 
-			Det_Cir<T, e_Host> det_cir; 							// Circular detectors
+			Det_Cir<T, e_Host> det_cir; 						// Circular detectors
 
 			HRTEM<T> hrtem;
 
@@ -107,7 +111,7 @@ namespace multem
 
 			int islice;
 			int nstream;
-			bool dp_Shift; 											// Shift diffraction pattern
+			bool dp_Shift; 										// Shift diffraction pattern
 
 			Input_Multislice(): precision(eP_double), device(e_Host), cpu_ncores(1), cpu_nthread(4), gpu_device(0), gpu_nstream(8), 
 						simulation_type(eST_EWRS), phonon_model(ePM_Still_Atom), interaction_model(eESIM_Multislice), 
@@ -115,36 +119,33 @@ namespace multem
 						fp_seed(1983), microscope_effect(eME_Partial_Coherent), spatial_temporal_effect(eSTE_Spatial_Temporal), 
 						zero_defocus_type(eZDT_Last), zero_defocus_plane(0), operation_mode(eOM_Normal), coherent_contribution(false), 
 						slice_storage(true), thickness_type(eTT_Whole_Specimen), dp_Shift(false), E_0(300), theta(0), phi(0), Vrl(c_Vrl), 
-						nR(c_nR), input_wave_type(eIWT_Automatic), beam_type(eBT_Plane_Wave), conv_beam_wave_x(0), conv_beam_wave_y(0), 
+						nR(c_nR), is_crystal(false), input_wave_type(eIWT_Automatic), beam_type(eBT_Plane_Wave), conv_beam_wave_x(0), conv_beam_wave_y(0), 
 						fp_iconf(0), islice(0), nstream(cpu_nthread){ };
 
 			void validate_parameters()
 			{
-				if((thickness_type==eTT_Whole_Specimen) || thickness.empty())
+				if(is_whole_specimen() || thickness.empty())
 				{
 					thickness_type=eTT_Whole_Specimen;
 					thickness.resize(1);
 					thickness[0] = atoms.z_max;
 				}
-				else if(thickness_type==eTT_Through_Planes)
+				else if(is_through_planes())
 				{
 					std::sort(thickness.begin(), thickness.end());
-
 					atoms.Sort_by_z();
 					atoms.get_z_layer();			
-					match_vectors(atoms.z_layer, thickness);
+					multem::match_vectors(atoms.z_layer.begin(), atoms.z_layer.end(), thickness);
 				}
-				else if(thickness_type==eTT_Through_Slices)
+				else if(is_through_slices())
 				{
 					std::sort(thickness.begin(), thickness.end());
-					Vector<T, e_Host> z_slice;
-
 					atoms.Sort_by_z();
 					atoms.get_z_layer();
+
+					Vector<T, e_Host> z_slice;
 					atoms.get_z_slice(potential_slicing, grid.dz, atoms, z_slice);
-					Vector<T, e_Host>  z_slice_v;
-					z_slice_v.assign(z_slice.begin()+1, z_slice.end());
-					match_vectors(z_slice_v, thickness);
+					multem::match_vectors(z_slice.begin()+1, z_slice.end(), thickness);
 				}
 
 				nstream = (is_Host())?cpu_nthread:gpu_nstream;
@@ -169,27 +170,6 @@ namespace multem
 				islice = max(0, islice);
 
 				gpu_device = max(0, gpu_device);
-
-				switch(zero_defocus_type)
-				{
-					case eZDT_First:
-					{
-						zero_defocus_plane = atoms.z_min;
-					}
-					break;
-					case eZDT_Middle:
-					{
-						zero_defocus_plane = 0.5*(atoms.z_min + atoms.z_max);
-					}
-					break;
-					case eZDT_Last:
-					{
-						zero_defocus_plane = atoms.z_max;
-					}
-					break;
-				}
-
-				thickness_type = eTT_Whole_Specimen;
 
 				if(isZero(Vrl))
 				{
@@ -256,7 +236,21 @@ namespace multem
 				}
 
 			}
+			/**************************************************************************************/
+			bool is_whole_specimen() const
+			{
+				return thickness_type==eTT_Whole_Specimen;
+			}
 
+			bool is_through_slices() const
+			{
+				return thickness_type==eTT_Through_Slices;
+			}
+
+			bool is_through_planes() const
+			{
+				return thickness_type==eTT_Through_Planes;
+			}
 			/**************************************************************************************/
 			bool is_user_define_wave() const
 			{

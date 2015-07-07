@@ -31,7 +31,7 @@ namespace multem
 	class Energy_Loss
 	{
 		public:
-			using value_type_r = typename T;
+			using value_type_r = T;
 			using value_type_c = typename complex<T>;
 
 			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io, FFT2<value_type_r, dev> *fft2_i)

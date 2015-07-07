@@ -25,12 +25,14 @@
 #include "math.cuh"
 #include "types.hpp"
 
+#include <thrust/sort.h>
+
 namespace multem
 {
 	template<class T>
 	class Atom_Data{
 		public:
-			using value_type = typename T;
+			using value_type = T;
 			using size_type = std::size_t;
 
 			Atom_Data(): l_x(0), l_y(0), l_z(0), 
@@ -52,6 +54,9 @@ namespace multem
 			// resize number of atoms
 			void resize(const size_type &new_size, const value_type &value = value_type())
 			{
+				idx.resize(new_size, value);
+				idx.shrink_to_fit();
+
 				Z.resize(new_size, value);
 				Z.shrink_to_fit();
 
@@ -81,7 +86,8 @@ namespace multem
 				l_z = l_z_i;
 
 				for(auto i = 0; i < natomsM_i; i++)
-				{		
+				{	
+					idx[i] = i;
 					Z[i] = static_cast<int>(atomsM_i[0*natomsM_i + i]); 		// Atomic number
 					x[i] = a_i*atomsM_i[1*natomsM_i + i]; 						// x-position
 					y[i] = b_i*atomsM_i[2*natomsM_i + i]; 						// y-position
@@ -110,6 +116,7 @@ namespace multem
 				{
 					if((!PBC_xy_i)||((atoms.x[i]<lx_b)&&(atoms.y[i]<ly_b)))
 					{
+						idx[j] = j;
 						Z[j] = atoms.Z[i];
 						x[j] = atoms.x[i];
 						y[j] = atoms.y[i];
@@ -149,13 +156,8 @@ namespace multem
 				x_mean = y_mean = z_mean = 0.0;
 				x_std = y_std = z_std = 0.0;
 
-				Z_unique.resize(c_nAtomsTypes);
-				std::fill(Z_unique.begin(), Z_unique.end(), 0);
-
 				for(auto iAtom = 0; iAtom < size(); iAtom++)
 				{
-					Z_unique[Z[iAtom]]++; 
-
 					Z_min = min(Z[iAtom], Z_min);
 					Z_max = max(Z[iAtom], Z_max);
 
@@ -188,9 +190,6 @@ namespace multem
 					y_std += y[iAtom]*y[iAtom];
 					z_std += z[iAtom]*z[iAtom];
 				}
-
-				auto it = std::remove_if(Z_unique.begin(), Z_unique.end(), [](const int &Z){return Z == 0;} );
-				Z_unique.resize(std::distance(Z_unique.begin(),it));
 
 				T nAtoms = static_cast<T>(size());
 
@@ -242,31 +241,13 @@ namespace multem
 			// Sort atoms along z-axis.
 			void Sort_by_z()
 			{
-				Vector<int, e_Host> idx_sort(size());
-				Vector<int, e_Host> val_i(size());
-				Vector<T, e_Host> val_d(size());
+				std::iota(idx.begin(), idx.end(), 0);
 
-				// Sort atoms along z-axis.
-				std::iota(idx_sort.begin(), idx_sort.end(), 0);
-				std::sort(idx_sort.begin(), idx_sort.end(), [&](int &i, int &j){ return z[i] < z[j]; });
+				//if(!thrust::is_sorted(z.begin(), z.end()));
+				auto first = thrust::make_zip_iterator(thrust::make_tuple(idx.begin(), Z.begin(), x.begin(), y.begin(), z.begin(), sigma.begin(), occ.begin()));
+				auto last = thrust::make_zip_iterator(thrust::make_tuple(idx.end(), Z.end(), x.end(), y.end(), z.end(), sigma.end(), occ.end()));
 
-				std::transform(idx_sort.begin(), idx_sort.end(), val_i.begin(), [&](int &i){ return Z[i]; });
-				Z.assign(val_i.begin(), val_i.end());
-
-				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i){ return x[i]; });
-				x.assign(val_d.begin(), val_d.end());
-
-				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i){ return y[i]; });
-				y.assign(val_d.begin(), val_d.end());
-
-				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i){ return z[i]; });
-				z.assign(val_d.begin(), val_d.end());
-
-				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i){ return sigma[i]; });
-				sigma.assign(val_d.begin(), val_d.end());
-
-				std::transform(idx_sort.begin(), idx_sort.end(), val_d.begin(), [&](int &i){ return occ[i]; });
-				occ.assign(val_d.begin(), val_d.end());
+				thrust::sort(first, last, sort_atoms_by_z());
 			}
 
 			// get Layers: Require that the atoms to be sorted along z
@@ -285,7 +266,7 @@ namespace multem
 				for(auto iAtom = 0; iAtom < size(); iAtom++)
 				{
 					zc = z[iAtom];
-					if(abs(zb-zc)<Epsilon<T>::rel)
+					if(abs(zb-zc) < Epsilon<float>::rel)
 					{
 						zm += zc;
 						zm_c += 1.0;
@@ -302,8 +283,60 @@ namespace multem
 				z_layer.shrink_to_fit();
 			}
 
+			// get spacing
+			template<class TVector>
+			T get_spacing(size_type ix, const TVector &x)
+			{
+				ix = (ix <= 0)?1:min(ix, x.size()-1);
+				return (x.size()>1)?x[ix]-x[ix-1]:0.0;
+			}
+
+			// find atoms in slice
+			int find_by_z(T z_e, bool Inc_Borders=true)
+			{
+				int iz_e=-1;
+				z_e = (Inc_Borders)?z_e+Epsilon<T>::rel:z_e;
+
+				if(z_e<z.front())
+				{
+					return iz_e;
+				}
+
+				iz_e = (z.back() <= z_e)?(z.size()-1):(std::lower_bound(z.begin(), z.end(), z_e)-z.begin()-1);
+
+				if(z[iz_e] < z.front())
+				{
+					iz_e = -1;
+				}
+
+				return iz_e;
+			}
+
+			// find atoms in slice
+			void find_by_z(T z_0, T z_e, int &iz_0, int &iz_e, bool Inc_Borders=true)
+			{
+				z_0 = (Inc_Borders)?(z_0-Epsilon<T>::rel):z_0;
+				z_e = (Inc_Borders)?(z_e+Epsilon<T>::rel):z_e;
+
+				if((z_0>z_e)||(z.back()<z_0)||(z_e<z.front()))
+				{
+					iz_0 = 1;
+					iz_e = 0;
+					return;
+				}
+
+				iz_0 = (z_0 <= z.front())?0:std::lower_bound(z.begin(), z.end(), z_0)-z.begin();
+				iz_e = (z.back() <= z_e)?z.size()-1:std::lower_bound(z.begin(), z.end(), z_e)-z.begin()-1;
+
+				if((iz_0 > iz_e)||(z[iz_e] < z_0)||(z_e < z[iz_0]))
+				{
+					iz_0 = 1; 
+					iz_e = 0;
+				}
+			}
+
 			// get z slicing
-			void get_z_slice(const ePotential_Slicing &potential_slicing, T dz_i, Atom_Data<T> &atoms, Vector<T, e_Host> &z_slice)
+			void get_z_slice(const ePotential_Slicing &potential_slicing, const T &dz_i, const Atom_Data<T> &atoms, Vector<T, e_Host> &z_slice)
 			{
 				z_slice.clear();
 
@@ -312,25 +345,12 @@ namespace multem
 					return (int)floor(A/B+Epsilon<T>::rel);
 				};
 
-				auto get_Spacing = [](size_type ix, const Vector<T, e_Host> &x)->T
-				{
-					ix = (ix <= 0)?1:min(ix, x.size()-1);
-					return (x.size()>1)?x[ix]-x[ix-1]:0.0;
-				};
-
-				auto get_dz_b = [](const T &z_0, const T &z_e, const T &dz)->T
-				{
-					T dz_b = fmod(abs(z_0-z_e), dz);
-					dz_b += (dz_b<((dz>2.0)?0.25:0.50)*dz)?dz:0.0;
-					return dz_b;
-				};
-
 				switch(potential_slicing)
 				{
 					case ePS_Planes:
 					{
-						T dz_Bot = get_Spacing(0, z_layer);
-						T dz_Top = get_Spacing(z_layer.size() - 1, z_layer);
+						T dz_Bot = get_spacing(0, z_layer);
+						T dz_Top = get_spacing(z_layer.size() - 1, z_layer);
 						T layer_0 = z_layer.front() - 0.5*dz_Bot;
 						T layer_e = z_layer.back() + 0.5*dz_Top;
 						int nz_Bot = (atoms.z_min<layer_0)?quot(layer_0-atoms.z_min, dz_Bot) + 1:0;
@@ -343,7 +363,7 @@ namespace multem
 						}
 						for(auto i=1; i<z_layer.size(); i++)
 						{
-							T dz = get_Spacing(i, z_layer);
+							T dz = get_spacing(i, z_layer);
 							z_slice[j++] = z_layer[i-1] + 0.5*dz;
 						}
 						for(auto i=0; i <= nz_Top; i++)
@@ -354,12 +374,15 @@ namespace multem
 					break;
 					case ePS_dz_Proj:
 					{
-						/*******************************************************************/
-						int nz = quot(atoms.s_z, dz_i )+ 1;
-						z_slice.resize(nz + 1);
-						/*******************************************************************/
-						z_slice[0] = atoms.z_min-0.5*(nz*dz_i-atoms.s_z);
-						for(auto i=1; i<z_slice.size(); i++)
+						int nz = quot(s_z, dz_i )+ 1;
+						T layer_0 = z_min-0.5*(nz*dz_i-s_z);
+						T layer_e = layer_0 + nz*dz_i;
+						int nz_Bot = (atoms.z_min<layer_0)?quot(layer_0-atoms.z_min, dz_i) + 1:0;
+						int nz_Top = (atoms.z_max>layer_e)?quot(atoms.z_max-layer_e, dz_i) + 1:0;
+						z_slice.resize(nz+nz_Bot+nz_Top+1);
+		
+						z_slice[0] = layer_0-nz_Bot*dz_i;
+						for(auto i=1; i < z_slice.size(); i++)
 						{
 							z_slice[i] = z_slice[i-1] + dz_i;
 						}
@@ -367,6 +390,12 @@ namespace multem
 					break;
 					case ePS_dz_Sub:
 					{
+						auto get_dz_b = [](const T &z_0, const T &z_e, const T &dz)->T
+						{
+							T dz_b = fmod(abs(z_0-z_e), dz);
+							dz_b += (dz_b<((dz>2.0)?0.25:0.50)*dz)?dz:0.0;
+							return dz_b;
+						};
 						/*******************************************************************/
 						int nz = quot(s_z, dz_i) + 1;
 						T dz_Bot = get_dz_b(atoms.z_Int_min, z_min-0.5*(nz*dz_i-s_z), dz_i);
@@ -386,26 +415,53 @@ namespace multem
 				z_slice.shrink_to_fit();
 			}
 
-			// find atoms in slice
-			void find_by_z(T z_0, T z_e, int &iz_0, int &iz_e, bool Inc_Borders=true)
+			bool is_periodic_along_z()
 			{
-				z_0 = (Inc_Borders)?z_0-Epsilon<T>::rel:z_0;
-				z_e = (Inc_Borders)?z_e+Epsilon<T>::rel:z_e;
-
-				if((z_0>z_e)||(z.back()<z_0)||(z_e<z.front()))
+				if(z_layer.empty())
 				{
-					iz_0 = 1;
-					iz_e = 0;
-					return;
+					return false;
+				}
+				else if(z_layer.size()<2)
+				{
+					return true;
 				}
 
-				iz_0 = (z_0 <= z.front())?0:std::lower_bound(z.begin(), z.end(), z_0)-z.begin();
-				iz_e = (z.back() <= z_e)?z.size()-1:std::lower_bound(z.begin(), z.end(), z_e)-z.begin()-1;
-
-				if((iz_0 > iz_e)||(z[iz_e] < z_0)||(z_e < z[iz_0]))
+				Vector<T, e_Host> dis(z_layer.size()-1);
+				for(auto i=0; i<dis.size(); i++)
 				{
-					iz_0 = 1; 
-					iz_e = 0;
+					dis[i] = z_layer[i+1] - z_layer[i];
+				}
+				T min_dis = *std::min_element(dis.begin(), dis.end());
+				T max_dis = *std::max_element(dis.begin(), dis.end());
+
+				T dz = 0.01;
+				int nhist = static_cast<int>(ceil((max_dis-min_dis)/dz)+1);
+				Vector<int, e_Host> hist(nhist, 0);
+				for(auto i=0; i<dis.size(); i++)
+				{
+					int j = static_cast<int>(floor((dis[i]-min_dis)/dz+0.5));
+					if(j<hist.size())
+					{
+						hist[j]++;
+					}
+				}
+
+				int counter=0;
+				for(auto i=0; i<hist.size(); i++)
+				{
+					if(hist[i]>0)
+					{
+						counter++;
+					}
+				}
+
+				if(counter>10)
+				{
+					return false;
+				}
+				else
+				{
+					return true;
 				}
 			}
 
@@ -413,6 +469,7 @@ namespace multem
 			T l_y; 			// Box size-y
 			T l_z; 			// Box size-z
 
+			Vector<int, e_Host> idx;
 			Vector<int, e_Host> Z;
 			Vector<T, e_Host> x;
 			Vector<T, e_Host> y;
@@ -420,7 +477,6 @@ namespace multem
 			Vector<float, e_Host> sigma;
 			Vector<float, e_Host> occ;
 
-			Vector<int, e_Host> Z_unique;
 			Vector<T, e_Host> z_layer;
 
 			int Z_min;
@@ -472,6 +528,17 @@ namespace multem
 			T l_x_Int;
 			T l_y_Int;
 			T l_z_Int;
+
+		private:
+			struct sort_atoms_by_z
+			{
+				template<class Ttuple1, class Ttuple2>
+				__host__ __device__
+				bool operator()(const Ttuple1 &t1, const Ttuple2 &t2)
+				{
+					return thrust::get<4>(t1) < thrust::get<4>(t2);
+				}
+			};
 	};
 
 } // namespace multem

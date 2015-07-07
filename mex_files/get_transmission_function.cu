@@ -80,7 +80,7 @@ template<class T, multem::eDevice dev>
 void get_transmission_function(const mxArray *mxB, m_matrix_c &trans)
 {
 	multem::Input_Multislice<T, dev> input_multislice;
-	read_input_data(mxB, input_multislice);
+	read_input_data(mxB, input_multislice, false);
 
 	multem::Stream<T, dev> stream;
 	multem::FFT2<T, dev> fft2;

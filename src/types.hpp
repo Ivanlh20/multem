@@ -637,8 +637,8 @@ namespace multem
 			z.resize(new_size, value);
 			z.shrink_to_fit();
 
-			z_zero_def.resize(new_size, value);
-			z_zero_def.shrink_to_fit();
+			z_zero_def_plane.resize(new_size, value);
+			z_zero_def_plane.shrink_to_fit();
 
 			z_back_prop.resize(new_size, value);
 			z_back_prop.shrink_to_fit();
@@ -650,15 +650,16 @@ namespace multem
 			islice.assign(thickness.islice.begin(), thickness.islice.end());
 			iatom_e.assign(thickness.iatom_e.begin(), thickness.iatom_e.end());
 			z.assign(thickness.z.begin(), thickness.z.end());
-			z_zero_def.assign(thickness.z_zero_def.begin(), thickness.z_zero_def.end());
+			z_zero_def_plane.assign(thickness.z_zero_def_plane.begin(), thickness.z_zero_def_plane.end());
 			z_back_prop.assign(thickness.z_back_prop.begin(), thickness.z_back_prop.end());
 		}
 
-		Vector<int, dev> islice; 		// slice position
-		Vector<int, dev> iatom_e; 		// Last Atom index
-		Vector<T, dev> z; 				// z
-		Vector<T, dev> z_zero_def; 		// z: Zero defocus
-		Vector<T, dev> z_back_prop; 	// z: Back propagation
+		eThickness_Type thickness_type; 
+		Vector<int, dev> islice; 			// slice position
+		Vector<int, dev> iatom_e; 			// Last Atom index
+		Vector<T, dev> z; 					// z
+		Vector<T, dev> z_zero_def_plane; 	// z: Zero defocus
+		Vector<T, dev> z_back_prop; 		// z: Back propagation
 	};
 
 	template<class T>
@@ -666,7 +667,7 @@ namespace multem
 	{
 		using value_type = T;
 
-		rThickness(): size(0), islice(nullptr), iatom_e(nullptr), z(nullptr), z_zero_def(nullptr), z_back_prop(nullptr){ }
+		rThickness(): size(0), islice(nullptr), iatom_e(nullptr), z_zero_def_plane(nullptr), z_back_prop(nullptr){ }
 
 		template<class TThickness> 
 		rThickness<T>& operator=(TThickness &thickness)
@@ -674,8 +675,7 @@ namespace multem
 			size = thickness.size();
 			islice = raw_pointer_cast(thickness.islice.data());
 			iatom_e = raw_pointer_cast(thickness.iatom_e.data());
-			z = raw_pointer_cast(thickness.z.data());
-			z_zero_def = raw_pointer_cast(thickness.z_zero_def.data());
+			z_zero_def_plane = raw_pointer_cast(thickness.z_zero_def_plane.data());
 			z_back_prop = raw_pointer_cast(thickness.z_back_prop.data());
 			return *this; 
 		}
@@ -689,8 +689,7 @@ namespace multem
 		int size;
 		int *islice;
 		int *iatom_e;
-		T *z;
-		T *z_zero_def;
+		T *z_zero_def_plane;
 		T *z_back_prop;
 	};
 

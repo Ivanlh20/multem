@@ -22,6 +22,7 @@
 #include <thread>
 #include <type_traits>
 #include <algorithm>
+#include <iterator>
 
 #include "fftw3.h"
 #include "math.cuh"
@@ -354,59 +355,62 @@ namespace multem
 		return irm;
 	}
 
-	template<class TVector>
-	void match_vectors(const TVector &A_base, TVector &A_search)
+	template<class InputIterator, class TVector>
+	void match_vectors(InputIterator A_base_first, InputIterator A_base_last, TVector &A_search)
 	{
 		using T = Value_type<TVector>;
 
-		Vector<bool, e_Host> A_base_c(A_base.size(), true);
-		int size = min(A_base.size(), A_search.size());
+		std::size_t A_base_size = static_cast<int>(A_base_last - A_base_first);
+		Vector<bool, e_Host> A_base_c(A_base_size, true);
+		int size = min(A_base_size, A_search.size());
 		TVector A_d;
 		A_d.reserve(size);
 
 		for(auto i=0; i<A_search.size(); i++)
 		{
 			T val = A_search[i];
-			auto it = std::min_element(A_base.begin(), A_base.end(), [&val](const T &a, const T &b)->bool{ return fabs(a-val)<fabs(b-val); });
-			auto imin = static_cast<int>(it - A_base.begin());
+			auto it = std::min_element(A_base_first, A_base_last, [&val](const T &a, const T &b)->bool{ return fabs(a-val)<fabs(b-val); });
+			auto imin = static_cast<int>(it - A_base_first);
 
 			if(A_base_c[imin])
 			{
 				A_base_c[imin] = false;
-				A_d.push_back(A_base[imin]);
+				A_d.push_back(*it);
 			}
 		}
-		A_d.shrink_to_fit();
-		A_search.assign(A_d.begin(), A_d.end());
+		A_search = A_d;
+		A_search.shrink_to_fit();
 	}
 
-	template<class TVector>
-	void match_vectors(const TVector &A_base, const TVector &A_search, Vector<int, e_Host> &A_id, TVector &A_d)
+	template<class InputIterator, class TVector>
+	void match_vectors(InputIterator A_base_first, InputIterator A_base_last, TVector &A_search, Vector<int, e_Host> &A_idx)
 	{
 		using T = Value_type<TVector>;
 
-		Vector<bool, e_Host> A_base_c(A_base.size(), true);
-		int size = min(A_base.size(), A_search.size());
-		A_id.clear();
-		A_id.reserve(size);
-		A_d.clear();
+		std::size_t A_base_size = static_cast<int>(A_base_last - A_base_first);
+		Vector<bool, e_Host> A_base_c(A_base_size, true);
+		int size = min(A_base_size, A_search.size());
+		A_idx.clear();
+		A_idx.reserve(size);
+		TVector A_d;
 		A_d.reserve(size);
 
 		for(auto i=0; i<A_search.size(); i++)
 		{
 			T val = A_search[i];
-			auto it = std::min_element(A_base.begin(), A_base.end(), [&val](const T &a, const T &b)->bool{ return fabs(a-val)<fabs(b-val); });
-			auto imin = static_cast<int>(it - A_base.begin());
+			auto it = std::min_element(A_base_first, A_base_last, [&val](const T &a, const T &b)->bool{ return fabs(a-val)<fabs(b-val); });
+			auto imin = static_cast<int>(it - A_base_first);
 
 			if(A_base_c[imin])
 			{
 				A_base_c[imin] = false;
-				A_id.push_back(imin);
-				A_d.push_back(A_base[imin]);
+				A_idx.push_back(imin);
+				A_d.push_back(*it);
 			}
 		}
-		A_id.shrink_to_fit();
-		A_d.shrink_to_fit();
+		A_search = A_d;
+		A_search.shrink_to_fit();
+		A_idx.shrink_to_fit();
 	}
 
 	int get_close_Prime(int64_t n)

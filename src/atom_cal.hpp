@@ -31,7 +31,7 @@ namespace multem
 	template<class T>
 	class Atom_Cal{
 		public:
-			using value_type = typename T;
+			using value_type = T;
 
 			Atom_Cal():potential_type(ePT_Lobato_0_12)
 			{

@@ -20,6 +20,7 @@
 #define SPECIMEN_H
 
 #include <random>
+#include <algorithm>
 
 #include "math.cuh"
 #include "types.hpp"
@@ -33,7 +34,7 @@ namespace multem
 	template<class T, eDevice dev>
 	class Specimen{
 		public:
-			using value_type_r = typename T;
+			using value_type_r = T;
 			using size_type = std::size_t;
 
 			Specimen():input_multislice(nullptr){ }
@@ -67,7 +68,7 @@ namespace multem
 				atoms.set_Atoms(atoms_u, false , &atom_type);
 
 				/***************************************************************************/
-				get_slicing(input_multislice->interaction_model, input_multislice->potential_slicing, input_multislice->grid.dz);
+				get_slicing(slice);
 
 				/***************************************************************************/
 				rand.set_input_data(input_multislice->fp_seed, input_multislice->fp_dim);
@@ -96,14 +97,10 @@ namespace multem
 				}
 				// get atom information
 				atoms.get_Statistic(&atom_type);
-
-				if(input_multislice->is_multislice())
-				{
-					// Ascending sort by z
-					atoms.Sort_by_z();
-					// Slicing procedure
-					get_slicing(input_multislice->interaction_model, input_multislice->potential_slicing, input_multislice->grid.dz);
-				}
+				// Ascending sort by z
+				atoms.Sort_by_z();
+				// Slicing procedure
+				get_slicing(slice);
 			}
 
 			T dz(const int &islice)
@@ -126,11 +123,108 @@ namespace multem
 			Thickness<T, e_Host> thickness; 					// Thicknesses
 
 		private:
+			// get thickness
+			void get_thickness(const Vector<T, e_Host> &z_slice, Thickness<T, e_Host> &thickness)
+			{
+				auto get_zero_defocus_plane = [&](const T &z_min, const T &z_max)->T
+				{
+					T zero_defocus_plane;
+					switch(input_multislice->zero_defocus_type)
+					{
+						case eZDT_First:
+						{
+							zero_defocus_plane = z_min;
+						}
+						break;
+						case eZDT_Middle:
+						{
+							zero_defocus_plane = 0.5*(z_min + z_max);
+						}
+						break;
+						case eZDT_Last:
+						{
+							zero_defocus_plane = z_max;
+						}
+						break;
+						default :
+						{
+							zero_defocus_plane = input_multislice->zero_defocus_plane;
+						}
+					}
+					return zero_defocus_plane;
+				};
+
+				Vector<int, e_Host> iz_layer;
+				if(input_multislice->is_through_planes())
+				{
+					multem::match_vectors(atoms_u.z_layer.begin(), atoms_u.z_layer.end(), input_multislice->thickness, iz_layer);
+				}
+				else
+				{
+					multem::match_vectors(z_slice.begin()+1, z_slice.end(), input_multislice->thickness);
+				}
+
+				thickness.resize(input_multislice->thickness.size());
+				for(auto i=0; i<thickness.size(); i++)
+				{
+					int iatom_e, islice = 0;
+					T thk = input_multislice->thickness[i];
+					for(auto j=0; j<z_slice.size()-1; j++)
+					{
+						if((z_slice[j] < thk)&&(thk <= z_slice[j+1]))
+						{
+							islice = j;
+							break;
+						}
+					}
+
+					thickness.islice[i] = islice;
+					T z_lim;
+					if(input_multislice->is_through_planes())
+					{
+						z_lim = atoms_u.z_layer[iz_layer[i]] + 0.5*atoms_u.get_spacing(iz_layer[i], atoms_u.z_layer);
+					}
+					else
+					{
+						z_lim = z_slice[islice+1];
+					}
+					thickness.iatom_e[i] = iatom_e = atoms_u.find_by_z(z_lim, false);
+					thickness.z_zero_def_plane[i] = get_zero_defocus_plane(atoms_u.z[0], atoms_u.z[iatom_e]);
+					if(input_multislice->is_through_slices())
+					{
+						thickness.z_back_prop[i] = 0;
+					}
+					else
+					{
+						thickness.z_back_prop[i] = thickness.z_zero_def_plane[i] - z_slice[islice+1];
+					}
+				}
+			}
+	
+			//template<class T>
+			//int IsInThickness(int islice)
+			//{
+			//	int iThickness = -1;
+			//	for(int i=0; i<thickness.n; i++)
+			//	{
+			//		if(thickness.islice[i] == islice)
+			//		{
+			//			iThickness = i;
+			//			break;
+			//		}
+			//	}
+	
+			//	return iThickness;
+			//}
 
 			// Slicing
-			void get_slicing(const eElec_Spec_Int_Model &interaction_model, const ePotential_Slicing &potential_slicing, T dz_i)
-			{
-				if(interaction_model != eESIM_Multislice){
+			void get_slicing(Slice<T, e_Host> &slice)
+			{				
+				
+				atoms_u.get_z_slice(input_multislice->potential_slicing, input_multislice->grid.dz, atoms, z_slice);
+				get_thickness(z_slice, thickness);
+
+				if(input_multislice->interaction_model != eESIM_Multislice){
 					slice.resize(1);
 					slice.z_0[0] = atoms.z_Int_min; 
 					slice.z_e[0] = atoms.z_Int_max; 
@@ -138,25 +232,16 @@ namespace multem
 					slice.z_int_e[0] = slice.z_e[0];
 					slice.iatom_0[0] = 0;
 					slice.iatom_e[0] = atoms.size()-1;
-
-					thickness.resize(1);
-					thickness.islice[0] = slice.size()-1;
-					thickness.iatom_e[0] = slice.iatom_e[slice.size()-1];
-					thickness.z[0] = atoms.z_max;
-					thickness.z_zero_def[0] = input_multislice->zero_defocus_plane;
-					thickness.z_back_prop[0] = thickness.z_zero_def[0] - atoms_u.z_max;
-
 					return;
 				}
 
-				atoms_u.get_z_slice(potential_slicing, dz_i, atoms, z_slice);
 				slice.resize(z_slice.size()-1);
 
 				for(auto islice=0; islice<slice.size(); islice++)
 				{
 					slice.z_0[islice] = z_slice[islice]; 
 					slice.z_e[islice] = z_slice[islice + 1];
-					switch(potential_slicing)
+					switch(input_multislice->potential_slicing)
 					{
 						case ePS_Planes:
 						{
@@ -186,21 +271,7 @@ namespace multem
 						break;
 					}
 				}
-
-				if((slice.size() == 1)||(input_multislice->thickness_type == eTT_Whole_Specimen))
-				{
-					thickness.resize(1);
-	
-					thickness.islice[0] = slice.size()-1;
-					thickness.iatom_e[0] = slice.iatom_e[slice.size()-1];
-					thickness.z[0] = atoms.z_max;
-					thickness.z_zero_def[0] = input_multislice->zero_defocus_plane;
-					thickness.z_back_prop[0] = thickness.z_zero_def[0] - slice.z_e[slice.size()-1];
-				}
 			}
-
-			// get thickness
-			//void get_Thickness(eThickness_Type thickness_type);
 
 			struct Random
 			{
@@ -269,92 +340,6 @@ namespace multem
 			Vector<T, e_Host> z_slice;
 	};
 
-	//// get thickness
-	//template<class T>
-	//void Specimen<T>::get_Thickness(eThickness_Type thickness_type)
-	//{
-	//	auto get_z_BackProp = [](eZero_Defocus_Type zero_defocus_type, T zero_defocus_plane, T z_min, T z_max)
-	//	{
-	//		switch(zero_defocus_type)
-	//		{
-	//			case eZDT_First:
-	//			{
-	//				zero_defocus_plane = z_min;
-	//			}
-	//			break;
-	//			case eZDT_Middle:
-	//			{
-	//				zero_defocus_plane = 0.5*(z_min + z_max);
-	//			}
-	//			break;
-	//			case eZDT_Last:
-	//			{
-	//				zero_defocus_plane = z_max;
-	//			}
-	//			break;
-	//		}
-	//
-	//		return zero_defocus_plane - (atoms.z[thickness.iAtom[iThickness]]+atoms.R_Int_max);
-	//	}
-	//
-	//	if((slice.size() == 1)||(thickness_type == eTT_Whole_Specimen))
-	//	{
-	//		thickness.resize(1);
-	//
-	//		thickness[0].islice = slice.size()-1;
-	//		thickness[0].iatom_e = slice.back().iatom_e;
-	//		thickness[0].z = atoms.z_max;
-	//		thickness[0].z_BackProp = input_multislice->zero_defocus_plane - slice[nslice-1].ze;
-	//		return;
-	//	}
-	//	
-	//	int nz_i, nz;
-	//	T *z_i = 0, *z = 0;
-	//
-	//	if(input_multislice->thickness_type == 3)
-	//	{ 
-	//		multem::match_vectors(input_multislice->nThickness_i, input_multislice->Thickness_i, nPlanes_u, Planes_u, nz_i, z_i);
-	//	}
-	//	else
-	//	{
-	//		nz_i = input_multislice->nThickness_i;
-	//		z_i = new T [nz_i];
-	//		memcpy(z_i, input_multislice->Thickness_i, nz_i*cSizeofRD); 
-	//	}
-	//
-	//	nz = nslice;
-	//	z = new T [nz];
-	//	for(int iz=0; iz<nz; iz++) 
-	//		z[iz] = 0.5*(slice[iz].z0+slice[iz].ze);
-	//
-	//	multem::match_vectors(nz_i, z_i, nz, z, thickness.n, thickness.h, thickness.islice);
-	//	nz = 0; delete [] z; z = 0;
-	//	nz_i = 0; delete [] z_i; z_i = 0;
-	//
-	//	delete [] thickness.zb; thickness.zb = new T[thickness.n];
-	//	delete [] thickness.iAtom; thickness.iAtom = new int[thickness.n];
-	//	for(int iThickness=0; iThickness<thickness.n; iThickness++)
-	//	{
-	//		thickness.iAtom[iThickness] = atoms.BinarySearch_by_z(thickness.h[iThickness], 0, atoms.n-1, eST_Top);
-	//		thickness.zb[iThickness] = input_multislice->zero_defocus_plane - (atoms.z[thickness.iAtom[iThickness]]+atoms.R_Int_max);
-	//	}
-	//}
-	//
-	//template<class T>
-	//int Specimen<T>::IsInThickness(int islice)
-	//{
-	//	int iThickness = -1;
-	//	for(int i=0; i<thickness.n; i++)
-	//	{
-	//		if(thickness.islice[i] == islice)
-	//		{
-	//			iThickness = i;
-	//			break;
-	//		}
-	//	}
-	//
-	//	return iThickness;
-	//}
 } // namespace multem
 
 #endif

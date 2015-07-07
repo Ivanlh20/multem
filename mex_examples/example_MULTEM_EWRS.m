@@ -3,9 +3,9 @@ clear all; clc;
 input_multislice = multem_default_values();         % Load default values;
 
 input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
-input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+input_multislice.device = 1;                        % eD_CPU = 1, eD_GPU = 2
 input_multislice.cpu_ncores = 1; 
-input_multislice.cpu_nthread = 4; 
+input_multislice.cpu_nthread = 2; 
 input_multislice.gpu_device = 0;
 input_multislice.gpu_nstream = 8;
 
@@ -17,7 +17,7 @@ input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Pen
 
 input_multislice.fp_dim = 110; 
 input_multislice.fp_seed = 1983; 
-input_multislice.fp_nconf = 50;
+input_multislice.fp_nconf = 10;
 input_multislice.fp_iconf = 0;
 
 input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4

@@ -21,6 +21,10 @@ input_multislice.fp_iconf = 1;
 
 input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
 input_multislice.zero_defocus_plane = 0;
+
+input_multislice.thickness_type = 1;                % eTT_Whole_Specimen = 1, eTT_Through_Slices = 2, eTT_Through_Planes = 3
+input_multislice.thickness = 0;                     % Array of thicknesses
+
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;
 
@@ -39,11 +43,14 @@ input_multislice.ewrs_convergent_beam = 0;     % 1: true, 0:false
 input_multislice.ewrs_x0 = 0.0;                % x position 
 input_multislice.ewrs_y0 = 0.0;                % y position
 
-na = 8; nb = 8; nc = 25; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
 , a, b, c, input_multislice.dz] = Au001Crystal(na, nb, nc, ncu, rms3d);
+
+input_multislice.thickness_type = 3;                 % eTT_Whole_Specimen = 1, eTT_Through_Slices = 2, eTT_Through_Planes = 3
+input_multislice.thickness = 0:0.5*c:1000;           % Array of thicknesses
 
 input_multislice.nx = 1024; 
 input_multislice.ny = 1024;

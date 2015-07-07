@@ -156,7 +156,7 @@ void get_wave_function(const mxArray *mxB, m_matrix_c &wave)
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	multem::Input_Multislice<double, multem::e_Host> input_multislice;
-	read_input_data(prhs[0], input_multislice);
+	read_input_data(prhs[0], input_multislice, false);
 
 	auto wave = mx_create_matrix<m_matrix_c>(input_multislice.grid, plhs[0]);
 

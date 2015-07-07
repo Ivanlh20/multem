@@ -32,7 +32,7 @@ namespace multem
 	class Microscope_Effects
 	{
 		public:
-			using value_type_r = typename T;
+			using value_type_r = T;
 			using value_type_c = typename complex<T>;
 
 			Microscope_Effects():input_multislice(nullptr), stream(nullptr), fft2(nullptr){ }			

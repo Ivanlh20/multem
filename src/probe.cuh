@@ -31,7 +31,7 @@ namespace multem
 	template<class T, eDevice dev>
 	class Probe{
 		public:
-			using value_type_r = typename T;
+			using value_type_r = T;
 			using value_type_c = typename complex<T>;
 
 			Probe():input_multislice(nullptr){ }
