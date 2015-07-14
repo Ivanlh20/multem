@@ -473,7 +473,7 @@ namespace multem
 				}
 				else
 				{
- 					M_io.V[ixy] = static_cast<T>(0);
+ 					M_io.V[ixy] = 0;
 				}
 			}
 		}
@@ -923,25 +923,25 @@ namespace multem
 			switch(potential_type)
 			{
 				case ePT_Doyle_0_4:
-					device_detail::linear_Vz<ePT_Doyle_0_4, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					device_detail::linear_Vz<ePT_Doyle_0_4, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
 					break;
 				case ePT_Peng_0_4:
-					device_detail::linear_Vz<ePT_Peng_0_4, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					device_detail::linear_Vz<ePT_Peng_0_4, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
 					break;
 				case ePT_Peng_0_12:
-					device_detail::linear_Vz<ePT_Peng_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					device_detail::linear_Vz<ePT_Peng_0_12, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
 					break;
 				case ePT_Kirkland_0_12:
-					device_detail::linear_Vz<ePT_Kirkland_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					device_detail::linear_Vz<ePT_Kirkland_0_12, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
 					break;
 				case ePT_Weickenmeier_0_12:
-					device_detail::linear_Vz<ePT_Weickenmeier_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					device_detail::linear_Vz<ePT_Weickenmeier_0_12, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
 					break;
 				case ePT_Lobato_0_12:
-					device_detail::linear_Vz<ePT_Lobato_0_12, TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+					device_detail::linear_Vz<ePT_Lobato_0_12, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
 					break;
 			}
-			device_detail::cubic_poly_coef<TQ1::value_type><<<dim3(1), dim3(c_nR), 0, stream[istream]>>>(atom_Vp[istream]);
+			device_detail::cubic_poly_coef<typename TQ1::value_type><<<dim3(1), dim3(c_nR), 0, stream[istream]>>>(atom_Vp[istream]);
 		}
 	}
 
@@ -959,7 +959,7 @@ namespace multem
 		{
 			GridBT gridBT = atom_Vp[istream].get_eval_cubic_poly_gridBT();
 
-			device_detail::eval_cubic_poly<TVector_r::value_type><<<gridBT.Blk, gridBT.Thr, 0, stream[istream]>>>(grid, atom_Vp[istream], V0);
+			device_detail::eval_cubic_poly<typename TVector_r::value_type><<<gridBT.Blk, gridBT.Thr, 0, stream[istream]>>>(grid, atom_Vp[istream], V0);
 		}
 	}
 
@@ -1033,7 +1033,7 @@ namespace multem
 
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::probe<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, lens, x, y, fPsi_o);
+		device_detail::probe<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, lens, x, y, fPsi_o);
 
 		value_type_r total = sum_square(grid, fPsi_o);
 		scale(fPsi_o, sqrt(value_type_r(grid.nxy())/total));

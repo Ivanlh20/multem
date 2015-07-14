@@ -1944,14 +1944,14 @@ namespace multem
 
 	/******************************FFT2************************/
 	template<class T, eDevice dev>
-	struct FFT2 { };
+	struct FFT2;
 
 	template<>
 	struct FFT2<float, e_Host>
 	{
 		public:
 			using value_type = float;
-			using TVector_c = Vector<complex<float>, e_Host>;
+			using TVector_c = Vector<std::complex<float>, e_Host>;
 
 			static const eDevice device = e_Host;
 

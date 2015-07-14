@@ -659,7 +659,7 @@ namespace multem
 
 		for(auto istream = 0; istream < stream.n_act_stream; istream++)
 		{
-			stream[istream] = std::thread(host_detail::eval_cubic_poly<Value_type<TVector_r>>, std::ref(grid), std::ref(atom_Vp[istream]), std::ref(V0));
+			stream[istream] = std::thread(std::bind(host_detail::eval_cubic_poly<Value_type<TVector_r>>, std::ref(grid), std::ref(atom_Vp[istream]), std::ref(V0)));
 		}
 		stream.synchronize();
 	}

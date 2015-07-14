@@ -88,7 +88,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	T get_Scherzer_focus(const T &E_0, const T &Cs3)
 	{
-		T lambda = get_lambda(E0);
+		T lambda = get_lambda(E_0);
 		return sqrt(Cs3*lambda);
 	}
 
@@ -96,7 +96,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	T get_Scherzer_aperture(const T &E_0, const T &Cs3)
 	{
-		T lambda = get_lambda(E0);
+		T lambda = get_lambda(E_0);
 		return pow(6.0/(Cs3*pow(lambda, 3)), 0.25);
 	}
 
@@ -1002,14 +1002,14 @@ namespace multem
 		DEVICE_CALLABLE FORCEINLINE 
 		void VR_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
 		{
-			int_VR(Vr_Weickenmeier_0_12<TrPP_Coef>, x, rcoef, rqz, y);
+			int_VR(Vr_Weickenmeier_0_12<TrPP_Coef, Value_type<TrPP_Coef>>, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void VR_dVR_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
 		{
-			int_VR_dVR(Vr_dVr_Weickenmeier_0_12<TrPP_Coef>, x, rcoef, rqz, y, dy);
+			int_VR_dVR(Vr_dVr_Weickenmeier_0_12<TrPP_Coef, Value_type<TrPP_Coef>>, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
@@ -1044,84 +1044,84 @@ namespace multem
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_Doyle_0_4(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
 		{
-			int_Vz_z0_ze(Vr_Doyle_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Doyle_0_4<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_dVz_Doyle_0_4(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Doyle_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Doyle_0_4<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_Peng_0_4(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
 		{
-			int_Vz_z0_ze(Vr_Peng_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Peng_0_4<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_dVz_Peng_0_4(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Peng_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Peng_0_4<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_Peng_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
 		{
-			int_Vz_z0_ze(Vr_Peng_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Peng_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_dVz_Peng_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Peng_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Peng_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_Kirkland_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
 		{
-			int_Vz_z0_ze(Vr_Kirkland_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Kirkland_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_dVz_Kirkland_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Kirkland_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Kirkland_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_Weickenmeier_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
 		{
-			int_Vz_z0_ze(Vr_Weickenmeier_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Weickenmeier_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_dVz_Weickenmeier_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Weickenmeier_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Weickenmeier_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_Lobato_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
 		{
-			int_Vz_z0_ze(Vr_Lobato_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Lobato_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
 		DEVICE_CALLABLE FORCEINLINE 
 		void Vz_dVz_Lobato_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Lobato_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Lobato_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		/***************************************************************************/
@@ -2025,7 +2025,7 @@ namespace multem
 
 	template<class TGrid, class TFFT2, class TVector_1, class TVector_2>
 	void transmission_funtion(TGrid &grid, TFFT2 &fft2, eElec_Spec_Int_Model elec_spec_int_model, const Value_type<TGrid> w, TVector_1 &V0_i, TVector_2 &Trans_o)
-	{	
+	{
 		using value_type_r = Value_type<TGrid>;
 
 		thrust::transform(V0_i.begin(), V0_i.end(), Trans_o.begin(), functor::transmission_funtion<value_type_r>(w, elec_spec_int_model));
