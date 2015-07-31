@@ -19,8 +19,9 @@
 #ifndef MULTISLICE_H
 #define MULTISLICE_H
 
-#include "fftw3.h"
+#include <fftw3.h>
 #include "types.hpp"
+#include "traits.cuh"
 #include "host_device_functions.cuh"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
@@ -36,11 +37,11 @@ namespace multem
 	{
 		public:
 			using value_type_r = T;
-			using value_type_c = typename complex<T>;
+			using value_type_c = complex<T>;
 
-			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io)
+			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i)
 			{
-				input_multislice = input_multislice_io;
+				input_multislice = input_multislice_i;
 				if(dev == e_Device)
 				{
 					cudaSetDevice(input_multislice->gpu_device);
@@ -176,15 +177,31 @@ namespace multem
 				}
 			}
 
-			template<class TVector_Host_r, class TVector_Host_c>
-			void EWFS_EWRS(TVector_Host_r &host_m2psi_tot, TVector_Host_c &host_psi_coh)
+			template<class TVector_Host_vr, class TVector_Host_vc>
+			void EWFS_EWRS(TVector_Host_vr &host_m2psi_v, TVector_Host_vc &host_psi_v)
 			{
-				tot_coh_FS_RS(m2psi_tot, psi_coh);
+				value_type_r gx_0 = input_multislice->gx_0();
+				value_type_r gy_0 = input_multislice->gy_0();
+				value_type_r w = input_multislice->ifp_nconf();
 
-				multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
-				if(input_multislice->coherent_contribution)
+				reset_m2psi_tot_and_psi_coh(host_m2psi_v, host_psi_v);
+
+				for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
 				{
-					multem::to_host_shift(input_multislice->grid, psi_coh, host_psi_coh);
+					wave_function.move_atoms(iconf);
+					wave_function.psi_0();
+
+					for(auto islice=0; islice<wave_function.slice.size(); islice++)
+					{
+						wave_function.psi_slice(gx_0, gy_0, islice, wave_function.psi_z);
+						wave_function.add_m2psi_psi(wave_function.psi_z, space, gx_0, gy_0, islice, w, host_m2psi_v, host_psi_v);
+					}
+				}
+
+				for(auto ithk=0; ithk<host_m2psi_v.size(); ithk++)
+				{
+					multem::fft2_shift(input_multislice.grid, host_m2psi_v[ithk]);
+					multem::fft2_shift(input_multislice.grid, host_psi_v[ithk]);
 				}
 			}
 
@@ -355,7 +372,7 @@ namespace multem
 			template<class TMatlab_1>
 			void output_matlab(TMatlab_1 *host_tot)
 			{
-				using value_type_1 = multem::traits::Value_type<TMatlab_1>;
+				using value_type_1 = Value_type<TMatlab_1>;
 
 				if(input_multislice->is_STEM())
 				{
@@ -365,42 +382,42 @@ namespace multem
 				}
 				else if(input_multislice->is_ISTEM())
 				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
-					m_matrix_r coh;
+					auto *tot = reinterpret_cast<rmatrix_r*>(host_tot);
+					rmatrix_r coh;
 
 					ISTEM(*tot, coh);
 				}
 				else if(input_multislice->is_CBED_CBEI())
 				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
-					m_matrix_r coh;
+					auto *tot = reinterpret_cast<rmatrix_r*>(host_tot);
+					rmatrix_r coh;
 
 					CBED_CBEI(*tot, coh);
 				}
 				else if(input_multislice->is_ED_HRTEM())
 				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
-					m_matrix_r coh;
+					auto *tot = reinterpret_cast<rmatrix_r*>(host_tot);
+					rmatrix_r coh;
 
 					ED_HRTEM(*tot, coh);
 				}
 				else if(input_multislice->is_PED_HCI())
 				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
-					m_matrix_r coh;
+					auto *tot = reinterpret_cast<rmatrix_r*>(host_tot);
+					rmatrix_r coh;
 
 					PED_HCI(*tot, coh);
 				}
 				else if(input_multislice->is_EWFS_EWRS())
 				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
-					m_matrix_c coh;
+					auto *tot = reinterpret_cast<rmatrix_r*>(host_tot);
+					rmatrix_c coh;
 
 					EWFS_EWRS(*tot, coh);
 				}
 				else if(input_multislice->is_EFTEM())
 				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
+					auto *tot = reinterpret_cast<rmatrix_r*>(host_tot);
 
 					EFTEM(*tot);
 				}
@@ -415,8 +432,8 @@ namespace multem
 			template<class TMatlab_1, class TMatlab_2>
 			void output_matlab(TMatlab_1 *host_tot, TMatlab_2 *host_coh)
 			{
-				using value_type_1 = multem::traits::Value_type<TMatlab_1>;
-				using value_type_2 = multem::traits::Value_type<TMatlab_2>;
+				using value_type_1 = Value_type<TMatlab_1>;
+				using value_type_2 = Value_type<TMatlab_2>;
 
 				if(input_multislice->is_STEM())
 				{
@@ -427,36 +444,36 @@ namespace multem
 				}
 				else if(input_multislice->is_ISTEM())
 				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
-					auto *coh = reinterpret_cast<m_matrix_r*>(host_coh);
+					auto *tot = reinterpret_cast<rmatrix_r*>(host_tot);
+					auto *coh = reinterpret_cast<rmatrix_r*>(host_coh);
 
 					ISTEM(*tot, *coh);
 				}
 				else if(input_multislice->is_CBED_CBEI())
 				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
-					auto *coh = reinterpret_cast<m_matrix_r*>(host_coh);
+					auto *tot = reinterpret_cast<rmatrix_r*>(host_tot);
+					auto *coh = reinterpret_cast<rmatrix_r*>(host_coh);
 
 					CBED_CBEI(*tot, *coh);
 				}
 				else if(input_multislice->is_ED_HRTEM())
 				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
-					auto *coh = reinterpret_cast<m_matrix_r*>(host_coh);
+					auto *tot = reinterpret_cast<rmatrix_r*>(host_tot);
+					auto *coh = reinterpret_cast<rmatrix_r*>(host_coh);
 
 					ED_HRTEM(*tot, *coh);
 				}
 				else if(input_multislice->is_PED_HCI())
 				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
-					auto *coh = reinterpret_cast<m_matrix_r*>(host_coh);
+					auto *tot = reinterpret_cast<rmatrix_r*>(host_tot);
+					auto *coh = reinterpret_cast<rmatrix_r*>(host_coh);
 
 					PED_HCI(*tot, *coh);
 				}
 				if(input_multislice->is_EWFS_EWRS())
 				{
-					auto *tot = reinterpret_cast<m_matrix_r*>(host_tot);
-					auto *coh = reinterpret_cast<m_matrix_c*>(host_coh);
+					auto *tot = reinterpret_cast<rmatrix_r*>(host_tot);
+					auto *coh = reinterpret_cast<rmatrix_c*>(host_coh);
 
 					EWFS_EWRS(*tot, *coh);
 				}

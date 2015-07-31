@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!-- Copyright 2013 The MathWorks, Inc. -->
+<!-- Copyright 2013-2014 The MathWorks, Inc. -->
 <config
     Name="nvcc"
     ShortName="nvcc"
@@ -29,19 +29,19 @@
           CMDLINE3="rm -f $OBJ"
           
           CXX="$NVCC"
-          DEFINES="--compiler-options=-O2,-D_GNU_SOURCE,$MATLABMEX"
+          DEFINES="--compiler-options=-D_GNU_SOURCE,$MATLABMEX"
           MATLABMEX="-DMATLAB_MEX_FILE"
-          NVCCFLAGS="-gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot; $NVCC_FLAGS -std=c++11"
-          CXXFLAGS="--compiler-options=-ansi,-fexceptions,-fPIC,-fno-omit-frame-pointer,-pthread,-std=c++11,-msse2,-mavx"
+          NVCCFLAGS="-gencode=arch=compute_20,code=sm_20 -gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot; $NVCC_FLAGS"
+          CXXFLAGS="--compiler-options=-ansi,-fexceptions,-fPIC,-fno-omit-frame-pointer,-pthread"
           INCLUDE="-I&quot;$MATLABROOT/extern/include&quot; -I&quot;$MATLABROOT/simulink/include&quot; -I&quot;$MATLABROOT/toolbox/distcomp/gpu/extern/include/&quot;" 
           CXXOPTIMFLAGS="-O -DNDEBUG"
           CXXDEBUGFLAGS="-g"
           
-          LDXX="g++"
+          LDXX="$GCC"
           LDFLAGS="-pthread -Wl,--no-undefined "
           LDTYPE="-shared"
           LINKEXPORT="-Wl,--version-script,&quot;$MATLABROOT/extern/lib/$ARCH/mexFunction.map&quot;"
-          LINKLIBS="-Wl,-rpath-link,$MATLABROOT/bin/$ARCH -L&quot;$MATLABROOT/bin/$ARCH&quot; -lmx -lmex -lmat -lm -lmwgpu -L/opt/cuda/lib64 -L/usr/local/cuda-7.0/lib64 -lcufft -lcudart"
+          LINKLIBS="-Wl,-rpath-link,$MATLABROOT/bin/$ARCH -L&quot;$MATLABROOT/bin/$ARCH&quot; -lmx -lmex -lmat -lm -lmwgpu $MATLABROOT/bin/$ARCH/libcudart.so.7.0"
           LDOPTIMFLAGS="-O"
           LDDEBUGFLAGS="-g"
           
@@ -58,8 +58,9 @@
                     <dirExists name="$$" />
                     <fileExists name="$$/nvcc" />
                 </and>
-		<cmdReturns name="which nvcc" />
-                <fileExists name="/opt/cuda/bin/nvcc" />
+                <cmdReturns name="which nvcc" />
+                <fileExists name="/usr/local/cuda-7.0/bin/nvcc" /> <!-- The default install location -->
+                <fileExists name="/usr/local/cuda/bin/nvcc" />               <!-- A common alternative install location -->
             </or>
         </NVCC>
 

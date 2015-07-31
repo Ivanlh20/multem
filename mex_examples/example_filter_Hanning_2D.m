@@ -1,6 +1,6 @@
 clc; clear all;
 nx = 1024; ny = 1024;
-dx = 1; dy = 1; k = 0.25; shift = 2;
+dx = 1; dy = 1; k = 0.01; shift = 2;
 tic;
 f = get_filter_Hanning_2D(ny, nx, dy, dx, k, shift);
 toc;

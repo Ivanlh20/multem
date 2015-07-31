@@ -17,6 +17,7 @@
  */
 
 #include "types.hpp"
+#include "traits.cuh"
 #include "input_multislice.hpp"
 #include "atom_data.hpp"
 #include "specimen.hpp"
@@ -25,21 +26,22 @@
 #include "device_functions.cuh"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
+using multem::rmatrix_r;
 
 template<class TInput_Multislice>
 void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice)
 {
-	using value_type_r = multem::traits::Value_type<TInput_Multislice>;
+	using value_type_r = multem::Value_type<TInput_Multislice>;
 
 	input_multislice.phonon_model = mx_get_scalar_field<multem::ePhonon_Model>(mx_input_multislice, "phonon_model"); 
 	input_multislice.interaction_model = mx_get_scalar_field<multem::eElec_Spec_Int_Model>(mx_input_multislice, "interaction_model");
 	input_multislice.potential_slicing = mx_get_scalar_field<multem::ePotential_Slicing>(mx_input_multislice, "potential_slicing");
 	input_multislice.fp_dim.set(mx_get_scalar_field<int>(mx_input_multislice, "fp_dim"));
 	input_multislice.fp_seed = mx_get_scalar_field<int>(mx_input_multislice, "fp_seed");
-	input_multislice.fp_iconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_iconf");
+	input_multislice.fp_single_conf = true;
+	input_multislice.fp_nconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_nconf");
 
 	int nx = 1024;
 	int ny = 1024;
@@ -49,7 +51,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	bool bwl = false;
 	bool pbc_xy = false; 
 
-	auto atoms = mx_get_matrix_field<m_matrix_r>(mx_input_multislice, "atoms");
+	auto atoms = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "atoms");
 
 	input_multislice.atoms.set_Atoms(atoms.rows, atoms.real, lx, ly, dz);
 	input_multislice.grid.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
@@ -64,11 +66,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	multem::Specimen<double, multem::e_Host> specimen;
 	specimen.set_input_data(&input_multislice);
-	specimen.move_atoms(input_multislice.fp_iconf);
+	specimen.move_atoms(input_multislice.fp_nconf);
 
 	/************************Output data**************************/
-	auto atomsM = mx_create_matrix<m_matrix_r>(specimen.atoms.size(), 6, plhs[0]);
-	auto sliceM = mx_create_matrix<m_matrix_r>(specimen.slice.size(), 6, plhs[1]);
+	auto atomsM = mx_create_matrix<rmatrix_r>(specimen.atoms.size(), 6, plhs[0]);
+	auto sliceM = mx_create_matrix<rmatrix_r>(specimen.slice.size(), 6, plhs[1]);
 
 	for(auto i=0; i<atomsM.rows; i++)
 	{

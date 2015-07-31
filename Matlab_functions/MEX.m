@@ -11,15 +11,21 @@ else
 	CUDA_INC = strcat('-I"', CUDA_PATH, filesep, 'include"');
 end;
 
+if(isunix)
+    FFTW_THREAD_LIB='-lfftw3f_threads -lfftw3_threads';
+else
+    FFTW_THREAD_LIB='';
+end;
+
 ADD_INC = strcat('-I', path);
-OUTDIR = strcat('..', filesep, 'Mex_Executables');
+OUTDIR = strcat('..', filesep, 'mex_executables');
 
 if (strcmpi(option, 'debug'))
     textcommands = strjoin({'mex -silent -g -largeArrayDims -outdir', OUTDIR, ADD_INC, CUDA_INC...
-    , mfile, strjoin(varargin), ['-L' path ' -lfftw3'], ['-L' path ' -lfftw3f']});   
+    , mfile, strjoin(varargin), ['-L' path ' -lfftw3f'], ['-L' path ' -lfftw3'], FFTW_THREAD_LIB});   
 else
     textcommands = strjoin({'mex -silent -largeArrayDims -outdir', OUTDIR, ADD_INC, CUDA_INC...
-    , mfile, strjoin(varargin), ['-L' path ' -lfftw3'], ['-L' path ' -lfftw3f']}); 
+    , mfile, strjoin(varargin), ['-L' path ' -lfftw3f'], ['-L' path ' -lfftw3'], FFTW_THREAD_LIB}); 
 end;
 disp(textcommands);
 eval(textcommands);

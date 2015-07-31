@@ -21,18 +21,18 @@
 #include "atomic_data.hpp"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
+using multem::rmatrix_r;
 
 void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	auto potential_type = mx_get_scalar<multem::ePotential_Type>(prhs[0]);
 	auto Z = mx_get_scalar<int>(prhs[1]);
-	auto g = mx_get_matrix<m_matrix_r>(prhs[2]);
+	auto g = mx_get_matrix<rmatrix_r>(prhs[2]);
 
-	auto feg = mx_create_matrix<m_matrix_r>(g.rows, g.cols, plhs[0]);
-	auto dfeg = mx_create_matrix<m_matrix_r>(g.rows, g.cols, plhs[1]);
+	auto feg = mx_create_matrix<rmatrix_r>(g.rows, g.cols, plhs[0]);
+	auto dfeg = mx_create_matrix<rmatrix_r>(g.rows, g.cols, plhs[1]);
 
 	multem::Atom_Type<double, multem::e_Host> atom_type;
 	multem::Atomic_Data atomic_data;

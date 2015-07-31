@@ -30,7 +30,7 @@ namespace multem
 	template<class T>
 	class Crystal{
 		public:
-			Crystal():na(0), nb(0), nc(0), a(0), b(0), c(0){ };
+			Crystal():na(0), nb(0), nc(0), a(0), b(0), c(0){};
 
 			void Create3DCrystal(const int &na_i, const int &nb_i, const int &nc_i, T a_i, T b_i, T c_i, Vector<Atom_Data<T>, e_Host> &uLayer_i, Atom_Data<T> &Atoms_o)
 			{

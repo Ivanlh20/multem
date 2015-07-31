@@ -63,8 +63,8 @@ namespace multem
 		totalPhysMem *= memInfo.mem_unit;
 		long long physMemFree = memInfo.freeram;
 		physMemFree *= memInfo.mem_unit;
-		free = static_cast<double>(physMemFree); // check if division by 1MB=1048576 is necessary
-		total = static_cast<double>(totalPhysMem); // check if division by 1MB=1048576 is necessary
+		free = static_cast<double>(physMemFree)/(1048576.0);	// check if division by 1MB=1048576 is necessary
+		total = static_cast<double>(totalPhysMem)/(1048576.0);	// check if division by 1MB=1048576 is necessary
 #endif
 	}
 
@@ -79,18 +79,9 @@ namespace multem
 			total = static_cast<double>(total_t)/(1048576.0);
 		}
 	}
-    
-    // the free and total amount of memory available (Mb)
-	inline
-	void memory_info(double &host_free, double &host_total, double &device_free, double &device_total)
-	{
-		memory_info<e_Host>(host_total, host_free);
-
-		memory_info<e_Device>(device_total, device_free);
-	}
 
 	template<eDevice dev>
-	double get_free_memory();
+	double get_free_memory(){ return 0; }
 
 	template<>
 	double get_free_memory<e_Host>()
@@ -149,7 +140,7 @@ namespace multem
 		int count = 0;
 		size_t count_len = sizeof(count);
 		sysctlbyname("hw.logicalcpu", &count, &count_len, NULL, 0);
-                host_properties.nprocessors = count;
+ host_properties.nprocessors = count;
 #else
 		host_properties.nprocessors = sysconf(_SC_NPROCESSORS_ONLN);
 #endif

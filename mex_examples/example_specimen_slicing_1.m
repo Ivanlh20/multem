@@ -1,11 +1,13 @@
 clear all; clc;
 
+input_multislice = multem_default_values();         % Load default values;
+
 input_multislice.phonon_model = 3;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multislice.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
 input_multislice.potential_slicing = 1;             % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 input_multislice.fp_dim = 111; 
-input_multislice.fp_seed = 1983; 
-input_multislice.fp_iconf = 1;
+input_multislice.fp_seed = 300183; 
+input_multislice.fp_nconf = 1;
 
 na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
 

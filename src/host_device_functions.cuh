@@ -24,6 +24,7 @@
 
 #include "math.cuh"
 #include "types.hpp"
+#include "traits.cuh"
 
 #include <thrust/complex.h>
 #include <thrust/swap.h>
@@ -34,10 +35,9 @@
 #include <thrust/copy.h>
 #include <thrust/fill.h>
 #include <thrust/iterator/zip_iterator.h>
+#include <thrust/iterator/transform_iterator.h>
 #include <thrust/tuple.h>
 #include <thrust/complex.h>
-
-using namespace multem::traits;
 
 namespace multem
 {
@@ -150,13 +150,13 @@ namespace multem
 			return x;
 		}
 
-		template<class TFn, class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TFn, class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void int_fx_x0_xe(TFn fn, const T &x0, const T &xe, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rq1, T &y)
+		void int_fx_x0_xe(TFn fn, const Value_type<TrPP_Coef> &x0, const Value_type<TrPP_Coef> &xe, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y)
 		{
-			T a = 0.5*(xe-x0); 
-			T b = 0.5*(xe+x0);
-			T xi, yi;
+			Value_type<TrPP_Coef> a = 0.5*(xe-x0); 
+			Value_type<TrPP_Coef> b = 0.5*(xe+x0);
+			Value_type<TrPP_Coef> xi, yi;
 			y = 0;
 
 			for(auto i = 0; i< rq1.size; i++)
@@ -167,13 +167,13 @@ namespace multem
 			}
 		}
 
-		template<class TFn, class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TFn, class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void int_fx_x0_xe(TFn fn, const T &x0, const T &xe, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rq1, T &y1, T &y2)
+		void int_fx_x0_xe(TFn fn, const Value_type<TrPP_Coef> &x0, const Value_type<TrPP_Coef> &xe, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y1, Value_type<TrPP_Coef> &y2)
 		{
-			T a = 0.5*(xe-x0); 
-			T b = 0.5*(xe+x0);
-			T xi, y1i, y2i;
+			Value_type<TrPP_Coef> a = 0.5*(xe-x0); 
+			Value_type<TrPP_Coef> b = 0.5*(xe+x0);
+			Value_type<TrPP_Coef> xi, y1i, y2i;
 			y1 = y2 = 0;
 
 			for(auto i = 0; i< rq1.size; i++)
@@ -185,10 +185,11 @@ namespace multem
 			}
 		}
 
-		template<class TFn, class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TFn, class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void int_fx_x0_pInfty(TFn fn, const T &x0, const T &x, const TrPP_Coef &rcoef, TrQ1&rq1, T &y)
+		void int_fx_x0_pInfty(TFn fn, const Value_type<TrPP_Coef> &x0, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, TrQ1&rq1, Value_type<TrPP_Coef> &y)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T xi, yi;
 			y = 0;
 
@@ -200,10 +201,11 @@ namespace multem
 			}
 		}
 
-		template<class TFn, class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TFn, class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void int_fx_x0_pInfty(TFn fn, const T &x0, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rq1, T &y1, T &y2)
+		void int_fx_x0_pInfty(TFn fn, const Value_type<TrPP_Coef> &x0, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y1, Value_type<TrPP_Coef> &y2)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T xi, y1i, y2i;
 			y1 = y2 = 0;
 
@@ -216,10 +218,11 @@ namespace multem
 			}
 		}
 
-		template<class TFn, class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TFn, class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void int_Vz_z0_ze(TFn fn, const T &z0, const T &ze, const T &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, T &y)
+		void int_Vz_z0_ze(TFn fn, const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y)
 		{
+			using T = Value_type<TrPP_Coef>;
 			bool split = (z0<0)&&(0<ze);
 			T a = (split)?-0.5*z0:0.5*(ze-z0); 
 			T b = (split)?0.5*z0:0.5*(ze+z0);
@@ -247,10 +250,11 @@ namespace multem
 			}
 		}
 
-		template<class TFn, class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TFn, class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void int_Vz_dVz_z0_ze(TFn fn, const T &z0, const T &ze, const T &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, T &y, T &dy)
+		void int_Vz_dVz_z0_ze(TFn fn, const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
+			using T = Value_type<TrPP_Coef>;
 			bool split = (z0<0)&&(0<ze);
 			T a = (split)?-0.5*z0:0.5*(ze-z0); 
 			T b = (split)?0.5*z0:0.5*(ze+z0);
@@ -280,10 +284,11 @@ namespace multem
 			}
 		}
 
-		template<class TFn, class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TFn, class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void int_VR(TFn fn, const T &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, T &y)
+		void int_VR(TFn fn, const Value_type<TrPP_Coef> &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T zi, ri, yi, R2 = R*R;
 			y = 0;
 			for(auto i = 0; i< rq1.size; i++)
@@ -296,10 +301,11 @@ namespace multem
 			y *= 2;
 		}
 
-		template<class TFn, class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TFn, class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void int_VR_dVR(TFn fn, const T &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, T &y, T &dy)
+		void int_VR_dVR(TFn fn, const Value_type<TrPP_Coef> &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T zi, ri, yi, dyi, R2 = R*R;
 			y = dy = 0;
 			for(auto i = 0; i< rq1.size; i++)
@@ -314,9 +320,9 @@ namespace multem
 			dy *= 2;
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void add_Exponential_Fn(const T &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, T &y, bool reset=true)
+		void add_Exponential_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, bool reset=true)
 		{
 			if(reset)
 			{
@@ -328,10 +334,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void add_Exponential_dExponential_Fn(const T &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, T &y, T &dy, bool reset=true)
+		void add_Exponential_dExponential_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy, bool reset=true)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T yt;
 			if(reset)
 			{
@@ -344,10 +351,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void add_Gaussian_Fn(const T &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, T &y, bool reset=true)
+		void add_Gaussian_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, bool reset=true)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T x2 = x*x;
 			if(reset)
 			{
@@ -359,10 +367,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void add_Gaussian_dGaussian_Fn(const T &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, T &y, T &dy, bool reset=true)
+		void add_Gaussian_dGaussian_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy, bool reset=true)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T yt, x2 = x*x;
 			if(reset)
 			{
@@ -375,10 +384,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void add_Lorentzian_Fn(const T &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, T &y, bool reset=true)
+		void add_Lorentzian_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, bool reset=true)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T x2 = x*x;
 			if(reset)
 			{
@@ -390,11 +400,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void add_Lorentzian_dLorentzian_Fn(const T &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, T &y, T &dy, bool reset=true)
+		void add_Lorentzian_dLorentzian_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy, bool reset=true)
 		{
-			T t, yt, x2 = x*x;
+			Value_type<TrPP_Coef> t, yt, x2 = x*x;
 			if(reset)
 			{
 				y = dy = 0;
@@ -407,10 +417,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void add_Yukawa_Fn(const T &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, T &y, bool reset=true)
+		void add_Yukawa_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, bool reset=true)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T ix = 1/x;
 			if(reset)
 			{
@@ -422,10 +433,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void add_Yukawa_dYukawa_Fn(const T &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, T &y, T &dy, bool reset=true)
+		void add_Yukawa_dYukawa_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy, bool reset=true)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T yt, ix = 1/x;
 			if(reset)
 			{
@@ -438,10 +450,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_Gaussian_feg(const T &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, T &y, bool reset=true)
+		void Pr_Gaussian_feg(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, bool reset=true)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T x2 = x*x;
 			if(reset)
 			{
@@ -453,10 +466,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_dPr_Gaussian_feg(const T &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, T &y, T &dy, bool reset=true)
+		void Pr_dPr_Gaussian_feg(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy, bool reset=true)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T yt, x2 = x*x;
 			if(reset)
 			{
@@ -473,68 +487,69 @@ namespace multem
 		/***************************************************************************/
 		/***************************************************************************/
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_Doyle_0_4(const T &x, const TrPP_Coef &rcoef, T &y)
+		void feg_Doyle_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 4, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_dfeg_Doyle_0_4(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void feg_dfeg_Doyle_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 4, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_Peng_0_4(const T &x, const TrPP_Coef &rcoef, T &y)
+		void feg_Peng_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_dfeg_Peng_0_4(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void feg_dfeg_Peng_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_Peng_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void feg_Peng_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_dfeg_Peng_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void feg_dfeg_Peng_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_Kirkland_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void feg_Kirkland_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Lorentzian_Fn(x, 0, 3, rcoef, y);
 			add_Gaussian_Fn(x, 3, 6, rcoef, y, false);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_dfeg_Kirkland_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void feg_dfeg_Kirkland_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Lorentzian_dLorentzian_Fn(x, 0, 3, rcoef, y, dy);
 			add_Gaussian_dGaussian_Fn(x, 3, 6, rcoef, y, dy, false);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void feg_Weickenmeier_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T x2 = x*x;
 	
 			y = 0;
@@ -555,10 +570,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_dfeg_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void feg_dfeg_Weickenmeier_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T t, x2 = x*x;
 			y = dy = 0;
 			if(x != 0)
@@ -581,10 +597,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_Lobato_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void feg_Lobato_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T t, x2 = x*x;
 			y = 0;
 			for(auto i = 0; i< 5; i++)
@@ -594,10 +611,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void feg_dfeg_Lobato_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void feg_dfeg_Lobato_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T t, x2 = x*x;
 			y = dy = 0;
 			for(auto i = 0; i< 5; i++)
@@ -611,92 +629,93 @@ namespace multem
 		/***************************************************************************/
 		/***************************************************************************/
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_Doyle_0_4(const T &x, const int &Z, const TrPP_Coef &rcoef, T &y)
+		void fxg_Doyle_0_4(const Value_type<TrPP_Coef> &x, const int &Z, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			feg_Doyle_0_4(x, rcoef, y);
 			y = Z - x*x*y;
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_dfxg_Doyle_0_4(const T &x, const int &Z, const TrPP_Coef &rcoef, T &y, T &dy)
+		void fxg_dfxg_Doyle_0_4(const Value_type<TrPP_Coef> &x, const int &Z, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			feg_dfeg_Doyle_0_4(x, rcoef, y, dy);
 			dy = -x*(2*y + x*dy);
 			y = Z - x*x*y;
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_Peng_0_4(const T &x, const int &Z, const TrPP_Coef &rcoef, T &y)
+		void fxg_Peng_0_4(const Value_type<TrPP_Coef> &x, const int &Z, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			feg_Peng_0_4(x, rcoef, y);
 			y = Z - x*x*y;
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_dfxg_Peng_0_4(const T &x, const int &Z, const TrPP_Coef &rcoef, T &y, T &dy)
+		void fxg_dfxg_Peng_0_4(const Value_type<TrPP_Coef> &x, const int &Z, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			feg_dfeg_Peng_0_4(x, rcoef, y, dy);
 			dy = -x*(2*y + x*dy);
 			y = Z - x*x*y;
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_Peng_0_12(const T &x, const int &Z, const TrPP_Coef &rcoef, T &y)
+		void fxg_Peng_0_12(const Value_type<TrPP_Coef> &x, const int &Z, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			feg_Peng_0_12(x, rcoef, y);
 			y = Z - x*x*y;
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_dfxg_Peng_0_12(const T &x, const int &Z, const TrPP_Coef &rcoef, T &y, T &dy)
+		void fxg_dfxg_Peng_0_12(const Value_type<TrPP_Coef> &x, const int &Z, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			feg_dfeg_Peng_0_12(x, rcoef, y, dy);
 			dy = -x*(2*y + x*dy);
 			y = Z - x*x*y;
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_Kirkland_0_12(const T &x, const int &Z, const TrPP_Coef &rcoef, T &y)
+		void fxg_Kirkland_0_12(const Value_type<TrPP_Coef> &x, const int &Z, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			feg_Kirkland_0_12(x, rcoef, y);
 			y = Z - x*x*y;
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_dfxg_Kirkland_0_12(const T &x, const int &Z, const TrPP_Coef &rcoef, T &y, T &dy)
+		void fxg_dfxg_Kirkland_0_12(const Value_type<TrPP_Coef> &x, const int &Z, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			feg_dfeg_Kirkland_0_12(x, rcoef, y, dy);
 			dy = -x*(2*y + x*dy);
 			y = Z - x*x*y;
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void fxg_Weickenmeier_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 6, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_dfxg_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void fxg_dfxg_Weickenmeier_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 6, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_Lobato_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void fxg_Lobato_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T t, x2 = x*x;
 			y = 0;
 			for(auto i = 0; i< 5; i++)
@@ -706,10 +725,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void fxg_dfxg_Lobato_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void fxg_dfxg_Lobato_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T t, yt, x2 = x*x;
 			y = dy = 0;
 			for(auto i = 0; i< 5; i++)
@@ -724,88 +744,88 @@ namespace multem
 		/***************************************************************************/
 		/***************************************************************************/
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_Doyle_0_4(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Pr_Doyle_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			Pr_Gaussian_feg(x, 0, 4, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_dPr_Doyle_0_4(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Pr_dPr_Doyle_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			Pr_dPr_Gaussian_feg(x, 0, 4, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_Peng_0_4(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Pr_Peng_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			Pr_Gaussian_feg(x, 0, 5, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_dPr_Peng_0_4(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Pr_dPr_Peng_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			Pr_dPr_Gaussian_feg(x, 0, 5, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_Peng_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Pr_Peng_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_dPr_Peng_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Pr_dPr_Peng_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			Pr_dPr_Gaussian_feg(x, 0, 5, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_Kirkland_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Pr_Kirkland_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Yukawa_Fn(x, 0, 3, rcoef, y);
 			Pr_Gaussian_feg(x, 3, 6, rcoef, y, false);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_dPr_Kirkland_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Pr_dPr_Kirkland_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Yukawa_dYukawa_Fn(x, 0, 3, rcoef, y, dy);
 			Pr_dPr_Gaussian_feg(x, 3, 6, rcoef, y, dy, false);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Pr_Weickenmeier_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 6, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_dPr_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Pr_dPr_Weickenmeier_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 6, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_Lobato_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Pr_Lobato_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Exponential_Fn(x, 0, 5, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Pr_dPr_Lobato_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Pr_dPr_Lobato_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Exponential_dExponential_Fn(x, 0, 5, rcoef, y, dy);
 		}
@@ -813,68 +833,69 @@ namespace multem
 		/***************************************************************************/
 		/***************************************************************************/
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_Doyle_0_4(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Vr_Doyle_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 4, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_dVr_Doyle_0_4(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Vr_dVr_Doyle_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 4, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_Peng_0_4(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Vr_Peng_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_dVr_Peng_0_4(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Vr_dVr_Peng_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_Peng_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Vr_Peng_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_dVr_Peng_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Vr_dVr_Peng_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_Kirkland_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Vr_Kirkland_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Yukawa_Fn(x, 0, 3, rcoef, y);
 			add_Gaussian_Fn(x, 3, 6, rcoef, y, false);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_dVr_Kirkland_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Vr_dVr_Kirkland_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Yukawa_dYukawa_Fn(x, 0, 3, rcoef, y, dy);
 			add_Gaussian_dGaussian_Fn(x, 3, 6, rcoef, y, dy, false);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Vr_Weickenmeier_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T ix = 1/x;
 			y = 0;
 
@@ -884,10 +905,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_dVr_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Vr_dVr_Weickenmeier_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
+			using T = Value_type<TrPP_Coef>;
 			const T c_Pii2 = 1.772453850905516027298;
 			T yt, ix = 1/x, x2 = x*x;
 			y = dy = 0;
@@ -899,10 +921,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_Lobato_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void Vr_Lobato_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T ix = 1/x;
 			y = 0;
 			for(auto i = 0; i< 5; i++)
@@ -911,10 +934,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vr_dVr_Lobato_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void Vr_dVr_Lobato_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
+			using T = Value_type<TrPP_Coef>;
 			T yt, icnl, ix = 1/x;
 			y = dy = 0;
 			for(auto i = 0; i< 5; i++)
@@ -929,51 +953,51 @@ namespace multem
 		/***************************************************************************/
 		/***************************************************************************/
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_Doyle_0_4(const T &x, const TrPP_Coef &rcoef, T &y)
+		void VR_Doyle_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 4, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_dVR_Doyle_0_4(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void VR_dVR_Doyle_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 4, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_Peng_0_4(const T &x, const TrPP_Coef &rcoef, T &y)
+		void VR_Peng_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_dVR_Peng_0_4(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void VR_dVR_Peng_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_Peng_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void VR_Peng_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			 add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_dVR_Peng_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void VR_dVR_Peng_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_Kirkland_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void VR_Kirkland_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			y = 0;
 			for(auto i = 0; i< 3; i++)
@@ -984,9 +1008,9 @@ namespace multem
 			add_Gaussian_Fn(x, 3, 6, rcoef, y, false);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_dVR_Kirkland_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void VR_dVR_Kirkland_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			y = dy = 0;
 			for(auto i = 0; i< 3; i++)
@@ -998,23 +1022,23 @@ namespace multem
 			add_Gaussian_dGaussian_Fn(x, 3, 6, rcoef, y, dy, false);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
+		void VR_Weickenmeier_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
-			int_VR(Vr_Weickenmeier_0_12<TrPP_Coef, Value_type<TrPP_Coef>>, x, rcoef, rqz, y);
+			int_VR(Vr_Weickenmeier_0_12<TrPP_Coef>, x, rcoef, rqz, y);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_dVR_Weickenmeier_0_12(const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
+		void VR_dVR_Weickenmeier_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
-			int_VR_dVR(Vr_dVr_Weickenmeier_0_12<TrPP_Coef, Value_type<TrPP_Coef>>, x, rcoef, rqz, y, dy);
+			int_VR_dVR(Vr_dVr_Weickenmeier_0_12<TrPP_Coef>, x, rcoef, rqz, y, dy);
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_Lobato_0_12(const T &x, const TrPP_Coef &rcoef, T &y)
+		void VR_Lobato_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			y = 0;
 			for(auto i = 0; i< 5; i++)
@@ -1023,10 +1047,11 @@ namespace multem
 			}
 		}
 
-		template<class TrPP_Coef, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef>
 		DEVICE_CALLABLE FORCEINLINE 
-		void VR_dVR_Lobato_0_12(const T &x, const TrPP_Coef &rcoef, T &y, T &dy)
+		void VR_dVR_Lobato_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
+			using T = Value_type<TrPP_Coef>;
 			y = dy = 0;
 			for(auto i = 0; i< 5; i++)
 			{
@@ -1040,88 +1065,88 @@ namespace multem
 		/***************************************************************************/
 		/***************************************************************************/
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_Doyle_0_4(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
+		void Vz_Doyle_0_4(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
-			int_Vz_z0_ze(Vr_Doyle_0_4<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Doyle_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_dVz_Doyle_0_4(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
+		void Vz_dVz_Doyle_0_4(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Doyle_0_4<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Doyle_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_Peng_0_4(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
+		void Vz_Peng_0_4(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
-			int_Vz_z0_ze(Vr_Peng_0_4<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Peng_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_dVz_Peng_0_4(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
+		void Vz_dVz_Peng_0_4(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Peng_0_4<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Peng_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_Peng_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
+		void Vz_Peng_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
-			int_Vz_z0_ze(Vr_Peng_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Peng_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_dVz_Peng_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
+		void Vz_dVz_Peng_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Peng_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Peng_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_Kirkland_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
+		void Vz_Kirkland_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
-			int_Vz_z0_ze(Vr_Kirkland_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Kirkland_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_dVz_Kirkland_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
+		void Vz_dVz_Kirkland_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Kirkland_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Kirkland_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_Weickenmeier_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
+		void Vz_Weickenmeier_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
-			int_Vz_z0_ze(Vr_Weickenmeier_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Weickenmeier_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_dVz_Weickenmeier_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
+		void Vz_dVz_Weickenmeier_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Weickenmeier_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Weickenmeier_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_Lobato_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y)
+		void Vz_Lobato_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
-			int_Vz_z0_ze(Vr_Lobato_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y);
+			int_Vz_z0_ze(Vr_Lobato_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
-		template<class TrPP_Coef, class TrQ1, class T = Value_type<TrPP_Coef>>
+		template<class TrPP_Coef, class TrQ1>
 		DEVICE_CALLABLE FORCEINLINE 
-		void Vz_dVz_Lobato_0_12(const T &z0, const T &ze, const T &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, T &y, T &dy)
+		void Vz_dVz_Lobato_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
-			int_Vz_dVz_z0_ze(Vr_dVr_Lobato_0_12<TrPP_Coef, T>, z0, ze, x, rcoef, rqz, y, dy);
+			int_Vz_dVz_z0_ze(Vr_dVr_Lobato_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		/***************************************************************************/
@@ -1239,6 +1264,351 @@ namespace multem
 			return i0;
 		}
 
+		// Get Local interpolation coefficients
+		template<class T>
+		DEVICE_CALLABLE FORCEINLINE 
+		void cubic_poly_coef(const int &iR, Atom_Vp<T> &atom_Vp)
+		{
+			T dR2 = 1.0/(atom_Vp.R2[iR+1]-atom_Vp.R2[iR]);
+			T V = atom_Vp.c0[iR]; 
+			T Vn = atom_Vp.c0[iR+1];
+			T dV = atom_Vp.c1[iR]; 
+			T dVn = atom_Vp.c1[iR+1];
+			T m = (Vn-V)*dR2; 
+			T n = dV+dVn;
+			atom_Vp.c0[iR] = V-atom_Vp.c0[c_nR-1];
+			atom_Vp.c2[iR] = (3.0*m-n-dV)*dR2;
+			atom_Vp.c3[iR] = (n-2.0*m)*dR2*dR2;
+		}
+
+		// Cubic polynomial evaluation
+		template<class T> 
+		DEVICE_CALLABLE FORCEINLINE 
+		T eval_cubic_poly(int ix, int iy, T R2, const Grid<T> &grid, const Atom_Vp<T> &atom_Vp, int &ixy)
+		{
+			R2 = max(R2, atom_Vp.R_min2);
+
+			ix -= static_cast<int>(floor(grid.Rx(ix)/grid.lx))*grid.nx;
+			iy -= static_cast<int>(floor(grid.Ry(iy)/grid.ly))*grid.ny;
+
+			ix = grid.iRx_shift(ix);
+			iy = grid.iRy_shift(iy);
+			ixy = grid.ind_col(ix, iy);
+
+			ix = unrolledBinarySearch_c_nR<T>(R2, atom_Vp.R2);
+
+			T dx = R2 - atom_Vp.R2[ix]; 
+			T dx2 = dx*dx;
+			return atom_Vp.occ*(atom_Vp.c0[ix] + atom_Vp.c1[ix]*dx + atom_Vp.c2[ix]*dx2 + atom_Vp.c3[ix]*dx2*dx);
+		}
+
+		template<class TGrid, class TVector>
+		DEVICE_CALLABLE FORCEINLINE 
+		void fft2_shift(const int &ix, const int &iy, const TGrid &grid, TVector &M_io)
+		{
+			int ixy = grid.ind_col(ix, iy); 
+			int ixy_shift = grid.ind_col(grid.nxh+ix, grid.nyh+iy);
+			thrust::swap(M_io[ixy], M_io[ixy_shift]);
+
+			ixy = grid.ind_col(ix, grid.nyh+iy); 
+			ixy_shift = grid.ind_col(grid.nxh+ix, iy);
+			thrust::swap(M_io[ixy], M_io[ixy_shift]);
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void bandwidth_limit(const int &ix, const int &iy, const TGrid &grid, const Value_type<TGrid> &g2_min, const Value_type<TGrid> &g2_max, const Value_type<TVector_c> &w, TVector_c &M_io)
+		{
+			using value_type_r = Value_type<TGrid>;
+
+			int ixy = grid.ind_col(ix, iy); 
+			value_type_r g2 = grid.g2_shift(ix, iy);
+
+			if((g2_min <= g2)&&(g2 <= g2_max))
+			{
+				M_io[ixy] *= w;
+			}
+			else
+			{
+ 				M_io[ixy] = 0;
+			}
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void phase_multiplication(const int &ix, const int &iy, const TGrid &grid, 
+		const TVector_c &exp_x_i, const TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
+		{
+			int ixy = grid.ind_col(ix, iy);
+			psi_o[ixy] = psi_i[ixy]*exp_y_i[ix]*exp_y_i[iy];
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void propagator_multiplication(const int &ix, const int &iy, const TGrid &grid, 
+		const TVector_c &prop_x_i, const TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &psi_o)
+		{
+			using value_type_r = Value_type<TGrid>;
+			using value_type_c = Value_type<TVector_c>;
+
+			int ixy = grid.ind_col(ix, iy);
+			value_type_r g2 = grid.g2_shift(ix, iy);
+
+			if((!grid.bwl)||(g2 < grid.gl2_max))
+			{
+				psi_o[ixy] = static_cast<value_type_c>(grid.inxy)*psi_i[ixy]*prop_x_i[ix]*prop_y_i[iy];
+			}
+			else
+			{
+ 				psi_o[ixy] = 0;
+			}
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void probe(const int &ix, const int &iy, const TGrid &grid, const Lens<Value_type<TGrid>> &lens, 
+		const Value_type<TGrid> &x, const Value_type<TGrid> &y, TVector_c &fPsi_o)
+		{
+			using value_type_r = Value_type<TGrid>;
+
+			int ixy = grid.ind_col(ix, iy);
+			value_type_r gx = grid.gx_shift(ix);
+			value_type_r gy = grid.gy_shift(iy);
+			value_type_r g2 = gx*gx + gy*gy;
+
+			if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
+			{
+				value_type_r chi = x*gx + y*gy + g2*(lens.cCs5*g2*g2+lens.cCs3*g2+lens.cf);
+				if(nonZero(lens.m)||nonZero(lens.cmfa2)||nonZero(lens.cmfa3))
+				{
+					value_type_r g = sqrt(g2);
+					value_type_r phi = atan2(gy, gx);
+					chi += lens.m*phi + lens.cmfa2*g2*sin(2*(phi-lens.afa2)) + lens.cmfa3*g*g2*sin(3*(phi-lens.afa3)); 			
+				}	
+				fPsi_o[ixy] = thrust::euler(chi); 
+			}
+			else
+			{
+ 				fPsi_o[ixy] = 0;
+			}
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void apply_CTF(const int &ix, const int &iy, const TGrid &grid, const Lens<Value_type<TGrid>> &lens,
+		const Value_type<TGrid> &gxu, const Value_type<TGrid> &gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
+		{
+			using value_type_r = Value_type<TGrid>;
+
+			int ixy = grid.ind_col(ix, iy);
+			value_type_r gx = grid.gx_shift(ix);
+			value_type_r gy = grid.gy_shift(iy);
+			value_type_r g2 = gx*gx + gy*gy;
+
+			if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
+			{
+				g2 = (gx-gxu)*(gx-gxu) + (gy-gyu)*(gy-gyu);
+				value_type_r chi = g2*(lens.cCs5*g2*g2+lens.cCs3*g2+lens.cf);
+				if(nonZero(lens.cmfa2)||nonZero(lens.cmfa3))
+				{
+					value_type_r g = sqrt(g2);
+					value_type_r phi = atan2(gy, gx);
+					chi += lens.cmfa2*g2*sin(2*(phi-lens.afa2)) + lens.cmfa3*g*g2*sin(3*(phi-lens.afa3)); 			
+				}
+				fPsi_o[ixy] = fPsi_i[ixy]*thrust::euler(chi);
+			}
+			else
+			{
+ 				fPsi_o[ixy] = 0;
+			}
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void apply_PCTF(const int &ix, const int &iy, const TGrid &grid, const Lens<Value_type<TGrid>> &lens,
+		TVector_c &fPsi_i, TVector_c &fPsi_o)
+		{
+			using value_type_r = Value_type<TGrid>;
+			const value_type_r c_Pi = 3.141592653589793238463;
+
+			int ixy = grid.ind_col(ix, iy);
+			value_type_r g2 = grid.g2_shift(ix, iy);
+
+			if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
+			{			
+				value_type_r chi = g2*(lens.cCs3*g2+lens.cf);
+				value_type_r c = c_Pi*lens.beta*lens.sf;
+				value_type_r u = 1.0 + c*c*g2;
+
+				c = c_Pi*lens.sf*lens.lambda*g2;
+				value_type_r sie = 0.25*c*c;
+				c = c_Pi*lens.beta*(lens.Cs3*lens.lambda2*g2-lens.f);
+				value_type_r tie = c*c*g2;
+				value_type_r sti = exp(-(sie+tie)/u);
+
+				fPsi_o[ixy] = fPsi_i[ixy]*thrust::polar(sti, chi);
+			}
+			else
+			{
+				fPsi_o[ixy] = 0;
+			}
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void kernel_xyz(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_x, TVector_c &k_y, TVector_c &k_z)
+		{
+			using value_type_r = Value_type<TGrid>;
+			using value_type_c = Value_type<TVector_c>;
+
+			int ixy = grid.ind_col(ix, iy);
+			value_type_r gx = grid.gx_shift(ix);
+			value_type_r gy = grid.gy_shift(iy);
+			value_type_r g2 = gx*gx + gy*gy;
+				
+			if(g2 < eels.gc2)
+			{
+				value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
+				value_type_r lorentz = eels.factor/(g2 + eels.ge2);
+				k_x[ixy] = value_type_c(gx*lorentz, 0)*pos;
+				k_y[ixy] = value_type_c(gy*lorentz, 0)*pos;
+				k_z[ixy] = value_type_c(eels.ge*lorentz, 0)*pos;
+			}
+			else
+			{
+				k_x[ixy] = 0;
+				k_y[ixy] = 0;
+				k_z[ixy] = 0;
+			}
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void kernel_x(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_x)
+		{
+			using value_type_r = Value_type<TGrid>;
+			using value_type_c = Value_type<TVector_c>;
+
+			int ixy = grid.ind_col(ix, iy);
+			value_type_r gx = grid.gx_shift(ix);
+			value_type_r gy = grid.gy_shift(iy);
+			value_type_r g2 = gx*gx + gy*gy;
+				
+			if(g2 < eels.gc2)
+			{
+				value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
+				value_type_r lorentz = eels.factor/(g2 + eels.ge2);
+				k_x[ixy] = value_type_c(gx*lorentz, 0)*pos;
+			}
+			else
+			{
+				k_x[ixy] = 0;
+			}
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void kernel_y(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_y)
+		{
+			using value_type_r = Value_type<TGrid>;
+			using value_type_c = Value_type<TVector_c>;
+
+			int ixy = grid.ind_col(ix, iy);
+			value_type_r gx = grid.gx_shift(ix);
+			value_type_r gy = grid.gy_shift(iy);
+			value_type_r g2 = gx*gx + gy*gy;
+				
+			if(g2 < eels.gc2)
+			{
+				value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
+				value_type_r lorentz = eels.factor/(g2 + eels.ge2);
+				k_y[ixy] = value_type_c(gy*lorentz, 0)*pos;
+			}
+			else
+			{
+				k_y[ixy] = 0;
+			}
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void kernel_z(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_z)
+		{
+			using value_type_r = Value_type<TGrid>;
+			using value_type_c = Value_type<TVector_c>;
+
+			int ixy = grid.ind_col(ix, iy);
+			value_type_r gx = grid.gx_shift(ix);
+			value_type_r gy = grid.gy_shift(iy);
+			value_type_r g2 = gx*gx + gy*gy;
+				
+			if(g2 < eels.gc2)
+			{
+				value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
+				value_type_r lorentz = eels.factor/(g2 + eels.ge2);
+				k_z[ixy] = value_type_c(eels.ge*lorentz, 0)*pos;
+			}
+			else
+			{
+				k_z[ixy] = 0;
+			}
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void kernel_mn1(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_mn1)
+		{
+			using value_type_r = Value_type<TGrid>;
+			using value_type_c = Value_type<TVector_c>;
+
+			int ixy = grid.ind_col(ix, iy);
+			value_type_r gx = grid.gx_shift(ix);
+			value_type_r gy = grid.gy_shift(iy);
+			value_type_r g2 = gx*gx + gy*gy;
+				
+			if(g2 < eels.gc2)
+			{
+				const value_type_r c_i2i2 = 0.70710678118654746; 
+
+				value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
+				value_type_r lorentz = c_i2i2*eels.factor/(g2 + eels.ge2);
+				value_type_c k_x(gx*lorentz, 0);
+				value_type_c k_y(0, gy*lorentz);
+				k_mn1[ixy] = (k_x - k_y)*pos;
+			}
+			else
+			{
+				k_mn1[ixy] = 0;
+			}
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void kernel_mp1(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_mp1)
+		{
+			using value_type_r = Value_type<TGrid>;
+			using value_type_c = Value_type<TVector_c>;
+
+			int ixy = grid.ind_col(ix, iy);
+			value_type_r gx = grid.gx_shift(ix);
+			value_type_r gy = grid.gy_shift(iy);
+			value_type_r g2 = gx*gx + gy*gy;
+				
+			if(g2 < eels.gc2)
+			{
+				const value_type_r c_i2i2 = 0.70710678118654746; 
+
+				value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
+				value_type_r lorentz = c_i2i2*eels.factor/(g2 + eels.ge2);
+				value_type_c k_x(gx*lorentz, 0);
+				value_type_c k_y(0, gy*lorentz);
+				k_mp1[ixy] = (k_x + k_y)*pos;
+			}
+			else
+			{
+				k_mp1[ixy] = 0;
+			}
+		}
 	} // host_device_detail
 
 	// Electron scattering factors calculation (feg)
@@ -1698,11 +2068,11 @@ namespace multem
 			const T w;
 			const T gxu;
 			const T gyu;
-			phase_components(TGrid grid_i, T w_i, T gxu_i, T gyu_i): grid(grid_i), w(w_i), gxu(gxu_i), gyu(gyu_i){ }
+			phase_components(TGrid grid_i, T w_i, T gxu_i, T gyu_i): grid(grid_i), w(w_i), gxu(gxu_i), gyu(gyu_i){}
 
 			template<class Ttuple>
 			__host__ __device__
-			void operator()(Ttuple &t)
+			void operator()(Ttuple t)
 			{
 				int ix = thrust::get<0>(t);
 				if(ix < grid.nx)
@@ -1729,11 +2099,11 @@ namespace multem
 			const T w;
 			const T gxu;
 			const T gyu;
-			propagator_components(TGrid grid_i, T w_i, T gxu_i, T gyu_i): grid(grid_i), w(w_i), gxu(gxu_i), gyu(gyu_i){ }
+			propagator_components(TGrid grid_i, T w_i, T gxu_i, T gyu_i): grid(grid_i), w(w_i), gxu(gxu_i), gyu(gyu_i){}
 
 			template<class Ttuple>
 			__host__ __device__
-			void operator()(Ttuple &t)
+			void operator()(Ttuple t)
 			{
 				int ix = thrust::get<0>(t);
 				if(ix < grid.nx)
@@ -1757,7 +2127,7 @@ namespace multem
 			const eElec_Spec_Int_Model elec_spec_int_model;
 
 			const T w;
-			transmission_funtion(T w_i, eElec_Spec_Int_Model ElecSpecIntModel_i): w(w_i), elec_spec_int_model(ElecSpecIntModel_i){ }
+			transmission_funtion(T w_i, eElec_Spec_Int_Model ElecSpecIntModel_i): w(w_i), elec_spec_int_model(ElecSpecIntModel_i){}
 
 			template<class U>
 			__host__ __device__
@@ -1772,7 +2142,7 @@ namespace multem
 		struct scale
 		{
 			const T w;
-			scale(T w_i = T()): w(w_i){ }
+			scale(T w_i = T()): w(w_i){}
 
 			__host__ __device__
 			T operator()(const T &x) const { return w*x; }
@@ -1790,7 +2160,7 @@ namespace multem
 		struct square_scale
 		{
 			const T w;
-			square_scale(T w_i = T()): w(w_i){ }
+			square_scale(T w_i = T()): w(w_i){}
 
 			template<class U>
 			__host__ __device__
@@ -1801,7 +2171,7 @@ namespace multem
 		struct add_scale
 		{
 			const T w;
-			add_scale(T w_i = T()): w(w_i){ }
+			add_scale(T w_i = T()): w(w_i){}
 
 			__host__ __device__
 			T operator()(const T &lhs, const T &rhs) const{ return w*lhs + rhs; }
@@ -1811,7 +2181,7 @@ namespace multem
 		struct add_scale_i
 		{
 			const T w;
-			add_scale_i(T w_i = T()): w(w_i){ }
+			add_scale_i(T w_i = T()): w(w_i){}
 
 			__host__ __device__
 			T operator()(const T &lhs, const T &rhs) const{ return w*(lhs + rhs); }
@@ -1837,7 +2207,7 @@ namespace multem
 		struct add_square_scale
 		{
 			const T w;
-			add_square_scale(T w_i = T()): w(w_i){ }
+			add_square_scale(T w_i = T()): w(w_i){}
 
 			template<class U>
 			__host__ __device__
@@ -1848,7 +2218,7 @@ namespace multem
 		struct add_square_scale_i
 		{
 			const T w;
-			add_square_scale_i(T w_i = T()): w(w_i){ }
+			add_square_scale_i(T w_i = T()): w(w_i){}
 
 			template<class U>
 			__host__ __device__
@@ -1856,7 +2226,6 @@ namespace multem
 		};
 
 	} //namespace functor
-
 
 	template<class TVector>
 	void scale(TVector &M_io, const Value_type<TVector> &w_i)
@@ -1872,16 +2241,16 @@ namespace multem
 	}
 
 
-	template<class TVector, class U>
-	void assign(TVector &M_i, U &M_o)
+	template<class TVector_1, class TVector_2>
+	void assign(TVector_1 &M_i, TVector_2 &M_o)
 	{
 		M_o.assign(M_i.begin(), M_i.end());
 	}
 
-	template<class TVector, class U>
-	void assign_square(TVector &M_i, U &M_o)
+	template<class TVector_1, class TVector_2>
+	void assign_square(TVector_1 &M_i, TVector_2 &M_o)
 	{
-		using value_type = Value_type<U>;
+		using value_type = Value_type<TVector_2>;
 		thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), functor::square<value_type>());
 	}
 
@@ -1892,54 +2261,54 @@ namespace multem
 		thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), functor::scale<value_type>(w_i));
 	}
 
-	template<class TVector, class U>
-	void assign_square_scale(Value_type<U> w_i, TVector &M_i, U &M_o)
+	template<class TVector_1, class TVector_2>
+	void assign_square_scale(Value_type<TVector_2> w_i, TVector_1 &M_i, TVector_2 &M_o)
 	{
-		using value_type = Value_type<U>;
+		using value_type = Value_type<TVector_2>;
 		thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), functor::square_scale<value_type>(w_i));
 	}
 
 
-	template<class TVector>
-	void add(const TVector &M_i, TVector &M_o)
+	template<class TVector_1, class TVector_2>
+	void add(const TVector_1 &M_i, TVector_2 &M_o)
 	{
-		using value_type = Value_type<TVector>;
+		using value_type = Value_type<TVector_2>;
 		thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), M_o.begin(), thrust::plus<value_type>());
 	}
 
-	template<class TVector>
-	void add(const TVector &M1_i, const TVector &M2_i, TVector &M_o)
+	template<class TVector_1, class TVector_2>
+	void add(const TVector_1 &M1_i, const TVector_1 &M2_i, TVector_2 &M_o)
 	{
-		using value_type = Value_type<TVector>;
+		using value_type = Value_type<TVector_1>;
 		thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), thrust::plus<value_type>());
 	}
 
 
-	template<class TVector, class U>
-	void add_square(const TVector &M_i, U &M_o)
+	template<class TVector_1, class TVector_2>
+	void add_square(const TVector_1 &M_i, TVector_2 &M_o)
 	{
-		using value_type = Value_type<U>;
+		using value_type = Value_type<TVector_1>;
 		thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), M_o.begin(), functor::add_square<value_type>());
 	}
 
-	template<class TVector, class U>
-	void add_square(const TVector &M1_i, const TVector &M2_i, U &M_o)
+	template<class TVector_1, class TVector_2>
+	void add_square(const TVector_1 &M1_i, const TVector_1 &M2_i, TVector_2 &M_o)
 	{
-		using value_type = Value_type<U>;
+		using value_type = Value_type<TVector_2>;
 		thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), functor::add_square_i<value_type>());
 	}
 
-	template<class TVector>
-	void add_scale(Value_type<TVector> w_i, const TVector &M_i, TVector &M_o)
+	template<class TVector_1, class TVector_2>
+	void add_scale(Value_type<TVector_1> w_i, const TVector_1 &M_i, TVector_2 &M_o)
 	{
-		using value_type = Value_type<TVector>;
+		using value_type = Value_type<TVector_1>;
 		thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), M_o.begin(), functor::add_scale<value_type>(w_i));
 	}
 
-	template<class TVector>
-	void add_scale(Value_type<TVector> w_i, const TVector &M1_i, const TVector &M2_i, TVector &M_o)
+	template<class TVector_1, class TVector_2>
+	void add_scale(Value_type<TVector_1> w_i, const TVector_1 &M1_i, const TVector_1 &M2_i, TVector_2 &M_o)
 	{
-		using value_type = Value_type<TVector>;
+		using value_type = Value_type<TVector_1>;
 
 		thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), functor::add_scale_i<value_type>());
 	}
@@ -1992,7 +2361,7 @@ namespace multem
 	void phase_components(TGrid &grid, const Value_type<TGrid> &gxu, const Value_type<TGrid> &gyu, TVector &V_x, TVector &V_y)
 	{
 		thrust::counting_iterator<int> first(0);
-		auto last = first + grid.nx_ny_max();
+		thrust::counting_iterator<int> last = first + grid.nx_ny_max();
 
 		thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(first, V_x.begin(), V_y.begin())), 
 						 thrust::make_zip_iterator(thrust::make_tuple(last, V_x.end(), V_y.end())), 
@@ -2000,10 +2369,10 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector>
-	void propagator_components(TGrid &grid, Value_type<TGrid> &gxu, const Value_type<TGrid> &gyu, const Value_type<TGrid> &w, TVector &V_x, TVector &V_y)
+	void propagator_components(TGrid &grid, const Value_type<TGrid> &gxu, const Value_type<TGrid> &gyu, const Value_type<TGrid> &w, TVector &V_x, TVector &V_y)
 	{
 		thrust::counting_iterator<int> first(0);
-		auto last = first + grid.nx_ny_max();
+		thrust::counting_iterator<int> last = first + grid.nx_ny_max();
 
 		thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(first, V_x.begin(), V_y.begin())), 
 						 thrust::make_zip_iterator(thrust::make_tuple(last, V_x.end(), V_y.end())), 
@@ -2015,7 +2384,7 @@ namespace multem
 	{
 		fft2.forward(psi_i, psi_o); 
 
-		propagator_mul(grid, prop_x_i, prop_y_i, psi_o, psi_o);
+		propagator_multiplication(grid, prop_x_i, prop_y_i, psi_o, psi_o);
 
 		if(space == eS_Real)
 		{
@@ -2025,7 +2394,7 @@ namespace multem
 
 	template<class TGrid, class TFFT2, class TVector_1, class TVector_2>
 	void transmission_funtion(TGrid &grid, TFFT2 &fft2, eElec_Spec_Int_Model elec_spec_int_model, const Value_type<TGrid> w, TVector_1 &V0_i, TVector_2 &Trans_o)
-	{
+	{	
 		using value_type_r = Value_type<TGrid>;
 
 		thrust::transform(V0_i.begin(), V0_i.end(), Trans_o.begin(), functor::transmission_funtion<value_type_r>(w, elec_spec_int_model));
@@ -2041,7 +2410,7 @@ namespace multem
 	template<class TGrid, class TVector_i, class TVector_o>
 	void to_host_shift(TGrid &grid, TVector_i &M_i, TVector_o &M_o)
 	{
-		to_host(grid, M_i, M_o);
+		copy_to_host(grid, M_i, M_o);
 		fft2_shift(grid, M_o);
 	}
 

@@ -16,19 +16,29 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MATLAB2CPP_H
-#define MATLAB2CPP_H
+#ifndef MEX_MATLAB_H
+#define MEX_MATLAB_H
 
 #include <algorithm>
 #include <type_traits>
 #include <cmath>
 
 #include "types.hpp"
+#include "traits.cuh"
 #include <mex.h>
 
-using namespace multem::traits;
-using multem::m_matrix_r;
-using multem::m_matrix_c;
+using multem::rmatrix_r;
+using multem::rmatrix_c;
+
+/**************************************************************************/
+template <class TVector>
+void mx_print(const TVector &vector)
+{
+	for(auto i=0; i<vector.size(); i++)
+	{
+		mexPrintf("i = %d, value = %8.5f\n", i, vector[i]);
+	}
+}
 
 inline int mx_get_MxN(const mxArray *mxB)
 {
@@ -62,12 +72,12 @@ float mx_get_scalar<float>(const mxArray *mxB)
 }
 /**************************************************************************/
 template <class T>
-T mx_get_matrix(const mxArray *mxB){ };
+T mx_get_matrix(const mxArray *mxB){};
 
 template <>
-m_matrix_r mx_get_matrix<m_matrix_r>(const mxArray *mxB)
+rmatrix_r mx_get_matrix<rmatrix_r>(const mxArray *mxB)
 {
-	multem::m_matrix_r matrix;
+	multem::rmatrix_r matrix;
 	matrix.rows = static_cast<int>(mxGetM(mxB));
 	matrix.cols = static_cast<int>(mxGetN(mxB));
 	matrix.size = matrix.rows*matrix.cols;
@@ -77,9 +87,9 @@ m_matrix_r mx_get_matrix<m_matrix_r>(const mxArray *mxB)
 }
 
 template <>
-m_matrix_c mx_get_matrix<m_matrix_c>(const mxArray *mxB)
+rmatrix_c mx_get_matrix<rmatrix_c>(const mxArray *mxB)
 {
-	multem::m_matrix_c matrix;
+	multem::rmatrix_c matrix;
 	matrix.rows = static_cast<int>(mxGetM(mxB));
 	matrix.cols = static_cast<int>(mxGetN(mxB));
 	matrix.size = matrix.rows*matrix.cols;
@@ -119,22 +129,22 @@ T mx_get_matrix_field(const mxArray *mxB, const char *field_name)
 
 /**************************************************************************/
 template <class T>
-T mx_create_matrix(const int &rows, const int &cols, mxArray *&mx_M){ }
+T mx_create_matrix(const int &rows, const int &cols, mxArray *&mx_M);
 
 template <>
-m_matrix_r mx_create_matrix<m_matrix_r>(const int &rows, const int &cols, mxArray *&mx_M)
+rmatrix_r mx_create_matrix<rmatrix_r>(const int &rows, const int &cols, mxArray *&mx_M)
 {
 	mx_M = mxCreateDoubleMatrix(rows, cols, mxREAL);
 
-	return mx_get_matrix<m_matrix_r>(mx_M);
+	return mx_get_matrix<rmatrix_r>(mx_M);
 }
 
 template <>
-m_matrix_c mx_create_matrix<m_matrix_c>(const int &rows, const int &cols, mxArray *&mx_M)
+rmatrix_c mx_create_matrix<rmatrix_c>(const int &rows, const int &cols, mxArray *&mx_M)
 {
 	mx_M = mxCreateDoubleMatrix(rows, cols, mxCOMPLEX);
 
-	return mx_get_matrix<m_matrix_c>(mx_M);
+	return mx_get_matrix<rmatrix_c>(mx_M);
 }
 
 template <class T>
@@ -151,29 +161,30 @@ T mx_create_matrix(TGrid &grid, mxArray *&mx_M)
 
 /**************************************************************************/
 template <class T>
-inline void mx_create_matrix_field(mxArray *mx_struct, const int &idx, const char *field_name, const int &rows, const int &cols)
+inline T mx_create_matrix_field(mxArray *mx_struct, const int &idx, const char *field_name, const int &rows, const int &cols)
 {
 	mxArray *mxfield;
-	mx_create_matrix<T>(rows, cols, mxfield);
+	T rmatrix = mx_create_matrix<T>(rows, cols, mxfield);
 	mxSetField(mx_struct, idx, field_name, mxfield);
+	return rmatrix;
 }
 
 template <class T>
-inline void mx_create_matrix_field(mxArray *mx_struct, const char *field_name, const int &rows, const int &cols)
+inline T mx_create_matrix_field(mxArray *mx_struct, const char *field_name, const int &rows, const int &cols)
 {
-	mx_create_matrix_field<T>(mx_struct, 0, field_name, rows, cols);
+	return mx_create_matrix_field<T>(mx_struct, 0, field_name, rows, cols);
 }
 
 template <class T>
-inline void mx_create_scalar_field(mxArray *mx_struct, const int &idx, const char *field_name)
+inline T mx_create_scalar_field(mxArray *mx_struct, const int &idx, const char *field_name)
 {
-	mx_create_matrix_field<T>(mx_struct, idx, field_name, 1, 1);
+	return mx_create_matrix_field<T>(mx_struct, idx, field_name, 1, 1);
 }
 
 template <class T>
-inline void mx_create_scalar_field(mxArray *mx_struct, const char *field_name)
+inline T mx_create_scalar_field(mxArray *mx_struct, const char *field_name)
 {
-	mx_create_scalar_field<T>(mx_struct, 0, field_name);
+	return mx_create_scalar_field<T>(mx_struct, 0, field_name);
 }
 
 /**************************************************************************/

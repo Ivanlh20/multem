@@ -20,9 +20,9 @@
 #include "atomic_data.hpp"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
+using multem::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
@@ -30,7 +30,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	auto Dim = mx_get_scalar<int>(prhs[1]);
 	auto Vrl = mx_get_scalar<double>(prhs[2]);
 
-	auto r = mx_create_matrix<m_matrix_r>(multem::c_nAtomsTypes, 3, plhs[0]);
+	auto r = mx_create_matrix<rmatrix_r>(multem::c_nAtomsTypes, 3, plhs[0]);
 
 	multem::Atom_Cal<double> atom_cal;
 	multem::Atomic_Data atomic_data;

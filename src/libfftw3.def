@@ -1,4 +1,4 @@
-LIBRARY libfftw3-3.dll
+LIBRARY libfftw3.dll
 EXPORTS
 dfftw_cleanup_
 dfftw_cleanup__

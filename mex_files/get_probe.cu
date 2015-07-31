@@ -17,6 +17,7 @@
  */
 
 #include "types.hpp"
+#include "traits.cuh"
 
 #include "host_functions.hpp"
 #include "device_functions.cuh"
@@ -25,15 +26,15 @@
 #include "Probe.cuh"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
-using multem::m_matrix_c;
+using multem::rmatrix_r;
+using multem::rmatrix_c;
 
 template<class TInput_Multislice>
 void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice)
 {
-	using value_type = multem::traits::Value_type<TInput_Multislice>;
+	using value_type = multem::Value_type<TInput_Multislice>;
 
 	input_multislice.precision = mx_get_scalar_field<multem::ePrecision>(mx_input_multislice, "precision");
 	input_multislice.device = mx_get_scalar_field<multem::eDevice>(mx_input_multislice, "device"); 
@@ -74,7 +75,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 }
 
 template<class T, multem::eDevice dev>
-void get_probe(const mxArray *mxB, m_matrix_c &host_probe)
+void get_probe(const mxArray *mxB, rmatrix_c &host_probe)
 {
 	multem::Input_Multislice<T, dev> input_multislice;
 	read_input_data(mxB, input_multislice);
@@ -92,7 +93,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	multem::Input_Multislice<double, multem::e_Host> input_multislice;
 	read_input_data(prhs[0], input_multislice);
 
-	auto probe = mx_create_matrix<m_matrix_c>(input_multislice.grid, plhs[0]);
+	auto probe = mx_create_matrix<rmatrix_c>(input_multislice.grid, plhs[0]);
 
 	if(input_multislice.is_float_Host())
 	{

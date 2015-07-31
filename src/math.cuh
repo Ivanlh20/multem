@@ -366,6 +366,7 @@
 	}
 
 #else
+	#include <cuda.h>
 	#include "math.h"
 	#include <thrust/complex.h>
 	using thrust::complex;
@@ -419,6 +420,58 @@
 	using std::min;
 	using std::max;
 
+	template<class T>
+	struct complex_s
+	{
+	public:
+		complex_s():m_real(nullptr), m_imag(nullptr){}
+
+		template <class U> 
+		inline complex_s<T>& operator=(const complex<U> & z)
+		{
+			*m_real = z.real();
+			*m_imag = z.imag();
+			return *this;
+		}
+
+		inline void operator()(T &real, T &imag)
+		{
+			m_real = &real;
+			m_imag = &imag;
+		}
+
+		template<class U>
+		inline operator complex<U>() const 
+		{
+			return complex<U>(*m_real, *m_imag);
+		}
+
+		inline void real(const T &re){ *m_real = re; }
+
+		inline void imag(const T &im){ *m_imag = im; }
+
+		inline T real() const { return *m_real; }
+
+		inline T imag() const { return *m_imag; }
+
+		template <class U>
+		inline complex_s<T>& operator+=(const complex<U> &z)
+		{
+			real(real()+z.real());
+			imag(imag()+z.imag());
+			return *this;
+		}
+
+	private:
+		T *m_real;
+		T *m_imag;
+	};
+
+	template<class T>
+	std::ostream& operator<<(std::ostream& out, const complex_s<T>& z){
+		return out << "("<< z.real() << ", " << z.imag() << ")";
+	}
+
 	namespace thrust
 	{
 		template<class T>
@@ -435,6 +488,15 @@
 			T sprt, cptr;
 			sincos(x, &sprt, &cptr);
 			return complex<T>(cptr, sprt);
+		}
+
+		template<class T, class U>
+		inline void swap(complex_s<T> a, complex_s<U> b)
+		{
+			complex<T> temp = a;
+			a.real(b.real());
+			a.imag(b.imag());
+			b = temp;
 		}
 	}
 

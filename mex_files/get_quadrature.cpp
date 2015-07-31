@@ -21,9 +21,9 @@
 #include "quadrature.hpp"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 	
-using multem::m_matrix_r;
+using multem::rmatrix_r;
 
 void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -37,8 +37,8 @@ void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	multem::Quadrature quadrature;
 	quadrature.get(q_type, nq, q);
 
-	m_matrix_r x = mx_create_matrix<m_matrix_r>(nq, 1, plhs[0]);
-	m_matrix_r w = mx_create_matrix<m_matrix_r>(nq, 1, plhs[1]);
+	rmatrix_r x = mx_create_matrix<rmatrix_r>(nq, 1, plhs[0]);
+	rmatrix_r w = mx_create_matrix<rmatrix_r>(nq, 1, plhs[1]);
 
 	std::copy(q.x.begin(), q.x.end(), x.real);
 	std::copy(q.w.begin(), q.w.end(), w.real);

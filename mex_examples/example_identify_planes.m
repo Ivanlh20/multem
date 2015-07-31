@@ -7,7 +7,7 @@ na = 8; nb = 8; nc = 4; ncu = 4; sigma = 0.0;
 Atomsi(Atomsi(:, 4)==8, 5) = sqrt(0.009275); Atomsi(Atomsi(:, 4)==22, 5) = sqrt(0.00557); 
 Atomsi(Atomsi(:, 4)==38, 5) = sqrt(0.00787);
  
-Dim = 111; Seed = 1983; iConfFP = 2; PotPar = 6;
+Dim = 111; Seed = 300183; iConfFP = 2; PotPar = 6;
 tic;
 % get specimen slicing
 [Atoms, Slice] = get_specimen_slicing(Atomsi, lx, ly, dz, iConfFP, Dim, Seed);

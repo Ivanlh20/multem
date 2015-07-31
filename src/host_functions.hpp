@@ -22,11 +22,15 @@
 #include <thread>
 #include <type_traits>
 #include <algorithm>
+#include <algorithm>
 #include <iterator>
 
-#include "fftw3.h"
+#include <fftw3.h>
 #include "math.cuh"
 #include "types.hpp"
+#include "traits.cuh"
+#include "fft2.cuh"
+#include "stream.cuh"
 
 #include "host_device_functions.cuh"
 
@@ -74,7 +78,7 @@ namespace multem
 	{
 		int j;
 		if(shift == 1)
-			j = (i<nh)?i:i-2*nh;
+			j = (i < nh)?i:i-2*nh;
 		else
 			j = i-nh;
 		return j;
@@ -326,7 +330,7 @@ namespace multem
 
 		// Shift and Normalize
 		double r0 = r[0], fIr0 = fIr[0];
-		for(int i=0; i<nr; i++)
+		for(int i=0; i < nr; i++)
 		{
 			r[i] = (r[i]-r0)/(r[nr-1]-r0);
 			fIr[i] = (fIr[i]-fIr0)/(fIr[nr-1]-fIr0);
@@ -342,7 +346,7 @@ namespace multem
 		irm = get_dmaxIndex_Point2Line(x1, y1, x2, y2, ir1, ir2, r, fIr);
 		double fIr_lim = 0.45*fIr[irm];
 
-		for(int i=0; i<nr; i++)
+		for(int i=0; i < nr; i++)
 			if(fIr[i]>fIr_lim)
 			{
 				irm = i-1;
@@ -368,7 +372,7 @@ namespace multem
 
 		for(auto i=0; i<A_search.size(); i++)
 		{
-			T val = A_search[i];
+			T val = A_search[i]+Epsilon<float>::rel;
 			auto it = std::min_element(A_base_first, A_base_last, [&val](const T &a, const T &b)->bool{ return fabs(a-val)<fabs(b-val); });
 			auto imin = static_cast<int>(it - A_base_first);
 
@@ -519,16 +523,7 @@ namespace multem
 		{
 			for(auto iR = 0; iR < c_nR-1; iR++)
 			{
-				T dR2 = 1.0/(atom_Vp.R2[iR+1]-atom_Vp.R2[iR]);
-				T V = atom_Vp.c0[iR]; 
-				T Vn = atom_Vp.c0[iR+1];
-				T dV = atom_Vp.c1[iR]; 
-				T dVn = atom_Vp.c1[iR+1];
-				T m = (Vn-V)*dR2; 
-				T n = dV+dVn;
-				atom_Vp.c0[iR] = V-atom_Vp.c0[c_nR-1];
-				atom_Vp.c2[iR] = (3.0*m-n-dV)*dR2;
-				atom_Vp.c3[iR] = (n-2.0*m)*dR2*dR2;
+				host_device_detail::cubic_poly_coef(iR, atom_Vp);
 			}
 		}
 
@@ -536,44 +531,30 @@ namespace multem
 		template<class T> 
 		void eval_cubic_poly(const Grid<T> &grid, const Atom_Vp<T> &atom_Vp, const rVector<T> &V0g)
 		{	
-			for(auto iy0 = 0; iy0 < atom_Vp.iyn; iy0++)
+			for(auto ix0 = 0; ix0 < atom_Vp.ixn; ix0++)
 			{
-				int ixc = 0;
-				for(auto ix0 = 0; ix0 < atom_Vp.ixn; ix0++)
+				int iyc = 0;
+				for(auto iy0 = 0; iy0 < atom_Vp.iyn; iy0++)
 				{
 					int ix = ix0 + atom_Vp.ix0;
 					int iy = iy0 + atom_Vp.iy0;
 
-					T Rx = grid.Rx(ix) - atom_Vp.x;
-					T Ry = grid.Ry(iy) - atom_Vp.y;
-					T R2 = Rx*Rx + Ry*Ry;
+					T R2 = grid.R2(ix, iy, atom_Vp.x, atom_Vp.y);
 					if (R2 < atom_Vp.R_max2)
 					{
-						R2 = max(R2, atom_Vp.R_min2);
-
-						ix -= static_cast<int>(floor(grid.Rx(ix)/grid.lx))*grid.nx;
-						iy -= static_cast<int>(floor(grid.Ry(iy)/grid.ly))*grid.ny;
-
-						ix = grid.iRx_shift(ix);
-						iy = grid.iRy_shift(iy);
-						int ixy = grid.ind_row(ix, iy);
-
-						ix = host_device_detail::unrolledBinarySearch_c_nR<T>(R2, atom_Vp.R2);
-
-						T dx = R2 - atom_Vp.R2[ix]; 
-						T dx2 = dx*dx;
-						T V = atom_Vp.occ*(atom_Vp.c0[ix] + atom_Vp.c1[ix]*dx + atom_Vp.c2[ix]*dx2 + atom_Vp.c3[ix]*dx2*dx);
+						int ixy;
+						T V = host_device_detail::eval_cubic_poly(ix, iy, R2, grid, atom_Vp, ixy);
 						
-						atom_Vp.iv[ixc] = ixy;
-						atom_Vp.v[ixc] = V;
-						ixc++;
+						atom_Vp.iv[iyc] = ixy;
+						atom_Vp.v[iyc] = V;
+						iyc++;
 					}
 				}
 
 				multem_mutex.lock();
-				for(auto ix0 = 0; ix0 < ixc; ix0++)
+				for(auto iy0 = 0; iy0 < iyc; iy0++)
 				{
-					V0g.V[atom_Vp.iv[ix0]] += atom_Vp.v[ix0];
+					V0g.V[atom_Vp.iv[iy0]] += atom_Vp.v[iy0];
 				}
 				multem_mutex.unlock();
 			}
@@ -585,12 +566,11 @@ namespace multem
 			using value_type_r = Value_type<TGrid>;
 
 			value_type_r sum = 0.0;
-			for(auto iy = 0; iy < grid.ny; iy++)
+			for(auto ix = 0; ix < grid.nx; ix++)
 			{
-				for(auto ix = 0; ix < grid.nx; ix++)
+				for(auto iy = 0; iy < grid.ny; iy++)
 				{
 					value_type_r g2 = grid.g2_shift(ix, iy);
-
 					if(g2 < eels.gc2)
 					{
 						sum += 1.0/(g2 + eels.ge2);
@@ -619,36 +599,36 @@ namespace multem
 			switch(potential_type)
 			{
 				case ePT_Doyle_0_4:
-					host_detail::linear_Vz<ePT_Doyle_0_4, Value_type<TQ1>>(qz, atom_Vp);
+					host_detail::linear_Vz<ePT_Doyle_0_4, typename TQ1::value_type>(qz, atom_Vp);
 					break;
 				case ePT_Peng_0_4:
-					host_detail::linear_Vz<ePT_Peng_0_4, Value_type<TQ1>>(qz, atom_Vp);
+					host_detail::linear_Vz<ePT_Peng_0_4, typename TQ1::value_type>(qz, atom_Vp);
 					break;
 				case ePT_Peng_0_12:
-					host_detail::linear_Vz<ePT_Peng_0_12, Value_type<TQ1>>(qz, atom_Vp);
+					host_detail::linear_Vz<ePT_Peng_0_12, typename TQ1::value_type>(qz, atom_Vp);
 					break;
 				case ePT_Kirkland_0_12:
-					host_detail::linear_Vz<ePT_Kirkland_0_12, Value_type<TQ1>>(qz, atom_Vp);
+					host_detail::linear_Vz<ePT_Kirkland_0_12, typename TQ1::value_type>(qz, atom_Vp);
 					break;
 				case ePT_Weickenmeier_0_12:
-					host_detail::linear_Vz<ePT_Weickenmeier_0_12, Value_type<TQ1>>(qz, atom_Vp);
+					host_detail::linear_Vz<ePT_Weickenmeier_0_12, typename TQ1::value_type>(qz, atom_Vp);
 					break;
 				case ePT_Lobato_0_12:
-					host_detail::linear_Vz<ePT_Lobato_0_12, Value_type<TQ1>>(qz, atom_Vp);
+					host_detail::linear_Vz<ePT_Lobato_0_12, typename TQ1::value_type>(qz, atom_Vp);
 					break;
 			}
-			host_detail::cubic_poly_coef<Value_type<TQ1>>(atom_Vp); 
+			host_detail::cubic_poly_coef<typename TQ1::value_type>(atom_Vp); 
 		};
 
 		for(auto istream = 0; istream < stream.n_act_stream; istream++)
 		{
-			stream[istream] = std::thread(cubic_poly_coef, potential_type, std::ref(qz), std::ref(atom_Vp[istream]));
+			stream[istream] = std::thread(std::bind(cubic_poly_coef, potential_type, std::ref(qz), std::ref(atom_Vp[istream])));
 		}
 		stream.synchronize();
 	}
 
 	template<class TGrid, class TVector_r>
-	enable_if_Host<TVector_r, void>
+	enable_if_host_vector<TVector_r, void>
 	eval_cubic_poly(TGrid &grid, Stream<Value_type<TGrid>, e_Host> &stream, 
 	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V0)
 	{
@@ -659,70 +639,27 @@ namespace multem
 
 		for(auto istream = 0; istream < stream.n_act_stream; istream++)
 		{
-			stream[istream] = std::thread(std::bind(host_detail::eval_cubic_poly<Value_type<TVector_r>>, std::ref(grid), std::ref(atom_Vp[istream]), std::ref(V0)));
+			stream[istream] = std::thread(std::bind(host_detail::eval_cubic_poly<typename TVector_r::value_type>, std::ref(grid), std::ref(atom_Vp[istream]), std::ref(V0)));
 		}
 		stream.synchronize();
 	}
 
+	//typename std::enable_if<is_Host<TVector>::value && !is_rmatrix_c<TVector>::value, void>::type
 	template<class TGrid, class TVector>
 	enable_if_Host<TVector, void>
 	fft2_shift(const TGrid &grid, TVector &M_io)
 	{
-		for(auto iy = 0; iy <grid.nyh; iy++)
+		for(auto ix = 0; ix <grid.nxh; ix++)
 		{
-			for(auto ix = 0; ix <grid.nxh; ix++)
+			for(auto iy = 0; iy <grid.nyh; iy++)			
 			{
-				int ixy = grid.ind_row(ix, iy); 
-				int ixy_shift = grid.ind_row(grid.nxh+ix, grid.nyh+iy);
-				thrust::swap(M_io[ixy], M_io[ixy_shift]);
-
-				ixy = grid.ind_row(ix, grid.nyh+iy); 
-				ixy_shift = grid.ind_row(grid.nxh+ix, iy);
-				thrust::swap(M_io[ixy], M_io[ixy_shift]);
-			}
-		}
-	}
-
-	template<class TGrid>
-	void fft2_shift(const TGrid &grid, m_matrix_r &M_io)
-	{
-		for(auto iy = 0; iy <grid.nyh; iy++)
-		{
-			for(auto ix = 0; ix <grid.nxh; ix++)
-			{
-				int ixy = grid.ind_col(ix, iy); 
-				int ixy_shift = grid.ind_col(grid.nxh+ix, grid.nyh+iy);
-				thrust::swap(M_io.real[ixy], M_io.real[ixy_shift]);
-
-				ixy = grid.ind_col(ix, grid.nyh+iy); 
-				ixy_shift = grid.ind_col(grid.nxh+ix, iy);
-				thrust::swap(M_io.real[ixy], M_io.real[ixy_shift]);
-			}
-		}
-	}
-
-	template<class TGrid>
-	void fft2_shift(const TGrid &grid, m_matrix_c &M_io)
-	{
-		for(auto iy = 0; iy <grid.nyh; iy++)
-		{
-			for(auto ix = 0; ix <grid.nxh; ix++)
-			{
-				int ixy = grid.ind_col(ix, iy); 
-				int ixy_shift = grid.ind_col(grid.nxh+ix, grid.nyh+iy);
-				thrust::swap(M_io.real[ixy], M_io.real[ixy_shift]);
-				thrust::swap(M_io.imag[ixy], M_io.imag[ixy_shift]);
-
-				ixy = grid.ind_col(ix, grid.nyh+iy); 
-				ixy_shift = grid.ind_col(grid.nxh+ix, iy);
-				thrust::swap(M_io.real[ixy], M_io.real[ixy_shift]);
-				thrust::swap(M_io.imag[ixy], M_io.imag[ixy_shift]);
+				host_device_detail::fft2_shift(ix, iy, grid, M_io);
 			}
 		}
 	}
 
 	template<class TGrid, class TVector>
-	enable_if_Host<TVector, Value_type<TVector>>
+	enable_if_host_vector<TVector, Value_type<TVector>>
 	sum_over_Det(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, TVector &M_i)
 	{
 		using value_type_r = Value_type<TGrid>;
@@ -732,14 +669,14 @@ namespace multem
 		value_type_r g2_max = pow(g_max, 2);
 
 		value_type sum = 0.0;
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
-			{
-				int ixy = grid.ind_row(ix, iy); 				
+			for(auto iy = 0; iy < grid.ny; iy++)
+			{				
 				value_type_r g2 = grid.g2_shift(ix, iy);
 				if((g2_min <= g2)&&(g2 <= g2_max))
 				{
+					int ixy = grid.ind_col(ix, iy); 
 					sum += M_i[ixy];
 				}
 			}
@@ -749,7 +686,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_r>
-	enable_if_Host<TVector_r, Value_type<TGrid>>
+	enable_if_host_vector<TVector_r, Value_type<TGrid>>
 	sum_square_over_Det(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, TVector_r &M_i)
 	{
 		using value_type_r = Value_type<TGrid>;
@@ -758,14 +695,14 @@ namespace multem
 		value_type_r g2_max = pow(g_max, 2);
 
 		value_type_r sum = 0;
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
-			{
-				int ixy = grid.ind_row(ix, iy); 		
+			for(auto iy = 0; iy < grid.ny; iy++)
+			{	
 				value_type_r g2 = grid.g2_shift(ix, iy);
 				if((g2_min <= g2)&&(g2 <= g2_max))
 				{
+					int ixy = grid.ind_col(ix, iy);
 					sum += thrust::norm(M_i[ixy]);
 				}
 			}
@@ -775,105 +712,60 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
+	enable_if_host_vector<TVector_c, void>
 	bandwidth_limit(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, Value_type<TVector_c> w, TVector_c &M_io)
 	{
 		using value_type_r = Value_type<TGrid>;
-		using value_type_c = Value_type<TVector_c>;
 
 		value_type_r g2_min = pow(g_min, 2);
 		value_type_r g2_max = pow(g_max, 2);
 
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy); 		
-				value_type_r g2 = grid.g2_shift(ix, iy);
-
-				if((g2_min <= g2)&&(g2 <= g2_max))
-				{
-					M_io[ixy] *= w;
-				}
-				else
-				{
- 					M_io[ixy] = static_cast<value_type_c>(0);
-				}
+				host_device_detail::bandwidth_limit(ix, iy, grid, g2_min, g2_max, w, M_io);
 			}
 		}
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
-	phase_mul(const TGrid &grid, TVector_c &exp_x_i, TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
+	enable_if_host_vector<TVector_c, void>
+	phase_multiplication(const TGrid &grid, TVector_c &exp_x_i, TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
 	{
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy);
-				psi_o[ixy] = psi_i[ixy]*exp_x_i[ix]*exp_y_i[iy]; 
+				host_device_detail::phase_multiplication(ix, iy, grid, exp_x_i, exp_y_i, psi_i, psi_o);
 			}
 		}
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
-	propagator_mul(const TGrid &grid, TVector_c &prop_x_i, TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &psi_o)
+	enable_if_host_vector<TVector_c, void>
+	propagator_multiplication(const TGrid &grid, TVector_c &prop_x_i, TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &psi_o)
 	{
-		using value_type_r = Value_type<TGrid>;
-		using value_type_c = Value_type<TVector_c>;
-
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy); 	
-				value_type_r g2 = grid.g2_shift(ix, iy);
-
-				if((!grid.bwl)||(g2 < grid.gl2_max))
-				{
-					psi_o[ixy] = static_cast<value_type_c>(grid.inxy)*psi_i[ixy]*prop_x_i[ix]*prop_y_i[iy];
-				}
-				else
-				{
- 					psi_o[ixy] = static_cast<value_type_c>(0);
-				}	
+				host_device_detail::propagator_multiplication(ix, iy, grid, prop_x_i, prop_y_i, psi_i, psi_o);
 			}
 		}
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
+	enable_if_host_vector<TVector_c, void>
 	probe(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, Value_type<TGrid> x, Value_type<TGrid> y, TVector_c &fPsi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
-		using value_type_c = Value_type<TVector_c>;
 
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
-				{
-					value_type_r chi = x*gx + y*gy + g2*(lens.cCs5*g2*g2+lens.cCs3*g2+lens.cf);
-					if(nonZero(lens.m)||nonZero(lens.cmfa2)||nonZero(lens.cmfa3))
-					{
-						value_type_r g = sqrt(g2);
-						value_type_r phi = atan2(gy, gx);
-						chi += lens.m*phi + lens.cmfa2*g2*sin(2*(phi-lens.afa2)) + lens.cmfa3*g*g2*sin(3*(phi-lens.afa3)); 			
-					}	
-					fPsi_o[ixy] = thrust::euler(chi); 	
-				}
-				else
-				{
- 					fPsi_o[ixy] = static_cast<value_type_c>(0);
-				}
+				host_device_detail::probe(ix, iy, grid, lens, x, y, fPsi_o);
 			}
 		}
 
@@ -882,109 +774,42 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
+	enable_if_host_vector<TVector_c, void>
 	apply_CTF(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
-		using value_type_r = Value_type<TGrid>;
-		using value_type_c = Value_type<TVector_c>;
-
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-
-				if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
-				{
-					g2 = (gx-gxu)*(gx-gxu) + (gy-gyu)*(gy-gyu);
-					value_type_r chi = g2*(lens.cCs5*g2*g2+lens.cCs3*g2+lens.cf);
-					if(nonZero(lens.cmfa2)||nonZero(lens.cmfa3))
-					{
-						value_type_r g = sqrt(g2);
-						value_type_r phi = atan2(gy, gx);
-						chi += lens.cmfa2*g2*sin(2*(phi-lens.afa2)) + lens.cmfa3*g*g2*sin(3*(phi-lens.afa3)); 			
-					}
-					fPsi_o[ixy] = fPsi_i[ixy]*thrust::euler(chi);
-				}
-				else
-				{
- 					fPsi_o[ixy] = static_cast<value_type_c>(0);
-				}
+				host_device_detail::apply_CTF(ix, iy, grid, lens, gxu, gyu, fPsi_i, fPsi_o);
 			}
 		}
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
+	enable_if_host_vector<TVector_c, void>
 	apply_PCTF(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
-		using value_type_r = Value_type<TGrid>;
-		using value_type_c = Value_type<TVector_c>;
-
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy);
-				value_type_r g2 = grid.g2_shift(ix, iy);
-
-				if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
-				{			
-					value_type_r chi = g2*(lens.cCs3*g2+lens.cf);
-					value_type_r c = c_Pi*lens.beta*lens.sf;
-					value_type_r u = 1.0 + c*c*g2;
-
-					c = c_Pi*lens.sf*lens.lambda*g2;
-					value_type_r sie = 0.25*c*c;
-					c = c_Pi*lens.beta*(lens.Cs3*lens.lambda2*g2-lens.f);
-					value_type_r tie = c*c*g2;
-					value_type_r sti = exp(-(sie+tie)/u);
-
-					fPsi_o[ixy] = fPsi_i[ixy]*thrust::polar(sti, chi);
-				}
-				else
-				{
-					fPsi_o[ixy] = static_cast<value_type_c>(0);
-				}
+				host_device_detail::apply_PCTF(ix, iy, grid, lens, fPsi_i, fPsi_o);
 			}
 		}
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
-	kernel_xyz(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_x, TVector_c &k_y, TVector_c &k_z)
+	enable_if_host_vector<TVector_c, void>
+	kernel_xyz(const TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_x, TVector_c &k_y, TVector_c &k_z)
 	{
-		using value_type_r = Value_type<TGrid>;
-		using value_type_c = Value_type<TVector_c>;
-
 		eels.factor = host_detail::Lorentz_factor(grid, eels);
 
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = eels.factor/(g2 + eels.ge2);
-					k_x[ixy] = static_cast<value_type_c>(gx*lorentz)*pos;
-					k_y[ixy] = static_cast<value_type_c>(gy*lorentz)*pos;
-					k_z[ixy] = static_cast<value_type_c>(eels.ge*lorentz)*pos;
-				}
-				else
-				{
-					k_x[ixy] = static_cast<value_type_c>(0);
-					k_y[ixy] = static_cast<value_type_c>(0);
-					k_z[ixy] = static_cast<value_type_c>(0);
-				}
+				host_device_detail::kernel_xyz(ix, iy, grid, eels, k_x, k_y, k_z);
 			}
 		}
 
@@ -994,33 +819,16 @@ namespace multem
 	}
 	
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
-	kernel_x(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_x)
+	enable_if_host_vector<TVector_c, void>
+	kernel_x(const TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_x)
 	{
-		using value_type_r = Value_type<TGrid>;
-		using value_type_c = Value_type<TVector_c>;
-
 		eels.factor = host_detail::Lorentz_factor(grid, eels);
 
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = eels.factor/(g2 + eels.ge2);
-					k_x[ixy] = static_cast<value_type_c>(gx*lorentz)*pos;
-				}
-				else
-				{
-					k_x[ixy] = static_cast<value_type_c>(0);
-				}
+				host_device_detail::kernel_x(ix, iy, grid, eels, k_x);
 			}
 		}
 
@@ -1028,33 +836,16 @@ namespace multem
 	}
 	
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
-	kernel_y(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_y)
+	enable_if_host_vector<TVector_c, void>
+	kernel_y(const TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_y)
 	{
-		using value_type_r = Value_type<TGrid>;
-		using value_type_c = Value_type<TVector_c>;
-
 		eels.factor = host_detail::Lorentz_factor(grid, eels);
 
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = eels.factor/(g2 + eels.ge2);
-					k_y[ixy] = static_cast<value_type_c>(gy*lorentz)*pos;
-				}
-				else
-				{
-					k_y[ixy] = static_cast<value_type_c>(0);
-				}
+				host_device_detail::kernel_y(ix, iy, grid, eels, k_y);
 			}
 		}
 
@@ -1062,33 +853,16 @@ namespace multem
 	}
 	
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
-	kernel_z(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_z)
+	enable_if_host_vector<TVector_c, void>
+	kernel_z(const TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_z)
 	{
-		using value_type_r = Value_type<TGrid>;
-		using value_type_c = Value_type<TVector_c>;
-
 		eels.factor = host_detail::Lorentz_factor(grid, eels);
 
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = eels.factor/(g2 + eels.ge2);
-					k_z[ixy] = static_cast<value_type_c>(eels.ge*lorentz)*pos;
-				}
-				else
-				{
-					k_z[ixy] = static_cast<value_type_c>(0);
-				}
+				host_device_detail::kernel_z(ix, iy, grid, eels, k_z);
 			}
 		}
 
@@ -1096,35 +870,16 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
-	kernel_mn1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_mn1)
+	enable_if_host_vector<TVector_c, void>
+	kernel_mn1(const TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_mn1)
 	{
-		using value_type_r = Value_type<TGrid>;
-		using value_type_c = Value_type<TVector_c>;
-
 		eels.factor = host_detail::Lorentz_factor(grid, eels);
 
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = eels.factor/(g2 + eels.ge2);
-					value_type_c k_x = value_type_c(gx*lorentz, 0);
-					value_type_c k_y = value_type_c(0, gy*lorentz);
-					k_mn1[ixy] = (k_x - k_y)*pos;
-				}
-				else
-				{
-					k_mn1[ixy] = static_cast<value_type_c>(0);
-				}
+				host_device_detail::kernel_mn1(ix, iy, grid, eels, k_mn1);
 			}
 		}
 
@@ -1132,35 +887,16 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Host<TVector_c, void>
-	kernel_mp1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_mp1)
+	enable_if_host_vector<TVector_c, void>
+	kernel_mp1(const TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Host> &fft2, TVector_c &k_mp1)
 	{
-		using value_type_r = Value_type<TGrid>;
-		using value_type_c = Value_type<TVector_c>;
-
 		eels.factor = host_detail::Lorentz_factor(grid, eels);
 
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
+			for(auto iy = 0; iy < grid.ny; iy++)
 			{
-				int ixy = grid.ind_row(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					value_type_c pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = eels.factor/(g2 + eels.ge2);
-					value_type_c k_x = value_type_c(gx*lorentz, 0);
-					value_type_c k_y = value_type_c(0, gy*lorentz);
-					k_mp1[ixy] = (k_x + k_y)*pos;
-				}
-				else
-				{
-					k_mp1[ixy] = static_cast<value_type_c>(0);
-				}
+				host_device_detail::kernel_mp1(ix, iy, grid, eels, k_mp1);
 			}
 		}
 
@@ -1168,68 +904,47 @@ namespace multem
 	}
 
 	template<class TVector_c>
-	enable_if_Host<TVector_c, void>
-	scomplex_to_complex(m_matrix_c &V_i, TVector_c &V_o)
+	enable_if_host_vector<TVector_c, void>
+	rmatrix_c_to_complex(rmatrix_c &M_i, TVector_c &M_o)
 	{
-		using value_type_c = Value_type<TVector_c>;
-
-		for(auto iy = 0; iy < V_i.rows; iy++)
+		for(auto ixy = 0; ixy < M_i.size; ixy++)
 		{
-			for(auto ix = 0; ix < V_i.cols; ix++)
-			{
-				int ixy_row = iy*V_i.cols+ix;
-				int ixy_col = ix*V_i.rows+iy;
-				V_o[ixy_row] = value_type_c(V_i.real[ixy_col], V_i.imag[ixy_col]);
-			}
+			M_o[ixy] = M_i[ixy];
+		}
+	}
+
+	/***************************************************************************/
+	/***************************************************************************/
+
+	template<class TGrid, class TVector_i, class TVector_o>
+	enable_if_host_vector<TVector_i, void>
+	copy_to_host(const TGrid &grid, TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_Host> *M_i_h=nullptr)
+	{
+		for(auto ixy = 0; ixy < M_i.size(); ixy++)
+		{
+			M_o[ixy] = M_i[ixy];
 		}
 	}
 
 	template<class TGrid, class TVector_i, class TVector_o>
-	typename std::enable_if<is_Host<TVector_i>::value && !is_m_matrix_rc<TVector_o>::value, void>::type
-	to_host(TGrid &grid, TVector_i &M_i, TVector_o &M_o)
+	enable_if_host_vector<TVector_i, void>
+	add_scale_to_host(TGrid &grid, Value_type<TVector_i> w_i, TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_Host> *M_i_h=nullptr)
 	{
-		multem::device_synchronize<multem::e_Host>();
-
-		for(auto iy = 0; iy < grid.ny; iy++)
+		for(auto i = 0; i < M_i_h->size(); i++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
-			{
-				M_o[grid.ind_col(ix, iy)] = M_i[grid.ind_row(ix, iy)];
-			}
+			M_o[i] += w_i*M_i[i];
 		}
 	}
 
-	template<class TGrid, class TVector, class Tm_matrix_r>
-	typename std::enable_if<is_Host<TVector>::value && is_m_matrix_r<Tm_matrix_r>::value, void>::type
-	to_host(TGrid &grid, TVector &M_i, Tm_matrix_r &M_o)
+	template<class TGrid, class TVector_c_i, class TVector_r_o, class TVector_c_o>
+	enable_if_host_vector<TVector_c_i, void>
+	add_scale_m2psi_psi(TGrid &grid, Value_type<TGrid> w_i, TVector_c_i &psi_i, TVector_r_o &m2psi_o, TVector_c_o &psi_o, Vector<Value_type<TVector_c_i>, e_Host> *psi_i_h=nullptr)
 	{
-		multem::device_synchronize<multem::e_Host>();
-
-		for(auto iy = 0; iy < grid.ny; iy++)
+		Value_type<TVector_c_i> w_i_c = w_i;
+		for(auto i = 0; i < psi_i.size(); i++)
 		{
-			for(auto ix = 0; ix < grid.nx; ix++)
-			{
-				M_o.real[grid.ind_col(ix, iy)] = M_i[grid.ind_row(ix, iy)];
-			}
-		}
-	}
-
-	template<class TGrid, class TVector, class Tm_matrix_c>
-	typename std::enable_if<is_Host<TVector>::value && is_m_matrix_c<Tm_matrix_c>::value, void>::type
-	to_host(TGrid &grid, TVector &M_i, Tm_matrix_c &M_o)
-	{
-		multem::device_synchronize<multem::e_Host>();
-
-		for(auto iy = 0; iy < grid.ny; iy++)
-		{
-			for(auto ix = 0; ix < grid.nx; ix++)
-			{
-				int ixy_row = grid.ind_row(ix, iy);
-				int ixy_col = grid.ind_col(ix, iy);
-
-				M_o.real[ixy_col] = M_i[ixy_row].real();
-				M_o.imag[ixy_col] = M_i[ixy_row].imag();
-			}
+			m2psi_o[i] += w_i*thrust::norm(psi_i[i]);
+			psi_o[i] += w_i_c*psi_i[i];
 		}
 	}
 } //namespace multem

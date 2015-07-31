@@ -21,9 +21,9 @@
 #include "crystal.hpp"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
+using multem::rmatrix_r;
 
 /*******************Matlab to layer unit cell*********************/
 void read_input_data(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, multem::Vector<multem::Atom_Data<double>, multem::e_Host> &uLayer)
@@ -44,7 +44,7 @@ void read_input_data(const mxArray *mxCrystal, int &na, int &nb, int &nc, double
 	uLayer.resize(nuLayer);
 	for(auto i=0; i < uLayer.size(); i++)
 	{
-		auto atoms = mx_get_matrix_field<m_matrix_r>(mexuLayer, i, "atoms");
+		auto atoms = mx_get_matrix_field<rmatrix_r>(mexuLayer, i, "atoms");
 		uLayer[i].set_Atoms(atoms.rows, atoms.real, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 	}
 }
@@ -61,7 +61,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	crystal.Create3DCrystal(na, nb, nc, a, b, c, uLayer, atoms);
 
-	auto atomsM = mx_create_matrix<m_matrix_r>(atoms.size(), 6, plhs[0]);
+	auto atomsM = mx_create_matrix<rmatrix_r>(atoms.size(), 6, plhs[0]);
 
 	for(auto i=0; i<atomsM.rows; i++)
 	{		

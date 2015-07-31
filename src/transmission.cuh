@@ -21,6 +21,7 @@
 
 #include "math.cuh"
 #include "types.hpp"
+#include "fft2.cuh"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
@@ -36,15 +37,16 @@ namespace multem
 	{
 		public:
 			using value_type_r = T;
-			using value_type_c = std::complex<T>;
+			using value_type_c = complex<T>;
+			using size_type = std::size_t;
 
-			Vector<value_type_c, dev> trans_0;
+			static const eDevice device = dev;
 
-			Transmission():fft2(nullptr){ }
+			Transmission():fft2(nullptr){}
 
-			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io, Stream<value_type_r, dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
+			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, Stream<value_type_r, dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
 			{
-				Potential<T, dev>::set_input_data(input_multislice_io, stream_i);
+				Potential<T, dev>::set_input_data(input_multislice_i, stream_i);
 				fft2 = fft2_i;
 
 				trans_0.resize(this->input_multislice->grid.nxy());
@@ -55,13 +57,8 @@ namespace multem
 					return;
 				}
 
-				int n_slice_req = 1;
-
-				if(this->input_multislice->is_multislice())
-				{
-					int n_slice_sig = (this->input_multislice->fp_dim.z)?(int)ceil(3.0*this->atoms.sigma_max/this->input_multislice->grid.dz):0;
-					n_slice_req = this->slice.size() + 2*n_slice_sig;
-				}
+				int n_slice_sig = (this->input_multislice->fp_dim.z)?(int)ceil(3.0*this->atoms.sigma_max/this->input_multislice->grid.dz):0;
+				int n_slice_req = this->slice.size() + 2*n_slice_sig;
 
 				memory_slice.set_input_data(n_slice_req, this->input_multislice->grid.nxy());
 
@@ -85,7 +82,7 @@ namespace multem
 				{
 					if(memory_slice.is_potential())
 					{
-						projected_potential(i, Vp_v[i]);
+						this->projected_potential(i, Vp_v[i]);
 					}
 					else if(memory_slice.is_transmission())
 					{
@@ -112,7 +109,7 @@ namespace multem
 				}
 				else
 				{
-					projected_potential(islice, this->V0);
+					this->projected_potential(islice, this->V0);
 					multem::transmission_funtion(this->input_multislice->grid, *fft2, this->input_multislice->interaction_model, fPot, this->V0, trans_0);
 				}
 			}
@@ -121,7 +118,7 @@ namespace multem
 			{
 				value_type_r fPot = this->input_multislice->Vr_factor();
 
-				projected_potential(islice_0, islice_e, this->V0);
+				this->projected_potential(islice_0, islice_e, this->V0);
 				multem::transmission_funtion(this->input_multislice->grid, *fft2, this->input_multislice->interaction_model, fPot, this->V0, trans_0);
 			}
 
@@ -136,6 +133,7 @@ namespace multem
 				multem::multiply(trans_0, psi_io);
 			}
 
+			Vector<value_type_c, dev> trans_0;
 		private:
 			struct Memory_Slice
 			{
@@ -144,7 +142,7 @@ namespace multem
 					int n_slice_Allow;
 					eSlice_Memory_Type slice_mem_type;
 
-					Memory_Slice():n_slice_req(0), n_slice_Allow(0), slice_mem_type(eSMT_none){ }
+					Memory_Slice():n_slice_req(0), n_slice_Allow(0), slice_mem_type(eSMT_none){}
 
 					void clear()
 					{
@@ -179,8 +177,7 @@ namespace multem
 					void resize_vector(const int &nxy_i, U &vector)
 					{
 						vector.resize(n_slice_Allow);
-						//vector.shrink_to_fit(); //this line produce a error --> thrust library
-						for(auto i=0; i<n_slice_Allow; i++)
+						for(auto i=0; i < n_slice_Allow; i++)
 						{
 							vector[i].resize(nxy_i);
 						}

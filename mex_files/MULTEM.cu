@@ -20,20 +20,21 @@
 
 #include "math.cuh"
 #include "types.hpp"
+#include "traits.cuh"
 #include "input_multislice.hpp"
 #include "atom_data.hpp"
 #include "multislice.cuh"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
-using multem::m_matrix_c;
+using multem::rmatrix_r;
+using multem::rmatrix_c;
 
 template<class TInput_Multislice>
 void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full=true)
 {
-	using value_type = multem::traits::Value_type<TInput_Multislice>;
+	using value_type = multem::Value_type<TInput_Multislice>;
 
 	input_multislice.precision = mx_get_scalar_field<multem::ePrecision>(mx_input_multislice, "precision");
 	input_multislice.device = mx_get_scalar_field<multem::eDevice>(mx_input_multislice, "device"); 
@@ -50,8 +51,8 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 
 	input_multislice.fp_dim.set(mx_get_scalar_field<int>(mx_input_multislice, "fp_dim"));
 	input_multislice.fp_seed = mx_get_scalar_field<int>(mx_input_multislice, "fp_seed");
+	input_multislice.fp_single_conf = mx_get_scalar_field<bool>(mx_input_multislice, "fp_single_conf");
 	input_multislice.fp_nconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_nconf");
-	input_multislice.fp_iconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_iconf");
 
 	input_multislice.microscope_effect = mx_get_scalar_field<multem::eMicroscope_Effect>(mx_input_multislice, "microscope_effect");
 	input_multislice.spatial_temporal_effect = mx_get_scalar_field<multem::eSpatial_Temporal_Effect>(mx_input_multislice, "spatial_temporal_effect");
@@ -62,7 +63,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.thickness_type = mx_get_scalar_field<multem::eThickness_Type>(mx_input_multislice, "thickness_type");
 	if(input_multislice.thickness_type != multem::eTT_Whole_Specimen && full)
 	{
-		auto thickness = mx_get_matrix_field<m_matrix_r>(mx_input_multislice, "thickness");
+		auto thickness = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "thickness");
 		input_multislice.thickness.resize(thickness.size);
 		std::copy(thickness.real, thickness.real + thickness.size, input_multislice.thickness.begin());
 	}
@@ -70,9 +71,9 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.input_wave_type = mx_get_scalar_field<multem::eInput_Wave_Type>(mx_input_multislice, "input_wave_type");
 	if(input_multislice.is_user_define_wave() && full)
 	{
-		auto psi_0 = mx_get_matrix_field<m_matrix_c>(mx_input_multislice, "psi_0");
+		auto psi_0 = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "psi_0");
 		input_multislice.psi_0.resize(psi_0.size);
-		multem::scomplex_to_complex(psi_0, input_multislice.psi_0);
+		multem::rmatrix_c_to_complex(psi_0, input_multislice.psi_0);
 		multem::fft2_shift(input_multislice.grid, input_multislice.psi_0);
 	}
 
@@ -92,7 +93,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	auto ly = mx_get_scalar_field<value_type>(mx_input_multislice, "ly");
 	auto dz = mx_get_scalar_field<value_type>(mx_input_multislice, "dz"); 				
 
-	auto atoms = mx_get_matrix_field<m_matrix_r>(mx_input_multislice, "atoms");
+	auto atoms = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "atoms");
 	if(full)
 	{
 		input_multislice.atoms.set_Atoms(atoms.rows, atoms.real, lx, ly, dz);
@@ -224,32 +225,32 @@ void set_output_data(const TInput_Multislice &input_multislice, mxArray *&mx_plh
 
 		for(auto iDet=0; iDet<input_multislice.det_cir.size(); iDet++)
 		{
-			mx_create_matrix_field<m_matrix_r>(mx_plhs0, iDet, "image", rows, input_multislice.scanning.nx);
+			mx_create_matrix_field<rmatrix_r>(mx_plhs0, iDet, "image", rows, input_multislice.scanning.nx);
 			if(input_multislice.coherent_contribution)
 			{
-				mx_create_matrix_field<m_matrix_r>(mx_plhs1, iDet, "image", rows, input_multislice.scanning.nx);
+				mx_create_matrix_field<rmatrix_r>(mx_plhs1, iDet, "image", rows, input_multislice.scanning.nx);
 			}
 		}
 	}
 	else if(input_multislice.is_EWFS_EWRS())
 	{
-		mx_create_matrix<m_matrix_r>(input_multislice.grid, mx_plhs0);
+		mx_create_matrix<rmatrix_r>(input_multislice.grid, mx_plhs0);
 		if(input_multislice.coherent_contribution)
 		{
-			mx_create_matrix<m_matrix_c>(input_multislice.grid, mx_plhs1);
+			mx_create_matrix<rmatrix_c>(input_multislice.grid, mx_plhs1);
 		}
 	}
 	else if(input_multislice.is_EELS())
 	{
 		int rows = (input_multislice.scanning.is_line())?1:input_multislice.scanning.ny;
-		mx_create_matrix<m_matrix_r>(rows, input_multislice.scanning.nx, mx_plhs0);
+		mx_create_matrix<rmatrix_r>(rows, input_multislice.scanning.nx, mx_plhs0);
 	}
 	else
 	{
-		mx_create_matrix<m_matrix_r>(input_multislice.grid, mx_plhs0);
+		mx_create_matrix<rmatrix_r>(input_multislice.grid, mx_plhs0);
 		if(input_multislice.coherent_contribution)
 		{
-			mx_create_matrix<m_matrix_r>(input_multislice.grid, mx_plhs1);
+			mx_create_matrix<rmatrix_r>(input_multislice.grid, mx_plhs1);
 		}
 	}
 }
@@ -319,29 +320,29 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		for(auto iDet=0; iDet<input_multislice.det_cir.size(); iDet++)
 		{
-			m_matrix_r m2psi_tot = mx_get_matrix_field<m_matrix_r>(plhs[0], iDet, "image");
+			rmatrix_r m2psi_tot = mx_get_matrix_field<rmatrix_r>(plhs[0], iDet, "image");
 			std::copy(det_int_tot.image[iDet].begin(), det_int_tot.image[iDet].end(), m2psi_tot.real);
 			if(input_multislice.coherent_contribution)
 			{
-				m_matrix_r m2psi_coh = mx_get_matrix_field<m_matrix_r>(plhs[1], iDet, "image");
+				rmatrix_r m2psi_coh = mx_get_matrix_field<rmatrix_r>(plhs[1], iDet, "image");
 				std::copy(det_int_coh.image[iDet].begin(), det_int_coh.image[iDet].end(), m2psi_coh.real);
 			}
 		}
 	}
 	else if(input_multislice.is_EWFS_EWRS())
 	{
-		m_matrix_r m2psi_tot = mx_get_matrix<m_matrix_r>(plhs[0]);
-		m_matrix_c psi_coh;
+		rmatrix_r m2psi_tot = mx_get_matrix<rmatrix_r>(plhs[0]);
+		rmatrix_c psi_coh;
 		if(input_multislice.coherent_contribution)
 		{
-			psi_coh = mx_get_matrix<m_matrix_c>(plhs[1]);
+			psi_coh = mx_get_matrix<rmatrix_c>(plhs[1]);
 		}
 
 		get_simulation(prhs[0], input_multislice, m2psi_tot, psi_coh);
 	}
 	else if(input_multislice.is_EELS())
 	{
-		m_matrix_r m2psi_tot = mx_get_matrix<m_matrix_r>(plhs[0]);
+		rmatrix_r m2psi_tot = mx_get_matrix<rmatrix_r>(plhs[0]);
 
 		multem::Vector<double, multem::e_Host> v_m2psi_tot(m2psi_tot.size);
 		multem::Vector<double, multem::e_Host> v_m2psi_coh;
@@ -351,11 +352,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 	else
 	{
-		m_matrix_r m2psi_tot = mx_get_matrix<m_matrix_r>(plhs[0]);
-		m_matrix_r m2psi_coh;
+		rmatrix_r m2psi_tot = mx_get_matrix<rmatrix_r>(plhs[0]);
+		rmatrix_r m2psi_coh;
 		if(input_multislice.coherent_contribution)
 		{
-			m2psi_coh = mx_get_matrix<m_matrix_r>(plhs[1]);
+			m2psi_coh = mx_get_matrix<rmatrix_r>(plhs[1]);
 		}
 		get_simulation(prhs[0], input_multislice, m2psi_tot, m2psi_coh);
 	}

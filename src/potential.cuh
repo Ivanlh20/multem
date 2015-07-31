@@ -34,12 +34,15 @@ namespace multem
 	class Potential: public Specimen<T, dev>{
 		public:
 			using value_type_r = T;
-                                            
+			using size_type = std::size_t;
+
+			static const eDevice device = dev;
+
 			Potential(): stream(nullptr){}
 
-			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io, Stream<value_type_r, dev> *stream_i)
+			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, Stream<value_type_r, dev> *stream_i)
 			{	
-				Specimen<T, dev>::set_input_data(input_multislice_io);
+				Specimen<T, dev>::set_input_data(input_multislice_i);
 				stream = stream_i;
 
 				Quadrature quadrature;
@@ -48,7 +51,7 @@ namespace multem
 				atom_type.resize(c_nAtomsTypes); 
 				for(auto i=0; i<atom_type.size(); i++)
 				{
-					atom_type[i].assign(Specimen<T, dev>::atom_type[i]);
+					atom_type[i].assign(this->ptr_atom_type()->at(i));
 				}
 
 				int nv = max(this->input_multislice->grid.nx_dRx(this->atoms.l_x_Int), this->input_multislice->grid.ny_dRy(this->atoms.l_y_Int));

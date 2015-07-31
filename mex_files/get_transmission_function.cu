@@ -17,24 +17,25 @@
  */
 
 #include "types.hpp"
+#include "traits.cuh"
+#include "Stream.cuh"
 #include "input_multislice.hpp"
-#include "atom_data.hpp"
-#include "transmission.cuh"
-
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
+#include "atom_data.hpp"
+#include "transmission.cuh"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
-using multem::m_matrix_c;
+using multem::rmatrix_r;
+using multem::rmatrix_c;
 
 template<class TInput_Multislice>
 void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full=true)
 {
-	using value_type = multem::traits::Value_type<TInput_Multislice>;
+	using value_type = multem::Value_type<TInput_Multislice>;
 
 	input_multislice.precision = mx_get_scalar_field<multem::ePrecision>(mx_input_multislice, "precision");
 	input_multislice.device = mx_get_scalar_field<multem::eDevice>(mx_input_multislice, "device"); 
@@ -43,6 +44,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.gpu_device = mx_get_scalar_field<int>(mx_input_multislice, "gpu_device"); 
 	input_multislice.gpu_nstream = mx_get_scalar_field<int>(mx_input_multislice, "gpu_nstream"); 
 	
+	input_multislice.simulation_type = multem::eST_TFRS;
 	input_multislice.phonon_model = mx_get_scalar_field<multem::ePhonon_Model>(mx_input_multislice, "phonon_model"); 
 	input_multislice.interaction_model = mx_get_scalar_field<multem::eElec_Spec_Int_Model>(mx_input_multislice, "interaction_model");
 	input_multislice.potential_slicing = mx_get_scalar_field<multem::ePotential_Slicing>(mx_input_multislice, "potential_slicing");
@@ -50,7 +52,8 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 
 	input_multislice.fp_dim.set(mx_get_scalar_field<int>(mx_input_multislice, "fp_dim"));
 	input_multislice.fp_seed = mx_get_scalar_field<int>(mx_input_multislice, "fp_seed");
-	input_multislice.fp_iconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_iconf");
+	input_multislice.fp_single_conf = mx_get_scalar_field<bool>(mx_input_multislice, "fp_single_conf");
+	input_multislice.fp_nconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_nconf");
 	
 	input_multislice.islice = mx_get_scalar_field<int>(mx_input_multislice, "islice")-1;
 
@@ -67,7 +70,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	auto ly = mx_get_scalar_field<value_type>(mx_input_multislice, "ly");
 	auto dz = mx_get_scalar_field<value_type>(mx_input_multislice, "dz"); 				
 
-	auto atoms = mx_get_matrix_field<m_matrix_r>(mx_input_multislice, "atoms");
+	auto atoms = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "atoms");
 	if(full)
 	{
 		input_multislice.atoms.set_Atoms(atoms.rows, atoms.real, lx, ly, dz);
@@ -77,10 +80,10 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 }
 
 template<class T, multem::eDevice dev>
-void get_transmission_function(const mxArray *mxB, m_matrix_c &trans)
+void get_transmission_function(const mxArray *mxB, rmatrix_c &trans)
 {
 	multem::Input_Multislice<T, dev> input_multislice;
-	read_input_data(mxB, input_multislice, false);
+	read_input_data(mxB, input_multislice);
 
 	multem::Stream<T, dev> stream;
 	multem::FFT2<T, dev> fft2;
@@ -103,7 +106,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	multem::Input_Multislice<double, multem::e_Host> input_multislice;
 	read_input_data(prhs[0], input_multislice, false);
 
-	auto trans = mx_create_matrix<m_matrix_c>(input_multislice.grid, plhs[0]);
+	auto trans = mx_create_matrix<rmatrix_c>(input_multislice.grid, plhs[0]);
 
 	if(input_multislice.is_float_Host())
 	{

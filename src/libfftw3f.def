@@ -1,4 +1,4 @@
-LIBRARY libfftw3f-3.dll
+LIBRARY libfftw3f.dll
 EXPORTS
 fftwf_alignment_of
 fftwf_alloc_complex

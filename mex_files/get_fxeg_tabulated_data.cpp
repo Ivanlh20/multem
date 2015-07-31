@@ -20,9 +20,9 @@
 #include "fxeg_tabulated_data.h"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
+using multem::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -34,11 +34,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	type = mx_get_scalar<int>(prhs[1]); 
 	fxeg_tabulated_data.ReadTabData(Z, type, 1, ng, g, g2, fxg, feg);
 	
-	m_matrix_r g_o, fxg_o, feg_o;
+	rmatrix_r g_o, fxg_o, feg_o;
 
-	g_o = mx_create_matrix<m_matrix_r>(ng, 1, plhs[0]);
-	fxg_o = mx_create_matrix<m_matrix_r>(ng, 1, plhs[1]);
-	feg_o = mx_create_matrix<m_matrix_r>(ng, 1, plhs[2]);
+	g_o = mx_create_matrix<rmatrix_r>(ng, 1, plhs[0]);
+	fxg_o = mx_create_matrix<rmatrix_r>(ng, 1, plhs[1]);
+	feg_o = mx_create_matrix<rmatrix_r>(ng, 1, plhs[2]);
 
 	std::copy(g, g + ng, g_o.real);
 	std::copy(fxg, fxg + ng, fxg_o.real);

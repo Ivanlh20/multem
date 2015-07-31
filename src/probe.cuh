@@ -21,6 +21,7 @@
 
 #include "math.cuh"
 #include "types.hpp"
+#include "fft2.cuh"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
@@ -34,11 +35,11 @@ namespace multem
 			using value_type_r = T;
 			using value_type_c = complex<T>;
 
-			Probe():input_multislice(nullptr){ }
+			Probe():input_multislice(nullptr){}
 
-			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io)
+			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i)
 			{
-				input_multislice = input_multislice_io;
+				input_multislice = input_multislice_i;
 
 				fft2.create_plan(input_multislice->grid.ny, input_multislice->grid.nx, input_multislice->nstream);
 

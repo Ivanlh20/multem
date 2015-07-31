@@ -19,15 +19,15 @@
 #include "host_functions.hpp"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
+using multem::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
 	int n, nx, ny, shift;
 	double dx, dy, Radius;
-	m_matrix_r f;
+	rmatrix_r f;
  
 	ny = mx_get_scalar<int>(prhs[0]);
 	nx = mx_get_scalar<int>(prhs[1]);
@@ -37,7 +37,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	n = mx_get_scalar<int>(prhs[5]);
 	shift = mx_get_scalar<int>(prhs[6]);
 
-	f = mx_create_matrix<m_matrix_r>(ny, nx, plhs[0]);
+	f = mx_create_matrix<rmatrix_r>(ny, nx, plhs[0]);
 
 	multem::filter_Butterworth_2D(ny, nx, dy, dx, Radius, n, 1, shift, f.real);
 }

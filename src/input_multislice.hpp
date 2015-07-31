@@ -25,7 +25,6 @@
 #include "math.cuh"
 #include "types.hpp"
 #include "atom_data.hpp"
-#include "host_functions.hpp"
 
 namespace multem
 {
@@ -39,7 +38,8 @@ namespace multem
 	void match_vectors(InputIterator A_base_first, InputIterator A_base_last, TVector &A_search);
 
 	template<class T, eDevice dev>
-	class Input_Multislice{
+	class Input_Multislice
+	{
 		public:
 			using value_type = T;
 
@@ -56,11 +56,11 @@ namespace multem
 			ePotential_Slicing potential_slicing; 				// ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 			ePotential_Type potential_type;						// potential type: 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 
-			int fp_nconf; 										// Number of frozen phonon configurations
 			FP_Dim fp_dim; 										// Phonon dimensions
 			int fp_dist; 										// 1: Gaussian (Phonon distribution)
 			int fp_seed; 										// Random seed(frozen phonon)
-			int fp_iconf;
+			bool fp_single_conf; 								// single configuration: true , false
+			int fp_nconf; 										// true: phonon configuration, false: number of frozen phonon configurations
 
 			eMicroscope_Effect microscope_effect; 				// 1: Partial coherente mode, 2: transmission cross coefficient
 			eSpatial_Temporal_Effect spatial_temporal_effect; 	// 1: Spatial and temporal, 2: Temporal, 3: Spatial
@@ -68,7 +68,7 @@ namespace multem
 			eZero_Defocus_Type zero_defocus_type; 				// 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
 			T zero_defocus_plane; 								// Zero defocus plane
 			
-			eThickness_Type thickness_type; 					// eTT_Whole_Specimen = 1, eTT_Through_Slices = 2, eTT_Through_Planes = 3
+			eThickness_Type thickness_type; 					// eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 			Vector<T, e_Host> thickness; 						// Array of thicknesses
 
 			eInput_Wave_Type input_wave_type; 					// 1: Automatic, 2: User define
@@ -116,39 +116,15 @@ namespace multem
 
 			Input_Multislice(): precision(eP_double), device(e_Host), cpu_ncores(1), cpu_nthread(4), gpu_device(0), gpu_nstream(8), 
 						simulation_type(eST_EWRS), phonon_model(ePM_Still_Atom), interaction_model(eESIM_Multislice), 
-						potential_slicing(ePS_Planes), potential_type(ePT_Lobato_0_12), fp_nconf(0), fp_dist(1), 
-						fp_seed(1983), microscope_effect(eME_Partial_Coherent), spatial_temporal_effect(eSTE_Spatial_Temporal), 
+						potential_slicing(ePS_Planes), potential_type(ePT_Lobato_0_12), fp_dist(1), fp_seed(300183), 
+						fp_nconf(0), fp_single_conf(false), microscope_effect(eME_Partial_Coherent), spatial_temporal_effect(eSTE_Spatial_Temporal), 
 						zero_defocus_type(eZDT_Last), zero_defocus_plane(0), operation_mode(eOM_Normal), coherent_contribution(false), 
-						slice_storage(true), thickness_type(eTT_Whole_Specimen), dp_Shift(false), E_0(300), theta(0), phi(0), Vrl(c_Vrl), 
+						slice_storage(false), thickness_type(eTT_Whole_Specimen), dp_Shift(false), E_0(300), theta(0), phi(0), Vrl(c_Vrl), 
 						nR(c_nR), is_crystal(false), input_wave_type(eIWT_Automatic), beam_type(eBT_Plane_Wave), conv_beam_wave_x(0), conv_beam_wave_y(0), 
-						fp_iconf(0), islice(0), nstream(cpu_nthread){ };
+						islice(0), nstream(cpu_nthread){};
 
 			void validate_parameters()
 			{
-				if(is_whole_specimen() || thickness.empty())
-				{
-					thickness_type=eTT_Whole_Specimen;
-					thickness.resize(1);
-					thickness[0] = atoms.z_max;
-				}
-				else if(is_through_planes())
-				{
-					std::sort(thickness.begin(), thickness.end());
-					atoms.Sort_by_z();
-					atoms.get_z_layer();			
-					multem::match_vectors(atoms.z_layer.begin(), atoms.z_layer.end(), thickness);
-				}
-				else if(is_through_slices())
-				{
-					std::sort(thickness.begin(), thickness.end());
-					atoms.Sort_by_z();
-					atoms.get_z_layer();
-
-					Vector<T, e_Host> z_slice;
-					atoms.get_z_slice(potential_slicing, grid.dz, atoms, z_slice);
-					multem::match_vectors(z_slice.begin()+1, z_slice.end(), thickness);
-				}
-
 				nstream = (is_Host())?cpu_nthread:gpu_nstream;
 
 				if(!is_float() && !is_double())
@@ -162,11 +138,9 @@ namespace multem
 					device = e_Host;
 				}
 
-				fp_nconf = (is_frozen_phonon())?max(1, fp_nconf):1;
-
-				fp_iconf = max(1, fp_iconf);
-
 				fp_seed = max(0, fp_seed);
+
+				fp_nconf = (!is_frozen_phonon())?1:max(1, fp_nconf);
 
 				islice = max(0, islice);
 
@@ -230,13 +204,54 @@ namespace multem
 					coherent_contribution = true;
 				}
 
-				slice_storage = true;
-				if(is_CBED_CBEI() || is_ED_HRTEM()|| is_EWFS_EWRS() ||(is_STEM() && coherent_contribution))
+				slice_storage = false;
+				if(is_PED_HCI() || is_EELS_EFTEM()|| is_ISTEM() ||(is_STEM() && !coherent_contribution))
 				{
-					slice_storage = false;
+					slice_storage = true;
 				}
 
+				if(!is_multislice())
+				{
+					potential_slicing = ePS_Planes;
+					thickness_type = eTT_Through_Thickness;
+					fp_dim.z = false;
+					slice_storage = slice_storage || !is_whole_specimen();
+				}
+
+				if(is_subslicing())
+				{
+					thickness_type = eTT_Whole_Specimen;
+				}
+
+				if(is_whole_specimen() || thickness.empty())
+				{
+					thickness_type = eTT_Whole_Specimen;
+					thickness.resize(1);
+					thickness[0] = atoms.z_max;
+				}
+				else if(is_through_thickness())
+				{
+					// for amorphous specimen it has to be modified
+					thickness_type = eTT_Through_Thickness;
+					std::sort(thickness.begin(), thickness.end());
+					atoms.Sort_by_z();
+					atoms.get_z_layer();			
+					multem::match_vectors(atoms.z_layer.begin(), atoms.z_layer.end(), thickness);
+				}
+				else if(is_through_slices())
+				{
+					std::sort(thickness.begin(), thickness.end());
+					atoms.Sort_by_z();
+					atoms.get_z_layer();
+
+					Vector<T, e_Host> z_slice;
+					atoms.get_z_slice(potential_slicing, grid.dz, atoms, z_slice);
+					vector<T> z_slicet;
+					z_slicet.assign(z_slice.begin(), z_slice.end());
+					multem::match_vectors(z_slice.begin()+1, z_slice.end(), thickness);
+				}
 			}
+
 			/**************************************************************************************/
 			bool is_whole_specimen() const
 			{
@@ -248,9 +263,9 @@ namespace multem
 				return thickness_type==eTT_Through_Slices;
 			}
 
-			bool is_through_planes() const
+			bool is_through_thickness() const
 			{
-				return thickness_type==eTT_Through_Planes;
+				return thickness_type==eTT_Through_Thickness;
 			}
 			/**************************************************************************************/
 			bool is_user_define_wave() const
@@ -326,14 +341,39 @@ namespace multem
 				return sin(theta)*sin(phi)/lens.lambda;
 			}
 
+			bool is_Still_Atom() const
+			{
+				return phonon_model == ePM_Still_Atom;
+			}
+
+			bool is_Absorptive() const
+			{
+				return phonon_model == ePM_Absorptive;
+			}
+
 			bool is_frozen_phonon() const
 			{
 				return phonon_model == ePM_Frozen_Phonon;
 			}
 
+			bool is_frozen_phonon_single_conf () const
+			{
+				return fp_single_conf == true;
+			}
+
 			bool is_multislice() const
 			{
 				return interaction_model == multem::eESIM_Multislice;
+			}
+
+			bool is_phase_object() const
+			{
+				return interaction_model == multem::eESIM_Phase_Object;
+			}
+
+			bool is_weak_phase_object() const
+			{
+				return interaction_model == multem::eESIM_Weak_Phase_Object;
 			}
 
 			bool is_subslicing() const
@@ -411,6 +451,36 @@ namespace multem
 				return simulation_type == multem::eST_ProbeRS;
 			}
 
+			bool is_PPFS() const
+			{
+				return simulation_type == multem::eST_PPFS;
+			}
+
+			bool is_PPRS() const
+			{
+				return simulation_type == multem::eST_PPRS;
+			}
+
+			bool is_TFFS() const
+			{
+				return simulation_type == multem::eST_TFFS;
+			}
+
+			bool is_TFRS() const
+			{
+				return simulation_type == multem::eST_TFRS;
+			}
+
+			bool is_EWSFS() const
+			{
+				return simulation_type == multem::eST_EWSFS;
+			}
+
+			bool is_EWSRS() const
+			{
+				return simulation_type == multem::eST_EWSRS;
+			}
+
 			bool is_STEM_ISTEM() const
 			{
 				return is_STEM() || is_ISTEM();
@@ -446,14 +516,30 @@ namespace multem
 				return is_ProbeFS() || is_ProbeRS();
 			}
 
+			bool is_PPFS_PPRS() const
+			{
+				return is_PPFS() || is_PPRS();
+			}
+
+			bool is_TFFS_TFRS() const
+			{
+				return is_TFFS() || is_TFRS();
+			}
+
+			bool is_EWSFS_EWSRS() const
+			{
+				return is_EWSFS() || is_EWSRS();
+			}
+
 			bool is_simulation_type_FS() const
 			{
-				return is_STEM() || is_CBED() || is_ED() || is_PED() || is_EWFS() || is_EELS(); 
+				return is_STEM() || is_CBED() || is_ED() || is_PED() || is_EWFS() ||
+					is_EELS() || is_ProbeFS() || is_PPFS() || is_TFFS() || is_EWSFS(); 
 			}
 
 			bool is_simulation_type_RS() const
 			{
-				return is_ISTEM() || is_CBEI() || is_HRTEM() || is_HCI() || is_EWRS() || is_EFTEM(); 
+				return !is_simulation_type_FS();
 			}
 
 			bool is_HRTEM_HCI_EFTEM() const

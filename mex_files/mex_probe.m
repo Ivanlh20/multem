@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'get_probe.cu', '../src');
+MEX('debug', 'get_probe.cu', '../src');

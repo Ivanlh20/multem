@@ -44,7 +44,7 @@ namespace multem
 				y_std(0), z_std(0), s_x(0), s_y(0),s_z(0),
 				x_Int_min(0), x_Int_max(0), y_Int_min(0),
 				y_Int_max(0), z_Int_min(0), z_Int_max(0),
-				s_x_Int(0), s_y_Int(0), s_z_Int(0){ }
+				s_x_Int(0), s_y_Int(0), s_z_Int(0){}
 
 			size_type size() const
 			{
@@ -342,7 +342,7 @@ namespace multem
 
 				auto quot = [&](const T &A, const T &B)->int
 				{
-					return (int)floor(A/B+Epsilon<T>::rel);
+					return (int)floor(A/B+Epsilon<float>::rel);
 				};
 
 				switch(potential_slicing)

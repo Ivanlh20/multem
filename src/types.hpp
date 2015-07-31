@@ -36,18 +36,12 @@
 #include <vector>
 #include <thread>
 #include <mutex>
-#include "fftw3.h"
 
 #include "math.cuh"
 
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 #include <thrust/detail/raw_pointer_cast.h>
-
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <device_functions.h>
-#include <cufft.h>
 
 using std::vector;
 using thrust::device_vector;
@@ -109,8 +103,8 @@ namespace multem
 	const int c_thrnxy = 256;
 	const double c_Vrl = 0.015;
 
-	#define IsFS(i,nh)	((i<nh)?i:i-2*nh)
-	#define IsRS(i,nh)	((i<nh)?i+nh:i-nh)
+	#define IsFS(i,nh)	((i < nh)?i:i-2*nh)
+	#define IsRS(i,nh)	((i < nh)?i+nh:i-nh)
 
 	const int cSizeofI = sizeof(int);
 	const int cSizeofRD = sizeof(double);
@@ -120,7 +114,7 @@ namespace multem
 	/******************************e_Device type******************************/
 	enum eDevice
 	{
-		e_Host = 1, e_Device = 2
+		e_Host = 1, e_Device = 2, e_none = 3
 	};
 
 	/******************************Slice memory type******************************/
@@ -138,7 +132,7 @@ namespace multem
 	/******************************Spatial and temporal***************************/
 	enum eSpatial_Temporal_Effect
 	{
-	 eSTE_Spatial_Temporal = 1, eSTE_Temporal = 2, eSTE_Spatial = 3, eSTE_none = 4
+		eSTE_Spatial_Temporal = 1, eSTE_Temporal = 2, eSTE_Spatial = 3, eSTE_none = 4
 	};
 
 	/********************************MULTEM type**********************************/
@@ -168,7 +162,10 @@ namespace multem
 		eST_PED=41, eST_HCI=42, 
 		eST_EWFS=51, eST_EWRS=52,
 		eST_EELS=61, eST_EFTEM=62,
-		eST_ProbeFS=71, eST_ProbeRS=72
+		eST_ProbeFS=71, eST_ProbeRS=72,
+		eST_PPFS=81, eST_PPRS=82,		//projected potential
+		eST_TFFS=91, eST_TFRS=92,		//transmission function
+		eST_EWSFS=101, eST_EWSRS=102	//exit wave single configuration
 	};
 
 	/***************************Potential parameterization************************/
@@ -217,7 +214,7 @@ namespace multem
 	/******************************thickness Type*******************************/
 	enum eThickness_Type
 	{
-		eTT_Whole_Specimen = 1, eTT_Through_Slices = 2, eTT_Through_Planes = 3
+		eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 	};
 
 	/***************************Input wave function*****************************/
@@ -288,216 +285,98 @@ namespace multem
 
 	};
 
-	/*********************matlab double matrix*****************/
-	struct m_matrix_r
+	/*******************forward declarations********************/
+	template<class T>
+	struct is_fundamental;
+
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	T get_lambda(const T &E_0);
+
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	T get_sigma(const T &E_0);
+
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	T get_gamma(const T &E_0);
+
+	/*********************pointer to double matrix*****************/
+	struct rmatrix_r
 	{
+	public:
 		using value_type = double;
+		static const eDevice device = e_Host;
 
 		int size;
 		int rows;
 		int cols;
 		double *real;
-		m_matrix_r(): size(0), rows(0), cols(0), real(nullptr){ }
+		rmatrix_r(): size(0), rows(0), cols(0), real(nullptr){}
+
+		double& operator[](const int i){ return real[i]; }
+		const double& operator[](const int i) const { return real[i]; }
+		host_vector<double>::iterator begin() const { return real; };
+		host_vector<double>::iterator end() const { return (real + size); };
 	};
 
-	/*********************matlab complex matrix****************/
-	struct m_matrix_c
+	/*********************pointer to complex matrix****************/
+	struct rmatrix_c
 	{
+	public:
 		using value_type = double;
+		static const eDevice device = e_Host;
 
 		int size;
 		int rows;
 		int cols;
 		double *real;
 		double *imag;
-		m_matrix_c(): size(0), rows(0), cols(0), real(nullptr), imag(nullptr){ }
+		rmatrix_c(): size(0), rows(0), cols(0), real(nullptr), imag(nullptr){}
+
+		complex_s<double>& operator[](const int i)
+		{ 
+			m_data(real[i], imag[i]);
+			return m_data; 
+		}
+
+		complex<double> operator[](const int i) const
+		{ 
+			return m_data; 
+		}
+	private:
+		complex_s<double> m_data;
+
 	};
-
-	namespace traits
-	{
-		template <class TVector>
-		using Value_type = typename TVector::value_type;
-
-		template <class TVector>
-		using Size_type = typename TVector::size_type;
-
-		template<class T>
-		struct is_bool: std::integral_constant<bool, std::is_same<T, bool>::value> { };
-
-		template<class T>
-		struct is_int: std::integral_constant<bool, std::is_same<T, int>::value || std::is_same<T, unsigned int>::value> { };
-
-		template<class T>
-		struct is_float: std::integral_constant<bool, std::is_same<T, float>::value> { };
-
-		template<class T>
-		struct is_double: std::integral_constant<bool, std::is_same<T, double>::value> { };
-
-		template<class T>
-		struct is_fundamental: std::integral_constant<bool, std::is_fundamental<T>::value || std::is_same<T, complex<float>>::value || std::is_same<T, complex<double>>::value> { };
-
-		template<class T>
-		struct is_m_matrix_r: std::integral_constant<bool, std::is_same<T, m_matrix_r>::value> { };
-
-		template<class T>
-		struct is_m_matrix_c: std::integral_constant<bool, std::is_same<T, m_matrix_c>::value> { };
-
-		template<class T>
-		struct is_m_matrix_rc: std::integral_constant<bool, is_m_matrix_r<T>::value || is_m_matrix_c<T>::value> { };
-
-		template<class T>
-		struct is_enum_bool: std::integral_constant<bool, std::is_enum<T>::value || is_bool<T>::value> { };
-
-		template<class T, eDevice dev, class Enable = void>
-		struct is_Vector { };
-
-		template<class T, eDevice dev>
-		struct is_Vector<T, dev, typename std::enable_if<std::is_scalar<T>::value>::type>: std::integral_constant<bool, false> { };
-	
-		template<class T, eDevice dev>
-		struct is_Vector<T, dev, typename std::enable_if<!std::is_scalar<T>::value>::type>: std::integral_constant<bool, (dev == e_Host)?(std::is_same<T, host_vector<Value_type<T>>>::value):(std::is_same<T, device_vector<Value_type<T>>>::value)> { };
-
-		template<class T, class Enable = void>
-		struct has_device_member { }; 
-
-		template<class T>
-		struct has_device_member<T, typename std::enable_if<std::is_scalar<T>::value>::type>: std::integral_constant<bool, false> { };
-	
-		template<class T>
-		struct has_device_member<T, typename std::enable_if<!std::is_scalar<T>::value>::type>
-		{
-			struct Fallback { int device; };
-			struct Derived: T, Fallback { };
-
-			template<typename C, C> struct ChT; 
-
-			template<typename C> static char (&f(ChT<int Fallback::*, &C::device>*))[1]; 
-			template<typename C> static char (&f(...))[2]; 
-
-			static const bool value = sizeof(f<Derived>(0)) == 2;
-		}; 
-
-		template<class T, eDevice dev, class Enable = void>
-		struct is_Host_Device{ };
-
-		template<class T, eDevice dev>
-		struct is_Host_Device<T, dev, typename std::enable_if<has_device_member<T>::value>::type>: std::integral_constant<bool, is_Vector<T, dev>::value || (T::device == dev)> { };
-
-		template<class T, eDevice dev>
-		struct is_Host_Device<T, dev, typename std::enable_if<!has_device_member<T>::value>::type>: std::integral_constant<bool, is_Vector<T, dev>::value> { };
-
-		template<class T>
-		struct is_Host: std::integral_constant<bool, is_Host_Device<T, e_Host>::value> { };
-
-		template<class T>
-		struct is_Device: std::integral_constant<bool, is_Host_Device<T, e_Device>::value> { };
-
-		template <class T, class U>
-		using enable_if_Host = typename std::enable_if<is_Host<T>::value, U>::type;
-
-		template <class T, class U>
-		using enable_if_Device = typename std::enable_if<is_Device<T>::value, U>::type;
-
-		template <class T, class U>
-		using enable_if_float = typename std::enable_if<is_float<T>::value, U>::type;
-
-		template <class T, class U>
-		using enable_if_double = typename std::enable_if<is_double<T>::value, U>::type;
-
-		template <class T, class U>
-		using enable_if_int = typename std::enable_if<is_int<T>::value, U>::type;
-
-		template <class T, class U>
-		using enable_if_bool = typename std::enable_if<is_bool<T>::value, U>::type;
-
-		template <class T, class U>
-		using enable_if_floating_point = typename std::enable_if<std::is_floating_point<T>::value, U>::type;
-	
-		template <class T, class U>
-		using enable_if_enum_bool = typename std::enable_if<is_enum_bool<T>::value, U>::type;
-		
-		template <class T, class U>
-		using enable_if_pointer = typename std::enable_if<std::is_pointer<T>::value, U>::type;
-
-		template <class T, class U>
-		using enable_if_m_matrix_r = typename std::enable_if<is_m_matrix_r<T>::value, U>::type;
-
-		template <class T, class U>
-		using enable_if_m_matrix_c = typename std::enable_if<is_m_matrix_c<T>::value, U>::type;	
-
-		template <class T, class U>
-		using enable_if_m_matrix_rc = typename std::enable_if<is_m_matrix_rc<T>::value, U>::type;	
-
-		template <int simulation_type, class U>
-		using enable_if_STEM = typename std::enable_if<simulation_type == eST_STEM, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_ISTEM = typename std::enable_if<simulation_type == eST_ISTEM, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_CBED = typename std::enable_if<simulation_type == eST_CBED, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_CBEI = typename std::enable_if<simulation_type == eST_CBEI, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_ED = typename std::enable_if<simulation_type == eST_ED, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_HRTEM = typename std::enable_if<simulation_type == eST_HRTEM, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_PED = typename std::enable_if<simulation_type == eST_PED, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_HCI = typename std::enable_if<simulation_type == eST_HCI, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_EWFS = typename std::enable_if<simulation_type == eST_EWFS, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_EWRS = typename std::enable_if<simulation_type == eST_EWRS, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_EELS = typename std::enable_if<simulation_type == eST_EELS, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_EFTEM = typename std::enable_if<simulation_type == eST_EFTEM, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_ProbeFS = typename std::enable_if<simulation_type == eST_ProbeFS, U>::type;
-
-		template <int simulation_type, class U>
-		using enable_if_ProbeRS = typename std::enable_if<simulation_type == eST_ProbeRS, U>::type;
-	}
 
 	/**************************vector**************************/
 	template<class T, eDevice dev>
-	using Vector = typename std::conditional<dev == e_Host, typename std::conditional<traits::is_fundamental<T>::value, host_vector<T>, vector<T>>::type, device_vector<T>>::type;
+	using Vector = typename std::conditional<dev == e_Host, typename std::conditional<std::is_fundamental<T>::value || 
+	std::is_same<T, complex<float>>::value || std::is_same<T, complex<double>>::value, host_vector<T>, vector<T>>::type, device_vector<T>>::type;
 
 	template<class T>
 	struct rVector
 	{
+	public:
 		using value_type = T;
 
 		int size;
 		T *V;
 
-		rVector(): size(0), V(nullptr){ }
-
-		template<class TVector> 
-		rVector<T>& operator=(TVector &vector)
-		{ 
-			size = vector.size();
-			V = raw_pointer_cast(vector.data());
-			return *this; 
-		}
+		rVector(): size(0), V(nullptr){}
 
 		template<class TVector>
 		rVector(TVector &vector)
 		{
-			*this = vector;
+			size = vector.size();
+			V = raw_pointer_cast(vector.data());
 		}
+
+		DEVICE_CALLABLE FORCEINLINE
+		T& operator[](const int i){ return V[i]; }
+
+		DEVICE_CALLABLE FORCEINLINE
+		const T& operator[](const int i) const { return V[i]; }
 	};
 
 	template<class T>
@@ -510,7 +389,14 @@ namespace multem
 	//static member function are not support for the cuda compiler
 	template<class T>
 	DEVICE_CALLABLE FORCEINLINE
-	bool isEqual(const T &a, const T &b){ return false;}
+	bool isEqual(const T &a, const T &b);
+
+	template<>
+	DEVICE_CALLABLE FORCEINLINE
+	bool isEqual<int>(const int &a, const int &b)
+	{
+		return a == b;
+	}
 
 	template<>
 	DEVICE_CALLABLE FORCEINLINE
@@ -542,13 +428,6 @@ namespace multem
  
 		// Otherwise fall back to Knuth's algorithm
 		return diff <= ((abs(a)<abs(b)?abs(b):abs(a))*eps_rel);
-	}
-
-	template<>
-	DEVICE_CALLABLE FORCEINLINE
-	bool isEqual<int>(const int &a, const int &b)
-	{
-		return a == b;
 	}
 
 	template<class T>
@@ -599,18 +478,6 @@ namespace multem
 	{
 		return (x_min <= x)&&(x <= x_max)&&(y_min <= y)&&(y <= y_max);
 	}
-	/*******************forward declarations********************/
-	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
-	T get_lambda(const T &E_0);
-
-	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
-	T get_sigma(const T &E_0);
-
-	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
-	T get_gamma(const T &E_0);
 
 	/************************thickness*************************/
 	template<class T, eDevice dev>
@@ -654,43 +521,11 @@ namespace multem
 			z_back_prop.assign(thickness.z_back_prop.begin(), thickness.z_back_prop.end());
 		}
 
-		eThickness_Type thickness_type; 
 		Vector<int, dev> islice; 			// slice position
 		Vector<int, dev> iatom_e; 			// Last Atom index
 		Vector<T, dev> z; 					// z
 		Vector<T, dev> z_zero_def_plane; 	// z: Zero defocus
 		Vector<T, dev> z_back_prop; 		// z: Back propagation
-	};
-
-	template<class T>
-	struct rThickness
-	{
-		using value_type = T;
-
-		rThickness(): size(0), islice(nullptr), iatom_e(nullptr), z_zero_def_plane(nullptr), z_back_prop(nullptr){ }
-
-		template<class TThickness> 
-		rThickness<T>& operator=(TThickness &thickness)
-		{ 
-			size = thickness.size();
-			islice = raw_pointer_cast(thickness.islice.data());
-			iatom_e = raw_pointer_cast(thickness.iatom_e.data());
-			z_zero_def_plane = raw_pointer_cast(thickness.z_zero_def_plane.data());
-			z_back_prop = raw_pointer_cast(thickness.z_back_prop.data());
-			return *this; 
-		}
-
-		template<class TThickness>
-		rThickness(TThickness &thickness)
-		{
-			*this = thickness;
-		}
-
-		int size;
-		int *islice;
-		int *iatom_e;
-		T *z_zero_def_plane;
-		T *z_back_prop;
 	};
 
 	/*************************slice thickness*****************/
@@ -710,22 +545,15 @@ namespace multem
 		void resize(const size_type &new_size, const value_type &value = value_type())
 		{
 			z_0.resize(new_size, value);
-			z_0.shrink_to_fit();
-
 			z_e.resize(new_size, value);
-			z_e.shrink_to_fit();
 
 			z_int_0.resize(new_size, value);
-			z_int_0.shrink_to_fit();
-
 			z_int_e.resize(new_size, value);
-			z_int_e.shrink_to_fit();
 
 			iatom_0.resize(new_size, value);
-			iatom_0.shrink_to_fit();
-
 			iatom_e.resize(new_size, value);
-			iatom_e.shrink_to_fit();
+
+			ithk.resize(new_size, -1);
 		}
 
 		template<class TSlice> 
@@ -737,6 +565,7 @@ namespace multem
 			z_int_e.assign(slice.z_int_e.begin(), slice.z_int_e.end());
 			iatom_0.assign(slice.iatom_0.begin(), slice.iatom_0.end());
 			iatom_e.assign(slice.iatom_e.begin(), slice.iatom_e.end());
+			ithk.assign(slice.ithk.begin(), slice.ithk.end());
 		}
 
 		T dz(const int &islice_0, const int &islice_e)
@@ -765,41 +594,7 @@ namespace multem
 		Vector<T, dev> z_int_e; 	// Final z-position
 		Vector<int, dev> iatom_0; 	// Index to initial z-position
 		Vector<int, dev> iatom_e; 	// Index to final z-position
-	};
-
-	template<class T>
-	struct rSlice
-	{
-		using value_type = T;
-
-		rSlice(): size(0), z_0(nullptr), z_e(nullptr), z_int_0(nullptr), z_int_e(nullptr), iatom_0(nullptr), iatom_e(nullptr){ }
-
-		template<class TSlice> 
-		rSlice<T>& operator=(TSlice &slice)
-		{
-			size = slice.size();
-			z_0 = raw_pointer_cast(slice.z_0.data());
-			z_e = raw_pointer_cast(slice.z_e.data());
-			z_int_0 = raw_pointer_cast(slice.z_int_0.data());
-			z_int_e = raw_pointer_cast(slice.z_int_e.data());
-			iatom_0 = raw_pointer_cast(slice.iatom_0.data());
-			iatom_e = raw_pointer_cast(slice.iatom_e.data());
-			return *this; 
-		}
-
-		template<class TSlice>
-		rSlice(TSlice &slice)
-		{
-			*this = slice;
-		}
-
-		int size;
-		T *z_0;
-		T *z_e;
-		T *z_int_0;
-		T *z_int_e;
-		int *iatom_0;
-		int *iatom_e;
+		Vector<int, dev> ithk;		// thickness index
 	};
 
 	/************************quadrature x**********************/
@@ -838,7 +633,7 @@ namespace multem
 	{
 		using value_type = T;
 
-		rQ1(): size(0), x(nullptr), w(nullptr){ }
+		rQ1(): size(0), x(nullptr), w(nullptr){}
 
 		template<class TQ1> 
 		rQ1<T>& operator=(TQ1 &q1)
@@ -899,7 +694,7 @@ namespace multem
 	{
 		using value_type = T;
 
-		rQ2(): size(0), x(nullptr), y(nullptr), w(nullptr){ }
+		rQ2(): size(0), x(nullptr), y(nullptr), w(nullptr){}
 
 		template<class TQ2> 
 		rQ2<T>& operator=(TQ2 &q2)
@@ -960,7 +755,7 @@ namespace multem
 	{
 		using value_type = T;
 
-		rPP_Coef(): size(0), cl(nullptr), cnl(nullptr){ }
+		rPP_Coef(): size(0), cl(nullptr), cnl(nullptr){}
 
 		template<class TPP_Coef> 
 		rPP_Coef<T>& operator=(TPP_Coef &rhs)
@@ -1024,7 +819,7 @@ namespace multem
 	{
 		using value_type = T;
 
-		rCI_Coef(): size(0), c0(nullptr), c1(nullptr), c2(nullptr), c3(nullptr){ }
+		rCI_Coef(): size(0), c0(nullptr), c1(nullptr), c2(nullptr), c3(nullptr){}
 
 		template<class TCI_Coef> 
 		rCI_Coef<T>& operator=(TCI_Coef &ci_coef)
@@ -1120,7 +915,7 @@ namespace multem
 		void resize(const size_type &new_size, const size_type &new_image_size)
 		{
 			image.resize(new_size);
-			for(auto i = 0; i<new_size; i++)
+			for(auto i = 0; i < new_size; i++)
 			{
 				image[i].resize(new_image_size);
 			}
@@ -1147,7 +942,7 @@ namespace multem
 		bool y;
 		bool z;
 
-		FP_Dim(): x(true), y(true), z(false){ }
+		FP_Dim(): x(true), y(true), z(false){}
 
 		void set(const int &Dim)
 		{
@@ -1240,7 +1035,7 @@ namespace multem
 		inline
 		Grid(): nx(0), ny(0), nxh(0), nyh(0), inxy(0), 
 			lx(0), ly(0), dz(0), pbc_xy(true), bwl(true), 
-			dRx(0), dRy(0), dgx(0), dgy(0), gl_max(0), gl2_max(0){ }
+			dRx(0), dRy(0), dgx(0), dgy(0), gl_max(0), gl2_max(0){}
 
 		inline
 		void set_input_data(int nx_i, int ny_i, T lx_i, T ly_i, T dz_i, bool BWL_i, bool PBC_xy_i)
@@ -1317,21 +1112,39 @@ namespace multem
 		int igy(const int &iy) const { return iy-nyh; }
 
 		DEVICE_CALLABLE FORCEINLINE
-		T gx(const int &ix) const { return static_cast<T>(igx(ix))*dgx; }
+		T gx(const int &ix) const { return igx(ix)*dgx; }
 
 		DEVICE_CALLABLE FORCEINLINE
-		T gy(const int &iy) const { return static_cast<T>(igy(iy))*dgy; }
+		T gy(const int &iy) const { return igy(iy)*dgy; }
 
 		DEVICE_CALLABLE FORCEINLINE
 		T g2(const int &ix, const int &iy) const 
 		{ 
 			T gxi = gx(ix);
 			T gyi = gy(iy);
-			return gxi*gxi + gyi*gyi;
+			return (gxi*gxi + gyi*gyi);
 		}
 
 		DEVICE_CALLABLE FORCEINLINE
-		T g(const int &ix, const int &iy)const { return sqrt(g2(ix, iy)); }
+		T g(const int &ix, const int &iy) const { return sqrt(g2(ix, iy)); }
+
+
+		DEVICE_CALLABLE FORCEINLINE
+		T gx(const int &ix, const T &x) const { return gx(ix)-x; }
+
+		DEVICE_CALLABLE FORCEINLINE
+		T gy(const int &iy, const T &y) const { return gy(iy)-y; }
+
+		DEVICE_CALLABLE FORCEINLINE
+		T g2(const int &ix, const int &iy, const T &x, const T &y) const 
+		{ 
+			T gxi = gx(ix, x);
+			T gyi = gy(iy, y);
+			return (gxi*gxi + gyi*gyi);
+		}
+
+		DEVICE_CALLABLE FORCEINLINE
+		T g(const int &ix, const int &iy, const T &x, const T &y) const { return sqrt(g2(ix, iy, x, y)); }
 
 		DEVICE_CALLABLE FORCEINLINE
 		int iRx(const int &ix) const { return ix; }
@@ -1340,21 +1153,38 @@ namespace multem
 		int iRy(const int &iy) const { return iy; }
 
 		DEVICE_CALLABLE FORCEINLINE
-		T Rx(const int &ix) const { return static_cast<T>(ix)*dRx; }
+		T Rx(const int &ix) const { return iRx(ix)*dRx; }
 
 		DEVICE_CALLABLE FORCEINLINE
-		T Ry(const int &iy) const { return static_cast<T>(iy)*dRy; }
+		T Ry(const int &iy) const { return iRy(iy)*dRy; }
 
 		DEVICE_CALLABLE FORCEINLINE
 		T R2(const int &ix, const int &iy) const 
 		{ 
 			T Rxi = Rx(ix);
 			T Ryi = Ry(iy);
-			return Rxi*Rxi + Ryi*Ryi;
+			return (Rxi*Rxi + Ryi*Ryi);
 		}
 
 		DEVICE_CALLABLE FORCEINLINE
 		T R(const int &ix, const int &iy) const { return sqrt(R2(ix, iy)); }
+
+		DEVICE_CALLABLE FORCEINLINE
+		T Rx(const int &ix, const T &x) const { return Rx(ix)-x; }
+
+		DEVICE_CALLABLE FORCEINLINE
+		T Ry(const int &iy, const T &y) const { return Ry(iy)-y; }
+
+		DEVICE_CALLABLE FORCEINLINE
+		T R2(const int &ix, const int &iy, const T &x, const T &y) const 
+		{ 
+			T Rxi = Rx(ix, x);
+			T Ryi = Ry(iy, y);
+			return (Rxi*Rxi + Ryi*Ryi);
+		}
+
+		DEVICE_CALLABLE FORCEINLINE
+		T R(const int &ix, const int &iy, const T &x, const T &y) const { return sqrt(R2(ix, iy, x, y)); }
 
 		DEVICE_CALLABLE FORCEINLINE
 		T bwl_factor(const int &ix, const int &iy) const 
@@ -1435,6 +1265,12 @@ namespace multem
 		DEVICE_CALLABLE FORCEINLINE
 		int ind_col(const int &ix, const int &iy) const { return ix*ny+iy; }
 
+		DEVICE_CALLABLE FORCEINLINE
+		void row_col(const int &ixy, int &ix, int &iy) const 
+		{ 
+			ix = ixy/ny;
+			iy = ixy - ix*ny;
+		}
 	};
 
 	/****************************lens***************************/
@@ -1479,15 +1315,13 @@ namespace multem
 		T dgys; 	// source sampling size;
 		T g2_maxs; 	// q maximum square;
 
-		inline
 		Lens(): gamma(0), lambda(0), m(0), f(0), Cs3(0), Cs5(0), 
 				mfa2(0),afa2(0), mfa3(0), afa3(0), aobjl(0),
 				aobju(0), sf(0), nsf(0), beta(0), nbeta(0),
 				lambda2(0), cf(0), cCs3(0),	cCs5(0), cmfa2(0),
 				cmfa3(0), g2_min(0), g2_max(0), sggs(0), ngxs(0),
-				ngys(0), dgxs(0), dgys(0), g2_maxs(0){ }
+				ngys(0), dgxs(0), dgys(0), g2_maxs(0){}
 
-		inline
 		void set_input_data(T E_0, Grid<T> &grid)
 		{
 			gamma = get_gamma(E_0);
@@ -1545,7 +1379,7 @@ namespace multem
 
 		inline
 		EELS(): space(eS_Real), E_0(0), E_loss(0), ge(0), ge2(0), gc(0), gc2(0), 
-		m_selection(0), collection_angle(0), channelling_type(eCT_Double_Channelling), factor(0), Z(0), x(0), y(0), occ(0){ }
+		m_selection(0), collection_angle(0), channelling_type(eCT_Double_Channelling), factor(0), Z(0), x(0), y(0), occ(0){}
 
 		inline
 		void set_input_data(eSpace space_i, T E_0_i, T E_loss_i, int m_selection_i, T collection_angle_i, eChannelling_Type channelling_type_i, int Z_i)
@@ -1624,7 +1458,7 @@ namespace multem
 		T g_collection;
 	};
 
-	/*********************Atomic type************************/
+	/*****************************Atomic type****************************/
 	template<class T, eDevice dev>
 	struct Atom_Type
 	{
@@ -1634,7 +1468,7 @@ namespace multem
 		static const eDevice device = dev;
 
 		Atom_Type(): Z(0), A(0), rn_e(0), rn_c(0), ra_e(0), ra_c(0), 
-						R_min(0), R_max(0), R_min2(0), R_max2(0){ }
+						R_min(0), R_max(0), R_min2(0), R_max2(0){}
 
 		template<class TAtom_Type> 
 		void assign(TAtom_Type &atom_type)
@@ -1686,71 +1520,7 @@ namespace multem
 
 	};
 
-	template<class T>
-	struct rAtom_Type
-	{
-		using value_type = T;
-
-		int Z; 
-		T m; 
-		int A; 
-		T rn_e;
-		T rn_c;
-		T ra_e;
-		T ra_c;
-		T R_min; 
-		T R_max; 
-		T R_min2; 
-		T R_max2; 
-
-		rPP_Coef<T> feg;
-		rPP_Coef<T> fxg;
-		rPP_Coef<T> Pr;
-		rPP_Coef<T> Vr;
-		rPP_Coef<T> VR;
-
-		T *R; 			
-		T *R2; 			
-		rCI_Coef<T> ciVR;
-
-		rAtom_Type(): Z(0), A(0), rn_e(0), rn_c(0), ra_e(0), ra_c(0), 
-						R_min(0), R_max(0), R_min2(0), R_max2(0){ }
-
-		template<class TAtom_Type> 
-		rAtom_Type<T>& operator=(TAtom_Type &atom_type)
-		{ 
-			Z = atom_type.Z;
-			m = atom_type.m;
-			A = atom_type.A;
-			rn_e = atom_type.rn_e;
-			rn_c = atom_type.rn_c;
-			ra_e = atom_type.ra_e;
-			ra_c = atom_type.ra_c;
-			R_min = atom_type.R_min;
-			R_max = atom_type.R_max;
-			R_min2 = atom_type.R_min2;
-			R_max2 = atom_type.R_max2;
-
-			feg = atom_type.feg;
-			fxg = atom_type.fxg;
-			Pr = atom_type.Pr;
-			Vr = atom_type.Vr;
-			VR = atom_type.VR;
-
-			R = raw_pointer_cast(atom_type.R.data());
-			R2 = raw_pointer_cast(atom_type.R2.data());
-			ciVR = atom_type.ciVR;
-			return *this; 
-		}
-
-		template<class TAtom_Type>
-		rAtom_Type(TAtom_Type &atom_type)
-		{
-			*this = atom_type;
-		}
-	};
-
-	/*****************************Atom_Vp*******************************/
+	/******************************Atom_Vp*******************************/
 	template<class T>
 	struct Atom_Vp
 	{
@@ -1820,453 +1590,7 @@ namespace multem
 			};
 	};
 
-	/******************************Streams************************/
-	template<class T, eDevice dev>
-	struct Stream { };
-
-	template<class T>
-	struct Stream<T, e_Host>
-	{
-		public:
-			using value_type = T;
-
-			static const eDevice device = e_Host;
-
-			Stream():nstream(0), n_act_stream(0), stream(nullptr){ }
-
-			~Stream(){ destroy(); nstream = 0; n_act_stream = 0; }
-
-			int size() const
-			{
-				return nstream;
-			}
-
-			void resize(const int &new_size)
-			{
-				destroy();
-
-				nstream = new_size;
-				stream = new std::thread[nstream];
-			}
-
-			std::thread& operator[](const int i){ return stream[i]; }
-
-			const std::thread& operator[](const int i) const { return stream[i]; }
-
-			void synchronize()
-			{
-				destroy();
-
-				stream = new std::thread[nstream];
-			}
-
-			int n_act_stream;
-		private:
-			int nstream;
-			std::thread *stream;
-
-			void destroy()
-			{
-				if(nstream == 0)
-				{
-					return;
-				}
-
-				for(auto i = 0; i < nstream; i++)
-				{
-					if(stream[i].joinable())
-					{
-						stream[i].join();
-					}
-				}
-
-				delete [] stream;
-			};
-	};
-
-	template<class T>
-	struct Stream<T, e_Device>
-	{
-		public:
-			using value_type = T;
-
-			static const eDevice device = e_Device;
-
-			Stream(): n_act_stream(0){ }
-
-			~Stream(){ destroy(); n_act_stream = 0;}
-
-			int size() const
-			{
-				return stream.size();
-			}
-
-			void resize(const int &new_size)
-			{
-				destroy();
-
-				stream.resize(new_size);
-
-				for(auto i = 0; i < stream.size(); i++)
-				{
-					cudaStreamCreate(&(stream[i]));
-				}
-			}
-
-			cudaStream_t& operator[](const int i){ return stream[i]; }
-
-			const cudaStream_t& operator[](const int i) const { return stream[i]; }
-
-			void synchronize()
-			{
-				cudaDeviceSynchronize();
-			}
-
-			int n_act_stream;
-		private:
-			std::vector<cudaStream_t> stream;
-
-			void destroy()
-			{
-				if(stream.empty())
-				{
-					return;
-				}
-
-				cudaDeviceSynchronize();
-
-				for(auto i = 0; i < stream.size(); i++)
-				{
-					cudaStreamDestroy(stream[i]);
-				}
-			}
-	};
-
-	/******************************FFT2************************/
-	template<class T, eDevice dev>
-	struct FFT2;
-
-	template<>
-	struct FFT2<float, e_Host>
-	{
-		public:
-			using value_type = float;
-			using TVector_c = Vector<std::complex<float>, e_Host>;
-
-			static const eDevice device = e_Host;
-
-			FFT2(): plan_forward(nullptr), plan_backward(nullptr){ fftwf_init_threads(); }
-
-			~FFT2()
-			{
-				destroy_plan();
-			}
-
-			void cleanup()
-			{
-				destroy_plan();
-				fftwf_cleanup_threads();
-			}
-
-			void destroy_plan()
-			{
-				if(plan_backward == nullptr)
-				{
-					return;
-				}
-
-				fftwf_destroy_plan(plan_forward);
-				fftwf_destroy_plan(plan_backward);
-
-				plan_backward = plan_forward = nullptr;
-			}
-
-			void create_plan(const int &ny, const int &nx, int nThread=1)
-			{
-				destroy_plan();
-
-				fftwf_import_wisdom_from_filename("fft2f.wisdom");
-
-				fftwf_plan_with_nthreads(nThread);
-
-				TVector_c M(nx*ny);
-
-				fftwf_complex *V = reinterpret_cast<fftwf_complex*>(M.data());
-
-				plan_forward = fftwf_plan_dft_2d(ny, nx, V, V, FFTW_FORWARD, FFTW_MEASURE);
-				plan_backward = fftwf_plan_dft_2d(ny, nx, V, V, FFTW_BACKWARD, FFTW_MEASURE);
-
-				fftwf_export_wisdom_to_filename("fft2f.wisdom");
-			}
-
-			void forward(TVector_c &M_io)
-			{
-				fftwf_complex *V_io = reinterpret_cast<fftwf_complex*>(M_io.data());
-				fftwf_execute_dft(plan_forward, V_io, V_io);
-			}
-
-			void inverse(TVector_c &M_io)
-			{
-				fftwf_complex *V_io = reinterpret_cast<fftwf_complex*>(M_io.data());
-				fftwf_execute_dft(plan_backward, V_io, V_io);
-			}
-
-			void forward(TVector_c &M_i, TVector_c &M_o)
-			{
-				if (M_i.data() != M_o.data())
-				{
-					M_o.assign(M_i.begin(), M_i.end());
-				}
-
-				forward(M_o);
-			}
-
-			void inverse(TVector_c &M_i, TVector_c &M_o)
-			{
-				if (M_i.data() != M_o.data())
-				{
-					M_o.assign(M_i.begin(), M_i.end());
-				}
-
-				inverse(M_o);
-			}
-		private:
-			fftwf_plan plan_forward;
-			fftwf_plan plan_backward;
-	};
-
-	template<>
-	struct FFT2<double, e_Host>
-	{
-		public:
-			using value_type = double;
-			using TVector_c = Vector<complex<double>, e_Host>;
-
-			static const eDevice device = e_Host;
-
-			FFT2(): plan_forward(nullptr), plan_backward(nullptr){ fftw_init_threads(); }
-
-			~FFT2()
-			{
-				destroy_plan();
-			}
-
-			void cleanup()
-			{
-				destroy_plan();
-				fftw_cleanup_threads();
-			}
-
-			void destroy_plan()
-			{
-				if(plan_backward == nullptr)
-				{
-					return;
-				}
-
-				fftw_destroy_plan(plan_forward);
-				fftw_destroy_plan(plan_backward);
-
-				plan_backward = plan_forward = nullptr;
-			}
-
-			void create_plan(const int &ny, const int &nx, int nThread=1)
-			{
-				destroy_plan();
-
-				fftw_import_wisdom_from_filename("fft2.wisdom");
-
-				fftw_plan_with_nthreads(nThread);
-
-				TVector_c M(nx*ny);
-
-				fftw_complex *V= reinterpret_cast<fftw_complex*>(M.data());
-
-				plan_forward = fftw_plan_dft_2d(ny, nx, V, V, FFTW_FORWARD, FFTW_MEASURE);
-				plan_backward = fftw_plan_dft_2d(ny, nx, V, V, FFTW_BACKWARD, FFTW_MEASURE);
-
-				fftw_export_wisdom_to_filename("fft2.wisdom");
-			}
-
-			void forward(TVector_c &M_io)
-			{
-				fftw_complex *V_io = reinterpret_cast<fftw_complex*>(M_io.data());
-				fftw_execute_dft(plan_forward, V_io, V_io);
-			}
-
-			void inverse(TVector_c &M_io)
-			{
-				fftw_complex *V_io = reinterpret_cast<fftw_complex*>(M_io.data());
-				fftw_execute_dft(plan_backward, V_io, V_io);
-			}
-
-			void forward(TVector_c &M_i, TVector_c &M_o)
-			{
-				if (M_i.data() != M_o.data())
-				{
-					M_o.assign(M_i.begin(), M_i.end());
-				}
-
-				forward(M_o);
-			}
-
-			void inverse(TVector_c &M_i, TVector_c &M_o)
-			{
-				if (M_i.data() != M_o.data())
-				{
-					M_o.assign(M_i.begin(), M_i.end());
-				}
-
-				inverse(M_o);
-			}
-		private:
-			fftw_plan plan_forward;
-			fftw_plan plan_backward;
-	};
-
-	template<>
-	struct FFT2<float, e_Device>
-	{
-		public:
-			using value_type = float;
-			using TVector_c = Vector<complex<float>, e_Device>;
-
-			static const eDevice device = e_Device;
-
-			FFT2(): plan_forward(0), plan_backward(0){ }
-
-			~FFT2()
-			{
-				destroy_plan();
-			}
-
-			void cleanup()
-			{
-				destroy_plan();
-			}
-
-			void destroy_plan()
-			{	
-				if(plan_backward == 0)
-				{
-					return;
-				}
-
-				cudaDeviceSynchronize();
-
-				cufftDestroy(plan_forward);
-				plan_backward = plan_forward = 0;
-			}
-
-			void create_plan(const int &ny, const int &nx, int nThread=1)
-			{
-				destroy_plan();
-
-				cufftPlan2d(&plan_forward, nx, ny, CUFFT_C2C);
-
-				plan_backward = plan_forward;
-			}
-
-			void forward(TVector_c &M_io)
-			{
-				forward(M_io, M_io);
-			}
-
-			void inverse(TVector_c &M_io)
-			{
-				inverse(M_io, M_io);
-			}
-
-			void forward(TVector_c &M_i, TVector_c &M_o)
-			{
-				cufftComplex *V_i = reinterpret_cast<cufftComplex*>(raw_pointer_cast(M_i.data()));
-				cufftComplex *V_o = reinterpret_cast<cufftComplex*>(raw_pointer_cast(M_o.data()));
-				cufftExecC2C(plan_forward, V_i, V_o, CUFFT_FORWARD);
-			}
-
-			void inverse(TVector_c &M_i, TVector_c &M_o)
-			{
-				cufftComplex *V_i = reinterpret_cast<cufftComplex*>(raw_pointer_cast(M_i.data()));
-				cufftComplex *V_o = reinterpret_cast<cufftComplex*>(raw_pointer_cast(M_o.data()));
-				cufftExecC2C(plan_backward, V_i, V_o, CUFFT_INVERSE);
-			}
-		private:
-			cufftHandle plan_forward;
-			cufftHandle plan_backward;
-	};
-
-	template<>
-	struct FFT2<double, e_Device>
-	{
-		public:
-			using value_type = double;
-			using TVector_c = Vector<complex<double>, e_Device>;
-
-			static const eDevice device = e_Device;
-
-			FFT2(): plan_forward(0), plan_backward(0){ }
-
-			~FFT2()
-			{
-				destroy_plan();
-			}
-
-			void cleanup()
-			{
-				destroy_plan();
-			}
-
-			void destroy_plan()
-			{	
-				if(plan_backward == 0)
-				{
-					return;
-				}
-
-				cudaDeviceSynchronize();
-
-				cufftDestroy(plan_forward);
-				plan_backward = plan_forward = 0;
-			}
-
-			void create_plan(const int &ny, const int &nx, int nThread=1)
-			{
-				destroy_plan();
-
-				cufftPlan2d(&plan_forward, nx, ny, CUFFT_Z2Z);
-
-				plan_backward = plan_forward;
-			}
-
-			void forward(TVector_c &M_io)
-			{
-				forward(M_io, M_io);
-			}
-
-			void inverse(TVector_c &M_io)
-			{
-				inverse(M_io, M_io);
-			}
-
-			void forward(TVector_c &M_i, TVector_c &M_o)
-			{
-				cufftDoubleComplex *V_i = reinterpret_cast<cufftDoubleComplex*>(raw_pointer_cast(M_i.data()));
-				cufftDoubleComplex *V_o = reinterpret_cast<cufftDoubleComplex*>(raw_pointer_cast(M_o.data()));
-				cufftExecZ2Z(plan_forward, V_i, V_o, CUFFT_FORWARD);
-			}
-
-			void inverse(TVector_c &M_i, TVector_c &M_o)
-			{
-				cufftDoubleComplex *V_i = reinterpret_cast<cufftDoubleComplex*>(raw_pointer_cast(M_i.data()));
-				cufftDoubleComplex *V_o = reinterpret_cast<cufftDoubleComplex*>(raw_pointer_cast(M_o.data()));
-				cufftExecZ2Z(plan_backward, V_i, V_o, CUFFT_INVERSE);
-			}
-		private:
-			cufftHandle plan_forward;
-			cufftHandle plan_backward;
-	};
-
-	/******************************Scanning*****************************/
+	/******************************Scanning******************************/
 	template<class T>
 	struct Scanning
 	{
@@ -2281,6 +1605,8 @@ namespace multem
 		T y0; 							// Initial scanning in y
 		T xe; 							// final scanning position in x
 		T ye; 							// final scanning position in y
+		T dRx;
+		T dRy;
 
 		Vector<T, e_Host> x;
 		Vector<T, e_Host> y;
@@ -2290,8 +1616,8 @@ namespace multem
 			return x.size();
 		}
 
-		Scanning():type(eST_Line), ns(0), nx(0), 
-			ny(0), x0(0), y0(0), xe(0), ye(0){ };
+		Scanning():type(eST_Line), ns(0), nx(0), dRx(0), dRy(0),
+			ny(0), x0(0), y0(0), xe(0), ye(0){};
 
 		void get_grid_dim()
 		{
@@ -2317,6 +1643,12 @@ namespace multem
 			}
 		}
 
+		int nxy() const { return nx*ny; }
+
+		T Rx(const int &ix) const { return x0 + ix*dRx; }
+
+		T Ry(const int &iy) const { return y0 + iy*dRy; }
+
 		void set_grid()
 		{
 			get_grid_dim();
@@ -2341,31 +1673,35 @@ namespace multem
 				T cos_theta = cos(theta);
 				T sin_theta = sin(theta);
 
+				dRx = ds*cos_theta;
+				dRy = ds*sin_theta;
+
 				x.resize(ns);
 				y.resize(ns);
 
-				for(auto i=0; i<ns; i++)
+				for(auto i=0; i < ns; i++)
 				{
-					x[i] = x0 + static_cast<T>(i)*ds*cos_theta;
-					y[i] = y0 + static_cast<T>(i)*ds*sin_theta;
+					x[i] = Rx(i);
+					y[i] = Ry(i);
 				}
 			}
 			else
 			{
 				T xu = xe-x0;
 				T yu = ye-y0;
-				T dsx = xu/static_cast<T>(nx);
-				T dsy = yu/static_cast<T>(ny);
 
-				x.resize(nx*ny);
-				y.resize(nx*ny);
+				dRx = xu/static_cast<T>(nx);
+				dRy = yu/static_cast<T>(ny);
+
+				x.resize(nxy());
+				y.resize(nxy());
 
 				for(auto ix=0; ix<nx; ix++)
 				{
 					for(auto iy=0; iy<ny; iy++)
 					{
-						x[ix*ny+iy] = x0 + static_cast<T>(ix)*dsx;
-						y[ix*ny+iy] = y0 + static_cast<T>(iy)*dsy;
+						x[ix*ny+iy] = Rx(ix);
+						y[ix*ny+iy] = Ry(iy);
 					}
 				}
 			}
@@ -2385,7 +1721,7 @@ namespace multem
 		}
 	};
 
-	/*****************Radial Schrodinger equation*******************/
+	/********************Radial Schrodinger equation*********************/
 	template<class T>
 	struct In_Rad_Schr
 	{
@@ -2397,19 +1733,19 @@ namespace multem
 		T *atomsM; 			// atoms
 	};
 
-	/****************************hrtem*****************************/
+	/********************************hrtem******************************/
 	template<class T>
 	struct HRTEM
 	{
 		int xx;
-		HRTEM():xx(0){ };
+		HRTEM():xx(0){};
 	};
 
 	/*****************************CBED/CBEI*****************************/
 	template<class T>
 	struct CBE_FR
 	{
-		CBE_FR(): space(eS_Real), x0(0), y0(0){ };
+		CBE_FR(): space(eS_Real), x0(0), y0(0){};
 
 		eSpace space;
 		T x0;
@@ -2420,7 +1756,7 @@ namespace multem
 	template<class T>
 	struct PE_FR
 	{
-		PE_FR():space(eS_Real), nrot(0), theta(0){ };
+		PE_FR():space(eS_Real), nrot(0), theta(0){};
 
 		inline T phi(const int &irot) const 
 		{ 
@@ -2441,7 +1777,7 @@ namespace multem
 	template<class T>
 	struct EW_FR
 	{
-		EW_FR():space(eS_Real), convergent_beam(false), x0(0), y0(0){ };
+		EW_FR():space(eS_Real), convergent_beam(false), x0(0), y0(0){};
 
 		eSpace space;
 		bool convergent_beam;
@@ -2459,7 +1795,7 @@ namespace multem
 		double free_memory_size;		// Mb
 
 		Device_Properties():id(0), name(""), compute_capability(0), 
-			total_memory_size(0), free_memory_size(0){ }
+			total_memory_size(0), free_memory_size(0){}
 	};
 
 	/***************************e_Device properties*************************/
@@ -2471,8 +1807,9 @@ namespace multem
 		double free_memory_size;		// Mb
 
 		Host_Properties(): nprocessors(0), nthreads(0), total_memory_size(0), 
-			free_memory_size(0){ }
+			free_memory_size(0){}
 	};
+
 } // namespace multem
 
 #endif

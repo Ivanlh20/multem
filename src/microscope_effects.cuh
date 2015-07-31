@@ -33,13 +33,13 @@ namespace multem
 	{
 		public:
 			using value_type_r = T;
-			using value_type_c = typename complex<T>;
+			using value_type_c = complex<T>;
 
-			Microscope_Effects():input_multislice(nullptr), stream(nullptr), fft2(nullptr){ }			
+			Microscope_Effects():input_multislice(nullptr), stream(nullptr), fft2(nullptr){}			
 			
-			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io, Stream<value_type_r, dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
+			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, Stream<value_type_r, dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
 			{
-				input_multislice = input_multislice_io;
+				input_multislice = input_multislice_i;
 				stream = stream_i;
 				fft2 = fft2_i;
 

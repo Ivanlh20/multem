@@ -24507,7 +24507,7 @@ class fxeg_Tabulated_Data{
 					g[240] = 12.0000000000; fxg[240] = 6.2170000000; feg[240] = 0.0643000000;
 					break;
 			}
-			for(auto i=0; i<ng; i++)
+			for(auto i=0; i < ng; i++)
 			{
 				g2[i] = g[i]*g[i];
 				if(i>0)

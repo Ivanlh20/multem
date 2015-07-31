@@ -19,19 +19,19 @@
 #include "host_functions.hpp"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
+using multem::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
 	int shift;
-	m_matrix_r fI, radius;
+	rmatrix_r fI, radius;
  
-	fI = mx_get_matrix<m_matrix_r>(prhs[0]);
+	fI = mx_get_matrix<rmatrix_r>(prhs[0]);
 	shift = mx_get_scalar<int>(prhs[1]);
 
-	radius = mx_create_scalar<m_matrix_r>(plhs[0]);
+	radius = mx_create_scalar<rmatrix_r>(plhs[0]);
 
 	*(radius.real) = multem::FFT_information_limit_2D(fI.rows, fI.cols, shift, fI.real);
 }

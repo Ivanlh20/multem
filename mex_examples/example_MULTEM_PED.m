@@ -16,7 +16,7 @@ input_multislice.potential_slicing = 1;             % ePS_Planes = 1, ePS_dz_Pro
 input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
 
 input_multislice.fp_dim = 110; 
-input_multislice.fp_seed = 1983; 
+input_multislice.fp_seed = 300183; 
 input_multislice.fp_nconf = 10;
 input_multislice.fp_iconf = 0;
 

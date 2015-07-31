@@ -19,25 +19,25 @@
 #include "host_functions.hpp"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
+using multem::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
-	m_matrix_r R, fR, Rl;
-	m_matrix_r rl, frl, cfrl;
+	rmatrix_r R, fR, Rl;
+	rmatrix_r rl, frl, cfrl;
 
-	R = mx_get_matrix<m_matrix_r>(prhs[0]);
-	fR = mx_get_matrix<m_matrix_r>(prhs[1]);
-	Rl = mx_get_matrix<m_matrix_r>(prhs[2]);
+	R = mx_get_matrix<rmatrix_r>(prhs[0]);
+	fR = mx_get_matrix<rmatrix_r>(prhs[1]);
+	Rl = mx_get_matrix<rmatrix_r>(prhs[2]);
 
 	int typ = mx_get_scalar<int>(prhs[3]);
 
 	/**************************************************************/
-	rl = mx_create_matrix<m_matrix_r>(Rl.size-1, 1, plhs[0]);
-	frl = mx_create_matrix<m_matrix_r>(Rl.size-1, 1, plhs[1]);
-	cfrl = mx_create_matrix<m_matrix_r>(Rl.size-1, 1, plhs[2]);
+	rl = mx_create_matrix<rmatrix_r>(Rl.size-1, 1, plhs[0]);
+	frl = mx_create_matrix<rmatrix_r>(Rl.size-1, 1, plhs[1]);
+	cfrl = mx_create_matrix<rmatrix_r>(Rl.size-1, 1, plhs[2]);
 
 	multem::radial_distribution_2D(R.size, R.real, fR.real, Rl.size, Rl.real, rl.real, frl.real, cfrl.real, true, typ);
 }

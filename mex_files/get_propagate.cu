@@ -17,6 +17,7 @@
  */
 
 #include "types.hpp"
+#include "traits.cuh"
 #include "input_multislice.hpp"
 #include "atom_data.hpp"
 #include "propagator.cuh"
@@ -26,15 +27,15 @@
 #include "host_device_functions.cuh"
 
 #include <mex.h>
-#include "matlab2cpp.hpp"
+#include "mex_matlab.hpp"
 
-using multem::m_matrix_r;
-using multem::m_matrix_c;
+using multem::rmatrix_r;
+using multem::rmatrix_c;
 
 template<class TInput_Multislice>
 void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full=true)
 {
-	using value_type = multem::traits::Value_type<TInput_Multislice>;
+	using value_type = multem::Value_type<TInput_Multislice>;
 
 	input_multislice.precision = mx_get_scalar_field<multem::ePrecision>(mx_input_multislice, "precision");
 	input_multislice.device = mx_get_scalar_field<multem::eDevice>(mx_input_multislice, "device"); 
@@ -48,9 +49,9 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.input_wave_type = mx_get_scalar_field<multem::eInput_Wave_Type>(mx_input_multislice, "input_wave_type");
 	if(input_multislice.is_user_define_wave() && full)
 	{
-		auto psi_0 = mx_get_matrix_field<m_matrix_c>(mx_input_multislice, "psi_0");
+		auto psi_0 = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "psi_0");
 		input_multislice.psi_0.resize(psi_0.size);
-		multem::scomplex_to_complex(psi_0, input_multislice.psi_0);
+		multem::rmatrix_c_to_complex(psi_0, input_multislice.psi_0);
 		multem::fft2_shift(input_multislice.grid, input_multislice.psi_0);
 	}
 
@@ -76,7 +77,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
  }
 
 template<class T, multem::eDevice dev>
-void get_propagate(const mxArray *mxB, m_matrix_c &psi_host)
+void get_propagate(const mxArray *mxB, rmatrix_c &psi_host)
 {
 	multem::Input_Multislice<T, dev> input_multislice;
 	read_input_data(mxB, input_multislice);
@@ -105,7 +106,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	multem::Input_Multislice<double, multem::e_Host> input_multislice;
 	read_input_data(prhs[0], input_multislice, false);
 
-	auto psi = mx_create_matrix<m_matrix_c>(input_multislice.grid, plhs[0]);
+	auto psi = mx_create_matrix<rmatrix_c>(input_multislice.grid, plhs[0]);
 
 	if(input_multislice.is_float_Host())
 	{

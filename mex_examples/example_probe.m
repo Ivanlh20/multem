@@ -3,7 +3,7 @@ clear all; clc;
 input_multislice = multem_default_values();         % Load default values;
 
 input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
-input_multislice.device = 1;                        % eD_CPU = 1, eD_GPU = 2
+input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
 input_multislice.cpu_ncores = 1; 
 input_multislice.cpu_nthread = 4; 
 input_multislice.gpu_device = 0;
@@ -11,13 +11,13 @@ input_multislice.gpu_nstream = 8;
 
 input_multislice.E_0 = 300;                          % Acceleration Voltage (keV)
 
-input_multislice.lx = 10;
-input_multislice.ly = 10;
+input_multislice.lx = 15;
+input_multislice.ly = 15;
 
 input_multislice.nx = 1024; 
 input_multislice.ny = 1024;
 
-input_multislice.lens_m = -1;           %mm
+input_multislice.lens_m = 0;           %mm
 input_multislice.lens_f = 88.7414;      %Angs
 input_multislice.lens_Cs3 = 0.04;       %mm
 input_multislice.lens_Cs5 = 0.00;       %mm
@@ -42,7 +42,7 @@ for x = 0:2:input_multislice.lx
         probe = get_probe(input_multislice); 
         toc;
         probe = flipud(probe);
-        figure(1);
+        figure(2);
         subplot(1, 2, 1);
         imagesc(abs(probe).^2);
         title('intensity');

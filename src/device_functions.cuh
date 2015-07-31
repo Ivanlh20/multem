@@ -24,6 +24,9 @@
 
 #include "math.cuh"
 #include "types.hpp"
+#include "traits.cuh"
+#include "fft2.cuh"
+#include "stream.cuh"
 
 #include "host_device_functions.cuh"
 
@@ -40,6 +43,52 @@
 #include <thrust/functional.h>
 #include <thrust/for_each.h>
 #include <thrust/fill.h>
+
+#define reduce_array_256(tid, sum, Mshare)						\
+	{															\
+		Mshare[tid] = sum;										\
+		__syncthreads();										\
+		if(tid < 128)											\
+		{														\
+			Mshare[tid] = sum = sum + Mshare[tid + 128];		\
+		}														\
+		__syncthreads();										\
+		if(tid < 64)											\
+		{														\
+			Mshare[tid] = sum = sum + Mshare[tid + 64];			\
+		}														\
+		__syncthreads();										\
+		if(tid < 32)											\
+		{														\
+			Mshare[tid] = sum = sum + Mshare[tid + 32];			\
+		}														\
+		__syncthreads();										\
+		if(tid < 16)											\
+		{														\
+			Mshare[tid] = sum = sum + Mshare[tid + 16];			\
+		}														\
+		__syncthreads();										\
+		if(tid < 8)												\
+		{														\
+			Mshare[tid] = sum = sum + Mshare[tid + 8];			\
+		}														\
+		__syncthreads();										\
+		if(tid < 4)												\
+		{														\
+			Mshare[tid] = sum = sum + Mshare[tid + 4];			\
+		}														\
+		__syncthreads();										\
+		if(tid < 2)												\
+		{														\
+			Mshare[tid] = sum = sum + Mshare[tid + 2];			\
+		}														\
+		__syncthreads();										\
+		if(tid < 1)												\
+		{														\
+			Mshare[tid] = sum = sum + Mshare[tid + 1];			\
+		}														\
+		__syncthreads();										\
+	}
 
 namespace multem
 {
@@ -204,16 +253,7 @@ namespace multem
 
 			if (iR < c_nR-1)
 			{
-				T dR2 = 1.0/(atom_Vp.R2[iR+1]-atom_Vp.R2[iR]);
-				T V = atom_Vp.c0[iR]; 
-				T Vn = atom_Vp.c0[iR+1];
-				T dV = atom_Vp.c1[iR]; 
-				T dVn = atom_Vp.c1[iR+1];
-				T m = (Vn-V)*dR2; 
-				T n = dV+dVn;
-				atom_Vp.c0[iR] = V-atom_Vp.c0[c_nR-1];
-				atom_Vp.c2[iR] = (3.0*m-n-dV)*dR2;
-				atom_Vp.c3[iR] = (n-2.0*m)*dR2*dR2;
+				host_device_detail::cubic_poly_coef(iR, atom_Vp);
 			}
 		}
 
@@ -229,26 +269,12 @@ namespace multem
 				int ix = ix0 + atom_Vp.ix0;
 				int iy = iy0 + atom_Vp.iy0;
 
-				T Rx = grid.Rx(ix) - atom_Vp.x;
-				T Ry = grid.Ry(iy) - atom_Vp.y;
-				T R2 = Rx*Rx + Ry*Ry;
+				T R2 = grid.R2(ix, iy, atom_Vp.x, atom_Vp.y);
 				if (R2 < atom_Vp.R_max2)
 				{
-					R2 = max(R2, atom_Vp.R_min2);
+					int ixy;
+					T V = host_device_detail::eval_cubic_poly(ix, iy, R2, grid, atom_Vp, ixy);
 
-					ix -= static_cast<int>(floor(grid.Rx(ix)/grid.lx))*grid.nx;
-					iy -= static_cast<int>(floor(grid.Ry(iy)/grid.ly))*grid.ny;
-
-					ix = grid.iRx_shift(ix);
-					iy = grid.iRy_shift(iy);
-					int ixy = grid.ind_col(ix, iy);
-
-					ix = host_device_detail::unrolledBinarySearch_c_nR<T>(R2, atom_Vp.R2);
-
-					T dx = R2 - atom_Vp.R2[ix]; 
-					T dx2 = dx*dx;
-					T V = atom_Vp.occ*(atom_Vp.c0[ix] + atom_Vp.c1[ix]*dx + atom_Vp.c2[ix]*dx2 + atom_Vp.c3[ix]*dx2*dx);
-						
 					atomicAdd<T>(&(V0g.V[ixy]), V);
 				}
 			}
@@ -263,13 +289,7 @@ namespace multem
 
 			if((ix < grid.nxh)&&(iy < grid.nyh))
 			{
-				int ixy = grid.ind_col(ix, iy); 
-				int ixy_shift = grid.ind_col(grid.nxh+ix, grid.nyh+iy);
-				thrust::swap(M_io.V[ixy], M_io.V[ixy_shift]);
-
-				ixy = grid.ind_col(ix, grid.nyh+iy); 
-				ixy_shift = grid.ind_col(grid.nxh+ix, iy);
-				thrust::swap(M_io.V[ixy], M_io.V[ixy_shift]);
+				host_device_detail::fft2_shift(ix, iy, grid, M_io);
 			}
 		}
 
@@ -295,71 +315,21 @@ namespace multem
 				int iy = iy0;
 				while (iy < grid.ny)
 				{
-					int ixy = grid.ind_col(ix, iy); 	
 					value_type_r g2 = grid.g2_shift(ix, iy);
 					if((g2_min <= g2)&&(g2 <= g2_max))
 					{
-						sum += M_i.V[ixy];
+						int ixy = grid.ind_col(ix, iy); 
+						sum += M_i[ixy];
 					}
 					iy += blockDim.y*gridDim.y;
 				}
 				ix += blockDim.x*gridDim.x;
 			}
-			Mshare[tid] = sum;
-
-			__syncthreads();
-
-			if(tid < 128)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 128];
-			}
-			__syncthreads();
-
-			if(tid < 64)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 64];
-			}
-			__syncthreads();
-
-			if(tid < 32)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 32];
-			}
-			__syncthreads();
-
-			if(tid < 16)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 16];
-			}
-			__syncthreads();
-
-			if(tid < 8)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 8];
-			}
-			__syncthreads();
-
-			if(tid < 4)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 4];
-			}
-			__syncthreads();
-
-			if(tid < 2)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 2];
-			}
-			__syncthreads();
-
-			if(tid < 1)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 1];
-			}
-			__syncthreads();
+			reduce_array_256(tid, sum, Mshare);
 
 			if(tid == 0 )
 			{
-				Mp_o.V[bid] = sum;
+				Mp_o[bid] = sum;
 			}
 		}
 
@@ -385,71 +355,22 @@ namespace multem
 				int iy = iy0;
 				while (iy < grid.ny)
 				{
-					int ixy = grid.ind_col(ix, iy); 	
 					value_type_r g2 = grid.g2_shift(ix, iy);
 					if((g2_min <= g2)&&(g2 <= g2_max))
 					{
-						sum += thrust::norm(M_i.V[ixy]);
+						int ixy = grid.ind_col(ix, iy);
+						sum += thrust::norm(M_i[ixy]);
 					}
 					iy += blockDim.y*gridDim.y;
 				}
 				ix += blockDim.x*gridDim.x;
 			}
-			Mshare[tid] = sum;
 
-			__syncthreads();
-
-			if(tid < 128)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 128];
-			}
-			__syncthreads();
-
-			if(tid < 64)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 64];
-			}
-			__syncthreads();
-
-			if(tid < 32)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 32];
-			}
-			__syncthreads();
-
-			if(tid < 16)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 16];
-			}
-			__syncthreads();
-
-			if(tid < 8)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 8];
-			}
-			__syncthreads();
-
-			if(tid < 4)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 4];
-			}
-			__syncthreads();
-
-			if(tid < 2)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 2];
-			}
-			__syncthreads();
-
-			if(tid < 1)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 1];
-			}
-			__syncthreads();
+			reduce_array_256(tid, sum, Mshare);
 
 			if(tid == 0 )
 			{
-				Mp_o.V[bid] = sum;
+				Mp_o[bid] = sum;
 			}
 		}
 
@@ -457,65 +378,40 @@ namespace multem
 		template<class TGrid, class T>
 		__global__ void bandwidth_limit(TGrid grid, Value_type<TGrid> g2_min, Value_type<TGrid> g2_max, T w, rVector<T> M_io)
 		{
-			using value_type_r = Value_type<TGrid>;
-
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				int ixy = grid.ind_col(ix, iy); 
-				value_type_r g2 = grid.g2_shift(ix, iy);
-
-				if((g2_min <= g2)&&(g2 <= g2_max))
-				{
-					M_io.V[ixy] *= w;
-				}
-				else
-				{
- 					M_io.V[ixy] = 0;
-				}
+				host_device_detail::bandwidth_limit(ix, iy, grid, g2_min, g2_max, w, M_io);
 			}
 		}
 
 		// Phase multiplication
 		template<class TGrid, class T>
-		__global__ void phase_mul(TGrid grid, rVector<T> V_x_i, 
-		rVector<T> V_y_i, rVector<T> psi_i, rVector<T> psi_o)
+		__global__ void phase_multiplication(TGrid grid, rVector<T> exp_x_i, 
+		rVector<T> exp_y_i, rVector<T> psi_i, rVector<T> psi_o)
 		{
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				int ixy = grid.ind_col(ix, iy);
-				psi_o.V[ixy] = psi_i.V[ixy]*V_x_i.V[ix]*V_y_i.V[iy]; 
+				host_device_detail::phase_multiplication(ix, iy, grid, exp_x_i, exp_y_i, psi_i, psi_o);
 			}
 		}
 
 		// Propagate, scale with cut-off (2/3)g_max
 		template<class TGrid, class T>
-		__global__ void propagator_mul(TGrid grid, rVector<T> V_x_i, 
-		rVector<T> V_y_i, rVector<T> psi_i, rVector<T> psi_o)
+		__global__ void propagator_multiplication(TGrid grid, rVector<T> prop_x_i, 
+		rVector<T> prop_y_i, rVector<T> psi_i, rVector<T> psi_o)
 		{
-			using value_type_r = Value_type<TGrid>;
-
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				int ixy = grid.ind_col(ix, iy);
-				value_type_r g2 = grid.g2_shift(ix, iy);
-
-				if((!grid.bwl)||(g2 < grid.gl2_max))
-				{
-					psi_o.V[ixy] = static_cast<T>(grid.inxy)*psi_i.V[ixy]*V_x_i.V[ix]*V_y_i.V[iy];
-				}
-				else
-				{
- 					psi_o.V[ixy] = static_cast<T>(0);
-				}
+				host_device_detail::propagator_multiplication(ix, iy, grid, prop_x_i, prop_y_i, psi_i, psi_o);
 			}
 		}
 
@@ -524,33 +420,12 @@ namespace multem
 		__global__ void probe(TGrid grid, Lens<Value_type<TGrid>> lens, 
 		Value_type<TGrid> x, Value_type<TGrid> y, rVector<T> fPsi_o)
 		{
-			using value_type_r = Value_type<TGrid>;
-
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{	
-				int ixy = grid.ind_col(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-
-				if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
-				{
-					value_type_r chi = x*gx + y*gy + g2*(lens.cCs5*g2*g2+lens.cCs3*g2+lens.cf);
-					if(nonZero(lens.m)||nonZero(lens.cmfa2)||nonZero(lens.cmfa3))
-					{
-						value_type_r g = sqrt(g2);
-						value_type_r phi = atan2(gy, gx);
-						chi += lens.m*phi + lens.cmfa2*g2*sin(2*(phi-lens.afa2)) + lens.cmfa3*g*g2*sin(3*(phi-lens.afa3)); 			
-					}	
-					fPsi_o.V[ixy] = thrust::euler(chi); 
-				}
-				else
-				{
- 					fPsi_o.V[ixy] = static_cast<T>(0);
-				}
+				host_device_detail::probe(ix, iy, grid, lens, x, y, fPsi_o);
 			}
 		}
 
@@ -566,27 +441,7 @@ namespace multem
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{	
-				int ixy = grid.ind_col(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-
-				if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
-				{
-					g2 = (gx-gxu)*(gx-gxu) + (gy-gyu)*(gy-gyu);
-					value_type_r chi = g2*(lens.cCs5*g2*g2+lens.cCs3*g2+lens.cf);
-					if(nonZero(lens.cmfa2)||nonZero(lens.cmfa3))
-					{
-						value_type_r g = sqrt(g2);
-						value_type_r phi = atan2(gy, gx);
-						chi += lens.cmfa2*g2*sin(2*(phi-lens.afa2)) + lens.cmfa3*g*g2*sin(3*(phi-lens.afa3)); 			
-					}
-					fPsi_o.V[ixy] = fPsi_i.V[ixy]*thrust::euler(chi);
-				}
-				else
-				{
- 					fPsi_o.V[ixy] = static_cast<T>(0);
-				}
+				host_device_detail::apply_CTF(ix, iy, grid, lens, gxu, gyu, fPsi_i, fPsi_o);
 			}
 		}
 
@@ -594,35 +449,12 @@ namespace multem
 		template<class TGrid, class T>
 		__global__ void apply_PCTF(TGrid grid, Lens<Value_type<TGrid>> lens, rVector<T> fPsi_i, rVector<T> fPsi_o)
 		{
-			using value_type_r = Value_type<TGrid>;
-			const value_type_r c_Pi = 3.141592653589793238463;
-
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				int ixy = grid.ind_col(ix, iy);
-				value_type_r g2 = grid.g2_shift(ix, iy);
-
-				if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
-				{			
-					value_type_r chi = g2*(lens.cCs3*g2+lens.cf);
-					value_type_r c = c_Pi*lens.beta*lens.sf;
-					value_type_r u = 1.0 + c*c*g2;
-
-					c = c_Pi*lens.sf*lens.lambda*g2;
-					value_type_r sie = 0.25*c*c;
-					c = c_Pi*lens.beta*(lens.Cs3*lens.lambda2*g2-lens.f);
-					value_type_r tie = c*c*g2;
-					value_type_r sti = exp(-(sie+tie)/u);
-
-					fPsi_o.V[ixy] = fPsi_i.V[ixy]*thrust::polar(sti, chi);
-				}
-				else
-				{
-					fPsi_o.V[ixy] = static_cast<T>(0);
-				}
+				host_device_detail::apply_PCTF(ix, iy, grid, lens, fPsi_i, fPsi_o);
 			}
 		}
 
@@ -655,61 +487,12 @@ namespace multem
 				}
 				ix += blockDim.x*gridDim.x;
 			}
-			Mshare[tid] = sum;
 
-			__syncthreads();
-
-			if(tid < 128)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 128];
-			}
-			__syncthreads();
-
-			if(tid < 64)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 64];
-			}
-			__syncthreads();
-
-			if(tid < 32)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 32];
-			}
-			__syncthreads();
-
-			if(tid < 16)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 16];
-			}
-			__syncthreads();
-
-			if(tid < 8)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 8];
-			}
-			__syncthreads();
-
-			if(tid < 4)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 4];
-			}
-			__syncthreads();
-
-			if(tid < 2)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 2];
-			}
-			__syncthreads();
-
-			if(tid < 1)
-			{
-				Mshare[tid] = sum = sum + Mshare[tid + 1];
-			}
-			__syncthreads();
+			reduce_array_256(tid, sum, Mshare);
 
 			if(tid == 0 )
 			{
-				Mp_o.V[bid] = sum;
+				Mp_o[bid] = sum;
 			}
 		}
 
@@ -720,7 +503,7 @@ namespace multem
 
 			auto gridBT = device_detail::get_grid_nxny(grid, dim3(c_thrnxny, c_thrnxny));
 
-			norm_factor_lorentz<TGrid::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels.gc2, eels.ge2, sum_v);
+			norm_factor_lorentz<Value_type<TGrid>><<<gridBT.Blk, gridBT.Thr>>>(grid, eels.gc2, eels.ge2, sum_v);
 
 			return sqrt(eels.occ)/multem::sum(grid, sum_v);
 		}
@@ -729,180 +512,72 @@ namespace multem
 		__global__ void kernel_xyz(TGrid grid, EELS<Value_type<TGrid>> eels,
 		rVector<T> k_x, rVector<T> k_y, rVector<T> k_z)
 		{
-			using value_type_r = Value_type<TGrid>;
-
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				int ixy = grid.ind_col(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					T pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = eels.factor/(g2 + eels.ge2);
-					k_x.V[ixy] = static_cast<T>(gx*lorentz)*pos;
-					k_y.V[ixy] = static_cast<T>(gy*lorentz)*pos;
-					k_z.V[ixy] = static_cast<T>(eels.ge*lorentz)*pos;
-				}
-				else
-				{
-					k_x.V[ixy] = static_cast<T>(0);
-					k_y.V[ixy] = static_cast<T>(0);
-					k_z.V[ixy] = static_cast<T>(0);
-				}
+				host_device_detail::kernel_xyz(ix, iy, grid, eels, k_x, k_y, k_z);
 			}
 		}
 
 		template<class TGrid, class T>
 		__global__ void kernel_x(TGrid grid, EELS<Value_type<TGrid>> eels, rVector<T> k_x)
 		{
-			using value_type_r = Value_type<TGrid>;
-
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				int ixy = grid.ind_col(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					T pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = eels.factor/(g2 + eels.ge2);
-					k_x.V[ixy] = static_cast<T>(gx*lorentz)*pos;
-				}
-				else
-				{
-					k_x.V[ixy] = static_cast<T>(0);
-				}
+				host_device_detail::kernel_x(ix, iy, grid, eels, k_x);
 			}
 		}
 
 		template<class TGrid, class T>
 		__global__ void kernel_y(TGrid grid, EELS<Value_type<TGrid>> eels, rVector<T> k_y)
 		{
-			using value_type_r = Value_type<TGrid>;
-
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				int ixy = grid.ind_col(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					T pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = eels.factor/(g2 + eels.ge2);
-					k_y.V[ixy] = static_cast<T>(gy*lorentz)*pos;
-				}
-				else
-				{
-					k_y.V[ixy] = static_cast<T>(0);
-				}
+				host_device_detail::kernel_y(ix, iy, grid, eels, k_y);
 			}
 		}
 
 		template<class TGrid, class T>
 		__global__ void kernel_z(TGrid grid, EELS<Value_type<TGrid>> eels, rVector<T> k_z)
 		{
-			using value_type_r = Value_type<TGrid>;
-
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				int ixy = grid.ind_col(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					T pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = eels.factor/(g2 + eels.ge2);
-					k_z.V[ixy] = static_cast<T>(eels.ge*lorentz)*pos;
-				}
-				else
-				{
-					k_z.V[ixy] = static_cast<T>(0);
-				}
+				host_device_detail::kernel_z(ix, iy, grid, eels, k_z);
 			}
 		}
 
 		template<class TGrid, class T>
 		__global__ void kernel_mn1(TGrid grid, EELS<Value_type<TGrid>> eels, rVector<T> k_mn1)
 		{
-			using value_type_r = Value_type<TGrid>;
-
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				int ixy = grid.ind_col(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					const value_type_r c_i2i2 = 0.70710678118654746; 
-
-					T pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = c_i2i2*eels.factor/(g2 + eels.ge2);
-					T k_x = T(gx*lorentz, 0);
-					T k_y = T(0, gy*lorentz);
-					k_mn1.V[ixy] = (k_x - k_y)*pos;
-				}
-				else
-				{
-					k_mn1.V[ixy] = static_cast<T>(0);
-				}
+				host_device_detail::kernel_mn1(ix, iy, grid, eels, k_mn1);
 			}
 		}
 
 		template<class TGrid, class T>
 		__global__ void kernel_mp1(TGrid grid, EELS<Value_type<TGrid>> eels, rVector<T> k_mp1)
 		{
-			using value_type_r = Value_type<TGrid>;
-
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				int ixy = grid.ind_col(ix, iy);
-				value_type_r gx = grid.gx_shift(ix);
-				value_type_r gy = grid.gy_shift(iy);
-				value_type_r g2 = gx*gx + gy*gy;
-				
-				if(g2 < eels.gc2)
-				{
-					const value_type_r c_i2i2 = 0.70710678118654746; 
-
-					T pos = thrust::euler(eels.x*gx + eels.y*gy);
-					value_type_r lorentz = c_i2i2*eels.factor/(g2 + eels.ge2);
-					T k_x = T(gx*lorentz, 0);
-					T k_y = T(0, gy*lorentz);
-					k_mp1.V[ixy] = (k_x + k_y)*pos;
-				}
-				else
-				{
-					k_mp1.V[ixy] = static_cast<T>(0);
-				}
+				host_device_detail::kernel_mp1(ix, iy, grid, eels, k_mp1);
 			}
 		}
 
@@ -946,7 +621,7 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_r>
-	enable_if_Device<TVector_r, void>
+	enable_if_device_vector<TVector_r, void>
 	eval_cubic_poly(TGrid &grid, Stream<Value_type<TGrid>, e_Device> &stream, 
 	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V0)
 	{
@@ -964,69 +639,70 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector>
-	enable_if_Device<TVector, void>
+	enable_if_device_vector<TVector, void>
 	fft2_shift(const TGrid &grid, TVector &M_io)
 	{
 		GridBT gridBT;
 		gridBT.Blk = dim3((grid.nyh+c_thrnxny-1)/c_thrnxny, (grid.nxh+c_thrnxny-1)/c_thrnxny);
 		gridBT.Thr = dim3(c_thrnxny, c_thrnxny);
 
-		device_detail::fft2_shift<TGrid, TVector::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, M_io); 	
+		device_detail::fft2_shift<TGrid, typename TVector::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, M_io); 	
 	}
 
 	template<class TGrid, class TVector>
-	enable_if_Device<TVector, Value_type<TVector>>
+	enable_if_device_vector<TVector, Value_type<TVector>>
 	sum_over_Det(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, TVector &M_i)
 	{
 		TVector sum_v(c_thrnxny*c_thrnxny);
 
 		auto gridBT = device_detail::get_grid_nxny(grid, dim3(c_thrnxny, c_thrnxny));
 
-		device_detail::sum_over_Det<TGrid, TVector::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, pow(g_min, 2), pow(g_max, 2), M_i, sum_v);
+		device_detail::sum_over_Det<TGrid, typename TVector::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, pow(g_min, 2), pow(g_max, 2), M_i, sum_v);
 
 		return multem::sum(grid, sum_v);
 	}
 
 	template<class TGrid, class TVector_r>
-	enable_if_Device<TVector_r, Value_type<TGrid>>
+	enable_if_device_vector<TVector_r, Value_type<TGrid>>
 	sum_square_over_Det(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, TVector_r &M_i)
 	{
 		device_vector<Value_type<TGrid>> sum_t(c_thrnxny*c_thrnxny);
 
 		auto gridBT = device_detail::get_grid_nxny(grid, dim3(c_thrnxny, c_thrnxny));
 
-		device_detail::sum_square_over_Det<TGrid, TVector_r::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, pow(g_min, 2), pow(g_max, 2), M_i, sum_t);
+		device_detail::sum_square_over_Det<TGrid, typename TVector_r::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, pow(g_min, 2), pow(g_max, 2), M_i, sum_t);
 		return sum(grid, sum_t);
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
+	enable_if_device_vector<TVector_c, void>
 	bandwidth_limit(const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, Value_type<TVector_c> w, TVector_c &M_io)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
-		device_detail::bandwidth_limit<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, pow(g_min, 2), pow(g_max, 2), w, M_io); 
+
+		device_detail::bandwidth_limit<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, pow(g_min, 2), pow(g_max, 2), w, M_io); 
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
-	phase_mul(const TGrid &grid, TVector_c &exp_x_i, TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
+	enable_if_device_vector<TVector_c, void>
+	phase_multiplication(const TGrid &grid, TVector_c &exp_x_i, TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::phase_mul<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, exp_x_i, exp_y_i, psi_i, psi_o);
+		device_detail::phase_multiplication<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, exp_x_i, exp_y_i, psi_i, psi_o);
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
-	propagator_mul(const TGrid &grid, TVector_c &prop_x_i, TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &psi_o)
+	enable_if_device_vector<TVector_c, void>
+	propagator_multiplication(const TGrid &grid, TVector_c &prop_x_i, TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &psi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::propagator_mul<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, prop_x_i, prop_y_i, psi_i, psi_o);
+		device_detail::propagator_multiplication<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, prop_x_i, prop_y_i, psi_i, psi_o);
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
+	enable_if_device_vector<TVector_c, void>
 	probe(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, Value_type<TGrid> x, Value_type<TGrid> y, TVector_c &fPsi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
@@ -1040,30 +716,30 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
+	enable_if_device_vector<TVector_c, void>
 	apply_CTF(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
-		device_detail::apply_CTF<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, lens, gxu, gyu, fPsi_i, fPsi_o);
+		device_detail::apply_CTF<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, lens, gxu, gyu, fPsi_i, fPsi_o);
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
+	enable_if_device_vector<TVector_c, void>
 	apply_PCTF(const TGrid &grid, const Lens<Value_type<TGrid>> &lens, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
-		device_detail::apply_PCTF<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, lens, fPsi_i, fPsi_o);
+		device_detail::apply_PCTF<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, lens, fPsi_i, fPsi_o);
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
+	enable_if_device_vector<TVector_c, void>
 	kernel_xyz(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_x, TVector_c &k_y, TVector_c &k_z)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::kernel_xyz<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_x, k_y, k_z);
+		device_detail::kernel_xyz<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_x, k_y, k_z);
 
 		fft2.inverse(k_x);
 		fft2.inverse(k_y);
@@ -1071,117 +747,165 @@ namespace multem
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
-	kernel_x(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_x)
+	enable_if_device_vector<TVector_c, void>
+	kernel_x(const TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_x)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::kernel_x<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_x);
+		device_detail::kernel_x<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_x);
 
 		fft2.inverse(k_x);
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
-	kernel_y(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_y)
+	enable_if_device_vector<TVector_c, void>
+	kernel_y(const TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_y)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::kernel_y<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_y);
+		device_detail::kernel_y<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_y);
 
 		fft2.inverse(k_y);
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
-	kernel_z(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_z)
+	enable_if_device_vector<TVector_c, void>
+	kernel_z(const TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_z)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::kernel_z<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_z);
+		device_detail::kernel_z<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_z);
 
 		fft2.inverse(k_z);
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
-	kernel_mn1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_mn1)
+	enable_if_device_vector<TVector_c, void>
+	kernel_mn1(const TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_mn1)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::kernel_mn1<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_mn1);
+		device_detail::kernel_mn1<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_mn1);
 
 		fft2.inverse(k_mn1);
 	}
 
 	template<class TGrid, class TVector_c>
-	enable_if_Device<TVector_c, void>
-	kernel_mp1(TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_mp1)
+	enable_if_device_vector<TVector_c, void>
+	kernel_mp1(const TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_Device> &fft2, TVector_c &k_mp1)
 	{
 		eels.factor = device_detail::Lorentz_factor(grid, eels);
 
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::kernel_mp1<TGrid, TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_mp1);
+		device_detail::kernel_mp1<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, eels, k_mp1);
 
 		fft2.inverse(k_mp1);
 	}
 
 	template<class TVector_c>
-	enable_if_Device<TVector_c, void>
-	scomplex_to_complex(m_matrix_c &V_i, TVector_c &V_o)
+	enable_if_device_vector<TVector_c, void>
+	rmatrix_c_to_complex(rmatrix_c &M_i, TVector_c &M_o)
 	{
-		using value_type_c = Value_type<TVector_c>;
-		
-		Vector<value_type_c, e_Host> V_h(V_i.size);
+		Vector<Value_type<TVector_c>, e_Host> M_h(M_i.size);
 
-		for(auto ixy = 0; ixy < V_i.size; ixy++)
+		for(auto ixy = 0; ixy < M_i.size; ixy++)
 		{
-			V_h[ixy] = value_type_c(V_i.real[ixy], V_i.imag[ixy]);
+			M_o[ixy] = M_i[ixy];
 		}
-
-		multem::assign(V_h, V_o);
+		multem::assign(M_h, M_o);
 	}
 
-	template<class TGrid, class TVector_i, class TVector_o>
-	typename std::enable_if<is_Device<TVector_i>::value && !is_m_matrix_rc<TVector_o>::value, void>::type
-	to_host(TGrid &grid, TVector_i &M_i, TVector_o &M_o)
-	{
-		multem::device_synchronize<multem::e_Device>();
+	/***************************************************************************/
+	/***************************************************************************/
 
+	template<class TGrid, class TVector_i, class TVector_o>
+	typename std::enable_if<is_device_vector<TVector_i>::value && !is_rmatrix_c<TVector_o>::value, void>::type
+	copy_to_host(const TGrid &grid, TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_Host> *M_i_h=nullptr)
+	{
 		thrust::copy(M_i.begin(), M_i.end(), M_o.begin());
 	}
 
-	template<class TGrid, class TVector, class Tm_matrix_r>
-	typename std::enable_if<is_Device<TVector>::value && is_m_matrix_r<Tm_matrix_r>::value, void>::type
-	to_host(TGrid &grid, TVector &M_i, Tm_matrix_r &M_o)
+	template<class TGrid, class TVector_i, class TVector_o>
+	typename std::enable_if<is_device_vector<TVector_i>::value && is_rmatrix_c<TVector_o>::value, void>::type
+	copy_to_host(const TGrid &grid, TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_Host> *M_i_h=nullptr)
 	{
-		multem::device_synchronize<multem::e_Device>();
-
-		thrust::copy(M_i.begin(), M_i.end(), M_o.real);
-	}
-
-	template<class TGrid, class TVector, class Tm_matrix_c>
-	typename std::enable_if<is_Device<TVector>::value && is_m_matrix_c<Tm_matrix_c>::value, void>::type
-	to_host(TGrid &grid, TVector &M_i, Tm_matrix_c &M_o)
-	{
-		multem::device_synchronize<multem::e_Device>();
-
-		Vector<Value_type<TVector>, e_Host> M_t(M_i.begin(), M_i.end());
-		for(auto i = 0; i<M_t.size(); i++)
+		Vector<Value_type<TVector_i>, e_Host> M_h;
+		if(M_i_h==nullptr)
 		{
-			M_o.real[i] = M_t[i].real();
-			M_o.imag[i] = M_t[i].imag();
+			M_i_h = &M_h;
+		}
+
+		M_i_h->assign(M_i.begin(), M_i.end());
+		for(auto i = 0; i < M_i_h->size(); i++)
+		{
+			M_o[i] = (*M_i_h)[i];
 		}
 	}
+
+	template<class TGrid, class TVector_i, class TVector_o>
+	enable_if_device_vector<TVector_i, void>
+	add_scale_to_host(TGrid &grid, Value_type<TVector_i> w_i, TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_Host> *M_i_h=nullptr)
+	{
+		Vector<Value_type<TVector_i>, e_Host> M_h;
+		if(M_i_h==nullptr)
+		{
+			M_i_h = &M_h;
+		}
+
+		M_i_h->assign(M_i.begin(), M_i.end());
+
+		for(auto i = 0; i < M_i_h->size(); i++)
+		{
+			M_o[i] += w_i*((*M_i_h)[i]);
+		}
+	}
+
+	template<class TGrid, class TVector_i, class TVector_o>
+	enable_if_device_vector<TVector_i, void>
+	add_square_scale_to_host(TGrid &grid, Value_type<TGrid> w_i, TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_Host> *M_i_h=nullptr)
+	{
+		Vector<Value_type<TVector_i>, e_Host> M_h;
+		if(M_i_h==nullptr)
+		{
+			M_i_h = &M_h;
+		}
+
+		M_i_h->assign(M_i.begin(), M_i.end());
+
+		multem::add_square_scale(w_i, *M_i_h, M_o);
+	}
+
+	template<class TGrid, class TVector_c_i, class TVector_r_o, class TVector_c_o>
+	enable_if_device_vector<TVector_c_i, void>
+	add_scale_m2psi_psi(TGrid &grid, Value_type<TGrid> w_i, TVector_c_i &psi_i, TVector_r_o &m2psi_o, TVector_c_o &psi_o, Vector<Value_type<TVector_c_i>, e_Host> *psi_i_h=nullptr)
+	{
+		Vector<Value_type<TVector_c_i>, e_Host> M_h;
+		if(psi_i_h==nullptr)
+		{
+			psi_i_h = &M_h;
+		}
+
+		psi_i_h->assign(psi_i.begin(), psi_i.end());
+
+		Value_type<TVector_c_i> w_i_c = w_i;
+		for(auto i = 0; i < psi_i_h->size(); i++)
+		{
+			m2psi_o[i] += w_i*thrust::norm((*psi_i_h)[i]);
+			psi_o[i] += w_i_c*((*psi_i_h)[i]);
+		}
+	}
+
+	/***************************************************************************/
+	/***************************************************************************/
 
 	inline
 	bool is_gpu_available()

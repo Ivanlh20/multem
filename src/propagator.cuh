@@ -21,6 +21,7 @@
 
 #include "math.cuh"
 #include "types.hpp"
+#include "fft2.cuh"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
@@ -34,11 +35,11 @@ namespace multem
 			using value_type_r = T;
 			using value_type_c = complex<T>;
 
-			Propagator():input_multislice(nullptr), fft2(nullptr){ }
+			Propagator():input_multislice(nullptr), fft2(nullptr){}
 
-			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_io, FFT2<value_type_r, dev> *fft2_i)
+			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, FFT2<value_type_r, dev> *fft2_i)
 			{
-				input_multislice = input_multislice_io;
+				input_multislice = input_multislice_i;
 				fft2 = fft2_i;
 
 				prop_x.resize(input_multislice->grid.nx);
@@ -70,7 +71,7 @@ namespace multem
 				}
 				else
 				{
-					multem::propagator_components<decltype(input_multislice->grid)>(input_multislice->grid, gxu, gyu, input_multislice->lens.prop_factor(z), prop_x, prop_y);
+					multem::propagator_components(input_multislice->grid, gxu, gyu, input_multislice->lens.prop_factor(z), prop_x, prop_y);
 					multem::propagate(input_multislice->grid, *fft2, space, prop_x, prop_y, psi_i, psi_o);
 				}
 			}

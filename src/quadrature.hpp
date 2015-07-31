@@ -20,6 +20,7 @@
 #define QUADRATURE_H
 
 #include "types.hpp"
+#include "traits.cuh"
 
 namespace multem
 {
@@ -28,7 +29,7 @@ namespace multem
 			template<class TQ1>
 			void get(const int &Quad_Type, const int &nQuad, TQ1 &Q, const double &tai=4.0)
 			{
-				using value_type = traits::Value_type<TQ1>;
+				using value_type = Value_type<TQ1>;
 
 				value_type xmin, xmax, rmax = 225;
 				cQ.resize(nQuad);
@@ -127,7 +128,7 @@ namespace multem
 			{
 				auto getLimit = [](double x, double t, int n)->double
 				{
-					for(int i=0; i<n; i++)
+					for(int i=0; i < n; i++)
 						t = t - (t-exp(-x)-log(x))/(1.0+exp(-t));
 					return t;
 				};
