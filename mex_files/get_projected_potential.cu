@@ -19,6 +19,7 @@
 #include "types.hpp"
 #include "traits.cuh"
 #include "Stream.cuh"
+#include "atom_data.hpp"
 #include "input_multislice.hpp"
 #include "output_multislice.hpp"
 #include "host_functions.hpp"
@@ -52,7 +53,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 
 	input_multislice.fp_dim.set(mx_get_scalar_field<int>(mx_input_multislice, "fp_dim"));
 	input_multislice.fp_seed = mx_get_scalar_field<int>(mx_input_multislice, "fp_seed");
-	input_multislice.fp_single_conf = mx_get_scalar_field<bool>(mx_input_multislice, "fp_single_conf");
+	input_multislice.fp_single_conf = true;
 	input_multislice.fp_nconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_nconf");
 
 	input_multislice.islice = mx_get_scalar_field<int>(mx_input_multislice, "islice")-1;
@@ -76,18 +77,24 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
  }
 
 template<class TOutput_multislice>
-void set_output_data(TOutput_multislice &output_multislice, mxArray *&mx_output_multislice)
+void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_multislice, TOutput_multislice &output_multislice)
 {
-	const char *field_names_output_multislice[] = {"V"};
-	int number_of_fields_output_multislice = 1;
-	mwSize dims_output_multislice[2] = {1, output_multislice.thickness.size()};
+	multem::Input_Multislice<double, multem::e_Host> input_multislice;
+	read_input_data(mx_input_multislice, input_multislice, false);
+	output_multislice.set_input_data(&input_multislice);
+
+	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thickness", "V"};
+	int number_of_fields_output_multislice = 6;
+	mwSize dims_output_multislice[2] = {1, 1};
 
 	mx_output_multislice = mxCreateStructArray(2, dims_output_multislice, number_of_fields_output_multislice, field_names_output_multislice);
 
-	for(auto ithk=0; ithk<output_multislice.thickness.size(); ithk++)
-	{
-		output_multislice.V[ithk] = mx_create_matrix_field<rmatrix_r>(mx_output_multislice, ithk, "V", output_multislice.ny, output_multislice.nx);
-	}
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx);
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x.data());
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y.data());
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thickness", 1, output_multislice.thickness.size(), output_multislice.thickness.data());
+	output_multislice.V[0] = mx_create_matrix_field<rmatrix_r>(mx_output_multislice, "V", output_multislice.ny, output_multislice.nx);
 }
 
 template<class T, multem::eDevice dev, class TOutput_multislice>
@@ -96,41 +103,37 @@ void get_projected_potential(const mxArray *mxB, TOutput_multislice &output_mult
 	multem::Input_Multislice<T, dev> input_multislice;
 	read_input_data(mxB, input_multislice);
 
-	multem::Potential<T, dev> potential;
 	multem::Stream<T, dev> stream;
+	multem::Potential<T, dev> potential;
 
 	stream.resize(input_multislice.nstream);
-
 	potential.set_input_data(&input_multislice, &stream);
+
 	potential.move_atoms(input_multislice.fp_nconf);
 	potential.projected_potential(input_multislice.islice);
 
-	multem::to_host_shift(input_multislice.grid, potential.V0, output_multislice.V[0]);
+	multem::copy_to_host(input_multislice.grid, potential.V_0, output_multislice.V[0]);
+	multem::fft2_shift(input_multislice.grid, output_multislice.V[0]);
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	multem::Input_Multislice<double, multem::e_Host> input_multislice;
-	read_input_data(prhs[0], input_multislice, false);
-
 	multem::Output_Multislice<rmatrix_r, rmatrix_c> output_multislice;
-	output_multislice.set_input_data(&input_multislice);
+	set_output_data(prhs[0], plhs[0], output_multislice);
 
-	set_output_data(output_multislice, plhs[0]);
-
-	if(input_multislice.is_float_Host())
+	if(output_multislice.is_float_Host())
 	{
 		get_projected_potential<float, multem::e_Host>(prhs[0], output_multislice);
 	}
-	else if(input_multislice.is_double_Host())
+	else if(output_multislice.is_double_Host())
 	{
 		get_projected_potential<double, multem::e_Host>(prhs[0], output_multislice);
 	}
-	if(input_multislice.is_float_Device())
+	if(output_multislice.is_float_Device())
 	{
 		get_projected_potential<float, multem::e_Device>(prhs[0], output_multislice);
 	}
-	else if(input_multislice.is_double_Device())
+	else if(output_multislice.is_double_Device())
 	{
 		get_projected_potential<double, multem::e_Device>(prhs[0], output_multislice);
 	}

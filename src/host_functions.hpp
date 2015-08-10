@@ -512,7 +512,7 @@ namespace multem
 					}
 				}
 
-				atom_Vp.c0[iR] = V0s; 		// V0
+				atom_Vp.c0[iR] = V0s; 		// V_0
 				atom_Vp.c1[iR] = 0.5*dV0s; 	// dR2V0
 			}
 		}
@@ -630,7 +630,7 @@ namespace multem
 	template<class TGrid, class TVector_r>
 	enable_if_host_vector<TVector_r, void>
 	eval_cubic_poly(TGrid &grid, Stream<Value_type<TGrid>, e_Host> &stream, 
-	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V0)
+	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V_0)
 	{
 		if(stream.n_act_stream<=0)
 		{
@@ -639,7 +639,7 @@ namespace multem
 
 		for(auto istream = 0; istream < stream.n_act_stream; istream++)
 		{
-			stream[istream] = std::thread(std::bind(host_detail::eval_cubic_poly<typename TVector_r::value_type>, std::ref(grid), std::ref(atom_Vp[istream]), std::ref(V0)));
+			stream[istream] = std::thread(std::bind(host_detail::eval_cubic_poly<typename TVector_r::value_type>, std::ref(grid), std::ref(atom_Vp[istream]), std::ref(V_0)));
 		}
 		stream.synchronize();
 	}
@@ -903,11 +903,12 @@ namespace multem
 		fft2.inverse(k_mp1);
 	}
 
-	template<class TVector_c>
-	enable_if_host_vector<TVector_c, void>
-	rmatrix_c_to_complex(rmatrix_c &M_i, TVector_c &M_o)
+	template<class TVector_o>
+	enable_if_host_vector<TVector_o, void>
+	assign(rmatrix_c &M_i, TVector_o &M_o, Vector<Value_type<TVector_o>, e_Host> *M_i_h=nullptr)
 	{
-		for(auto ixy = 0; ixy < M_i.size; ixy++)
+		M_o.resize(M_i.size);
+		for(auto ixy = 0; ixy < M_o.size(); ixy++)
 		{
 			M_o[ixy] = M_i[ixy];
 		}
@@ -930,9 +931,9 @@ namespace multem
 	enable_if_host_vector<TVector_i, void>
 	add_scale_to_host(TGrid &grid, Value_type<TVector_i> w_i, TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_Host> *M_i_h=nullptr)
 	{
-		for(auto i = 0; i < M_i_h->size(); i++)
+		for(auto ixy = 0; ixy < M_i.size(); ixy++)
 		{
-			M_o[i] += w_i*M_i[i];
+			M_o[ixy] += w_i*M_i[ixy];
 		}
 	}
 

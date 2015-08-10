@@ -2,7 +2,7 @@ clear all; clc;
 
 input_multislice = multem_default_values();         % Load default values;
 
-input_multislice.precision = 2;                     % eP_Float = 1, eP_double = 2
+input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
 input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
 input_multislice.cpu_ncores = 1; 
 input_multislice.cpu_nthread = 4; 
@@ -17,14 +17,14 @@ input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Pen
 
 input_multislice.fp_dim = 110; 
 input_multislice.fp_seed = 300183; 
-input_multislice.fp_nconf = 4;
+input_multislice.fp_nconf = 5;
 input_multislice.fp_iconf = 0;
 
 input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
 input_multislice.zero_defocus_plane = 0;
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;
-input_multislice.bwl = 1;
+input_multislice.bwl = 0;
 
 input_multislice.E_0 = 200;                         % Acceleration Voltage (keV)
 input_multislice.theta = 0.0;                       % Till ilumination (degrees)
@@ -62,13 +62,20 @@ input_multislice.scanning_y0 = 2*b;
 input_multislice.scanning_xe = 3*a;
 input_multislice.scanning_ye = 3*b;
 
+input_multislice.thickness_type = 2;             % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
+input_multislice.thickness = 0:c:1000;           % Array of thicknesses
+
 clear MULTEM;
 tic;
-[m2psi_tot] = MULTEM(input_multislice); 
+output_multislice = MULTEM(input_multislice); 
 toc;
+clear MULTEM;
 
 figure(1);
-imagesc(m2psi_tot);
-title('Total intensity');
-axis image;
-colormap gray;
+for i=1:length(output_multislice.data)
+    imagesc(output_multislice.data(i).m2psi_tot);
+    title(strcat('Total intensity -  Thickness = ', num2str(i)));
+    axis image;
+    colormap gray;
+    pause(0.25);
+end;

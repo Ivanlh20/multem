@@ -306,6 +306,7 @@ namespace multem
 	{
 	public:
 		using value_type = double;
+		using size_type = std::size_t;
 		static const eDevice device = e_Host;
 
 		int size;
@@ -318,6 +319,22 @@ namespace multem
 		const double& operator[](const int i) const { return real[i]; }
 		host_vector<double>::iterator begin() const { return real; };
 		host_vector<double>::iterator end() const { return (real + size); };
+
+		void resize(const size_type &new_size)
+		{
+			size = new_size;
+			delete [] real;
+			real = new double [new_size];
+		}
+
+		void clear()
+		{
+			size = 0;
+			rows = 0;
+			cols = 0;
+			delete [] real; 
+			real = nullptr;
+		}
 	};
 
 	/*********************pointer to complex matrix****************/
@@ -325,6 +342,7 @@ namespace multem
 	{
 	public:
 		using value_type = double;
+		using size_type = std::size_t;
 		static const eDevice device = e_Host;
 
 		int size;
@@ -343,6 +361,26 @@ namespace multem
 		complex<double> operator[](const int i) const
 		{ 
 			return m_data; 
+		}
+
+		void resize(const size_type &new_size)
+		{
+			size = new_size;
+			delete [] real;
+			real = new double [new_size];
+			delete [] imag;
+			imag = new double [new_size];
+		}
+
+		void clear()
+		{
+			size = 0;
+			rows = 0;
+			cols = 0;
+			delete [] real; 
+			real = nullptr;
+			delete [] imag; 
+			imag = nullptr;
 		}
 	private:
 		complex_s<double> m_data;
@@ -846,13 +884,13 @@ namespace multem
 	};
 
 	/**********************STEM Detector**********************/
-	template<class T, eDevice dev>
+	template<class T>
 	struct Det_Cir
 	{
 		using value_type = T;
 		using size_type = std::size_t;
 
-		static const eDevice device = dev;
+		static const eDevice device = e_Host;
 
 		inline
 		void set_input_data(value_type E_0)
@@ -888,40 +926,26 @@ namespace multem
 			return ang_outer[idx]/lambda;
 		}
 
-		Vector<T, dev> ang_inner; // Inner aperture (rad)
-		Vector<T, dev> ang_outer; // Outer aperture (rad)
+		Vector<T, e_Host> ang_inner; // Inner aperture (rad)
+		Vector<T, e_Host> ang_outer; // Outer aperture (rad)
 		value_type lambda;	 // lambda
 	};
 
 	/********************STEM Intensity***********************/
-	template<class T, eDevice dev>
+	template<class TVector>
 	struct Det_Int
 	{
-		using value_type = T;
+		using value_type = typename TVector::value_type;
 		using size_type = std::size_t;
 
-		static const eDevice device = dev;
+		static const eDevice device = e_Host;
 
 		size_type size() const
 		{
 			return image.size();
 		}
 
-		size_type image_size() const
-		{
-			return image[0].size();
-		}
-
-		void resize(const size_type &new_size, const size_type &new_image_size)
-		{
-			image.resize(new_size);
-			for(auto i = 0; i < new_size; i++)
-			{
-				image[i].resize(new_image_size);
-			}
-		}
-
-		Vector<Vector<T, dev>, e_Host> image;
+		Vector<TVector, e_Host> image;
 	};
 
 	/******************************pair<int, val>************************************/
@@ -1745,41 +1769,18 @@ namespace multem
 	template<class T>
 	struct CBE_FR
 	{
-		CBE_FR(): space(eS_Real), x0(0), y0(0){};
+		CBE_FR(): x0(0), y0(0){};
 
-		eSpace space;
 		T x0;
 		T y0;
-	};
-
-	/******************************PED/HCI******************************/
-	template<class T>
-	struct PE_FR
-	{
-		PE_FR():space(eS_Real), nrot(0), theta(0){};
-
-		inline T phi(const int &irot) const 
-		{ 
-			return c_2Pi*static_cast<T>(irot)/static_cast<T>(nrot);
-		}
-
-		inline T weight(const int &fp_nconf) const 
-		{ 
-			return 1.0/static_cast<T>(fp_nconf*nrot);
-		}
-
-		eSpace space;
-		int nrot; 		// Total number of orientations
-		T theta; 		// Precession angle in rad
 	};
 
 	/***************************Exit Wave FS/RS*************************/
 	template<class T>
 	struct EW_FR
 	{
-		EW_FR():space(eS_Real), convergent_beam(false), x0(0), y0(0){};
+		EW_FR():convergent_beam(false), x0(0), y0(0){};
 
-		eSpace space;
 		bool convergent_beam;
 		T x0;
 		T y0;

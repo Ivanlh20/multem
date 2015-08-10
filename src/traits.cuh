@@ -160,6 +160,9 @@ namespace multem
 	using enable_if_rmatrix_c = typename std::enable_if<is_rmatrix_c<T>::value, U>::type;
 
 	template <class T, class U>
+	using enable_if_not_rmatrix_c = typename std::enable_if<!is_rmatrix_c<T>::value, U>::type;
+
+	template <class T, class U>
 	using enable_if_rmatrix = typename std::enable_if<is_rmatrix_r<T>::value || is_rmatrix_c<T>::value, U>::type;	
 
 	template <int simulation_type, class U>

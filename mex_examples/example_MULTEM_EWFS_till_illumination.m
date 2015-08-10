@@ -25,10 +25,10 @@ input_multislice.zero_defocus_plane = 0;
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;
 
-input_multislice.bwl = 1;
+input_multislice.bwl = 0;
 
 input_multislice.E_0 = 300;                          % Acceleration Voltage (keV)
-input_multislice.theta = 2.0;                       % Till ilumination (degrees)
+input_multislice.theta = 3.0;                       % Till ilumination (degrees)
 input_multislice.phi = 0;                         % Till ilumination (degrees)
 
 %%%%%%%%%%%%%%%%%%%%%%%%% EW Fourier Space %%%%%%%%%%%%%%%%%%%%%%
@@ -49,31 +49,34 @@ na = 8; nb = 8; nc = 20; ncu = 2; rms3d = 0.085;
 input_multislice.nx = 1024; 
 input_multislice.ny = 1024;
 
+input_multislice.thickness_type = 2;             % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
+input_multislice.thickness = 0:c:1000;           % Array of thicknesses
+
 clear MULTEM;
 tic;
-[m2psi_tot, psi_coh] = MULTEM(input_multislice); 
+output_multislice = MULTEM(input_multislice); 
 toc;
 
-m2psi_coh = abs(psi_coh).^2;
-
-c = 1e5;
-m2psi_tot = log(1+c*m2psi_tot/max(m2psi_tot(:)));
-m2psi_coh = log(1+c*m2psi_coh/max(m2psi_coh(:)));
-
-I_min = min([min(m2psi_tot(:)), min(m2psi_coh(:))]);
-I_max = max([max(m2psi_tot(:)), max(m2psi_coh(:))]);
-
 figure(1);
-subplot(1, 2, 1);
-imagesc(m2psi_tot, [I_min I_max]);
+for i=1:length(output_multislice.data)
+    c = 1e6;
+    m2psi_coh = abs(output_multislice.data(i).psi_coh).^2;
+    m2psi_tot = log(1+c*output_multislice.data(i).m2psi_tot/max(output_multislice.data(i).m2psi_tot(:)));
+    m2psi_coh = log(1+c*m2psi_coh/max(m2psi_coh(:)));
 
-title('Total intensity');
-axis image;
-colormap gray;
+    I_min = min([min(m2psi_tot(:)), min(m2psi_coh(:))]);
+    I_max = max([max(m2psi_tot(:)), max(m2psi_coh(:))]);
 
-subplot(1, 2, 2);
-imagesc(m2psi_coh, [I_min I_max]);
+    subplot(1, 2, 1);
+    imagesc(m2psi_tot, [I_min I_max]);
+    title(strcat('Total intensity -  Thickness = ', num2str(i)));
+    axis image;
+    colormap gray;
 
-title('Coherent intensity');
-axis image;
-colormap gray;
+    subplot(1, 2, 2);
+    imagesc(m2psi_coh, [I_min I_max]);
+    title(strcat('Coherent intensity -  Thickness = ', num2str(i)));
+    axis image;
+    colormap gray;
+    pause(0.25);
+end;

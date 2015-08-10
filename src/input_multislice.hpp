@@ -60,7 +60,8 @@ namespace multem
 			int fp_dist; 										// 1: Gaussian (Phonon distribution)
 			int fp_seed; 										// Random seed(frozen phonon)
 			bool fp_single_conf; 								// single configuration: true , false
-			int fp_nconf; 										// true: phonon configuration, false: number of frozen phonon configurations
+			int fp_nconf; 										// true: single phonon configuration, false: number of frozen phonon configurations
+			int fp_iconf_0;										// initial configuration
 
 			eMicroscope_Effect microscope_effect; 				// 1: Partial coherente mode, 2: transmission cross coefficient
 			eSpatial_Temporal_Effect spatial_temporal_effect; 	// 1: Spatial and temporal, 2: Temporal, 3: Spatial
@@ -81,6 +82,7 @@ namespace multem
 			T E_0; 												// Acceleration volatage in KeV
 			T theta; 											// incident tilt (in spherical coordinates) (rad)
 			T phi; 												// incident tilt (in spherical coordinates) (rad)
+			int nrot; 											// Total number of rotations
 
 			Grid<T> grid; 										// gridBT information
 
@@ -96,19 +98,18 @@ namespace multem
 
 			Scanning<T> scanning; 								// Scanning
 
-			Det_Cir<T, e_Host> det_cir; 						// Circular detectors
+			Det_Cir<T> det_cir; 								// Circular detectors
 
 			HRTEM<T> hrtem;
 
 			CBE_FR<T> cbe_fr;
-
-			PE_FR<T> pe_fr;
 
 			EW_FR<T> ew_fr;
 
 			eBeam_Type beam_type;
 			T conv_beam_wave_x;
 			T conv_beam_wave_y;
+			int iscan;
 
 			int islice;
 			int nstream;
@@ -117,10 +118,10 @@ namespace multem
 			Input_Multislice(): precision(eP_double), device(e_Host), cpu_ncores(1), cpu_nthread(4), gpu_device(0), gpu_nstream(8), 
 						simulation_type(eST_EWRS), phonon_model(ePM_Still_Atom), interaction_model(eESIM_Multislice), 
 						potential_slicing(ePS_Planes), potential_type(ePT_Lobato_0_12), fp_dist(1), fp_seed(300183), 
-						fp_nconf(0), fp_single_conf(false), microscope_effect(eME_Partial_Coherent), spatial_temporal_effect(eSTE_Spatial_Temporal), 
+						fp_nconf(0), fp_single_conf(false), fp_iconf_0(1), microscope_effect(eME_Partial_Coherent), spatial_temporal_effect(eSTE_Spatial_Temporal), 
 						zero_defocus_type(eZDT_Last), zero_defocus_plane(0), operation_mode(eOM_Normal), coherent_contribution(false), 
-						slice_storage(false), thickness_type(eTT_Whole_Specimen), dp_Shift(false), E_0(300), theta(0), phi(0), Vrl(c_Vrl), 
-						nR(c_nR), is_crystal(false), input_wave_type(eIWT_Automatic), beam_type(eBT_Plane_Wave), conv_beam_wave_x(0), conv_beam_wave_y(0), 
+						slice_storage(false), thickness_type(eTT_Whole_Specimen), dp_Shift(false), E_0(300), theta(0), phi(0), nrot(1), Vrl(c_Vrl), 
+						nR(c_nR), is_crystal(false), input_wave_type(eIWT_Automatic), beam_type(eBT_Plane_Wave), conv_beam_wave_x(0), conv_beam_wave_y(0), iscan(0), 
 						islice(0), nstream(cpu_nthread){};
 
 			void validate_parameters()
@@ -141,6 +142,8 @@ namespace multem
 				fp_seed = max(0, fp_seed);
 
 				fp_nconf = (!is_frozen_phonon())?1:max(1, fp_nconf);
+
+				fp_iconf_0 = (!is_frozen_phonon() || !fp_single_conf)?1:fp_single_conf;
 
 				islice = max(0, islice);
 
@@ -168,8 +171,11 @@ namespace multem
 				det_cir.set_input_data(E_0);
 
 				theta = set_incident_angle(theta);
-				pe_fr.theta = set_incident_angle(pe_fr.theta);
-
+				nrot = max(1, nrot);
+				if(!is_PED_HCI())
+				{
+					nrot = 1;
+				}
 				//Set beam type
 				if(is_user_define_wave())
 				{
@@ -212,9 +218,10 @@ namespace multem
 
 				if(!is_multislice())
 				{
+					islice = 0;
+					fp_dim.z = false;
 					potential_slicing = ePS_Planes;
 					thickness_type = eTT_Through_Thickness;
-					fp_dim.z = false;
 					slice_storage = slice_storage || !is_whole_specimen();
 				}
 
@@ -234,6 +241,7 @@ namespace multem
 					// for amorphous specimen it has to be modified
 					thickness_type = eTT_Through_Thickness;
 					std::sort(thickness.begin(), thickness.end());
+					fp_dim.z = false;
 					atoms.Sort_by_z();
 					atoms.get_z_layer();			
 					multem::match_vectors(atoms.z_layer.begin(), atoms.z_layer.end(), thickness);
@@ -275,7 +283,7 @@ namespace multem
 
 			bool is_convergent_beam_wave() const
 			{
-				return is_scanning() || is_CBED_CBEI() || (is_EWFS_EWRS() && ew_fr.convergent_beam);
+				return is_scanning() || is_CBED_CBEI() || (is_EWFS_EWRS() && ew_fr.convergent_beam) || (is_EWSFS_EWSRS() && ew_fr.convergent_beam);
 			}
 
 			bool is_plane_wave() const
@@ -290,9 +298,10 @@ namespace multem
 				conv_beam_wave_y = y;
 			}
 
-			void set_stem_beam_position(const int &idx)
+			void set_beam_position(const int &iscan_i)
 			{
-				set_beam_position(scanning.x[idx], scanning.y[idx]);
+				iscan = iscan_i;
+				set_beam_position(scanning.x[iscan], scanning.y[iscan]);
 			}
 
 			T get_Rx_pos_shift(const T &x)
@@ -321,9 +330,14 @@ namespace multem
 				return (isZero(theta))?0:asin(n*lens.lambda*grid.dg_min());
 			}
 
-			T ifp_nconf() const
+			T get_weight() const
 			{
-				return 1.0/fp_nconf;
+				return 1.0/static_cast<T>(fp_nconf*nrot);
+			}
+
+			void set_phi(const int &irot)
+			{
+				phi = (irot==0)?0.0:(c_2Pi*static_cast<T>(irot))/static_cast<T>(nrot);
 			}
 
 			T Vr_factor() const
@@ -356,9 +370,9 @@ namespace multem
 				return phonon_model == ePM_Frozen_Phonon;
 			}
 
-			bool is_frozen_phonon_single_conf () const
+			bool is_frozen_phonon_single_conf() const
 			{
-				return fp_single_conf == true;
+				return is_frozen_phonon() && fp_single_conf;
 			}
 
 			bool is_multislice() const
@@ -547,6 +561,10 @@ namespace multem
 				return is_HRTEM() || is_HCI() || is_EFTEM(); 
 			}
 
+			eSpace get_simulation_space() const
+			{
+				return (is_simulation_type_FS() || is_HRTEM_HCI_EFTEM())?eS_Reciprocal:eS_Real; 
+			}
 			bool is_scanning() const
 			{
 				return is_STEM() || is_ISTEM() || is_EELS();

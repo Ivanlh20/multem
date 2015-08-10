@@ -61,15 +61,26 @@ input_multislice.lens_nbeta = 10; %(mrad, half number of steps)
 input_multislice.ped_nrot = 180;       % number of orientations
 input_multislice.ped_theta = 3.0;      % Precession angle (degrees)
 
+input_multislice.thickness_type = 2;             % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
+input_multislice.thickness = 0:c:1000;           % Array of thicknesses
+
 clear MULTEM;
 tic;
-[m2psi_tot] = MULTEM(input_multislice); 
+output_multislice = MULTEM(input_multislice); 
 toc;
+clear MULTEM;
 
-c = 2e6;
-m2psi_tot = log(1+c*m2psi_tot/max(m2psi_tot(:)));
 figure(1);
-imagesc(m2psi_tot);
-title('Total intensity');
-axis image;
-colormap gray;
+for i=1:length(output_multislice.data)
+    c = 1e6;
+    m2psi_tot = log(1+c*output_multislice.data(i).m2psi_tot/max(output_multislice.data(i).m2psi_tot(:)));
+
+    I_min = min(m2psi_tot(:));
+    I_max = max(m2psi_tot(:));
+
+    imagesc(m2psi_tot, [I_min I_max]);
+    title(strcat('Total intensity -  Thickness = ', num2str(i)));
+    axis image;
+    colormap gray;
+    pause(0.25);
+end;

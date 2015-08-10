@@ -21,12 +21,12 @@
 #include "traits.cuh"
 #include "Stream.cuh"
 #include "FFt2.cuh"
+#include "atom_data.hpp"
 #include "input_multislice.hpp"
 #include "output_multislice.hpp"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
-#include "atom_data.hpp"
 #include "wave_function.cuh"
 
 #include <mex.h>
@@ -34,7 +34,6 @@
 
 using multem::rmatrix_r;
 using multem::rmatrix_c;
-using multem::Vector;
 
 template<class TInput_Multislice>
 void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full=true)
@@ -48,7 +47,9 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.gpu_device = mx_get_scalar_field<int>(mx_input_multislice, "gpu_device"); 
 	input_multislice.gpu_nstream = mx_get_scalar_field<int>(mx_input_multislice, "gpu_nstream"); 
 
-	input_multislice.simulation_type = mx_get_scalar_field<multem::eSimulation_Type>(mx_input_multislice, "simulation_type"); 
+	input_multislice.simulation_type = mx_get_scalar_field<multem::eSimulation_Type>(mx_input_multislice, "simulation_type");
+	input_multislice.simulation_type = (input_multislice.is_EWFS())?multem::eST_EWSFS:multem::eST_EWSRS;
+
 	input_multislice.phonon_model = mx_get_scalar_field<multem::ePhonon_Model>(mx_input_multislice, "phonon_model"); 
 	input_multislice.interaction_model = mx_get_scalar_field<multem::eElec_Spec_Int_Model>(mx_input_multislice, "interaction_model");
 	input_multislice.potential_slicing = mx_get_scalar_field<multem::ePotential_Slicing>(mx_input_multislice, "potential_slicing");
@@ -56,14 +57,14 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 
 	input_multislice.fp_dim.set(mx_get_scalar_field<int>(mx_input_multislice, "fp_dim"));
 	input_multislice.fp_seed = mx_get_scalar_field<int>(mx_input_multislice, "fp_seed");
-	input_multislice.fp_single_conf = mx_get_scalar_field<bool>(mx_input_multislice, "fp_single_conf");
+	input_multislice.fp_single_conf = true;
 	input_multislice.fp_nconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_nconf");
 
 	input_multislice.zero_defocus_type = mx_get_scalar_field<multem::eZero_Defocus_Type>(mx_input_multislice, "zero_defocus_type");
 	input_multislice.zero_defocus_plane = mx_get_scalar_field<value_type>(mx_input_multislice, "zero_defocus_plane");
 	
 	input_multislice.thickness_type = mx_get_scalar_field<multem::eThickness_Type>(mx_input_multislice, "thickness_type");
-	if(input_multislice.thickness_type != multem::eTT_Whole_Specimen && full)
+	if(!input_multislice.is_whole_specimen() && full)
 	{
 		auto thickness = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "thickness");
 		input_multislice.thickness.resize(thickness.size);
@@ -74,8 +75,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	if(input_multislice.is_user_define_wave() && full)
 	{
 		auto psi_0 = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "psi_0");
-		input_multislice.psi_0.resize(psi_0.size);
-		multem::rmatrix_c_to_complex(psi_0, input_multislice.psi_0);
+		multem::assign(psi_0, input_multislice.psi_0);
 		multem::fft2_shift(input_multislice.grid, input_multislice.psi_0);
 	}
 
@@ -117,16 +117,14 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.lens.nbeta = mx_get_scalar_field<int>(mx_input_multislice, "lens_nbeta"); 									// half number sampling points
 	input_multislice.lens.set_input_data(input_multislice.E_0, input_multislice.grid);
 
-	if (input_multislice.is_EWFS())
+	if (input_multislice.is_EWSFS())
 	{
-		input_multislice.ew_fr.space = multem::eS_Reciprocal;
 		input_multislice.ew_fr.convergent_beam = mx_get_scalar_field<bool>(mx_input_multislice, "ewfs_convergent_beam");
 		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewfs_x0");
 		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewfs_y0");
 	}
-	else if (input_multislice.is_EWRS())
+	else if (input_multislice.is_EWSRS())
 	{
-		input_multislice.ew_fr.space = multem::eS_Real;
 		input_multislice.ew_fr.convergent_beam = mx_get_scalar_field<bool>(mx_input_multislice, "ewrs_convergent_beam");
 		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewrs_x0");
 		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewrs_y0");
@@ -135,24 +133,41 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.validate_parameters();
 }
 
-template<class TInput_Multislice, class TOutput_multislice>
-void set_output_data(const TInput_Multislice &input_multislice, mxArray *&mx_plhs0, TOutput_multislice &output_multislice)
+template<class TOutput_multislice>
+void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_multislice, TOutput_multislice &output_multislice)
 {
+	multem::Input_Multislice<double, multem::e_Host> input_multislice;
+	read_input_data(mx_input_multislice, input_multislice);
+	output_multislice.set_input_data(&input_multislice);
+
+	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thickness", "wave"};
+	int number_of_fields_output_multislice = 6;
+	mwSize dims_output_multislice[2] = {1, 1};
+
+	mxArray *mx_field_psi;
 	const char *field_names_psi[] = {"psi"};
 	int number_of_fields_psi = 1;
-	mwSize dims_psi[2] = {1, input_multislice.thickness.size()};
+	mwSize dims_psi[2] = {1, output_multislice.thickness.size()};
 
-	output_multislice.resize(input_multislice.thickness.size());
-	mx_plhs0 = mxCreateStructArray(2, dims_psi, number_of_fields_psi, field_names_psi);
+	mx_output_multislice = mxCreateStructArray(2, dims_output_multislice, number_of_fields_output_multislice, field_names_output_multislice);
 
-	for(auto ithk=0; ithk<input_multislice.thickness.size(); ithk++)
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, "dx", output_multislice.dx);
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, "dy", output_multislice.dy);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x.data());
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y.data());
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thickness", 1, output_multislice.thickness.size(), output_multislice.thickness.data());
+
+	mx_field_psi = mxCreateStructArray(2, dims_psi, number_of_fields_psi, field_names_psi);
+	mxSetField(mx_output_multislice, 0, "wave", mx_field_psi);
+
+	for(auto ithk=0; ithk<output_multislice.thickness.size(); ithk++)
 	{
-		output_multislice[ithk] = mx_create_matrix_field<rmatrix_c>(mx_plhs0, ithk, "psi", input_multislice.grid.ny, input_multislice.grid.nx);
+		output_multislice.psi_coh[ithk] = mx_create_matrix_field<rmatrix_c>(mx_field_psi, ithk, "psi", output_multislice.ny, output_multislice.nx);
 	}
 }
 
-template<class T, multem::eDevice dev>
-void get_wave_function(const mxArray *mxB, Vector<rmatrix_c, multem::e_Host> &wave)
+template<class T, multem::eDevice dev, class TOutput_multislice>
+void get_wave_function(const mxArray *mxB, TOutput_multislice &output_multislice)
 {
 	multem::Input_Multislice<T, dev> input_multislice;
 	read_input_data(mxB, input_multislice);
@@ -163,37 +178,37 @@ void get_wave_function(const mxArray *mxB, Vector<rmatrix_c, multem::e_Host> &wa
 
 	stream.resize(input_multislice.nstream);
 	fft2.create_plan(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
-
 	wave_function.set_input_data(&input_multislice, &stream, &fft2);
-	wave_function.move_atoms(input_multislice.fp_iconf);
-	wave_function.psi_0();
-	wave_function.psi(input_multislice.ew_fr.space, wave);
+
+	wave_function.move_atoms(input_multislice.fp_nconf);
+	wave_function.psi_0(wave_function.psi_z);
+	wave_function.psi(1.0, output_multislice);
+
+	output_multislice.shift();
+	output_multislice.clear_temporal_data();
 
 	fft2.cleanup();
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	multem::Input_Multislice<double, multem::e_Host> input_multislice;
-	read_input_data(prhs[0], input_multislice);
+	multem::Output_Multislice<rmatrix_r, rmatrix_c> output_multislice;
+	set_output_data(prhs[0], plhs[0], output_multislice);
 
-	Vector<rmatrix_c, multem::e_Host> wave;
-	set_output_data(input_multislice, plhs[0], wave);
-
-	if(input_multislice.is_float_Host())
+	if(output_multislice.is_float_Host())
 	{
-		get_wave_function<float, multem::e_Host>(prhs[0], wave);
+		get_wave_function<float, multem::e_Host>(prhs[0], output_multislice);
 	}
-	else if(input_multislice.is_double_Host())
+	else if(output_multislice.is_double_Host())
 	{
-		get_wave_function<double, multem::e_Host>(prhs[0], wave);
+		get_wave_function<double, multem::e_Host>(prhs[0], output_multislice);
 	}
-	if(input_multislice.is_float_Device())
+	if(output_multislice.is_float_Device())
 	{
-		get_wave_function<float, multem::e_Device>(prhs[0], wave);
+		get_wave_function<float, multem::e_Device>(prhs[0], output_multislice);
 	}
-	else if(input_multislice.is_double_Device())
+	else if(output_multislice.is_double_Device())
 	{
-		get_wave_function<double, multem::e_Device>(prhs[0], wave);
+		get_wave_function<double, multem::e_Device>(prhs[0], output_multislice);
 	}
 }

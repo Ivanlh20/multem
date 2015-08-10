@@ -50,8 +50,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	if(input_multislice.is_user_define_wave() && full)
 	{
 		auto psi_0 = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "psi_0");
-		input_multislice.psi_0.resize(psi_0.size);
-		multem::rmatrix_c_to_complex(psi_0, input_multislice.psi_0);
+		multem::assign(psi_0, input_multislice.psi_0);
 		multem::fft2_shift(input_multislice.grid, input_multislice.psi_0);
 	}
 

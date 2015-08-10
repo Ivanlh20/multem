@@ -240,7 +240,7 @@ namespace multem
 
 			if(ix == 0 )
 			{
-				atom_Vp.c0[iR] = V; 		// V0
+				atom_Vp.c0[iR] = V; 		// V_0
 				atom_Vp.c1[iR] = 0.5*dVir; 	// dR2V0
 			}
 		}
@@ -623,7 +623,7 @@ namespace multem
 	template<class TGrid, class TVector_r>
 	enable_if_device_vector<TVector_r, void>
 	eval_cubic_poly(TGrid &grid, Stream<Value_type<TGrid>, e_Device> &stream, 
-	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V0)
+	Vector<Atom_Vp<Value_type<TGrid>>, e_Host> &atom_Vp, TVector_r &V_0)
 	{
 		if(stream.n_act_stream<=0)
 		{
@@ -634,7 +634,7 @@ namespace multem
 		{
 			GridBT gridBT = atom_Vp[istream].get_eval_cubic_poly_gridBT();
 
-			device_detail::eval_cubic_poly<typename TVector_r::value_type><<<gridBT.Blk, gridBT.Thr, 0, stream[istream]>>>(grid, atom_Vp[istream], V0);
+			device_detail::eval_cubic_poly<typename TVector_r::value_type><<<gridBT.Blk, gridBT.Thr, 0, stream[istream]>>>(grid, atom_Vp[istream], V_0);
 		}
 	}
 
@@ -811,17 +811,23 @@ namespace multem
 		fft2.inverse(k_mp1);
 	}
 
-	template<class TVector_c>
-	enable_if_device_vector<TVector_c, void>
-	rmatrix_c_to_complex(rmatrix_c &M_i, TVector_c &M_o)
+	template<class TVector_o>
+	enable_if_device_vector<TVector_o, void>
+	assign(rmatrix_c &M_i, TVector_o &M_o, Vector<Value_type<TVector_o>, e_Host> *M_i_h=nullptr)
 	{
-		Vector<Value_type<TVector_c>, e_Host> M_h(M_i.size);
-
-		for(auto ixy = 0; ixy < M_i.size; ixy++)
+		Vector<Value_type<TVector_o>, e_Host> M_h;
+		if(M_i_h==nullptr)
 		{
-			M_o[ixy] = M_i[ixy];
+			M_i_h = &M_h;
 		}
-		multem::assign(M_h, M_o);
+
+		M_i_h->resize(M_i.size);
+
+		for(auto ixy = 0; ixy < M_i_h->size(); ixy++)
+		{
+			(*M_i_h)[ixy] = M_i[ixy];
+		}
+		multem::assign(*M_i_h, M_o);
 	}
 
 	/***************************************************************************/
@@ -845,9 +851,9 @@ namespace multem
 		}
 
 		M_i_h->assign(M_i.begin(), M_i.end());
-		for(auto i = 0; i < M_i_h->size(); i++)
+		for(auto ixy = 0; ixy < M_i_h->size(); ixy++)
 		{
-			M_o[i] = (*M_i_h)[i];
+			M_o[ixy] = (*M_i_h)[ixy];
 		}
 	}
 
@@ -863,9 +869,9 @@ namespace multem
 
 		M_i_h->assign(M_i.begin(), M_i.end());
 
-		for(auto i = 0; i < M_i_h->size(); i++)
+		for(auto ixy = 0; ixy < M_i_h->size(); ixy++)
 		{
-			M_o[i] += w_i*((*M_i_h)[i]);
+			M_o[ixy] += w_i*((*M_i_h)[ixy]);
 		}
 	}
 

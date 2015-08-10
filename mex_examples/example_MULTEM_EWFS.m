@@ -10,14 +10,14 @@ input_multislice.gpu_device = 0;
 input_multislice.gpu_nstream = 8;
 
 input_multislice.simulation_type = 51;              % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, eST_EELS=61, eST_EFTEM=62	
-input_multislice.phonon_model = 1;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
-input_multislice.interaction_model = 2;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
+input_multislice.phonon_model = 3;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+input_multislice.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
 input_multislice.potential_slicing = 1;             % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
 
 input_multislice.fp_dim = 110; 
 input_multislice.fp_seed = 300183; 
-input_multislice.fp_nconf = 20;
+input_multislice.fp_nconf = 10;
 input_multislice.fp_iconf = 0;
 
 input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
@@ -49,29 +49,34 @@ na = 8; nb = 8; nc = 40; ncu = 2; rms3d = 0.085;
 input_multislice.nx = 1024; 
 input_multislice.ny = 1024;
 
+input_multislice.thickness_type = 2;             % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
+input_multislice.thickness = 0:c:1000;           % Array of thicknesses
+
 clear MULTEM;
 tic;
-[m2psi_tot, psi_coh] = MULTEM(input_multislice); 
+output_multislice = MULTEM(input_multislice); 
 toc;
 
-m2psi_coh = abs(psi_coh).^2;
-
-c = 2e5;
-m2psi_tot = log(1+c*m2psi_tot/max(m2psi_tot(:)));
-m2psi_coh = log(1+c*m2psi_coh/max(m2psi_coh(:)));
-
-I_min = min([min(m2psi_tot(:)), min(m2psi_coh(:))]);
-I_max = max([max(m2psi_tot(:)), max(m2psi_coh(:))]);
-
 figure(1);
-subplot(1, 2, 1);
-imagesc(m2psi_tot, [I_min I_max]);
-title('Total intensity');
-axis image;
-colormap gray;
+for i=1:length(output_multislice.data)
+    c = 1e6;
+    m2psi_coh = abs(output_multislice.data(i).psi_coh).^2;
+    m2psi_tot = log(1+c*output_multislice.data(i).m2psi_tot/max(output_multislice.data(i).m2psi_tot(:)));
+    m2psi_coh = log(1+c*m2psi_coh/max(m2psi_coh(:)));
 
-subplot(1, 2, 2);
-imagesc(m2psi_coh, [I_min I_max]);
-title('Coherent intensity');
-axis image;
-colormap gray;
+    I_min = min([min(m2psi_tot(:)), min(m2psi_coh(:))]);
+    I_max = max([max(m2psi_tot(:)), max(m2psi_coh(:))]);
+
+    subplot(1, 2, 1);
+    imagesc(m2psi_tot, [I_min I_max]);
+    title(strcat('Total intensity -  Thickness = ', num2str(i)));
+    axis image;
+    colormap gray;
+
+    subplot(1, 2, 2);
+    imagesc(m2psi_coh, [I_min I_max]);
+    title(strcat('Coherent intensity -  Thickness = ', num2str(i)));
+    axis image;
+    colormap gray;
+    pause(0.25);
+end;

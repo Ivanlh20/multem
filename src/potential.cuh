@@ -68,7 +68,7 @@ namespace multem
 
 				atom_Vp.resize(stream->size());
 
-				V0.resize(this->input_multislice->grid.nxy());
+				V_0.resize(this->input_multislice->grid.nxy());
 			}
 
 			void projected_potential(const value_type_r &z_0, const value_type_r &z_e, const int &iatom_0, const int &iatom_e, Vector<value_type_r, dev> &V)
@@ -100,7 +100,7 @@ namespace multem
 
 			void projected_potential(const int &islice_0, const int &islice_e)
 			{
-				projected_potential(islice_0, islice_e, V0);
+				projected_potential(islice_0, islice_e, V_0);
 			}
 
 			void projected_potential(const int &islice, Vector<value_type_r, dev> &V)
@@ -110,10 +110,10 @@ namespace multem
 
 			void projected_potential(const int &islice)
 			{
-				projected_potential(islice, islice, V0);
+				projected_potential(islice, islice, V_0);
 			}
 
-			Vector<value_type_r, dev> V0;
+			Vector<value_type_r, dev> V_0;
 		private:
 
 			void set_atom_Vp(const value_type_r &z_0, const value_type_r &z_e, int iatom, Stream<value_type_r, dev> &stream, Vector<Atom_Vp<value_type_r>, e_Host> &atom_Vp)

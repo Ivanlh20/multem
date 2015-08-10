@@ -32,9 +32,9 @@ void set_output_data(TAtom_Types &atom_type, mxArray *&mx_atom_type)
 {
 	const char *field_names[] = {"Z", "m", "A", "rn_e", "rn_c", "ra_e", "ra_c", "R_min", "R_max", "feg", "fxg", "Pr", "Vr", "VR", "R2", "ciVR"};
 	int number_of_fields = 16;
-	mwSize dims[2] = {atom_type.size(), 1};
+	mwSize dims[2] = {1, atom_type.size()};
 
-	mxArray *mxfield_CoefPar;
+	mxArray *mx_field_CoefPar;
 	const char *field_names_CoefPar[] = {"cl", "cnl"};
 	int number_of_fields_CoefPar = 2;
 	mwSize dims_CoefPar[2] = {1, 1};
@@ -58,34 +58,34 @@ void set_output_data(TAtom_Types &atom_type, mxArray *&mx_atom_type)
 		mx_create_set_scalar_field<rmatrix_r>(mx_atom_type, i, "R_max", atom_type[i].R_max);
 
 		/*************************fg***************************/
-		mxfield_CoefPar = mxCreateStructArray(2, dims_CoefPar, number_of_fields_CoefPar, field_names_CoefPar);
-		mxSetField(mx_atom_type, i, "feg", mxfield_CoefPar);
-		mx_create_set_matrix_field<rmatrix_r>(mxfield_CoefPar, "cl", 1, atom_type[i].feg.size(), atom_type[i].feg.cl.data());
-		mx_create_set_matrix_field<rmatrix_r>(mxfield_CoefPar, "cnl", 1, atom_type[i].feg.size(), atom_type[i].feg.cnl.data());
+		mx_field_CoefPar = mxCreateStructArray(2, dims_CoefPar, number_of_fields_CoefPar, field_names_CoefPar);
+		mxSetField(mx_atom_type, i, "feg", mx_field_CoefPar);
+		mx_create_set_matrix_field<rmatrix_r>(mx_field_CoefPar, "cl", 1, atom_type[i].feg.size(), atom_type[i].feg.cl.data());
+		mx_create_set_matrix_field<rmatrix_r>(mx_field_CoefPar, "cnl", 1, atom_type[i].feg.size(), atom_type[i].feg.cnl.data());
 
 		/*************************fx***************************/
-		mxfield_CoefPar = mxCreateStructArray(2, dims_CoefPar, number_of_fields_CoefPar, field_names_CoefPar);
-		mxSetField(mx_atom_type, i, "fxg", mxfield_CoefPar);
-		mx_create_set_matrix_field<rmatrix_r>(mxfield_CoefPar, "cl", 1, atom_type[i].fxg.size(), atom_type[i].fxg.cl.data());
-		mx_create_set_matrix_field<rmatrix_r>(mxfield_CoefPar, "cnl", 1, atom_type[i].fxg.size(), atom_type[i].fxg.cnl.data());
+		mx_field_CoefPar = mxCreateStructArray(2, dims_CoefPar, number_of_fields_CoefPar, field_names_CoefPar);
+		mxSetField(mx_atom_type, i, "fxg", mx_field_CoefPar);
+		mx_create_set_matrix_field<rmatrix_r>(mx_field_CoefPar, "cl", 1, atom_type[i].fxg.size(), atom_type[i].fxg.cl.data());
+		mx_create_set_matrix_field<rmatrix_r>(mx_field_CoefPar, "cnl", 1, atom_type[i].fxg.size(), atom_type[i].fxg.cnl.data());
 
 		/*************************Pr***************************/
-		mxfield_CoefPar = mxCreateStructArray(2, dims_CoefPar, number_of_fields_CoefPar, field_names_CoefPar);
-		mxSetField(mx_atom_type, i, "Pr", mxfield_CoefPar);
-		mx_create_set_matrix_field<rmatrix_r>(mxfield_CoefPar, "cl", 1, atom_type[i].Pr.size(), atom_type[i].Pr.cl.data());
-		mx_create_set_matrix_field<rmatrix_r>(mxfield_CoefPar, "cnl", 1, atom_type[i].Pr.size(), atom_type[i].Pr.cnl.data());
+		mx_field_CoefPar = mxCreateStructArray(2, dims_CoefPar, number_of_fields_CoefPar, field_names_CoefPar);
+		mxSetField(mx_atom_type, i, "Pr", mx_field_CoefPar);
+		mx_create_set_matrix_field<rmatrix_r>(mx_field_CoefPar, "cl", 1, atom_type[i].Pr.size(), atom_type[i].Pr.cl.data());
+		mx_create_set_matrix_field<rmatrix_r>(mx_field_CoefPar, "cnl", 1, atom_type[i].Pr.size(), atom_type[i].Pr.cnl.data());
 
 		/*************************Vr***************************/
-		mxfield_CoefPar = mxCreateStructArray(2, dims_CoefPar, number_of_fields_CoefPar, field_names_CoefPar);
-		mxSetField(mx_atom_type, i, "Vr", mxfield_CoefPar);
-		mx_create_set_matrix_field<rmatrix_r>(mxfield_CoefPar, "cl", 1, atom_type[i].Vr.size(), atom_type[i].Vr.cl.data());
-		mx_create_set_matrix_field<rmatrix_r>(mxfield_CoefPar, "cnl", 1, atom_type[i].Vr.size(), atom_type[i].Vr.cnl.data());
+		mx_field_CoefPar = mxCreateStructArray(2, dims_CoefPar, number_of_fields_CoefPar, field_names_CoefPar);
+		mxSetField(mx_atom_type, i, "Vr", mx_field_CoefPar);
+		mx_create_set_matrix_field<rmatrix_r>(mx_field_CoefPar, "cl", 1, atom_type[i].Vr.size(), atom_type[i].Vr.cl.data());
+		mx_create_set_matrix_field<rmatrix_r>(mx_field_CoefPar, "cnl", 1, atom_type[i].Vr.size(), atom_type[i].Vr.cnl.data());
 
 		/*************************VR***************************/
-		mxfield_CoefPar = mxCreateStructArray(2, dims_CoefPar, number_of_fields_CoefPar, field_names_CoefPar);
-		mxSetField(mx_atom_type, i, "VR", mxfield_CoefPar);
-		mx_create_set_matrix_field<rmatrix_r>(mxfield_CoefPar, "cl", 1, atom_type[i].VR.size(), atom_type[i].VR.cl.data());
-		mx_create_set_matrix_field<rmatrix_r>(mxfield_CoefPar, "cnl", 1, atom_type[i].VR.size(), atom_type[i].VR.cnl.data());
+		mx_field_CoefPar = mxCreateStructArray(2, dims_CoefPar, number_of_fields_CoefPar, field_names_CoefPar);
+		mxSetField(mx_atom_type, i, "VR", mx_field_CoefPar);
+		mx_create_set_matrix_field<rmatrix_r>(mx_field_CoefPar, "cl", 1, atom_type[i].VR.size(), atom_type[i].VR.cl.data());
+		mx_create_set_matrix_field<rmatrix_r>(mx_field_CoefPar, "cnl", 1, atom_type[i].VR.size(), atom_type[i].VR.cnl.data());
 
 		/*************************ciVR***************************/
 		mx_create_set_matrix_field<rmatrix_r>(mx_atom_type, i, "R2", 1, atom_type[i].R2.size(), atom_type[i].R2.data());

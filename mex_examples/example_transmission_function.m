@@ -25,7 +25,7 @@ input_multislice.E_0 = 300;
 input_multislice.theta = 0.0; 
 input_multislice.phi = 0.0;
 
-na = 2; nb = 2; nc = 5; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
@@ -36,7 +36,7 @@ na = 2; nb = 2; nc = 5; ncu = 2; rms3d = 0.085;
 % input_multislice.ly = 8.0; 
 % input_multislice.dz = 0.5;
 
-input_multislice.nx = 512; 
+input_multislice.nx = 1024; 
 input_multislice.ny = 1024;
 
 clear get_specimen_slicing;
@@ -46,34 +46,34 @@ clear get_specimen_slicing;
 for islice = 1:nslice
     input_multislice.islice = islice;
     
-    input_multislice.device = 1;                        % eD_CPU = 1, eD_GPU = 2
-    input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
-    tic;
-    clear get_transmission_function;
-    Trans = get_transmission_function(input_multislice);
-    toc;
-    
     input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
     input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
     tic;
     clear get_transmission_function;
-    Trans0 = get_transmission_function(input_multislice);
+    ouput_multislice_1 = get_transmission_function(input_multislice);
     toc;
-    sum(abs(Trans(:)-Trans0(:))/(input_multislice.nx*input_multislice.ny))
+    
+    input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+    input_multislice.precision = 2;                     % eP_Float = 1, eP_double = 2
+    tic;
+    clear get_transmission_function;
+    ouput_multislice_2 = get_transmission_function(input_multislice);
+    toc;
+    sum(abs(ouput_multislice_1.trans(:)-ouput_multislice_2.trans(:))/(input_multislice.nx*input_multislice.ny))
     
     figure(1);
     subplot(1, 3, 1);    
-    imagesc(real(Trans));
+    imagesc(real(ouput_multislice_1.trans));
     colormap gray;
     axis image;
     subplot(1, 3, 2);    
-    imagesc(imag(Trans));
+    imagesc(imag(ouput_multislice_1.trans));
     colormap gray;
     axis image;   
     subplot(1, 3, 3);    
-    imagesc(abs(Trans));
+    imagesc(abs(ouput_multislice_1.trans));
     colormap gray;
     axis image;   
-    num2str([islice, min(abs(Trans(:))), max(abs(Trans(:))), sum(abs(Trans(:)))/(input_multislice.nx*input_multislice.ny)], 10)
+    num2str([islice, min(abs(ouput_multislice_1.trans(:))), max(abs(ouput_multislice_1.trans(:))), sum(abs(ouput_multislice_1.trans(:)))/(input_multislice.nx*input_multislice.ny)], 10)
     pause(0.10);
 end;

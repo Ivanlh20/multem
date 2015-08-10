@@ -25,7 +25,7 @@ input_multislice.zero_defocus_plane = 0;
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
 input_multislice.psi_0 = 0;
 
-input_multislice.bwl = 1;
+input_multislice.bwl = 0;
 
 input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
 input_multislice.theta = 0.0;                       % Till ilumination (degrees)
@@ -71,19 +71,23 @@ input_multislice.det_cir(2).ang_outer = 160;
 input_multislice.det_cir(3).ang_inner = 80; 
 input_multislice.det_cir(3).ang_outer = 100;
 
+input_multislice.thickness_type = 2;             % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
+input_multislice.thickness = 0:c:1000;           % Array of thicknesses
+
 clear MULTEM;
 tic;
-[det_int] = MULTEM(input_multislice); 
+output_multislice = MULTEM(input_multislice); 
 toc;
+clear MULTEM;
 
 figure(1);
-for i=1:3
-    I_min = min(det_int(i).image(:));
-    I_max = max(det_int(i).image(:));
-
-    subplot(1, 3, i);
-    imagesc(det_int(i).image, [I_min I_max]);
-    title('Total intensity');
-    axis image;
-    colormap gray;
+for i=1:length(output_multislice.data)
+    for j=1:length(input_multislice.det_cir)
+        subplot(1, length(input_multislice.det_cir), j);
+        imagesc(output_multislice.data(i).image_tot(j).image);
+        title(strcat('Thickness = ', num2str(i), ', detector = ', num2str(j)));
+        axis image;
+        colormap gray;
+        pause(0.25);
+    end;
 end;

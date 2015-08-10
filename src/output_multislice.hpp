@@ -27,6 +27,9 @@
 #include "traits.cuh"
 #include "atom_data.hpp"
 #include "input_multislice.hpp"
+#include "host_functions.hpp"
+#include "device_functions.cuh"
+#include "host_device_functions.cuh"
 
 namespace multem
 {
@@ -35,113 +38,283 @@ namespace multem
 	{
 		public:
 			using value_type_r = Value_type<TVector_r>;
+			static const bool is_vector = is_Vector<TVector_r>::value;
 
 			Output_Multislice(): Input_Multislice<value_type_r, e_Host>(), output_type(0), nx(0), ny(0), dx(0), dy(0){}
 
-			//template<class TInput_Multislice>
-			//enable_if_host_vector<TVector_r, void>
-			//set_input_data(TInput_Multislice *input_multislice_i)
-			//{ 
-			//	set_input_multislice(*input_multislice_i);
-
-			//	switch(output_type)
-			//	{
-			//		case 1:
-			//		{
-			//			m2psi.resize(this->thickness.size());
-			//			psi.resize(this->thickness.size());
-			//		}
-			//		case 2:
-			//		{
-			//			m2psi.resize(this->thickness.size());
-			//		}
-			//		case 3:
-			//		{
-			//			probe.resize(this->thickness.size());
-			//		}
-			//		case 4:
-			//		{
-			//			V.resize(this->thickness.size());
-			//		}
-			//		case 5:
-			//		{
-			//			trans.resize(this->thickness.size());
-			//		}
-			//		case 6:
-			//		{
-			//			psi.resize(this->thickness.size());					
-			//		}
-			//		break;
-			//	}
-
-			//	for(auto i=0; i < m2psi.size(); i++)
-			//	{
-			//		switch(output_type)
-			//		{
-			//			case 1:
-			//			{
-			//				m2psi[i].resize(nxy());
-			//				psi[i].resize(nxy());
-			//			}
-			//			case 2:
-			//			{
-			//				m2psi[i].resize(nxy());
-			//			}
-			//			case 3:
-			//			{
-			//				probe[i].resize(nxy());
-			//			}
-			//			case 4:
-			//			{
-			//				V[i].resize(nxy());
-			//			}
-			//			case 5:
-			//			{
-			//				trans[i].resize(nxy());
-			//			}
-			//			case 6:
-			//			{
-			//				psi[i].resize(nxy());							
-			//			}
-			//			break;
-			//		}
-			//	}
-			//}
-
-			//enable_if_rmatrix<TVector_r, void>
 			template<class TInput_Multislice>
 			void set_input_data(TInput_Multislice *input_multislice_i)
 			{ 
 				set_input_multislice(*input_multislice_i);
 
+				// 1:(image_tot, image_coh); 2:(image_tot); 3:(m2psi_tot, m2psi_coh); 4:(m2psi_tot); 5:(m2psi_tot, psi_coh); 6:(psi_coh); 7:(probe); 8:(V); 9:(trans)
 				switch(output_type)
 				{
 					case 1:
 					{
-						m2psi.resize(this->thickness.size());
-						psi.resize(this->thickness.size());
+						image_tot.resize(this->thickness.size());
+						image_coh.resize(this->thickness.size());
+						int ndet = (this->is_EELS())?1:this->det_cir.size();
+						for(auto ithk=0; ithk < this->thickness.size(); ithk++)
+						{
+							image_tot[ithk].image.resize(ndet);
+							image_coh[ithk].image.resize(ndet);
+						}
+						psi_coh.resize(this->thickness.size());
 					}
+					break;
 					case 2:
 					{
-						m2psi.resize(this->thickness.size());
+						image_tot.resize(this->thickness.size());
+						int ndet = (this->is_EELS())?1:this->det_cir.size();
+						for(auto ithk=0; ithk < this->thickness.size(); ithk++)
+						{
+							image_tot[ithk].image.resize(ndet);
+						}
 					}
+					break;
 					case 3:
+					{
+						m2psi_tot.resize(this->thickness.size());
+						m2psi_coh.resize(this->thickness.size());
+						psi_coh.resize(this->thickness.size());
+					}
+					break;
+					case 4:
+					{
+						m2psi_tot.resize(this->thickness.size());
+					}
+					break;
+					case 5:
+					{
+						m2psi_tot.resize(this->thickness.size());
+						psi_coh.resize(this->thickness.size());										
+					}
+					break;
+					case 6:
+					{
+						psi_coh.resize(this->thickness.size());					
+					}
+					break;
+					case 7:
 					{
 						probe.resize(this->thickness.size());
 					}
-					case 4:
+					break;
+					case 8:
 					{
 						V.resize(this->thickness.size());
 					}
-					case 5:
+					break;
+					case 9:
 					{
 						trans.resize(this->thickness.size());
 					}
-					case 6:
-					{
-						psi.resize(this->thickness.size());					
-					}
 					break;
+				}
+
+				if(is_vector)
+				{
+					for(auto ithk=0; ithk < this->thickness.size(); ithk++)
+					{
+						switch(output_type)
+						{
+							case 1:
+							{
+								int ndet = (this->is_EELS())?1:this->det_cir.size();
+								for(auto idet=0; idet < ndet; idet++)
+								{
+									image_tot[ithk].image[idet].resize(nxy());
+									image_coh[ithk].image[idet].resize(nxy());
+								}
+								psi_coh[ithk].resize(nxy());
+							}
+							break;
+							case 2:
+							{
+								int ndet = (this->is_EELS())?1:this->det_cir.size();
+								for(auto idet=0; idet < ndet; idet++)
+								{
+									image_tot[ithk].image[idet].resize(nxy());
+								}
+							}
+							break;
+							case 3:
+							{
+								m2psi_tot[ithk].resize(nxy());
+								m2psi_coh[ithk].resize(nxy());
+								psi_coh[ithk].resize(nxy());
+							}
+							break;
+							case 4:
+							{
+								m2psi_tot[ithk].resize(nxy());
+							}
+							break;
+							case 5:
+							{
+								m2psi_tot[ithk].resize(nxy());
+								psi_coh[ithk].resize(nxy());							
+							}
+							break;
+							case 6:
+							{
+								psi_coh[ithk].resize(nxy());							
+							}
+							break;
+							case 7:
+							{
+								probe[ithk].resize(nxy());
+							}
+							break;
+							case 8:
+							{
+								V[ithk].resize(nxy());
+							}
+							break;
+							case 9:
+							{
+								trans[ithk].resize(nxy());
+							}
+							break;
+						}
+					}
+				}
+				else
+				{
+					if((output_type==1)||(output_type==3))
+					{
+						for(auto ithk=0; ithk < this->thickness.size(); ithk++)
+						{
+							psi_coh[ithk].resize(nxy());
+						}
+					}
+				}
+			}
+
+			void init()
+			{ 
+				for(auto ithk=0; ithk < this->thickness.size(); ithk++)
+				{
+					switch(output_type)
+					{
+						case 1:
+						{
+							for(auto idet=0; idet < image_tot[ithk].image.size(); idet++)
+							{
+								multem::fill(image_tot[ithk].image[idet], 0);
+								multem::fill(image_coh[ithk].image[idet], 0);
+							}
+							multem::fill(psi_coh[ithk], 0);
+						}
+						break;
+						case 2:
+						{
+							for(auto idet=0; idet < image_tot[ithk].image.size(); idet++)
+							{
+								multem::fill(image_tot[ithk].image[idet], 0);
+							}
+						}
+						break;
+						case 3:
+						{
+							multem::fill(m2psi_tot[ithk], 0);
+							multem::fill(psi_coh[ithk], 0);
+						}
+						break;
+						case 4:
+						{
+							multem::fill(m2psi_tot[ithk], 0);
+						}
+						break;
+						case 5:
+						{
+							multem::fill(m2psi_tot[ithk], 0);
+							multem::fill(psi_coh[ithk], 0);
+						}
+						break;
+						case 6:
+						{
+							multem::fill(psi_coh[ithk], 0);							
+						}
+						break;
+						case 7:
+						{
+							multem::fill(probe[ithk], 0);
+						}
+						break;
+						case 8:
+						{
+							multem::fill(V[ithk], 0);
+						}
+						break;
+						case 9:
+						{
+							multem::fill(trans[ithk], 0);
+						}
+						break;
+					}
+				}
+			}
+
+			void shift()
+			{ 
+				for(auto ithk=0; ithk < this->thickness.size(); ithk++)
+				{
+					switch(output_type)
+					{
+						case 3:
+						{
+							multem::fft2_shift(this->grid, m2psi_tot[ithk]);
+							multem::fft2_shift(this->grid, m2psi_coh[ithk]);
+						}
+						break;
+						case 4:
+						{
+							multem::fft2_shift(this->grid, m2psi_tot[ithk]);
+						}
+						break;
+						case 5:
+						{
+							multem::fft2_shift(this->grid, m2psi_tot[ithk]);
+							multem::fft2_shift(this->grid, psi_coh[ithk]);
+						}
+						break;
+						case 6:
+						{
+							multem::fft2_shift(this->grid, psi_coh[ithk]);							
+						}
+						break;
+						case 7:
+						{
+							multem::fft2_shift(this->grid, probe[ithk]);
+						}
+						break;
+						case 8:
+						{
+							multem::fft2_shift(this->grid, V[ithk]);
+						}
+						break;
+						case 9:
+						{
+							multem::fft2_shift(this->grid, trans[ithk]);
+						}
+						break;
+					}
+				}
+			}
+
+			void clear_temporal_data()
+			{
+				if((output_type==1)||(output_type==3))
+				{
+					for(auto ithk=0; ithk < this->thickness.size(); ithk++)
+					{
+						psi_coh[ithk].clear();
+					}
+
+					psi_coh.clear();
+					psi_coh.shrink_to_fit();
 				}
 			}
 
@@ -149,8 +322,8 @@ namespace multem
 
 			bool is_grid_FS() const
 			{
-				return is_CBED() || is_ED() || is_PED() || is_EWFS() ||
-					is_ProbeFS() || is_PPFS() || is_TFFS() || is_EWSFS(); 
+				return this->is_CBED() || this->is_ED() || this->is_PED() || this->is_EWFS() ||
+					this->is_ProbeFS() || this->is_PPFS() || this->is_TFFS() || this->is_EWSFS(); 
 			}
 
 			bool is_grid_RS() const
@@ -158,7 +331,8 @@ namespace multem
 				return !is_grid_FS();
 			}
 
-			int output_type;	// 1:(m2psi, psi); 2:(m2psi); 3:(probe); 4:(V); 5:(trans); 6:(psi)
+			// 1:(image_tot, image_coh); 2:(image_tot); 3:(m2psi_tot, m2psi_coh); 4:(m2psi_tot); 5:(m2psi_tot, psi_coh); 6:(psi_coh); 7:(probe); 8:(V); 9:(trans)
+			int output_type;	
 			int nx;
 			int ny;
 			value_type_r dx;
@@ -167,8 +341,11 @@ namespace multem
 			Vector<value_type_r, e_Host> x;
 			Vector<value_type_r, e_Host> y;
 
-			Vector<TVector_r, e_Host> m2psi;
-			Vector<TVector_c, e_Host> psi;
+			Vector<Det_Int<TVector_r>, e_Host> image_tot;
+			Vector<Det_Int<TVector_r>, e_Host> image_coh;
+			Vector<TVector_r, e_Host> m2psi_tot;
+			Vector<TVector_r, e_Host> m2psi_coh;
+			Vector<TVector_c, e_Host> psi_coh;
 			Vector<TVector_r, e_Host> V;
 			Vector<TVector_c, e_Host> trans;
 			Vector<TVector_c, e_Host> probe;
@@ -217,7 +394,6 @@ namespace multem
 				this->det_cir = input_multislice.det_cir;
 				this->hrtem = input_multislice.hrtem;
 				this->cbe_fr = input_multislice.cbe_fr;
-				this->pe_fr = input_multislice.pe_fr;
 				this->ew_fr = input_multislice.ew_fr;
 				this->beam_type = input_multislice.beam_type;
 				this->conv_beam_wave_x = input_multislice.conv_beam_wave_x;
@@ -226,11 +402,20 @@ namespace multem
 				this->nstream = input_multislice.nstream;
 				this->dp_Shift = input_multislice.dp_Shift;
 
-				m2psi.clear();
-				m2psi.shrink_to_fit();
+				image_tot.clear();
+				image_tot.shrink_to_fit();
 
-				psi.clear();
-				psi.shrink_to_fit();
+				image_coh.clear();
+				image_coh.shrink_to_fit();
+
+				m2psi_tot.clear();
+				m2psi_tot.shrink_to_fit();
+
+				m2psi_coh.clear();
+				m2psi_coh.shrink_to_fit();
+
+				psi_coh.clear();
+				psi_coh.shrink_to_fit();
 
 				V.clear();
 				V.shrink_to_fit();
@@ -241,7 +426,7 @@ namespace multem
 				probe.clear();
 				probe.shrink_to_fit();
 				
-				if(this->is_scanning())
+				if(this->is_STEM() || this->is_EELS())
 				{
 					nx = this->scanning.nx;
 					ny = this->scanning.ny;
@@ -280,27 +465,35 @@ namespace multem
 					}
 				}
 
-				// 1:(m2psi, psi); 2:(m2psi); 3:(probe); 4:(V); 5:(trans); 6:(psi)
-				if(this->is_STEM_ISTEM()||this->is_CBED_CBEI() || this->is_ED_HRTEM()||
-					this->is_PED_HCI() || this->is_EWFS_EWRS() || this->is_EELS_EFTEM())
+				// 1:(image_tot, image_coh); 2:(image_tot); 3:(m2psi_tot, m2psi_coh); 4:(m2psi_tot); 5:(m2psi_tot, psi_coh); 6:(psi_coh); 7:(probe); 8:(V); 9:(trans)
+				if(this->is_STEM() || this->is_EELS())
 				{
 					output_type = (this->coherent_contribution)?1:2;
 				}
-				else if(this->is_ProbeFS_ProbeRS())
+				else if(this->is_ISTEM() || this->is_CBED_CBEI() ||this->is_PED_HCI() || 
+					this->is_ED_HRTEM() || this->is_EFTEM())
 				{
-					output_type = 3;
+					output_type = (this->coherent_contribution)?3:4;
 				}
-				else if(this->is_PPFS_PPRS())
-				{
-					output_type = 4;
-				}
-				else if(this->is_TFFS_TFRS())
+				else if(this->is_EWFS_EWRS())
 				{
 					output_type = 5;
 				}
 				else if(this->is_EWSFS_EWSRS())
 				{
 					output_type = 6;
+				}
+				else if(this->is_ProbeFS_ProbeRS())
+				{
+					output_type = 7;
+				}
+				else if(this->is_PPFS_PPRS())
+				{
+					output_type = 8;
+				}
+				else if(this->is_TFFS_TFRS())
+				{
+					output_type = 9;
 				}
 			}
 

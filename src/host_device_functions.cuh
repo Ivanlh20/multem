@@ -1340,7 +1340,7 @@ namespace multem
 		const TVector_c &exp_x_i, const TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
 		{
 			int ixy = grid.ind_col(ix, iy);
-			psi_o[ixy] = psi_i[ixy]*exp_y_i[ix]*exp_y_i[iy];
+			psi_o[ixy] = psi_i[ixy]*exp_x_i[ix]*exp_y_i[iy];
 		}
 
 		template<class TGrid, class TVector_c>
@@ -2228,21 +2228,31 @@ namespace multem
 	} //namespace functor
 
 	template<class TVector>
-	void scale(TVector &M_io, const Value_type<TVector> &w_i)
+	void scale(TVector &M_io, Value_type<TVector> w_i)
 	{
 		using value_type = Value_type<TVector>;
 		thrust::transform(M_io.begin(), M_io.end(), M_io.begin(), functor::scale<value_type>(w_i));
 	}
 
 	template<class TVector>
-	void fill(TVector &M_io, const Value_type<TVector> &value_i)
+	enable_if_not_rmatrix_c<TVector, void>
+	fill(TVector &M_io, Value_type<TVector> value_i)
 	{
 		thrust::fill(M_io.begin(), M_io.end(), value_i);
 	}
 
+	template<class TVector>
+	enable_if_rmatrix_c<TVector, void>
+	fill(TVector &M_io, complex<double> value_i)
+	{
+		for(auto ixy = 0; ixy < M_io.size; ixy++)
+		{
+			M_io[ixy] = value_i;
+		}
+	}
 
 	template<class TVector_1, class TVector_2>
-	void assign(TVector_1 &M_i, TVector_2 &M_o)
+	void assign(TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_Host> *M_i_h=nullptr)
 	{
 		M_o.assign(M_i.begin(), M_i.end());
 	}
@@ -2252,6 +2262,14 @@ namespace multem
 	{
 		using value_type = Value_type<TVector_2>;
 		thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), functor::square<value_type>());
+	}
+
+	void assign_square(rmatrix_c &M_i, rmatrix_r &M_o)
+	{
+		for(auto i = 0; i < M_i.size; i++)
+		{
+			M_o[i] = M_i.real[i]*M_i.real[i] + M_i.imag[i]*M_i.imag[i];
+		}
 	}
 
 	template<class TVector>

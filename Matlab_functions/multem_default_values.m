@@ -7,7 +7,9 @@ input_multislice.cpu_nthread = 4;                   % Number of threads
 input_multislice.gpu_device = 0;                    % GPU device
 input_multislice.gpu_nstream = 8;                   % Number of streams
 
-input_multislice.simulation_type = 52;              % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, eST_EELS=61, eST_EFTEM=62	
+% eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, 
+% eST_EELS=61, eST_EFTEM=62, eST_ProbeFS=71, eST_ProbeRS=72, eST_PPFS=81, eST_PPRS=82,	eST_TFFS=91, eST_TFRS=92
+input_multislice.simulation_type = 52;             
 input_multislice.phonon_model = 1;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multislice.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
 input_multislice.potential_slicing = 1;             % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
@@ -46,20 +48,20 @@ input_multislice.ly = 10;
 input_multislice.dz = 0.25;
 
 %%%%%%%%%%%%%%%%%%%%%%%% Microscope effects %%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.lens_m = 0;       %mm
-input_multislice.lens_f = 0.0;     %Angs
-input_multislice.lens_Cs3 = 0.00;	%mm
-input_multislice.lens_Cs5 = 0.00;	%mm
+input_multislice.lens_m = 0;            %mm
+input_multislice.lens_f = 15.836;       %Angs
+input_multislice.lens_Cs3 = 1e-03;      %mm
+input_multislice.lens_Cs5 = 0.00;       %mm
 input_multislice.lens_mfa2 = 0.0; 
-input_multislice.lens_afa2 = 0.0; %(Angs, degrees)
+input_multislice.lens_afa2 = 0.0;       %(Angs, degrees)
 input_multislice.lens_mfa3 = 0.0; 
-input_multislice.lens_afa3 = 0.0; %(Angs, degrees)
+input_multislice.lens_afa3 = 0.0;       %(Angs, degrees)
 input_multislice.lens_aobjl = 0.0; 
-input_multislice.lens_aobju = 100000.0; %(mrad, mrad)
+input_multislice.lens_aobju = 24.0;     %(mrad, mrad)
 input_multislice.lens_sf = 32; 
-input_multislice.lens_nsf = 10; % (Angs, number of steps)
+input_multislice.lens_nsf = 10;         % (Angs, number of steps)
 input_multislice.lens_beta = 0.2; 
-input_multislice.lens_nbeta = 10; %(mrad, half number of steps)
+input_multislice.lens_nbeta = 10;       %(mrad, half number of steps)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.scanning_type = 1; % eST_Line = 1, eST_Area = 2
@@ -102,7 +104,7 @@ input_multislice.ewrs_y0 = 0.0;                % y position
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EFTEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.eftem_E_loss = 0;              % Energy loss (eV)
 input_multislice.eftem_m_selection = 3;         % selection rule
-input_multislice.eftem_collection_angle = 100;   % Collection half angle (mrad)
+input_multislice.eftem_collection_angle = 100;  % Collection half angle (mrad)
 input_multislice.eftem_channelling_type = 2;    % eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_POA = 3, eCT_Double_Channelling_SOMS = 4
 input_multislice.eftem_Z = 79;                  % atomic type
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EELS %%%%%%%%%%%%%%%%%%%%%%%%%%%%

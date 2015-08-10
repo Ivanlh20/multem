@@ -17,7 +17,7 @@ input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Pen
 
 input_multislice.fp_dim = 110; 
 input_multislice.fp_seed = 300183; 
-input_multislice.fp_nconf = 50;
+input_multislice.fp_nconf = 25;
 input_multislice.fp_iconf = 0;
 
 input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
@@ -40,7 +40,7 @@ input_multislice.ewrs_convergent_beam = 0;     % 1: true, 0:false
 input_multislice.ewrs_x0 = 0.0;                % x position 
 input_multislice.ewrs_y0 = 0.0;                % y position
 
-na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
@@ -49,27 +49,26 @@ na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
 input_multislice.nx = 1024; 
 input_multislice.ny = 1024;
 
+input_multislice.thickness_type = 2;             % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
+input_multislice.thickness = 0:c:1000;           % Array of thicknesses
+
 clear MULTEM;
 tic;
-[m2psi_tot, psi_coh] = MULTEM(input_multislice); 
+output_multislice = MULTEM(input_multislice); 
 toc;
 
-m2psi_coh = abs(psi_coh).^2;
-
-I_min = min([min(m2psi_tot(:)), min(m2psi_coh(:))]);
-I_max = max([max(m2psi_tot(:)), max(m2psi_coh(:))]);
-
 figure(1);
-subplot(1, 2, 1);
-imagesc(m2psi_tot, [I_min I_max]);
+for i=1:length(output_multislice.data)
+    subplot(1, 2, 1);
+    imagesc(output_multislice.data(i).m2psi_tot);
+    title(strcat('Total intensity -  Thickness = ', num2str(i)));
+    axis image;
+    colormap gray;
 
-title('Total intensity');
-axis image;
-colormap gray;
-
-subplot(1, 2, 2);
-imagesc(m2psi_coh, [I_min I_max]);
-
-title('Coherent intensity');
-axis image;
-colormap gray;
+    subplot(1, 2, 2);
+    imagesc(abs(output_multislice.data(i).psi_coh).^2);
+    title(strcat('Coherent intensity -  Thickness = ', num2str(i)));
+    axis image;
+    colormap gray;
+    pause(0.25);
+end;
