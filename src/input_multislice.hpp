@@ -161,10 +161,11 @@ namespace multem
 
 				dp_Shift = (is_PED())?true:false;
 
-				if(is_scanning())
+				if(!is_scanning())
 				{
-					scanning.set_grid();
+					scanning.set_default();
 				}
+				scanning.set_grid();
 
 				lens.set_input_data(E_0, grid);
 
@@ -353,6 +354,13 @@ namespace multem
 			T gy_0() const
 			{
 				return sin(theta)*sin(phi)/lens.lambda;
+			}
+
+			void set_eels_fr_atom(const int &iatom, const Atom_Data<T> &atoms)
+			{
+				eels_fr.x = get_Rx_pos_shift(atoms.x[iatom]);
+				eels_fr.y = get_Ry_pos_shift(atoms.y[iatom]);
+				eels_fr.occ = atoms.occ[iatom];
 			}
 
 			bool is_Still_Atom() const

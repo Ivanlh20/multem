@@ -1,3 +1,3 @@
 clc; clear all;
   
-MEX('debug', 'MULTEM.cu', '../src');
+MEX('release', 'MULTEM.cu', '../src');

@@ -219,9 +219,13 @@ void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_mul
 
 	if(output_multislice.is_STEM() || output_multislice.is_EELS())
 	{
+		int ndet = (output_multislice.is_EELS())?1:output_multislice.det_cir.size();
+
 		mxArray *mx_field_data;
-		const char *field_names_data[] = {"image_tot", "image_coh"};
-		int number_of_fields_data = 2;
+		const char *field_names_data_full[] = {"image_tot", "imagecoh"};
+		const char *field_names_data_partial[] = {"image_tot"};
+		const char **field_names_data = (output_multislice.coherent_contribution)?field_names_data_full:field_names_data_partial;
+		int number_of_fields_data = (output_multislice.coherent_contribution)?2:1;
 		mwSize dims_data[2] = {1, output_multislice.thickness.size()};
 
 		mx_field_data = mxCreateStructArray(2, dims_data, number_of_fields_data, field_names_data);
@@ -231,7 +235,7 @@ void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_mul
 		mxArray *mx_field_detector_coh;
 		const char *field_names_detector[] = {"image"};
 		int number_of_fields_detector = 1;
-		mwSize dims_detector[2] = {1, output_multislice.det_cir.size()};
+		mwSize dims_detector[2] = {1, ndet};
 
 		for(auto ithk=0; ithk<output_multislice.thickness.size(); ithk++)
 		{
@@ -243,7 +247,7 @@ void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_mul
 				mxSetField(mx_field_data, ithk, "image_coh", mx_field_detector_coh);
 			}
 
-			for(auto iDet=0; iDet<output_multislice.det_cir.size(); iDet++)
+			for(auto iDet=0; iDet<ndet; iDet++)
 			{
 				output_multislice.image_tot[ithk].image[iDet] = mx_create_matrix_field<rmatrix_r>(mx_field_detector_tot, iDet, "image", output_multislice.ny, output_multislice.nx);
 				if(output_multislice.coherent_contribution)
@@ -275,9 +279,8 @@ void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_mul
 		const char *field_names_data_full[] = {"m2psi_tot", "m2psi_coh"};
 		const char *field_names_data_partial[] = {"m2psi_tot"};
 		const char **field_names_data = (output_multislice.coherent_contribution)?field_names_data_full:field_names_data_partial;
-		int number_of_fields_data;
+		int number_of_fields_data = (output_multislice.coherent_contribution)?2:1;
 		mwSize dims_data[2] = {1, output_multislice.thickness.size()};
-		number_of_fields_data = (output_multislice.coherent_contribution)?2:1;
 
 		mx_field_data = mxCreateStructArray(2, dims_data, number_of_fields_data, field_names_data);
 		mxSetField(mx_output_multislice, 0, "data", mx_field_data);

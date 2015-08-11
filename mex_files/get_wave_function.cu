@@ -182,7 +182,7 @@ void get_wave_function(const mxArray *mxB, TOutput_multislice &output_multislice
 
 	wave_function.move_atoms(input_multislice.fp_nconf);
 	wave_function.psi_0(wave_function.psi_z);
-	wave_function.psi(1.0, output_multislice);
+	wave_function.psi(1.0, wave_function.psi_z, output_multislice);
 
 	output_multislice.shift();
 	output_multislice.clear_temporal_data();

@@ -85,9 +85,9 @@ for i=1:length(output_multislice.data)
     for j=1:length(input_multislice.det_cir)
         subplot(1, length(input_multislice.det_cir), j);
         imagesc(output_multislice.data(i).image_tot(j).image);
-        title(strcat('Thickness = ', num2str(i), ', detector = ', num2str(j)));
+        title(strcat('Thk = ', num2str(i), ', det = ', num2str(j)));
         axis image;
         colormap gray;
-        pause(0.25);
     end;
+    pause(0.25);
 end;

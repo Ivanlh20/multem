@@ -73,14 +73,29 @@ input_multislice.eels_m_selection = 3;        % selection rule
 input_multislice.eels_collection_angle = 20; % Collection half angle (mrad)
 input_multislice.eels_Z = 38;                  % atomic type
 
-cc = [1 0 1; 1 0 0; 0 0 1; 0 0 0];
-for i=1:4
-    input_multislice.eels_channelling_type = i;
-    clear MULTEM;
-    tic;
-    [eels] = MULTEM(input_multislice); 
-    toc;
-    figure(1);
-    hold on;
-    plot(eels, 'color', cc(i, :));
+clear MULTEM;
+tic;
+output_multislice = MULTEM(input_multislice); 
+toc;
+clear MULTEM;
+
+figure(1);
+for i=1:length(output_multislice.data)
+    imagesc(output_multislice.data(i).image_tot(1).image);
+    title(strcat('Thk = ', num2str(i), ', det = ', num2str(j)));
+    axis image;
+    colormap gray;
+    pause(0.25);
 end;
+
+% cc = [1 0 1; 1 0 0; 0 0 1; 0 0 0];
+% for i=1:4
+%     input_multislice.eels_channelling_type = i;
+%     clear MULTEM;
+%     tic;
+%     [eels] = MULTEM(input_multislice); 
+%     toc;
+%     figure(1);
+%     hold on;
+%     plot(eels, 'color', cc(i, :));
+% end;

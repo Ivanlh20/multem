@@ -1458,7 +1458,7 @@ namespace multem
 			return channelling_type == eCT_Double_Channelling_SOMS;
 		}
 
-		bool is_Double_Channelling_POA_SOMS() const
+		bool is_Double_Channelling_FOMS_SOMS() const
 		{
 			return is_Double_Channelling_FOMS() || is_Double_Channelling_SOMS();
 		}
@@ -1640,8 +1640,16 @@ namespace multem
 			return x.size();
 		}
 
-		Scanning():type(eST_Line), ns(0), nx(0), dRx(0), dRy(0),
+		Scanning():type(eST_Line), ns(1), nx(0), dRx(0), dRy(0),
 			ny(0), x0(0), y0(0), xe(0), ye(0){};
+
+		void set_default()
+		{
+			type = eST_Line;
+			ns = 1;
+			x0 = y0 = 0;
+			xe = ye = 0;
+		}
 
 		void get_grid_dim()
 		{

@@ -53,8 +53,7 @@ namespace multem
 				{
 					energy_loss.set_input_data(input_multislice, &fft2);
 					psi_thk.resize(input_multislice->grid.nxy());
-					psi_kn.resize(input_multislice->grid.nxy());
-					if(input_multislice->eels_fr.is_Double_Channelling_POA_SOMS())
+					if(input_multislice->eels_fr.is_Double_Channelling_FOMS_SOMS())
 					{
 						trans_thk.resize(input_multislice->grid.nxy());
 					}
@@ -66,13 +65,9 @@ namespace multem
 			template<class TOutput_multislice>
 			void run(TOutput_multislice &output_multislice)
 			{
-				if(input_multislice->is_STEM())
+				if(input_multislice->is_STEM_ISTEM())
 				{
-					STEM(output_multislice);
-				}
-				else if(input_multislice->is_ISTEM())
-				{
-					ISTEM(output_multislice);
+					STEM_ISTEM(output_multislice);
 				}
 				else if(input_multislice->is_CBED_CBEI())
 				{
@@ -90,13 +85,9 @@ namespace multem
 				{
 					EWFS_EWRS(output_multislice);
 				}
-				else if(input_multislice->is_EELS())
+				else if(input_multislice->is_EELS_EFTEM())
 				{
-					EELS(output_multislice);
-				}
-				else if(input_multislice->is_EFTEM())
-				{
-					EFTEM(output_multislice);
+					EELS_EFTEM(output_multislice);
 				}
 			}
 
@@ -107,13 +98,13 @@ namespace multem
 
 		private:
 			template<class TOutput_multislice>
-			void STEM(TOutput_multislice &output_multislice)
+			void STEM_ISTEM(TOutput_multislice &output_multislice)
 			{
 				value_type_r w = input_multislice->get_weight();
 
 				output_multislice.init();
 
-				if(input_multislice->coherent_contribution)
+				if(input_multislice->is_STEM() && input_multislice->coherent_contribution)
 				{
 					for(auto iscan=0; iscan < input_multislice->scanning.size(); iscan++)
 					{	
@@ -122,7 +113,7 @@ namespace multem
 						{
 							wave_function.move_atoms(iconf);		
 							wave_function.psi_0(wave_function.psi_z);
-							wave_function.psi(w, output_multislice);
+							wave_function.psi(w, wave_function.psi_z, output_multislice);
 						}
 
 						wave_function.set_m2psi_coh(output_multislice);
@@ -137,36 +128,12 @@ namespace multem
 						{
 							input_multislice->set_beam_position(iscan);
 							wave_function.psi_0(wave_function.psi_z);
-							wave_function.psi(w, output_multislice);
+							wave_function.psi(w, wave_function.psi_z, output_multislice);
 						}
 					}
 
 					wave_function.set_m2psi_coh(output_multislice);
 				}
-
-				output_multislice.shift();
-				output_multislice.clear_temporal_data();
-			}
-
-			template<class TOutput_multislice>
-			void ISTEM(TOutput_multislice &output_multislice)
-			{
-				value_type_r w = input_multislice->get_weight();
-
-				output_multislice.init();
-
-				for(auto iconf=input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
-				{
-					wave_function.move_atoms(iconf);		
-					for(auto iscan=0; iscan < input_multislice->scanning.size(); iscan++)
-					{
-						input_multislice->set_beam_position(iscan);
-						wave_function.psi_0(wave_function.psi_z);
-						wave_function.psi(w, output_multislice);
-					}
-				}
-
-				wave_function.set_m2psi_coh(output_multislice);
 
 				output_multislice.shift();
 				output_multislice.clear_temporal_data();
@@ -198,7 +165,7 @@ namespace multem
 					{
 						input_multislice->set_phi(irot);
 						wave_function.psi_0(wave_function.psi_z);
-						wave_function.psi(w, output_multislice);
+						wave_function.psi(w, wave_function.psi_z, output_multislice);
 					}
 				}
 
@@ -219,7 +186,7 @@ namespace multem
 				{
 					wave_function.move_atoms(iconf);		
 					wave_function.psi_0(wave_function.psi_z);
-					wave_function.psi(w, output_multislice);
+					wave_function.psi(w, wave_function.psi_z, output_multislice);
 				}
 
 				wave_function.set_m2psi_coh(output_multislice);
@@ -229,137 +196,67 @@ namespace multem
 			}
 
 			template<class TOutput_multislice>
-			void EELS(TOutput_multislice &output_multislice)
+			void EELS_EFTEM(TOutput_multislice &output_multislice)
 			{
-				//value_type_r w = input_multislice->get_weight();
-				//value_type_r gx_0 = input_multislice->gx_0();
-				//value_type_r gy_0 = input_multislice->gy_0();
+				value_type_r w = input_multislice->get_weight();
 
-				//multem::fill(host_stem_eels, 0.0);
+				auto psi = [&](value_type_r w, Vector<value_type_c, dev> &psi_z, TOutput_multislice &output_multislice)
+				{
+					value_type_r gx_0 = input_multislice->gx_0();
+					value_type_r gy_0 = input_multislice->gy_0();
 
-				//for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
-				//{
-				//	wave_function.move_atoms(iconf);
-				//	for(auto iscan=0; iscan < input_multislice->scanning.size(); iscan++)
-				//	{
-				//		input_multislice->set_beam_position(iscan);
-				//		wave_function.psi_0(psi_thk);
-				//		for(auto islice=0; islice < wave_function.slice.size(); islice++)
-				//		{
-				//			if(input_multislice->eels_fr.is_Double_Channelling_POA_SOMS())
-				//			{
-				//				wave_function.trans(islice, wave_function.slice.size()-1, trans_thk);
-				//			}
-				//			for(auto iatom=wave_function.slice.iatom_0[islice]; iatom <= wave_function.slice.iatom_e[islice]; iatom++)
-				//			{
-				//				if(wave_function.atoms.Z[iatom] == input_multislice->eels_fr.Z)
-				//				{
-				//					input_multislice->eels_fr.x = input_multislice->get_Rx_pos_shift(wave_function.atoms.x[iatom]);
-				//					input_multislice->eels_fr.y = input_multislice->get_Ry_pos_shift(wave_function.atoms.y[iatom]);
-				//					input_multislice->eels_fr.occ = wave_function.atoms.occ[iatom];
+					for(auto islice=0; islice < wave_function.slice.size(); islice++)
+					{
+						if(input_multislice->eels_fr.is_Double_Channelling_FOMS_SOMS())
+						{
+							wave_function.trans(islice, wave_function.slice.size()-1, trans_thk);
+						}			
 
-				//					energy_loss.set_atom_type(input_multislice->eels_fr);
-				//					for(auto ikn=0; ikn < energy_loss.kernel.size(); ikn++)
-				//					{
-				//						multem::multiply(energy_loss.kernel[ikn], psi_thk, psi_kn);
-				//						if(input_multislice->eels_fr.is_Single_Channelling())
-				//						{
-				//							value_type_r dz = wave_function.dz_m(islice, wave_function.slice.size()-1);
-				//							wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
-				//						}
-				//						else if(input_multislice->eels_fr.is_Double_Channelling_FOMS())
-				//						{
-				//							value_type_r dz = wave_function.dz_m(islice, wave_function.slice.size()-1);
-				//							multem::multiply(trans_thk, psi_kn);
-				//							wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
-				//						}
-				//						else if(input_multislice->eels_fr.is_Double_Channelling_SOMS())
-				//						{
-				//							value_type_r dz = 0.5*wave_function.dz_m(islice, wave_function.slice.size()-1);
-				//							wave_function.prog.propagate(eS_Real, gx_0, gy_0, dz, psi_kn);
-				//							multem::multiply(trans_thk, psi_kn);
-				//							wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
-				//						}
-				//						else if(input_multislice->eels_fr.is_Double_Channelling())
-				//						{
-				//							wave_function.psi(eS_Reciprocal, islice, wave_function.slice.size(), psi_kn);
-				//						}
-				//						host_stem_eels[iscan] += sum_square_over_Det(input_multislice->grid, 0, input_multislice->eels_fr.g_collection, psi_kn);
-				//					}
-				//				}
-				//			}
-				//			wave_function.transmit(islice, psi_thk);
-				//			wave_function.prog.propagate(eS_Real, gx_0, gy_0, wave_function.dz(islice), psi_thk);
-				//		}
-				//	}
-				//}
-			}
+						for(auto iatom=wave_function.slice.iatom_0[islice]; iatom <= wave_function.slice.iatom_e[islice]; iatom++)
+						{
+							if(wave_function.atoms.Z[iatom] == input_multislice->eels_fr.Z)
+							{
+								input_multislice->set_eels_fr_atom(iatom, wave_function.atoms);
+								energy_loss.set_atom_type(input_multislice->eels_fr);
 
-			template<class TOutput_multislice>
-			void EFTEM(TOutput_multislice &output_multislice)
-			{
-				//value_type_r w = input_multislice->get_weight();
-				//value_type_r gx_0 = input_multislice->gx_0();
-				//value_type_r gy_0 = input_multislice->gy_0();
+								for(auto ikn=0; ikn < energy_loss.kernel.size(); ikn++)
+								{
+									multem::multiply(energy_loss.kernel[ikn], psi_z, wave_function.psi_z);
+									wave_function.psi(islice, wave_function.slice.size()-1, w, trans_thk, output_multislice);
+								}
+							}
+						}
+						wave_function.psi_slice(gx_0, gy_0, islice, psi_z);
+					}
+				};
 
-				//multem::fill(m2psi_tot, 0.0);
+				output_multislice.init();
 
-				//for(auto iconf=1; iconf <= input_multislice->fp_nconf; iconf++)
-				//{
-				//	wave_function.move_atoms(iconf);
-				//	wave_function.psi_0(psi_thk);
-				//	for(auto islice=0; islice < wave_function.slice.size(); islice++)
-				//	{
-				//		if(input_multislice->eels_fr.is_Double_Channelling_POA_SOMS())
-				//		{
-				//			wave_function.trans(islice, wave_function.slice.size()-1, trans_thk);
-				//		}				
-				//		for(auto iatom=wave_function.slice.iatom_0[islice]; iatom <= wave_function.slice.iatom_e[islice]; iatom++)
-				//		{
-				//			if(wave_function.atoms.Z[iatom] == input_multislice->eels_fr.Z)
-				//			{
-				//				input_multislice->eels_fr.x = input_multislice->get_Rx_pos_shift(wave_function.atoms.x[iatom]);
-				//				input_multislice->eels_fr.y = input_multislice->get_Ry_pos_shift(wave_function.atoms.y[iatom]);
-				//				input_multislice->eels_fr.occ = wave_function.atoms.occ[iatom];
+				if(input_multislice->is_EELS())
+				{
+					for(auto iconf=input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+					{
+						wave_function.move_atoms(iconf);		
+						for(auto iscan=0; iscan < input_multislice->scanning.size(); iscan++)
+						{
+							input_multislice->set_beam_position(iscan);
+							wave_function.psi_0(psi_thk);
+							psi(w, psi_thk, output_multislice);
+						}
+					}
+				}
+				else
+				{
+					for(auto iconf=input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+					{
+						wave_function.move_atoms(iconf);		
+						wave_function.psi_0(psi_thk);
+						psi(w, psi_thk, output_multislice);
+					}
+				}
 
-				//				energy_loss.set_atom_type(input_multislice->eels_fr);
-				//				for(auto ikn=0; ikn < energy_loss.kernel.size(); ikn++)
-				//				{
-				//					multem::multiply(energy_loss.kernel[ikn], psi_thk, psi_kn);
-				//					if(input_multislice->eels_fr.is_Single_Channelling())
-				//					{
-				//						value_type_r dz = wave_function.dz_m(islice, wave_function.slice.size()-1);
-				//						wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
-				//					}
-				//					else if(input_multislice->eels_fr.is_Double_Channelling_FOMS())
-				//					{
-				//						value_type_r dz = wave_function.dz_m(islice, wave_function.slice.size()-1);
-				//						multem::multiply(trans_thk, psi_kn);
-				//						wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
-				//					}
-				//					else if(input_multislice->eels_fr.is_Double_Channelling_SOMS())
-				//					{
-				//						value_type_r dz = 0.5*wave_function.dz_m(islice, wave_function.slice.size()-1);
-				//						wave_function.prog.propagate(eS_Real, gx_0, gy_0, dz, psi_kn);
-				//						multem::multiply(trans_thk, psi_kn);
-				//						wave_function.prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_kn);
-				//					}
-				//					else if(input_multislice->eels_fr.is_Double_Channelling())
-				//					{
-				//						wave_function.psi(eS_Reciprocal, islice, wave_function.slice.size(), psi_kn);
-				//					}
-				//					multem::bandwidth_limit(input_multislice->grid, 0, input_multislice->eels_fr.g_collection, 1.0, psi_kn);
-				//					fft2.inverse(psi_kn);
-				//					multem::add_square(psi_kn, m2psi_tot);
-				//				}
-				//			}
-				//		}
-				//		wave_function.transmit(islice, psi_thk);
-				//		wave_function.prog.propagate(eS_Real, gx_0, gy_0, wave_function.dz(islice), psi_thk);
-				//	}
-				//}
-
-				//multem::to_host_shift(input_multislice->grid, m2psi_tot, host_m2psi_tot);
+				output_multislice.shift();
+				output_multislice.clear_temporal_data();
 			}
 
 			Input_Multislice<value_type_r, dev> *input_multislice;
@@ -370,7 +267,6 @@ namespace multem
 			Energy_Loss<value_type_r, dev> energy_loss;
 
 			Vector<value_type_c, dev> psi_thk;
-			Vector<value_type_c, dev> psi_kn;
 			Vector<value_type_c, dev> trans_thk;
 		};
 

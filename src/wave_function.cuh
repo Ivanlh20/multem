@@ -179,7 +179,7 @@ namespace multem
 						}
 						else
 						{
-							multem::assign_square_scale(w_i, *psi_zt, m2psi_z);
+							multem::assign_square(*psi_zt, m2psi_z);
 							multem::add_scale_to_host(this->input_multislice->grid, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
 						}
 					}
@@ -237,7 +237,7 @@ namespace multem
 			}
 
 			template<class TOutput_multislice>
-			void psi(value_type_r w_i, TOutput_multislice &output_multislice)
+			void psi(value_type_r w_i, Vector<value_type_c, dev> &psi_z, TOutput_multislice &output_multislice)
 			{
 				value_type_r gx_0 = this->input_multislice->gx_0();
 				value_type_r gy_0 = this->input_multislice->gy_0();
@@ -249,33 +249,57 @@ namespace multem
 				}
 			}
 
-			//void psi(const eSpace &space, int islice_0, int islice_e, Vector<value_type_c, dev> &psi_z)
-			//{
-			//	value_type_r gx_0 = this->input_multislice->gx_0();
-			//	value_type_r gy_0 = this->input_multislice->gy_0();
+			template<class TOutput_multislice>
+			void psi(int islice_0, int islice_e, value_type_r w_i, Vector<value_type_c, dev> &trans, TOutput_multislice &output_multislice)
+			{
+				int ithk = this->slice.ithk[islice_e];
+				if(0 <= ithk)
+				{
+					value_type_r gx_0 = this->input_multislice->gx_0();
+					value_type_r gy_0 = this->input_multislice->gy_0();
 
-			//	if(this->input_multislice->is_multislice())
-			//	{
-			//		for(auto islice=islice_0; islice<islice_e; islice++)
-			//		{
-			//			this->transmit(islice, psi_z);
-			//			prog.propagate(eS_Real, gx_0, gy_0, dz(islice), psi_z);
-			//		}
-			//		phase_multiplication(gx_0, gy_0, psi_z);
-			//		prog.propagate(space, gx_0, gy_0, 0, psi_z);
-			//	}
-			//	else
-			//	{
-			//		this->transmit(0, psi_z);
-			//		phase_multiplication(gx_0, gy_0, psi_z);
+					if(this->input_multislice->eels_fr.is_Single_Channelling())
+					{
+						value_type_r dz = this->dz_m(islice_0, islice_e);
+						prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_z);
+					}
+					else if(this->input_multislice->eels_fr.is_Double_Channelling_FOMS())
+					{
+						value_type_r dz = this->dz_m(islice_0, islice_e);
+						multem::multiply(trans, psi_z);
+						prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_z);
+					}
+					else if(this->input_multislice->eels_fr.is_Double_Channelling_SOMS())
+					{
+						value_type_r dz = 0.5*this->dz_m(islice_0, islice_e);
+						this->prog.propagate(eS_Real, gx_0, gy_0, dz, psi_z);
+						multem::multiply(trans, psi_z);
+						prog.propagate(eS_Reciprocal, gx_0, gy_0, dz, psi_z);
+					}
+					else if(this->input_multislice->eels_fr.is_Double_Channelling())
+					{
+						for(auto islice=islice_0; islice<=islice_e; islice++)
+						{
+							psi_slice(gx_0, gy_0, islice, psi_z);
+						}
+						phase_multiplication(gx_0, gy_0, psi_z);
+						prog.propagate(eS_Reciprocal, gx_0, gy_0, this->thickness.z_back_prop[ithk], psi_z);
+					}
 
-			//		if(space == eS_Reciprocal)
-			//		{
-			//			this->fft2->forward(psi_z);
-			//			multem::scale(psi_z, this->input_multislice->grid.inxy);
-			//		}
-			//	}
-			//}
+					if(this->input_multislice->is_EELS())
+					{
+						int iscan = this->input_multislice->iscan;
+						output_multislice.image_tot[ithk].image[0][iscan] += w_i*sum_square_over_Det(this->input_multislice->grid, 0, this->input_multislice->eels_fr.g_collection, psi_z);
+					}
+					else
+					{
+						multem::bandwidth_limit(this->input_multislice->grid, 0, this->input_multislice->eels_fr.g_collection, 1.0, psi_z);
+						this->fft2->inverse(psi_z);
+						multem::assign_square(psi_z, m2psi_z);
+						multem::add_scale_to_host(this->input_multislice->grid, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
+					}
+				}
+			}
 
 			Propagator<value_type_r, dev> prog;
 

@@ -31,7 +31,7 @@ input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
 input_multislice.theta = 0.0;                       % Till ilumination (degrees)
 input_multislice.phi = 0.0;                         % Till ilumination (degrees)
 
-na = 4; nb = 4; nc = 25; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
@@ -42,38 +42,44 @@ input_multislice.ny = 1024;
 
 input_multislice.eftem_E_loss = 532;           % Energy loss (eV)
 input_multislice.eftem_m_selection = 3;        % selection rule
-input_multislice.eftem_channelling_type = 2;   % eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_FOMS = 3, eCT_Double_Channelling_SOMS = 4
+input_multislice.eftem_channelling_type = 3;   % eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_FOMS = 3, eCT_Double_Channelling_SOMS = 4
 input_multislice.eftem_collection_angle = 100; % Collection half angle (mrad)
 input_multislice.eftem_Z = 8;                  % atomic type
 
-% clear MULTEM;
-% tic;
-% [m2psi_tot] = MULTEM(input_multislice); 
-% toc;
-% imagesc(m2psi_tot);
-% title('Total intensity');
-% axis image;
-% colormap gray;
+clear MULTEM;
+tic;
+output_multislice = MULTEM(input_multislice); 
+toc;
+clear MULTEM;
 
-cc = [1 0 1; 1 0 0; 0 0 1; 0 0 0];
-for i=1:4
-    input_multislice.eftem_channelling_type = i;
-    clear MULTEM;
-    tic;
-    [m2psi_tot] = MULTEM(input_multislice); 
-    toc;
-    figure(1);
-    subplot(2, 1, 1);
-    hold on;
-    plot(m2psi_tot(129, :), 'color', cc(i, :));
-    subplot(2, 1, 2);
-    hold on;
-    plot(m2psi_tot(257, :), 'color', cc(i, :)); 
-    
-    figure(2);
-    subplot(2, 2, i);
-    imagesc(m2psi_tot);
-    title('Total intensity');
+figure(1);
+for i=1:length(output_multislice.data)
+    imagesc(output_multislice.data(i).m2psi_tot);
+    title(strcat('Total intensity -  Thickness = ', num2str(i)));
     axis image;
     colormap gray;
+    pause(0.25);
 end;
+
+% cc = [1 0 1; 1 0 0; 0 0 1; 0 0 0];
+% for i=1:4
+%     input_multislice.eftem_channelling_type = i;
+%     clear MULTEM;
+%     tic;
+%     [m2psi_tot] = MULTEM(input_multislice); 
+%     toc;
+%     figure(1);
+%     subplot(2, 1, 1);
+%     hold on;
+%     plot(m2psi_tot(129, :), 'color', cc(i, :));
+%     subplot(2, 1, 2);
+%     hold on;
+%     plot(m2psi_tot(257, :), 'color', cc(i, :)); 
+%     
+%     figure(2);
+%     subplot(2, 2, i);
+%     imagesc(m2psi_tot);
+%     title('Total intensity');
+%     axis image;
+%     colormap gray;
+% end;
