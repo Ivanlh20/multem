@@ -20,6 +20,15 @@ input_multislice.fp_seed = 300183;                  % Random seed(frozen phonon)
 input_multislice.fp_single_conf = 0;                % 1: true, 0:false
 input_multislice.fp_nconf = 1;                      % true: phonon configuration, false: number of frozen phonon configurations
 
+input_multislice.tm_active = 0;						% 1: true, 0:false
+input_multislice.tm_nrot = 10; 						% number of rotations
+input_multislice.tm_irot = 0;						% specific rotation configuration
+input_multislice.tm_theta_0 = -90; 					% initial angle
+input_multislice.tm_theta_e = 90; 					% final angle
+input_multislice.tm_u0 = [0 0 1]; 					% unitary vector			
+input_multislice.tm_rot_point_type = 1; 			% 1: geometric center, 2: User define		
+input_multislice.tm_p0 = [0 0 0];					% rotation point
+
 input_multislice.microscope_effect = 1;             % 1: Partial coherente mode, 2: transmission_fun cross coefficient
 input_multislice.spatial_temporal_effect = 2;       % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 

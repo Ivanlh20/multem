@@ -16,17 +16,17 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "types.hpp"
+#include "types.cuh"
 #include "atom_data.hpp"
 #include "crystal.hpp"
 
 #include <mex.h>
-#include "mex_matlab.hpp"
+#include "matlab_mex.cuh"
 
 using multem::rmatrix_r;
 
 /*******************Matlab to layer unit cell*********************/
-void read_input_data(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, multem::Vector<multem::Atom_Data<double>, multem::e_Host> &uLayer)
+void read_input_data(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, multem::Vector<multem::Atom_Data<double>, multem::e_host> &uLayer)
 {
 	na = mx_get_scalar_field<int>(mxCrystal, "na"); 
 	nb = mx_get_scalar_field<int>(mxCrystal, "nb");
@@ -53,7 +53,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	int na, nb, nc;
 	double a, b, c;
-	multem::Vector<multem::Atom_Data<double>, multem::e_Host> uLayer;
+	multem::Vector<multem::Atom_Data<double>, multem::e_host> uLayer;
 	multem::Atom_Data<double> atoms;
 	multem::Crystal<double> crystal;
 

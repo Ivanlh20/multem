@@ -19,11 +19,13 @@
 #ifndef ENERGY_LOSS_H
 #define ENERGY_LOSS_H
 
-#include "types.hpp"
+#include "types.cuh"
+#include "stream.cuh"
+#include "fft2.cuh"
+#include "input_multislice.hpp"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
-#include "input_multislice.hpp"
 
 namespace multem
 {
@@ -34,9 +36,10 @@ namespace multem
 			using value_type_r = T;
 			using value_type_c = complex<T>;
 
-			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, FFT2<value_type_r, dev> *fft2_i)
+			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, Stream<dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
 			{
 				input_multislice = input_multislice_i;
+				stream = stream_i;
 				fft2 = fft2_i;
 
 				if(input_multislice->eels_fr.m_selection>2)
@@ -59,33 +62,34 @@ namespace multem
 			{
 				if(eels.m_selection>2)
 				{
-					multem::kernel_xyz(input_multislice->grid, eels, *fft2, kernel[0], kernel[1], kernel[2]);
+					multem::kernel_xyz(*stream, input_multislice->grid, eels, *fft2, kernel[0], kernel[1], kernel[2]);
 				}
 				else if(eels.m_selection == -2)
 				{
-					multem::kernel_x(input_multislice->grid, eels, *fft2, kernel[0]);
+					multem::kernel_x(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
 				}
 				else if(eels.m_selection == -1)
 				{
-					multem::kernel_mn1(input_multislice->grid, eels, *fft2, kernel[0]);
+					multem::kernel_mn1(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
 				}
 				else if(eels.m_selection == 0)
 				{
-					multem::kernel_z(input_multislice->grid, eels, *fft2, kernel[0]);
+					multem::kernel_z(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
 				}
 				else if(eels.m_selection == 1)
 				{
-					multem::kernel_mp1(input_multislice->grid, eels, *fft2, kernel[0]);
+					multem::kernel_mp1(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
 				}
 				else if(eels.m_selection == 2)
 				{
-					multem::kernel_y(input_multislice->grid, eels, *fft2, kernel[0]);
+					multem::kernel_y(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
 				}
 			}
 
-			Vector<Vector<value_type_c, dev>, e_Host> kernel;
+			Vector<Vector<value_type_c, dev>, e_host> kernel;
 		private:
 			Input_Multislice<value_type_r, dev> *input_multislice;
+			Stream<dev> *stream;
 			FFT2<value_type_r, dev> *fft2;
 	};
 

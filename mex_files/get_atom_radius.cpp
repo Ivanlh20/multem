@@ -16,11 +16,11 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "types.hpp"
+#include "types.cuh"
 #include "atomic_data.hpp"
 
 #include <mex.h>
-#include "mex_matlab.hpp"
+#include "matlab_mex.cuh"
 
 using multem::rmatrix_r;
 
@@ -35,7 +35,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	multem::Atom_Cal<double> atom_cal;
 	multem::Atomic_Data atomic_data;
 	atomic_data.Load_Data(potential_type);
-	multem::Atom_Type<double, multem::e_Host> atom_type;
+	multem::Atom_Type<double, multem::e_host> atom_type;
 
 	for(auto i=0; i<r.rows; i++)
 	{

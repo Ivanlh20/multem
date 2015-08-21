@@ -16,9 +16,10 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "types.hpp"
+#include "types.cuh"
+#include "matlab_types.cuh"
 #include "traits.cuh"
-#include "Stream.cuh"
+#include "stream.cuh"
 #include "fft2.cuh"
 #include "atom_data.hpp"
 #include "input_multislice.hpp"
@@ -29,7 +30,7 @@
 #include "transmission.cuh"
 
 #include <mex.h>
-#include "mex_matlab.hpp"
+#include "matlab_mex.cuh"
 
 using multem::rmatrix_r;
 using multem::rmatrix_c;
@@ -84,7 +85,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 template<class TOutput_multislice>
 void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_multislice, TOutput_multislice &output_multislice)
 {
-	multem::Input_Multislice<double, multem::e_Host> input_multislice;
+	multem::Input_Multislice<double, multem::e_host> input_multislice;
 	read_input_data(mx_input_multislice, input_multislice, false);
 	output_multislice.set_input_data(&input_multislice);
 
@@ -108,7 +109,7 @@ void get_transmission_function(const mxArray *mxB, TOutput_multislice &output_mu
 	multem::Input_Multislice<T, dev> input_multislice;
 	read_input_data(mxB, input_multislice);
 
-	multem::Stream<T, dev> stream;
+	multem::Stream<dev> stream;
 	multem::FFT2<T, dev> fft2;
 	multem::Transmission<T, dev> transmission;
 
@@ -117,10 +118,7 @@ void get_transmission_function(const mxArray *mxB, TOutput_multislice &output_mu
 	transmission.set_input_data(&input_multislice, &stream, &fft2);
 
 	transmission.move_atoms(input_multislice.fp_nconf);
-	transmission.trans(input_multislice.islice);
-
-	multem::copy_to_host(input_multislice.grid, transmission.trans_0, output_multislice.trans[0]);
-	multem::fft2_shift(input_multislice.grid, output_multislice.trans[0]);
+	transmission.trans(input_multislice.islice, output_multislice);
 
 	fft2.cleanup();
 }
@@ -130,20 +128,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	multem::Output_Multislice<rmatrix_r, rmatrix_c> output_multislice;
 	set_output_data(prhs[0], plhs[0], output_multislice);
 
-	if(output_multislice.is_float_Host())
+	if(output_multislice.is_float_host())
 	{
-		get_transmission_function<float, multem::e_Host>(prhs[0], output_multislice);
+		get_transmission_function<float, multem::e_host>(prhs[0], output_multislice);
 	}
-	else if(output_multislice.is_double_Host())
+	else if(output_multislice.is_double_host())
 	{
-		get_transmission_function<double, multem::e_Host>(prhs[0], output_multislice);
+		get_transmission_function<double, multem::e_host>(prhs[0], output_multislice);
 	}
-	if(output_multislice.is_float_Device())
+	if(output_multislice.is_float_device())
 	{
-		get_transmission_function<float, multem::e_Device>(prhs[0], output_multislice);
+		get_transmission_function<float, multem::e_device>(prhs[0], output_multislice);
 	}
-	else if(output_multislice.is_double_Device())
+	else if(output_multislice.is_double_device())
 	{
-		get_transmission_function<double, multem::e_Device>(prhs[0], output_multislice);
+		get_transmission_function<double, multem::e_device>(prhs[0], output_multislice);
 	}
 }

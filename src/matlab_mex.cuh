@@ -16,15 +16,16 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MEX_MATLAB_H
-#define MEX_MATLAB_H
+#ifndef MATLAB_MEX_H
+#define MATLAB_MEX_H
 
 #include <algorithm>
 #include <type_traits>
 #include <cmath>
 
-#include "types.hpp"
+#include "types.cuh"
 #include "traits.cuh"
+#include "matlab_types.cuh"
 #include <mex.h>
 
 using multem::rmatrix_r;

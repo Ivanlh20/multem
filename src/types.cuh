@@ -42,6 +42,7 @@
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 #include <thrust/detail/raw_pointer_cast.h>
+#include <thrust/tuple.h>
 
 using std::vector;
 using thrust::device_vector;
@@ -50,48 +51,46 @@ using thrust::raw_pointer_cast;
 
 namespace multem
 {
-	std::mutex multem_mutex;
-
-	const double c_Ha = 27.2113850656389; 				// Hartree to electron-Volt
-	const double c_a0 = 0.52917721077817892; 			// Bohr radius
-	const double c_Potf = 47.877645145863056; 			//
+	const double c_Ha = 27.2113850656389; 					// Hartree to electron-Volt
+	const double c_a0 = 0.52917721077817892; 				// Bohr radius
+	const double c_Potf = 47.877645145863056; 				//
 	const double c_2Pi2a0 = 10.445539456905012; 			// 2*pi^2*a0
 
-	const double c_H = 6.62606876e-34; 					// Planck's constant - J s
-	const double c_bH = 1.054571596e-34; 				// h/(2*pi) - J s
-	const double c_C = 2.99792458e+8; 					// Velocity of light - m s^-1 
-	const double c_Qe = 1.602176462e-19; 				// Elementary charge
+	const double c_H = 6.62606876e-34; 						// Planck's constant - J s
+	const double c_bH = 1.054571596e-34; 					// h/(2*pi) - J s
+	const double c_C = 2.99792458e+8; 						// Velocity of light - m s^-1 
+	const double c_Qe = 1.602176462e-19; 					// Elementary charge
 	const double c_me = 9.10938291e-31; 					// Electron rest mass [kg]
-	const double c_mp = 1.672621637e-27; 				// Proton rest mass [kg]
-	const double c_KB = 1.3806504e-23; 					// Boltzmann's constant - J K^-1
-	const double c_Na = 6.0221415e+23; 					// Avogadro's Number - mol^-1
+	const double c_mp = 1.672621637e-27; 					// Proton rest mass [kg]
+	const double c_KB = 1.3806504e-23; 						// Boltzmann's constant - J K^-1
+	const double c_Na = 6.0221415e+23; 						// Avogadro's Number - mol^-1
 
-	const double c_E = 2.7182818284590452354; 			// e (base of natural log)
+	const double c_E = 2.7182818284590452354; 				// e (base of natural log)
 
-	const double c_Pi = 3.141592653589793238463; 		// pi
-	const double c_iPi = 0.3183098861837906715378; 		// 1.0/pi
-	const double c_i2Pi = 1.570796326794896619231; 		// pi/2
-	const double c_i3Pi = 1.047197551196597746154; 		// pi/3
+	const double c_Pi = 3.141592653589793238463; 			// pi
+	const double c_iPi = 0.3183098861837906715378; 			// 1.0/pi
+	const double c_i2Pi = 1.570796326794896619231; 			// pi/2
+	const double c_i3Pi = 1.047197551196597746154; 			// pi/3
 	const double c_i4Pi = 0.7853981633974483096157; 		// pi/4
-	const double c_2Pi = 6.283185307179586476925; 		// 2*pi
-	const double c_3Pi = 9.424777960769379715388; 		// 3*pi
-	const double c_4Pi = 12.56637061435917295385; 		// 4*pi
-	const double c_Pi2 = 9.869604401089358618834; 		// pi^2
-	const double c_Pi3 = 31.00627668029982017548; 		// pi^3
-	const double c_Pi4 = 97.4090910340024372364; 		// pi^4
-	const double c_Pii2 = 1.772453850905516027298; 		// pi^(1/2)
-	const double c_Pii3 = 1.46459188756152326302; 		// pi^(1/3)
-	const double c_Pii4 = 1.331335363800389712798; 		// pi^(1/4)
+	const double c_2Pi = 6.283185307179586476925; 			// 2*pi
+	const double c_3Pi = 9.424777960769379715388; 			// 3*pi
+	const double c_4Pi = 12.56637061435917295385; 			// 4*pi
+	const double c_Pi2 = 9.869604401089358618834; 			// pi^2
+	const double c_Pi3 = 31.00627668029982017548; 			// pi^3
+	const double c_Pi4 = 97.4090910340024372364; 			// pi^4
+	const double c_Pii2 = 1.772453850905516027298; 			// pi^(1/2)
+	const double c_Pii3 = 1.46459188756152326302; 			// pi^(1/3)
+	const double c_Pii4 = 1.331335363800389712798; 			// pi^(1/4)
 
-	const double c_2i2 = 1.414213562373095048802; 		// 2^(1/2)
-	const double c_3i2 = 1.732050807568877293527; 		// 3^(1/2)
-	const double c_5i2 = 2.236067977499789696409; 		// 5^(1/2)
-	const double c_7i2 = 2.645751311064590590502; 		// 7^(1/2)	
+	const double c_2i2 = 1.414213562373095048802; 			// 2^(1/2)
+	const double c_3i2 = 1.732050807568877293527; 			// 3^(1/2)
+	const double c_5i2 = 2.236067977499789696409; 			// 5^(1/2)
+	const double c_7i2 = 2.645751311064590590502; 			// 7^(1/2)	
 
-	const double c_mrad_2_rad = 1.0e-03; 				// mrad-->rad
-	const double c_deg_2_rad = 0.01745329251994329576924; // degrees-->rad
-	const double c_mm_2_Ags = 1.0e+07; 					// mm-->Angstrom
-	const double c_meV_2_keV = 1e-03; 					// ev-->keV
+	const double c_mrad_2_rad = 1.0e-03; 					// mrad-->rad
+	const double c_deg_2_rad = 0.01745329251994329576924;	// degrees-->rad
+	const double c_mm_2_Ags = 1.0e+07; 						// mm-->Angstrom
+	const double c_meV_2_keV = 1e-03; 						// ev-->keV
 
 	const int c_cSynCPU = 5;
 
@@ -111,10 +110,10 @@ namespace multem
 	const int cSizeofRF = sizeof(float);
 	const int cSizeofCD = 2*cSizeofRD;
 
-	/******************************e_Device type******************************/
+	/******************************e_device type******************************/
 	enum eDevice
 	{
-		e_Host = 1, e_Device = 2, e_none = 3
+		e_host = 1, e_device = 2, e_host_device = 3
 	};
 
 	/******************************Slice memory type******************************/
@@ -163,9 +162,28 @@ namespace multem
 		eST_EWFS=51, eST_EWRS=52,
 		eST_EELS=61, eST_EFTEM=62,
 		eST_ProbeFS=71, eST_ProbeRS=72,
-		eST_PPFS=81, eST_PPRS=82,		//projected potential
-		eST_TFFS=91, eST_TFRS=92,		//transmission function
-		eST_EWSFS=101, eST_EWSRS=102	//exit wave single configuration
+		eST_PPFS=81, eST_PPRS=82,			//projected potential
+		eST_TFFS=91, eST_TFRS=92,			//transmission function
+		eST_EWSFS=101, eST_EWSRS=102,		//exit wave single configuration
+		eST_PropFS=111, eST_PropRS=112		//propagate
+	};
+
+	/********************************Potential model****************************/
+	enum ePhonon_Model
+	{
+		ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+	};
+
+	/******************Electron specimen interaction model**********************/
+	enum eElec_Spec_Int_Model
+	{
+		eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
+	};
+
+	/**************************Potential Slicing Type***************************/
+	enum ePotential_Slicing
+	{
+		ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 	};
 
 	/***************************Potential parameterization************************/
@@ -175,10 +193,9 @@ namespace multem
 		ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
 	};
 
-	/********************************Potential model****************************/
-	enum ePhonon_Model
+	enum eRot_Point_Type
 	{
-		ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+		eRPT_geometric_center = 1, eRPT_User = 2
 	};
 
 	/***************************Real or Fourier space***************************/
@@ -197,18 +214,6 @@ namespace multem
 	enum eSurface_Type
 	{
 		eST_Bottom = 1, eST_Top = 2
-	};
-
-	/******************Electron specimen interaction model**********************/
-	enum eElec_Spec_Int_Model
-	{
-		eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
-	};
-
-	/**************************Potential Slicing Type***************************/
-	enum ePotential_Slicing
-	{
-		ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 	};
 
 	/******************************thickness Type*******************************/
@@ -285,6 +290,12 @@ namespace multem
 
 	};
 
+	template<class T>
+	using Pos_2d = thrust::tuple<T, T>;
+
+	template<class T>
+	using Pos_3d = thrust::tuple<T, T, T>;
+
 	/*******************forward declarations********************/
 	template<class T>
 	struct is_fundamental;
@@ -301,95 +312,9 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	T get_gamma(const T &E_0);
 
-	/*********************pointer to double matrix*****************/
-	struct rmatrix_r
-	{
-	public:
-		using value_type = double;
-		using size_type = std::size_t;
-		static const eDevice device = e_Host;
-
-		int size;
-		int rows;
-		int cols;
-		double *real;
-		rmatrix_r(): size(0), rows(0), cols(0), real(nullptr){}
-
-		double& operator[](const int i){ return real[i]; }
-		const double& operator[](const int i) const { return real[i]; }
-		host_vector<double>::iterator begin() const { return real; };
-		host_vector<double>::iterator end() const { return (real + size); };
-
-		void resize(const size_type &new_size)
-		{
-			size = new_size;
-			delete [] real;
-			real = new double [new_size];
-		}
-
-		void clear()
-		{
-			size = 0;
-			rows = 0;
-			cols = 0;
-			delete [] real; 
-			real = nullptr;
-		}
-	};
-
-	/*********************pointer to complex matrix****************/
-	struct rmatrix_c
-	{
-	public:
-		using value_type = double;
-		using size_type = std::size_t;
-		static const eDevice device = e_Host;
-
-		int size;
-		int rows;
-		int cols;
-		double *real;
-		double *imag;
-		rmatrix_c(): size(0), rows(0), cols(0), real(nullptr), imag(nullptr){}
-
-		complex_s<double>& operator[](const int i)
-		{ 
-			m_data(real[i], imag[i]);
-			return m_data; 
-		}
-
-		complex<double> operator[](const int i) const
-		{ 
-			return m_data; 
-		}
-
-		void resize(const size_type &new_size)
-		{
-			size = new_size;
-			delete [] real;
-			real = new double [new_size];
-			delete [] imag;
-			imag = new double [new_size];
-		}
-
-		void clear()
-		{
-			size = 0;
-			rows = 0;
-			cols = 0;
-			delete [] real; 
-			real = nullptr;
-			delete [] imag; 
-			imag = nullptr;
-		}
-	private:
-		complex_s<double> m_data;
-
-	};
-
 	/**************************vector**************************/
 	template<class T, eDevice dev>
-	using Vector = typename std::conditional<dev == e_Host, typename std::conditional<std::is_fundamental<T>::value || 
+	using Vector = typename std::conditional<dev == e_host, typename std::conditional<std::is_fundamental<T>::value || 
 	std::is_same<T, complex<float>>::value || std::is_same<T, complex<double>>::value, host_vector<T>, vector<T>>::type, device_vector<T>>::type;
 
 	template<class T>
@@ -890,7 +815,7 @@ namespace multem
 		using value_type = T;
 		using size_type = std::size_t;
 
-		static const eDevice device = e_Host;
+		static const eDevice device = e_host;
 
 		inline
 		void set_input_data(value_type E_0)
@@ -926,8 +851,8 @@ namespace multem
 			return ang_outer[idx]/lambda;
 		}
 
-		Vector<T, e_Host> ang_inner; // Inner aperture (rad)
-		Vector<T, e_Host> ang_outer; // Outer aperture (rad)
+		Vector<T, e_host> ang_inner; // Inner aperture (rad)
+		Vector<T, e_host> ang_outer; // Outer aperture (rad)
 		value_type lambda;	 // lambda
 	};
 
@@ -938,14 +863,40 @@ namespace multem
 		using value_type = typename TVector::value_type;
 		using size_type = std::size_t;
 
-		static const eDevice device = e_Host;
+		static const eDevice device = e_host;
 
 		size_type size() const
 		{
 			return image.size();
 		}
 
-		Vector<TVector, e_Host> image;
+		Vector<TVector, e_host> image;
+	};
+
+	/******************************range************************************/
+	struct Range
+	{
+		int ix_0; 	// initial index
+		int ix_e; 	// final index
+		int iy_0; 	// initial index
+		int iy_e; 	// final index
+		int ixy_0; 	// initial index
+		int ixy_e; 	// final index
+		Range():ix_0(0), ix_e(0), iy_0(0), iy_e(0), ixy_0(0), ixy_e(0){}
+
+		template<class TGrid>
+		Range(const TGrid &grid){ set_grid(grid); }
+
+		template<class TGrid>
+		void set_grid(const TGrid &grid)
+		{
+			ix_0 = 0;
+			ix_e = grid.nx;
+			iy_0 = 0;
+			iy_e = grid.ny;
+			ixy_0 = 0;
+			ixy_e = grid.nxy();
+		}
 	};
 
 	/******************************pair<int, val>************************************/
@@ -1377,6 +1328,12 @@ namespace multem
 			dgys = gmaxs/ngys;
 		}
 
+		void set_defocus(T f_i)
+		{
+			f = f_i;
+			cf = (isZero(f))?0:c_Pi*f_i*lambda;
+		}
+
 		inline
 		T prop_factor(const T &z) const { return -c_Pi*lambda*z; }
 
@@ -1632,8 +1589,8 @@ namespace multem
 		T dRx;
 		T dRy;
 
-		Vector<T, e_Host> x;
-		Vector<T, e_Host> y;
+		Vector<T, e_host> x;
+		Vector<T, e_host> y;
 
 		size_type size() const
 		{
@@ -1794,7 +1751,7 @@ namespace multem
 		T y0;
 	};
 
-	/***************************e_Device properties*************************/
+	/***************************e_device properties*************************/
 	struct Device_Properties
 	{
 		int id;
@@ -1807,7 +1764,7 @@ namespace multem
 			total_memory_size(0), free_memory_size(0){}
 	};
 
-	/***************************e_Device properties*************************/
+	/***************************e_device properties*************************/
 	struct Host_Properties
 	{
 		int nprocessors;

@@ -26,18 +26,17 @@
 
 namespace multem
 {
-	template<class T, eDevice dev>
+	template< eDevice dev>
 	struct Stream;
 
-	template<class T>
-	struct Stream<T, e_Host>
+	template<>
+	struct Stream<e_host>
 	{
 		public:
-			using value_type = T;
+			static const eDevice device = e_host;
+			std::mutex stream_mutex;
 
-			static const eDevice device = e_Host;
-
-			Stream():nstream(0), n_act_stream(0), stream(nullptr){}
+			Stream():nx(0), ny(0), nxy(0), nstream(0), n_act_stream(0), stream(nullptr){}
 
 			~Stream(){ destroy(); nstream = 0; n_act_stream = 0; }
 
@@ -46,11 +45,11 @@ namespace multem
 				return nstream;
 			}
 
-			void resize(const int &new_size)
+			void resize(const int &new_nstream)
 			{
 				destroy();
 
-				nstream = new_size;
+				nstream = new_nstream;
 				stream = new std::thread[nstream];
 			}
 
@@ -65,8 +64,56 @@ namespace multem
 				stream = new std::thread[nstream];
 			}
 
+			void set_n_act_stream(const int &new_n_act_stream)
+			{
+				n_act_stream = (new_n_act_stream<0)?0:min(size(), new_n_act_stream);
+			}
+
+			void set_grid(const int &nx_i, const int &ny_i)
+			{
+				nx = nx_i;
+				ny = ny_i;
+				nxy = nx*ny;
+			}
+
+			Range get_range(const int &istream)
+			{
+				Range range;
+				
+				int qnxy = nxy/n_act_stream;
+				range.ixy_0 = istream*qnxy;
+				range.ixy_e = (istream+1)*qnxy;
+
+				int qnx = nx/n_act_stream;
+				range.ix_0 = istream*qnx;
+				range.ix_e = (istream+1)*qnx;
+				range.iy_0 = 0;
+				range.iy_e = ny;
+
+				if(istream == n_act_stream-1)
+				{
+					range.ix_e += (nx - qnx*n_act_stream);
+					range.ixy_e += (nxy - qnxy*n_act_stream);
+				}
+				return range;
+			}
+
+			template<class TFn>
+			void exec(TFn &fn)
+			{
+				for(auto istream = 0; istream < n_act_stream; istream++)
+				{
+					stream[istream] = std::thread(fn, get_range(istream));
+				}
+				synchronize();
+			}
+
 			int n_act_stream;
 		private:
+			int nx;
+			int ny;
+			int nxy;
+
 			int nstream;
 			std::thread *stream;
 
@@ -89,13 +136,11 @@ namespace multem
 			};
 	};
 
-	template<class T>
-	struct Stream<T, e_Device>
+	template<>
+	struct Stream<e_device>
 	{
 		public:
-			using value_type = T;
-
-			static const eDevice device = e_Device;
+			static const eDevice device = e_device;
 
 			Stream(): n_act_stream(0){}
 
@@ -106,11 +151,11 @@ namespace multem
 				return stream.size();
 			}
 
-			void resize(const int &new_size)
+			void resize(const int &new_nstream)
 			{
 				destroy();
 
-				stream.resize(new_size);
+				stream.resize(new_nstream);
 
 				for(auto i = 0; i < stream.size(); i++)
 				{
@@ -127,7 +172,13 @@ namespace multem
 				cudaDeviceSynchronize();
 			}
 
+			void set_n_act_stream(const int &new_n_act_stream)
+			{
+				n_act_stream = (new_n_act_stream<0)?0:min(size(), new_n_act_stream);
+			}
+
 			int n_act_stream;
+
 		private:
 			std::vector<cudaStream_t> stream;
 

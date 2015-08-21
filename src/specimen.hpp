@@ -23,7 +23,7 @@
 #include <algorithm>
 
 #include "math.cuh"
-#include "types.hpp"
+#include "types.cuh"
 #include "atomic_data.hpp"
 #include "atom_data.hpp"
 #include "input_multislice.hpp"
@@ -83,29 +83,41 @@ namespace multem
 			}
 
 			/* Move atoms (ramdom distribution will be included in the future) */
-			void move_atoms(const int &iconf)
+			void move_atoms(const int &fp_iconf, const int &tm_irot=0)
 			{
-				if(!input_multislice->is_frozen_phonon()||(iconf <= 0))
+				if(!input_multislice->is_frozen_phonon()||(fp_iconf <= 0))
 				{
 					return;
 				}
 
 				// set configuration
-				rand.set_configuration(iconf);
+				rand.set_configuration(fp_iconf);
 
-				// Move atoms
-				for(int iAtoms = 0; iAtoms<atoms_u.size(); iAtoms++)
+				Vector<T, e_host> Rm;
+				if(input_multislice->is_tomography())
 				{
-					atoms.Z[iAtoms] = atoms_u.Z[iAtoms];
-					atoms.x[iAtoms] = atoms_u.x[iAtoms] + rand.dx(atoms_u.sigma[iAtoms]);
-					atoms.y[iAtoms] = atoms_u.y[iAtoms] + rand.dy(atoms_u.sigma[iAtoms]);
-					atoms.z[iAtoms] = atoms_u.z[iAtoms] + rand.dz(atoms_u.sigma[iAtoms]);
-					atoms.sigma[iAtoms] = atoms_u.sigma[iAtoms];
-					atoms.occ[iAtoms] = atoms_u.occ[iAtoms];
+					Rm = get_rotation_matrix(input_multislice->get_tm_rot_angle(tm_irot), input_multislice->tm_u0);
+				}
+				// Move atoms
+				for(int iatoms = 0; iatoms<atoms_u.size(); iatoms++)
+				{
+					atoms.Z[iatoms] = atoms_u.Z[iatoms];
+					T x = atoms_u.x[iatoms];
+					T y = atoms_u.y[iatoms];
+					T z = atoms_u.z[iatoms];
+					if(input_multislice->is_tomography())
+					{
+						rotate_position(Rm, input_multislice->tm_p0, x, y, z);
+					}
+					atoms.x[iatoms] = x + rand.dx(atoms_u.sigma[iatoms]);
+					atoms.y[iatoms] = y + rand.dy(atoms_u.sigma[iatoms]);
+					atoms.z[iatoms] = z + rand.dz(atoms_u.sigma[iatoms]);
+					atoms.sigma[iatoms] = atoms_u.sigma[iatoms];
+					atoms.occ[iatoms] = atoms_u.occ[iatoms];
 				}
 				// get atom information
 				atoms.get_Statistic(&atom_type);
-				if(input_multislice->is_multislice())
+				if(input_multislice->is_multislice() || input_multislice->is_tomography() )
 				{
 					// Ascending sort by z
 					atoms.Sort_by_z();
@@ -124,7 +136,7 @@ namespace multem
 				return slice.dz_m(islice_0, islice_e)/cos(input_multislice->theta);
 			}
 
-			Vector<Atom_Type<T, e_Host>, e_Host>* ptr_atom_type()
+			Vector<Atom_Type<T, e_host>, e_host>* ptr_atom_type()
 			{
 				return &atom_type;
 			}
@@ -133,14 +145,14 @@ namespace multem
 
 			Input_Multislice<T, dev> *input_multislice; 			
 
-			Vector<Atom_Type<T, e_Host>, e_Host> atom_type;		// Atom types
+			Vector<Atom_Type<T, e_host>, e_host> atom_type;		// Atom types
 			Atom_Data<T> atoms; 								// displaced atoms
-			Slice<T, e_Host> slice; 							// Slicing procedure
-			Thickness<T, e_Host> thickness; 					// Thicknesses
+			Slice<T, e_host> slice; 							// Slicing procedure
+			Thickness<T, e_host> thickness; 					// Thicknesses
 
 		private:
 			// get thickness
-			void get_thickness(const Vector<T, e_Host> &z_slice, Thickness<T, e_Host> &thickness)
+			void get_thickness(const Vector<T, e_host> &z_slice, Thickness<T, e_host> &thickness)
 			{
 				auto get_zero_defocus_plane = [&](const T &z_min, const T &z_max)->T
 				{
@@ -201,7 +213,7 @@ namespace multem
 			}
 
 			// Slicing
-			void get_slicing(Slice<T, e_Host> &slice)
+			void get_slicing(Slice<T, e_host> &slice)
 			{				
 				
 				atoms_u.get_z_slice(input_multislice->potential_slicing, input_multislice->grid.dz, atoms, z_slice);
@@ -278,12 +290,12 @@ namespace multem
 						fp_dim = fp_dim_i;
 					}
 
-					void set_configuration(int iconf)
+					void set_configuration(int fp_iconf)
 					{	
 						gen_u.seed(fp_seed);
 						rand_u.reset();
 						unsigned int seed_x, seed_y, seed_z;
-						for(auto i=0; i<iconf; i++)
+						for(auto i=0; i<fp_iconf; i++)
 						{
 							seed_x = rand_u(gen_u);
 							seed_y = rand_u(gen_u);
@@ -333,7 +345,7 @@ namespace multem
 			Random rand;
 			// Undisplaced atoms
 			Atom_Data<T> atoms_u;
-			Vector<T, e_Host> z_slice;
+			Vector<T, e_host> z_slice;
 	};
 
 } // namespace multem

@@ -20,7 +20,7 @@
 #define FXEG_TABULATED_DATA_H
 
 #include "math.cuh"
-#include "types.hpp"
+#include "types.cuh"
 
 class fxeg_Tabulated_Data{
 	public:
@@ -24527,10 +24527,10 @@ class fxeg_Tabulated_Data{
 
 		}
 
-		multem::Vector<double, multem::e_Host> g;
-		multem::Vector<double, multem::e_Host> g2;
-		multem::Vector<double, multem::e_Host> feg;
-		multem::Vector<double, multem::e_Host> fxg;
+		multem::Vector<double, multem::e_host> g;
+		multem::Vector<double, multem::e_host> g2;
+		multem::Vector<double, multem::e_host> feg;
+		multem::Vector<double, multem::e_host> fxg;
 };
 
 #endif

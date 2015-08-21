@@ -29,6 +29,7 @@ input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_U
 input_multislice.psi_0 = 0;
 
 input_multislice.bwl = 0;
+input_multislice.coherent_contribution = 0;         % 1: true, 0:false
 
 input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
 input_multislice.theta = 0.0;                       % Till ilumination (degrees)
@@ -44,7 +45,7 @@ input_multislice.nx = 1024;
 input_multislice.ny = 1024;
 
 input_multislice.lens_m = 0;       %mm
-input_multislice.lens_f = 100;     %Angs
+input_multislice.lens_f = 10;     %Angs
 input_multislice.lens_Cs3 = 0.04;	%mm
 input_multislice.lens_Cs5 = 0.00;	%mm
 input_multislice.lens_mfa2 = 0.0; 
@@ -58,35 +59,43 @@ input_multislice.lens_nsf = 64; % (Angs, number of steps)
 input_multislice.lens_beta = 0.1; 
 input_multislice.lens_nbeta = 10; %(mrad, half number of steps)
 
-input_multislice.simulation_type = 32;              % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, eST_EELS=61, eST_EFTEM=62
+input_multislice.simulation_type = 52;              % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, eST_EELS=61, eST_EFTEM=62
+input_multislice.coherent_contribution = 1;         % 1: true, 0:false
 clear MULTEM;
 tic;
-[m2psi_tot_m0] = MULTEM(input_multislice); 
+output_multislice_0 = MULTEM(input_multislice); 
 toc;
 
-input_multislice.simulation_type = 52;              % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, eST_EELS=61, eST_EFTEM=62
+input_multislice.simulation_type = 32;              % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, eST_EELS=61, eST_EFTEM=62
+input_multislice.coherent_contribution = 0;         % 1: true, 0:false
 clear MULTEM;
 tic;
-[m2psi_tot_w, psi_coh_w] = MULTEM(input_multislice); 
+output_multislice_1 = MULTEM(input_multislice); 
 toc;
 
 input_multislice.input_wave_type = 2;               % eIWT_Automatic = 1, eIWT_User_Define = 2
-input_multislice.psi_0 = psi_coh_w;
+input_multislice.psi_0 = output_multislice_0.data.psi_coh;
 
 clear MULTEM;
 tic;
-[m2psi_tot_m1] = get_microscope_aberrations(input_multislice); 
+output_multislice_2 = get_microscope_aberrations(input_multislice); 
 toc;
 
 figure(1);
-subplot(1, 2, 1);
-imagesc(m2psi_tot_m0);
+subplot(1, 3, 1);
+imagesc(output_multislice_0.data.m2psi_tot);
 title('Total intensity');
 axis image;
 colormap gray;
 
-subplot(1, 2, 2);
-imagesc(m2psi_tot_m1);
+subplot(1, 3, 2);
+imagesc(output_multislice_1.data.m2psi_tot);
+title('Total intensity');
+axis image;
+colormap gray;
+
+subplot(1, 3, 3);
+imagesc(output_multislice_2.m2psi);
 title('Total intensity');
 axis image;
 colormap gray;

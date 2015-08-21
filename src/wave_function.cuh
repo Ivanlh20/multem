@@ -19,7 +19,7 @@
 #ifndef WAVE_FUNCTION_H
 #define WAVE_FUNCTION_H
 
-#include "types.hpp"
+#include "types.cuh"
 #include "fft2.cuh"
 #include "input_multislice.hpp"
 #include "host_functions.hpp"
@@ -41,7 +41,7 @@ namespace multem
 
 			static const eDevice device = dev;
 
-			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, Stream<value_type_r, dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
+			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, Stream<dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
 			{
 				exp_x.resize(input_multislice_i->grid.nx);
 				exp_y.resize(input_multislice_i->grid.ny);
@@ -49,13 +49,13 @@ namespace multem
 				psi_z.resize(input_multislice_i->grid.nxy());
 				m2psi_z.resize(input_multislice_i->grid.nxy());
 
-				if(input_multislice_i->is_Device())
+				if(input_multislice_i->is_device())
 				{
 					psi_zh.resize(input_multislice_i->grid.nxy());
 					m2psi_zh.resize(input_multislice_i->grid.nxy());
 				}
 
-				prog.set_input_data(input_multislice_i, fft2_i);
+				prog.set_input_data(input_multislice_i, stream_i, fft2_i);
 
 				if(input_multislice_i->is_HRTEM_HCI_EFTEM())
 				{
@@ -80,7 +80,11 @@ namespace multem
 				value_type_r x = this->input_multislice->get_Rx_pos_shift();
 				value_type_r y = this->input_multislice->get_Ry_pos_shift();
 
-				multem::probe(this->input_multislice->grid, this->input_multislice->lens, x, y, psi_z);
+				//value_type_r f0 = this->input_multislice->lens.f;
+				//value_type_r f = f0 - (slice.size()>0)?slice.z_int_0[0]:0;
+				//this->input_multislice->lens.set_defocus(f);
+				multem::probe(*(this->stream), this->input_multislice->grid, this->input_multislice->lens, x, y, psi_z);
+				//this->input_multislice->lens.set_defocus(f0);
 				this->fft2->inverse(psi_z);
 			}
 
@@ -96,7 +100,7 @@ namespace multem
 				}
 
 				multem::phase_components(this->input_multislice->grid, gxu, gyu, exp_x, exp_y);
-				multem::phase_multiplication(this->input_multislice->grid, exp_x, exp_y, psi_i, psi_o);
+				multem::phase_multiplication(*(this->stream), this->input_multislice->grid, exp_x, exp_y, psi_i, psi_o);
 			}	
 
 			void phase_multiplication(const value_type_r &gxu, const value_type_r &gyu, Vector<value_type_c, dev> &psi_io)
@@ -145,15 +149,15 @@ namespace multem
 					Vector<value_type_c, dev> *psi_zt = get_psi(ithk, this->input_multislice->get_simulation_space(), gxu, gyu);
 					if(this->input_multislice->is_EWSFS_EWSRS())
 					{
-						multem::copy_to_host(this->input_multislice->grid, *psi_zt, output_multislice.psi_coh[ithk], &psi_zh);
+						multem::copy_to_host(output_multislice.stream, this->input_multislice->grid, *psi_zt, output_multislice.psi_coh[ithk], &psi_zh);
 					}
 					else if(this->input_multislice->is_HRTEM_HCI_EFTEM())
 					{
 						microscope_effects.apply(*psi_zt, m2psi_z);
-						multem::add_scale_to_host(this->input_multislice->grid, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
+						multem::add_scale_to_host(output_multislice.stream, this->input_multislice->grid, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
 						if(this->input_multislice->coherent_contribution)
 						{
-							multem::add_scale_to_host(this->input_multislice->grid, w_i, *psi_zt, output_multislice.psi_coh[ithk], &psi_zh);
+							multem::add_scale_to_host(output_multislice.stream, this->input_multislice->grid, w_i, *psi_zt, output_multislice.psi_coh[ithk], &psi_zh);
 						}
 					}
 					else if(this->input_multislice->is_STEM())
@@ -163,24 +167,24 @@ namespace multem
 							value_type_r g_inner = this->input_multislice->det_cir.g_inner(iDet);
 							value_type_r g_outer = this->input_multislice->det_cir.g_outer(iDet);
 							int iscan = this->input_multislice->iscan;
-							output_multislice.image_tot[ithk].image[iDet][iscan] += w_i*sum_square_over_Det(this->input_multislice->grid, g_inner, g_outer, *psi_zt);
+							output_multislice.image_tot[ithk].image[iDet][iscan] += w_i*sum_square_over_Det(*(this->stream), this->input_multislice->grid, g_inner, g_outer, *psi_zt);
 						}
 
 						if(this->input_multislice->coherent_contribution)
 						{
-							multem::add_scale_to_host(this->input_multislice->grid, w_i, *psi_zt, output_multislice.psi_coh[ithk], &psi_zh);
+							multem::add_scale_to_host(output_multislice.stream, this->input_multislice->grid, w_i, *psi_zt, output_multislice.psi_coh[ithk], &psi_zh);
 						}
 					}
 					else
 					{
 						if(this->input_multislice->coherent_contribution)
 						{
-							multem::add_scale_m2psi_psi(this->input_multislice->grid, w_i, *psi_zt, output_multislice.m2psi_tot[ithk], output_multislice.psi_coh[ithk], &psi_zh);
+							multem::add_scale_m2psi_psi_to_host(output_multislice.stream, this->input_multislice->grid, w_i, *psi_zt, output_multislice.m2psi_tot[ithk], output_multislice.psi_coh[ithk], &psi_zh);
 						}
 						else
 						{
 							multem::assign_square(*psi_zt, m2psi_z);
-							multem::add_scale_to_host(this->input_multislice->grid, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
+							multem::add_scale_to_host(output_multislice.stream, this->input_multislice->grid, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
 						}
 					}
 				}
@@ -200,7 +204,7 @@ namespace multem
 					{
 						multem::assign(output_multislice.psi_coh[ithk], psi_z, &psi_zh);
 						microscope_effects.apply(psi_z, m2psi_z);
-						multem::copy_to_host(this->input_multislice->grid, m2psi_z, output_multislice.m2psi_coh[ithk], &m2psi_zh);
+						multem::copy_to_host(output_multislice.stream, this->input_multislice->grid, m2psi_z, output_multislice.m2psi_coh[ithk], &m2psi_zh);
 					}
 				}
 				else if(this->input_multislice->is_STEM())
@@ -213,7 +217,7 @@ namespace multem
 							value_type_r g_inner = this->input_multislice->det_cir.g_inner(iDet);
 							value_type_r g_outer = this->input_multislice->det_cir.g_outer(iDet);
 							int iscan = this->input_multislice->iscan;
-							output_multislice.image_coh[ithk].image[iDet][iscan] = sum_square_over_Det(this->input_multislice->grid, g_inner, g_outer, psi_z);
+							output_multislice.image_coh[ithk].image[iDet][iscan] = sum_square_over_Det(*(this->stream), this->input_multislice->grid, g_inner, g_outer, psi_z);
 						}
 					}
 				}
@@ -289,14 +293,14 @@ namespace multem
 					if(this->input_multislice->is_EELS())
 					{
 						int iscan = this->input_multislice->iscan;
-						output_multislice.image_tot[ithk].image[0][iscan] += w_i*sum_square_over_Det(this->input_multislice->grid, 0, this->input_multislice->eels_fr.g_collection, psi_z);
+						output_multislice.image_tot[ithk].image[0][iscan] += w_i*sum_square_over_Det(*(this->stream), this->input_multislice->grid, 0, this->input_multislice->eels_fr.g_collection, psi_z);
 					}
 					else
 					{
-						multem::bandwidth_limit(this->input_multislice->grid, 0, this->input_multislice->eels_fr.g_collection, 1.0, psi_z);
+						multem::bandwidth_limit(*(this->stream), this->input_multislice->grid, 0, this->input_multislice->eels_fr.g_collection, 1.0, psi_z);
 						this->fft2->inverse(psi_z);
 						multem::assign_square(psi_z, m2psi_z);
-						multem::add_scale_to_host(this->input_multislice->grid, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
+						multem::add_scale_to_host(output_multislice.stream, this->input_multislice->grid, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
 					}
 				}
 			}
@@ -306,8 +310,8 @@ namespace multem
 			Vector<value_type_c, dev> psi_z;
 			Vector<value_type_r, dev> m2psi_z;
 
-			Vector<value_type_c, e_Host> psi_zh;
-			Vector<value_type_r, e_Host> m2psi_zh;
+			Vector<value_type_c, e_host> psi_zh;
+			Vector<value_type_r, e_host> m2psi_zh;
 
 			Microscope_Effects<value_type_r, dev> microscope_effects;
 		private:

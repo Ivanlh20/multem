@@ -19,7 +19,7 @@
 #ifndef FFT2_H
 #define FFT2_H
 
-#include <types.hpp>
+#include <types.cuh>
 #include <fftw3.h>
 
 #include <cuda.h>
@@ -32,13 +32,13 @@ namespace multem
 	struct FFT2;
 
 	template<>
-	struct FFT2<float, e_Host>
+	struct FFT2<float, e_host>
 	{
 		public:
 			using value_type = float;
-			using TVector_c = Vector<complex<float>, e_Host>;
+			using TVector_c = Vector<complex<float>, e_host>;
 
-			static const eDevice device = e_Host;
+			static const eDevice device = e_host;
 
 			FFT2(): plan_forward(nullptr), plan_backward(nullptr){ fftwf_init_threads(); }
 
@@ -121,13 +121,13 @@ namespace multem
 	};
 
 	template<>
-	struct FFT2<double, e_Host>
+	struct FFT2<double, e_host>
 	{
 		public:
 			using value_type = double;
-			using TVector_c = Vector<complex<double>, e_Host>;
+			using TVector_c = Vector<complex<double>, e_host>;
 
-			static const eDevice device = e_Host;
+			static const eDevice device = e_host;
 
 			FFT2(): plan_forward(nullptr), plan_backward(nullptr){ fftw_init_threads(); }
 
@@ -210,13 +210,13 @@ namespace multem
 	};
 
 	template<>
-	struct FFT2<float, e_Device>
+	struct FFT2<float, e_device>
 	{
 		public:
 			using value_type = float;
-			using TVector_c = Vector<complex<float>, e_Device>;
+			using TVector_c = Vector<complex<float>, e_device>;
 
-			static const eDevice device = e_Device;
+			static const eDevice device = e_device;
 
 			FFT2(): plan_forward(0), plan_backward(0){}
 
@@ -281,13 +281,13 @@ namespace multem
 	};
 
 	template<>
-	struct FFT2<double, e_Device>
+	struct FFT2<double, e_device>
 	{
 		public:
 			using value_type = double;
-			using TVector_c = Vector<complex<double>, e_Device>;
+			using TVector_c = Vector<complex<double>, e_device>;
 
-			static const eDevice device = e_Device;
+			static const eDevice device = e_device;
 
 			FFT2(): plan_forward(0), plan_backward(0){}
 

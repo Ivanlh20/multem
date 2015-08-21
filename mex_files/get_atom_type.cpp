@@ -17,14 +17,14 @@
  */
 
 #include <vector>
-#include "types.hpp"
+#include "types.cuh"
 #include "atomic_data.hpp"
 
 #include <mex.h>
-#include "mex_matlab.hpp"
+#include "matlab_mex.cuh"
 
 using multem::rmatrix_r;
-using multem::e_Host;
+using multem::e_host;
 using multem::Atom_Type;
 
 template<class TAtom_Types>
@@ -104,7 +104,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	multem::Atomic_Data atomic_data;
 	atomic_data.Load_Data(potential_type);
-	multem::Vector<Atom_Type<double, e_Host>, e_Host> atom_type(multem::c_nAtomsTypes);
+	multem::Vector<Atom_Type<double, e_host>, e_host> atom_type(multem::c_nAtomsTypes);
 
 	for(auto i=0; i<atom_type.size(); i++)
 	{

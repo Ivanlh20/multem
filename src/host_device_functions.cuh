@@ -23,7 +23,7 @@
 #include <algorithm>
 
 #include "math.cuh"
-#include "types.hpp"
+#include "types.cuh"
 #include "traits.cuh"
 
 #include <thrust/complex.h>
@@ -108,14 +108,73 @@ namespace multem
 		aperture = get_Scherzer_aperture(E_0, Cs3);
 	}
 
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	Vector<T, e_host> get_rotation_matrix(const T &theta, const Pos_3d<T> &u0)
+	{
+		T u_x = thrust::get<0>(u0);
+		T u_y = thrust::get<1>(u0);
+		T u_z = thrust::get<2>(u0);
+
+		Vector<T, e_host> Rm(9);
+		T alpha = 1-cos(theta);
+		T beta = sin(theta);
+		Rm[0] = 1.0 + alpha*(u_x*u_x-1);
+		Rm[1] = u_y*u_x*alpha + u_z*beta;
+		Rm[2] = u_z*u_x*alpha - u_y*beta;
+		Rm[3] = u_x*u_y*alpha - u_z*beta;
+		Rm[4] = 1.0 + alpha*(u_y*u_y-1);
+		Rm[5] = u_z*u_y*alpha + u_x*beta;
+		Rm[6] = u_x*u_z*alpha + u_y*beta;
+		Rm[7] = u_y*u_z*alpha - u_x*beta;
+		Rm[8] = 1.0 + alpha*(u_z*u_z-1);
+		return Rm;
+	}
+
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	void rotate_position(const Vector<T, e_host> &Rm, const Pos_3d<T> &p0, T x_i, T y_i, T z_i, T &x_o, T &y_o, T &z_o)
+	{
+		T r_x = thrust::get<0>(p0);
+		T r_y = thrust::get<1>(p0);
+		T r_z = thrust::get<2>(p0);
+
+		x_i -= r_x;
+		y_i -= r_y;
+		z_i -= r_z;
+		x_o = Rm[0]*x_i + Rm[3]*y_i + Rm[6]*z_i + r_x;
+		y_o = Rm[1]*x_i + Rm[4]*y_i + Rm[7]*z_i + r_y;
+		z_o = Rm[2]*x_i + Rm[5]*y_i + Rm[8]*z_i + r_z;
+	}
+
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	void rotate_position(const Vector<T, e_host> &Rm, const Pos_3d<T> &p0, T &x_io, T &y_io, T &z_io)
+	{
+		rotate_position(Rm, p0, x_io, y_io, z_io, x_io, y_io, z_io);
+	}
+
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	void norm_Pos_3d(Pos_3d<T> &p0)
+	{
+		T &v_x = thrust::get<0>(p0);
+		T &v_y = thrust::get<1>(p0);
+		T &v_z = thrust::get<2>(p0);
+		T norm = sqrt(v_x*v_x + v_y*v_y + v_z*v_z);
+		v_x /= norm;
+		v_y /= norm;
+		v_z /= norm;
+	}
+
 	template<eDevice dev>
 	void device_synchronize()
 	{
-		if(dev == e_Host)
+		if(dev == e_host)
 		{
 
 		}
-		else if(dev == e_Device)
+		else if(dev == e_device)
 		{
 			cudaDeviceSynchronize();
 		}
@@ -1284,7 +1343,7 @@ namespace multem
 		// Cubic polynomial evaluation
 		template<class T> 
 		DEVICE_CALLABLE FORCEINLINE 
-		T eval_cubic_poly(int ix, int iy, T R2, const Grid<T> &grid, const Atom_Vp<T> &atom_Vp, int &ixy)
+		T eval_cubic_poly(int ix, int iy, const Grid<T> &grid, T R2, const Atom_Vp<T> &atom_Vp, int &ixy)
 		{
 			R2 = max(R2, atom_Vp.R_min2);
 
@@ -1315,14 +1374,38 @@ namespace multem
 			thrust::swap(M_io[ixy], M_io[ixy_shift]);
 		}
 
+		template<class TGrid, class TVector>
+		DEVICE_CALLABLE FORCEINLINE 
+		void sum_over_Det(const int &ix, const int &iy, const TGrid &grid, 
+		const Value_type<TGrid> &g2_min, const Value_type<TGrid> &g2_max, const TVector &M_i, Value_type<TGrid> &sum)
+		{
+			auto g2 = grid.g2_shift(ix, iy);
+			if((g2_min <= g2)&&(g2 < g2_max))
+			{
+				int ixy = grid.ind_col(ix, iy); 
+				sum += M_i[ixy];
+			}
+		}
+
+		template<class TGrid, class TVector>
+		DEVICE_CALLABLE FORCEINLINE 
+		void sum_square_over_Det(const int &ix, const int &iy, const TGrid &grid, 
+		const Value_type<TGrid> &g2_min, const Value_type<TGrid> &g2_max, const TVector &M_i, Value_type<TGrid> &sum)
+		{
+			auto g2 = grid.g2_shift(ix, iy);
+			if((g2_min <= g2)&&(g2 < g2_max))
+			{
+				int ixy = grid.ind_col(ix, iy);
+				sum += thrust::norm(M_i[ixy]);
+			}
+		}
+
 		template<class TGrid, class TVector_c>
 		DEVICE_CALLABLE FORCEINLINE 
 		void bandwidth_limit(const int &ix, const int &iy, const TGrid &grid, const Value_type<TGrid> &g2_min, const Value_type<TGrid> &g2_max, const Value_type<TVector_c> &w, TVector_c &M_io)
 		{
-			using value_type_r = Value_type<TGrid>;
-
 			int ixy = grid.ind_col(ix, iy); 
-			value_type_r g2 = grid.g2_shift(ix, iy);
+			auto g2 = grid.g2_shift(ix, iy);
 
 			if((g2_min <= g2)&&(g2 <= g2_max))
 			{
@@ -1451,6 +1534,19 @@ namespace multem
 			else
 			{
 				fPsi_o[ixy] = 0;
+			}
+		}
+
+		template<class TGrid>
+		DEVICE_CALLABLE FORCEINLINE 
+		void Lorentz_factor(const int &ix, const int &iy, const TGrid &grid, const Value_type<TGrid> &gc2, const Value_type<TGrid> &ge2, Value_type<TGrid> &sum)
+		{
+			using value_type_r = Value_type<TGrid>;
+
+			value_type_r g2 = grid.g2_shift(ix, iy);
+			if(g2 < gc2)
+			{
+				sum += 1.0/(g2 + ge2);
 			}
 		}
 
@@ -2235,24 +2331,13 @@ namespace multem
 	}
 
 	template<class TVector>
-	enable_if_not_rmatrix_c<TVector, void>
-	fill(TVector &M_io, Value_type<TVector> value_i)
+	void fill(TVector &M_io, Value_type<TVector> value_i)
 	{
 		thrust::fill(M_io.begin(), M_io.end(), value_i);
 	}
 
-	template<class TVector>
-	enable_if_rmatrix_c<TVector, void>
-	fill(TVector &M_io, complex<double> value_i)
-	{
-		for(auto ixy = 0; ixy < M_io.size; ixy++)
-		{
-			M_io[ixy] = value_i;
-		}
-	}
-
 	template<class TVector_1, class TVector_2>
-	void assign(TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_Host> *M_i_h=nullptr)
+	void assign(TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h=nullptr)
 	{
 		M_o.assign(M_i.begin(), M_i.end());
 	}
@@ -2262,14 +2347,6 @@ namespace multem
 	{
 		using value_type = Value_type<TVector_2>;
 		thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), functor::square<value_type>());
-	}
-
-	void assign_square(rmatrix_c &M_i, rmatrix_r &M_o)
-	{
-		for(auto i = 0; i < M_i.size; i++)
-		{
-			M_o[i] = M_i.real[i]*M_i.real[i] + M_i.imag[i]*M_i.imag[i];
-		}
 	}
 
 	template<class TVector>
@@ -2286,7 +2363,6 @@ namespace multem
 		thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), functor::square_scale<value_type>(w_i));
 	}
 
-
 	template<class TVector_1, class TVector_2>
 	void add(const TVector_1 &M_i, TVector_2 &M_o)
 	{
@@ -2300,7 +2376,6 @@ namespace multem
 		using value_type = Value_type<TVector_1>;
 		thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), thrust::plus<value_type>());
 	}
-
 
 	template<class TVector_1, class TVector_2>
 	void add_square(const TVector_1 &M_i, TVector_2 &M_o)
@@ -2397,12 +2472,12 @@ namespace multem
 						 functor::propagator_components<TGrid>(grid, w, gxu, gyu));
 	}
 
-	template<class TGrid, class TFFT2, class TVector>
-	void propagate(TGrid &grid, TFFT2 &fft2, eSpace space, TVector &prop_x_i, TVector &prop_y_i, TVector &psi_i, TVector &psi_o)
+	template<class TStream, class TFFT2, class TGrid, class TVector>
+	void propagate(TStream &stream, TFFT2 &fft2, TGrid &grid, eSpace space, TVector &prop_x_i, TVector &prop_y_i, TVector &psi_i, TVector &psi_o)
 	{
 		fft2.forward(psi_i, psi_o); 
 
-		propagator_multiplication(grid, prop_x_i, prop_y_i, psi_o, psi_o);
+		propagator_multiplication(stream, grid, prop_x_i, prop_y_i, psi_o, psi_o);
 
 		if(space == eS_Real)
 		{
@@ -2410,8 +2485,8 @@ namespace multem
 		}
 	}
 
-	template<class TGrid, class TFFT2, class TVector_1, class TVector_2>
-	void transmission_funtion(TGrid &grid, TFFT2 &fft2, eElec_Spec_Int_Model elec_spec_int_model, const Value_type<TGrid> w, TVector_1 &V0_i, TVector_2 &Trans_o)
+	template<class TStream, class TGrid, class TFFT2, class TVector_1, class TVector_2>
+	void transmission_funtion(TStream &stream, TGrid &grid, TFFT2 &fft2, eElec_Spec_Int_Model elec_spec_int_model, const Value_type<TGrid> w, TVector_1 &V0_i, TVector_2 &Trans_o)
 	{	
 		using value_type_r = Value_type<TGrid>;
 
@@ -2420,16 +2495,9 @@ namespace multem
 		if(grid.bwl)
 		{
 			fft2.forward(Trans_o);
-			bandwidth_limit(grid, 0, grid.gl_max, grid.inxy, Trans_o);
+			bandwidth_limit(stream, grid, 0, grid.gl_max, grid.inxy, Trans_o);
 			fft2.inverse(Trans_o);
 		}
-	}
-
-	template<class TGrid, class TVector_i, class TVector_o>
-	void to_host_shift(TGrid &grid, TVector_i &M_i, TVector_o &M_o)
-	{
-		copy_to_host(grid, M_i, M_o);
-		fft2_shift(grid, M_o);
 	}
 
 } //namespace multem

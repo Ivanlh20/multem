@@ -21,7 +21,8 @@
 
 #include <type_traits>
 #include "math.cuh"
-#include "types.hpp"
+#include "types.cuh"
+#include "matlab_types.cuh"
 
 namespace multem
 {
@@ -45,12 +46,6 @@ namespace multem
 
 	template<class T>
 	struct is_fundamental: std::integral_constant<bool, std::is_fundamental<T>::value || std::is_same<T, complex<float>>::value || std::is_same<T, complex<double>>::value> {};
-
-	template<class T>
-	struct is_rmatrix_r: std::integral_constant<bool, std::is_same<T, rmatrix_r>::value> {};
-
-	template<class T>
-	struct is_rmatrix_c: std::integral_constant<bool, std::is_same<T, rmatrix_c>::value> {};
 
 	template<class T>
 	struct is_enum_bool: std::integral_constant<bool, std::is_enum<T>::value || is_bool<T>::value> {};
@@ -97,7 +92,7 @@ namespace multem
 	struct is_host_vector: std::integral_constant<bool, false> {};
 
 	template<class T>
-	struct is_host_vector<T, typename std::enable_if<detail_traits::has_value_type<T>::value>::type>: std::integral_constant<bool, std::is_same<T, host_vector<Value_type<T>>>::value || std::is_same<T, vector<Value_type<T>>>::value> {};
+	struct is_host_vector<T, typename std::enable_if<detail_traits::has_value_type<T>::value>::type>: std::integral_constant<bool, std::is_same<T, host_vector<Value_type<T>>>::value || std::is_same<T, vector<Value_type<T>>>::value || is_rmatrix_r<T>::value> {};
 
 	template<class T, class Enable = void>
 	struct is_device_vector: std::integral_constant<bool, false> {};
@@ -105,20 +100,23 @@ namespace multem
 	template<class T>
 	struct is_device_vector<T, typename std::enable_if<detail_traits::has_value_type<T>::value>::type>: std::integral_constant<bool, std::is_same<T, device_vector<Value_type<T>>>::value> {};
 
-	template<class T, eDevice dev=e_none>
-	struct is_Vector: std::integral_constant<bool, (dev == e_none)?(is_host_vector<T>::value || is_device_vector<T>::value):((dev == e_Host)?is_host_vector<T>::value:is_device_vector<T>::value)> {};
+	template<class T>
+	struct is_host_device_vector: std::integral_constant<bool, is_host_vector<T>::value || is_device_vector<T>::value> {};
+
+	template<class T, eDevice dev=e_host_device>
+	struct is_Vector: std::integral_constant<bool, (dev == e_host_device)?(is_host_device_vector<T>::value):((dev == e_host)?is_host_vector<T>::value:is_device_vector<T>::value)> {};
 
 	template<class T, eDevice dev, class Enable = void>
-	struct is_Host_Device: std::integral_constant<bool, is_Vector<T, dev>::value> {};
+	struct is_host_device: std::integral_constant<bool, is_Vector<T, dev>::value> {};
 
 	template<class T, eDevice dev>
-	struct is_Host_Device<T, dev, typename std::enable_if<detail_traits::has_device_member<T>::value>::type>: std::integral_constant<bool, T::device == dev> {};
+	struct is_host_device<T, dev, typename std::enable_if<detail_traits::has_device_member<T>::value>::type>: std::integral_constant<bool, T::device == dev> {};
 
 	template<class T>
-	struct is_Host: std::integral_constant<bool, is_Host_Device<T, e_Host>::value> {};
+	struct is_host: std::integral_constant<bool, is_host_device<T, e_host>::value> {};
 
 	template<class T>
-	struct is_Device: std::integral_constant<bool, is_Host_Device<T, e_Device>::value> {};
+	struct is_device: std::integral_constant<bool, is_host_device<T, e_device>::value> {};
 
 	template <class T, class U>
 	using enable_if_host_vector = typename std::enable_if<is_host_vector<T>::value, U>::type;
@@ -127,10 +125,25 @@ namespace multem
 	using enable_if_device_vector = typename std::enable_if<is_device_vector<T>::value, U>::type;
 
 	template <class T, class U>
-	using enable_if_Host = typename std::enable_if<is_Host<T>::value, U>::type;
+	using enable_if_host_device_vector = typename std::enable_if<is_host_device_vector<T>::value, U>::type;
+
+	template <class T1, class T2, class U>
+	using enable_if_host_vector_and_vector = typename std::enable_if<is_host_vector<T1>::value && is_host_device_vector<T2>::value, U>::type;
+
+	template <class T1, class T2, class U>
+	using enable_if_device_vector_and_vector = typename std::enable_if<is_device_vector<T1>::value && is_host_device_vector<T2>::value, U>::type;
+
+	template <class T1, class T2, class U>
+	using enable_if_host_vector_and_host_vector = typename std::enable_if<is_host_vector<T1>::value && is_host_vector<T2>::value, U>::type;
+
+	template <class T1, class T2, class U>
+	using enable_if_device_vector_and_host_vector = typename std::enable_if<is_device_vector<T1>::value && is_host_vector<T2>::value, U>::type;
 
 	template <class T, class U>
-	using enable_if_Device = typename std::enable_if<is_Device<T>::value, U>::type;
+	using enable_if_host = typename std::enable_if<is_host<T>::value, U>::type;
+
+	template <class T, class U>
+	using enable_if_device = typename std::enable_if<is_device<T>::value, U>::type;
 
 	template <class T, class U>
 	using enable_if_float = typename std::enable_if<is_float<T>::value, U>::type;
@@ -152,18 +165,6 @@ namespace multem
 		
 	template <class T, class U>
 	using enable_if_pointer = typename std::enable_if<std::is_pointer<T>::value, U>::type;
-
-	template <class T, class U>
-	using enable_if_rmatrix_r = typename std::enable_if<is_rmatrix_r<T>::value, U>::type;
-
-	template <class T, class U>
-	using enable_if_rmatrix_c = typename std::enable_if<is_rmatrix_c<T>::value, U>::type;
-
-	template <class T, class U>
-	using enable_if_not_rmatrix_c = typename std::enable_if<!is_rmatrix_c<T>::value, U>::type;
-
-	template <class T, class U>
-	using enable_if_rmatrix = typename std::enable_if<is_rmatrix_r<T>::value || is_rmatrix_c<T>::value, U>::type;	
 
 	template <int simulation_type, class U>
 	using enable_if_STEM = typename std::enable_if<simulation_type == eST_STEM, U>::type;

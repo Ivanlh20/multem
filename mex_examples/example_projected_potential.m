@@ -25,8 +25,8 @@ na = 4; nb = 4; nc = 4; ncu = 2; rms3d = 0.085;
 , input_multislice.ly, input_multislice.lz...
 , a, b, c, input_multislice.dz] = Au001Crystal(na, nb, nc, ncu, rms3d);
 
-input_multislice.nx = 1024; 
-input_multislice.ny = 1024;
+input_multislice.nx = 2048; 
+input_multislice.ny = 2048;
 
 clear get_specimen_slicing;
 [atoms, Slice] = get_specimen_slicing(input_multislice);
@@ -35,8 +35,8 @@ clear get_specimen_slicing;
 for islice = 1:nslice
     input_multislice.islice = islice;
     
-    input_multislice.device = 1;                        % eD_CPU = 1, eD_GPU = 2
-    input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
+    input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+    input_multislice.precision = 2;                     % eP_Float = 1, eP_double = 2
     tic;
     clear get_projected_potential;
     ouput_multislice_1 = get_projected_potential(input_multislice);

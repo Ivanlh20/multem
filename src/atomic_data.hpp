@@ -20,7 +20,7 @@
 #define ATOMIC_DATA_H
 
 #include "math.cuh"
-#include "types.hpp"
+#include "types.cuh"
 #include "atom_cal.hpp"
 
 namespace multem
@@ -121,8 +121,8 @@ namespace multem
 					c_atom_type.R2[iR] = pow(c_atom_type.R[iR], 2);
 				}
 
-				Vector<value_type, e_Host> VR(nR_i);
-				Vector<value_type, e_Host> dVR(nR_i);
+				Vector<value_type, e_host> VR(nR_i);
+				Vector<value_type, e_host> dVR(nR_i);
 
 				c_atom_cal.Set_Atom_Type(potential_type, &c_atom_type);
 				c_atom_cal.VR_dVR(nR_i, c_atom_type.R.data(), VR.data(), dVR.data());
@@ -159,8 +159,8 @@ namespace multem
 				int A;						// mass number	
 				double rn;					// nuclear radius	
 				double ra;					// atomic radius
-				Vector<double, e_Host> cl;	// Lineal coefficients fe paraterization
-				Vector<double, e_Host> cnl;	// non-Lineal coefficients fe paraterization
+				Vector<double, e_host> cl;	// Lineal coefficients fe paraterization
+				Vector<double, e_host> cnl;	// non-Lineal coefficients fe paraterization
 			};
 
 			// Load atomic data tables
@@ -1079,16 +1079,16 @@ namespace multem
 
 			ePotential_Type potential_type;
 
-			Vector<Data_Table, e_Host> data_table;
+			Vector<Data_Table, e_host> data_table;
 
-			PP_Coef<double, e_Host> c_feg;
-			PP_Coef<double, e_Host> c_fxg;
-			PP_Coef<double, e_Host> c_Pr;
-			PP_Coef<double, e_Host> c_Vr;
-			PP_Coef<double, e_Host> c_VR;
+			PP_Coef<double, e_host> c_feg;
+			PP_Coef<double, e_host> c_fxg;
+			PP_Coef<double, e_host> c_Pr;
+			PP_Coef<double, e_host> c_Vr;
+			PP_Coef<double, e_host> c_VR;
 
 			Atom_Cal<double> c_atom_cal;
-			Atom_Type<double, e_Host> c_atom_type;
+			Atom_Type<double, e_host> c_atom_type;
 	};
 
 } //namespace multem

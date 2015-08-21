@@ -46,8 +46,8 @@ clear get_specimen_slicing;
 for islice = 1:nslice
     input_multislice.islice = islice;
     
-    input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
-    input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
+    input_multislice.device = 1;                        % eD_CPU = 1, eD_GPU = 2
+    input_multislice.precision = 2;                     % eP_Float = 1, eP_double = 2
     tic;
     clear get_transmission_function;
     ouput_multislice_1 = get_transmission_function(input_multislice);

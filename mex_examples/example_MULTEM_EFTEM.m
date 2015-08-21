@@ -42,7 +42,7 @@ input_multislice.ny = 1024;
 
 input_multislice.eftem_E_loss = 532;           % Energy loss (eV)
 input_multislice.eftem_m_selection = 3;        % selection rule
-input_multislice.eftem_channelling_type = 3;   % eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_FOMS = 3, eCT_Double_Channelling_SOMS = 4
+input_multislice.eftem_channelling_type = 2;   % eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_FOMS = 3, eCT_Double_Channelling_SOMS = 4
 input_multislice.eftem_collection_angle = 100; % Collection half angle (mrad)
 input_multislice.eftem_Z = 8;                  % atomic type
 

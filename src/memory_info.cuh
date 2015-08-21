@@ -36,7 +36,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "types.hpp"
+#include "types.cuh"
 #include "device_functions.cuh"
 
 #include <cuda.h>
@@ -48,7 +48,7 @@ namespace multem
 	void memory_info(double &total, double &free);
 
 	template<>
-	void memory_info<e_Host>(double &total, double &free)
+	void memory_info<e_host>(double &total, double &free)
 	{
 #ifdef _WIN32
 		MEMORYSTATUSEX status;
@@ -69,7 +69,7 @@ namespace multem
 	}
 
 	template<>
-	void memory_info<e_Device>(double &total, double &free)
+	void memory_info<e_device>(double &total, double &free)
 	{
 		free = total = 0;
 		size_t free_t, total_t;
@@ -84,18 +84,18 @@ namespace multem
 	double get_free_memory(){ return 0; }
 
 	template<>
-	double get_free_memory<e_Host>()
+	double get_free_memory<e_host>()
 	{
 		double total, free;
-		memory_info<e_Host>(total, free);
+		memory_info<e_host>(total, free);
 		return free;
 	}
 
 	template<>
-	double get_free_memory<e_Device>()
+	double get_free_memory<e_device>()
 	{
 		double total, free;
-		memory_info<e_Device>(total, free);
+		memory_info<e_device>(total, free);
 		return free;
 	}
 
@@ -122,7 +122,7 @@ namespace multem
 			device_properties[idev].id = idev;
 			device_properties[idev].name = cuda_device_prop.name;
 			device_properties[idev].compute_capability = 10*cuda_device_prop.major+cuda_device_prop.minor;
-			memory_info<e_Device>(device_properties[idev].total_memory_size, device_properties[idev].free_memory_size);
+			memory_info<e_device>(device_properties[idev].total_memory_size, device_properties[idev].free_memory_size);
 		}
 
 		auto compare_fn = [](const Device_Properties &a, const Device_Properties &b)->bool{ return a.compute_capability > b.compute_capability; };
@@ -145,7 +145,7 @@ namespace multem
 		host_properties.nprocessors = sysconf(_SC_NPROCESSORS_ONLN);
 #endif
 		host_properties.nthreads = std::thread::hardware_concurrency();
-		memory_info<e_Host>(host_properties.total_memory_size, host_properties.free_memory_size);
+		memory_info<e_host>(host_properties.total_memory_size, host_properties.free_memory_size);
 	}
 
 } // namespace multem

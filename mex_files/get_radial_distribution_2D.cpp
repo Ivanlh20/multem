@@ -19,7 +19,7 @@
 #include "host_functions.hpp"
 
 #include <mex.h>
-#include "mex_matlab.hpp"
+#include "matlab_mex.cuh"
 
 using multem::rmatrix_r;
 

@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "math.cuh"
-#include "types.hpp"
+#include "types.cuh"
 #include "traits.cuh"
 #include "atom_data.hpp"
 #include "input_multislice.hpp"
@@ -34,18 +34,21 @@
 namespace multem
 {
 	template<class TVector_r, class TVector_c>
-	class Output_Multislice: public Input_Multislice<Value_type<TVector_r>, e_Host>
+	class Output_Multislice: public Input_Multislice<Value_type<TVector_r>, e_host>
 	{
 		public:
 			using value_type_r = Value_type<TVector_r>;
+			using value_type_c = Value_type<TVector_c>;
 			static const bool is_vector = is_Vector<TVector_r>::value;
 
-			Output_Multislice(): Input_Multislice<value_type_r, e_Host>(), output_type(0), nx(0), ny(0), dx(0), dy(0){}
+			Output_Multislice(): Input_Multislice<value_type_r, e_host>(), output_type(0), nx(0), ny(0), dx(0), dy(0){}
 
 			template<class TInput_Multislice>
 			void set_input_data(TInput_Multislice *input_multislice_i)
 			{ 
 				set_input_multislice(*input_multislice_i);
+
+				stream.resize(this->cpu_nthread);
 
 				// 1:(image_tot, image_coh); 2:(image_tot); 3:(m2psi_tot, m2psi_coh); 4:(m2psi_tot); 5:(m2psi_tot, psi_coh); 6:(psi_coh); 7:(probe); 8:(V); 9:(trans)
 				switch(output_type)
@@ -205,7 +208,7 @@ namespace multem
 								multem::fill(image_tot[ithk].image[idet], 0);
 								multem::fill(image_coh[ithk].image[idet], 0);
 							}
-							multem::fill(psi_coh[ithk], 0);
+							multem::fill(psi_coh[ithk], value_type_c(0));
 						}
 						break;
 						case 2:
@@ -219,7 +222,7 @@ namespace multem
 						case 3:
 						{
 							multem::fill(m2psi_tot[ithk], 0);
-							multem::fill(psi_coh[ithk], 0);
+							multem::fill(psi_coh[ithk], value_type_c(0));
 						}
 						break;
 						case 4:
@@ -230,17 +233,17 @@ namespace multem
 						case 5:
 						{
 							multem::fill(m2psi_tot[ithk], 0);
-							multem::fill(psi_coh[ithk], 0);
+							multem::fill(psi_coh[ithk], value_type_c(0));
 						}
 						break;
 						case 6:
 						{
-							multem::fill(psi_coh[ithk], 0);							
+							multem::fill(psi_coh[ithk], value_type_c(0));							
 						}
 						break;
 						case 7:
 						{
-							multem::fill(probe[ithk], 0);
+							multem::fill(probe[ithk], value_type_c(0));
 						}
 						break;
 						case 8:
@@ -250,7 +253,7 @@ namespace multem
 						break;
 						case 9:
 						{
-							multem::fill(trans[ithk], 0);
+							multem::fill(trans[ithk], value_type_c(0));
 						}
 						break;
 					}
@@ -265,39 +268,39 @@ namespace multem
 					{
 						case 3:
 						{
-							multem::fft2_shift(this->grid, m2psi_tot[ithk]);
-							multem::fft2_shift(this->grid, m2psi_coh[ithk]);
+							multem::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
+							multem::fft2_shift(stream, this->grid, m2psi_coh[ithk]);
 						}
 						break;
 						case 4:
 						{
-							multem::fft2_shift(this->grid, m2psi_tot[ithk]);
+							multem::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
 						}
 						break;
 						case 5:
 						{
-							multem::fft2_shift(this->grid, m2psi_tot[ithk]);
-							multem::fft2_shift(this->grid, psi_coh[ithk]);
+							multem::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
+							multem::fft2_shift(stream, this->grid, psi_coh[ithk]);
 						}
 						break;
 						case 6:
 						{
-							multem::fft2_shift(this->grid, psi_coh[ithk]);							
+							multem::fft2_shift(stream, this->grid, psi_coh[ithk]);							
 						}
 						break;
 						case 7:
 						{
-							multem::fft2_shift(this->grid, probe[ithk]);
+							multem::fft2_shift(stream, this->grid, probe[ithk]);
 						}
 						break;
 						case 8:
 						{
-							multem::fft2_shift(this->grid, V[ithk]);
+							multem::fft2_shift(stream, this->grid, V[ithk]);
 						}
 						break;
 						case 9:
 						{
-							multem::fft2_shift(this->grid, trans[ithk]);
+							multem::fft2_shift(stream, this->grid, trans[ithk]);
 						}
 						break;
 					}
@@ -338,18 +341,19 @@ namespace multem
 			value_type_r dx;
 			value_type_r dy;
 
-			Vector<value_type_r, e_Host> x;
-			Vector<value_type_r, e_Host> y;
+			Vector<value_type_r, e_host> x;
+			Vector<value_type_r, e_host> y;
 
-			Vector<Det_Int<TVector_r>, e_Host> image_tot;
-			Vector<Det_Int<TVector_r>, e_Host> image_coh;
-			Vector<TVector_r, e_Host> m2psi_tot;
-			Vector<TVector_r, e_Host> m2psi_coh;
-			Vector<TVector_c, e_Host> psi_coh;
-			Vector<TVector_r, e_Host> V;
-			Vector<TVector_c, e_Host> trans;
-			Vector<TVector_c, e_Host> probe;
+			Vector<Det_Int<TVector_r>, e_host> image_tot;
+			Vector<Det_Int<TVector_r>, e_host> image_coh;
+			Vector<TVector_r, e_host> m2psi_tot;
+			Vector<TVector_r, e_host> m2psi_coh;
+			Vector<TVector_c, e_host> psi_coh;
+			Vector<TVector_r, e_host> V;
+			Vector<TVector_c, e_host> trans;
+			Vector<TVector_c, e_host> probe;
 
+			Stream<e_host> stream;
 		private:
 			template<class TInput_Multislice>
 			void set_input_multislice(TInput_Multislice &input_multislice)
@@ -364,11 +368,22 @@ namespace multem
 				this->interaction_model = input_multislice.interaction_model;
 				this->potential_slicing = input_multislice.potential_slicing;
 				this->potential_type = input_multislice.potential_type;
+
 				this->fp_dim = input_multislice.fp_dim;
 				this->fp_dist = input_multislice.fp_dist;
 				this->fp_seed = input_multislice.fp_seed;
 				this->fp_single_conf = input_multislice.fp_single_conf;
 				this->fp_nconf = input_multislice.fp_nconf;
+
+				this->tm_active = input_multislice.tm_active;
+				this->tm_nrot = input_multislice.tm_nrot;
+				this->tm_irot = input_multislice.tm_irot;
+				this->tm_theta_0 = input_multislice.tm_theta_0;
+				this->tm_theta_e = input_multislice.tm_theta_e;
+				this->tm_u0 = input_multislice.tm_u0;
+				this->tm_rot_point_type = input_multislice.tm_rot_point_type;
+				this->tm_p0 = input_multislice.tm_p0;
+
 				this->microscope_effect = input_multislice.microscope_effect;
 				this->spatial_temporal_effect = input_multislice.spatial_temporal_effect;
 				this->zero_defocus_type = input_multislice.zero_defocus_type;
@@ -479,7 +494,7 @@ namespace multem
 				{
 					output_type = 5;
 				}
-				else if(this->is_EWSFS_EWSRS())
+				else if(this->is_EWSFS_EWSRS() || this->is_PropFS_PropRS())
 				{
 					output_type = 6;
 				}

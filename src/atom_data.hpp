@@ -23,7 +23,7 @@
 #include <algorithm>
 
 #include "math.cuh"
-#include "types.hpp"
+#include "types.cuh"
 
 #include <thrust/sort.h>
 
@@ -100,7 +100,7 @@ namespace multem
 			}
 
 			// set atoms
-			void set_Atoms(const Atom_Data<T> &atoms, bool PBC_xy_i=false, Vector<Atom_Type<T, e_Host>, e_Host> *atom_type=0)
+			void set_Atoms(const Atom_Data<T> &atoms, bool PBC_xy_i=false, Vector<Atom_Type<T, e_host>, e_host> *atom_type=0)
 			{
 				resize(atoms.size());
 
@@ -133,7 +133,7 @@ namespace multem
 			}
 		
 			// get statistic
-			void get_Statistic(Vector<Atom_Type<T, e_Host>, e_Host> *atom_type_ptr=nullptr)
+			void get_Statistic(Vector<Atom_Type<T, e_host>, e_host> *atom_type_ptr=nullptr)
 			{
 				if(Z.empty())
 				{
@@ -336,7 +336,7 @@ namespace multem
 			}
 
 			// get z slicing
-			void get_z_slice(const ePotential_Slicing &potential_slicing, const T &dz_i, const Atom_Data<T> &atoms, Vector<T, e_Host> &z_slice)
+			void get_z_slice(const ePotential_Slicing &potential_slicing, const T &dz_i, const Atom_Data<T> &atoms, Vector<T, e_host> &z_slice)
 			{
 				z_slice.clear();
 
@@ -426,7 +426,7 @@ namespace multem
 					return true;
 				}
 
-				Vector<T, e_Host> dis(z_layer.size()-1);
+				Vector<T, e_host> dis(z_layer.size()-1);
 				for(auto i=0; i<dis.size(); i++)
 				{
 					dis[i] = z_layer[i+1] - z_layer[i];
@@ -436,7 +436,7 @@ namespace multem
 
 				T dz = 0.01;
 				int nhist = static_cast<int>(ceil((max_dis-min_dis)/dz)+1);
-				Vector<int, e_Host> hist(nhist, 0);
+				Vector<int, e_host> hist(nhist, 0);
 				for(auto i=0; i<dis.size(); i++)
 				{
 					int j = static_cast<int>(floor((dis[i]-min_dis)/dz+0.5));
@@ -469,15 +469,15 @@ namespace multem
 			T l_y; 			// Box size-y
 			T l_z; 			// Box size-z
 
-			Vector<int, e_Host> idx;
-			Vector<int, e_Host> Z;
-			Vector<T, e_Host> x;
-			Vector<T, e_Host> y;
-			Vector<T, e_Host> z;
-			Vector<float, e_Host> sigma;
-			Vector<float, e_Host> occ;
+			Vector<int, e_host> idx;
+			Vector<int, e_host> Z;
+			Vector<T, e_host> x;
+			Vector<T, e_host> y;
+			Vector<T, e_host> z;
+			Vector<float, e_host> sigma;
+			Vector<float, e_host> occ;
 
-			Vector<T, e_Host> z_layer;
+			Vector<T, e_host> z_layer;
 
 			int Z_min;
 			int Z_max;

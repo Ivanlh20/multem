@@ -20,12 +20,15 @@
 #define PROPAGATOR_H
 
 #include "math.cuh"
-#include "types.hpp"
+#include "types.cuh"
+#include "traits.cuh"
+#include "stream.cuh"
 #include "fft2.cuh"
+#include "input_multislice.hpp"
+#include "output_multislice.hpp"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
-#include "input_multislice.hpp"
 
 namespace multem
 {
@@ -35,11 +38,12 @@ namespace multem
 			using value_type_r = T;
 			using value_type_c = complex<T>;
 
-			Propagator():input_multislice(nullptr), fft2(nullptr){}
+			Propagator():input_multislice(nullptr), stream(nullptr), fft2(nullptr){}
 
-			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, FFT2<value_type_r, dev> *fft2_i)
+			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, Stream<dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
 			{
 				input_multislice = input_multislice_i;
+				stream = stream_i;
 				fft2 = fft2_i;
 
 				prop_x.resize(input_multislice->grid.nx);
@@ -54,7 +58,7 @@ namespace multem
 					if(input_multislice->grid.bwl)
 					{
 						fft2->forward(psi_i, psi_o); 
-						multem::bandwidth_limit(input_multislice->grid, 0, input_multislice->grid.gl_max, input_multislice->grid.inxy, psi_o);
+						multem::bandwidth_limit(*stream, input_multislice->grid, 0, input_multislice->grid.gl_max, input_multislice->grid.inxy, psi_o);
 						if(space == eS_Real)
 						{
 							fft2->inverse(psi_o);
@@ -72,7 +76,7 @@ namespace multem
 				else
 				{
 					multem::propagator_components(input_multislice->grid, gxu, gyu, input_multislice->lens.prop_factor(z), prop_x, prop_y);
-					multem::propagate(input_multislice->grid, *fft2, space, prop_x, prop_y, psi_i, psi_o);
+					multem::propagate(*stream, *fft2, input_multislice->grid, space, prop_x, prop_y, psi_i, psi_o);
 				}
 			}
 
@@ -82,8 +86,19 @@ namespace multem
 				propagate(space, gxu, gyu, z, psi_io, psi_io);
 			}
 
+			template<class TOutput_multislice>
+			void propagate(const eSpace &space, value_type_r gxu, value_type_r gyu, 
+			value_type_r z, TOutput_multislice &output_multislice)
+			{
+				propagate(space, gxu, gyu, z, input_multislice->psi_0, input_multislice->psi_0);
+				multem::copy_to_host(output_multislice.stream, input_multislice->grid, input_multislice->psi_0, output_multislice.psi_coh[0]);
+				output_multislice.shift();
+				output_multislice.clear_temporal_data();
+			}
+
 		private:
 			Input_Multislice<value_type_r, dev> *input_multislice;
+			Stream<dev> *stream;
 			FFT2<value_type_r, dev> *fft2;
 
 			Vector<value_type_c, dev> prop_x;

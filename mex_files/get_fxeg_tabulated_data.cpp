@@ -20,7 +20,7 @@
 #include "fxeg_tabulated_data.h"
 
 #include <mex.h>
-#include "mex_matlab.hpp"
+#include "matlab_mex.cuh"
 
 using multem::rmatrix_r;
 

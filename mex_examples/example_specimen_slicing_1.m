@@ -9,6 +9,15 @@ input_multislice.fp_dim = 111;
 input_multislice.fp_seed = 300183; 
 input_multislice.fp_nconf = 1;
 
+input_multislice.tm_active = 0;						% 1: true, 0:false
+input_multislice.tm_nrot = 10; 						% number of rotations
+input_multislice.tm_irot = 1;						% specific rotation configuration
+input_multislice.tm_theta_0 = -10; 					% initial angle
+input_multislice.tm_theta_e = +10; 					% final angle
+input_multislice.tm_u0 = [0 1 1]; 					% unitary vector			
+input_multislice.tm_rot_point_type = 1; 			% 1: geometric center, 2: User define		
+input_multislice.tm_p0 = [0 0 0];					% rotation point
+
 na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...

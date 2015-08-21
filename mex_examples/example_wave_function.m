@@ -74,7 +74,7 @@ input_multislice.nx = 1024;
 input_multislice.ny = 1024;
 
 input_multislice.device = 2;                     % eD_CPU = 1, eD_GPU = 2
-input_multislice.precision = 1;                  % eP_Float = 1, eP_double = 2
+input_multislice.precision = 2;                  % eP_Float = 1, eP_double = 2
 clear get_wave_function;
 tic;
 ouput_multislice = get_wave_function(input_multislice);
@@ -94,6 +94,5 @@ for ithk=1:length(ouput_multislice.thickness)
     colormap gray;
     axis image; 
     title(strcat('Phase, thickness = ', num2str(ithk))); 
-    [max(abs(psi(:))) max(abs(psi(:)))]
     pause(0.5);
 end;

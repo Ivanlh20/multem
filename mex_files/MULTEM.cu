@@ -19,14 +19,16 @@
 #include <algorithm>
 
 #include "math.cuh"
-#include "types.hpp"
+#include "types.cuh"
+#include "matlab_types.cuh"
 #include "traits.cuh"
 #include "input_multislice.hpp"
+#include "output_multislice.hpp"
 #include "atom_data.hpp"
 #include "multislice.cuh"
 
 #include <mex.h>
-#include "mex_matlab.hpp"
+#include "matlab_mex.cuh"
 
 using multem::rmatrix_r;
 using multem::rmatrix_c;
@@ -34,7 +36,7 @@ using multem::rmatrix_c;
 template<class TInput_Multislice>
 void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full=true)
 {
-	using value_type = multem::Value_type<TInput_Multislice>;
+	using value_type_r = multem::Value_type<TInput_Multislice>;
 
 	input_multislice.precision = mx_get_scalar_field<multem::ePrecision>(mx_input_multislice, "precision");
 	input_multislice.device = mx_get_scalar_field<multem::eDevice>(mx_input_multislice, "device"); 
@@ -54,11 +56,22 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.fp_single_conf = mx_get_scalar_field<bool>(mx_input_multislice, "fp_single_conf");
 	input_multislice.fp_nconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_nconf");
 
+	input_multislice.tm_active = mx_get_scalar_field<bool>(mx_input_multislice, "tm_active");
+	input_multislice.tm_nrot = mx_get_scalar_field<int>(mx_input_multislice, "tm_nrot");
+	input_multislice.tm_irot = mx_get_scalar_field<int>(mx_input_multislice, "tm_irot");
+	input_multislice.tm_theta_0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "tm_theta_0")*multem::c_deg_2_rad;
+	input_multislice.tm_theta_e = mx_get_scalar_field<value_type_r>(mx_input_multislice, "tm_theta_e")*multem::c_deg_2_rad;
+	auto tm_u0 = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "tm_u0");
+	input_multislice.tm_u0 = multem::Pos_3d<value_type_r>(tm_u0[0], tm_u0[1], tm_u0[2]);
+	input_multislice.tm_rot_point_type = mx_get_scalar_field<multem::eRot_Point_Type>(mx_input_multislice, "tm_rot_point_type");
+	auto tm_p0 = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "tm_p0");
+	input_multislice.tm_p0 = multem::Pos_3d<value_type_r>(tm_p0[0], tm_p0[1], tm_p0[2]);
+
 	input_multislice.microscope_effect = mx_get_scalar_field<multem::eMicroscope_Effect>(mx_input_multislice, "microscope_effect");
 	input_multislice.spatial_temporal_effect = mx_get_scalar_field<multem::eSpatial_Temporal_Effect>(mx_input_multislice, "spatial_temporal_effect");
 
 	input_multislice.zero_defocus_type = mx_get_scalar_field<multem::eZero_Defocus_Type>(mx_input_multislice, "zero_defocus_type");
-	input_multislice.zero_defocus_plane = mx_get_scalar_field<value_type>(mx_input_multislice, "zero_defocus_plane");
+	input_multislice.zero_defocus_plane = mx_get_scalar_field<value_type_r>(mx_input_multislice, "zero_defocus_plane");
 
 	input_multislice.thickness_type = mx_get_scalar_field<multem::eThickness_Type>(mx_input_multislice, "thickness_type");
 	if(!input_multislice.is_whole_specimen() && full)
@@ -79,18 +92,18 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.operation_mode = mx_get_scalar_field<multem::eOperation_Mode>(mx_input_multislice, "operation_mode");
 	input_multislice.coherent_contribution = mx_get_scalar_field<bool>(mx_input_multislice, "coherent_contribution");
 
-	input_multislice.E_0 = mx_get_scalar_field<value_type>(mx_input_multislice, "E_0");
-	input_multislice.theta = mx_get_scalar_field<value_type>(mx_input_multislice, "theta")*multem::c_deg_2_rad;
-	input_multislice.phi = mx_get_scalar_field<value_type>(mx_input_multislice, "phi")*multem::c_deg_2_rad;
+	input_multislice.E_0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "E_0");
+	input_multislice.theta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "theta")*multem::c_deg_2_rad;
+	input_multislice.phi = mx_get_scalar_field<value_type_r>(mx_input_multislice, "phi")*multem::c_deg_2_rad;
 
 	bool bwl = mx_get_scalar_field<bool>(mx_input_multislice, "bwl");
 	bool pbc_xy = true;
 
 	auto nx = mx_get_scalar_field<int>(mx_input_multislice, "nx");
 	auto ny = mx_get_scalar_field<int>(mx_input_multislice, "ny");
-	auto lx = mx_get_scalar_field<value_type>(mx_input_multislice, "lx");
-	auto ly = mx_get_scalar_field<value_type>(mx_input_multislice, "ly");
-	auto dz = mx_get_scalar_field<value_type>(mx_input_multislice, "dz"); 				
+	auto lx = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lx");
+	auto ly = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ly");
+	auto dz = mx_get_scalar_field<value_type_r>(mx_input_multislice, "dz"); 				
 
 	auto atoms = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "atoms");
 	if(full)
@@ -100,18 +113,18 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.grid.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
 
 	input_multislice.lens.m = mx_get_scalar_field<int>(mx_input_multislice, "lens_m"); 											// momentum of the vortex
-	input_multislice.lens.f = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_f"); 									// defocus(Angstrom)
-	input_multislice.lens.Cs3 = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_Cs3")*multem::c_mm_2_Ags; 			// spherical aberration(mm-->Angstrom)
-	input_multislice.lens.Cs5 = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_Cs5")*multem::c_mm_2_Ags; 			// spherical aberration(mm-->Angstrom)
-	input_multislice.lens.mfa2 = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_mfa2"); 							// magnitude 2-fold astigmatism(Angstrom)
-	input_multislice.lens.afa2 = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_afa2")*multem::c_deg_2_rad; 		// angle 2-fold astigmatism(degrees-->rad)
-	input_multislice.lens.mfa3 = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_mfa3"); 							// magnitude 3-fold astigmatism(Angstrom)
-	input_multislice.lens.afa3 = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_afa3")*multem::c_deg_2_rad; 		// angle 3-fold astigmatism(degrees-->rad)
-	input_multislice.lens.aobjl = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_aobjl")*multem::c_mrad_2_rad; 		// lower objective aperture(mrad-->rad)
-	input_multislice.lens.aobju = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_aobju")*multem::c_mrad_2_rad; 		// upper objective aperture(mrad-->rad)
-	input_multislice.lens.sf = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_sf"); 								// defocus spread(Angstrom)
+	input_multislice.lens.f = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_f"); 									// defocus(Angstrom)
+	input_multislice.lens.Cs3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_Cs3")*multem::c_mm_2_Ags; 			// spherical aberration(mm-->Angstrom)
+	input_multislice.lens.Cs5 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_Cs5")*multem::c_mm_2_Ags; 			// spherical aberration(mm-->Angstrom)
+	input_multislice.lens.mfa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_mfa2"); 							// magnitude 2-fold astigmatism(Angstrom)
+	input_multislice.lens.afa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_afa2")*multem::c_deg_2_rad; 		// angle 2-fold astigmatism(degrees-->rad)
+	input_multislice.lens.mfa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_mfa3"); 							// magnitude 3-fold astigmatism(Angstrom)
+	input_multislice.lens.afa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_afa3")*multem::c_deg_2_rad; 		// angle 3-fold astigmatism(degrees-->rad)
+	input_multislice.lens.aobjl = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_aobjl")*multem::c_mrad_2_rad; 		// lower objective aperture(mrad-->rad)
+	input_multislice.lens.aobju = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_aobju")*multem::c_mrad_2_rad; 		// upper objective aperture(mrad-->rad)
+	input_multislice.lens.sf = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_sf"); 								// defocus spread(Angstrom)
 	input_multislice.lens.nsf = mx_get_scalar_field<int>(mx_input_multislice, "lens_nsf"); 										// Number of defocus sampling point
-	input_multislice.lens.beta = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_beta")*multem::c_mrad_2_rad; 		// semi-convergence angle(mrad-->rad)
+	input_multislice.lens.beta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_beta")*multem::c_mrad_2_rad; 		// semi-convergence angle(mrad-->rad)
 	input_multislice.lens.nbeta = mx_get_scalar_field<int>(mx_input_multislice, "lens_nbeta"); 									// half number sampling points
 	input_multislice.lens.set_input_data(input_multislice.E_0, input_multislice.grid);
 
@@ -119,10 +132,10 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	{
 		input_multislice.scanning.type = mx_get_scalar_field<multem::eScanning_Type>(mx_input_multislice, "scanning_type");
 		input_multislice.scanning.ns = mx_get_scalar_field<int>(mx_input_multislice, "scanning_ns");
-		input_multislice.scanning.x0 = mx_get_scalar_field<value_type>(mx_input_multislice, "scanning_x0");
-		input_multislice.scanning.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "scanning_y0");
-		input_multislice.scanning.xe = mx_get_scalar_field<value_type>(mx_input_multislice, "scanning_xe");
-		input_multislice.scanning.ye = mx_get_scalar_field<value_type>(mx_input_multislice, "scanning_ye");
+		input_multislice.scanning.x0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "scanning_x0");
+		input_multislice.scanning.y0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "scanning_y0");
+		input_multislice.scanning.xe = mx_get_scalar_field<value_type_r>(mx_input_multislice, "scanning_xe");
+		input_multislice.scanning.ye = mx_get_scalar_field<value_type_r>(mx_input_multislice, "scanning_ye");
 		input_multislice.scanning.set_grid();
 	}
 
@@ -135,49 +148,49 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 			input_multislice.det_cir.resize(ndet_cir);
 			for(auto i=0; i<input_multislice.det_cir.size(); i++)
 			{
-				input_multislice.det_cir.ang_inner[i] = mx_get_scalar_field<value_type>(mx_det_cir, i, "ang_inner")*multem::c_mrad_2_rad; // Inner angle(mrad-->rad)
-				input_multislice.det_cir.ang_outer[i] = mx_get_scalar_field<value_type>(mx_det_cir, i, "ang_outer")*multem::c_mrad_2_rad; // Outer angle(mrad-->rad)
+				input_multislice.det_cir.ang_inner[i] = mx_get_scalar_field<value_type_r>(mx_det_cir, i, "ang_inner")*multem::c_mrad_2_rad; // Inner angle(mrad-->rad)
+				input_multislice.det_cir.ang_outer[i] = mx_get_scalar_field<value_type_r>(mx_det_cir, i, "ang_outer")*multem::c_mrad_2_rad; // Outer angle(mrad-->rad)
 			}
 		}
 	}
 	else if (input_multislice.is_CBED())
 	{
-		input_multislice.cbe_fr.x0 = mx_get_scalar_field<value_type>(mx_input_multislice, "cbed_x0");
-		input_multislice.cbe_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "cbed_y0");
+		input_multislice.cbe_fr.x0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cbed_x0");
+		input_multislice.cbe_fr.y0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cbed_y0");
 	}
 	else if (input_multislice.is_CBEI())
 	{
-		input_multislice.cbe_fr.x0 = mx_get_scalar_field<value_type>(mx_input_multislice, "cbei_x0");
-		input_multislice.cbe_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "cbei_y0");
+		input_multislice.cbe_fr.x0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cbei_x0");
+		input_multislice.cbe_fr.y0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cbei_y0");
 	}
 	else if (input_multislice.is_PED())
 	{
-		input_multislice.theta = mx_get_scalar_field<value_type>(mx_input_multislice, "ped_theta")*multem::c_deg_2_rad;
-		input_multislice.nrot = mx_get_scalar_field<value_type>(mx_input_multislice, "ped_nrot");
+		input_multislice.theta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ped_theta")*multem::c_deg_2_rad;
+		input_multislice.nrot = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ped_nrot");
 	}
 	else if (input_multislice.is_HCI())
 	{
-		input_multislice.theta = mx_get_scalar_field<value_type>(mx_input_multislice, "hci_theta")*multem::c_deg_2_rad;
-		input_multislice.nrot = mx_get_scalar_field<value_type>(mx_input_multislice, "hci_nrot");
+		input_multislice.theta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "hci_theta")*multem::c_deg_2_rad;
+		input_multislice.nrot = mx_get_scalar_field<value_type_r>(mx_input_multislice, "hci_nrot");
 	}
 	else if (input_multislice.is_EWFS())
 	{
 		input_multislice.ew_fr.convergent_beam = mx_get_scalar_field<bool>(mx_input_multislice, "ewfs_convergent_beam");
-		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewfs_x0");
-		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewfs_y0");
+		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ewfs_x0");
+		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ewfs_y0");
 	}
 	else if (input_multislice.is_EWRS())
 	{
 		input_multislice.ew_fr.convergent_beam = mx_get_scalar_field<bool>(mx_input_multislice, "ewrs_convergent_beam");
-		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewrs_x0");
-		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type>(mx_input_multislice, "ewrs_y0");
+		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ewrs_x0");
+		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ewrs_y0");
 	}
 	else if (input_multislice.is_EELS())
 	{
 		multem::eSpace space = multem::eS_Reciprocal;
-		value_type E_loss = mx_get_scalar_field<value_type>(mx_input_multislice, "eels_E_loss")*multem::c_meV_2_keV;
+		value_type_r E_loss = mx_get_scalar_field<value_type_r>(mx_input_multislice, "eels_E_loss")*multem::c_meV_2_keV;
 		int m_selection = mx_get_scalar_field<int>(mx_input_multislice, "eels_m_selection");
-		value_type collection_angle = mx_get_scalar_field<double>(mx_input_multislice, "eels_collection_angle")*multem::c_mrad_2_rad;
+		value_type_r collection_angle = mx_get_scalar_field<double>(mx_input_multislice, "eels_collection_angle")*multem::c_mrad_2_rad;
 		multem::eChannelling_Type channelling_type = mx_get_scalar_field<multem::eChannelling_Type>(mx_input_multislice, "eels_channelling_type");
 		int Z = mx_get_scalar_field<int>(mx_input_multislice, "eels_Z");
 
@@ -186,9 +199,9 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	else if (input_multislice.is_EFTEM())
 	{
 		multem::eSpace space = multem::eS_Real;
-		value_type E_loss = mx_get_scalar_field<value_type>(mx_input_multislice, "eftem_E_loss")*multem::c_meV_2_keV;
+		value_type_r E_loss = mx_get_scalar_field<value_type_r>(mx_input_multislice, "eftem_E_loss")*multem::c_meV_2_keV;
 		int m_selection = mx_get_scalar_field<int>(mx_input_multislice, "eftem_m_selection");
-		value_type collection_angle = mx_get_scalar_field<double>(mx_input_multislice, "eftem_collection_angle")*multem::c_mrad_2_rad;
+		value_type_r collection_angle = mx_get_scalar_field<double>(mx_input_multislice, "eftem_collection_angle")*multem::c_mrad_2_rad;
 		multem::eChannelling_Type channelling_type = mx_get_scalar_field<multem::eChannelling_Type>(mx_input_multislice, "eftem_channelling_type");
 		int Z = mx_get_scalar_field<int>(mx_input_multislice, "eftem_Z");
 
@@ -201,7 +214,7 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 template<class TOutput_multislice>
 void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_multislice, TOutput_multislice &output_multislice)
 {
-	multem::Input_Multislice<double, multem::e_Host> input_multislice;
+	multem::Input_Multislice<double, multem::e_host> input_multislice;
 	read_input_data(mx_input_multislice, input_multislice);
 	output_multislice.set_input_data(&input_multislice);
 
@@ -315,20 +328,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	multem::Output_Multislice<rmatrix_r, rmatrix_c> output_multislice;
 	set_output_data(prhs[0], plhs[0], output_multislice);
 
-	if(output_multislice.is_float_Host())
+	if(output_multislice.is_float_host())
 	{
-		get_multislice<float, multem::e_Host>(prhs[0], output_multislice);
+		get_multislice<float, multem::e_host>(prhs[0], output_multislice);
 	}
-	else if(output_multislice.is_double_Host())
+	else if(output_multislice.is_double_host())
 	{
-		get_multislice<double, multem::e_Host>(prhs[0], output_multislice);
+		get_multislice<double, multem::e_host>(prhs[0], output_multislice);
 	}
-	if(output_multislice.is_float_Device())
+	if(output_multislice.is_float_device())
 	{
-		get_multislice<float, multem::e_Device>(prhs[0], output_multislice);
+		get_multislice<float, multem::e_device>(prhs[0], output_multislice);
 	}
-	else if(output_multislice.is_double_Device())
+	else if(output_multislice.is_double_device())
 	{
-		get_multislice<double, multem::e_Device>(prhs[0], output_multislice);
+		get_multislice<double, multem::e_device>(prhs[0], output_multislice);
 	}
 }

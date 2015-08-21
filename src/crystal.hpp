@@ -22,7 +22,7 @@
 #include <vector>
 #include <cstdlib>
 
-#include "types.hpp"
+#include "types.cuh"
 #include "atom_data.hpp"
 
 namespace multem
@@ -32,7 +32,7 @@ namespace multem
 		public:
 			Crystal():na(0), nb(0), nc(0), a(0), b(0), c(0){};
 
-			void Create3DCrystal(const int &na_i, const int &nb_i, const int &nc_i, T a_i, T b_i, T c_i, Vector<Atom_Data<T>, e_Host> &uLayer_i, Atom_Data<T> &Atoms_o)
+			void Create3DCrystal(const int &na_i, const int &nb_i, const int &nc_i, T a_i, T b_i, T c_i, Vector<Atom_Data<T>, e_host> &uLayer_i, Atom_Data<T> &Atoms_o)
 			{
 				na = na_i;
 				nb = nb_i;
@@ -125,7 +125,7 @@ namespace multem
 				Layer.resize(l);
 			}
 
-			std::size_t StackLayers(const int &na, const int &nb, T a, T b, T c, Vector<Atom_Data<T>, e_Host> &uLayer, Vector<Atom_Data<T>, e_Host> &Layers)
+			std::size_t StackLayers(const int &na, const int &nb, T a, T b, T c, Vector<Atom_Data<T>, e_host> &uLayer, Vector<Atom_Data<T>, e_host> &Layers)
 			{
 				std::size_t nAtoms_Layers = 0;
 				for(auto i = 0; i < uLayer.size(); i++)
@@ -144,8 +144,8 @@ namespace multem
 			T b;
 			T c;
 
-			Vector<Atom_Data<T>, e_Host> uLayer;
-			Vector<Atom_Data<T>, e_Host> Layers;
+			Vector<Atom_Data<T>, e_host> uLayer;
+			Vector<Atom_Data<T>, e_host> Layers;
 	};
 
 } // namespace multem

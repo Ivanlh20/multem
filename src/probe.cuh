@@ -20,12 +20,15 @@
 #define PROBE_H
 
 #include "math.cuh"
-#include "types.hpp"
+#include "types.cuh"
+#include "traits.cuh"
+#include "stream.cuh"
 #include "fft2.cuh"
+#include "input_multislice.hpp"
+#include "output_multislice.hpp"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
-#include "input_multislice.hpp"
 
 namespace multem
 {
@@ -35,41 +38,39 @@ namespace multem
 			using value_type_r = T;
 			using value_type_c = complex<T>;
 
-			Probe():input_multislice(nullptr){}
+			Probe():input_multislice(nullptr), stream(nullptr), fft2(nullptr){}
 
-			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i)
+			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, Stream<dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
 			{
 				input_multislice = input_multislice_i;
-
-				fft2.create_plan(input_multislice->grid.ny, input_multislice->grid.nx, input_multislice->nstream);
+				stream = stream_i;
+				fft2 = fft2_i;
 
 				probe_0.resize(input_multislice->grid.nxy());
 			}
 
-			template<class TVector_c>
-			void get(const eSpace &space, TVector_c &host_probe)
+			template<class TOutput_multislice>
+			void get(const eSpace &space, TOutput_multislice &output_multislice)
 			{
 				value_type_r x = input_multislice->get_Rx_pos_shift();
 				value_type_r y = input_multislice->get_Ry_pos_shift();
 
-				multem::probe(input_multislice->grid, input_multislice->lens, x, y, probe_0);
+				multem::probe(*stream, input_multislice->grid, input_multislice->lens, x, y, probe_0);
 
 				if(space == eS_Real)
 				{
-					fft2.inverse(probe_0);
+					fft2->inverse(probe_0);
 				}
 
-				multem::to_host_shift(input_multislice->grid, probe_0, host_probe);
-			}
-
-			void cleanup()
-			{
-				fft2.cleanup();
+				multem::copy_to_host(output_multislice.stream, input_multislice->grid, probe_0, output_multislice.probe[0]);
+				output_multislice.shift();
+				output_multislice.clear_temporal_data();
 			}
 
 		private:
 			Input_Multislice<value_type_r, dev> *input_multislice;
-			FFT2<value_type_r, dev> fft2;
+			Stream<dev> *stream;
+			FFT2<value_type_r, dev> *fft2;
 
 			Vector<value_type_c, dev> probe_0;
 	};

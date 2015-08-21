@@ -16,7 +16,7 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "types.hpp"
+#include "types.cuh"
 #include "traits.cuh"
 #include "input_multislice.hpp"
 #include "atom_data.hpp"
@@ -26,7 +26,7 @@
 #include "device_functions.cuh"
 
 #include <mex.h>
-#include "mex_matlab.hpp"
+#include "matlab_mex.cuh"
 
 using multem::rmatrix_r;
 
@@ -42,6 +42,17 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.fp_seed = mx_get_scalar_field<int>(mx_input_multislice, "fp_seed");
 	input_multislice.fp_single_conf = true;
 	input_multislice.fp_nconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_nconf");
+
+	input_multislice.tm_active = mx_get_scalar_field<bool>(mx_input_multislice, "tm_active");
+	input_multislice.tm_nrot = mx_get_scalar_field<int>(mx_input_multislice, "tm_nrot");
+	input_multislice.tm_irot = mx_get_scalar_field<int>(mx_input_multislice, "tm_irot");
+	input_multislice.tm_theta_0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "tm_theta_0")*multem::c_deg_2_rad;
+	input_multislice.tm_theta_e = mx_get_scalar_field<value_type_r>(mx_input_multislice, "tm_theta_e")*multem::c_deg_2_rad;
+	auto tm_u0 = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "tm_u0");
+	input_multislice.tm_u0 = multem::Pos_3d<value_type_r>(tm_u0[0], tm_u0[1], tm_u0[2]);
+	input_multislice.tm_rot_point_type = mx_get_scalar_field<multem::eRot_Point_Type>(mx_input_multislice, "tm_rot_point_type");
+	auto tm_p0 = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "tm_p0");
+	input_multislice.tm_p0 = multem::Pos_3d<value_type_r>(tm_p0[0], tm_p0[1], tm_p0[2]);
 
 	int nx = 1024;
 	int ny = 1024;
@@ -61,12 +72,12 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {	
 	/*************************Input data**************************/
-	multem::Input_Multislice<double, multem::e_Host> input_multislice;
+	multem::Input_Multislice<double, multem::e_host> input_multislice;
 	read_input_data(prhs[0], input_multislice);
 
-	multem::Specimen<double, multem::e_Host> specimen;
+	multem::Specimen<double, multem::e_host> specimen;
 	specimen.set_input_data(&input_multislice);
-	specimen.move_atoms(input_multislice.fp_nconf);
+	specimen.move_atoms(input_multislice.fp_nconf, input_multislice.tm_irot);
 
 	/************************Output data**************************/
 	auto atomsM = mx_create_matrix<rmatrix_r>(specimen.atoms.size(), 6, plhs[0]);

@@ -20,7 +20,7 @@
 #define MULTISLICE_H
 
 #include <fftw3.h>
-#include "types.hpp"
+#include "types.cuh"
 #include "traits.cuh"
 #include "input_multislice.hpp"
 #include "output_multislice.hpp"
@@ -42,7 +42,7 @@ namespace multem
 			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i)
 			{
 				input_multislice = input_multislice_i;
-				if(dev == e_Device)
+				if(dev == e_device)
 				{
 					cudaSetDevice(input_multislice->gpu_device);
 				}
@@ -51,7 +51,7 @@ namespace multem
 
 				if(input_multislice->is_EELS_EFTEM())
 				{
-					energy_loss.set_input_data(input_multislice, &fft2);
+					energy_loss.set_input_data(input_multislice, &stream, &fft2);
 					psi_thk.resize(input_multislice->grid.nxy());
 					if(input_multislice->eels_fr.is_Double_Channelling_FOMS_SOMS())
 					{
@@ -111,7 +111,7 @@ namespace multem
 						input_multislice->set_beam_position(iscan);					
 						for(auto iconf=input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 						{
-							wave_function.move_atoms(iconf);		
+							wave_function.move_atoms(iconf, input_multislice->tm_irot);		
 							wave_function.psi_0(wave_function.psi_z);
 							wave_function.psi(w, wave_function.psi_z, output_multislice);
 						}
@@ -123,7 +123,7 @@ namespace multem
 				{
 					for(auto iconf=input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 					{
-						wave_function.move_atoms(iconf);		
+						wave_function.move_atoms(iconf, input_multislice->tm_irot);		
 						for(auto iscan=0; iscan < input_multislice->scanning.size(); iscan++)
 						{
 							input_multislice->set_beam_position(iscan);
@@ -160,7 +160,7 @@ namespace multem
 
 				for(auto iconf=input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 				{
-					wave_function.move_atoms(iconf);		
+					wave_function.move_atoms(iconf, input_multislice->tm_irot);		
 					for(auto irot=0; irot < input_multislice->nrot; irot++)
 					{
 						input_multislice->set_phi(irot);
@@ -184,7 +184,7 @@ namespace multem
 
 				for(auto iconf=input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 				{
-					wave_function.move_atoms(iconf);		
+					wave_function.move_atoms(iconf, input_multislice->tm_irot);		
 					wave_function.psi_0(wave_function.psi_z);
 					wave_function.psi(w, wave_function.psi_z, output_multislice);
 				}
@@ -236,7 +236,7 @@ namespace multem
 				{
 					for(auto iconf=input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 					{
-						wave_function.move_atoms(iconf);		
+						wave_function.move_atoms(iconf, input_multislice->tm_irot);		
 						for(auto iscan=0; iscan < input_multislice->scanning.size(); iscan++)
 						{
 							input_multislice->set_beam_position(iscan);
@@ -249,7 +249,7 @@ namespace multem
 				{
 					for(auto iconf=input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 					{
-						wave_function.move_atoms(iconf);		
+						wave_function.move_atoms(iconf, input_multislice->tm_irot);		
 						wave_function.psi_0(psi_thk);
 						psi(w, psi_thk, output_multislice);
 					}
@@ -260,7 +260,7 @@ namespace multem
 			}
 
 			Input_Multislice<value_type_r, dev> *input_multislice;
-			Stream<value_type_r, dev> stream;
+			Stream<dev> stream;
 			FFT2<value_type_r, dev> fft2;
 
 			Wave_Function<value_type_r, dev> wave_function;

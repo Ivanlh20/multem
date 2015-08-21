@@ -22,7 +22,7 @@
 #include <functional>
 
 #include "math.cuh"
-#include "types.hpp"
+#include "types.cuh"
 #include "quadrature.hpp"
 #include "host_device_functions.cuh"
 
@@ -40,7 +40,7 @@ namespace multem
 				quadrature.get(1, c_nqz, Qz_0_I); 	// 1: int_0^infty y(x) dx - ExpSinh quadrature
 			}
 
-			void Set_Atom_Type(const ePotential_Type &PotPar_i, Atom_Type<T, e_Host> *atom_type_CPU_i)
+			void Set_Atom_Type(const ePotential_Type &PotPar_i, Atom_Type<T, e_host> *atom_type_CPU_i)
 			{
 				potential_type = PotPar_i;
 				atom_type = atom_type_CPU_i;
@@ -256,9 +256,9 @@ namespace multem
 
 		private:
 			ePotential_Type potential_type;
-			Atom_Type<T, e_Host> *atom_type;
-			Q1<T, e_Host> Qz_a_b;
-			Q1<T, e_Host> Qz_0_I;
+			Atom_Type<T, e_host> *atom_type;
+			Q1<T, e_host> Qz_a_b;
+			Q1<T, e_host> Qz_0_I;
 	};
 
 } // namespace multem

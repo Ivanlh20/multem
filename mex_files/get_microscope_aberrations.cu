@@ -16,18 +16,21 @@
  * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "types.hpp"
+#include "types.cuh"
+#include "matlab_types.cuh"
 #include "traits.cuh"
+#include "stream.cuh"
+#include "fft2.cuh"
 #include "input_multislice.hpp"
+#include "output_multislice.hpp"
 #include "atom_data.hpp"
 #include "microscope_effects.cuh"
-
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
 
 #include <mex.h>
-#include "mex_matlab.hpp"
+#include "matlab_mex.cuh"
 
 using multem::rmatrix_r;
 using multem::rmatrix_c;
@@ -94,51 +97,65 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.validate_parameters();
  }
 
-template<class T, multem::eDevice dev>
-void get_microscope_aberrations(const mxArray *mxB, rmatrix_r &m2psi_host)
+template<class TOutput_multislice>
+void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_multislice, TOutput_multislice &output_multislice)
+{
+	multem::Input_Multislice<double, multem::e_host> input_multislice;
+	read_input_data(mx_input_multislice, input_multislice, false);
+	output_multislice.set_input_data(&input_multislice);
+
+	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thickness", "m2psi"};
+	int number_of_fields_output_multislice = 6;
+	mwSize dims_output_multislice[2] = {1, 1};
+
+	mx_output_multislice = mxCreateStructArray(2, dims_output_multislice, number_of_fields_output_multislice, field_names_output_multislice);
+
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx);
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x.data());
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y.data());
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thickness", 1, output_multislice.thickness.size(), output_multislice.thickness.data());
+	output_multislice.m2psi_tot[0] = mx_create_matrix_field<rmatrix_r>(mx_output_multislice, "m2psi", output_multislice.ny, output_multislice.nx);
+}
+
+template<class T, multem::eDevice dev, class TOutput_multislice>
+void get_microscope_aberrations(const mxArray *mxB, TOutput_multislice &output_multislice)
 {
 	multem::Input_Multislice<T, dev> input_multislice;
 	read_input_data(mxB, input_multislice);
 
-	multem::Stream<T, dev> stream;
+	multem::Stream<dev> stream;
 	multem::FFT2<T, dev> fft2;
 	multem::Microscope_Effects<T, dev> microscope_effects;
-	multem::Vector<T, dev> m2psi(input_multislice.grid.nxy());
 
 	stream.resize(input_multislice.nstream);
 	fft2.create_plan(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
 	microscope_effects.set_input_data(&input_multislice, &stream, &fft2);
 
-	fft2.forward(input_multislice.psi_0);
-	multem::scale(input_multislice.psi_0, 1.0/input_multislice.grid.nxy());
-	microscope_effects.apply(input_multislice.psi_0, m2psi);
-
-	multem::to_host_shift(input_multislice.grid, m2psi, m2psi_host);
+	microscope_effects.apply(input_multislice.psi_0, output_multislice);
 
 	fft2.cleanup();
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	multem::Input_Multislice<double, multem::e_Host> input_multislice;
-	read_input_data(prhs[0], input_multislice, false);
+	multem::Output_Multislice<rmatrix_r, rmatrix_c> output_multislice;
+	set_output_data(prhs[0], plhs[0], output_multislice);
 
-	auto m2psi = mx_create_matrix<rmatrix_r>(input_multislice.grid, plhs[0]);
-
-	if(input_multislice.is_float_Host())
+	if(output_multislice.is_float_host())
 	{
-		get_microscope_aberrations<float, multem::e_Host>(prhs[0], m2psi);
+		get_microscope_aberrations<float, multem::e_host>(prhs[0], output_multislice);
 	}
-	else if(input_multislice.is_double_Host())
+	else if(output_multislice.is_double_host())
 	{
-		get_microscope_aberrations<double, multem::e_Host>(prhs[0], m2psi);
+		get_microscope_aberrations<double, multem::e_host>(prhs[0], output_multislice);
 	}
-	if(input_multislice.is_float_Device())
+	if(output_multislice.is_float_device())
 	{
-		get_microscope_aberrations<float, multem::e_Device>(prhs[0], m2psi);
+		get_microscope_aberrations<float, multem::e_device>(prhs[0], output_multislice);
 	}
-	else if(input_multislice.is_double_Device())
+	else if(output_multislice.is_double_device())
 	{
-		get_microscope_aberrations<double, multem::e_Device>(prhs[0], m2psi);
+		get_microscope_aberrations<double, multem::e_device>(prhs[0], output_multislice);
 	}
 }

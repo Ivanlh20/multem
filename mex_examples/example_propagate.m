@@ -3,7 +3,7 @@ clear all; clc;
 input_multislice = multem_default_values();         % Load default values;
 
 input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
-input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+input_multislice.device = 1;                        % eD_CPU = 1, eD_GPU = 2
 input_multislice.cpu_ncores = 1; 
 input_multislice.cpu_nthread = 4; 
 input_multislice.gpu_device = 0;
@@ -46,40 +46,40 @@ input_multislice.ny = 1024;
 input_multislice.simulation_type = 52;              % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, eST_EELS=61, eST_EFTEM=62
 clear MULTEM;
 tic;
-[m2psi_tot_w, psi_coh_w] = MULTEM(input_multislice); 
+output_multislice = MULTEM(input_multislice); 
 toc;
 
-input_multislice.lens_f = -10;     %Angs
+input_multislice.lens_f = +15;                      %Angs
 
 input_multislice.input_wave_type = 2;               % eIWT_Automatic = 1, eIWT_User_Define = 2
-input_multislice.psi_0 = psi_coh_w;
+input_multislice.psi_0 = output_multislice.data.psi_coh;
 
 clear MULTEM;
 tic;
-[psi_coh_p] = get_propagate(input_multislice); 
+output_propagate = get_propagate(input_multislice); 
 toc;
 
 figure(1);
 subplot(2, 2, 1);
-imagesc(abs(psi_coh_w).^2);
+imagesc(abs(output_multislice.data.psi_coh).^2);
 title('wave intensity');
 axis image;
 colormap gray;
 
 subplot(2, 2, 2);
-imagesc(angle(psi_coh_w));
+imagesc(angle(output_multislice.data.psi_coh));
 title('Total intensity');
 axis image;
 colormap gray;
 
 subplot(2, 2, 3);
-imagesc(abs(psi_coh_p).^2);
+imagesc(abs(output_propagate.psi).^2);
 title('wave intensity');
 axis image;
 colormap gray;
 
 subplot(2, 2, 4);
-imagesc(angle(psi_coh_p));
+imagesc(angle(output_propagate.psi));
 title('Total intensity');
 axis image;
 colormap gray;

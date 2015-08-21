@@ -42,7 +42,7 @@
           MATLABMEX="/DMATLAB_MEX_FILE"
           OPTIMFLAGS="--compiler-options=/O2,/Oy-,/DNDEBUG"
           INCLUDE="-I&quot;$MATLABROOT\extern\include&quot; -I&quot;$MATLABROOT\simulink\include&quot;"
-          DEBUGFLAGS="--compiler-options=/Zi -g"
+          DEBUGFLAGS="--compiler-options=/Z7 -g"
           
           LINKER="link"
           LINKFLAGS="/nologo /manifest "
@@ -131,16 +131,6 @@
                 <fileExists name="$$\lib\x64\cudart.lib" />
                 <dirExists name="$$" />
               </and>
-              <and>
-                <envVarExists name="CUDA_LIB_PATH"/>
-                <fileExists name="$$\cufft.lib" />
-                <dirExists name="$$" />
-              </and>
-              <and>
-                <envVarExists name="CUDA_PATH"/>
-                <fileExists name="$$\lib\x64\cufft.lib" />
-                <dirExists name="$$" />
-              </and>              
             </or>
         </CUDA_LIB_PATH>
         <CUDA_BIN_PATH>
