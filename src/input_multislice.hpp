@@ -37,6 +37,10 @@ namespace multem
 	template<class InputIterator, class TVector>
 	void match_vectors(InputIterator A_base_first, InputIterator A_base_last, TVector &A_search);
 
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	void norm_Pos_3d(Pos_3d<T> &p0);
+
 	template<class T, eDevice dev>
 	class Input_Multislice
 	{

@@ -3,7 +3,7 @@ clear all; clc;
 input_multislice = multem_default_values();         % Load default values;
 
 input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
-input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+input_multislice.device = 1;                        % eD_CPU = 1, eD_GPU = 2
 input_multislice.cpu_ncores = 1; 
 input_multislice.cpu_nthread = 4; 
 input_multislice.gpu_device = 0;

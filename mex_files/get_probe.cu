@@ -27,7 +27,7 @@
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
 
-#include "Probe.cuh"
+#include "probe.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"

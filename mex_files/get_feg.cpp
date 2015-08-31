@@ -25,7 +25,7 @@
 
 using multem::rmatrix_r;
 
-void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	auto potential_type = mx_get_scalar<multem::ePotential_Type>(prhs[0]);
 	auto Z = mx_get_scalar<int>(prhs[1]);

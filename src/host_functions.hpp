@@ -596,6 +596,220 @@ namespace multem
 		}
 	} // host_detail
 
+
+
+	//template<class TGrid, class TVector>
+	//void scale(Stream<e_host> &stream, const TGrid &grid, TVector &M_io, Value_type<TVector> w_i)
+	//{
+	//	using value_type = Value_type<TVector>;
+	//	auto scale = [&](const Range &range)
+	//	{
+	//		thrust::transform(M_io.begin()+range.ixy_0, M_io.begin()+range.ixy_e, M_io.begin()+range.ixy_0, multem::functor::scale<value_type>(w_i));
+	//	};
+
+	//	stream.set_n_act_stream(grid.nxy());
+	//	stream.set_grid(grid.nx, grid.ny);
+	//	stream.exec(scale);
+	//}
+
+	//template<class TGrid, class TVector>
+	//void fill(Stream<e_host> &stream, const TGrid &grid, TVector &M_io, Value_type<TVector> value_i)
+	//{
+	//	auto fill = [&](const Range &range)
+	//	{
+	//		thrust::fill(M_io.begin()+range.ixy_0, M_io.begin()+range.ixy_e, value_i);
+	//	};
+
+	//	stream.set_n_act_stream(grid.nxy());
+	//	stream.set_grid(grid.nx, grid.ny);
+	//	stream.exec(fill);
+	//}
+
+	//template<class TGrid, class TVector_1, class TVector_2>
+	//void assign(Stream<e_host> &stream, const TGrid &grid, TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h=nullptr)
+	//{
+	//	M_o.assign(M_i.begin(), M_i.end());
+	//}
+
+	//template<class TGrid, class TVector_1, class TVector_2>
+	//void assign_square(Stream<e_host> &stream, const TGrid &grid, TVector_1 &M_i, TVector_2 &M_o)
+	//{
+	//	using value_type = Value_type<TVector_2>;
+	//	thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), functor::square<value_type>());
+
+	//	using value_type = Value_type<TVector>;
+	//	auto scale = [&](const Range &range)
+	//	{
+	//		thrust::transform(M_io.begin()+range.ixy_0, M_io.begin()+range.ixy_e, M_io.begin()+range.ixy_0, multem::functor::scale<value_type>(w_i));
+	//	};
+
+	//	stream.set_n_act_stream(grid.nxy());
+	//	stream.set_grid(grid.nx, grid.ny);
+	//	stream.exec(scale);
+	//}
+
+	//template<class TGrid, class TVector>
+	//void assign_scale(Stream<e_host> &stream, const TGrid &grid, Value_type<TVector> w_i, TVector &M_i, TVector &M_o)
+	//{
+	//	using value_type = Value_type<TVector>;
+	//	thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), functor::scale<value_type>(w_i));
+	//}
+
+	//template<class TGrid, class TVector_1, class TVector_2>
+	//void assign_square_scale(Stream<e_host> &stream, const TGrid &grid, Value_type<TVector_2> w_i, TVector_1 &M_i, TVector_2 &M_o)
+	//{
+	//	using value_type = Value_type<TVector_2>;
+	//	thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), functor::square_scale<value_type>(w_i));
+	//}
+
+	//template<class TGrid, class TVector_1, class TVector_2>
+	//void add(Stream<e_host> &stream, const TGrid &grid, const TVector_1 &M_i, TVector_2 &M_o)
+	//{
+	//	using value_type = Value_type<TVector_2>;
+	//	thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), M_o.begin(), thrust::plus<value_type>());
+	//}
+
+	//template<class TGrid, class TVector_1, class TVector_2>
+	//void add(Stream<e_host> &stream, const TGrid &grid, const TVector_1 &M1_i, const TVector_1 &M2_i, TVector_2 &M_o)
+	//{
+	//	using value_type = Value_type<TVector_1>;
+	//	thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), thrust::plus<value_type>());
+	//}
+
+	//template<class TGrid, class TVector_1, class TVector_2>
+	//void add_square(Stream<e_host> &stream, const TGrid &grid, const TVector_1 &M_i, TVector_2 &M_o)
+	//{
+	//	using value_type = Value_type<TVector_1>;
+	//	thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), M_o.begin(), functor::add_square<value_type>());
+	//}
+
+	//template<class TGrid, class TVector_1, class TVector_2>
+	//void add_square(Stream<e_host> &stream, const TGrid &grid, const TVector_1 &M1_i, const TVector_1 &M2_i, TVector_2 &M_o)
+	//{
+	//	using value_type = Value_type<TVector_2>;
+	//	thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), functor::add_square_i<value_type>());
+	//}
+
+	//template<class TGrid, class TVector_1, class TVector_2>
+	//void add_scale(Stream<e_host> &stream, const TGrid &grid, Value_type<TVector_1> w_i, const TVector_1 &M_i, TVector_2 &M_o)
+	//{
+	//	using value_type = Value_type<TVector_1>;
+	//	thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), M_o.begin(), functor::add_scale<value_type>(w_i));
+	//}
+
+	//template<class TGrid, class TVector_1, class TVector_2>
+	//void add_scale(Stream<e_host> &stream, const TGrid &grid, Value_type<TVector_1> w_i, const TVector_1 &M1_i, const TVector_1 &M2_i, TVector_2 &M_o)
+	//{
+	//	using value_type = Value_type<TVector_1>;
+
+	//	thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), functor::add_scale_i<value_type>());
+	//}
+
+	//template<class TGrid, class TVector_1, class TVector_2>
+	//void add_square_scale(Stream<e_host> &stream, const TGrid &grid, Value_type<TVector_2> w_i, const TVector_1 &M_i, TVector_2 &M_o)
+	//{
+	//	using value_type = Value_type<TVector_2>;
+	//	thrust::transform(M_i.begin(), M_i.end(), M_o.begin(), M_o.begin(), functor::add_square_scale<value_type>(w_i));
+	//}
+
+	//template<class TGrid, class TVector_1, class TVector_2>
+	//void add_square_scale(Stream<e_host> &stream, const TGrid &grid, Value_type<TVector_1> w_i, const TVector_1 &M1_i, const TVector_1 &M2_i, TVector_2 &M_o)
+	//{
+	//	using value_type = Value_type<TVector_2>;
+	//	thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), functor::add_square_scale_i<value_type>(w_i));
+	//}
+
+	//template<class TGrid, class TVector>
+	//void multiply(Stream<e_host> &stream, const TGrid &grid, const TVector &M_i, TVector &M_io)
+	//{
+	//	using value_type = Value_type<TVector>;
+	//	thrust::transform(M_i.begin(), M_i.end(), M_io.begin(), M_io.begin(), thrust::multiplies<value_type>());
+	//}
+
+	//template<class TGrid, class TVector>
+	//void multiply(Stream<e_host> &stream, const TGrid &grid, const TVector &M1_i, const TVector &M2_i, TVector &M_o)
+	//{
+	//	using value_type = Value_type<TVector>;
+	//	thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), thrust::multiplies<value_type>());
+	//}
+
+	//template<class TGrid, class TVector>
+	//Value_type<TVector> sum(Stream<e_host> &stream, const TGrid &grid, TGrid &grid, TVector &M_i)
+	//{
+	//	Value_type<TVector> sum_o = thrust::reduce(M_i.begin(), M_i.end());
+	//	return sum_o;
+	//}
+
+	//template<class TGrid, class TVector>
+	//Value_type<TGrid> sum_square(Stream<e_host> &stream, const TGrid &grid, TGrid &grid, TVector &M_i)
+	//{
+	//	using value_type_r = Value_type<TGrid>;
+	//	value_type_r sum_o = thrust::transform_reduce(M_i.begin(), M_i.end(), 
+	//	functor::square<value_type_r>(), static_cast<value_type_r>(0), thrust::plus<value_type_r>());
+	//	return sum_o;
+	//}
+
+	//template<class TGrid, class TVector>
+	//void phase_components(Stream<e_host> &stream, const TGrid &grid, const Value_type<TGrid> &gxu, const Value_type<TGrid> &gyu, TVector &V_x, TVector &V_y)
+	//{
+	//	thrust::counting_iterator<int> first(0);
+	//	thrust::counting_iterator<int> last = first + grid.nx_ny_max();
+
+	//	thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(first, V_x.begin(), V_y.begin())), 
+	//					 thrust::make_zip_iterator(thrust::make_tuple(last, V_x.end(), V_y.end())), 
+	//					 functor::phase_components<TGrid>(grid, c_2Pi, gxu, gyu));
+	//}
+
+	//template<class TGrid, class TVector>
+	//void propagator_components(Stream<e_host> &stream, const TGrid &grid, const Value_type<TGrid> &gxu, const Value_type<TGrid> &gyu, const Value_type<TGrid> &w, TVector &V_x, TVector &V_y)
+	//{
+	//	thrust::counting_iterator<int> first(0);
+	//	thrust::counting_iterator<int> last = first + grid.nx_ny_max();
+
+	//	thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(first, V_x.begin(), V_y.begin())), 
+	//					 thrust::make_zip_iterator(thrust::make_tuple(last, V_x.end(), V_y.end())), 
+	//					 functor::propagator_components<TGrid>(grid, w, gxu, gyu));
+	//}
+
+	//template<class TStream, class TFFT2, class TGrid, class TVector>
+	//void propagate(TStream &stream, TFFT2 &fft2, TGrid &grid, eSpace space, TVector &prop_x_i, TVector &prop_y_i, TVector &psi_i, TVector &psi_o)
+	//{
+	//	fft2.forward(psi_i, psi_o); 
+
+	//	propagator_multiplication(stream, grid, prop_x_i, prop_y_i, psi_o, psi_o);
+
+	//	if(space == eS_Real)
+	//	{
+	//		fft2.inverse(psi_o);
+	//	}
+	//}
+
+	//template<class TStream, class TGrid, class TFFT2, class TVector_1, class TVector_2>
+	//void transmission_funtion(TStream &stream, TGrid &grid, TFFT2 &fft2, eElec_Spec_Int_Model elec_spec_int_model, const Value_type<TGrid> w, TVector_1 &V0_i, TVector_2 &Trans_o)
+	//{	
+	//	using value_type_r = Value_type<TGrid>;
+
+	//	thrust::transform(V0_i.begin(), V0_i.end(), Trans_o.begin(), functor::transmission_funtion<value_type_r>(w, elec_spec_int_model));
+
+	//	if(grid.bwl)
+	//	{
+	//		fft2.forward(Trans_o);
+	//		bandwidth_limit(stream, grid, 0, grid.gl_max, grid.inxy, Trans_o);
+	//		fft2.inverse(Trans_o);
+	//	}
+	//}
+
+
+
+
+
+
+
+
+
+
+
+
 	template<class TQ1>
 	enable_if_host<TQ1, void>
 	get_cubic_poly_coef_Vz(Stream<e_host> &stream, ePotential_Type potential_type, 

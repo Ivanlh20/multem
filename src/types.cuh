@@ -1578,7 +1578,7 @@ namespace multem
 		using value_type = T;
 		using size_type = std::size_t;
 
-		eScanning_Type type;	// 1: Line, 2: Area, 
+		eScanning_Type type;			// 1: Line, 2: Area, 
 		int ns; 						// Sampling points
 		int nx;
 		int ny;
@@ -1608,30 +1608,6 @@ namespace multem
 			xe = ye = 0;
 		}
 
-		void get_grid_dim()
-		{
-			if(ns <= 0)
-			{
-				nx = ny = 0;
-				return;
-			}
-
-			nx = ny = ns;
-			if(type == eST_Area)
-			{
-				T lx = fabs(xe-x0);
-				T ly = fabs(ye-y0);
-				if(lx>ly)
-				{
-					ny = static_cast<int>(ceil(ns*ly/lx));
-				}
-				else
-				{
-					nx = static_cast<int>(ceil(ns*lx/ly));
-				}
-			}
-		}
-
 		int nxy() const { return nx*ny; }
 
 		T Rx(const int &ix) const { return x0 + ix*dRx; }
@@ -1640,24 +1616,20 @@ namespace multem
 
 		void set_grid()
 		{
-			get_grid_dim();
-
 			if(ns <= 0)
-			{				
+			{
+				ns = nx = ny = 0;
+				x.clear();
+				y.clear();
 				return;
 			}
 
-			x.resize(nx);
-			x.shrink_to_fit();
-
-			y.resize(ny);
-			y.shrink_to_fit();
-
-			if(type == eST_Line)
+			nx = ny = ns;
+			if(is_line())
 			{
 				T xu = xe-x0;
 				T yu = ye-y0;
-				T ds = sqrt(yu*yu+xu*xu)/static_cast<T>(ns);
+				T ds = sqrt(yu*yu+xu*xu)/ns;
 				T theta = atan2(yu, xu);
 				T cos_theta = cos(theta);
 				T sin_theta = sin(theta);
@@ -1678,9 +1650,18 @@ namespace multem
 			{
 				T xu = xe-x0;
 				T yu = ye-y0;
-
-				dRx = xu/static_cast<T>(nx);
-				dRy = yu/static_cast<T>(ny);
+				if(fabs(xu)>fabs(yu))
+				{
+					dRx = xu/ns;
+					dRy = std::copysign(dRx, yu);
+					ny = int(floor(yu/dRy+Epsilon<T>::rel+0.5));
+				}
+				else
+				{
+					dRy = yu/ns;
+					dRx = std::copysign(dRy, xu);
+					nx = int(floor(xu/dRx+Epsilon<T>::rel+0.5));
+				}
 
 				x.resize(nxy());
 				y.resize(nxy());

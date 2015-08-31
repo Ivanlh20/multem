@@ -25,12 +25,10 @@
 	
 using multem::rmatrix_r;
 
-void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[])
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	int q_type, nq;
-
-	q_type = mx_get_scalar<int>(prhs[0]);
-	nq = mx_get_scalar<int>(prhs[1]);
+	auto q_type = mx_get_scalar<int>(prhs[0]);
+	auto nq = mx_get_scalar<int>(prhs[1]);
 
 	/*****************************************************************************/
 	multem::Q1<double, multem::e_host> q;
@@ -40,6 +38,6 @@ void mexFunction(int nlhs,mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	rmatrix_r x = mx_create_matrix<rmatrix_r>(nq, 1, plhs[0]);
 	rmatrix_r w = mx_create_matrix<rmatrix_r>(nq, 1, plhs[1]);
 
-	std::copy(q.x.begin(), q.x.end(), x.real);
-	std::copy(q.w.begin(), q.w.end(), w.real);
+	std::copy(q.x.begin(), q.x.end(), x.begin());
+	std::copy(q.w.begin(), q.w.end(), w.begin());
 }

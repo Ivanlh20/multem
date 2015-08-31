@@ -26,19 +26,17 @@ using multem::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	int Z, ng, type;
+	int ng;
 	double g[1024], g2[1024], fxg[1024], feg[1024];
 	fxeg_Tabulated_Data fxeg_tabulated_data;
 
-	Z = mx_get_scalar<int>(prhs[0]); 
-	type = mx_get_scalar<int>(prhs[1]); 
+	auto Z = mx_get_scalar<int>(prhs[0]); 
+	auto type = mx_get_scalar<int>(prhs[1]); 
 	fxeg_tabulated_data.ReadTabData(Z, type, 1, ng, g, g2, fxg, feg);
 	
-	rmatrix_r g_o, fxg_o, feg_o;
-
-	g_o = mx_create_matrix<rmatrix_r>(ng, 1, plhs[0]);
-	fxg_o = mx_create_matrix<rmatrix_r>(ng, 1, plhs[1]);
-	feg_o = mx_create_matrix<rmatrix_r>(ng, 1, plhs[2]);
+	auto g_o = mx_create_matrix<rmatrix_r>(ng, 1, plhs[0]);
+	auto fxg_o = mx_create_matrix<rmatrix_r>(ng, 1, plhs[1]);
+	auto feg_o = mx_create_matrix<rmatrix_r>(ng, 1, plhs[2]);
 
 	std::copy(g, g + ng, g_o.real);
 	std::copy(fxg, fxg + ng, fxg_o.real);

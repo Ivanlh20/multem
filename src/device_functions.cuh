@@ -290,8 +290,6 @@ namespace multem
 		template<class TGrid, class T>
 		__global__ void sum_over_Det(TGrid grid, Value_type<TGrid> g2_min, Value_type<TGrid> g2_max, rVector<T> M_i, rVector<T> Mp_o)
 		{ 
-			using value_type_r = Value_type<TGrid>;
-
 			__shared__ T Mshare[c_thrnxny*c_thrnxny];
 
 			int tid = threadIdx.x + threadIdx.y*blockDim.x;
@@ -648,7 +646,6 @@ namespace multem
 		auto gridBT = device_detail::get_grid_nxny(grid, dim3(c_thrnxny, c_thrnxny));
 
 		device_detail::sum_over_Det<TGrid, typename TVector::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, pow(g_min, 2), pow(g_max, 2), M_i, sum_v);
-
 		return multem::sum(grid, sum_v);
 	}
 
@@ -656,7 +653,7 @@ namespace multem
 	enable_if_device_vector<TVector, Value_type<TGrid>>
 	sum_square_over_Det(Stream<e_device> &stream, const TGrid &grid, const Value_type<TGrid> &g_min, const Value_type<TGrid> &g_max, TVector &M_i)
 	{
-		device_vector<Value_type<TGrid>> sum_t(c_thrnxny*c_thrnxny);
+		device_vector<Value_type<TGrid>> sum_t(c_thrnxny*c_thrnxny, 0);
 
 		auto gridBT = device_detail::get_grid_nxny(grid, dim3(c_thrnxny, c_thrnxny));
 
@@ -701,8 +698,8 @@ namespace multem
 
 		device_detail::probe<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, lens, x, y, fPsi_o);
 
-		value_type_r total = sum_square(grid, fPsi_o);
-		scale(fPsi_o, sqrt(value_type_r(grid.nxy())/total));
+		auto total = sum_square(grid, fPsi_o);
+		scale(fPsi_o, sqrt(grid.nxy()/total));
 	}
 
 	template<class TGrid, class TVector_c>

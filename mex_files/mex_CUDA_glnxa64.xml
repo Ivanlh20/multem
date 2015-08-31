@@ -37,11 +37,11 @@
           CXXOPTIMFLAGS="-O -DNDEBUG"
           CXXDEBUGFLAGS="-g"
           
-          LDXX="g++"
+          LDXX="$GCC"
           LDFLAGS="-pthread -Wl,--no-undefined "
           LDTYPE="-shared"
           LINKEXPORT="-Wl,--version-script,&quot;$MATLABROOT/extern/lib/$ARCH/mexFunction.map&quot;"
-          LINKLIBS="-Wl,-rpath-link,$MATLABROOT/bin/$ARCH -L&quot;$MATLABROOT/bin/$ARCH&quot; -lmx -lmex -lmat -lm -lmwgpu -L/opt/cuda/lib64 -L/usr/local/cuda-7.0/lib64 -lcufft -lcudart"
+          LINKLIBS="-Wl,-rpath-link,$MATLABROOT/bin/$ARCH -L&quot;$MATLABROOT/bin/$ARCH&quot; -lmx -lmex -lmat -lm -lmwgpu -L/usr/local/cuda-7.0/lib64 -lcufft -lcudart"
           LDOPTIMFLAGS="-O"
           LDDEBUGFLAGS="-g"
           

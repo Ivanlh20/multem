@@ -18,7 +18,6 @@ input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Pen
 input_multislice.fp_dim = 110; 
 input_multislice.fp_seed = 300183; 
 input_multislice.fp_nconf = 20;
-input_multislice.fp_iconf = 0;
 
 input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
 input_multislice.zero_defocus_plane = 0;

@@ -167,19 +167,6 @@ namespace multem
 		v_z /= norm;
 	}
 
-	template<eDevice dev>
-	void device_synchronize()
-	{
-		if(dev == e_host)
-		{
-
-		}
-		else if(dev == e_device)
-		{
-			cudaDeviceSynchronize();
-		}
-	}
-
 	namespace host_device_detail
 	{
 		template<class TFn, class T>
@@ -1454,7 +1441,6 @@ namespace multem
 		{
 			using value_type_r = Value_type<TGrid>;
 
-			int ixy = grid.ind_col(ix, iy);
 			value_type_r gx = grid.gx_shift(ix);
 			value_type_r gy = grid.gy_shift(iy);
 			value_type_r g2 = gx*gx + gy*gy;
@@ -1468,10 +1454,12 @@ namespace multem
 					value_type_r phi = atan2(gy, gx);
 					chi += lens.m*phi + lens.cmfa2*g2*sin(2*(phi-lens.afa2)) + lens.cmfa3*g*g2*sin(3*(phi-lens.afa3)); 			
 				}	
+				int ixy = grid.ind_col(ix, iy);
 				fPsi_o[ixy] = thrust::euler(chi); 
 			}
 			else
 			{
+				int ixy = grid.ind_col(ix, iy);
  				fPsi_o[ixy] = 0;
 			}
 		}
@@ -2446,7 +2434,7 @@ namespace multem
 	{
 		using value_type_r = Value_type<TGrid>;
 		value_type_r sum_o = thrust::transform_reduce(M_i.begin(), M_i.end(), 
-		functor::square<value_type_r>(), static_cast<value_type_r>(0), thrust::plus<value_type_r>());
+		functor::square<value_type_r>(), value_type_r(0), thrust::plus<value_type_r>());
 		return sum_o;
 	}
 

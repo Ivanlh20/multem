@@ -47,7 +47,7 @@ namespace multem
 			}
 
 			// Electron scattering factors calculation (feg)
-			void feg(const T &g, T &y)
+			inline void feg(const T &g, T &y)
 			{
 				multem::feg<T>(potential_type, g, atom_type->feg, y);
 			}
@@ -61,7 +61,7 @@ namespace multem
 			}
 
 			// Electron scattering factor(feg, dfeg) where dfg is the first derivative along g
-			void feg_dfeg(const T &g, T &y, T &dy)
+			inline void feg_dfeg(const T &g, T &y, T &dy)
 			{
 				multem::feg_dfeg<T>(potential_type, g, atom_type->feg, y, dy);
 			}
@@ -75,7 +75,7 @@ namespace multem
 			}
 
 			// Electron scattering factor(fg)
-			void fxg(const T &g, T &y)
+			inline void fxg(const T &g, T &y)
 			{
 				multem::fxg<T>(potential_type, g, atom_type->Z, atom_type->fxg, y);
 			}
@@ -83,11 +83,13 @@ namespace multem
 			void fxg(const int &ng, T *g, T *y)
 			{
 				for(auto i = 0; i < ng; i++)
+				{
 					fxg(g[i], y[i]);
+				}
 			}
 
 			// Electron scattering factor(fg, dfg) where dfg is the first derivative along g
-			void fxg_dfxg(const T &g, T &y, T &dy)
+			inline void fxg_dfxg(const T &g, T &y, T &dy)
 			{
 				multem::fxg_dfxg<T>(potential_type, g, atom_type->Z, atom_type->fxg, y, dy);
 			}
@@ -95,11 +97,13 @@ namespace multem
 			void fxg_dfxg(const int &ng, T *g, T *y, T *dy)
 			{
 				for(auto i = 0; i < ng; i++)
+				{
 					fxg_dfxg(g[i], y[i], dy[i]);
+				}
 			}
 
 			// Electron density (Pr)
-			void Pr(const T &r, T &y)
+			inline void Pr(const T &r, T &y)
 			{
 				multem::Pr<T>(potential_type, r, atom_type->Pr, y);
 			}
@@ -107,11 +111,13 @@ namespace multem
 			void Pr(const int &nr, T *r, T *y)
 			{
 				for(auto i = 0; i < nr; i++)
+				{
 					Pr(r[i], y[i]);
+				}
 			}
 
 			// Electron density (Pr, dPr) where dPr is the first derivative along r
-			void Pr_dPr(const T &r, T &y, T &dy)
+			inline void Pr_dPr(const T &r, T &y, T &dy)
 			{
 				multem::Pr_dPr<T>(potential_type, r, atom_type->Pr, y, dy);
 			}
@@ -119,11 +125,13 @@ namespace multem
 			void Pr_dPr(const int &nr, T *r, T *y, T *dy)
 			{
 				for(auto i = 0; i < nr; i++)
+				{
 					Pr_dPr(r[i], y[i], dy[i]);
+				}
 			}
 
 			// Potential calculation(Vr)
-			void Vr(const T &r, T &y)
+			inline void Vr(const T &r, T &y)
 			{
 				multem::Vr<T>(potential_type, r, atom_type->Vr, y);
 			}
@@ -131,11 +139,13 @@ namespace multem
 			void Vr(const int &nr, T *r, T *y)
 			{
 				for(auto i = 0; i < nr; i++)
+				{
 					Vr(r[i], y[i]);
+				}
 			}
 
 			// Potential calculation (Vr, dVr) where dVr is the first derivative along r
-			void Vr_dVr(const T &r, T &y, T &dy)
+			inline void Vr_dVr(const T &r, T &y, T &dy)
 			{
 				multem::Vr_dVr<T>(potential_type, r, atom_type->Vr, y, dy);
 			}
@@ -143,11 +153,13 @@ namespace multem
 			void Vr_dVr(const int &nr, T *r, T *y, T *dy)
 			{
 				for(auto i = 0; i < nr; i++)
+				{
 					Vr_dVr(r[i], y[i], dy[i]);
+				}
 			}
 
 			// Projected potential (VR)
-			void VR(const T &R, T &y)
+			inline void VR(const T &R, T &y)
 			{
 				multem::VR<T>(potential_type, R, atom_type->VR, Qz_0_I, y);
 			}
@@ -155,11 +167,13 @@ namespace multem
 			void VR(const int &nR, T *R, T *y)
 			{
 				for(auto i = 0; i < nR; i++)
+				{
 					VR(R[i], y[i]);
+				}
 			}
 
 			// Projected potential (VR, dVR) where dVr is the first derivative along R
-			void VR_dVR(const T &R, T &y, T &dy)
+			inline void VR_dVR(const T &R, T &y, T &dy)
 			{
 				multem::VR_dVR<T>(potential_type, R, atom_type->VR, Qz_0_I, y, dy);
 			}
@@ -167,11 +181,13 @@ namespace multem
 			void VR_dVR(const int &nR, T *R, T *y, T *dy)
 			{
 				for(auto i = 0; i < nR; i++)
+				{
 					VR_dVR(R[i], y[i], dy[i]);
+				}
 			}
 
 			// Projected potential (Vz)[z0, ze]
-			void Vz(const T &z0, const T &ze, const T &R, T &y)
+			inline void Vz(const T &z0, const T &ze, const T &R, T &y)
 			{
 				multem::Vz<T>(potential_type, z0, ze, R, atom_type->Vr, Qz_a_b, y);
 			}
@@ -179,11 +195,13 @@ namespace multem
 			void Vz(const T &z0, const T &ze, const int &nR, T *R, T *y)
 			{
 				for(auto i = 0; i < nR; i++)
-					Vz(R[i], y[i]);
+				{
+					Vz(z0, ze, R[i], y[i]);
+				}
 			}
 
 			// Projected potential (Vz, dVz)[z0, ze] where dVr is the first derivative along R
-			void Vz_dVz(const T &z0, const T &ze, const T &R, T &y, T &dy)
+			inline void Vz_dVz(const T &z0, const T &ze, const T &R, T &y, T &dy)
 			{
 				multem::Vz_dVz<T>(potential_type, z0, ze, R, atom_type->Vr, Qz_a_b, y, dy);
 			}
@@ -191,7 +209,9 @@ namespace multem
 			void Vz_dVz(const T &z0, const T &ze, const int &nR, T *R, T *y, T *dy)
 			{
 				for(auto i = 0; i < nR; i++)
+				{
 					Vz_dVz(z0, ze, R[i], y[i], dy[i]);
+				}
 			}
 
 			T AtomicRadius_rms(const int &Dim)

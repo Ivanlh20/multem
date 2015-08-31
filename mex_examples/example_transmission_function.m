@@ -9,12 +9,12 @@ input_multislice.cpu_nthread = 4;
 input_multislice.gpu_device = 0;
 input_multislice.gpu_nstream = 8;
 
-input_multislice.phonon_model = 1;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+input_multislice.phonon_model = 3;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multislice.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
 input_multislice.potential_slicing = 1;             % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
 
-input_multislice.fp_dim = 111;                      % phonon dimensions
+input_multislice.fp_dim = 110;                      % phonon dimensions
 input_multislice.fp_seed = 300183;                  % Random seed(frozen phonon)
 input_multislice.fp_single_conf = 1;                % 1: true, 0:false
 input_multislice.fp_nconf = 1;                      % true: phonon configuration, false: number of frozen phonon configurations

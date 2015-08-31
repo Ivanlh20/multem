@@ -14,8 +14,8 @@ input_multislice.E_0 = 300;                          % Acceleration Voltage (keV
 input_multislice.lx = 14;
 input_multislice.ly = 14;
 
-input_multislice.nx = 1024; 
-input_multislice.ny = 1024;
+input_multislice.nx = 2048; 
+input_multislice.ny = 2048;
 
 input_multislice.lens_m = 0;           %mm
 input_multislice.lens_f = 88.7414;      %Angs

@@ -39,7 +39,7 @@ namespace multem
 		public:
 			using value_type_r = Value_type<TVector_r>;
 			using value_type_c = Value_type<TVector_c>;
-			static const bool is_vector = is_Vector<TVector_r>::value;
+			static const bool is_vector = is_host_device_vector<TVector_c>::value;
 
 			Output_Multislice(): Input_Multislice<value_type_r, e_host>(), output_type(0), nx(0), ny(0), dx(0), dy(0){}
 

@@ -142,7 +142,7 @@ namespace multem
 		public:
 			static const eDevice device = e_device;
 
-			Stream(): n_act_stream(0){}
+			Stream(): nx(0), ny(0), nxy(0), n_act_stream(0){}
 
 			~Stream(){ destroy(); n_act_stream = 0; }
 
@@ -177,10 +177,52 @@ namespace multem
 				n_act_stream = (new_n_act_stream<0)?0:min(size(), new_n_act_stream);
 			}
 
+			void set_grid(const int &nx_i, const int &ny_i)
+			{
+				nx = nx_i;
+				ny = ny_i;
+				nxy = nx*ny;
+			}
+
+			Range get_range(const int &istream)
+			{
+				Range range;
+				
+				int qnxy = nxy/n_act_stream;
+				range.ixy_0 = istream*qnxy;
+				range.ixy_e = (istream+1)*qnxy;
+
+				int qnx = nx/n_act_stream;
+				range.ix_0 = istream*qnx;
+				range.ix_e = (istream+1)*qnx;
+				range.iy_0 = 0;
+				range.iy_e = ny;
+
+				if(istream == n_act_stream-1)
+				{
+					range.ix_e += (nx - qnx*n_act_stream);
+					range.ixy_e += (nxy - qnxy*n_act_stream);
+				}
+				return range;
+			}
+
+			template<class TFn>
+			void exec(TFn &fn)
+			{
+				//for(auto istream = 0; istream < n_act_stream; istream++)
+				//{
+				//	stream[istream] = std::thread(fn, get_range(istream));
+				//}
+				//synchronize();
+			}
+
 			int n_act_stream;
 
-		private:
 			std::vector<cudaStream_t> stream;
+		private:
+			int nx;
+			int ny;
+			int nxy;
 
 			void destroy()
 			{

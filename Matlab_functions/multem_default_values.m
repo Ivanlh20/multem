@@ -83,8 +83,6 @@ input_multislice.scanning_ye = 4.078;
 % Inner angle(mrad) and Outer angle(mrad)
 input_multislice.det_cir(1).ang_inner = 60; 
 input_multislice.det_cir(1).ang_outer = 180;
-input_multislice.det_cir(2).ang_inner = 80; 
-input_multislice.det_cir(2).ang_outer = 120;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CBED %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.cbed_x0 = 0.0;      % x position 

@@ -124,11 +124,6 @@ namespace multem
 				multem::transmission_funtion(*(this->stream), this->input_multislice->grid, *fft2, this->input_multislice->interaction_model, fPot, this->V_0, trans_0);
 			}
 
-			void trans(const int &islice)
-			{
-				trans(islice, trans_0);
-			}
-
 			template<class TOutput_multislice>
 			void trans(const int &islice, TOutput_multislice &output_multislice)
 			{
@@ -140,7 +135,7 @@ namespace multem
 
 			void transmit(const int &islice, Vector<value_type_c, dev> &psi_io)
 			{
-				trans(islice);
+				trans(islice, trans_0);
 				multem::multiply(trans_0, psi_io);
 			}
 

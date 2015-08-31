@@ -80,11 +80,7 @@ namespace multem
 				value_type_r x = this->input_multislice->get_Rx_pos_shift();
 				value_type_r y = this->input_multislice->get_Ry_pos_shift();
 
-				//value_type_r f0 = this->input_multislice->lens.f;
-				//value_type_r f = f0 - (slice.size()>0)?slice.z_int_0[0]:0;
-				//this->input_multislice->lens.set_defocus(f);
 				multem::probe(*(this->stream), this->input_multislice->grid, this->input_multislice->lens, x, y, psi_z);
-				//this->input_multislice->lens.set_defocus(f0);
 				this->fft2->inverse(psi_z);
 			}
 
