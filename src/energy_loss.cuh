@@ -22,7 +22,7 @@
 #include "types.cuh"
 #include "stream.cuh"
 #include "fft2.cuh"
-#include "input_multislice.hpp"
+#include "input_multislice.cuh"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"

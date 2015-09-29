@@ -229,6 +229,17 @@ namespace multem
 	}
 
 	template<class T>
+	void assign(rmatrix_r &M_i, host_vector<complex<T>> &M_o, host_vector<complex<T>> *M_i_h=nullptr)
+	{
+		M_o.resize(M_i.size);
+		for(auto ixy = 0; ixy < M_o.size(); ixy++)
+		{
+			M_o[ixy].real(M_i.real[ixy]);
+			M_o[ixy].imag(0);
+		}
+	}
+
+	template<class T>
 	void assign(rmatrix_c &M_i, host_vector<T> &M_o, host_vector<T> *M_i_h=nullptr)
 	{
 		M_o.resize(M_i.size);

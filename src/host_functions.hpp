@@ -22,6 +22,8 @@
 #include <thread>
 #include <type_traits>
 #include <algorithm>
+#include <numeric>
+#include <random>
 
 #include <fftw3.h>
 #include "math.cuh"
@@ -72,57 +74,95 @@ namespace multem
 
 	//symmetric coordinates(Fourier space Coordinates)
 	inline
-	int FSC(int i, int nh, int shift=2)
+	int FSC(int i, int nh, bool shift=false)
 	{
 		int j;
-		if(shift == 1)
+		if(shift)
 			j = (i < nh)?i:i-2*nh;
 		else
 			j = i-nh;
 		return j;
 	}
 
+	//symmetric coordinates(Fourier space Coordinates)
+	inline
+	int RSC(int i, int nh, bool shift=false)
+	{
+		int j;
+		if(shift)
+			j = (i < nh)?i+nh:i-nh;
+		else
+			j = i;
+		return j;
+	}
+
 	// get two dimensional Hanning_Filter
-	void filter_Hanning_2D(int ny, int nx, double dx, double dy, double k, int shift, double *fI)
+	void filter_Hanning_1D(int nx, double dx, double k, bool shift, double *fI)
+	{	
+		int nxh = nx/2;
+		auto cx = c_2Pi/(dx*(nx-1));
+
+		for(auto ix = 0; ix < nx; ix++)
+		{
+			auto Rx = RSC(ix, nxh, shift)*dx; 
+			auto f = 0.5*(1.0-cos(cx*Rx));
+			fI[ix] = (f>k)?1.0:f/k;
+		}
+	}
+
+	// get two dimensional Hanning_Filter
+	void filter_Hanning_2D(int ny, int nx, double dx, double dy, double k, bool shift, double *fI)
 	{	
 		int nxh = nx/2, nyh = ny/2;
-		double Rx, Ry, f;
-		double cx = c_2Pi/(dx*(nx-1));
-		double cy = c_2Pi/(dy*(ny-1));
+		auto cx = c_2Pi/(dx*(nx-1));
+		auto cy = c_2Pi/(dy*(ny-1));
 
 		Vector<double, e_host> fx(nx);
 		Vector<double, e_host> fy(ny);
 
 		for(auto ix = 0; ix < fx.size(); ix++)
 		{
-			Rx = FSC(ix, nxh, shift)*dx; 
-			fx[ix] = 0.5*(1.0+cos(cx*Rx));
+			auto Rx = RSC(ix, nxh, shift)*dx; 
+			fx[ix] = 0.5*(1.0-cos(cx*Rx));
 		}
+
 		for(auto iy = 0; iy < fy.size(); iy++)
 		{
-			Ry = FSC(iy, nyh, shift)*dy; 
-			fy[iy] = 0.5*(1.0+cos(cy*Ry));
+			auto Ry = RSC(iy, nyh, shift)*dy;  
+			fy[iy] = 0.5*(1.0-cos(cy*Ry));
 		}
 
 		for(auto ix = 0; ix < fx.size(); ix++)
 		{
 			for(auto iy = 0; iy < fy.size(); iy++)
 			{
-				f = fx[ix]*fy[iy];
-				if(f>k)
-					fI[ix*ny+iy] = 1;
-				else
-					fI[ix*ny+iy] = f/k;
+				auto f = fx[ix]*fy[iy];
+				fI[ix*ny+iy] = (f>k)?1.0:f/k;
 			}
 		}
 	}
 
+
 	// get two dimensional Gaussian_Filter
-	void filter_Gaussian_2D(int ny, int nx, double dx, double dy, double Sigma, int shift, double *fI)
+	void filter_Gaussian_1D(int nx, double dx, double Sigma, bool shift, double *fI)
+	{	
+		int nxh = nx/2;
+		auto cx = 0.5/(Sigma*Sigma);
+
+		for(auto ix = 0; ix < nx; ix++)
+		{
+			auto Rx = FSC(ix, nxh, shift)*dx; 
+			fI[ix] = exp(-cx*Rx*Rx);
+		}
+	}
+
+	// get two dimensional Gaussian_Filter
+	void filter_Gaussian_2D(int ny, int nx, double dx, double dy, double Sigma, bool shift, double *fI)
 	{	
 		int nxh = nx/2, nyh = ny/2;
 		double Rx, Ry;
-		double c = 0.5/(Sigma*Sigma);
+		double cx = 0.5/(Sigma*Sigma);
+		double cy = 0.5/(Sigma*Sigma);
 
 		Vector<double, e_host> fx(nx);
 		Vector<double, e_host> fy(ny);
@@ -130,13 +170,13 @@ namespace multem
 		for(auto ix = 0; ix < fx.size(); ix++)
 		{
 			Rx = FSC(ix, nxh, shift)*dx; 
-			fx[ix] = exp(-c*Rx*Rx);
+			fx[ix] = exp(-cx*Rx*Rx);
 		}
 
 		for(auto iy = 0; iy < fy.size(); iy++)
 		{
 			Ry = FSC(iy, nyh, shift)*dy; 
-			fy[iy] = exp(-c*Ry*Ry);
+			fy[iy] = exp(-cy*Ry*Ry);
 		}
 
 		for(auto ix = 0; ix < fx.size(); ix++)
@@ -148,25 +188,40 @@ namespace multem
 		}
 	}
 
-	// get two dimensional Butterworth_Filter
-	void filter_Butterworth_2D(int ny, int nx, double dx, double dy, double Radius, int n, int lpf, int shift, double *fI)
+
+	// get two dimensional Butterworth_Filter 1D
+	void filter_Butterworth_1D(int nx, double dx, double Radius, int n, bool shift, double *fI)
+	{	
+		int nxh = nx/2;
+		auto R02 = pow(Radius, 2);
+
+		for(auto ix = 0; ix < nx; ix++)
+		{
+			auto Rx = FSC(ix, nxh, shift)*dx; 
+			fI[ix] = 1.0/(1.0+pow(Rx*Rx/R02, n));
+		}
+	}
+
+	// get two dimensional Butterworth_Filter 2D
+	void filter_Butterworth_2D(int ny, int nx, double dx, double dy, double Radius, int n, bool shift, double *fI)
 	{	
 		int nxh = nx/2, nyh = ny/2;
-		double R02 = pow(Radius, 2);
+		auto R02 = pow(Radius, 2);
 
 		for(auto ix = 0; ix < nx; ix++)
 		{
 			for(auto iy = 0; iy < ny; iy++)
 			{
-				double Rx = FSC(ix, nxh, shift)*dx; 
-				double Ry = FSC(iy, nyh, shift)*dy;
-				double R2 = Rx*Rx + Ry*Ry;
-				fI[ix*ny+iy] = (lpf == 1)?1.0/(1.0+pow(R2/R02, n)):(isZero(R2))?0.0:1.0/(1.0+pow(R02/R2, n));
+				auto Rx = FSC(ix, nxh, shift)*dx; 
+				auto Ry = FSC(iy, nyh, shift)*dy;
+				auto R2 = Rx*Rx + Ry*Ry;
+				fI[ix*ny+iy] = 1.0/(1.0+pow(R2/R02, n));
 			}
 		}
 	}
 
-	// get two dimensional radial distribution for regular gridBT
+
+	// get two dimensional radial distribution for regular grid
 	void radial_distribution_2D(int nR, double *R, double *fR, int nRl, double *Rl, double *rl, double *frl, double *cfrl, bool reg, int typ)
 	{	
 		double Rlmin = Rl[0], Rlmax = Rl[nRl-1], dRl = Rl[1]-Rl[0];
@@ -197,7 +252,7 @@ namespace multem
 			}
 	}
 
-	// get two dimensional radial distribution for regular gridBT
+	// get two dimensional radial distribution for regular grid
 	void getCumRadDist_2D(int ny, int nx, int shift, double *fI, int nr, double *r, double *fIr)
 	{	
 		int idx, nxh = nx/2, nyh = ny/2;
@@ -230,6 +285,123 @@ namespace multem
 				fIr[i] /= cfIr[i];
 			fIr[i] += fIr[i-1];
 		}
+	}
+
+	// Gaussian convolution
+	template <class TGrid, class TVector_c>
+	void gaussian_convolution(const TGrid &grid, FFT2<Value_type<TGrid>, e_host> &fft2, Value_type<TGrid> sigma, TVector_c &image)
+	{	
+		using T = Value_type<TGrid>;
+
+		fft2.forward(image);
+
+		T alpha = 2.0*c_Pi2*sigma*sigma;
+
+		for(auto ix = 0; ix < grid.nx; ix++)
+		{
+			for(auto iy = 0; iy < grid.ny; iy++)
+			{
+				int ixy = grid.ind_col(ix, iy);
+				T g2 = grid.g2_shift(ix, iy);
+				image[ixy] *= complex<T>(exp(-alpha*g2)/grid.nxy());
+			}
+		}
+
+		fft2.inverse(image);
+	}
+
+	// add Poisson noise
+	template <class TVector>
+	Value_type<TVector> add_poisson_noise(Value_type<TVector> SNR, TVector &image)
+	{	
+		using value_type = Value_type<TVector>;
+
+		std::mt19937_64 gen;
+		std::poisson_distribution<int> randp;
+
+		auto get_std = [](TVector &image)->value_type
+		{
+			value_type x_mean = 0;
+			value_type x_std = 0;
+			for(auto ixy = 0; ixy < image.size(); ixy++)
+			{
+				auto x = image[ixy];
+				x_mean += x;
+				x_std += x*x;
+			}
+			x_mean /= image.size();
+			return sqrt(x_std/image.size()-x_mean*x_mean);
+		};
+
+		auto get_SNR = [&](TVector &image, value_type image_std, value_type k)->value_type
+		{
+			value_type x_mean_n = 0;
+			value_type x_std_n = 0;
+			for(auto ixy = 0; ixy < image.size(); ixy++)
+			{
+				auto y = k*image[ixy];
+				randp.param(std::poisson_distribution<int>::param_type(y));
+				auto x = y-randp(gen);
+				x_mean_n += x;
+				x_std_n += x*x;
+			}
+			x_mean_n /= image.size();
+			x_std_n = sqrt(x_std_n/image.size()-x_mean_n*x_mean_n);
+
+			return k*image_std/x_std_n;
+		};
+
+		auto image_std = get_std(image);
+
+		value_type SNR_k = get_SNR(image, image_std, 1);
+	    
+		value_type k_0, k_e;
+		k_0 = k_e = 1;
+
+		if(SNR_k<SNR)
+		{
+			do
+			{
+				k_e *= 2;
+				SNR_k = get_SNR(image, image_std, k_e);
+			} while (SNR_k < SNR);
+			k_0 = k_e/2;	
+		}
+		else
+		{
+			do
+			{
+				k_0 /= 2;
+				SNR_k = get_SNR(image, image_std, k_0);
+			} while (SNR_k >= SNR);
+			k_e = 2*k_0;
+		}
+
+
+		//bisection method
+		int c = 0;
+		value_type k_m;
+		do
+		{
+			k_m = 0.5*(k_0 + k_e);
+			auto SNR_k = get_SNR(image, image_std, k_m);
+
+			if(SNR_k < SNR)
+				k_0 = k_m;
+			else
+				k_e = k_m;
+			c++;
+		} while ((abs(SNR-SNR_k)>0.05) && (c<10));
+
+
+		// add Poisson noise
+		for(auto ixy = 0; ixy < image.size(); ixy++)
+		{
+			auto y = k_m*image[ixy];
+			randp.param(std::poisson_distribution<int>::param_type(y));
+			image[ixy] = randp(gen);
+		}
+		return k_m;
 	}
 
 	// get index to maximun distance
@@ -312,6 +484,128 @@ namespace multem
 			}
 		}
 		return l;
+	}
+
+	// get information limit for regular gridBT
+	void get_sigma_by_row(int ny, int nx, double *g, double *fg, double *sigma)
+	{
+		int nr = nx/2-1;
+		vector<double> rl, frl, cfrl;
+		double g_min = 0, g_max = nr, dg = abs(g[1]-g[0]);
+
+		rl.resize(nr);
+		frl.resize(nr);
+		cfrl.resize(nr);
+
+		for(int i=0; i < nr; i++)
+		{
+			rl[i] = 0.5+i;
+		}
+
+		// Shift and Normalize
+		auto shift_normalize = [&](const double &x, const double &x_min, const double &x_max)->double
+		{
+			return (x-x_min)/(x_max-x_min);
+		};
+
+		for(int iy=0; iy < ny; iy++)
+		{
+			std::fill(frl.begin(), frl.end(), 0.0);
+			std::fill(cfrl.begin(), cfrl.end(), 0.0);
+			for(int ix=0; ix < nx; ix++)
+			{
+				if((g_min <= g[ix])&&(g[ix]<g_max))
+				{
+					auto j = (int)floor((g[ix]-g_min)/dg);
+					frl[j] += fg[ix];
+					cfrl[j] += 1.0;
+				}
+			}
+
+			for(auto i=0; i < nr; i++)
+			{
+				if(cfrl[i]>0)
+					frl[i] /= cfrl[i];
+			}
+
+			frl[0] = 1.01*frl[1];
+
+			auto rl_min = rl.front();
+			auto rl_max = rl.back();
+			auto frl_min = *std::min_element(frl.begin(), frl.end());
+			auto frl_max = *std::max_element(frl.begin(), frl.end());
+
+			int k0 = 0;
+			auto x = shift_normalize(rl[k0], rl_min, rl_max);
+			auto y = shift_normalize(frl[k0], frl_min, frl_max);
+			auto d2_min = x*x + y*y;
+			for(int i=1; i < nr; i++)
+			{
+				auto x = shift_normalize(rl[i], rl_min, rl_max);
+				auto y = shift_normalize(frl[i], frl_min, frl_max);
+				auto d2 = x*x + y*y;
+				if(d2 < d2_min)
+				{
+					d2_min = d2;
+					k0 = i;
+				}
+			}
+
+			int ke = std::max_element(frl.begin() + k0, frl.end()) - frl.begin();
+
+			sigma[iy] = 0.5*(rl[ke]+rl[k0]);
+		}
+	}
+
+	// get information limit for regular gridBT
+	double get_sigma(int ny, int nx, double *g, double *fg)
+	{
+		auto dgx = abs(g[1]-g[0]);
+		auto dgy = abs(g[ny]-g[0]);
+		int nr = (nx*dgx < ny*dgy)?(nx/2-1):(ny/2-1);
+		vector<double> gl, rl, frl, cfrl;
+
+		gl.resize(nr+1);	
+		rl.resize(nr);
+		frl.resize(nr);
+		cfrl.resize(nr);
+
+		std::iota(gl.begin(), gl.end(), 0);
+
+		// radial distribution
+		auto nxy = nx*ny;
+		radial_distribution_2D(nxy, g, fg, nr+1, gl.data(), rl.data(), frl.data(), cfrl.data(), true, 0);
+		frl[0] = 1.01*frl[1];
+		auto rl_min = rl.front();
+		auto rl_max = rl.back();
+		auto frl_min = *std::min_element(frl.begin(), frl.end());
+		auto frl_max = *std::max_element(frl.begin(), frl.end());
+
+		// Shift and Normalize
+		auto shift_normalize = [&](const double &x, const double &x_min, const double &x_max)->double
+		{
+			return (x-x_min)/(x_max-x_min);
+		};
+
+		int k0 = 0;
+		auto x = shift_normalize(rl[k0], rl_min, rl_max);
+		auto y = shift_normalize(frl[k0], frl_min, frl_max);
+		auto d2_min = x*x + y*y;
+		for(int i=1; i < nr; i++)
+		{
+			auto x = shift_normalize(rl[i], rl_min, rl_max);
+			auto y = shift_normalize(frl[i], frl_min, frl_max);
+			auto d2 = x*x + y*y;
+			if(d2 < d2_min)
+			{
+				d2_min = d2;
+				k0 = i;
+			}
+		}
+
+		int ke = std::max_element(frl.begin() + k0, frl.end()) - frl.begin();
+
+		return rl[ke];
 	}
 
 	// get information limit for regular gridBT
@@ -1011,7 +1305,7 @@ namespace multem
 		stream.exec(probe);
 
 		auto total = sum_square(grid, fPsi_o);
-		multem::scale(fPsi_o, sqrt(grid.nxy()/total));
+		multem::scale(fPsi_o, sqrt(1.0/total));
 	}
 
 	template<class TGrid, class TVector_c>

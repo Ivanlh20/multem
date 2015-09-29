@@ -41,10 +41,11 @@ namespace multem
 				sigma_min(0), sigma_max(0), occ_min(0), 
 				occ_max(0), R_Int_min(0), R_Int_max(0), 
 				x_mean(0), y_mean(0), z_mean(0), x_std(0), 
-				y_std(0), z_std(0), s_x(0), s_y(0),s_z(0),
+				y_std(0), z_std(0), s_x(0), s_y(0), s_z(0),
 				x_Int_min(0), x_Int_max(0), y_Int_min(0),
 				y_Int_max(0), z_Int_min(0), z_Int_max(0),
-				s_x_Int(0), s_y_Int(0), s_z_Int(0){}
+				s_x_Int(0), s_y_Int(0), s_z_Int(0),
+				l_x_Int(0), l_y_Int(0), l_z_Int(0){}
 
 			size_type size() const
 			{

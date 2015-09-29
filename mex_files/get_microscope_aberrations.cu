@@ -21,7 +21,7 @@
 #include "traits.cuh"
 #include "stream.cuh"
 #include "fft2.cuh"
-#include "input_multislice.hpp"
+#include "input_multislice.cuh"
 #include "output_multislice.hpp"
 #include "atom_data.hpp"
 #include "microscope_effects.cuh"

@@ -33,7 +33,7 @@ namespace multem
 		public:
 			using value_type = T;
 
-			Atom_Cal():potential_type(ePT_Lobato_0_12)
+			Atom_Cal():potential_type(ePT_Lobato_0_12), atom_type(nullptr)
 			{
 				Quadrature quadrature;
 				quadrature.get(0, c_nqz, Qz_a_b); 	// 0: int_-1^1 y(x) dx - TanhSinh quadrature
@@ -216,34 +216,38 @@ namespace multem
 
 			T AtomicRadius_rms(const int &Dim)
 			{
+		
 				if(isZero(atom_type->Vr.cl[0]))
 				{
 					return 0.0;
 				}
 				else
 				{
-					auto f = [&](const T &x)->T
+					auto fx = [=](const T &x)->T
 					{	
 						T V;
-						if(Dim == 3) Vr(x, V);
-						else VR(x, V);
+						if(Dim == 3)
+						{
+							this->Vr(x, V);
+						}
+						else 
+						{
+							this->VR(x, V);
+						}
 						return V;
 					};
+					
+					auto rmin = atom_type->rn_c;
+					auto Vri = fx(rmin);
 
-					T iVr, iVrn, Vrt;
-					T rmin, ri, Vri;
+					auto iVr = Vri*pow(rmin, Dim)/Dim;
+					auto iVrn = Vri*pow(rmin, Dim+2)/(Dim+2);
 
-					rmin = atom_type->rn_c;
-					Vri = f(rmin);
-
-					iVr = Vri*pow(rmin, Dim)/Dim;
-					iVrn = Vri*pow(rmin, Dim+2)/(Dim+2);
-
-					/************************************************************/
 					for(auto i = 0; i< Qz_0_I.size(); i++)
 					{
-						ri = Qz_0_I.x[i] + rmin;
-						Vri = f(ri);
+						auto ri = Qz_0_I.x[i] + rmin;
+						Vri = fx(ri);
+						T Vrt;
 						iVr += Vrt = Qz_0_I.w[i]*Vri*pow(ri, Dim-1);
 						iVrn += Vrt*ri*ri;
 					}
@@ -259,11 +263,17 @@ namespace multem
 				}
 				else
 				{
-					auto f = [&](const T &x)->T
+					auto f = [=](const T &x)->T
 					{	
 						T V;
-						if(Dim == 3) Vr(x, V);
-						else VR(x, V);
+						if(Dim == 3)
+						{
+							this->Vr(x, V);
+						}
+						else 
+						{
+							this->VR(x, V);
+						}
 						return V-Vrl;
 					};
 

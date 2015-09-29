@@ -21,7 +21,7 @@
 #include "traits.cuh"
 #include "stream.cuh"
 #include "atom_data.hpp"
-#include "input_multislice.hpp"
+#include "input_multislice.cuh"
 #include "output_multislice.hpp"
 #include "host_functions.hpp"
 #include "device_functions.cuh"

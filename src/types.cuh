@@ -817,6 +817,8 @@ namespace multem
 
 		static const eDevice device = e_host;
 
+		Det_Cir(): lambda(0){}
+
 		inline
 		void set_input_data(value_type E_0)
 		{
@@ -1448,7 +1450,7 @@ namespace multem
 
 		static const eDevice device = dev;
 
-		Atom_Type(): Z(0), A(0), rn_e(0), rn_c(0), ra_e(0), ra_c(0), 
+		Atom_Type(): Z(0), m(0), A(0), rn_e(0), rn_c(0), ra_e(0), ra_c(0), 
 						R_min(0), R_max(0), R_min2(0), R_max2(0){}
 
 		template<class TAtom_Type> 

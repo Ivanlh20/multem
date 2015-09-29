@@ -22,7 +22,7 @@
 #include <fftw3.h>
 #include "types.cuh"
 #include "traits.cuh"
-#include "input_multislice.hpp"
+#include "input_multislice.cuh"
 #include "output_multislice.hpp"
 #include "host_functions.hpp"
 #include "device_functions.cuh"

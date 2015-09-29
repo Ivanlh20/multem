@@ -18,7 +18,7 @@
 
 #include <cstring>
 #include "types.cuh"
-#include "input_multislice.hpp"
+#include "input_multislice.cuh"
 #include "specimen.hpp"
 #include <mex.h>
 

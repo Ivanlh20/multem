@@ -699,7 +699,7 @@ namespace multem
 		device_detail::probe<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, lens, x, y, fPsi_o);
 
 		auto total = sum_square(grid, fPsi_o);
-		scale(fPsi_o, sqrt(grid.nxy()/total));
+		scale(fPsi_o, sqrt(1.0/total));
 	}
 
 	template<class TGrid, class TVector_c>

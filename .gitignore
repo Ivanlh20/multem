@@ -6,3 +6,5 @@
 *.asv
 *.deps
 *.wisdom
+*.dll
+*.exe

@@ -26,7 +26,7 @@
 #include "types.cuh"
 #include "atomic_data.hpp"
 #include "atom_data.hpp"
-#include "input_multislice.hpp"
+#include "input_multislice.cuh"
 #include "host_device_functions.cuh"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
@@ -73,7 +73,7 @@ namespace multem
 					input_multislice->interaction_model = eESIM_Phase_Object;
 				}
 
-				atoms.set_Atoms(atoms_u, false , &atom_type);
+				atoms.set_Atoms(atoms_u, false, &atom_type);
 
 				/***************************************************************************/
 				get_slicing(slice);
@@ -85,13 +85,11 @@ namespace multem
 			/* Move atoms (ramdom distribution will be included in the future) */
 			void move_atoms(const int &fp_iconf, const int &tm_irot=0)
 			{
-				if(!input_multislice->is_frozen_phonon()||(fp_iconf <= 0))
-				{
-					return;
-				}
-
 				// set configuration
-				rand.set_configuration(fp_iconf);
+				if(input_multislice->is_frozen_phonon())
+				{
+					rand.set_configuration(fp_iconf);
+				}
 
 				Vector<T, e_host> Rm;
 				if(input_multislice->is_tomography())
@@ -105,25 +103,30 @@ namespace multem
 					T x = atoms_u.x[iatoms];
 					T y = atoms_u.y[iatoms];
 					T z = atoms_u.z[iatoms];
+
 					if(input_multislice->is_tomography())
 					{
 						rotate_position(Rm, input_multislice->tm_p0, x, y, z);
 					}
-					atoms.x[iatoms] = x + rand.dx(atoms_u.sigma[iatoms]);
-					atoms.y[iatoms] = y + rand.dy(atoms_u.sigma[iatoms]);
-					atoms.z[iatoms] = z + rand.dz(atoms_u.sigma[iatoms]);
+
+					if(input_multislice->is_frozen_phonon())
+					{
+						x += rand.dx(atoms_u.sigma[iatoms]);
+						y += rand.dy(atoms_u.sigma[iatoms]);
+						z += rand.dz(atoms_u.sigma[iatoms]);
+					}
+					atoms.x[iatoms] = x;
+					atoms.y[iatoms] = y;
+					atoms.z[iatoms] = z;
 					atoms.sigma[iatoms] = atoms_u.sigma[iatoms];
 					atoms.occ[iatoms] = atoms_u.occ[iatoms];
 				}
 				// get atom information
 				atoms.get_Statistic(&atom_type);
-				if(input_multislice->is_multislice() || input_multislice->is_tomography() )
-				{
-					// Ascending sort by z
-					atoms.Sort_by_z();
-					// Slicing procedure
-					get_slicing(slice);
-				}
+				// Ascending sort by z
+				atoms.Sort_by_z();
+				// Slicing procedure
+				get_slicing(slice);
 			}
 
 			T dz(const int &islice)
@@ -228,7 +231,7 @@ namespace multem
 						thickness.islice[islice] = islice;
 						thickness.z_back_prop[islice] = thickness.z_zero_def_plane[islice] - thickness.z[islice];
 						slice.z_0[islice] = (islice==0)?atoms.z_Int_min:thickness.z[islice-1]; 
-						slice.z_e[islice] = thickness.z[islice]; 
+						slice.z_e[islice] = thickness.z[islice];
 						slice.z_int_0[islice] = slice.z_0[islice];
 						slice.z_int_e[islice] = slice.z_e[islice];
 						slice.iatom_0[islice] = (islice==0)?0:thickness.iatom_e[islice-1]+1;

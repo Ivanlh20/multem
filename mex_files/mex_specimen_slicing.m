@@ -1,3 +1,3 @@
 clc; clear all;
   
-MEX('release', 'get_specimen_slicing.cu', '../src');
+MEX('debug', 'get_specimen_slicing.cu', '../src');

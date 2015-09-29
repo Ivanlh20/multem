@@ -5,7 +5,7 @@
     Name="NVIDIA CUDA Compiler"
     ShortName="nvcc"
     Manufacturer="NVIDIA"
-    Version="7.0"
+    Version="7.5"
     Language="CUDA"
     Priority="A"
     Location="$NVCC" >
@@ -37,7 +37,7 @@
           
           COMPILER="nvcc"
           COMPFLAGS="--compiler-options=/Zp8,/bigobj,/GR,/W3,/EHs,/nologo,/MD $ARCHFLAGS"
-          ARCHFLAGS="-gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot;"
+          ARCHFLAGS="-gencode=arch=compute_20,code=sm_20 -gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot;"
           COMPDEFINES="--compiler-options=/D_CRT_SECURE_NO_DEPRECATE,/D_SCL_SECURE_NO_DEPRECATE,/D_SECURE_SCL=0,$MATLABMEX"
           MATLABMEX="/DMATLAB_MEX_FILE"
           OPTIMFLAGS="--compiler-options=/O2,/Oy-,/DNDEBUG"
@@ -151,7 +151,7 @@
                     <dirExists name="$$" />
                 </and>
                 <and>
-                    <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\bin\nvcc.exe" />
+                    <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5\bin\nvcc.exe" />
                     <dirExists name="$$" />
                 </and>
             </or>

@@ -22,7 +22,7 @@
 #include "types.cuh"
 #include "matlab_types.cuh"
 #include "traits.cuh"
-#include "input_multislice.hpp"
+#include "input_multislice.cuh"
 #include "output_multislice.hpp"
 #include "atom_data.hpp"
 #include "multislice.cuh"
@@ -248,7 +248,10 @@ void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_mul
 		mxArray *mx_field_detector_coh;
 		const char *field_names_detector[] = {"image"};
 		int number_of_fields_detector = 1;
-		mwSize dims_detector[2] = {1, ndet};
+		//mwSize dims_detector[2] = {1, ndet};
+		mwSize dims_detector[2];
+		dims_detector[0] = 1;
+		dims_detector[1] = ndet;
 
 		for(auto ithk=0; ithk<output_multislice.thickness.size(); ithk++)
 		{

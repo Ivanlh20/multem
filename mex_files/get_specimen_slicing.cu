@@ -17,13 +17,14 @@
  */
 
 #include "types.cuh"
+#include "matlab_types.cuh"
 #include "traits.cuh"
-#include "input_multislice.hpp"
 #include "atom_data.hpp"
 #include "specimen.hpp"
 #include "host_device_functions.cuh"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
+#include "input_multislice.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -79,7 +80,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	specimen.set_input_data(&input_multislice);
 	specimen.move_atoms(input_multislice.fp_nconf, input_multislice.tm_irot);
 
-	/************************Output data**************************/
+	///************************Output data**************************/
 	auto atomsM = mx_create_matrix<rmatrix_r>(specimen.atoms.size(), 6, plhs[0]);
 	auto sliceM = mx_create_matrix<rmatrix_r>(specimen.slice.size(), 6, plhs[1]);
 

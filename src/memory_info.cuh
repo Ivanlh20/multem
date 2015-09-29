@@ -20,15 +20,18 @@
 #define MEMORY_INFO_H
 
 #ifdef _WIN32
-#include <Windows.h>
+	#include <Windows.h>
 #else
-#include <sys/types.h>
-#ifdef __APPLE__
-#include <sys/sysctl.h>
-#else
-#include <sys/sysinfo.h>
-#include <unistd.h>
-#endif
+	#include <sys/types.h>
+	#ifdef __APPLE__
+		#include <sys/sysctl.h>
+		#include <mach/mach.h>
+		#include <stdint.h>
+		#include <unistd.h>
+	#else
+		#include <sys/sysinfo.h>
+		#include <unistd.h>
+	#endif
 #endif
 #include <cstddef>
 
@@ -50,12 +53,27 @@ namespace multem
 	template<>
 	void memory_info<e_host>(double &total, double &free)
 	{
-#ifdef _WIN32
+#if defined(_WIN32)
 		MEMORYSTATUSEX status;
 		status.dwLength = sizeof(status);
 		GlobalMemoryStatusEx(&status);
 		free = static_cast<double>(status.ullAvailPhys)/(1048576.0);
 		total = static_cast<double>(status.ullTotalPhys)/(1048576.0);
+#elif defined(__APPLE__)
+        int mib[2];
+        mib[0] = CTL_HW;
+        mib[1] = HW_MEMSIZE;
+		uint64_t physicalMem = 0;
+        size_t returnSize = sizeof(physicalMem);
+        sysctl(mib, 2, &physicalMem, &returnSize, NULL, 0);
+		total = returnSize/(1048576.0);
+
+        task_t targetTask = mach_task_self();
+        struct task_basic_info ti;
+        mach_msg_type_number_t count = TASK_BASIC_INFO_64_COUNT;
+        task_info(targetTask, TASK_BASIC_INFO_64,(task_info_t) &ti, &count);
+		free = ti.resident_size/(1048576.0);
+
 #else // unix
 		struct sysinfo memInfo;
 		sysinfo (&memInfo);

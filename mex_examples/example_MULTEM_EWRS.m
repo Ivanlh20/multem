@@ -40,7 +40,7 @@ input_multislice.ewrs_convergent_beam = 0;     % 1: true, 0:false
 input_multislice.ewrs_x0 = 4.0;                % x position 
 input_multislice.ewrs_y0 = 4.0;                % y position
 
-na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc = 20; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
