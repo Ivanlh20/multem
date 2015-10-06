@@ -48,7 +48,6 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.gpu_nstream = mx_get_scalar_field<int>(mx_input_multislice, "gpu_nstream"); 
 
 	input_multislice.simulation_type = mx_get_scalar_field<multem::eSimulation_Type>(mx_input_multislice, "simulation_type");
-	input_multislice.simulation_type = (input_multislice.is_EWFS())?multem::eST_EWSFS:multem::eST_EWSRS;
 
 	input_multislice.phonon_model = mx_get_scalar_field<multem::ePhonon_Model>(mx_input_multislice, "phonon_model"); 
 	input_multislice.interaction_model = mx_get_scalar_field<multem::eElec_Spec_Int_Model>(mx_input_multislice, "interaction_model");
@@ -82,14 +81,6 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 		std::copy(thickness.real, thickness.real + thickness.size, input_multislice.thickness.begin());
 	}
 
-	input_multislice.input_wave_type = mx_get_scalar_field<multem::eInput_Wave_Type>(mx_input_multislice, "input_wave_type");
-	if(input_multislice.is_user_define_wave() && full)
-	{
-		auto psi_0 = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "psi_0");
-		multem::assign(psi_0, input_multislice.psi_0);
-		multem::fft2_shift(input_multislice.grid, input_multislice.psi_0);
-	}
-
 	input_multislice.coherent_contribution = true;
 
 	input_multislice.E_0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "E_0");
@@ -112,34 +103,33 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	}
 	input_multislice.grid.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
 
+	/****************************** Incident wave ********************************/
+	input_multislice.iw_type = mx_get_scalar_field<multem::eIncident_Wave_Type>(mx_input_multislice, "iw_type");
+	if(input_multislice.is_user_define_wave() && full)
+	{
+		auto iw_psi = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "iw_psi");
+		multem::assign(iw_psi, input_multislice.iw_psi);
+		multem::fft2_shift(input_multislice.grid, input_multislice.iw_psi);
+	}
+	input_multislice.iw_x = mx_get_scalar_field<value_type_r>(mx_input_multislice, "iw_x");
+	input_multislice.iw_y = mx_get_scalar_field<value_type_r>(mx_input_multislice, "iw_y");
+
+	/****************************** aberrations ********************************/
 	input_multislice.lens.m = mx_get_scalar_field<int>(mx_input_multislice, "lens_m"); 											// momentum of the vortex
-	input_multislice.lens.f = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_f"); 									// defocus(Angstrom)
+	input_multislice.lens.f = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_f"); 								// defocus(Angstrom)
 	input_multislice.lens.Cs3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_Cs3")*multem::c_mm_2_Ags; 			// spherical aberration(mm-->Angstrom)
 	input_multislice.lens.Cs5 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_Cs5")*multem::c_mm_2_Ags; 			// spherical aberration(mm-->Angstrom)
 	input_multislice.lens.mfa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_mfa2"); 							// magnitude 2-fold astigmatism(Angstrom)
 	input_multislice.lens.afa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_afa2")*multem::c_deg_2_rad; 		// angle 2-fold astigmatism(degrees-->rad)
 	input_multislice.lens.mfa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_mfa3"); 							// magnitude 3-fold astigmatism(Angstrom)
 	input_multislice.lens.afa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_afa3")*multem::c_deg_2_rad; 		// angle 3-fold astigmatism(degrees-->rad)
-	input_multislice.lens.aobjl = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_aobjl")*multem::c_mrad_2_rad; 		// lower objective aperture(mrad-->rad)
-	input_multislice.lens.aobju = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_aobju")*multem::c_mrad_2_rad; 		// upper objective aperture(mrad-->rad)
+	input_multislice.lens.aobjl = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_aobjl")*multem::c_mrad_2_rad; 	// lower objective aperture(mrad-->rad)
+	input_multislice.lens.aobju = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_aobju")*multem::c_mrad_2_rad; 	// upper objective aperture(mrad-->rad)
 	input_multislice.lens.sf = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_sf"); 								// defocus spread(Angstrom)
 	input_multislice.lens.nsf = mx_get_scalar_field<int>(mx_input_multislice, "lens_nsf"); 										// Number of defocus sampling point
 	input_multislice.lens.beta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_beta")*multem::c_mrad_2_rad; 		// semi-convergence angle(mrad-->rad)
 	input_multislice.lens.nbeta = mx_get_scalar_field<int>(mx_input_multislice, "lens_nbeta"); 									// half number sampling points
 	input_multislice.lens.set_input_data(input_multislice.E_0, input_multislice.grid);
-
-	if (input_multislice.is_EWSFS())
-	{
-		input_multislice.ew_fr.convergent_beam = mx_get_scalar_field<bool>(mx_input_multislice, "ewfs_convergent_beam");
-		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ewfs_x0");
-		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ewfs_y0");
-	}
-	else if (input_multislice.is_EWSRS())
-	{
-		input_multislice.ew_fr.convergent_beam = mx_get_scalar_field<bool>(mx_input_multislice, "ewrs_convergent_beam");
-		input_multislice.ew_fr.x0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ewrs_x0");
-		input_multislice.ew_fr.y0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ewrs_y0");
-	}
 
 	input_multislice.validate_parameters();
 }
@@ -151,12 +141,12 @@ void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_mul
 	read_input_data(mx_input_multislice, input_multislice);
 	output_multislice.set_input_data(&input_multislice);
 
-	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thickness", "wave"};
+	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thickness", "data"};
 	int number_of_fields_output_multislice = 6;
 	mwSize dims_output_multislice[2] = {1, 1};
 
 	mxArray *mx_field_psi;
-	const char *field_names_psi[] = {"psi"};
+	const char *field_names_psi[] = {"psi_coh"};
 	int number_of_fields_psi = 1;
 	mwSize dims_psi[2] = {1, output_multislice.thickness.size()};
 
@@ -169,11 +159,11 @@ void set_output_data(const mxArray *mx_input_multislice, mxArray *&mx_output_mul
 	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thickness", 1, output_multislice.thickness.size(), output_multislice.thickness.data());
 
 	mx_field_psi = mxCreateStructArray(2, dims_psi, number_of_fields_psi, field_names_psi);
-	mxSetField(mx_output_multislice, 0, "wave", mx_field_psi);
+	mxSetField(mx_output_multislice, 0, "data", mx_field_psi);
 
 	for(auto ithk=0; ithk<output_multislice.thickness.size(); ithk++)
 	{
-		output_multislice.psi_coh[ithk] = mx_create_matrix_field<rmatrix_c>(mx_field_psi, ithk, "psi", output_multislice.ny, output_multislice.nx);
+		output_multislice.psi_coh[ithk] = mx_create_matrix_field<rmatrix_c>(mx_field_psi, ithk, "psi_coh", output_multislice.ny, output_multislice.nx);
 	}
 }
 

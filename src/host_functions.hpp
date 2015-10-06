@@ -128,7 +128,7 @@ namespace multem
 
 		for(auto iy = 0; iy < fy.size(); iy++)
 		{
-			auto Ry = RSC(iy, nyh, shift)*dy;  
+			auto Ry = RSC(iy, nyh, shift)*dy;
 			fy[iy] = 0.5*(1.0-cos(cy*Ry));
 		}
 
@@ -354,7 +354,7 @@ namespace multem
 		auto image_std = get_std(image);
 
 		value_type SNR_k = get_SNR(image, image_std, 1);
-	    
+	
 		value_type k_0, k_e;
 		k_0 = k_e = 1;
 

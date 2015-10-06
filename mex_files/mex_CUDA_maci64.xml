@@ -32,7 +32,10 @@
           CXX="$NVCC"
           DEFINES="$MATLABMEX"
           MATLABMEX="-DMATLAB_MEX_FILE"
-          NVCCFLAGS="-gencode=arch=compute_30,code=sm_30 -m 64 -std=c++11 $NVCC_FLAGS"
+
+          SINGLE_CARD="-gencode=arch=compute_35,code=sm_35 -m 64 -std=c++11 $NVCC_FLAGS"
+          MULTI_CARD="-gencode=arch=compute_20,code=sm_20 -gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot; -gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot; -m 64 -std=c++11 $NVCC_FLAGS"
+		  NVCCFLAGS="$MULTI_CARD"
           CXXFLAGS="--compiler-bindir=$CLANG_COMPILER --compiler-options=-fno-common,-arch,$ARCHS,-mmacosx-version-min=$SDKVER,-fexceptions,-isysroot,$ISYSROOT,-stdlib=libc++"
           INCLUDE="-I&quot;$MATLABROOT/extern/include&quot; -I&quot;$MATLABROOT/simulink/include&quot; -I&quot;$MATLABROOT/toolbox/distcomp/gpu/extern/include/&quot;"
           CXXOPTIMFLAGS="-O2 -DNDEBUG"

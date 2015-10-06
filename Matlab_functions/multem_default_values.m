@@ -8,7 +8,7 @@ input_multislice.gpu_device = 0;                    % GPU device
 input_multislice.gpu_nstream = 8;                   % Number of streams
 
 % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, 
-% eST_EELS=61, eST_EFTEM=62, eST_ProbeFS=71, eST_ProbeRS=72, eST_PPFS=81, eST_PPRS=82,	eST_TFFS=91, eST_TFRS=92
+% eST_EELS=61, eST_EFTEM=62, eST_ProbeFS=71, eST_ProbeRS=72, eST_PPFS=81, eST_PPRS=82,eST_TFFS=91, eST_TFRS=92
 input_multislice.simulation_type = 52;             
 input_multislice.phonon_model = 1;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multislice.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
@@ -38,9 +38,7 @@ input_multislice.zero_defocus_plane = 0;            % Zero defocus plane
 input_multislice.thickness_type = 1;                % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 input_multislice.thickness = 0;                     % Array of thicknesses
 
-input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
-input_multislice.psi_0 = 0;                         % Input wave
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.bwl = 0;                           % Band-width limit, 1: true, 0:false
 input_multislice.operation_mode = 1;                % eOM_Normal = 1, eOM_Advanced = 2
 input_multislice.coherent_contribution = 0;         % 1: true, 0:false
@@ -56,20 +54,26 @@ input_multislice.lx = 10;
 input_multislice.ly = 10; 
 input_multislice.dz = 0.25;
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
+input_multislice.iw_type = 1;   % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define(options 1 and 2 are only active for EWRS or EWFS)
+input_multislice.iw_psi = 0;    % user define incident wave
+input_multislice.iw_x = 0.0;    % x position 
+input_multislice.iw_y = 0.0;    % y position
+
 %%%%%%%%%%%%%%%%%%%%%%%% Microscope effects %%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.lens_m = 0;            %mm
-input_multislice.lens_f = 15.836;       %Angs
-input_multislice.lens_Cs3 = 1e-03;      %mm
-input_multislice.lens_Cs5 = 0.00;       %mm
-input_multislice.lens_mfa2 = 0.0; 
-input_multislice.lens_afa2 = 0.0;       %(Angs, degrees)
-input_multislice.lens_mfa3 = 0.0; 
-input_multislice.lens_afa3 = 0.0;       %(Angs, degrees)
-input_multislice.lens_aobjl = 0.0; 
-input_multislice.lens_aobju = 24.0;     %(mrad, mrad)
-input_multislice.lens_sf = 32; 
-input_multislice.lens_nsf = 10;         % (Angs, number of steps)
-input_multislice.lens_beta = 0.2; 
+input_multislice.lens_m = 0;            % vortex momentum
+input_multislice.lens_f = 15.836;       % Angs
+input_multislice.lens_Cs3 = 1e-03;      % mm
+input_multislice.lens_Cs5 = 0.00;       % mm
+input_multislice.lens_mfa2 = 0.0;       % Angs
+input_multislice.lens_afa2 = 0.0;       % degrees)
+input_multislice.lens_mfa3 = 0.0;       % Angs 
+input_multislice.lens_afa3 = 0.0;       % degrees)
+input_multislice.lens_aobjl = 0.0;      % mrad 
+input_multislice.lens_aobju = 24.0;     % mrad
+input_multislice.lens_sf = 32;          % Angs
+input_multislice.lens_nsf = 10;         % number of steps
+input_multislice.lens_beta = 0.2;       % mrad
 input_multislice.lens_nbeta = 10;       %(mrad, half number of steps)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -84,30 +88,12 @@ input_multislice.scanning_ye = 4.078;
 input_multislice.det_cir(1).ang_inner = 60; 
 input_multislice.det_cir(1).ang_outer = 180;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CBED %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.cbed_x0 = 0.0;      % x position 
-input_multislice.cbed_y0 = 0.0;      % y position
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CBED %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.cbei_x0 = 0.0;      % x position 
-input_multislice.cbei_y0 = 0.0;      % y position
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HRTEM %%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.ped_nrot = 360;         % number of orientations
 input_multislice.ped_theta = 3.0;        % Precession angle (degrees)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HCI %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.hci_nrot = 360;         % number of orientations
 input_multislice.hci_theta = 3.0;        % Precession angle (degrees)
-%%%%%%%%%%%%%%%%%%%%%%%%% EW Fourier Space %%%%%%%%%%%%%%%%%%%%%%
-input_multislice.ewfs_convergent_beam = 0;     % 1: true, 0:false
-input_multislice.ewfs_x0 = 0.0;                % x position 
-input_multislice.ewfs_y0 = 0.0;                % y position
-%%%%%%%%%%%%%%%%%%%%%%%%%% EW Real Space %%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.ewrs_convergent_beam = 0;     % 1: true, 0:false
-input_multislice.ewrs_x0 = 0.0;                % x position 
-input_multislice.ewrs_y0 = 0.0;                % y position
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EFTEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.eftem_E_loss = 0;              % Energy loss (eV)
 input_multislice.eftem_m_selection = 3;         % selection rule

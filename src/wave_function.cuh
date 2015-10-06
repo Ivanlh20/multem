@@ -70,18 +70,18 @@ namespace multem
 				multem::fill(psi_z, value_type_c(1.0, 0.0));
 			}
 
-			void set_user_input_wave(Vector<value_type_c, dev> &psi_z)
-			{
-				multem::assign(this->input_multislice->psi_0, psi_z);
-			}
-
-			void set_conv_beam_wave(Vector<value_type_c, dev> &psi_z)
+			void set_convergent_wave(Vector<value_type_c, dev> &psi_z)
 			{
 				value_type_r x = this->input_multislice->get_Rx_pos_shift();
 				value_type_r y = this->input_multislice->get_Ry_pos_shift();
 
 				multem::probe(*(this->stream), this->input_multislice->grid, this->input_multislice->lens, x, y, psi_z);
 				this->fft2->inverse(psi_z);
+			}
+
+			void set_user_define_wave(Vector<value_type_c, dev> &psi_z)
+			{
+				multem::assign(this->input_multislice->iw_psi, psi_z);
 			}
 
 			void phase_multiplication(const value_type_r &gxu, const value_type_r &gyu, Vector<value_type_c, dev> &psi_i, Vector<value_type_c, dev> &psi_o)
@@ -106,21 +106,21 @@ namespace multem
 
 			void psi_0(Vector<value_type_c, dev> &psi_z)
 			{
-				switch(this->input_multislice->beam_type)
+				switch(this->input_multislice->iw_type)
 				{
-					case eBT_Plane_Wave:
+					case eIWT_Plane_Wave:
 					{
 						set_plane_wave(psi_z);
 					}
 					break;
-					case eBT_Convergent:
+					case eIWT_Convergent_Wave:
 					{
-						set_conv_beam_wave(psi_z);
+						set_convergent_wave(psi_z);
 					}
 					break;
-					case eBT_User_Define:
+					case eIWT_User_Define_Wave:
 					{
-						set_user_input_wave(psi_z);
+						set_user_define_wave(psi_z);
 					}
 					break;
 				}
@@ -144,7 +144,7 @@ namespace multem
 				if(0 <= ithk)
 				{
 					auto *psi_z_o = get_psi(this->input_multislice->get_simulation_space(), gxu, gyu, this->thickness.z_back_prop[ithk], psi_z_i);
-					if(this->input_multislice->is_EWSFS_EWSRS())
+					if(this->input_multislice->is_EWFS_EWRS_SC())
 					{
 						multem::copy_to_host(output_multislice.stream, this->input_multislice->grid, *psi_z_o, output_multislice.psi_coh[ithk], &psi_zh);
 					}
@@ -190,7 +190,7 @@ namespace multem
 			template<class TOutput_multislice>
 			void set_m2psi_coh(TOutput_multislice &output_multislice)
 			{
-				if(!this->input_multislice->coherent_contribution || this->input_multislice->is_EWFS_EWRS() || this->input_multislice->is_EWSFS_EWSRS())
+				if(!this->input_multislice->coherent_contribution || this->input_multislice->is_EWFS_EWRS())
 				{
 					return;
 				}

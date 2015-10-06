@@ -48,14 +48,6 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 
 	input_multislice.simulation_type = multem::eST_PropRS;
 
-	input_multislice.input_wave_type = mx_get_scalar_field<multem::eInput_Wave_Type>(mx_input_multislice, "input_wave_type");
-	if(input_multislice.is_user_define_wave() && full)
-	{
-		auto psi_0 = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "psi_0");
-		multem::assign(psi_0, input_multislice.psi_0);
-		multem::fft2_shift(input_multislice.grid, input_multislice.psi_0);
-	}
-
 	input_multislice.E_0 = mx_get_scalar_field<value_type>(mx_input_multislice, "E_0");
 	input_multislice.theta = mx_get_scalar_field<value_type>(mx_input_multislice, "theta")*multem::c_deg_2_rad;
 	input_multislice.phi = mx_get_scalar_field<value_type>(mx_input_multislice, "phi")*multem::c_deg_2_rad;
@@ -70,6 +62,15 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	value_type dz = 0.25;
 
 	input_multislice.grid.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
+
+	/****************************** Incident wave ********************************/
+	input_multislice.iw_type = mx_get_scalar_field<multem::eIncident_Wave_Type>(mx_input_multislice, "iw_type");
+	if(input_multislice.is_user_define_wave() && full)
+	{
+		auto iw_psi = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "iw_psi");
+		multem::assign(iw_psi, input_multislice.iw_psi);
+		multem::fft2_shift(input_multislice.grid, input_multislice.iw_psi);
+	}
 
 	input_multislice.lens.f = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_f"); 									// defocus(Angstrom)
 	input_multislice.lens.set_input_data(input_multislice.E_0, input_multislice.grid);

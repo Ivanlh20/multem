@@ -85,9 +85,6 @@ namespace multem
 			eThickness_Type thickness_type; 					// eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 			Vector<T, e_host> thickness; 						// Array of thicknesses
 
-			eInput_Wave_Type input_wave_type; 					// 1: Automatic, 2: User define
-			Vector<complex<T>, dev> psi_0; 						// Input wave
-
 			eOperation_Mode operation_mode;						// eOM_Normal = 1, eOM_Advanced = 2
 			bool coherent_contribution;							// true , false
 			bool slice_storage;									// true , false
@@ -102,6 +99,11 @@ namespace multem
 			T Vrl; 												// Atomic potential cut-off
 			int nR; 											// Number of gridBT points
 
+			eIncident_Wave_Type iw_type; 						// 1: Plane_Wave, 2: Convergent_wave, 3:User_Define(options 1 and 2 are only active for EWRS or EWFS)
+			Vector<complex<T>, dev> iw_psi; 					// user define incident wave
+			T iw_x;												// x position
+			T iw_y; 											// y position
+
 			Lens<T> lens; 										// Aberrations
 
 			bool is_crystal;
@@ -113,20 +115,12 @@ namespace multem
 
 			Det_Cir<T> det_cir; 								// Circular detectors
 
-			HRTEM<T> hrtem;
-
-			CBE_FR<T> cbe_fr;
-
-			EW_FR<T> ew_fr;
-
-			eBeam_Type beam_type;
-			T conv_beam_wave_x;
-			T conv_beam_wave_y;
+			T beam_x;
+			T beam_y;
 			int iscan;
-
 			int islice;
-			int nstream;
 			bool dp_Shift; 										// Shift diffraction pattern
+			int nstream;
 
 			Input_Multislice(): precision(eP_double), device(e_host), cpu_ncores(1), cpu_nthread(4), gpu_device(0), gpu_nstream(8), 
 						simulation_type(eST_EWRS), phonon_model(ePM_Still_Atom), interaction_model(eESIM_Multislice), 
@@ -135,9 +129,9 @@ namespace multem
 						tm_theta_e(90), tm_u0(Pos_3d<T>(0, 0, 1)), tm_rot_point_type(eRPT_geometric_center), tm_p0(Pos_3d<T>(1, 0, 0)), 			
 						microscope_effect(eME_Partial_Coherent), spatial_temporal_effect(eSTE_Spatial_Temporal), 
 						zero_defocus_type(eZDT_Last), zero_defocus_plane(0), operation_mode(eOM_Normal), coherent_contribution(false), 
-						slice_storage(false), thickness_type(eTT_Whole_Specimen), dp_Shift(false), E_0(300), theta(0), 
-						phi(0), nrot(1), Vrl(c_Vrl), nR(c_nR), is_crystal(false), input_wave_type(eIWT_Automatic), 
-						beam_type(eBT_Plane_Wave), conv_beam_wave_x(0), conv_beam_wave_y(0), iscan(0), islice(0), nstream(cpu_nthread){};
+						slice_storage(false), thickness_type(eTT_Whole_Specimen), E_0(300), theta(0), phi(0), nrot(1), Vrl(c_Vrl), 
+						nR(c_nR), is_crystal(false), iw_type(eIWT_Plane_Wave), iw_x(0), iw_y(0), beam_x(0), beam_y(0), 
+						iscan(0), islice(0), dp_Shift(false), nstream(cpu_nthread){};
 
 			void validate_parameters()
 			{
@@ -212,28 +206,17 @@ namespace multem
 				{
 					nrot = 1;
 				}
-				//Set beam type
-				if(is_user_define_wave())
-				{
-					beam_type = eBT_User_Define;
-				}
-				else if(is_convergent_beam_wave())
-				{
-					beam_type = eBT_Convergent;
 
-					if(is_CBED_CBEI())
-					{
-						set_beam_position(cbe_fr.x0, cbe_fr.y0);
-					}
-					else if(is_EWFS_EWRS() || is_EWSFS_EWSRS())
-					{
-						set_beam_position(ew_fr.x0, ew_fr.y0);
-					}
-				}
-				else if(is_plane_wave())
+				//Set Incident wave type
+				if(is_plane_wave())
 				{
-					beam_type = eBT_Plane_Wave;
+					iw_type = eIWT_Plane_Wave;
 				}
+				else if(is_convergent_wave())
+				{
+					iw_type = eIWT_Convergent_Wave;
+				}
+				set_beam_position(iw_x, iw_y);
 
 				if(is_EELS() || is_EFTEM())
 				{
@@ -315,26 +298,26 @@ namespace multem
 				return thickness_type==eTT_Through_Thickness;
 			}
 			/**************************************************************************************/
-			bool is_user_define_wave() const
-			{
-				return input_wave_type == eIWT_User_Define;
-			}
-
-			bool is_convergent_beam_wave() const
-			{
-				return is_scanning() || is_CBED_CBEI() || (is_EWFS_EWRS() && ew_fr.convergent_beam) || (is_EWSFS_EWSRS() && ew_fr.convergent_beam);
-			}
-
 			bool is_plane_wave() const
 			{
-				return !(is_user_define_wave() || is_convergent_beam_wave());
+				return !(is_user_define_wave() || is_convergent_wave());
+			}
+
+			bool is_convergent_wave() const
+			{
+				return is_scanning() || is_CBED_CBEI() || (is_EWFS_EWRS() && (iw_type==eIWT_Convergent_Wave));
+			}
+
+			bool is_user_define_wave() const
+			{
+				return iw_type == eIWT_User_Define_Wave;
 			}
 
 			/**************************************************************************************/
 			void set_beam_position(const T &x, const T &y)
 			{
-				conv_beam_wave_x = x;
-				conv_beam_wave_y = y;
+				beam_x = x;
+				beam_y = y;
 			}
 
 			void set_beam_position(const int &iscan_i)
@@ -367,12 +350,12 @@ namespace multem
 
 			T get_Rx_pos_shift()
 			{
-				return get_Rx_pos_shift(conv_beam_wave_x);
+				return get_Rx_pos_shift(beam_x);
 			}
 
 			T get_Ry_pos_shift()
 			{
-				return get_Ry_pos_shift(conv_beam_wave_y);
+				return get_Ry_pos_shift(beam_y);
 			}
 
 			T set_incident_angle(const T &theta) const
@@ -518,6 +501,16 @@ namespace multem
 				return simulation_type == multem::eST_EWRS;
 			}
 
+			bool is_EWFS_SC() const
+			{
+				return is_EWFS() && (!is_frozen_phonon() || is_frozen_phonon_single_conf());
+			}
+
+			bool is_EWRS_SC() const
+			{
+				return is_EWRS() && (!is_frozen_phonon() || is_frozen_phonon_single_conf());
+			}
+
 			bool is_EELS() const
 			{
 				return simulation_type == multem::eST_EELS;
@@ -558,16 +551,6 @@ namespace multem
 				return simulation_type == multem::eST_TFRS;
 			}
 
-			bool is_EWSFS() const
-			{
-				return simulation_type == multem::eST_EWSFS;
-			}
-
-			bool is_EWSRS() const
-			{
-				return simulation_type == multem::eST_EWSRS;
-			}
-
 			bool is_PropFS() const
 			{
 				return simulation_type == multem::eST_PropFS;
@@ -603,9 +586,9 @@ namespace multem
 				return is_EWFS() || is_EWRS();
 			}
 
-			bool is_EWSFS_EWSRS() const
+			bool is_EWFS_EWRS_SC() const
 			{
-				return is_EWSFS() || is_EWSRS();
+				return is_EWFS_SC() || is_EWRS_SC();
 			}
 
 			bool is_EELS_EFTEM() const
@@ -636,7 +619,7 @@ namespace multem
 			bool is_simulation_type_FS() const
 			{
 				return is_STEM() || is_CBED() || is_ED() || is_PED() || is_EWFS() ||
-					is_EELS() || is_ProbeFS() || is_PPFS() || is_TFFS() || is_EWSFS(); 
+					is_EELS() || is_ProbeFS() || is_PPFS() || is_TFFS(); 
 			}
 
 			bool is_simulation_type_RS() const

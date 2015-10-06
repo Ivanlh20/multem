@@ -72,8 +72,8 @@ void read_input_data(const mxArray *mx_input_multislice, TInput_Multislice &inpu
 	input_multislice.lens.aobjl = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_aobjl")*multem::c_mrad_2_rad; 		// lower objective aperture(mrad-->rad)
 	input_multislice.lens.aobju = mx_get_scalar_field<value_type>(mx_input_multislice, "lens_aobju")*multem::c_mrad_2_rad; 		// upper objective aperture(mrad-->rad)
 
-	input_multislice.conv_beam_wave_x = mx_get_scalar_field<value_type>(mx_input_multislice, "conv_beam_wave_x");
-	input_multislice.conv_beam_wave_y = mx_get_scalar_field<value_type>(mx_input_multislice, "conv_beam_wave_y");
+	input_multislice.iw_x = mx_get_scalar_field<value_type>(mx_input_multislice, "iw_x");
+	input_multislice.iw_y = mx_get_scalar_field<value_type>(mx_input_multislice, "iw_y");
 
 	input_multislice.validate_parameters();
 }

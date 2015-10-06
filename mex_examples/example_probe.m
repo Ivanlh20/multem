@@ -17,9 +17,9 @@ input_multislice.ly = 10;
 input_multislice.nx = 1024; 
 input_multislice.ny = 1024;
 
-input_multislice.lens_m = 0;           %mm
-input_multislice.lens_f = 14.03;      %Angs
-input_multislice.lens_Cs3 = 0.001;       %mm
+input_multislice.lens_m = 0;            %mm
+input_multislice.lens_f = 14.03;        %Angs
+input_multislice.lens_Cs3 = 0.001;      %mm
 input_multislice.lens_Cs5 = 0.00;       %mm
 input_multislice.lens_mfa2 = 0.0; 
 input_multislice.lens_afa2 = 0.0;       %(Angs, degrees)
@@ -32,10 +32,11 @@ input_multislice.lens_nsf = 10;         % (Angs, number of steps)
 input_multislice.lens_beta = 0.2; 
 input_multislice.lens_nbeta = 10;       %(mrad, half number of steps)
 
-for ap = [5 10 15 20 30 52 80 120  150]
-        input_multislice.lens_aobju = ap;
-        input_multislice.conv_beam_wave_x = input_multislice.lx/2;
-        input_multislice.conv_beam_wave_y = input_multislice.ly/2;
+for x = 1:input_multislice.lx
+    for y = 1:input_multislice.ly
+        
+        input_multislice.iw_x = x;
+        input_multislice.iw_y = y;
 
         clear MULTEM;
         tic;
@@ -54,5 +55,6 @@ for ap = [5 10 15 20 30 52 80 120  150]
         title('phase');
         axis image;
         colormap gray;
-        pause(1.0);
+        pause(0.25);
+    end;
 end;

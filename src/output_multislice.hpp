@@ -326,7 +326,7 @@ namespace multem
 			bool is_grid_FS() const
 			{
 				return this->is_CBED() || this->is_ED() || this->is_PED() || this->is_EWFS() ||
-					this->is_ProbeFS() || this->is_PPFS() || this->is_TFFS() || this->is_EWSFS(); 
+					this->is_ProbeFS() || this->is_PPFS() || this->is_TFFS(); 
 			}
 
 			bool is_grid_RS() const
@@ -390,8 +390,6 @@ namespace multem
 				this->zero_defocus_plane = input_multislice.zero_defocus_plane;
 				this->thickness_type = input_multislice.thickness_type;
 				this->thickness = input_multislice.thickness;
-				this->input_wave_type = input_multislice.input_wave_type;
-				//this->psi_0 = input_multislice.psi_0;
 				this->operation_mode = input_multislice.operation_mode;
 				this->coherent_contribution = input_multislice.coherent_contribution;
 				this->slice_storage = input_multislice.slice_storage;
@@ -401,21 +399,22 @@ namespace multem
 				this->grid = input_multislice.grid;
 				this->Vrl = input_multislice.Vrl;
 				this->nR = input_multislice.nR;
+				this->iw_type = input_multislice.iw_type;
+				//this->iw_psi = input_multislice.iw_psi;
+				this->iw_x = input_multislice.iw_x;
+				this->iw_y = input_multislice.iw_y;
 				this->lens = input_multislice.lens;
 				this->is_crystal = input_multislice.is_crystal;
 				//this->atoms = input_multislice.atoms;
 				this->eels_fr = input_multislice.eels_fr;
 				this->scanning = input_multislice.scanning;
 				this->det_cir = input_multislice.det_cir;
-				this->hrtem = input_multislice.hrtem;
-				this->cbe_fr = input_multislice.cbe_fr;
-				this->ew_fr = input_multislice.ew_fr;
-				this->beam_type = input_multislice.beam_type;
-				this->conv_beam_wave_x = input_multislice.conv_beam_wave_x;
-				this->conv_beam_wave_y = input_multislice.conv_beam_wave_y;
+				this->beam_x = input_multislice.beam_x;
+				this->beam_y = input_multislice.beam_y;
+				this->iscan = input_multislice.iscan;
 				this->islice = input_multislice.islice;
-				this->nstream = input_multislice.nstream;
 				this->dp_Shift = input_multislice.dp_Shift;
+				this->nstream = input_multislice.nstream;
 
 				image_tot.clear();
 				image_tot.shrink_to_fit();
@@ -492,9 +491,9 @@ namespace multem
 				}
 				else if(this->is_EWFS_EWRS())
 				{
-					output_type = 5;
+					output_type = (this->is_EWFS_EWRS_SC())?6:5;
 				}
-				else if(this->is_EWSFS_EWSRS() || this->is_PropFS_PropRS())
+				else if(this->is_PropFS_PropRS())
 				{
 					output_type = 6;
 				}

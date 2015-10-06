@@ -164,8 +164,7 @@ namespace multem
 		eST_ProbeFS=71, eST_ProbeRS=72,
 		eST_PPFS=81, eST_PPRS=82,			//projected potential
 		eST_TFFS=91, eST_TFRS=92,			//transmission function
-		eST_EWSFS=101, eST_EWSRS=102,		//exit wave single configuration
-		eST_PropFS=111, eST_PropRS=112		//propagate
+		eST_PropFS=101, eST_PropRS=102		//propagate
 	};
 
 	/********************************Potential model****************************/
@@ -210,10 +209,10 @@ namespace multem
 		eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
 	};
 
-	/*******************************Surface Type********************************/
-	enum eSurface_Type
+	/**********************************Incident Wave Type********************************/
+	enum eIncident_Wave_Type
 	{
-		eST_Bottom = 1, eST_Top = 2
+		eIWT_Plane_Wave = 1, eIWT_Convergent_Wave = 2, eIWT_User_Define_Wave = 3
 	};
 
 	/******************************thickness Type*******************************/
@@ -222,24 +221,11 @@ namespace multem
 		eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 	};
 
-	/***************************Input wave function*****************************/
-	enum eInput_Wave_Type
-	{
-		eIWT_Automatic = 1, eIWT_User_Define = 2
-	};
-
-	/**********************************Beam type********************************/
-	enum eBeam_Type
-	{
-		eBT_Plane_Wave = 1, eBT_Convergent = 2, eBT_User_Define = 3
-	};
-
 	/******************************Scanning Type********************************/
 	enum eScanning_Type
 	{
 		eST_Line = 1, eST_Area = 2
 	};
-
 
 	/**********************************Channelling type********************************/
 	enum eChannelling_Type
@@ -1703,35 +1689,6 @@ namespace multem
 		int nr; 				// Number of gridBT points
 		int natomsM; 			// Number of atoms
 		T *atomsM; 			// atoms
-	};
-
-	/********************************hrtem******************************/
-	template<class T>
-	struct HRTEM
-	{
-		int xx;
-		HRTEM():xx(0){};
-	};
-
-	/*****************************CBED/CBEI*****************************/
-	template<class T>
-	struct CBE_FR
-	{
-		CBE_FR(): x0(0), y0(0){};
-
-		T x0;
-		T y0;
-	};
-
-	/***************************Exit Wave FS/RS*************************/
-	template<class T>
-	struct EW_FR
-	{
-		EW_FR():convergent_beam(false), x0(0), y0(0){};
-
-		bool convergent_beam;
-		T x0;
-		T y0;
 	};
 
 	/***************************e_device properties*************************/

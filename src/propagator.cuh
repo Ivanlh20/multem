@@ -90,8 +90,8 @@ namespace multem
 			void propagate(const eSpace &space, value_type_r gxu, value_type_r gyu, 
 			value_type_r z, TOutput_multislice &output_multislice)
 			{
-				propagate(space, gxu, gyu, z, input_multislice->psi_0, input_multislice->psi_0);
-				multem::copy_to_host(output_multislice.stream, input_multislice->grid, input_multislice->psi_0, output_multislice.psi_coh[0]);
+				propagate(space, gxu, gyu, z, input_multislice->iw_psi, input_multislice->iw_psi);
+				multem::copy_to_host(output_multislice.stream, input_multislice->grid, input_multislice->iw_psi, output_multislice.psi_coh[0]);
 				output_multislice.shift();
 				output_multislice.clear_temporal_data();
 			}

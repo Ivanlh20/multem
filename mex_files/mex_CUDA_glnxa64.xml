@@ -31,7 +31,10 @@
           CXX="$NVCC"
           DEFINES="--compiler-options=-O2,-D_GNU_SOURCE,$MATLABMEX"
           MATLABMEX="-DMATLAB_MEX_FILE"
-          NVCCFLAGS="-gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot; $NVCC_FLAGS -std=c++11"
+          SINGLE_CARD="-gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot; -std=c++11 $NVCC_FLAGS"
+		  MULTI_CARD="-gencode=arch=compute_20,code=sm_20 -gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot; -gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot; -std=c++11 $NVCC_FLAGS"
+		  NVCCFLAGS="$MULTI_CARD"
+		  
           CXXFLAGS="--compiler-options=-ansi,-fexceptions,-fPIC,-fno-omit-frame-pointer,-pthread,-std=c++11,-msse2,-mavx"
           INCLUDE="-I&quot;$MATLABROOT/extern/include&quot; -I&quot;$MATLABROOT/simulink/include&quot; -I&quot;$MATLABROOT/toolbox/distcomp/gpu/extern/include/&quot;" 
           CXXOPTIMFLAGS="-O -DNDEBUG"
@@ -41,7 +44,7 @@
           LDFLAGS="-fPIC -fno-omit-frame-pointer -pthread"
           LDTYPE="-shared"
           LINKEXPORT="-Wl,--version-script,&quot;$MATLABROOT/extern/lib/$ARCH/mexFunction.map&quot;"
-          LINKLIBS="-Wl,-rpath-link,$MATLABROOT/bin/$ARCH -L&quot;$MATLABROOT/bin/$ARCH&quot; -lmx -lmex -lmat -lm -lmwgpu -lstdc++ -L/usr/local/cuda-7.0/lib64 -lcufft -lcudart"
+          LINKLIBS="-Wl,-rpath-link,$MATLABROOT/bin/$ARCH -L&quot;$MATLABROOT/bin/$ARCH&quot; -lmx -lmex -lmat -lm -lmwgpu -lstdc++ -L/usr/local/cuda-7.5/lib64 -lcufft -lcudart"
           LDOPTIMFLAGS="-O"
           LDDEBUGFLAGS="-g"
           
