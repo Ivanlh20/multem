@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Copyright 2015 The MathWorks, Inc. -->
+<config
+    Name="nvcc"
+    ShortName="nvcc"
+    HostCompiler="Clang++"
+    Manufacturer="NVIDIA"
+    Version="7.5"
+    Language="CUDA"
+    Priority="A"
+    Location="$NVCC" >
+    <Details
+        CompilerExecutable="$CXX"
+        CompilerDefines="$DEFINES"
+        CompilerFlags="$CXXFLAGS"
+        OptimizationFlags="$CXXOPTIMFLAGS"
+        DebugFlags="$CXXDEBUGFLAGS"
+        IncludeFlags="$INCLUDE"
+        LinkerLibraries="$LINKLIBS"
+        LinkerOptimizationFlags="$LDOPTIMFLAGS"
+        LinkerDebugFlags="$LDDEBUGFLAGS"
+
+        CompilerDefineFormatter="-D%s"
+        LinkerLibrarySwitchFormatter="-l%s"
+        LinkerPathFormatter="-L%s"
+    />
+    <vars
+          CMDLINE1="$CXX -c $DEFINES $INCLUDE $NVCCFLAGS $CXXFLAGS $OPTIM $SRC -o $OBJ"
+          CMDLINE2="$LDXX $LDFLAGS $LINKOPTIM $LINKEXPORT $OBJS $CXXLIBS $LINKLIBS -o $EXE"
+          CMDLINE3="rm -f $OBJ"
+
+          CXX="$NVCC"
+          DEFINES="$MATLABMEX"
+          MATLABMEX="-DMATLAB_MEX_FILE"
+          NVCCFLAGS="-gencode=arch=compute_30,code=sm_30 -m 64 -std=c++11 $NVCC_FLAGS"
+          CXXFLAGS="--compiler-bindir=$CLANG_COMPILER --compiler-options=-fno-common,-arch,$ARCHS,-mmacosx-version-min=$SDKVER,-fexceptions,-isysroot,$ISYSROOT,-stdlib=libc++"
+          INCLUDE="-I&quot;$MATLABROOT/extern/include&quot; -I&quot;$MATLABROOT/simulink/include&quot; -I&quot;$MATLABROOT/toolbox/distcomp/gpu/extern/include/&quot;"
+          CXXOPTIMFLAGS="-O2 -DNDEBUG"
+          CXXDEBUGFLAGS="-g"
+          ARCHS="x86_64"
+
+          LDXX="$XCRUN_DIR/xcrun -sdk macosx$SDKVER clang++"
+          LDFLAGS="-Wl,-twolevel_namespace -undefined error -arch $ARCHS -mmacosx-version-min=$SDKVER -Wl,-syslibroot,$ISYSROOT -framework Cocoa $LDBUNDLE $LINKEXPORT -stdlib=libc++"
+          LDBUNDLE="-bundle"
+          LINKEXPORT="-Wl,-exported_symbols_list,&quot;$MATLABROOT/extern/lib/$ARCH/mexFunction.map&quot;"
+          LINKLIBS="-L&quot;$MATLABROOT/bin/$ARCH&quot; -lmx -lmex -lmat -lm -lmwgpu -lcudart -lcufft"
+          LDOPTIMFLAGS="-O"
+          LDDEBUGFLAGS="-g"
+
+          OBJEXT=".o"
+          LDEXT=".mexmaci64" >
+    </vars>
+    <client>
+    </client>
+    <locationFinder>
+        <NVCC diagnostic="Version 7.5 of the CUDA toolkit could not be found. If installed, set MW_NVCC_PATH environment variable to location of nvcc compiler." >
+            <and>
+                <or>
+                    <and> <!-- Search for nvcc in standard locations, favoring user variable MW_NVCC_PATH, but reject if it isn't the supported version -->
+                        <or>
+                            <and>
+                                <envVarExists name="MW_NVCC_PATH" />
+                                <fileExists name="$$/nvcc" />
+                            </and>
+                            <and>
+                                <envVarExists name="CUDA_BIN_PATH" />
+                                <fileExists name="$$/nvcc" />
+                            </and>
+                            <and>
+                                <envVarExists name="CUDA_PATH" />
+                                <fileExists name="$$/bin/nvcc" />
+                            </and>
+                            <cmdReturns name="which nvcc" />
+                            <fileExists name="/usr/local/cuda/bin/nvcc" />
+                        </or>
+                        <cmdReturns name="$$/nvcc --version | egrep -E 'release 7.5' > /dev/null && echo $$/nvcc" />
+                    </and>
+                    <fileExists name="/Developer/NVIDIA/CUDA-7.5/bin/nvcc" /> <!-- Search the default install location -->
+                </or>
+                <cmdReturns name="$$/nvcc --version | egrep -E 'release 7.5' > /dev/null && echo $$/nvcc" />
+            </and>
+        </NVCC>
+    <!--Check for faulty DEVELOPER_DIR environment variable -->
+        <DEVELOPER_DIR_CHECK>
+            <or>
+                <not>
+                    <envVarExists name="DEVELOPER_DIR" />
+                   </not>
+                     <dirExists name="$$" diagnostic="The environment variable DEVELOPER_DIR indicates a folder that does not exist. Please correct or delete this variable before using MEX." />
+              </or>
+        </DEVELOPER_DIR_CHECK>
+
+    <!-- User needs to run "!sudo xcode-select -switch /Applications/Xcode.app/"
+         to configure xcrun.  This creates the file /usr/share/xcode-select/xcode_dir_path -->
+        <XCODE_DIR>
+            <and diagnostic="Xcode appears to be installed, but it has not been configured.  Run &quot;&lt;a href=&quot;matlab:system(['osascript -e ''do shell script ' char(34) 'xcode-select -switch /Applications/Xcode.app' char(34) ' with administrator privileges'''])&quot;&gt;osascript -e 'do shell script &quot;xcode-select -switch /Applications/Xcode.app&quot; with administrator privileges'&lt;/a&gt;&quot; to configure Xcode.  You must be an administrator of this computer to complete this action." >
+                <cmdReturns name="xcode-select -print-path" />
+                <dirExists name="$$" />
+            </and>
+        </XCODE_DIR>
+        <XCRUN_DIR>
+            <and>
+                <cmdReturns name="which xcrun" />
+                <dirExists name="$$" />
+            </and>
+        </XCRUN_DIR>
+        <!-- User needs to agree to license of the version (or higher) that we support -->
+        <XCODE_AGREED_VERSION>
+            <and diagnostic="Xcode is installed, but its license has not been accepted. Run Xcode and accept its license agreement." >
+                <or>
+                    <cmdReturns name="defaults read com.apple.dt.Xcode IDEXcodeVersionForAgreedToGMLicense"/>
+                    <cmdReturns name="defaults read /Library/Preferences/com.apple.dt.Xcode IDEXcodeVersionForAgreedToGMLicense"/>
+                </or>
+                <cmdReturns name="&#10;agreed=$$ &#10; if echo $agreed | grep -E '[\.\&quot;]' >/dev/null; then &#10; lhs=`expr &quot;$agreed&quot; : '\([0-9]*\)[\.].*'` &#10;  rhs=`expr &quot;$agreed&quot; : '[0-9]*[\.]\(.*\)$'` &#10; if echo $rhs | grep -E '[\.&quot;]' >/dev/null; then &#10; rhs=`expr &quot;$rhs&quot; : '\([0-9]*\)[\.].*'` &#10; fi &#10; if [ $lhs -gt 4 ] || ( [ $lhs -eq 4 ] &amp;&amp; [ $rhs -ge 3 ] ); then &#10; echo $agreed &#10; else &#10; exit 1&#10; fi &#10; fi" />
+            </and>
+        </XCODE_AGREED_VERSION>
+        <ISYSROOT>
+            <and>
+                <cmdReturns name="xcode-select -print-path"/>
+                <or>
+                    <dirExists name="$$/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk" />
+                    <dirExists name="$$/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk" />
+                    <cmdReturns name="find $$ -name MacOSX10.9.sdk" />
+                    <cmdReturns name="find $$ -name MacOSX10.10.sdk" />
+                </or>
+            </and>
+        </ISYSROOT>
+        <SDKVER>
+            <and>
+                <and>
+                    <cmdReturns name="xcode-select -print-path"/>
+                    <or>
+                        <dirExists name="$$/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk" />
+                        <dirExists name="$$/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk" />
+                        <cmdReturns name="find $$ -name MacOSX10.9.sdk" />
+                        <cmdReturns name="find $$ -name MacOSX10.10.sdk" />
+                    </or>
+                </and>
+                <cmdReturns name="echo $$ | rev | cut -c1-10 | rev | egrep -oh '[0-9]+\.[0-9]+'" />
+            </and>
+        </SDKVER>
+        <CLANG_COMPILER>
+            <or>
+                <envVarExists name="MW_XCODE_CLANG_COMPILER" />
+                <and>
+                    <cmdReturns name="xcrun -sdk macosx$SDKVER -f clang" />
+                    <dirExists name="$$" />
+                    <fileExists name="$$/clang" />
+                </and>
+            </or>
+        </CLANG_COMPILER>
+    </locationFinder>
+</config>

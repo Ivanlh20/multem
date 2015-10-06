@@ -164,7 +164,7 @@ namespace multem
 
 				tm_nrot = max(1, tm_nrot);
 				tm_irot = max(0, tm_irot);
-				tm_nrot = max(1, tm_nrot);
+
 				norm_Pos_3d(tm_u0);
 				if(tm_rot_point_type == eRPT_geometric_center)
 				{
@@ -257,11 +257,14 @@ namespace multem
 					islice = 0;
 					fp_dim.z = false;
 					potential_slicing = ePS_Planes;
-					thickness_type = eTT_Through_Thickness;
+					if(is_through_slices())
+					{
+						thickness_type = eTT_Through_Thickness;
+					}
 					slice_storage = slice_storage || !is_whole_specimen();
 				}
 
-				if(is_subslicing())
+				if(is_subslicing() && is_through_thickness())
 				{
 					thickness_type = eTT_Whole_Specimen;
 				}
@@ -445,9 +448,24 @@ namespace multem
 				return interaction_model == multem::eESIM_Weak_Phase_Object;
 			}
 
+			bool is_slicing_by_planes() const
+			{
+				return is_multislice() && (potential_slicing == multem::ePS_Planes);
+			}
+
+			bool is_slicing_by_dz() const
+			{
+				return is_multislice() && (potential_slicing == multem::ePS_dz_Proj);
+			}
+
 			bool is_subslicing() const
 			{
 				return is_multislice() && (potential_slicing == multem::ePS_dz_Sub);
+			}
+
+			bool is_subslicing_whole_specimen() const
+			{
+				return is_subslicing() && is_whole_specimen();
 			}
 
 			bool is_STEM() const

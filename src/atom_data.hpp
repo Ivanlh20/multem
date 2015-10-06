@@ -350,6 +350,14 @@ namespace multem
 				{
 					case ePS_Planes:
 					{
+						if(z_layer.size()==1)
+						{
+							z_slice.resize(2);
+							z_slice[0] = z_Int_min;
+							z_slice[1] = z_Int_max;
+							z_slice.shrink_to_fit();
+							return;
+						}
 						T dz_Bot = get_spacing(0, z_layer);
 						T dz_Top = get_spacing(z_layer.size() - 1, z_layer);
 						T layer_0 = z_layer.front() - 0.5*dz_Bot;

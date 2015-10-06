@@ -67,10 +67,17 @@ namespace multem
 				atoms_u.get_z_layer();
 
 				/***************************************************************************/
-				if(atoms_u.s_z_Int < 2.0*input_multislice->grid.dz)
+				if((atoms_u.s_z_Int < 2.0*input_multislice->grid.dz) || ((atoms_u.z_layer.size()==1) && input_multislice->is_slicing_by_planes()))
 				{
 					input_multislice->grid.dz = atoms_u.s_z_Int;
 					input_multislice->interaction_model = eESIM_Phase_Object;
+					input_multislice->islice = 0;
+					input_multislice->fp_dim.z = false;
+					if(input_multislice->is_through_slices())
+					{
+						input_multislice->thickness_type = eTT_Through_Thickness;
+					}
+					input_multislice->slice_storage = input_multislice->slice_storage || !input_multislice->is_whole_specimen();
 				}
 
 				atoms.set_Atoms(atoms_u, false, &atom_type);
@@ -185,20 +192,28 @@ namespace multem
 					return zero_defocus_plane;
 				};
 
-				for(auto i=0; i<thickness.size(); i++)
+				auto get_islice = [](const Vector<T, e_host> &z_slice, const T &z)->int
 				{
-					int iatom_e, islice = 0;
-					for(auto j=0; j<z_slice.size()-1; j++)
+					for(auto i=0; i<z_slice.size()-1; i++)
 					{
-						if((z_slice[j] < thickness.z[i])&&(thickness.z[i] <= z_slice[j+1]))
+						if((z_slice[i] < z)&&(z <= z_slice[i+1]))
 						{
-							islice = j;
-							break;
+							return i;
 						}
 					}
+					return 0;
+				};
 
+				auto b_sub_whole = input_multislice->is_subslicing_whole_specimen();
+
+				for(auto i=0; i<thickness.size(); i++)
+				{
+					auto islice = (b_sub_whole)?(z_slice.size()-2):get_islice(z_slice, thickness.z[i]);
 					thickness.islice[i] = islice;
-					thickness.iatom_e[i] = iatom_e = atoms_u.find_by_z(z_slice[islice+1], false);
+
+					auto iatom_e = atoms_u.find_by_z(z_slice[islice+1], false);
+					thickness.iatom_e[i] = iatom_e;
+
 					thickness.z_zero_def_plane[i] = get_zero_defocus_plane(atoms_u.z[0], atoms_u.z[iatom_e]);
 					if(input_multislice->is_through_slices())
 					{
@@ -218,7 +233,6 @@ namespace multem
 			// Slicing
 			void get_slicing(Slice<T, e_host> &slice)
 			{				
-				
 				atoms_u.get_z_slice(input_multislice->potential_slicing, input_multislice->grid.dz, atoms, z_slice);
 				get_thickness(z_slice, thickness);
 
@@ -231,7 +245,7 @@ namespace multem
 						thickness.islice[islice] = islice;
 						thickness.z_back_prop[islice] = thickness.z_zero_def_plane[islice] - thickness.z[islice];
 						slice.z_0[islice] = (islice==0)?atoms.z_Int_min:thickness.z[islice-1]; 
-						slice.z_e[islice] = thickness.z[islice];
+						slice.z_e[islice] = (thickness.size()==1)?atoms.z_Int_max:thickness.z[islice];
 						slice.z_int_0[islice] = slice.z_0[islice];
 						slice.z_int_e[islice] = slice.z_e[islice];
 						slice.iatom_0[islice] = (islice==0)?0:thickness.iatom_e[islice-1]+1;
