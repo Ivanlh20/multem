@@ -16,8 +16,9 @@ input_multislice.potential_slicing = 1;             % ePS_Planes = 1, ePS_dz_Pro
 input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
 
 input_multislice.fp_dim = 110; 
-input_multislice.fp_seed = 300183; 
-input_multislice.fp_nconf = 10;
+input_multislice.fp_seed = 300183;
+input_multislice.fp_single_conf = 1;                % 1: true, 0:false
+input_multislice.fp_nconf = 1;
 
 input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
 input_multislice.zero_defocus_plane = 0;
@@ -36,7 +37,7 @@ input_multislice.ewfs_convergent_beam = 0;     % 1: true, 0:false
 input_multislice.ewfs_x0 = 0.0;                % x position 
 input_multislice.ewfs_y0 = 0.0;                % y position
 %%%%%%%%%%%%%%%%%%%%%%%%%% EW Real Space %%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.ewrs_convergent_beam = 0;     % 1: true, 0:false
+input_multislice.ewrs_convergent_beam = 1;     % 1: true, 0:false
 input_multislice.ewrs_x0 = 4.0;                % x position 
 input_multislice.ewrs_y0 = 4.0;                % y position
 

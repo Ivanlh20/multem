@@ -225,7 +225,7 @@ namespace multem
 					{
 						set_beam_position(cbe_fr.x0, cbe_fr.y0);
 					}
-					else if(is_EWFS_EWRS())
+					else if(is_EWFS_EWRS() || is_EWSFS_EWSRS())
 					{
 						set_beam_position(ew_fr.x0, ew_fr.y0);
 					}
@@ -603,6 +603,11 @@ namespace multem
 				return is_EWFS() || is_EWRS();
 			}
 
+			bool is_EWSFS_EWSRS() const
+			{
+				return is_EWSFS() || is_EWSRS();
+			}
+
 			bool is_EELS_EFTEM() const
 			{
 				return is_EELS() || is_EFTEM();
@@ -621,11 +626,6 @@ namespace multem
 			bool is_TFFS_TFRS() const
 			{
 				return is_TFFS() || is_TFRS();
-			}
-
-			bool is_EWSFS_EWSRS() const
-			{
-				return is_EWSFS() || is_EWSRS();
 			}
 
 			bool is_PropFS_PropRS() const
