@@ -3,7 +3,7 @@ clear all; clc;
 input_multislice = multem_default_values();         % Load default values;
 
 input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
-input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+input_multislice.device = 1;                        % eD_CPU = 1, eD_GPU = 2
 input_multislice.cpu_ncores = 1;
 input_multislice.cpu_nthread = 4; 
 input_multislice.gpu_device = 0;
@@ -61,7 +61,7 @@ input_multislice.lens_nsf = 10;     % (Angs, number of steps)
 input_multislice.lens_beta = 0.2; 
 input_multislice.lens_nbeta = 10;	%(mrad, half number of steps)
 
-input_multislice.thickness_type = 2;   	% eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
+input_multislice.thickness_type = 1;   	% eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 input_multislice.thickness = 0:c:1000;  % Array of thicknesses
 
 clear il_MULTEM;

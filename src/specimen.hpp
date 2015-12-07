@@ -47,8 +47,7 @@ namespace multem
 				input_multislice = input_multislice_i;
 
 				/***************************************************************************/
-				Atomic_Data atomic_data;
-				atomic_data.Load_Data(input_multislice->potential_type);
+				Atomic_Data atomic_data(input_multislice->potential_type);
 
 				atom_type.resize(c_nAtomsTypes); 
 				for(auto i = 0; i<atom_type.size(); i++)
@@ -103,6 +102,7 @@ namespace multem
 				for(int iatoms = 0; iatoms<atoms_u.size(); iatoms++)
 				{
 					atoms.Z[iatoms] = atoms_u.Z[iatoms];
+					atoms.charge[iatoms] = atoms_u.charge[iatoms];
 					r3d<T> r = atoms_u.to_r3d(iatoms);
 
 					if(input_multislice->is_tomography())

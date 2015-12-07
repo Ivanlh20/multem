@@ -165,7 +165,8 @@ namespace multem
 				{
 					auto iZ = this->atoms.Z[iatom]-1;
 					auto charge = this->atoms.charge[iatom];
-					auto &coef = atom_type[iZ].coef[charge];
+					int icharge = atom_type[iZ].charge_to_idx(charge);
+					auto &coef = atom_type[iZ].coef[icharge];
 
 					atom_Vp[istream].charge = charge;
 					atom_Vp[istream].x = this->atoms.x[iatom];

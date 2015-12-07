@@ -95,7 +95,7 @@ namespace multem
 				for(auto i = 0; i < natomsM_i; i++)
 				{	
 					Z[i] = static_cast<int>(atomsM_i[0*natomsM_i + i]); 		// Atomic number
-					charge[i] = a_i*atomsM_i[1*natomsM_i + i]; 					// charge
+					charge[i] = static_cast<int>(atomsM_i[1*natomsM_i + i]); 	// charge
 					x[i] = a_i*atomsM_i[2*natomsM_i + i]; 						// x-position
 					y[i] = b_i*atomsM_i[3*natomsM_i + i]; 						// y-position
 					z[i] = c_i*atomsM_i[4*natomsM_i + i]; 						// z-position

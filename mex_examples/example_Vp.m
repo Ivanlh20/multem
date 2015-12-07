@@ -1,7 +1,7 @@
 clear all; clc;
 
-Z = 29;
-charge = 0;
+Z = 58;
+charge = 4;
 
 Rmin = 1e-02; Rmax = 5.0; nR = 512;
 dlnR = log(Rmax/Rmin)/(nR-1); R = Rmin*exp((0:1:(nR-1))*dlnR);

@@ -1197,7 +1197,7 @@ namespace multem
 				if(nonZero(feg.cl[0]))
 				{
 					int j = 5;
-					T r0 = c_i2Pi;
+					T r0 = 2.0;
 					auto cl = charge/c_2Pi2a0;
 					auto cnl = pow(c_2Pi*r0, -2);
 
