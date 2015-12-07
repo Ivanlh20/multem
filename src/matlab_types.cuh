@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef MATLAB_TYPES_H
@@ -22,7 +22,9 @@
 #include <type_traits>
 #include "math.cuh"
 #include "types.cuh"
+#include "traits.cuh"
 #include "stream.cuh"
+#include "host_functions.hpp"
 
 namespace multem
 {
@@ -30,10 +32,10 @@ namespace multem
 	struct complex_s
 	{
 	public:
-		complex_s():m_real(nullptr), m_imag(nullptr){}
+		complex_s(): m_real(nullptr), m_imag(nullptr){}
 
 		template <class U> 
-		inline complex_s<T>& operator=(const complex<U> & z)
+		inline complex_s<T>& operator = (const complex<U> & z)
 		{
 			*m_real = z.real();
 			*m_imag = z.imag();
@@ -61,7 +63,7 @@ namespace multem
 		inline T imag() const { return *m_imag; }
 
 		template <class U>
-		inline complex_s<T>& operator+=(const complex<U> &z)
+		inline complex_s<T>& operator+= (const complex<U> &z)
 		{
 			real(real()+z.real());
 			imag(imag()+z.imag());
@@ -86,31 +88,71 @@ namespace multem
 		using size_type = std::size_t;
 		static const eDevice device = e_host;
 
-		int size;
+		int m_size;
 		int rows;
 		int cols;
 		double *real;
-		rmatrix_r(): size(0), rows(0), cols(0), real(nullptr){}
+		double *imag;
+		rmatrix_r(): m_size(0), rows(0), cols(0), real(nullptr), imag(nullptr){}
 
 		double& operator[](const int i){ return real[i]; }
 		const double& operator[](const int i) const { return real[i]; }
 		host_vector<double>::iterator begin() const { return real; };
-		host_vector<double>::iterator end() const { return (real + size); };
+		host_vector<double>::iterator end() const { return (real + m_size); };
+
+		size_type size() const
+		{
+			return m_size;
+		}
 
 		void resize(const size_type &new_size)
 		{
-			size = new_size;
+			m_size = new_size;
 			delete [] real;
 			real = new double [new_size];
 		}
 
 		void clear()
 		{
-			size = 0;
+			m_size = 0;
 			rows = 0;
 			cols = 0;
 			delete [] real; 
 			real = nullptr;
+		}
+
+		template<class TInput_Iterator>
+		void assign(TInput_Iterator first, TInput_Iterator last)
+		{
+			if(real!=nullptr)
+			{
+				thrust::copy(first, last, real);
+			}
+		}
+
+		template <class T>
+		T get(const int &i) const
+		{
+			return T(real[i]);
+		}
+
+		template <class T>
+		typename std::enable_if<is_complex<T>::value, void>::type
+		set(const int &i, const T &z)
+		{
+			real[i] = z.real();
+		}
+
+		template <class T>
+		typename std::enable_if<!is_complex<T>::value, void>::type
+		set(const int &i, const T &z)
+		{
+			real[i] = z;
+		}
+
+		void swap(const int &i, const int &j)
+		{
+			thrust::swap(real[i], real[j]);
 		}
 	};
 
@@ -122,37 +164,26 @@ namespace multem
 		using size_type = std::size_t;
 		static const eDevice device = e_host;
 
-		int size;
+		int m_size;
 		int rows;
 		int cols;
 		double *real;
 		double *imag;
-		rmatrix_c(): size(0), rows(0), cols(0), real(nullptr), imag(nullptr){}
+		rmatrix_c(): m_size(0), rows(0), cols(0), real(nullptr), imag(nullptr){}
 
-		//complex_s<double>& operator[](const int i)
-		//{ 
-		//	m_data(real[i], imag[i]);
-		//	return m_data; 
-		//}
+		complex<double> operator[](const int i) const
+		{ 
+			return complex<double>(real[i], imag[i]); 
+		}
 
-		//complex<double> operator[](const int i) const
-		//{ 
-		//	return m_data; 
-		//}
-
-		//thrust::zip_iterator<thrust::tuple<double*, double*>> begin() const 
-		//{ 
-		//	return thrust::make_zip_iterator(thrust::make_tuple(real, imag)); 
-		//};
-
-		//thrust::zip_iterator<thrust::tuple<double*, double*>> end() const 
-		//{ 
-		//	return thrust::make_zip_iterator(thrust::make_tuple(real+size, imag+size)); 
-		//};
+		size_type size() const
+		{
+			return m_size;
+		}
 
 		void resize(const size_type &new_size)
 		{
-			size = new_size;
+			m_size = new_size;
 			delete [] real;
 			real = new double [new_size];
 			delete [] imag;
@@ -161,7 +192,7 @@ namespace multem
 
 		void clear()
 		{
-			size = 0;
+			m_size = 0;
 			rows = 0;
 			cols = 0;
 			delete [] real; 
@@ -169,16 +200,67 @@ namespace multem
 			delete [] imag; 
 			imag = nullptr;
 		}
-	private:
-		complex_s<double> m_data;
 
+		template <class T>
+		typename std::enable_if<is_complex<T>::value, T>::type
+		get(const int &i) const
+		{
+			return T(real[i], imag[i]);
+		}
+
+		template <class T>
+		typename std::enable_if<!is_complex<T>::value, T>::type
+		get(const int &i) const
+		{
+			return T(real[i]);
+		}
+
+		template <class T>
+		typename std::enable_if<is_complex<T>::value, void>::type
+		set(const int &i, const T &z)
+		{
+			real[i] = z.real();
+			imag[i] = z.imag();
+		}
+
+		template <class T>
+		typename std::enable_if<!is_complex<T>::value, void>::type
+		set(const int &i, const T &z)
+		{
+			real[i] = z;
+		}
+
+		void swap(const int &i, const int &j)
+		{
+			thrust::swap(real[i], real[j]);
+			thrust::swap(imag[i], imag[j]);
+		}
 	};
 
+	/***********************Matlab traits**************************/
 	template<class T>
 	struct is_rmatrix_r: std::integral_constant<bool, std::is_same<T, rmatrix_r>::value> {};
 
 	template<class T>
 	struct is_rmatrix_c: std::integral_constant<bool, std::is_same<T, rmatrix_c>::value> {};
+
+	template<class T>
+	struct is_rmatrix: std::integral_constant<bool, is_rmatrix_r<T>::value || is_rmatrix_c<T>::value> {};
+
+	template<class T1, class T2>
+	struct is_rmatrix_and_rmatrix: std::integral_constant<bool, is_rmatrix<T1>::value && is_rmatrix<T2>::value> {};
+
+	template<class T1, class T2>
+	struct is_rmatrix_and_host_vector: std::integral_constant<bool, is_rmatrix<T1>::value && is_host_vector<T2>::value> {};
+
+	template<class T1, class T2>
+	struct is_rmatrix_and_device_vector: std::integral_constant<bool, is_rmatrix<T1>::value && is_device_vector<T2>::value> {};
+
+	template<class T1, class T2>
+	struct is_host_vector_and_rmatrix: std::integral_constant<bool, is_host_vector<T1>::value && is_rmatrix<T2>::value> {};
+
+	template<class T1, class T2>
+	struct is_device_vector_and_rmatrix: std::integral_constant<bool, is_device_vector<T1>::value && is_rmatrix<T2>::value> {};
 
 	template <class T, class U>
 	using enable_if_rmatrix_r = typename std::enable_if<is_rmatrix_r<T>::value, U>::type;
@@ -187,167 +269,303 @@ namespace multem
 	using enable_if_rmatrix_c = typename std::enable_if<is_rmatrix_c<T>::value, U>::type;
 
 	template <class T, class U>
-	using enable_if_not_rmatrix_c = typename std::enable_if<!is_rmatrix_c<T>::value, U>::type;
+	using enable_if_rmatrix = typename std::enable_if<is_rmatrix<T>::value, U>::type;
 
-	template <class T, class U>
-	using enable_if_rmatrix = typename std::enable_if<is_rmatrix_r<T>::value || is_rmatrix_c<T>::value, U>::type;
+	template <class T1, class T2, class U>
+	using enable_if_rmatrix_and_rmatrix = typename std::enable_if<is_rmatrix_and_rmatrix<T1, T2>::value, U>::type;
 
-	template<class TGrid>
-	void fft2_shift(Stream<e_host> &stream, const TGrid &grid, rmatrix_c &M_io)
+	template <class T1, class T2, class U>
+	using enable_if_rmatrix_and_host_vector = typename std::enable_if<is_rmatrix_and_host_vector<T1, T2>::value, U>::type;
+
+	template <class T1, class T2, class U>
+	using enable_if_rmatrix_and_device_vector = typename std::enable_if<is_rmatrix_and_device_vector<T1, T2>::value, U>::type;
+
+	template <class T1, class T2, class U>
+	using enable_if_host_vector_and_rmatrix = typename std::enable_if<is_host_vector_and_rmatrix<T1, T2>::value, U>::type;
+
+	template <class T1, class T2, class U>
+	using enable_if_device_vector_and_rmatrix = typename std::enable_if<is_device_vector_and_rmatrix<T1, T2>::value, U>::type;
+
+	/***********************Matlab functions**************************/
+
+	template<class TVector_1, class TVector_2>
+	enable_if_rmatrix_and_host_vector<TVector_1, TVector_2, void>
+	assign(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h =nullptr)
 	{
-		auto fft2_shift = [&](const multem::Range &range)
-		{
-			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
-			{
-				for(auto iy = range.iy_0; iy < range.iy_e; iy++)
-				{
-					int ixy = grid.ind_col(ix, iy); 
-					int ixy_shift = grid.ind_col(grid.nxh+ix, grid.nyh+iy);
-					thrust::swap(M_io.real[ixy], M_io.real[ixy_shift]);
-					thrust::swap(M_io.imag[ixy], M_io.imag[ixy_shift]);
+		using value_type = Value_type<TVector_2>;
 
-					ixy = grid.ind_col(ix, grid.nyh+iy); 
-					ixy_shift = grid.ind_col(grid.nxh+ix, iy);
-					thrust::swap(M_io.real[ixy], M_io.real[ixy_shift]);
-					thrust::swap(M_io.imag[ixy], M_io.imag[ixy_shift]);
-				}
+		M_o.resize(M_i.size());
+		auto thr_assign = [&](const Range &range)
+		{
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				M_o[ixy] = M_i.template get<value_type>(ixy);
 			}
+		};
+
+		stream.set_n_act_stream(M_o.size());
+		stream.set_grid(1, M_o.size());
+		stream.exec(thr_assign);
+	}
+
+	template<class TVector_1, class TVector_2>
+	enable_if_rmatrix_and_device_vector<TVector_1, TVector_2, void>
+	assign(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h =nullptr)
+	{
+		Vector<Value_type<TVector_2>, e_host> M_h;
+		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		assign(stream, M_i, *M_i_h);
+		M_o.assign(M_i_h->begin(), M_i_h->end());
+	}
+	
+	template<class TVector>
+	enable_if_rmatrix<TVector, void>
+	fill(Stream<e_host> &stream, TVector &M_io, Value_type<TVector> value_i)
+	{
+		auto thr_fill = [&](const Range &range)
+		{
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				M_io.set(ixy, value_i);
+			}
+		};
+
+		stream.set_n_act_stream(M_io.size());
+		stream.set_grid(1, M_io.size());
+		stream.exec(thr_fill);
+	}
+
+	template<class TVector_1, class TVector_2>
+	enable_if_rmatrix_and_rmatrix<TVector_1, TVector_2, void>
+	scale(Stream<e_host> &stream, Value_type<TVector_2> w_i, TVector_1 &M_i, TVector_2 &M_o)
+	{
+		using value_type = Value_type<TVector_2>;
+		auto thr_scale = [&](const Range &range)
+		{
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				auto z = w_i*M_i.template get<value_type>(ixy);
+				M_o.set(ixy, z);
+			};
+		};
+
+		stream.set_n_act_stream(M_o.size());
+		stream.set_grid(1, M_o.size());
+		stream.exec(thr_scale);
+	}
+
+	template<class TVector>
+	enable_if_rmatrix<TVector, void>
+	scale(Stream<e_host> &stream, Value_type<TVector> w_i, TVector &M_io)
+	{
+		scale(stream, w_i, M_io, M_io);
+	}
+
+	template<class TVector_1, class TVector_2>
+	enable_if_rmatrix_and_rmatrix<TVector_1, TVector_2, void>
+	square(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_o)
+	{
+		using value_type = Value_type<TVector_2>;
+		auto thr_square = [&](const Range &range)
+		{
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				auto z = thrust::norm(M_i.template get<value_type>(ixy));
+				M_o.set(ixy, z);
+			}
+		};
+
+		stream.set_n_act_stream(M_o.size());
+		stream.set_grid(1, M_o.size());
+		stream.exec(thr_square);
+	}
+
+	template<class TVector_1, class TVector_2>
+	enable_if_rmatrix_and_rmatrix<TVector_1, TVector_2, void>
+	square_scale(Stream<e_host> &stream, Value_type<TVector_2> w_i, TVector_1 &M_i, TVector_2 &M_o)
+	{
+		using value_type = Value_type<TVector_2>;
+		auto thr_square_scale = [&](const Range &range)
+		{
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				auto z = w_i*thrust::norm(M_i.template get<value_type>(ixy));
+				M_o.set(ixy, z);
+			}
+		};
+
+		stream.set_n_act_stream(M_o.size());
+		stream.set_grid(1, M_o.size());
+		stream.exec(thr_square_scale);
+	}
+
+	template<class TGrid, class TVector>
+	enable_if_rmatrix<TVector, void>
+	fft2_shift(Stream<e_host> &stream, TGrid &grid, TVector &M_io)
+	{
+		auto krn_fft2_shift = [](const int &ix, const int &iy, const TGrid &grid, TVector &M_io)
+		{
+			int ixy = grid.ind_col(ix, iy); 
+			int ixy_shift = grid.ind_col(grid.nxh+ix, grid.nyh+iy);
+			M_io.swap(ixy, ixy_shift);
+
+			ixy = grid.ind_col(ix, grid.nyh+iy); 
+			ixy_shift = grid.ind_col(grid.nxh+ix, iy);
+			M_io.swap(ixy, ixy_shift);
+		};
+
+		auto thr_fft2_shift = [&](const Range &range)
+		{
+			host_detail::matrix_iter(range, krn_fft2_shift, grid, M_io);
 		};
 
 		stream.set_n_act_stream(grid.nxh);
 		stream.set_grid(grid.nxh, grid.nyh);
-		stream.exec(fft2_shift);
+		stream.exec(thr_fft2_shift);
 	}
 
-	void fill(rmatrix_c &M_io, complex<double> value_i)
+	/***************************************************************************/
+	/***************************************************************************/
+	template<class TVector_i, class TVector_o>
+	enable_if_host_vector_and_rmatrix<TVector_i, TVector_o, void>
+	copy_to_host(Stream<e_host> &stream, TVector_i &M_i, 
+	TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
 	{
-		for(auto ixy = 0; ixy < M_io.size; ixy++)
-		{
-			M_io.real[ixy] = value_i.real();
-			M_io.imag[ixy] = value_i.imag();
-		}
-	}
-
-	template<class T>
-	void assign(rmatrix_r &M_i, host_vector<complex<T>> &M_o, host_vector<complex<T>> *M_i_h=nullptr)
-	{
-		M_o.resize(M_i.size);
-		for(auto ixy = 0; ixy < M_o.size(); ixy++)
-		{
-			M_o[ixy].real(M_i.real[ixy]);
-			M_o[ixy].imag(0);
-		}
-	}
-
-	template<class T>
-	void assign(rmatrix_c &M_i, host_vector<T> &M_o, host_vector<T> *M_i_h=nullptr)
-	{
-		M_o.resize(M_i.size);
-		for(auto ixy = 0; ixy < M_o.size(); ixy++)
-		{
-			M_o[ixy].real(M_i.real[ixy]);
-			M_o[ixy].imag(M_i.imag[ixy]);
-		}
-	}
-
-	template<class T>
-	void assign(rmatrix_c &M_i, device_vector<T> &M_o, host_vector<T> *M_i_h=nullptr)
-	{
-		host_vector<T> M_h;
-		M_i_h = (M_i_h==nullptr)?&M_h:M_i_h;
-
-		assign(M_i, *M_i_h);
-		M_o.assign(M_i_h->begin(), M_i_h->end());
-	}
-
-	void assign_square(rmatrix_c &M_i, rmatrix_r &M_o)
-	{
-		for(auto i = 0; i < M_i.size; i++)
-		{
-			M_o[i] = M_i.real[i]*M_i.real[i] + M_i.imag[i]*M_i.imag[i];
-		}
-	}
-
-	template<class TGrid, class T>
-	void copy_to_host(Stream<e_host> &stream, const TGrid &grid, host_vector<T> &M_i, rmatrix_c &M_o, host_vector<T> *M_i_h=nullptr)
-	{
-		auto copy_to_host = [&](const multem::Range &range)
+		auto thr_copy_to_host = [&](const Range &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
-				M_o.real[ixy] = M_i[ixy].real();
-				M_o.imag[ixy] = M_i[ixy].imag();
+				M_o.set(ixy, M_i[ixy]);
 			}
 		};
 
-		stream.set_n_act_stream(grid.nxy());
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(copy_to_host);
+		stream.set_n_act_stream(M_o.size());
+		stream.set_grid(1, M_o.size());
+		stream.exec(thr_copy_to_host);
 	}
 
-	template<class TGrid, class T>
-	void copy_to_host(Stream<e_host> &stream, const TGrid &grid, device_vector<T> &M_i, rmatrix_c &M_o, host_vector<T> *M_i_h=nullptr)
+	template<class TVector_i, class TVector_o>
+	enable_if_device_vector_and_rmatrix<TVector_i, TVector_o, void>
+	copy_to_host(Stream<e_host> &stream, TVector_i &M_i, 
+	TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
 	{
-		host_vector<T> M_h;
-		M_i_h = (M_i_h==nullptr)?&M_h:M_i_h;
+		Vector<Value_type<TVector_i>, e_host> M_h;
+		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
 
+		// data transfer from GPU to CPU
 		M_i_h->assign(M_i.begin(), M_i.end());
-		copy_to_host(stream, grid, *M_i_h, M_o);
+
+		// copy data from host to host
+		multem::copy_to_host(stream, *M_i_h, M_o);
 	}
 
-	template<class TGrid, class T>
-	void add_scale_to_host(Stream<e_host> &stream, TGrid &grid, typename TGrid::value_type w_i, host_vector<T> &M_i, rmatrix_c &M_o, host_vector<T> *M_i_h=nullptr)
+
+	template<class TVector_i, class TVector_o>
+	enable_if_host_vector_and_rmatrix<TVector_i, TVector_o, void>
+	add_scale_to_host(Stream<e_host> &stream, Value_type<TVector_i> w_i, 
+	TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
 	{
-		auto add_scale_to_host = [&](const multem::Range &range)
+		using value_type = Value_type<TVector_o>;
+		auto thr_add_scale_to_host = [&](const Range &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
-				M_o.real[ixy] += w_i*M_i[ixy].real();
-				M_o.imag[ixy] += w_i*M_i[ixy].imag();
-			}
+				auto z = M_o.template get<value_type>(ixy) + value_type(w_i*M_i[ixy]);
+				M_o.set(ixy, z);
+			};
 		};
 
-		stream.set_n_act_stream(grid.nxy());
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(add_scale_to_host);
+		stream.set_n_act_stream(M_o.size());
+		stream.set_grid(1, M_o.size());
+		stream.exec(thr_add_scale_to_host);
 	}
 
-	template<class TGrid, class T>
-	void add_scale_to_host(Stream<e_host> &stream, TGrid &grid, typename TGrid::value_type w_i, device_vector<T> &M_i, rmatrix_c &M_o, host_vector<T> *M_i_h=nullptr)
+	template<class TVector_i, class TVector_o>
+	enable_if_device_vector_and_rmatrix<TVector_i, TVector_o, void>
+	add_scale_to_host(Stream<e_host> &stream, Value_type<TVector_i> w_i, 
+	TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
 	{
-		host_vector<T> M_h;
-		M_i_h = (M_i_h==nullptr)?&M_h:M_i_h;
+		Vector<Value_type<TVector_i>, e_host> M_h;
+		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
 
+		// data transfer from GPU to CPU
 		M_i_h->assign(M_i.begin(), M_i.end());
-		add_scale_to_host(stream, grid, w_i, *M_i_h, M_o);
+
+		// add and scale
+		multem::add_scale_to_host(stream, w_i, *M_i_h, M_o);
 	}
 
-	template<class TGrid, class T>
-	void add_scale_m2psi_psi_to_host(Stream<e_host> &stream, TGrid &grid, typename TGrid::value_type w_i, host_vector<T> &psi_i, rmatrix_r &m2psi_o, rmatrix_c &psi_o, host_vector<T> *psi_i_h=nullptr)
+
+	template<class TVector_i, class TVector_o>
+	enable_if_host_vector_and_rmatrix<TVector_i, TVector_o, void>
+	add_square_scale_to_host(Stream<e_host> &stream, Value_type<TVector_o> w_i, 
+	TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
 	{
-		auto add_scale_m2psi_psi_to_host = [&](const multem::Range &range)
+		auto thr_add_scale_to_host = [&](const Range &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
-				m2psi_o[ixy] += w_i*thrust::norm(psi_i[ixy]);
-				psi_o.real[ixy] += w_i*psi_i[ixy].real();
-				psi_o.imag[ixy] += w_i*psi_i[ixy].imag();
+				auto z = M_o.template get<Value_type<TVector_o>>(ixy) + w_i*thrust::norm(M_i[ixy]);
+				M_o.set(ixy, z);
+			};
+		};
+
+		stream.set_n_act_stream(M_o.size());
+		stream.set_grid(1, M_o.size());
+		stream.exec(thr_add_scale_to_host);
+	}
+
+	template<class TVector_i, class TVector_o>
+	enable_if_device_vector_and_rmatrix<TVector_i, TVector_o, void>
+	add_square_scale_to_host(Stream<e_host> &stream, Value_type<TVector_o> w_i, 
+	TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
+	{
+		Vector<Value_type<TVector_i>, e_host> M_h;
+		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		// data transfer from GPU to CPU
+		M_i_h->assign(M_i.begin(), M_i.end());
+
+		multem::add_square_scale_to_host(stream, w_i, *M_i_h, M_o);
+	}
+
+
+	template<class TVector_c_i, class TVector_r_o, class TVector_c_o>
+	enable_if_host_vector_and_rmatrix<TVector_c_i, TVector_c_o, void>
+	add_scale_m2psi_psi_to_host(Stream<e_host> &stream, Value_type<TVector_r_o> w_i, 
+	TVector_c_i &psi_i, TVector_r_o &m2psi_o, TVector_c_o &psi_o, Vector<Value_type<TVector_c_i>, e_host> *psi_i_h =nullptr)
+	{
+		using value_type_r = Value_type<TVector_r_o>;
+		using value_type_c = Value_type<TVector_c_o>;
+		auto thr_add_scale_m2psi_psi_to_host = [&](const Range &range)
+		{
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				auto z1 = m2psi_o.template get<value_type_r>(ixy) + value_type_r(w_i)*thrust::norm(psi_i[ixy]);
+				auto z2 = psi_o.template get<value_type_c>(ixy) + value_type_c(w_i)*value_type_c(psi_i[ixy]);
+				m2psi_o.set(ixy, z1);
+				psi_o.set(ixy, z2);
 			}
 		};
 
-		stream.set_n_act_stream(grid.nxy());
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(add_scale_m2psi_psi_to_host);
+		stream.set_n_act_stream(psi_o.size());
+		stream.set_grid(1, psi_o.size());
+		stream.exec(thr_add_scale_m2psi_psi_to_host);
 	}
 
-	template<class TGrid, class T>
-	void add_scale_m2psi_psi_to_host(Stream<e_host> &stream, TGrid &grid, typename TGrid::value_type w_i, device_vector<T> &psi_i, rmatrix_r &m2psi_o, rmatrix_c &psi_o, host_vector<T> *psi_i_h=nullptr)
+	template<class TVector_c_i, class TVector_r_o, class TVector_c_o>
+	enable_if_device_vector_and_rmatrix<TVector_c_i, TVector_c_o, void>
+	add_scale_m2psi_psi_to_host(Stream<e_host> &stream, Value_type<TVector_r_o> w_i, 
+	TVector_c_i &psi_i, TVector_r_o &m2psi_o, TVector_c_o &psi_o, Vector<Value_type<TVector_c_i>, e_host> *psi_i_h =nullptr)
 	{
-		host_vector<T> M_h;
-		psi_i_h = (psi_i_h==nullptr)?&M_h:psi_i_h;
+		Vector<Value_type<TVector_c_i>, e_host> M_h;
+		psi_i_h = (psi_i_h == nullptr)?&M_h:psi_i_h;
 
+		// data transfer from GPU to CPU
 		psi_i_h->assign(psi_i.begin(), psi_i.end());
-		add_scale_m2psi_psi_to_host(stream, grid, w_i, *psi_i_h, m2psi_o, psi_o);
+
+		multem::add_scale_m2psi_psi_to_host(stream, w_i, *psi_i_h, m2psi_o, psi_o);
 	}
 
 } // namespace multem

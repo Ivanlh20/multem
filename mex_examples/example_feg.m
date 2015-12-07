@@ -1,17 +1,18 @@
 clear all;
 clc;
-Z = 79;
+Z = 12;
+charge = +2;
 
 gmin = 0; gmax = 12; ng = 512;
 dg = (gmax-gmin)/(ng-1); 
 g = gmin:dg:gmax;
 
-[f1, df1] = get_feg(1, Z, g);
-[f2, df2] = get_feg(2, Z, g);
-[f3, df3] = get_feg(3, Z, g);
-[f4, df4] = get_feg(4, Z, g);
-[f5, df5] = get_feg(5, Z, g);
-[f6, df6] = get_feg(6, Z, g);
+[f1, df1] = il_feg(1, Z, charge, g);
+[f2, df2] = il_feg(2, Z, charge, g);
+[f3, df3] = il_feg(3, Z, charge, g);
+[f4, df4] = il_feg(4, Z, charge, g);
+[f5, df5] = il_feg(5, Z, charge, g);
+[f6, df6] = il_feg(6, Z, charge, g);
 
 figure(1); clf;
 

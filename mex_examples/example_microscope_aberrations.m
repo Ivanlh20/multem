@@ -25,7 +25,7 @@ input_multislice.fp_nconf = 5;
 input_multislice.microscope_effect = 1;             % 1: Partial coherente mode, 2: transmission_fun cross coefficient
 input_multislice.spatial_temporal_effect = 1;       % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
-input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
+input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 input_multislice.zero_defocus_plane = 0;
 
 input_multislice.bwl = 0;
@@ -49,7 +49,7 @@ input_multislice.iw_psi = 0;                       % user define incident wave
 input_multislice.iw_x = input_multislice.lx/2;     % x position 
 input_multislice.iw_y = input_multislice.ly/2;     % y position
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% aberrations %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% lens aberrations %%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.lens_m = 0;       % vortex momentum
 input_multislice.lens_f = 10;      %Angs
 input_multislice.lens_Cs3 = 0.04;  %mm
@@ -68,25 +68,25 @@ input_multislice.lens_nbeta = 10; %(mrad, half number of steps)
 % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, 
 % eST_EELS=61, eST_EFTEM=62, eST_ProbeFS=71, eST_ProbeRS=72, eST_PPFS=81, eST_PPRS=82,eST_TFFS=91, eST_TFRS=92
 input_multislice.simulation_type = 52;
-clear MULTEM;
+clear il_MULTEM;
 tic;
-output_multislice_0 = MULTEM(input_multislice); 
+output_multislice_0 = il_MULTEM(input_multislice); 
 toc;
 
 % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, 
 % eST_EELS=61, eST_EFTEM=62, eST_ProbeFS=71, eST_ProbeRS=72, eST_PPFS=81, eST_PPRS=82,eST_TFFS=91, eST_TFRS=92
 input_multislice.simulation_type = 32;
-clear MULTEM;
+clear il_MULTEM;
 tic;
-output_multislice_1 = MULTEM(input_multislice); 
+output_multislice_1 = il_MULTEM(input_multislice); 
 toc;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.iw_type = 3;                      % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define. (options 1 and 2 are only active for EWRS or EWFS)
 input_multislice.iw_psi = output_multislice_0.data.psi_coh;  % user define incident wave
-clear MULTEM;
+clear il_MULTEM;
 tic;
-output_multislice_2 = get_microscope_aberrations(input_multislice); 
+output_multislice_2 = il_microscope_aberrations(input_multislice); 
 toc;
 
 figure(1);

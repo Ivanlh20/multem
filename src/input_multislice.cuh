@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef INPUT_MULTISLICE_H
@@ -24,7 +24,9 @@
 
 #include "math.cuh"
 #include "types.cuh"
+#include "r3d.cuh"
 #include "atom_data.hpp"
+#include "memory_info.cuh"
 
 namespace multem
 {
@@ -38,10 +40,6 @@ namespace multem
 	void match_vectors(InputIterator A_base_first, InputIterator A_base_last, TVector &A_search);
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
-	void norm_Pos_3d(Pos_3d<T> &p0);
-
-	template<class T, eDevice dev>
 	class Input_Multislice
 	{
 		public:
@@ -56,7 +54,7 @@ namespace multem
 
 			eSimulation_Type simulation_type; 					// 11: Scanning, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
 			ePhonon_Model phonon_model; 						// 1: Still atom model, 2: Absorptive potential model, 3: Frozen phonon
-			eElec_Spec_Int_Model interaction_model; 			// eESIM_Multislice = 1, eESIM_Phase_Object= 2, eESIM_Weak_Phase_Object = 3
+			eElec_Spec_Int_Model interaction_model; 			// eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
 			ePotential_Slicing potential_slicing; 				// ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 			ePotential_Type potential_type;						// potential type: 1: Doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 
@@ -68,13 +66,10 @@ namespace multem
 			int fp_iconf_0;										// initial configuration
 
 			bool tm_active;										// true or false
-			int tm_nrot; 										// number of rotations
-			int tm_irot;										// specific rotation configuration
-			T tm_theta_0; 										// initial angle
-			T tm_theta_e; 										// final angle
-			Pos_3d<T> tm_u0; 									// unitary vector			
+			T tm_theta; 										// angle
+			r3d<T> tm_u0; 										// unitary vector			
 			eRot_Point_Type tm_rot_point_type; 					// 1: geometric center, 2: User define		
-			Pos_3d<T> tm_p0; 									// rotation point
+			r3d<T> tm_p0; 										// rotation point
 
 			eMicroscope_Effect microscope_effect; 				// 1: Partial coherente mode, 2: transmission cross coefficient
 			eSpatial_Temporal_Effect spatial_temporal_effect; 	// 1: Spatial and temporal, 2: Temporal, 3: Spatial
@@ -100,7 +95,7 @@ namespace multem
 			int nR; 											// Number of gridBT points
 
 			eIncident_Wave_Type iw_type; 						// 1: Plane_Wave, 2: Convergent_wave, 3:User_Define(options 1 and 2 are only active for EWRS or EWFS)
-			Vector<complex<T>, dev> iw_psi; 					// user define incident wave
+			Vector<complex<T>, e_host> iw_psi; 					// user define incident wave
 			T iw_x;												// x position
 			T iw_y; 											// y position
 
@@ -113,7 +108,7 @@ namespace multem
 
 			Scanning<T> scanning; 								// Scanning
 
-			Det_Cir<T> det_cir; 								// Circular detectors
+			Detector<T, e_host> detector; 						// STEM Detectors
 
 			T beam_x;
 			T beam_y;
@@ -125,44 +120,43 @@ namespace multem
 			Input_Multislice(): precision(eP_double), device(e_host), cpu_ncores(1), cpu_nthread(4), gpu_device(0), gpu_nstream(8), 
 						simulation_type(eST_EWRS), phonon_model(ePM_Still_Atom), interaction_model(eESIM_Multislice), 
 						potential_slicing(ePS_Planes), potential_type(ePT_Lobato_0_12), fp_dist(1), fp_seed(300183), 
-						fp_nconf(0), fp_single_conf(false), fp_iconf_0(1), tm_active(false), tm_nrot(1), tm_irot(1), tm_theta_0(-90), 
-						tm_theta_e(90), tm_u0(Pos_3d<T>(0, 0, 1)), tm_rot_point_type(eRPT_geometric_center), tm_p0(Pos_3d<T>(1, 0, 0)), 			
-						microscope_effect(eME_Partial_Coherent), spatial_temporal_effect(eSTE_Spatial_Temporal), 
-						zero_defocus_type(eZDT_Last), zero_defocus_plane(0), operation_mode(eOM_Normal), coherent_contribution(false), 
-						slice_storage(false), thickness_type(eTT_Whole_Specimen), E_0(300), theta(0), phi(0), nrot(1), Vrl(c_Vrl), 
-						nR(c_nR), is_crystal(false), iw_type(eIWT_Plane_Wave), iw_x(0), iw_y(0), beam_x(0), beam_y(0), 
-						iscan(0), islice(0), dp_Shift(false), nstream(cpu_nthread){};
+						fp_single_conf(false), fp_nconf(1), fp_iconf_0(1), tm_active(false), tm_theta(0), tm_u0(0, 0, 1), 
+						tm_rot_point_type(eRPT_geometric_center), tm_p0(1, 0, 0), microscope_effect(eME_Partial_Coherent), 
+						spatial_temporal_effect(eSTE_Spatial_Temporal), zero_defocus_type(eZDT_Last), zero_defocus_plane(0), 
+						thickness_type(eTT_Whole_Specimen), operation_mode(eOM_Normal), coherent_contribution(false), 
+						slice_storage(false), E_0(300), theta(0), phi(0), nrot(1), Vrl(c_Vrl), nR(c_nR), iw_type(eIWT_Plane_Wave), 
+						iw_x(0), iw_y(0), is_crystal(false), beam_x(0), beam_y(0), iscan(0), islice(0), dp_Shift(false), nstream(cpu_nthread){};
 
 			void validate_parameters()
 			{
+				// check precision
+				if(!(is_float() || is_double()))
+				{
+					precision = eP_float;
+				}
+
+				// check cpu or gpu
+				if(!(is_host() || is_device()))
+				{
+					device = e_host;
+				}
+
 				cpu_nthread = max(1, cpu_nthread);
 				gpu_nstream = max(1, gpu_nstream);
 				nstream = (is_host())?cpu_nthread:gpu_nstream;
 
-				if(!is_float() && !is_double())
-					precision = eP_float;
-
-				if(!is_host() && !is_device())
-					device = e_host;
-
-				if(!is_gpu_available())
-				{
-					device = e_host;
-				}
+				set_device();
 
 				fp_seed = max(0, fp_seed);
 
 				fp_nconf = (!is_frozen_phonon())?1:max(1, fp_nconf);
 
-				fp_iconf_0 = (!is_frozen_phonon() || !fp_single_conf)?1:fp_single_conf;
+				fp_iconf_0 = (!is_frozen_phonon())?1:(fp_single_conf)?fp_nconf:1;
 
-				tm_nrot = max(1, tm_nrot);
-				tm_irot = max(0, tm_irot);
-
-				norm_Pos_3d(tm_u0);
+				tm_u0.normalized();
 				if(tm_rot_point_type == eRPT_geometric_center)
 				{
-					tm_p0 = Pos_3d<T>(atoms.x_mean, atoms.y_mean, atoms.z_mean);
+					tm_p0 = r3d<T>(atoms.x_mean, atoms.y_mean, atoms.z_mean);
 				}
 
 				if(is_tomography())
@@ -175,8 +169,6 @@ namespace multem
 				}
 
 				islice = max(0, islice);
-
-				gpu_device = max(0, gpu_device);
 
 				if(isZero(Vrl))
 				{
@@ -198,8 +190,6 @@ namespace multem
 
 				lens.set_input_data(E_0, grid);
 
-				det_cir.set_input_data(E_0);
-
 				theta = set_incident_angle(theta);
 				nrot = max(1, nrot);
 				if(!is_PED_HCI())
@@ -207,7 +197,7 @@ namespace multem
 					nrot = 1;
 				}
 
-				//Set Incident wave type
+				// Set Incident wave type
 				if(is_plane_wave())
 				{
 					iw_type = eIWT_Plane_Wave;
@@ -238,7 +228,6 @@ namespace multem
 				if(!is_multislice())
 				{
 					islice = 0;
-					fp_dim.z = false;
 					potential_slicing = ePS_Planes;
 					if(is_through_slices())
 					{
@@ -250,6 +239,11 @@ namespace multem
 				if(is_subslicing() && is_through_thickness())
 				{
 					thickness_type = eTT_Whole_Specimen;
+				}
+
+				if(!is_subslicing())
+				{
+					fp_dim.z = false;
 				}
 
 				if(is_whole_specimen() || thickness.empty())
@@ -276,8 +270,6 @@ namespace multem
 
 					Vector<T, e_host> z_slice;
 					atoms.get_z_slice(potential_slicing, grid.dz, atoms, z_slice);
-					vector<T> z_slicet;
-					z_slicet.assign(z_slice.begin(), z_slice.end());
 					multem::match_vectors(z_slice.begin()+1, z_slice.end(), thickness);
 				}
 			}
@@ -285,17 +277,17 @@ namespace multem
 			/**************************************************************************************/
 			bool is_whole_specimen() const
 			{
-				return thickness_type==eTT_Whole_Specimen;
+				return thickness_type == eTT_Whole_Specimen;
 			}
 
 			bool is_through_slices() const
 			{
-				return thickness_type==eTT_Through_Slices;
+				return thickness_type == eTT_Through_Slices;
 			}
 
 			bool is_through_thickness() const
 			{
-				return thickness_type==eTT_Through_Thickness;
+				return thickness_type == eTT_Through_Thickness;
 			}
 			/**************************************************************************************/
 			bool is_plane_wave() const
@@ -305,7 +297,7 @@ namespace multem
 
 			bool is_convergent_wave() const
 			{
-				return is_scanning() || is_CBED_CBEI() || (is_EWFS_EWRS() && (iw_type==eIWT_Convergent_Wave));
+				return is_scanning() || is_CBED_CBEI() || ((is_EWFS_EWRS() || is_IWFS_IWRS() )&& (iw_type == eIWT_Convergent_Wave));
 			}
 
 			bool is_user_define_wave() const
@@ -330,11 +322,6 @@ namespace multem
 			bool is_tomography() const
 			{
 				return tm_active;
-			}
-
-			T get_tm_rot_angle(const int &irot) const
-			{
-				return tm_theta_0 + (tm_theta_e-tm_theta_0)*irot/tm_nrot;;
 			}
 
 			/**************************************************************************************/
@@ -371,7 +358,7 @@ namespace multem
 
 			void set_phi(const int &irot)
 			{
-				phi = (irot==0)?0.0:(c_2Pi*static_cast<T>(irot))/static_cast<T>(nrot);
+				phi = (irot == 0)?0.0:(c_2Pi*static_cast<T>(irot))/static_cast<T>(nrot);
 			}
 
 			T Vr_factor() const
@@ -521,14 +508,14 @@ namespace multem
 				return simulation_type == multem::eST_EFTEM;
 			}
 
-			bool is_ProbeFS() const
+			bool is_IWFS() const
 			{
-				return simulation_type == multem::eST_ProbeFS;
+				return simulation_type == multem::eST_IWFS;
 			}
 
-			bool is_ProbeRS() const
+			bool is_IWRS() const
 			{
-				return simulation_type == multem::eST_ProbeRS;
+				return simulation_type == multem::eST_IWRS;
 			}
 
 			bool is_PPFS() const
@@ -596,9 +583,9 @@ namespace multem
 				return is_EELS() || is_EFTEM();
 			}
 
-			bool is_ProbeFS_ProbeRS() const
+			bool is_IWFS_IWRS() const
 			{
-				return is_ProbeFS() || is_ProbeRS();
+				return is_IWFS() || is_IWRS();
 			}
 
 			bool is_PPFS_PPRS() const
@@ -619,7 +606,7 @@ namespace multem
 			bool is_simulation_type_FS() const
 			{
 				return is_STEM() || is_CBED() || is_ED() || is_PED() || is_EWFS() ||
-					is_EELS() || is_ProbeFS() || is_PPFS() || is_TFFS(); 
+					is_EELS() || is_IWFS() || is_PPFS() || is_TFFS(); 
 			}
 
 			bool is_simulation_type_RS() const
@@ -639,6 +626,42 @@ namespace multem
 			bool is_scanning() const
 			{
 				return is_STEM() || is_ISTEM() || is_EELS();
+			}
+
+			bool is_detector_circular() const
+			{
+				return detector.type == eDT_Circular;
+			}
+
+			bool is_detector_radial() const
+			{
+				return detector.type == eDT_Radial;
+			}
+
+			bool is_detector_matrix() const
+			{
+				return detector.type == eDT_Matrix;
+			}
+
+			void set_device()
+			{
+				if(is_device())
+				{
+					if(!is_gpu_available())
+					{
+						device = multem::e_host;
+					} 
+					else
+					{
+						auto ngpu = number_of_gpu_available();
+						gpu_device = min(max(0, gpu_device), ngpu-1);
+						cudaSetDevice(gpu_device);
+					}
+				}
+				else
+				{
+					device = multem::e_host;
+				}
 			}
 
 			bool is_host() const
@@ -692,6 +715,6 @@ namespace multem
 			}
 	};
 
-} //namespace multem
+} // namespace multem
 
 #endif

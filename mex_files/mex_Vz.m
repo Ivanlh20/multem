@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'get_Vz.cpp', '../src');
+MEX('release', 'il_Vz.cpp', '../src');

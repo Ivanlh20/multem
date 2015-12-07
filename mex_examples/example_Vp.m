@@ -1,21 +1,22 @@
 clear all; clc;
 
-Z = 79;
+Z = 29;
+charge = 0;
 
 Rmin = 1e-02; Rmax = 5.0; nR = 512;
 dlnR = log(Rmax/Rmin)/(nR-1); R = Rmin*exp((0:1:(nR-1))*dlnR);
 
 tic;
-[f1, df1] = get_Vp(1, Z, R);
-[f2, df2] = get_Vp(2, Z, R);
-[f3, df3] = get_Vp(3, Z, R);
-[f4, df4] = get_Vp(4, Z, R);
-[f5, df5] = get_Vp(5, Z, R);
-[f6, df6] = get_Vp(6, Z, R);
+[f1, df1] = il_Vp(1, Z, charge, R);
+[f2, df2] = il_Vp(2, Z, charge, R);
+[f3, df3] = il_Vp(3, Z, charge, R); 
+[f4, df4] = il_Vp(4, Z, charge, R);
+[f5, df5] = il_Vp(5, Z, charge, R);
+[f6, df6] = il_Vp(6, Z, charge, R);
 toc;
 
 figure(1); clf;
-
+ 
 subplot(1, 2, 1);
 hold on;
 plot(R, f1, '-k', R, f2, '-b', R, f3, '-c', R, f4, '-m', R, f5, '-r', R, f6, '-g');

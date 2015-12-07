@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef QUADRATURE_H
@@ -27,7 +27,7 @@ namespace multem
 	class Quadrature{
 		public:
 			template<class TQ1>
-			void get(const int &Quad_Type, const int &nQuad, TQ1 &Q, const double &tai=4.0)
+			void get(const int &Quad_Type, const int &nQuad, TQ1 &Q, const double &tai =4.0)
 			{
 				using value_type = Value_type<TQ1>;
 
@@ -128,7 +128,7 @@ namespace multem
 			{
 				auto getLimit = [](double x, double t, int n)->double
 				{
-					for(int i=0; i < n; i++)
+					for(int i = 0; i < n; i++)
 						t = t - (t-exp(-x)-log(x))/(1.0+exp(-t));
 					return t;
 				};

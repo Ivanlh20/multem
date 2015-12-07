@@ -2,11 +2,11 @@ clc; clear all;
 nx = 1024; ny = 1024;
 dx = 1; dy = 1; Radius = nx/4; n = 16; shift = 0;
 tic;
-f_1d = get_filter_Butterworth(ny, 1, dy, dx, Radius, n, shift);
+f_1d = il_filter_Butterworth(ny, 1, dy, dx, Radius, n, shift);
 toc;
 
 tic;
-f_2d = get_filter_Butterworth(ny, nx, dy, dx, Radius, n, shift);
+f_2d = il_filter_Butterworth(ny, nx, dy, dx, Radius, n, shift);
 toc;
 
 figure(1);

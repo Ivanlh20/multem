@@ -1,4 +1,4 @@
-function [Crys3D, lx, ly, lz, a, b, c, dz] = PrimitiveCrystal(na, nb, nc, ncu, sigma)
+function [Crys3D, lx, ly, lz, a, b, c, dz] = PrimitiveCrystal(na, nb, nc, ncu, rms3d)
 CrysPar.na = na;
 CrysPar.nb = nb;
 CrysPar.nc = nc;
@@ -11,9 +11,11 @@ CrysPar.a = a;
 CrysPar.b = b;
 CrysPar.c = c;
 CrysPar.nuLayer = 1;
-% x y z Z sigma occupancy
-CrysPar.uLayer(1).atoms = [79, 0.5, 0.5, 0.0, sigma, 1];
-Crys3D = get_crystal_by_layers(CrysPar);
+charge = 0;
+% Au = 79
+% Z charge x y z rms3d occupancy
+CrysPar.uLayer(1).atoms = [79, charge, 0.5, 0.5, 0.0, rms3d, 1];
+Crys3D = il_crystal_by_layers(CrysPar);
 
 dz = CrysPar.c/ncu;
 lx = na*CrysPar.a; ly = nb*CrysPar.b; lz = nc*CrysPar.c;

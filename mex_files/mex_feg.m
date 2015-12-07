@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'get_feg.cpp', '../src');
+MEX('release', 'il_feg.cpp', '../src');

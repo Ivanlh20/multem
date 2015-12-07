@@ -5,4 +5,4 @@ alpha = 0.5/sigma^2;
 [Rx, Ry] = meshgrid(rl, rl); R = sqrt(Rx.^2+Ry.^2);
 G2d = exp(-alpha*R.^2);
 fG2d = abs(fft2(ifftshift(G2d)));
-radius = get_FFT_information_limit_2D(fG2d, 0)
+radius = il_FFT_information_limit_2D(fG2d, 0)

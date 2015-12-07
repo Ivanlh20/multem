@@ -1,18 +1,19 @@
 clear all; clc;
 
 Z = 79;
+charge = 1;
 
 rmin = 1e-02; rmax = 5.0; nr = 512;
 dlnr = log(rmax/rmin)/(nr-1); r = rmin*exp((0:1:(nr-1))*dlnr);
-z0 = -5.0; ze = 5.0;
+z0 = -8.0; ze = 8.0;
 
 tic;
-[f1, df1] = get_Vz(1, Z, z0, ze, r);
-[f2, df2] = get_Vz(2, Z, z0, ze, r);
-[f3, df3] = get_Vz(3, Z, z0, ze, r);
-[f4, df4] = get_Vz(4, Z, z0, ze, r);
-[f5, df5] = get_Vz(5, Z, z0, ze, r);
-[f6, df6] = get_Vz(6, Z, z0, ze, r);
+[f1, df1] = il_Vz(1, Z, charge, z0, ze, r);
+[f2, df2] = il_Vz(2, Z, charge, z0, ze, r);
+[f3, df3] = il_Vz(3, Z, charge, z0, ze, r);
+[f4, df4] = il_Vz(4, Z, charge, z0, ze, r);
+[f5, df5] = il_Vz(5, Z, charge, z0, ze, r);
+[f6, df6] = il_Vz(6, Z, charge, z0, ze, r);
 toc;
 
 figure(1); clf;

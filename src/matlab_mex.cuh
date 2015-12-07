@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef MATLAB_MEX_H
@@ -25,19 +25,21 @@
 
 #include "types.cuh"
 #include "traits.cuh"
+#include "r3d.cuh"
 #include "matlab_types.cuh"
 #include <mex.h>
 
 using multem::rmatrix_r;
 using multem::rmatrix_c;
+using multem::r3d;
 
 /**************************************************************************/
 template <class TVector>
 void mx_print(const TVector &vector)
 {
-	for(auto i=0; i<vector.size(); i++)
+	for(auto i = 0; i<vector.size(); i++)
 	{
-		mexPrintf("i = %d, value = %8.5f\n", i, vector[i]);
+		mexPrintf("i = %d, value = %8.5f\n", i, double(vector[i]));
 	}
 }
 
@@ -71,6 +73,8 @@ float mx_get_scalar<float>(const mxArray *mxB)
 {
 	return static_cast<float>(mxGetScalar(mxB));
 }
+
+
 /**************************************************************************/
 template <class T>
 T mx_get_matrix(const mxArray *mxB){};
@@ -81,7 +85,7 @@ rmatrix_r mx_get_matrix<rmatrix_r>(const mxArray *mxB)
 	multem::rmatrix_r matrix;
 	matrix.rows = static_cast<int>(mxGetM(mxB));
 	matrix.cols = static_cast<int>(mxGetN(mxB));
-	matrix.size = matrix.rows*matrix.cols;
+	matrix.m_size = matrix.rows*matrix.cols;
 	matrix.real = mxGetPr(mxB);
 
 	return matrix;
@@ -93,7 +97,7 @@ rmatrix_c mx_get_matrix<rmatrix_c>(const mxArray *mxB)
 	multem::rmatrix_c matrix;
 	matrix.rows = static_cast<int>(mxGetM(mxB));
 	matrix.cols = static_cast<int>(mxGetN(mxB));
-	matrix.size = matrix.rows*matrix.cols;
+	matrix.m_size = matrix.rows*matrix.cols;
 	matrix.real = mxGetPr(mxB);
 	matrix.imag = mxGetPi(mxB);
 
@@ -126,6 +130,14 @@ template <class T>
 T mx_get_matrix_field(const mxArray *mxB, const char *field_name)
 {
 	return mx_get_matrix_field<T>(mxB, 0, field_name);
+}
+
+
+template <class T>
+r3d<T> mx_get_r3d_field(const mxArray *mxB, const char *field_name)
+{
+	auto r = mx_get_matrix_field<rmatrix_r>(mxB, field_name);
+	return r3d<T>(r[0], r[1], r[2]);
 }
 
 /**************************************************************************/
@@ -194,7 +206,7 @@ inline void mx_create_set_matrix_field(mxArray *mx_struct, const int &idx, const
 {
 	mxArray *mxfield;
 	T matrix = mx_create_matrix<T>(rows, cols, mxfield);
-	std::copy(field_value, field_value + matrix.size, matrix.real);
+	std::copy(field_value, field_value + matrix.m_size, matrix.real);
 	mxSetField(mx_struct, idx, field_name, mxfield);
 }
 

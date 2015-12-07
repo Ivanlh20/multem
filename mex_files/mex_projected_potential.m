@@ -1,3 +1,3 @@
 clc; clear all;
   
-MEX('release', 'get_projected_potential.cu', '../src');
+MEX('release', 'il_projected_potential.cu', '../src');

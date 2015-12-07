@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef TYPES_H
@@ -38,6 +38,7 @@
 #include <mutex>
 
 #include "math.cuh"
+#include "r3d.cuh"
 
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
@@ -53,7 +54,7 @@ namespace multem
 {
 	const double c_Ha = 27.2113850656389; 					// Hartree to electron-Volt
 	const double c_a0 = 0.52917721077817892; 				// Bohr radius
-	const double c_Potf = 47.877645145863056; 				//
+	const double c_Potf = 47.877645145863056; 				// 
 	const double c_2Pi2a0 = 10.445539456905012; 			// 2*pi^2*a0
 
 	const double c_H = 6.62606876e-34; 						// Planck's constant - J s
@@ -87,6 +88,8 @@ namespace multem
 	const double c_5i2 = 2.236067977499789696409; 			// 5^(1/2)
 	const double c_7i2 = 2.645751311064590590502; 			// 7^(1/2)	
 
+	const double c_fwhm2sigma = 0.42466090014400953; 		// fwhm to sigma 
+
 	const double c_mrad_2_rad = 1.0e-03; 					// mrad-->rad
 	const double c_deg_2_rad = 0.01745329251994329576924;	// degrees-->rad
 	const double c_mm_2_Ags = 1.0e+07; 						// mm-->Angstrom
@@ -95,6 +98,7 @@ namespace multem
 	const int c_cSynCPU = 5;
 
 	const int c_nAtomsTypes = 103;
+	const int c_nAtomsIons = 15;
 	const int c_nqz = 128;
 	const int c_nR = 128;
 
@@ -102,13 +106,24 @@ namespace multem
 	const int c_thrnxy = 256;
 	const double c_Vrl = 0.015;
 
-	#define IsFS(i,nh)	((i < nh)?i:i-2*nh)
-	#define IsRS(i,nh)	((i < nh)?i+nh:i-nh)
+	#define IsFS(i, nh)	((i < nh)?i:i-2*nh)
+	#define IsRS(i, nh)	((i < nh)?i+nh:i-nh)
 
 	const int cSizeofI = sizeof(int);
 	const int cSizeofRD = sizeof(double);
 	const int cSizeofRF = sizeof(float);
 	const int cSizeofCD = 2*cSizeofRD;
+
+	/******************************modify vector******************************/
+	enum eInput_Atoms
+	{
+		eIA_yes = 1, eIA_no = 2
+	};
+	/******************************modify vector******************************/
+	enum eModify_Vector
+	{
+		eMV_yes = 1, eMV_no = 2
+	};
 
 	/******************************e_device type******************************/
 	enum eDevice
@@ -155,19 +170,19 @@ namespace multem
 	/*****************************simulation type*********************************/
 	enum eSimulation_Type
 	{
-		eST_STEM=11, eST_ISTEM=12, 
-		eST_CBED=21, eST_CBEI=22, 
-		eST_ED=31, eST_HRTEM=32, 
-		eST_PED=41, eST_HCI=42, 
-		eST_EWFS=51, eST_EWRS=52,
-		eST_EELS=61, eST_EFTEM=62,
-		eST_ProbeFS=71, eST_ProbeRS=72,
-		eST_PPFS=81, eST_PPRS=82,			//projected potential
-		eST_TFFS=91, eST_TFRS=92,			//transmission function
-		eST_PropFS=101, eST_PropRS=102		//propagate
+		eST_STEM =11, eST_ISTEM =12, 
+		eST_CBED =21, eST_CBEI =22, 
+		eST_ED =31, eST_HRTEM =32, 
+		eST_PED =41, eST_HCI =42, 
+		eST_EWFS =51, eST_EWRS =52, 
+		eST_EELS =61, eST_EFTEM =62, 
+		eST_IWFS =71, eST_IWRS =72, 
+		eST_PPFS =81, eST_PPRS =82, 			// projected potential
+		eST_TFFS =91, eST_TFRS =92, 			// transmission function
+		eST_PropFS =101, eST_PropRS =102		// propagate
 	};
 
-	/********************************Potential model****************************/
+	/********************************Projected_Potential model****************************/
 	enum ePhonon_Model
 	{
 		ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
@@ -179,13 +194,13 @@ namespace multem
 		eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
 	};
 
-	/**************************Potential Slicing Type***************************/
+	/**************************Projected_Potential Slicing Type***************************/
 	enum ePotential_Slicing
 	{
 		ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 	};
 
-	/***************************Potential parameterization************************/
+	/***************************Projected_Potential parameterization************************/
 	enum ePotential_Type
 	{
 		ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, 
@@ -206,7 +221,7 @@ namespace multem
 	/****************************Defocus plane type*****************************/
 	enum eZero_Defocus_Type
 	{
-		eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
+		eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 	};
 
 	/**********************************Incident Wave Type********************************/
@@ -226,11 +241,29 @@ namespace multem
 	{
 		eST_Line = 1, eST_Area = 2
 	};
+	/******************************grid Type********************************/
+	enum eGrid_Type
+	{
+		eGT_Regular = 1, eGT_Quadratic = 2
+	};
+
+	/****************************Detector type*****************************/
+	enum eDetector_Type
+	{
+		eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
+	};
+
 
 	/**********************************Channelling type********************************/
 	enum eChannelling_Type
 	{
 		eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_FOMS = 3, eCT_Double_Channelling_SOMS = 4
+	};
+
+	/****************************Output type*****************************/
+	enum eOutput_Type
+	{
+		eOT_Matlab = 1, eOT_Vector = 2
 	};
 
 	/*********************************Epsilon***********************************/
@@ -276,12 +309,6 @@ namespace multem
 
 	};
 
-	template<class T>
-	using Pos_2d = thrust::tuple<T, T>;
-
-	template<class T>
-	using Pos_3d = thrust::tuple<T, T, T>;
-
 	/*******************forward declarations********************/
 	template<class T>
 	struct is_fundamental;
@@ -308,16 +335,22 @@ namespace multem
 	{
 	public:
 		using value_type = T;
+		using size_type = std::size_t;
 
-		int size;
+		int m_size;
 		T *V;
 
-		rVector(): size(0), V(nullptr){}
+		rVector(): m_size(0), V(nullptr){}
+
+		size_type size() const
+		{
+			return m_size;
+		}
 
 		template<class TVector>
 		rVector(TVector &vector)
 		{
-			size = vector.size();
+			m_size = vector.size();
 			V = raw_pointer_cast(vector.data());
 		}
 
@@ -335,7 +368,7 @@ namespace multem
 		return static_cast<double>(n*sizeof(T)/1048576.0);
 	}
 
-	//static member function are not support for the cuda compiler
+	// static member function are not support for the cuda compiler
 	template<class T>
 	DEVICE_CALLABLE FORCEINLINE
 	bool isEqual(const T &a, const T &b);
@@ -355,12 +388,12 @@ namespace multem
 		const float eps_rel = 1e-4f;
 
 		// Check if the numbers are really close -- needed when comparing numbers near zero.
-		float diff = abs(a - b);
+		float diff = fabs(a - b);
 		if (diff <= eps_abs)
 			return true;
  
 		// Otherwise fall back to Knuth's algorithm
-		return diff <= ((abs(a)<abs(b)?abs(b):abs(a))*eps_rel);
+		return diff <= ((fabs(a)<fabs(b)?fabs(b):fabs(a))*eps_rel);
 	}
 
 	template<>
@@ -371,12 +404,12 @@ namespace multem
 		const double eps_rel = 1e-8;
 
 		// Check if the numbers are really close -- needed when comparing numbers near zero.
-		double diff = abs(a - b);
+		double diff = fabs(a - b);
 		if (diff <= eps_abs)
 			return true;
  
 		// Otherwise fall back to Knuth's algorithm
-		return diff <= ((abs(a)<abs(b)?abs(b):abs(a))*eps_rel);
+		return diff <= ((fabs(a)<fabs(b)?fabs(b):fabs(a))*eps_rel);
 	}
 
 	template<class T>
@@ -529,12 +562,12 @@ namespace multem
 
 		T z_m(const int &islice)
 		{
-			return (islice<size())?(0.5*abs(z_e[islice]+z_0[islice])):0.0;
+			return (islice<size())?(0.5*fabs(z_e[islice]+z_0[islice])):0.0;
 		}
 
 		T dz_m(const int &islice_0, const int &islice_e)
 		{
-			return abs(z_m(islice_e) - z_m(islice_0));
+			return fabs(z_m(islice_e) - z_m(islice_0));
 		}
 
 		Vector<T, dev> z_0; 		// Initial z-position
@@ -582,12 +615,12 @@ namespace multem
 	{
 		using value_type = T;
 
-		rQ1(): size(0), x(nullptr), w(nullptr){}
+		rQ1(): m_size(0), x(nullptr), w(nullptr){}
 
 		template<class TQ1> 
-		rQ1<T>& operator=(TQ1 &q1)
+		rQ1<T>& operator = (TQ1 &q1)
 		{
-			size = q1.size();
+			m_size = q1.size();
 			x = raw_pointer_cast(q1.x.data());
 			w = raw_pointer_cast(q1.w.data());
 			return *this; 
@@ -599,7 +632,7 @@ namespace multem
 			*this = q1;
 		}
 
-		int size;
+		int m_size;
 		T *x;
 		T *w;
 	};
@@ -643,12 +676,12 @@ namespace multem
 	{
 		using value_type = T;
 
-		rQ2(): size(0), x(nullptr), y(nullptr), w(nullptr){}
+		rQ2(): m_size(0), x(nullptr), y(nullptr), w(nullptr){}
 
 		template<class TQ2> 
-		rQ2<T>& operator=(TQ2 &q2)
+		rQ2<T>& operator = (TQ2 &q2)
 		{
-			size = q2.size();
+			m_size = q2.size();
 			x = raw_pointer_cast(q2.x.data());
 			y = raw_pointer_cast(q2.y.data());
 			w = raw_pointer_cast(q2.w.data());
@@ -661,7 +694,7 @@ namespace multem
 			*this = q2;
 		}
 
-		int size;
+		int m_size;
 		T *x;
 		T *y;
 		T *w;
@@ -679,6 +712,12 @@ namespace multem
 		size_type size() const
 		{
 			return cl.size();
+		}
+
+		void fill(const value_type &value = value_type())
+		{
+			thrust::fill(cl.begin(), cl.end(), value);
+			thrust::fill(cnl.begin(), cnl.end(), value);
 		}
 
 		void resize(const size_type &new_size, const value_type &value = value_type())
@@ -704,12 +743,12 @@ namespace multem
 	{
 		using value_type = T;
 
-		rPP_Coef(): size(0), cl(nullptr), cnl(nullptr){}
+		rPP_Coef(): m_size(0), cl(nullptr), cnl(nullptr){}
 
 		template<class TPP_Coef> 
-		rPP_Coef<T>& operator=(TPP_Coef &rhs)
+		rPP_Coef<T>& operator = (TPP_Coef &rhs)
 		{ 
-			size = rhs.size();
+			m_size = rhs.size();
 			cl = raw_pointer_cast(rhs.cl.data());
 			cnl = raw_pointer_cast(rhs.cnl.data());
 			return *this; 
@@ -721,7 +760,7 @@ namespace multem
 			*this = pp_coef;
 		}
 
-		int size;
+		int m_size;
 		T *cl;
 		T *cnl;
 	};
@@ -768,12 +807,12 @@ namespace multem
 	{
 		using value_type = T;
 
-		rCI_Coef(): size(0), c0(nullptr), c1(nullptr), c2(nullptr), c3(nullptr){}
+		rCI_Coef(): m_size(0), c0(nullptr), c1(nullptr), c2(nullptr), c3(nullptr){}
 
 		template<class TCI_Coef> 
-		rCI_Coef<T>& operator=(TCI_Coef &ci_coef)
+		rCI_Coef<T>& operator = (TCI_Coef &ci_coef)
 		{
-			size = ci_coef.size();
+			m_size = ci_coef.size();
 			c0 = raw_pointer_cast(ci_coef.c0.data());
 			c1 = raw_pointer_cast(ci_coef.c1.data());
 			c2 = raw_pointer_cast(ci_coef.c2.data());
@@ -787,7 +826,7 @@ namespace multem
 			*this = ci_coef;
 		}
 
-		int size;
+		int m_size;
 		T *c0;
 		T *c1;
 		T *c2;
@@ -795,53 +834,78 @@ namespace multem
 	};
 
 	/**********************STEM Detector**********************/
-	template<class T>
-	struct Det_Cir
+	template<class T, eDevice dev>
+	struct Detector
 	{
 		using value_type = T;
 		using size_type = std::size_t;
 
-		static const eDevice device = e_host;
+		static const eDevice device = dev;
 
-		Det_Cir(): lambda(0){}
+		Detector(): type(eDT_Circular){}
 
-		inline
-		void set_input_data(value_type E_0)
-		{
-			lambda = get_lambda(E_0);
-		}		
-		
 		size_type size() const
 		{
-			return ang_inner.size();
+			size_type size_out = 0;
+			switch (type)
+			{
+				case eDT_Circular:
+				{
+					size_out = g_inner.size();
+				}
+				break;
+				case eDT_Radial:
+				{
+					size_out = fx.size();
+				}
+					break;
+				case eDT_Matrix:
+				{
+					size_out = fR.size();
+				}
+				break;
+			}
+			return size_out;
 		}
 
-		void resize(const size_type &new_size, const value_type &value = value_type())
+		void resize(const size_type &new_size)
 		{
-			ang_inner.resize(new_size, value);
-			ang_outer.resize(new_size, value);
+			switch (type)
+			{
+				case eDT_Circular:
+				{
+					g_inner.resize(new_size);
+					g_outer.resize(new_size);
+				}
+				break;
+				case eDT_Radial:
+				{
+					fx.resize(new_size);
+				}
+					break;
+				case eDT_Matrix:
+				{
+					fR.resize(new_size);
+				}
+				break;
+			}
+
 		}
 
-		template<class TDet_Cir> 
-		void assign(TDet_Cir &det_cir)
+		template<class TDetector> 
+		void assign(TDetector &detector)
 		{
-			ang_inner.assign(det_cir.ang_inner.begin(), det_cir.ang_inner.end());
-			ang_outer.assign(det_cir.ang_outer.begin(), det_cir.ang_outer.end());
+			g_inner.assign(detector.g_inner.begin(), detector.g_inner.end());
+			g_outer.assign(detector.g_outer.begin(), detector.g_outer.end());
+			fx.assign(detector.fx.begin(), detector.fx.end());
+			fR.assign(detector.fR.begin(), detector.fR.end());
 		}
 
-		value_type g_inner(const int & idx) const
-		{
-			return ang_inner[idx]/lambda;
-		}
-
-		value_type g_outer(const int & idx) const
-		{
-			return ang_outer[idx]/lambda;
-		}
-
-		Vector<T, e_host> ang_inner; // Inner aperture (rad)
-		Vector<T, e_host> ang_outer; // Outer aperture (rad)
-		value_type lambda;	 // lambda
+		eDetector_Type type;					// eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
+		Vector<T, e_host> g_inner;				// Inner aperture Ang^-1
+		Vector<T, e_host> g_outer;				// Outer aperture Ang^-1
+		Vector<Vector<T, dev>, e_host> fx;		// radial sensitivity value
+		Vector<Vector<T, dev>, e_host> fR;		// 2D sensitivity value
 	};
 
 	/********************STEM Intensity***********************/
@@ -870,7 +934,7 @@ namespace multem
 		int iy_e; 	// final index
 		int ixy_0; 	// initial index
 		int ixy_e; 	// final index
-		Range():ix_0(0), ix_e(0), iy_0(0), iy_e(0), ixy_0(0), ixy_e(0){}
+		Range(): ix_0(0), ix_e(0), iy_0(0), iy_e(0), ixy_0(0), ixy_e(0){}
 
 		template<class TGrid>
 		Range(const TGrid &grid){ set_grid(grid); }
@@ -978,8 +1042,8 @@ namespace multem
 
 		T inxy; 				// 1.0/nxy
 
-		T lx; 					// Box size in x direction(Angstroms)
-		T ly; 					// Box size in y direction(Angstroms)
+		T lx; 					// Box m_size in x direction(Angstroms)
+		T ly; 					// Box m_size in y direction(Angstroms)
 		T dz; 					// slice thicknes
 
 		bool bwl; 				// Band-width limit
@@ -1024,6 +1088,19 @@ namespace multem
 			alpha = log(1.0/fg0-1.0)/(pow(gl_max-dg0, 2)-gl2_max);
 		}
 	
+		template<class TGrid> 
+		void assign(TGrid &grid)
+		{
+			set_input_data(grid.nx, grid.ny, grid.lx, grid.ly, grid.dz, grid.bwl, grid.pbc_xy);
+		}
+
+		template<class TGrid> 
+		Grid<T>& operator=(TGrid &grid)
+		{
+			assign(grid);
+			return *this; 
+		}
+
 		DEVICE_CALLABLE FORCEINLINE
 		int nxy() const { return nx*ny; }
 
@@ -1049,17 +1126,17 @@ namespace multem
 		/*********************************************************/
 		// Maximun frequency
 		DEVICE_CALLABLE FORCEINLINE
-		T g_max() const { return fmin(static_cast<T>(nxh)*dgx, static_cast<T>(nyh)*dgy); }
+		T g_max() const { return ::fmin(static_cast<T>(nxh)*dgx, static_cast<T>(nyh)*dgy); }
 
 		// Squared of the maximun frequency
 		DEVICE_CALLABLE FORCEINLINE
 		T g2_max() const { return pow(g_max(), 2); }
 
 		DEVICE_CALLABLE FORCEINLINE
-		T dR_min() const { return fmin(dRx, dRy); }
+		T dR_min() const { return ::fmin(dRx, dRy); }
 
 		DEVICE_CALLABLE FORCEINLINE
-		T dg_min() const { return fmin(dgx, dgy); }
+		T dg_min() const { return ::fmin(dgx, dgy); }
 
 		DEVICE_CALLABLE FORCEINLINE
 		int nx_dRx(const T &lx) const { return static_cast<int>(ceil(lx/dRx)); }
@@ -1090,7 +1167,6 @@ namespace multem
 
 		DEVICE_CALLABLE FORCEINLINE
 		T g(const int &ix, const int &iy) const { return sqrt(g2(ix, iy)); }
-
 
 		DEVICE_CALLABLE FORCEINLINE
 		T gx(const int &ix, const T &x) const { return gx(ix)-x; }
@@ -1234,6 +1310,7 @@ namespace multem
 			ix = ixy/ny;
 			iy = ixy - ix*ny;
 		}
+
 	};
 
 	/****************************lens***************************/
@@ -1274,15 +1351,15 @@ namespace multem
 		T sggs; 	// Standard deviation
 		int ngxs; 	// Number of source sampling points x
 		int ngys; 	// Number of source sampling points y
-		T dgxs; 	// source sampling size;
-		T dgys; 	// source sampling size;
+		T dgxs; 	// source sampling m_size;
+		T dgys; 	// source sampling m_size;
 		T g2_maxs; 	// q maximum square;
 
 		Lens(): gamma(0), lambda(0), m(0), f(0), Cs3(0), Cs5(0), 
-				mfa2(0),afa2(0), mfa3(0), afa3(0), aobjl(0),
-				aobju(0), sf(0), nsf(0), beta(0), nbeta(0),
-				lambda2(0), cf(0), cCs3(0),	cCs5(0), cmfa2(0),
-				cmfa3(0), g2_min(0), g2_max(0), sggs(0), ngxs(0),
+				mfa2(0), afa2(0), mfa3(0), afa3(0), aobjl(0), 
+				aobju(0), sf(0), nsf(0), beta(0), nbeta(0), 
+				lambda2(0), cf(0), cCs3(0), 	cCs5(0), cmfa2(0), 
+				cmfa3(0), g2_min(0), g2_max(0), sggs(0), ngxs(0), 
 				ngys(0), dgxs(0), dgys(0), g2_maxs(0){}
 
 		void set_input_data(T E_0, Grid<T> &grid)
@@ -1298,7 +1375,7 @@ namespace multem
 			cmfa2 = (isZero(mfa2))?0:-c_Pi*mfa2*lambda;
 			cmfa3 = (isZero(mfa3))?0:-2.0*c_Pi*mfa3*pow(lambda, 2)/3.0;
 			g2_min = (isZero(aobjl)||(aobjl<0))?0:pow(aobjl/lambda, 2);
-			g2_max = (isZero(aobju)||(aobju<0))?grid.g2_max():pow(aobju/lambda, 2);
+			g2_max = (isZero(aobju)||(aobju<0))?grid.g2_max(): pow(aobju/lambda, 2);
 
 			T g0s = beta/lambda;
 			sggs = g0s/c_2i2;
@@ -1314,6 +1391,53 @@ namespace multem
 			n = (dgs<grid.dgy)?static_cast<int>(floor(grid.dgy/dgs)+1):1;
 			ngys = static_cast<int>(floor(n*gmaxs/grid.dgy)) + 1;
 			dgys = gmaxs/ngys;
+		}
+
+		template<class TLens> 
+		void assign(TLens &lens)
+		{
+			m = lens.m;
+			f = lens.f;
+			Cs3 = lens.Cs3;
+			Cs5 = lens.Cs5;
+			mfa2 = lens.mfa2;
+			afa2 = lens.afa2;
+			mfa3 = lens.mfa3;
+			afa3 = lens.afa3;
+			aobjl = lens.aobjl;
+			aobju = lens.aobju;
+
+			sf = lens.sf;
+			nsf = lens.nsf;
+
+			beta = lens.beta;
+			nbeta = lens.nbeta;
+
+			gamma = lens.gamma;
+			lambda = lens.lambda;
+			lambda2 = lens.lambda2;
+
+			cf = lens.cf;
+			cCs3 = lens.cCs3;
+			cCs5 = lens.cCs5;
+			cmfa2 = lens.cmfa2;
+			cmfa3 = lens.cmfa3;
+			g2_min = lens.g2_min;
+			g2_max = lens.g2_max;
+
+			sggs = lens.sggs;
+			ngxs = lens.ngxs;
+			ngys = lens.ngys;
+			dgxs = lens.dgxs;
+			dgys = lens.dgys;
+			g2_maxs = lens.g2_maxs;
+		}
+
+		template<class TLens> 
+		Lens<T>& operator=(TLens &lens)
+		{
+			assign(lens);
+			return *this; 
 		}
 
 		void set_defocus(T f_i)
@@ -1348,7 +1472,8 @@ namespace multem
 
 		inline
 		EELS(): space(eS_Real), E_0(0), E_loss(0), ge(0), ge2(0), gc(0), gc2(0), 
-		m_selection(0), collection_angle(0), channelling_type(eCT_Double_Channelling), factor(0), Z(0), x(0), y(0), occ(0){}
+		m_selection(0), collection_angle(0), channelling_type(eCT_Double_Channelling), 
+		g_collection(0), factor(0), Z(0), x(0), y(0), occ(0){}
 
 		inline
 		void set_input_data(eSpace space_i, T E_0_i, T E_loss_i, int m_selection_i, T collection_angle_i, eChannelling_Type channelling_type_i, int Z_i)
@@ -1372,6 +1497,23 @@ namespace multem
 			channelling_type = channelling_type_i;
 
 			Z = Z_i;
+		}
+
+		template<class TEELS> 
+		void assign(TEELS &eels)
+		{
+			set_input_data(eels.space, eels.E_0, eels.E_loss, eels.m_selection, eels.collection_angle, eels.channelling_type, eels.Z);
+			factor = eels.factor;
+			x = eels.x;
+			y = eels.y;
+			occ = eels.occ;
+		}
+
+		template<class TEELS> 
+		EELS<T>& operator=(TEELS &eels)
+		{
+			assign(eels);
+			return *this; 
 		}
 
 		// effective scattering angle
@@ -1427,6 +1569,217 @@ namespace multem
 		T g_collection;
 	};
 
+	template<class T>
+	class Atom_SA{
+		public:
+			using value_type = T;
+			using size_type = std::size_t;
+
+			size_type size() const
+			{
+				return Z.size();
+			}
+
+			bool empty() const
+			{
+				return size() == 0;
+			}
+
+			template<class TAtom_SA> 
+			void assign(TAtom_SA &atom_sa)
+			{ 
+				Z.assign(atom_sa.Z.begin(), atom_sa.Z.end());
+
+				r_min.assign(atom_sa.r_min.begin(), atom_sa.r_min.end());
+				r_max.assign(atom_sa.r_max.begin(), atom_sa.r_max.end());
+				r_0.assign(atom_sa.r_0.begin(), atom_sa.r_0.end());
+				r_d.assign(atom_sa.r_d.begin(), atom_sa.r_d.end());
+
+				r.assign(atom_sa.r.begin(), atom_sa.r.end());
+				r_n.assign(atom_sa.r_n.begin(), atom_sa.r_n.end());
+				r_opt.assign(atom_sa.r_opt.begin(), atom_sa.r_opt.end());
+
+				chi2.assign(atom_sa.chi2.begin(), atom_sa.chi2.end());
+				chi2_n.assign(atom_sa.chi2_n.begin(), atom_sa.chi2_n.end());
+				chi2_opt.assign(atom_sa.chi2_opt.begin(), atom_sa.chi2_opt.end());
+
+				df.assign(atom_sa.df.begin(), atom_sa.df.end());
+			}
+
+			// resize number of atoms
+			void resize(const size_type &new_size, const value_type &value = value_type())
+			{
+				Z.resize(new_size, value);
+
+				r_min.resize(new_size, value);
+				r_max.resize(new_size, value);
+				r_0.resize(new_size, value);
+				r_d.resize(new_size, value);
+
+				r.resize(new_size, value);
+				r_n.resize(new_size, value);
+				r_opt.resize(new_size, value);
+
+				chi2.resize(new_size, value);
+				chi2_n.resize(new_size, value);
+				chi2_opt.resize(new_size, value);
+
+				df.resize(new_size, value);
+
+			}
+
+			// set atoms
+			void set_Atoms(const size_type &natoms_i, double *atoms_i, double *atoms_min_i, double *atoms_max_i)
+			{
+				resize(natoms_i);
+
+				for(auto iatoms = 0; iatoms < size(); iatoms++)
+				{
+					Z[iatoms] = static_cast<int>(atoms_i[0*natoms_i + iatoms]); 		// Atomic number
+					r[iatoms].x = atoms_i[1*natoms_i + iatoms]; 						// x-position
+					r[iatoms].y = atoms_i[2*natoms_i + iatoms]; 						// y-position
+					r[iatoms].z = atoms_i[3*natoms_i + iatoms]; 						// z-position
+
+					r_min[iatoms].x = atoms_min_i[0*natoms_i + iatoms]; 				// x-position
+					r_min[iatoms].y = atoms_min_i[1*natoms_i + iatoms]; 				// y-position
+					r_min[iatoms].z = atoms_min_i[2*natoms_i + iatoms]; 				// z-position
+
+					r_max[iatoms].x = atoms_max_i[0*natoms_i + iatoms]; 				// x-position
+					r_max[iatoms].y = atoms_max_i[1*natoms_i + iatoms]; 				// y-position
+					r_max[iatoms].z = atoms_max_i[2*natoms_i + iatoms]; 				// z-position
+
+					r_0[iatoms] = r_min[iatoms];
+					r_d[iatoms] = r_max[iatoms]-r_min[iatoms];
+
+					df[iatoms] = 1;
+				}
+			}
+
+			// set atoms
+			void set_Atoms(const size_type &natoms_i, double *atoms_i, r3d<T> d_i)
+			{
+				resize(natoms_i);
+
+				for(auto iatoms = 0; iatoms < size(); iatoms++)
+				{
+					Z[iatoms] = static_cast<int>(atoms_i[0*natoms_i + iatoms]); 		// Atomic number
+
+					r[iatoms].x = atoms_i[0*natoms_i + iatoms]; 						// x-position
+					r[iatoms].y = atoms_i[1*natoms_i + iatoms]; 						// y-position
+					r[iatoms].z = atoms_i[2*natoms_i + iatoms]; 						// z-position
+
+					r_min[iatoms] = r - d_i;
+					r_max[iatoms] = r + d_i;
+
+					r_0[iatoms] = r_min[iatoms];
+					r_d[iatoms] = r_max[iatoms]-r_min[iatoms];
+
+					df[iatoms] = 1;
+				}
+			}
+
+			void set_range(int Z_i, r3d<T> r_min_i, r3d<T> r_max_i)
+			{
+				for(auto iatoms = 0; iatoms < size(); iatoms++)
+				{
+					Z[iatoms] = Z_i;
+
+					r_min[iatoms] = r_min_i;
+					r_max[iatoms] = r_max_i;
+					r_0[iatoms] = r_min[iatoms];
+					r_d[iatoms] = r_max[iatoms]-r_min[iatoms];
+					df[iatoms] = 1;
+				}
+			}
+
+			Vector<int, e_host> Z;
+
+			Vector<r3d<T>, e_host> r_min;
+			Vector<r3d<T>, e_host> r_max;
+			Vector<r3d<T>, e_host> r_0;
+			Vector<r3d<T>, e_host> r_d;
+
+			Vector<r3d<T>, e_host> r;
+			Vector<r3d<T>, e_host> r_n;
+			Vector<r3d<T>, e_host> r_opt;
+
+			Vector<T, e_host> chi2;
+			Vector<T, e_host> chi2_n;
+			Vector<T, e_host> chi2_opt;
+
+			Vector<T, e_host> df;
+	};
+
+	/*****************************Atomic Coefficients****************************/
+	template<class T, eDevice dev>
+	struct Atom_Coef
+	{
+		using value_type = T;
+		using size_type = std::size_t;
+
+		static const eDevice device = dev;
+
+		Atom_Coef(): charge(0), tag(0), R_min(0), R_max(0), R_tap(0), tap_cf(0){}
+
+		template<class TAtom_Coef> 
+		void assign(TAtom_Coef &atom_coef)
+		{ 
+			charge = atom_coef.charge;
+			tag = atom_coef.tag;
+
+			R_min = atom_coef.R_min;
+			R_max = atom_coef.R_max;
+
+			R_tap = atom_coef.R_tap;
+			tap_cf = atom_coef.tap_cf;
+
+			feg.assign(atom_coef.feg);
+			fxg.assign(atom_coef.fxg);
+			Pr.assign(atom_coef.Pr);
+			Vr.assign(atom_coef.Vr);
+			VR.assign(atom_coef.VR);
+
+			R.assign(atom_coef.R.begin(), atom_coef.R.end());
+			R2.assign(atom_coef.R2.begin(), atom_coef.R2.end());
+			ciVR.assign(atom_coef.ciVR);
+		}
+
+		template<class TAtom_Coef> 
+		Atom_Coef<T, dev>& operator=(TAtom_Coef &atom_coef)
+		{
+			assign(atom_coef);
+			return *this; 
+		}
+
+		// Minimum interaction radius squared
+		T R2_min() const { return pow(R_min, 2); }
+
+		// Maximum interaction radius squared
+		T R2_max() const { return pow(R_max, 2); }
+
+		// Tapering radius squared
+		T R2_tap() const { return pow(R_tap, 2); }
+
+		int charge; 				// Charge
+		T tag; 						// tag
+
+		T R_min; 					// Minimum interaction radius
+		T R_max; 					// Maximum interaction radius
+		T R_tap; 					// Tapering radius
+		T tap_cf; 					// Tapering cosine factor
+
+		PP_Coef<T, dev> feg; 		// Electron scattering factor coefficients
+		PP_Coef<T, dev> fxg; 		// X-ray scattering factor coefficients
+		PP_Coef<T, dev> Pr; 		// Projected_Potential coefficients
+		PP_Coef<T, dev> Vr; 		// Projected_Potential coefficients
+		PP_Coef<T, dev> VR; 		// Projected potential coefficients
+
+		Vector<T, dev> R; 			// R
+		Vector<T, dev> R2; 			// R2
+		CI_Coef<T, dev> ciVR; 		// Look up table - Projected potential coefficients
+
+	};
+
 	/*****************************Atomic type****************************/
 	template<class T, eDevice dev>
 	struct Atom_Type
@@ -1436,8 +1789,7 @@ namespace multem
 
 		static const eDevice device = dev;
 
-		Atom_Type(): Z(0), m(0), A(0), rn_e(0), rn_c(0), ra_e(0), ra_c(0), 
-						R_min(0), R_max(0), R_min2(0), R_max2(0){}
+		Atom_Type(): Z(0), m(0), A(0), rn_e(0), rn_c(0), ra_e(0), ra_c(0){}
 
 		template<class TAtom_Type> 
 		void assign(TAtom_Type &atom_type)
@@ -1449,44 +1801,86 @@ namespace multem
 			rn_c = atom_type.rn_c;
 			ra_e = atom_type.ra_e;
 			ra_c = atom_type.ra_c;
-			R_min = atom_type.R_min;
-			R_max = atom_type.R_max;
-			R_min2 = atom_type.R_min2;
-			R_max2 = atom_type.R_max2;
 
-			feg.assign(atom_type.feg);
-			fxg.assign(atom_type.fxg);
-			Pr.assign(atom_type.Pr);
-			Vr.assign(atom_type.Vr);
-			VR.assign(atom_type.VR);
-
-			R.assign(atom_type.R.begin(), atom_type.R.end());
-			R2.assign(atom_type.R2.begin(), atom_type.R2.end());
-			ciVR.assign(atom_type.ciVR);
+			coef.resize(atom_type.coef.size());
+			for(auto i=0; i<atom_type.coef.size(); i++)
+			{
+				coef[i].assign(atom_type.coef[i]);
+			}
 		}
 
-		int Z; 						// Atomic number
-		T m; 						// Atomic mass
-		int A; 						// Mass number
-		T rn_e; 					// Experimental Nuclear radius
-		T rn_c; 					// Calculated Nuclear radius
-		T ra_e; 					// Experimental atomic radius
-		T ra_c; 					// Calculated atomic radius
-		T R_min; 					// Minimum interaction radius
-		T R_max; 					// Maximum interaction radius
-		T R_min2; 					// Minimum interaction radius squared
-		T R_max2; 					// Maximum interaction radius squared
+		template<class TAtom_Type> 
+		Atom_Type<T, dev>& operator=(TAtom_Type &atom_type)
+		{
+			assign(atom_type);
+			return *this; 
+		}
 
-		PP_Coef<T, dev> feg; 		// Electron scattering factor coefficients
-		PP_Coef<T, dev> fxg; 		// X-ray scattering factor coefficients
-		PP_Coef<T, dev> Pr; 		// Potential coefficients
-		PP_Coef<T, dev> Vr; 		// Potential coefficients
-		PP_Coef<T, dev> VR; 		// Projected potential coefficients
+		int check_charge(const int &charge) const
+		{ 
+			for(auto i=0; i<coef.size(); i++)
+			{
+				if(coef[i].charge==charge)
+				{
+					return charge;
+				}
+			}
+			return 0;
+		};
 
-		Vector<T, dev> R; 			// R gridBT
-		Vector<T, dev> R2; 			// R2 gridBT
-		CI_Coef<T, dev> ciVR; 		// Look up table - Projected potential coefficients
+		int charge_to_idx(const int &charge) const
+		{ 
+			int icharge = 0;
+			for(auto i=0; i<coef.size(); i++)
+			{
+				if(coef[i].charge==charge)
+				{
+					icharge = i;
+					break;
+				}
+			}
+			return icharge;
+		};
 
+		PP_Coef<T, dev>* feg(const int &charge)
+		{
+			int icharge = charge_to_idx(charge);
+			return &(coef[icharge].feg);
+		};
+
+		PP_Coef<T, dev>* fxg(const int &charge)
+		{
+			int icharge = charge_to_idx(charge);
+			return &(coef[icharge].fxg);
+		};
+
+		PP_Coef<T, dev>* Pr(const int &charge)
+		{
+			int icharge = charge_to_idx(charge);
+			return &(coef[icharge].Pr);
+		};
+
+		PP_Coef<T, dev>* Vr(const int &charge)
+		{
+			int icharge = charge_to_idx(charge);
+			return &(coef[icharge].Vr);
+		};
+
+		PP_Coef<T, dev>* VR(const int &charge)
+		{
+			int icharge = charge_to_idx(charge);
+			return &(coef[icharge].VR);
+		};
+
+		int Z; 										// Atomic number
+		T m; 										// Atomic mass
+		int A; 										// Mass number
+		T rn_e; 									// Experimental Nuclear radius
+		T rn_c; 									// Calculated Nuclear radius
+		T ra_e; 									// Experimental atomic radius
+		T ra_c; 									// Calculated atomic radius
+
+		Vector<Atom_Coef<T, dev>, e_host> coef;		// atomic coefficients
 	};
 
 	/******************************Atom_Vp*******************************/
@@ -1496,21 +1890,22 @@ namespace multem
 		public:
 			using value_type = T;
 
+			int charge;
 			T x;
 			T y;
 			T z0h;
 			T zeh;
 			bool split;
 			T occ;
-			T R_min2;
-			T R_max2;
+			T R2_min;
+			T R2_max;
 			T *R2;
 			T *cl;
 			T *cnl;
-			T *c0;
-			T *c1;
-			T *c2;
 			T *c3;
+			T *c2;
+			T *c1;
+			T *c0;
 			int ix0;
 			int ixn;
 			int iy0;
@@ -1518,6 +1913,10 @@ namespace multem
 
 			int *iv;
 			T *v;
+
+			Atom_Vp(): charge(0), x(0), y(0), z0h(0), zeh(0), split(false), occ(1), R2_min(0), R2_max(0), 
+			R2(nullptr), cl(nullptr), cnl(nullptr), c3(nullptr), c2(nullptr), c1(nullptr), 
+			c0(nullptr), ix0(1), ixn(0), iy0(0), iyn(0), iv(nullptr), v(nullptr){}
 
 			inline
 			void set_ix0_ixn(const Grid<T> &grid, const T &R_max)
@@ -1540,143 +1939,261 @@ namespace multem
 				return gridBT;
 			}
 
-		private:
+	};
+
+	/******************************Atom_Ip*******************************/
+	template<class T>
+	struct Atom_Ip
+	{
+		public:
+			using value_type = T;
+
+			T x;
+			T y;
+			T R2_max;
+			T *R2;
+			T *c3;
+			T *c2;
+			T *c1;
+			T *c0;
+
+			int ix0;
+			int ixn;
+			int iy0;
+			int iyn;
+
+			int *iv;
+			T *v;
+
+			Atom_Ip(): x(0), y(0), R2_max(0), R2(nullptr), c3(nullptr), c2(nullptr), c1(nullptr), 
+			c0(nullptr), ix0(1), ixn(0), iy0(0), iyn(0), iv(nullptr), v(nullptr){}
+
 			inline
-			void get_bn(const T &R, const int &nR, const T &dR, const T &R_max, const bool &pbc, int &iR0, int &iRn)
+			void set_ix0_ixn(const Grid<T> &grid, const T &R_max)
 			{
-				int iR_0 = static_cast<int>(floor((R-R_max)/dR));
-				int iR_e = static_cast<int>(ceil((R+R_max)/dR));
+				get_bn(x, grid.nx, grid.dRx, R_max, grid.pbc_xy, ix0, ixn);
+			}
 
-				if(!pbc)
-				{
-					auto set_Bound = [](const int &i, const int &n)->int{ return (i<0)?0:((i>=n)?n-1:i); };
-					iR_0 = set_Bound(iR_0, nR);
-					iR_e = set_Bound(iR_e, nR);
-				}
+			inline
+			void set_iy0_iyn(const Grid<T> &grid, const T &R_max)
+			{
+				get_bn(y, grid.ny, grid.dRy, R_max, grid.pbc_xy, iy0, iyn);
+			}
 
-				iR0 = iR_0;
-				iRn = (iR_0 == iR_e)?0:iR_e-iR_0+1;
-			};
+			inline
+			GridBT get_eval_cubic_poly_gridBT()
+			{
+				GridBT gridBT;
+				gridBT.Blk = dim3((iyn+c_thrnxny-1)/c_thrnxny, (ixn+c_thrnxny-1)/c_thrnxny);
+				gridBT.Thr = dim3(c_thrnxny, c_thrnxny);
+				return gridBT;
+			}
 	};
 
 	/******************************Scanning******************************/
 	template<class T>
 	struct Scanning
 	{
-		using value_type = T;
-		using size_type = std::size_t;
+		public:
+			using value_type = T;
+			using size_type = std::size_t;
 
-		eScanning_Type type;			// 1: Line, 2: Area, 
-		int ns; 						// Sampling points
-		int nx;
-		int ny;
-		T x0; 							// Initial scanning position in x
-		T y0; 							// Initial scanning in y
-		T xe; 							// final scanning position in x
-		T ye; 							// final scanning position in y
-		T dRx;
-		T dRy;
+			eScanning_Type type;			// 1: Line, 2: Area, 
+			eGrid_Type grid_type;			// 1: regular, 2: quadratic
+			int ns; 						// Sampling points
+			int nx;
+			int ny;
+			T x0; 							// Initial scanning position in x
+			T y0; 							// Initial scanning in y
+			T xe; 							// final scanning position in x
+			T ye; 							// final scanning position in y
+			T dRx;
+			T dRy;
 
-		Vector<T, e_host> x;
-		Vector<T, e_host> y;
+			Vector<T, e_host> x;
+			Vector<T, e_host> y;
+			Vector<T, e_host> r;
 
-		size_type size() const
-		{
-			return x.size();
-		}
-
-		Scanning():type(eST_Line), ns(1), nx(0), dRx(0), dRy(0),
-			ny(0), x0(0), y0(0), xe(0), ye(0){};
-
-		void set_default()
-		{
-			type = eST_Line;
-			ns = 1;
-			x0 = y0 = 0;
-			xe = ye = 0;
-		}
-
-		int nxy() const { return nx*ny; }
-
-		T Rx(const int &ix) const { return x0 + ix*dRx; }
-
-		T Ry(const int &iy) const { return y0 + iy*dRy; }
-
-		void set_grid()
-		{
-			if(ns <= 0)
+			size_type size() const
 			{
-				ns = nx = ny = 0;
-				x.clear();
-				y.clear();
-				return;
+				return x.size();
 			}
 
-			nx = ny = ns;
-			if(is_line())
+			Scanning(): type(eST_Line), grid_type(eGT_Regular), ns(1), nx(0), dRx(0), dRy(0), 
+				ny(0), x0(0), y0(0), xe(0), ye(0){};
+
+			template<class TScanning> 
+			void assign(TScanning &scanning)
 			{
-				T xu = xe-x0;
-				T yu = ye-y0;
-				T ds = sqrt(yu*yu+xu*xu)/ns;
-				T theta = atan2(yu, xu);
-				T cos_theta = cos(theta);
-				T sin_theta = sin(theta);
+				type = scanning.type;
+				grid_type = scanning.grid_type;
+				ns = scanning.ns;
+				nx = scanning.nx;
+				ny = scanning.ny;
+				x0 = scanning.x0;
+				y0 = scanning.y0;
+				xe = scanning.xe;
+				ye = scanning.ye;
+				dRx = scanning.dRx;
+				dRy = scanning.dRy;
 
-				dRx = ds*cos_theta;
-				dRy = ds*sin_theta;
+				x = scanning.x;
+				y = scanning.y;
+				r = scanning.r;
+			}
 
-				x.resize(ns);
-				y.resize(ns);
+			template<class TScanning> 
+			Scanning<T>& operator=(TScanning &scanning)
+			{
+				assign(scanning);
+				return *this; 
+			}
 
-				for(auto i=0; i < ns; i++)
+			void set_default()
+			{
+				type = eST_Line;
+				grid_type = eGT_Regular;
+				ns = 1;
+				x0 = y0 = 0;
+				xe = ye = 0;
+			}
+
+			int nxy() const { return nx*ny; }
+
+			T Rx(const int &ix) const 
+			{ 
+				T x = 0;
+				switch (grid_type)
 				{
-					x[i] = Rx(i);
-					y[i] = Ry(i);
+					case eGT_Regular:
+					{
+						x = x0 + ix*dRx;
+					}
+					break;
+					case eGT_Quadratic:
+					{
+						x = x0 + pow(ix*dRx, 2);
+					}
+					break;
 				}
+				return x; 
 			}
-			else
-			{
-				T xu = xe-x0;
-				T yu = ye-y0;
-				if(fabs(xu)>fabs(yu))
+
+			T Ry(const int &iy) const
+			{ 
+				T y = 0;
+				switch (grid_type)
 				{
-					dRx = xu/ns;
-					dRy = std::copysign(dRx, yu);
-					ny = int(floor(yu/dRy+Epsilon<T>::rel+0.5));
+					case eGT_Regular:
+					{
+						y = y0 + iy*dRy;
+					}
+					break;
+					case eGT_Quadratic:
+					{
+						y = y0 + pow(iy*dRy, 2);
+					}
+					break;
+				}
+				return y; 
+			}
+
+			void set_grid()
+			{
+				if(ns <= 0)
+				{
+					ns = nx = ny = 0;
+					x.clear();
+					y.clear();
+					r.clear();
+					return;
+				}
+
+				nx = ny = ns;
+				if(is_line())
+				{
+					T xu = xe-x0;
+					T yu = ye-y0;
+					T ds = sqrt(yu*yu+xu*xu);
+					T theta = atan2(yu, xu);
+					T cos_theta = cos(theta);
+					cos_theta = (isZero(cos_theta))?0:cos_theta;
+					T sin_theta = sin(theta);
+					theta = (isZero(theta))?0:theta;
+
+					switch (grid_type)
+					{
+						case eGT_Regular:
+						{
+							dRx = ds*cos_theta/ns;
+							dRy = ds*sin_theta/ns;
+						}
+						break;
+						case eGT_Quadratic:
+						{
+							dRx = sqrt(ds*cos_theta)/ns;
+							dRy = sqrt(ds*sin_theta)/ns;
+						}
+						break;
+					}
+
+					x.resize(ns);
+					y.resize(ns);
+					r.resize(ns);
+
+					for(auto i = 0; i < ns; i++)
+					{
+						x[i] = Rx(i);
+						y[i] = Ry(i);
+						r[i] = sqrt(pow(x[i]-x0, 2)+pow(y[i]-y0, 2));
+					}
 				}
 				else
 				{
-					dRy = yu/ns;
-					dRx = std::copysign(dRy, xu);
-					nx = int(floor(xu/dRx+Epsilon<T>::rel+0.5));
-				}
-
-				x.resize(nxy());
-				y.resize(nxy());
-
-				for(auto ix=0; ix<nx; ix++)
-				{
-					for(auto iy=0; iy<ny; iy++)
+					T xu = xe-x0;
+					T yu = ye-y0;
+					if(fabs(xu)>fabs(yu))
 					{
-						x[ix*ny+iy] = Rx(ix);
-						y[ix*ny+iy] = Ry(iy);
+						dRx = xu/ns;
+						dRy = std::copysign(dRx, yu);
+						ny = int(floor(yu/dRy+Epsilon<T>::rel+0.5));
+					}
+					else
+					{
+						dRy = yu/ns;
+						dRx = std::copysign(dRy, xu);
+						nx = int(floor(xu/dRx+Epsilon<T>::rel+0.5));
+					}
+
+					x.resize(nxy());
+					y.resize(nxy());
+
+					for(auto ix =0; ix<nx; ix++)
+					{
+						for(auto iy =0; iy<ny; iy++)
+						{
+							x[ix*ny+iy] = Rx(ix);
+							y[ix*ny+iy] = Ry(iy);
+						}
 					}
 				}
+
+				x.shrink_to_fit();
+				y.shrink_to_fit();
+				r.shrink_to_fit();
 			}
 
-			x.shrink_to_fit();
-			y.shrink_to_fit();
-		}
+			bool is_line() const
+			{
+				return type == eST_Line;
+			}
 
-		bool is_line() const
-		{
-			return type == eST_Line;
-		}
+			bool is_area() const
+			{
+				return type == eST_Area;
+			}
 
-		bool is_area() const
-		{
-			return type == eST_Area;
-		}
+		private:
 	};
 
 	/********************Radial Schrodinger equation*********************/
@@ -1700,7 +2217,7 @@ namespace multem
 		double total_memory_size;		// Mb
 		double free_memory_size;		// Mb
 
-		Device_Properties():id(0), name(""), compute_capability(0), 
+		Device_Properties(): id(0), name(""), compute_capability(0), 
 			total_memory_size(0), free_memory_size(0){}
 	};
 

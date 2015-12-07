@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'get_sigma.cpp', '../src');
+MEX('release', 'il_sigma.cpp', '../src');

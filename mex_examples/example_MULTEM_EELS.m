@@ -22,7 +22,7 @@ input_multislice.fp_seed = 300183;
 input_multislice.fp_single_conf = 0;                % 1: true, 0:false
 input_multislice.fp_nconf = 5;
 
-input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
+input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 input_multislice.zero_defocus_plane = 0;
 
 input_multislice.bwl = 0;                           % Band-width limit, 1: true, 0:false
@@ -46,7 +46,7 @@ input_multislice.iw_psi = 0;                       % user define incident wave
 input_multislice.iw_x = input_multislice.lx/2;     % x position 
 input_multislice.iw_y = input_multislice.ly/2;     % y position
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% aberrations %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% lens aberrations %%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.lens_m = 0;            % vortex momentum
 input_multislice.lens_f = 88.7414;      %Angs
 input_multislice.lens_Cs3 = 0.04;       %mm
@@ -80,11 +80,11 @@ input_multislice.eels_m_selection = 3;        % selection rule
 input_multislice.eels_collection_angle = 20; % Collection half angle (mrad)
 input_multislice.eels_Z = 38;                  % atomic type
 
-clear MULTEM;
+clear il_MULTEM;
 tic;
-output_multislice = MULTEM(input_multislice); 
+output_multislice = il_MULTEM(input_multislice); 
 toc;
-clear MULTEM;
+clear il_MULTEM;
 
 figure(1);
 for i=1:length(output_multislice.data)
@@ -98,9 +98,9 @@ end;
 % cc = [1 0 1; 1 0 0; 0 0 1; 0 0 0];
 % for i=1:4
 %     input_multislice.eels_channelling_type = i;
-%     clear MULTEM;
+%     clear il_MULTEM;
 %     tic;
-%     [eels] = MULTEM(input_multislice); 
+%     [eels] = il_MULTEM(input_multislice); 
 %     toc;
 %     figure(1);
 %     hold on;

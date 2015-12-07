@@ -20,9 +20,9 @@ input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Pen
 input_multislice.fp_dim = 110; 
 input_multislice.fp_seed = 300183;
 input_multislice.fp_single_conf = 0;                % 1: true, 0:false
-input_multislice.fp_nconf = 5;
+input_multislice.fp_nconf = 20;
 
-input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
+input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 input_multislice.zero_defocus_plane = 0;
 
 input_multislice.input_wave_type = 1;               % eIWT_Automatic = 1, eIWT_User_Define = 2
@@ -34,7 +34,7 @@ input_multislice.E_0 = 300;                          % Acceleration Voltage (keV
 input_multislice.theta = 0.0;                       % Till ilumination (degrees)
 input_multislice.phi = 0.0;                         % Till ilumination (degrees)
 
-na = 4; nb = 4; nc = 20; ncu = 2; rms3d = 0.085;
+na = 8; nb = 8; nc = 20; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
@@ -44,12 +44,12 @@ input_multislice.nx = 1024;
 input_multislice.ny = 1024;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.iw_type = 1;                      % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define. (options 1 and 2 are only active for EWRS or EWFS)
-input_multislice.iw_psi = 0;                       % user define incident wave
+input_multislice.iw_type = 1;   % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define(options 1 and 2 are only active for EWRS or EWFS)
+input_multislice.iw_psi = read_psi_0_multem(input_multislice.nx, input_multislice.ny);    % user define incident wave
 input_multislice.iw_x = input_multislice.lx/2;     % x position 
 input_multislice.iw_y = input_multislice.ly/2;     % y position
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% aberrations %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% lens aberrations %%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.lens_m = 0;        % vortex momentum
 input_multislice.lens_f = 1110;     %Angs
 input_multislice.lens_Cs3 = 3.3;	%mm
@@ -68,9 +68,9 @@ input_multislice.lens_nbeta = 10; %(mrad, half number of steps)
 input_multislice.thickness_type = 2;             % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 input_multislice.thickness = 0:c:1000;           % Array of thicknesses
 
-clear MULTEM;
+clear il_MULTEM;
 tic;
-output_multislice = MULTEM(input_multislice); 
+output_multislice = il_MULTEM(input_multislice); 
 toc;
 
 figure(1);

@@ -8,7 +8,7 @@ ya = exp(-alpha*rlh.^2);
 
 rlhn = (0:1.0:(nh-1))*dr;
 tic;
-[x, f, cf] = get_radial_distribution_2D(R, G2d, rlhn, typ);
+[x, f, cf] = il_radial_distribution_2D(R, G2d, rlhn, typ);
 toc;
 figure(1);
 subplot(1, 2,1 );

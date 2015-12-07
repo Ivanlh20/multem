@@ -36,28 +36,28 @@ na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
 % input_multislice.ly = 8.0; 
 % input_multislice.dz = 0.5;
 
-input_multislice.nx = 1024; 
-input_multislice.ny = 1024;
+input_multislice.nx = 2048; 
+input_multislice.ny = 2048;
 
-clear get_specimen_slicing;
-[atoms, Slice] = get_specimen_slicing(input_multislice);
+clear il_specimen_slicing;
+[atoms, Slice] = il_specimen_slicing(input_multislice);
 
 [natoms,~] = size(atoms); [nslice, ~] = size(Slice);
 for islice = 1:nslice
     input_multislice.islice = islice;
     
     input_multislice.device = 1;                        % eD_CPU = 1, eD_GPU = 2
-    input_multislice.precision = 2;                     % eP_Float = 1, eP_double = 2
+    input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
     tic;
-    clear get_transmission_function;
-    ouput_multislice_1 = get_transmission_function(input_multislice);
+%     clear il_transmission_function;
+    ouput_multislice_1 = il_transmission_function(input_multislice);
     toc;
     
-    input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+    input_multislice.device = 1;                        % eD_CPU = 1, eD_GPU = 2
     input_multislice.precision = 2;                     % eP_Float = 1, eP_double = 2
     tic;
-    clear get_transmission_function;
-    ouput_multislice_2 = get_transmission_function(input_multislice);
+%     clear il_transmission_function;
+    ouput_multislice_2 = il_transmission_function(input_multislice);
     toc;
     sum(abs(ouput_multislice_1.trans(:)-ouput_multislice_2.trans(:))/(input_multislice.nx*input_multislice.ny))
     

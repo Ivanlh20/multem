@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('debug', 'get_fxeg_tabulated_data.cpp', '../src');
+MEX('debug', 'il_fxeg_tabulated_data.cpp', '../src');

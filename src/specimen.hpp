@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef SPECIMEN_H
@@ -24,26 +24,25 @@
 
 #include "math.cuh"
 #include "types.cuh"
+#include "r3d.cuh"
 #include "atomic_data.hpp"
 #include "atom_data.hpp"
 #include "input_multislice.cuh"
 #include "host_device_functions.cuh"
 #include "host_functions.hpp"
-#include "device_functions.cuh"
 
 namespace multem
 {
-	template<class T, eDevice dev>
-	class Specimen{
+	template<class T>
+	class Specimen
+	{
 		public:
 			using value_type_r = T;
 			using size_type = std::size_t;
 
-			static const eDevice device = dev;
+			Specimen(): input_multislice(nullptr){}
 
-			Specimen():input_multislice(nullptr){}
-
-			void set_input_data(Input_Multislice<T, dev> *input_multislice_i)
+			void set_input_data(Input_Multislice<T> *input_multislice_i)
 			{
 				input_multislice = input_multislice_i;
 
@@ -52,7 +51,7 @@ namespace multem
 				atomic_data.Load_Data(input_multislice->potential_type);
 
 				atom_type.resize(c_nAtomsTypes); 
-				for(auto i=0; i<atom_type.size(); i++)
+				for(auto i = 0; i<atom_type.size(); i++)
 				{
 					atomic_data.To_atom_type_CPU(i+1, input_multislice->Vrl, input_multislice->nR, input_multislice->grid.dR_min(), atom_type[i]);
 				}
@@ -67,7 +66,7 @@ namespace multem
 				atoms_u.get_z_layer();
 
 				/***************************************************************************/
-				if((atoms_u.s_z_Int < 2.0*input_multislice->grid.dz) || ((atoms_u.z_layer.size()==1) && input_multislice->is_slicing_by_planes()))
+				if((atoms_u.s_z_Int < 2.0*input_multislice->grid.dz) || ((atoms_u.z_layer.size() == 1) && input_multislice->is_slicing_by_planes()))
 				{
 					input_multislice->grid.dz = atoms_u.s_z_Int;
 					input_multislice->interaction_model = eESIM_Phase_Object;
@@ -83,14 +82,11 @@ namespace multem
 				atoms.set_Atoms(atoms_u, false, &atom_type);
 
 				/***************************************************************************/
-				get_slicing(slice);
-
-				/***************************************************************************/
 				rand.set_input_data(input_multislice->fp_seed, input_multislice->fp_dim);
 			}
 
-			/* Move atoms (ramdom distribution will be included in the future) */
-			void move_atoms(const int &fp_iconf, const int &tm_irot=0)
+			/* Move atoms (random distribution will be included in the future) */
+			void move_atoms(const int &fp_iconf)
 			{
 				// set configuration
 				if(input_multislice->is_frozen_phonon())
@@ -101,30 +97,26 @@ namespace multem
 				Vector<T, e_host> Rm;
 				if(input_multislice->is_tomography())
 				{
-					Rm = get_rotation_matrix(input_multislice->get_tm_rot_angle(tm_irot), input_multislice->tm_u0);
+					Rm = get_rotation_matrix(input_multislice->tm_theta, input_multislice->tm_u0);
 				}
 				// Move atoms
 				for(int iatoms = 0; iatoms<atoms_u.size(); iatoms++)
 				{
 					atoms.Z[iatoms] = atoms_u.Z[iatoms];
-					T x = atoms_u.x[iatoms];
-					T y = atoms_u.y[iatoms];
-					T z = atoms_u.z[iatoms];
+					r3d<T> r = atoms_u.to_r3d(iatoms);
 
 					if(input_multislice->is_tomography())
 					{
-						rotate_position(Rm, input_multislice->tm_p0, x, y, z);
+						r = r.rotate(Rm, input_multislice->tm_p0);
 					}
 
 					if(input_multislice->is_frozen_phonon())
 					{
-						x += rand.dx(atoms_u.sigma[iatoms]);
-						y += rand.dy(atoms_u.sigma[iatoms]);
-						z += rand.dz(atoms_u.sigma[iatoms]);
+						r += rand.dr(atoms_u.sigma[iatoms], atoms_u.sigma[iatoms], atoms_u.sigma[iatoms]);
 					}
-					atoms.x[iatoms] = x;
-					atoms.y[iatoms] = y;
-					atoms.z[iatoms] = z;
+					atoms.x[iatoms] = r.x;
+					atoms.y[iatoms] = r.y;
+					atoms.z[iatoms] = r.z;
 					atoms.sigma[iatoms] = atoms_u.sigma[iatoms];
 					atoms.occ[iatoms] = atoms_u.occ[iatoms];
 				}
@@ -151,9 +143,9 @@ namespace multem
 				return &atom_type;
 			}
 
-			//int IsInThickness(int islice);
+			// int IsInThickness(int islice);
 
-			Input_Multislice<T, dev> *input_multislice; 			
+			Input_Multislice<T> *input_multislice; 			
 
 			Vector<Atom_Type<T, e_host>, e_host> atom_type;		// Atom types
 			Atom_Data<T> atoms; 								// displaced atoms
@@ -166,49 +158,63 @@ namespace multem
 			{
 				auto get_zero_defocus_plane = [&](const T &z_min, const T &z_max)->T
 				{
-					T zero_defocus_plane;
+					T defocus_plane = 0;
 					switch(input_multislice->zero_defocus_type)
 					{
 						case eZDT_First:
 						{
-							zero_defocus_plane = z_min;
+							defocus_plane = z_min;
 						}
 						break;
 						case eZDT_Middle:
 						{
-							zero_defocus_plane = 0.5*(z_min + z_max);
+							defocus_plane = 0.5*(z_min + z_max);
 						}
 						break;
 						case eZDT_Last:
 						{
-							zero_defocus_plane = z_max;
+							defocus_plane = z_max;
 						}
 						break;
 						default:
 						{
-							zero_defocus_plane = input_multislice->zero_defocus_plane;
+							defocus_plane = input_multislice->zero_defocus_plane;
 						}
 					}
-					return zero_defocus_plane;
+					return defocus_plane;
 				};
 
-				auto get_islice = [](const Vector<T, e_host> &z_slice, const T &z)->int
+				auto get_islice = [&](const Vector<T, e_host> &z_slice, const T &z)->int
 				{
-					for(auto i=0; i<z_slice.size()-1; i++)
+					if(input_multislice->is_through_slices())
 					{
-						if((z_slice[i] < z)&&(z <= z_slice[i+1]))
+						for(auto i = 0; i<z_slice.size()-1; i++)
 						{
-							return i;
+							if(fabs(z_slice[i+1]-z)<Epsilon<float>::rel)
+							{
+								return i;
+							}
 						}
+						return 0;
 					}
-					return 0;
+					else
+					{
+						for(auto i = 0; i<z_slice.size()-1; i++)
+						{
+							if((z_slice[i] < z)&&(z <= z_slice[i+1]))
+							{
+								return i;
+							}
+						}
+						return 0;
+					}
 				};
 
-				auto b_sub_whole = input_multislice->is_subslicing_whole_specimen();
+				auto b_sws = input_multislice->is_subslicing_whole_specimen();
 
-				for(auto i=0; i<thickness.size(); i++)
+				for(auto i = 0; i<thickness.size(); i++)
 				{
-					auto islice = (b_sub_whole)?(z_slice.size()-2):get_islice(z_slice, thickness.z[i]);
+					auto islice = (b_sws)?(z_slice.size()-2):get_islice(z_slice, thickness.z[i]);
 					thickness.islice[i] = islice;
 
 					auto iatom_e = atoms_u.find_by_z(z_slice[islice+1], false);
@@ -222,7 +228,7 @@ namespace multem
 					else
 					{
 						thickness.z_back_prop[i] = thickness.z_zero_def_plane[i] - z_slice[islice+1];
-						if(abs(thickness.z_back_prop[i])<Epsilon<float>::rel)
+						if(fabs(thickness.z_back_prop[i])<Epsilon<float>::rel)
 						{
 							thickness.z_back_prop[i] = 0;
 						}
@@ -240,15 +246,15 @@ namespace multem
 					slice.resize(thickness.size());
 					std::fill(slice.ithk.begin(), slice.ithk.end(), -1);
 
-					for(auto islice=0; islice<slice.size(); islice++)
+					for(auto islice =0; islice<slice.size(); islice++)
 					{
 						thickness.islice[islice] = islice;
 						thickness.z_back_prop[islice] = thickness.z_zero_def_plane[islice] - thickness.z[islice];
-						slice.z_0[islice] = (islice==0)?atoms.z_Int_min:thickness.z[islice-1]; 
-						slice.z_e[islice] = (thickness.size()==1)?atoms.z_Int_max:thickness.z[islice];
+						slice.z_0[islice] = (islice == 0)?atoms.z_Int_min:thickness.z[islice-1]; 
+						slice.z_e[islice] = (thickness.size() == 1)?atoms.z_Int_max:thickness.z[islice];
 						slice.z_int_0[islice] = slice.z_0[islice];
 						slice.z_int_e[islice] = slice.z_e[islice];
-						slice.iatom_0[islice] = (islice==0)?0:thickness.iatom_e[islice-1]+1;
+						slice.iatom_0[islice] = (islice == 0)?0:thickness.iatom_e[islice-1]+1;
 						slice.iatom_e[islice] = thickness.iatom_e[islice];
 						slice.ithk[islice] = islice;
 					}
@@ -257,12 +263,11 @@ namespace multem
 
 				slice.resize(z_slice.size()-1);
 				std::fill(slice.ithk.begin(), slice.ithk.end(), -1);
-				for(auto ithk=0; ithk<thickness.size(); ithk++)
+				for(auto ithk =0; ithk<thickness.size(); ithk++)
 				{
 					slice.ithk[thickness.islice[ithk]] = ithk;
 				}
-
-				for(auto islice=0; islice<slice.size(); islice++)
+				for(auto islice =0; islice<slice.size(); islice++)
 				{
 					slice.z_0[islice] = z_slice[islice]; 
 					slice.z_e[islice] = z_slice[islice + 1];
@@ -278,18 +283,18 @@ namespace multem
 						break;
 						case ePS_dz_Proj:
 						{
-							slice.z_int_0[islice] = slice.z_0[islice] ;
-							slice.z_int_e[islice] = slice.z_e[islice] ;
+							slice.z_int_0[islice] = slice.z_0[islice];
+							slice.z_int_e[islice] = slice.z_e[islice];
 
 							atoms.find_by_z(slice.z_int_0[islice], slice.z_int_e[islice], slice.iatom_0[islice], slice.iatom_e[islice], false);
 						}
 						break;
 						case ePS_dz_Sub:
 						{
-							T zm = 0.5*(slice.z_0[islice]+ slice.z_e[islice]);
+							T zm = 0.5*(slice.z_0[islice] + slice.z_e[islice]);
 
-							slice.z_int_0[islice] = min(zm - atoms.R_Int_max, slice.z_0[islice]);
-							slice.z_int_e[islice] = max(zm + atoms.R_Int_max, slice.z_e[islice]);
+							slice.z_int_0[islice] = ::fmin(zm - atoms.R_Int_max, slice.z_0[islice]);
+							slice.z_int_e[islice] = ::fmax(zm + atoms.R_Int_max, slice.z_e[islice]);
 
 							atoms.find_by_z(slice.z_int_0[islice], slice.z_int_e[islice], slice.iatom_0[islice], slice.iatom_e[islice]);
 						}
@@ -312,7 +317,7 @@ namespace multem
 						gen_u.seed(fp_seed);
 						rand_u.reset();
 						unsigned int seed_x, seed_y, seed_z;
-						for(auto i=0; i<fp_iconf; i++)
+						for(auto i = 0; i<fp_iconf; i++)
 						{
 							seed_x = rand_u(gen_u);
 							seed_y = rand_u(gen_u);
@@ -342,6 +347,12 @@ namespace multem
 					{
 						return (fp_dim.z)?sigma*randn_z(gen_z):0.0;
 					}
+
+					r3d<T> dr(const T &sigma_x, const T &sigma_y, const T &sigma_z)
+					{
+						return r3d<T>(dx(sigma_x), dy(sigma_y), dz(sigma_z));
+					}
+
 				private:
 					int fp_seed;
 					FP_Dim fp_dim;
@@ -353,10 +364,10 @@ namespace multem
 					std::normal_distribution<T> randn_x;
 					std::normal_distribution<T> randn_y;
 					std::normal_distribution<T> randn_z;
-					//std::uniform_int_distribution<int> rand_u(0);
-					//std::normal_distribution<T> randn_x(0.0, 1.0);
-					//std::normal_distribution<T> randn_y(0.0, 1.0);
-					//std::normal_distribution<T> randn_z(0.0, 1.0);
+					// std::uniform_int_distribution<int> rand_u(0);
+					// std::normal_distribution<T> randn_x(0.0, 1.0);
+					// std::normal_distribution<T> randn_y(0.0, 1.0);
+					// std::normal_distribution<T> randn_z(0.0, 1.0);
 			};
 
 			Random rand;

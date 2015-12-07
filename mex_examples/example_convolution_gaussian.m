@@ -1,8 +1,8 @@
 clc; clear all;
 
 % A = double(rgb2gray(imread('ngc6543a.jpg')));
-nx = 512;
-lx = 15;
+nx = 1024;
+lx = 20;
 lxh = lx/2;
 dx = lx/nx;
 d = 4;
@@ -25,9 +25,9 @@ colormap gray;
 
 dRx = dx;
 dRy = dx;
-sigma = 4;
+sigma = 2.0;
 tic;
-Ab = get_convolution_gaussian(A0, dRx, dRy, sigma);
+Ab = il_convolution_gaussian(A0, dRx, dRy, sigma);
 toc;
 subplot(1, 2, 2)
 imagesc(Ab);
@@ -38,7 +38,7 @@ colormap gray;
 % dRy = 1;
 % sigma = 5;
 % tic;
-% Ab = get_convolution_gaussian(A, dRx, dRy, sigma);
+% Ab = il_convolution_gaussian(A, dRx, dRy, sigma);
 % toc;
 % 
 % figure(1);

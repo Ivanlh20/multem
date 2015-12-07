@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef ATOM_CAL_H
@@ -33,23 +33,30 @@ namespace multem
 		public:
 			using value_type = T;
 
-			Atom_Cal():potential_type(ePT_Lobato_0_12), atom_type(nullptr)
+			Atom_Cal(): potential_type(ePT_Lobato_0_12), charge(0), atom_type(nullptr), 
+			pr_feg(nullptr), pr_fxg(nullptr), pr_Pr(nullptr), pr_Vr(nullptr), pr_VR(nullptr)
 			{
 				Quadrature quadrature;
 				quadrature.get(0, c_nqz, Qz_a_b); 	// 0: int_-1^1 y(x) dx - TanhSinh quadrature
 				quadrature.get(1, c_nqz, Qz_0_I); 	// 1: int_0^infty y(x) dx - ExpSinh quadrature
 			}
 
-			void Set_Atom_Type(const ePotential_Type &PotPar_i, Atom_Type<T, e_host> *atom_type_CPU_i)
+			void Set_Atom_Type(const ePotential_Type &PotPar_i, const int &charge_i, Atom_Type<T, e_host> *atom_type_CPU_i)
 			{
 				potential_type = PotPar_i;
+				charge = atom_type_CPU_i->check_charge(charge_i);
 				atom_type = atom_type_CPU_i;
+				pr_feg = atom_type->feg(charge);
+				pr_fxg = atom_type->fxg(charge);
+				pr_Pr = atom_type->Pr(charge);
+				pr_Vr = atom_type->Vr(charge);
+				pr_VR = atom_type->VR(charge);
 			}
 
 			// Electron scattering factors calculation (feg)
 			inline void feg(const T &g, T &y)
 			{
-				multem::feg<T>(potential_type, g, atom_type->feg, y);
+				multem::feg<T>(potential_type, charge, g, *pr_feg, y);
 			}
 
 			void feg(const int &ng, T *g, T *y)
@@ -63,7 +70,7 @@ namespace multem
 			// Electron scattering factor(feg, dfeg) where dfg is the first derivative along g
 			inline void feg_dfeg(const T &g, T &y, T &dy)
 			{
-				multem::feg_dfeg<T>(potential_type, g, atom_type->feg, y, dy);
+				multem::feg_dfeg<T>(potential_type, charge, g, *pr_feg, y, dy);
 			}
 
 			void feg_dfeg(const int &ng, T *g, T *y, T *dy)
@@ -77,7 +84,7 @@ namespace multem
 			// Electron scattering factor(fg)
 			inline void fxg(const T &g, T &y)
 			{
-				multem::fxg<T>(potential_type, g, atom_type->Z, atom_type->fxg, y);
+				multem::fxg<T>(potential_type, charge, atom_type->Z, g, *pr_fxg, y);
 			}
 
 			void fxg(const int &ng, T *g, T *y)
@@ -91,7 +98,7 @@ namespace multem
 			// Electron scattering factor(fg, dfg) where dfg is the first derivative along g
 			inline void fxg_dfxg(const T &g, T &y, T &dy)
 			{
-				multem::fxg_dfxg<T>(potential_type, g, atom_type->Z, atom_type->fxg, y, dy);
+				multem::fxg_dfxg<T>(potential_type, charge, atom_type->Z, g, *pr_fxg, y, dy);
 			}
 
 			void fxg_dfxg(const int &ng, T *g, T *y, T *dy)
@@ -105,7 +112,7 @@ namespace multem
 			// Electron density (Pr)
 			inline void Pr(const T &r, T &y)
 			{
-				multem::Pr<T>(potential_type, r, atom_type->Pr, y);
+				multem::Pr<T>(potential_type, charge, r, *pr_Pr, y);
 			}
 
 			void Pr(const int &nr, T *r, T *y)
@@ -119,7 +126,7 @@ namespace multem
 			// Electron density (Pr, dPr) where dPr is the first derivative along r
 			inline void Pr_dPr(const T &r, T &y, T &dy)
 			{
-				multem::Pr_dPr<T>(potential_type, r, atom_type->Pr, y, dy);
+				multem::Pr_dPr<T>(potential_type, charge, r, *pr_Pr, y, dy);
 			}
 
 			void Pr_dPr(const int &nr, T *r, T *y, T *dy)
@@ -130,10 +137,10 @@ namespace multem
 				}
 			}
 
-			// Potential calculation(Vr)
+			// Projected_Potential calculation(Vr)
 			inline void Vr(const T &r, T &y)
 			{
-				multem::Vr<T>(potential_type, r, atom_type->Vr, y);
+				multem::Vr<T>(potential_type, charge, r, *pr_Vr, y);
 			}
 
 			void Vr(const int &nr, T *r, T *y)
@@ -144,10 +151,10 @@ namespace multem
 				}
 			}
 
-			// Potential calculation (Vr, dVr) where dVr is the first derivative along r
+			// Projected_Potential calculation (Vr, dVr) where dVr is the first derivative along r
 			inline void Vr_dVr(const T &r, T &y, T &dy)
 			{
-				multem::Vr_dVr<T>(potential_type, r, atom_type->Vr, y, dy);
+				multem::Vr_dVr<T>(potential_type, charge, r, *pr_Vr, y, dy);
 			}
 
 			void Vr_dVr(const int &nr, T *r, T *y, T *dy)
@@ -161,7 +168,7 @@ namespace multem
 			// Projected potential (VR)
 			inline void VR(const T &R, T &y)
 			{
-				multem::VR<T>(potential_type, R, atom_type->VR, Qz_0_I, y);
+				multem::VR<T>(potential_type, charge, R, *pr_VR, Qz_0_I, y);
 			}
 
 			void VR(const int &nR, T *R, T *y)
@@ -175,7 +182,7 @@ namespace multem
 			// Projected potential (VR, dVR) where dVr is the first derivative along R
 			inline void VR_dVR(const T &R, T &y, T &dy)
 			{
-				multem::VR_dVR<T>(potential_type, R, atom_type->VR, Qz_0_I, y, dy);
+				multem::VR_dVR<T>(potential_type, charge, R, *pr_VR, Qz_0_I, y, dy);
 			}
 
 			void VR_dVR(const int &nR, T *R, T *y, T *dy)
@@ -189,7 +196,7 @@ namespace multem
 			// Projected potential (Vz)[z0, ze]
 			inline void Vz(const T &z0, const T &ze, const T &R, T &y)
 			{
-				multem::Vz<T>(potential_type, z0, ze, R, atom_type->Vr, Qz_a_b, y);
+				multem::Vz<T>(potential_type, charge, z0, ze, R, *pr_Vr, Qz_a_b, y);
 			}
 
 			void Vz(const T &z0, const T &ze, const int &nR, T *R, T *y)
@@ -203,7 +210,7 @@ namespace multem
 			// Projected potential (Vz, dVz)[z0, ze] where dVr is the first derivative along R
 			inline void Vz_dVz(const T &z0, const T &ze, const T &R, T &y, T &dy)
 			{
-				multem::Vz_dVz<T>(potential_type, z0, ze, R, atom_type->Vr, Qz_a_b, y, dy);
+				multem::Vz_dVz<T>(potential_type, charge, z0, ze, R, *pr_Vr, Qz_a_b, y, dy);
 			}
 
 			void Vz_dVz(const T &z0, const T &ze, const int &nR, T *R, T *y, T *dy)
@@ -217,7 +224,7 @@ namespace multem
 			T AtomicRadius_rms(const int &Dim)
 			{
 		
-				if(isZero(atom_type->Vr.cl[0]))
+				if(isZero(pr_Vr->cl[0]))
 				{
 					return 0.0;
 				}
@@ -257,7 +264,7 @@ namespace multem
 
 			T AtomicRadius_Cutoff(const int &Dim, const T &Vrl)
 			{
-				if(!nonZero(Vrl, atom_type->Vr.cl[0]))
+				if(!nonZero(Vrl, pr_Vr->cl[0]))
 				{
 					return 0;
 				}
@@ -286,7 +293,15 @@ namespace multem
 
 		private:
 			ePotential_Type potential_type;
+			int charge;
+
 			Atom_Type<T, e_host> *atom_type;
+			PP_Coef<T, e_host>	*pr_feg;
+			PP_Coef<T, e_host>	*pr_fxg;
+			PP_Coef<T, e_host>	*pr_Pr;
+			PP_Coef<T, e_host>	*pr_Vr;
+			PP_Coef<T, e_host>	*pr_VR;
+
 			Q1<T, e_host> Qz_a_b;
 			Q1<T, e_host> Qz_0_I;
 	};

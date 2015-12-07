@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef ENERGY_LOSS_H
@@ -36,7 +36,7 @@ namespace multem
 			using value_type_r = T;
 			using value_type_c = complex<T>;
 
-			void set_input_data(Input_Multislice<value_type_r, dev> *input_multislice_i, Stream<dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
+			void set_input_data(Input_Multislice<value_type_r> *input_multislice_i, Stream<dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
 			{
 				input_multislice = input_multislice_i;
 				stream = stream_i;
@@ -51,7 +51,7 @@ namespace multem
 					kernel.resize(1);
 				}
 
-				for(auto ikn=0; ikn<kernel.size(); ikn++)
+				for(auto ikn =0; ikn<kernel.size(); ikn++)
 				{
 					kernel[ikn].resize(input_multislice->grid.nxy());
 				}
@@ -88,7 +88,7 @@ namespace multem
 
 			Vector<Vector<value_type_c, dev>, e_host> kernel;
 		private:
-			Input_Multislice<value_type_r, dev> *input_multislice;
+			Input_Multislice<value_type_r> *input_multislice;
 			Stream<dev> *stream;
 			FFT2<value_type_r, dev> *fft2;
 	};

@@ -10,10 +10,7 @@ input_multislice.fp_seed = 300183;
 input_multislice.fp_nconf = 1;
 
 input_multislice.tm_active = 0;						% 1: true, 0:false
-input_multislice.tm_nrot = 10; 						% number of rotations
-input_multislice.tm_irot = 1;						% specific rotation configuration
-input_multislice.tm_theta_0 = -10; 					% initial angle
-input_multislice.tm_theta_e = +10; 					% final angle
+input_multislice.tm_theta = 10; 					% final angle
 input_multislice.tm_u0 = [0 1 1]; 					% unitary vector			
 input_multislice.tm_rot_point_type = 1; 			% 1: geometric center, 2: User define		
 input_multislice.tm_p0 = [0 0 0];					% rotation point
@@ -27,20 +24,20 @@ na = 4; nb = 4; nc = 10; ncu = 4; rms3d = 0.08;
 % get specimen slicing
 tic;
 input_multislice.phonon_model = 1;
-[atoms0, Slice0] = get_specimen_slicing(input_multislice);
+[atoms0, Slice0] = il_specimen_slicing(input_multislice);
 toc;
 
 [nslice0, ~] = size(Slice0);
 
 tic;
 input_multislice.phonon_model = 3;
-[atoms, Slice] = get_specimen_slicing(input_multislice);
+[atoms, Slice] = il_specimen_slicing(input_multislice);
 toc;
 
 [nslice, ~] = size(Slice);
 
 figure(1); clf;
-plot(atoms(:, 2), atoms(:, 4), '*k');   
+plot(atoms(:, 3), atoms(:, 5), '*k');   
 set(gca,'FontSize',12,'LineWidth',1,'PlotBoxAspectRatio',[1.25 1 1]);
 title('Atomic positions');
 ylabel('y','FontSize',14);

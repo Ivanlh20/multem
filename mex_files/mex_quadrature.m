@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'get_quadrature.cpp', '../src');
+MEX('release', 'il_quadrature.cpp', '../src');

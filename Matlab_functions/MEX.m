@@ -12,24 +12,26 @@ else
 end;
 
 if(ispc)
-    FFTW_LIB = ['-L' path];
-    FFTW_LIB = [FFTW_LIB ' -lfftw3f -lfftw3'];
+    FFTW_LIB = ['-L' path ' -lfftw3f -lfftw3'];
+    LAPACK_LIB = ['-L' path ' -lblas -llapack'];
 elseif(ismac)
     FFTW_LIB = ' -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';
+    LAPACK_LIB = ' -lblas -llapack';
 else
-    FFTW_LIB = '-L/opt/local/lib'; %scientific linux
-    FFTW_LIB = [FFTW_LIB ' -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads'];    
+    %scientific linux
+    FFTW_LIB = '-L/opt/local/lib -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';  
+    LAPACK_LIB = '-L/opt/local/lib -lblas -llapack';
 end;
 
 ADD_INC = strcat('-I', path);
 OUTDIR = strcat('..', filesep, 'mex_executables');
 
 if (strcmpi(option, 'debug'))
-    mex_comand = 'mex -v -g -largeArrayDims -outdir';
+    mex_comand = 'mex -g -largeArrayDims -outdir';
 else
-    mex_comand = 'mex -v -largeArrayDims -outdir';   
+    mex_comand = 'mex -largeArrayDims -outdir';   
 end;
 
-textcommands = strjoin({mex_comand, OUTDIR, ADD_INC, CUDA_INC, mfile, strjoin(varargin), FFTW_LIB});  
+textcommands = strjoin({mex_comand, OUTDIR, ADD_INC, CUDA_INC, mfile, strjoin(varargin), LAPACK_LIB, FFTW_LIB});  
 disp(textcommands);
 eval(textcommands);

@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef FXEG_TABULATED_DATA_H
@@ -24507,7 +24507,7 @@ class fxeg_Tabulated_Data{
 					g[240] = 12.0000000000; fxg[240] = 6.2170000000; feg[240] = 0.0643000000;
 					break;
 			}
-			for(auto i=0; i < ng; i++)
+			for(auto i = 0; i < ng; i++)
 			{
 				g2[i] = g[i]*g[i];
 				if(i>0)

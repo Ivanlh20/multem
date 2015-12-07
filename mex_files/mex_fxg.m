@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'get_fxg.cpp', '../src');
+MEX('release', 'il_fxg.cpp', '../src');

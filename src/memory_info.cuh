@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef MEMORY_INFO_H
@@ -71,7 +71,7 @@ sysctl(mib, 2, &physicalMem, &returnSize, NULL, 0);
 task_t targetTask = mach_task_self();
 struct task_basic_info ti;
 mach_msg_type_number_t count = TASK_BASIC_INFO_64_COUNT;
-task_info(targetTask, TASK_BASIC_INFO_64,(task_info_t) &ti, &count);
+task_info(targetTask, TASK_BASIC_INFO_64, (task_info_t) &ti, &count);
 		free = ti.resident_size/(1048576.0);
 
 #else // unix
@@ -81,8 +81,8 @@ task_info(targetTask, TASK_BASIC_INFO_64,(task_info_t) &ti, &count);
 		totalPhysMem *= memInfo.mem_unit;
 		long long physMemFree = memInfo.freeram;
 		physMemFree *= memInfo.mem_unit;
-		free = static_cast<double>(physMemFree)/(1048576.0);	// check if division by 1MB=1048576 is necessary
-		total = static_cast<double>(totalPhysMem)/(1048576.0);	// check if division by 1MB=1048576 is necessary
+		free = static_cast<double>(physMemFree)/(1048576.0);	// check if division by 1MB =1048576 is necessary
+		total = static_cast<double>(totalPhysMem)/(1048576.0);	// check if division by 1MB =1048576 is necessary
 #endif
 	}
 

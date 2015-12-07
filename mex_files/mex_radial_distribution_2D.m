@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'get_radial_distribution_2D.cpp', '../src');
+MEX('release', 'il_radial_distribution_2D.cpp', '../src');

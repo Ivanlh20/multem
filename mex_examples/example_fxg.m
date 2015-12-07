@@ -1,17 +1,18 @@
 clear all;
 clc;
 Z = 79;
+charge = 1;
 
 gmin = 0; gmax = 20; ng = 512;
 dg = (gmax-gmin)/(ng-1); 
 g = gmin:dg:gmax;
 
-[f1, df1] = get_fxg(1, Z, g);
-[f2, df2] = get_fxg(2, Z, g);
-[f3, df3] = get_fxg(3, Z, g);
-[f4, df4] = get_fxg(4, Z, g);
-[f5, df5] = get_fxg(5, Z, g);
-[f6, df6] = get_fxg(6, Z, g);
+[f1, df1] = il_fxg(1, Z, charge, g);
+[f2, df2] = il_fxg(2, Z, charge, g);
+[f3, df3] = il_fxg(3, Z, charge, g);
+[f4, df4] = il_fxg(4, Z, charge, g);
+[f5, df5] = il_fxg(5, Z, charge, g);
+[f6, df6] = il_fxg(6, Z, charge, g);
 
 figure(1); clf;
 

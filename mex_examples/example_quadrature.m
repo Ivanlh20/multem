@@ -15,16 +15,16 @@ clear all; clc;
 QuadType = 1; nQuad = 128;
 
 % Load quadrature
-[xi, wi] = get_quadrature(QuadType, nQuad);
+[xi, wi] = il_quadrature(QuadType, nQuad);
 
 Z = 6; PotPar = 6; sigma = 0.0; IntTyp = 0; Dim = 3;
-[rhoi, ~] = get_Pr(6, Z, xi);
-[Vi, ~] = get_Vr(PotPar, Z, xi);
+[rhoi, ~] = il_Pr(6, Z, xi);
+[Vi, ~] = il_Vr(PotPar, Z, xi);
 % get volumen
 Volume1 = sum(4*pi*(xi.^2).*Vi.*wi);
 
 %first component of f_e(g)
 cPotf=47.877645145863056; g0 = 0.0;
-Volume2 = get_feg(6, Z, g0);
+Volume2 = il_feg(6, Z, g0);
 
 num2str([Volume1 cPotf*Volume2], 8)

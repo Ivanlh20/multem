@@ -1,16 +1,17 @@
 clear all; clc;
 
 Z = 79;
+charge = 0;
 
 rmin = 1e-05; rmax = 0.1; nr = 512;
 dlnr = log(rmax/rmin)/(nr-1); r = rmin*exp((0:1:(nr-1))*dlnr);
 
-[f1, df1] = get_Pr(1, Z, r); 
-[f2, df2] = get_Pr(2, Z, r);
-[f3, df3] = get_Pr(3, Z, r);
-[f4, df4] = get_Pr(4, Z, r);
-[f5, df5] = get_Pr(5, Z, r);
-[f6, df6] = get_Pr(6, Z, r);
+[f1, df1] = il_Pr(1, Z, charge, r); 
+[f2, df2] = il_Pr(2, Z, charge, r);
+[f3, df3] = il_Pr(3, Z, charge, r);
+[f4, df4] = il_Pr(4, Z, charge, r);
+[f5, df5] = il_Pr(5, Z, charge, r);
+[f6, df6] = il_Pr(6, Z, charge, r);
 
 figure(1); clf;
 

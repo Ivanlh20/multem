@@ -2,7 +2,7 @@ clear all; clc;
 Z = 79; dg = 2;
 % Load Kirkland X-ray and electron scattering tabulated data
 tic;
-[g, fxg, feg] = get_fxeg_tabulated_data(Z, dg);
+[g, fxg, feg] = il_fxeg_tabulated_data(Z, dg);
 toc;
 
 figure(1); clf;

@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'get_filter_Gaussian.cpp', '../src');
+MEX('release', 'il_filter_Gaussian.cpp', '../src');

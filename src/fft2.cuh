@@ -7,19 +7,20 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef FFT2_H
 #define FFT2_H
 
-#include <types.cuh>
+#include "math.cuh"
+#include "types.cuh"
 #include <fftw3.h>
 
 #include <cuda.h>
@@ -66,7 +67,7 @@ namespace multem
 				plan_backward = plan_forward = nullptr;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread=1)
+			void create_plan(const int &ny, const int &nx, int nThread =1)
 			{
 				destroy_plan();
 
@@ -155,7 +156,7 @@ namespace multem
 				plan_backward = plan_forward = nullptr;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread=1)
+			void create_plan(const int &ny, const int &nx, int nThread =1)
 			{
 				destroy_plan();
 
@@ -165,7 +166,7 @@ namespace multem
 
 				TVector_c M(nx*ny);
 
-				fftw_complex *V= reinterpret_cast<fftw_complex*>(M.data());
+				fftw_complex *V = reinterpret_cast<fftw_complex*>(M.data());
 
 				plan_forward = fftw_plan_dft_2d(nx, ny, V, V, FFTW_FORWARD, FFTW_MEASURE);
 				plan_backward = fftw_plan_dft_2d(nx, ny, V, V, FFTW_BACKWARD, FFTW_MEASURE);
@@ -243,7 +244,7 @@ namespace multem
 				plan_backward = plan_forward = 0;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread=1)
+			void create_plan(const int &ny, const int &nx, int nThread =1)
 			{
 				destroy_plan();
 
@@ -314,7 +315,7 @@ namespace multem
 				plan_backward = plan_forward = 0;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread=1)
+			void create_plan(const int &ny, const int &nx, int nThread =1)
 			{
 				destroy_plan();
 

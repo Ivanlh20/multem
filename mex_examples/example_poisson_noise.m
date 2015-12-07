@@ -8,7 +8,7 @@ toc;
 
 SNR = 8;
 tic;
-[An, k] = get_poisson_noise(A, SNR);
+[An, k] = il_poisson_noise(A, SNR);
 toc;
 std(A(:))
 k

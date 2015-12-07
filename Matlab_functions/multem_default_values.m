@@ -21,10 +21,7 @@ input_multislice.fp_single_conf = 0;                % 1: true, 0:false
 input_multislice.fp_nconf = 1;                      % true: phonon configuration, false: number of frozen phonon configurations
 
 input_multislice.tm_active = 0;						% 1: true, 0:false
-input_multislice.tm_nrot = 10; 						% number of rotations
-input_multislice.tm_irot = 0;						% specific rotation configuration
-input_multislice.tm_theta_0 = -90; 					% initial angle
-input_multislice.tm_theta_e = 90; 					% final angle
+input_multislice.tm_theta = 90; 					% angle
 input_multislice.tm_u0 = [0 0 1]; 					% unitary vector			
 input_multislice.tm_rot_point_type = 1; 			% 1: geometric center, 2: User define		
 input_multislice.tm_p0 = [0 0 0];					% rotation point
@@ -32,7 +29,7 @@ input_multislice.tm_p0 = [0 0 0];					% rotation point
 input_multislice.microscope_effect = 1;             % 1: Partial coherente mode, 2: transmission_fun cross coefficient
 input_multislice.spatial_temporal_effect = 2;       % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
-input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
+input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 input_multislice.zero_defocus_plane = 0;            % Zero defocus plane
 
 input_multislice.thickness_type = 1;                % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
@@ -84,9 +81,14 @@ input_multislice.scanning_y0 = 0.0;
 input_multislice.scanning_xe = 4.078; 
 input_multislice.scanning_ye = 4.078;
 
-% Inner angle(mrad) and Outer angle(mrad)
-input_multislice.det_cir(1).ang_inner = 60; 
-input_multislice.det_cir(1).ang_outer = 180;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Detector %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+input_multislice.detector.type = 1;  % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
+input_multislice.detector.cir(1).ang_inner = 60;  % Inner angle(mrad) 
+input_multislice.detector.cir(1).ang_outer = 180; % Outer angle(mrad)
+input_multislice.detector.radial(1).x = 0;          % radial detector angle(mrad)
+input_multislice.detector.radial(1).fx = 0;         % radial sensitivity value
+input_multislice.detector.matrix(1).R = 0;          % 2D detector angle(mrad)
+input_multislice.detector.matrix(1).fR = 0;         % 2D sensitivity value
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.ped_nrot = 360;         % number of orientations

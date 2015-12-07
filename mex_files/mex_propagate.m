@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'get_propagate.cu', '../src');
+MEX('release', 'il_propagate.cu', '../src');

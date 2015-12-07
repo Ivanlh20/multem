@@ -20,12 +20,12 @@ input_multislice.potential_type = 6;                % ePT_Doyle_0_4 = 1, ePT_Pen
 input_multislice.fp_dim = 110; 
 input_multislice.fp_seed = 300183; 
 input_multislice.fp_single_conf = 0;                % 1: true, 0:false
-input_multislice.fp_nconf = 40;
+input_multislice.fp_nconf = 20;
 
 input_multislice.microscope_effect = 1;             % 1: Partial coherente mode, 2: transmission_fun cross coefficient
 input_multislice.spatial_temporal_effect = 1;       % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
-input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User = 4
+input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 input_multislice.zero_defocus_plane = 0;
 
 input_multislice.bwl = 0;
@@ -43,7 +43,7 @@ na = 8; nb = 8; nc = 40; ncu = 2; rms3d = 0.085;
 input_multislice.nx = 1024; 
 input_multislice.ny = 1024;
 
-input_multislice.thickness_type = 2;             % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
+input_multislice.thickness_type = 1;             % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 input_multislice.thickness = 0:c:1000;           % Array of thicknesses
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,7 +52,7 @@ input_multislice.iw_psi = 0;                       % user define incident wave
 input_multislice.iw_x = input_multislice.lx/2;     % x position 
 input_multislice.iw_y = input_multislice.ly/2;     % y position
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% aberrations %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% lens aberrations %%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.lens_m = 0;        % vortex momentum
 input_multislice.lens_f = +100;     % Angs
 input_multislice.lens_Cs3 = 0.04;	% mm
@@ -68,11 +68,11 @@ input_multislice.lens_nsf = 10; % (Angs, number of steps)
 input_multislice.lens_beta = 0.1; 
 input_multislice.lens_nbeta = 10; %(mrad, half number of steps)
 
-clear MULTEM;
+clear il_MULTEM;
 tic;
-output_multislice = MULTEM(input_multislice); 
+output_multislice = il_MULTEM(input_multislice); 
 toc;
-clear MULTEM;
+clear il_MULTEM;
 
 figure(1);
 for i=1:length(output_multislice.data)

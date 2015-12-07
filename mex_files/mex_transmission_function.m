@@ -1,3 +1,3 @@
 clc; clear all;
   
-MEX('release', 'get_transmission_function.cu', '../src');
+MEX('release', 'il_transmission_function.cu', '../src');

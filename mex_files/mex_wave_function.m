@@ -1,3 +1,3 @@
 clc; clear all;
   
-MEX('release', 'get_wave_function.cu', '../src');
+MEX('release', 'il_wave_function.cu', '../src');

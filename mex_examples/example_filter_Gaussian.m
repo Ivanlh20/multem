@@ -3,11 +3,11 @@ nx = 1024; ny = 1024;
 dx = 1; dy = 1; Sigma = 128; shift = 0;
 
 tic;
-f_1d = get_filter_Gaussian(ny, 1, dy, dx, Sigma, shift);
+f_1d = il_filter_Gaussian(ny, 1, dy, dx, Sigma, shift);
 toc;
 
 tic;
-f_2d = get_filter_Gaussian(ny, nx, dy, dx, Sigma, shift);
+f_2d = il_filter_Gaussian(ny, nx, dy, dx, Sigma, shift);
 toc;
 
 figure(1);

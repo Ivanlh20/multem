@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef CRYSTAL_H
@@ -30,7 +30,7 @@ namespace multem
 	template<class T>
 	class Crystal{
 		public:
-			Crystal():na(0), nb(0), nc(0), a(0), b(0), c(0){};
+			Crystal(): na(0), nb(0), nc(0), a(0), b(0), c(0){};
 
 			void Create3DCrystal(const int &na_i, const int &nb_i, const int &nc_i, T a_i, T b_i, T c_i, Vector<Atom_Data<T>, e_host> &uLayer_i, Atom_Data<T> &Atoms_o)
 			{
@@ -65,6 +65,7 @@ namespace multem
 						for(auto j = 0; j < Layers[i].size(); j++)
 						{
 							Atoms_o.Z[l] = Layers[i].Z[j];
+							Atoms_o.charge[l] = Layers[i].charge[j];
 							Atoms_o.x[l] = Layers[i].x[j];
 							Atoms_o.y[l] = Layers[i].y[j];
 							Atoms_o.z[l] = Layers[i].z[j] + c*static_cast<T>(k);
@@ -79,6 +80,7 @@ namespace multem
 				for(auto j = 0; j < Layers[0].size(); j++)
 				{
 					Atoms_o.Z[l] = Layers[0].Z[j];
+					Atoms_o.charge[l] = Layers[0].charge[j];
 					Atoms_o.x[l] = Layers[0].x[j];
 					Atoms_o.y[l] = Layers[0].y[j];
 					Atoms_o.z[l] = Layers[0].z[j] + c*static_cast<T>(nc);
@@ -112,6 +114,7 @@ namespace multem
 							if(Check_Bound(x, xmin, xmax, y, ymin, ymax))
 							{
 								Layer.Z[l] = uLayer.Z[k];
+								Layer.charge[l] = uLayer.charge[k];
 								Layer.x[l] = x;
 								Layer.y[l] = y;
 								Layer.z[l] = c*uLayer.z[k];

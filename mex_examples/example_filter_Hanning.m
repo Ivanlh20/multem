@@ -1,12 +1,12 @@
 clc; clear all;
 nx = 1024; ny = 1024;
-dx = 1; dy = 1; k = 1; shift = 1;
+dx = 1; dy = 1; k = 0.5; shift = 0;
 tic;
-f_1d = get_filter_Hanning(ny, 1, dy, dx, k, shift);
+f_1d = il_filter_Hanning(ny, 1, dy, dx, k, shift);
 toc;
 
 tic;
-f_2d = get_filter_Hanning(ny, nx, dy, dx, k, shift);
+f_2d = il_filter_Hanning(ny, nx, dy, dx, k, shift);
 toc;
 
 figure(1);

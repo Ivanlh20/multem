@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'get_atom_radius.cpp', '../src');
+MEX('release', 'il_atom_radius.cpp', '../src');

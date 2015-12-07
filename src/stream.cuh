@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful,
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef STREAM_H
@@ -36,7 +36,12 @@ namespace multem
 			static const eDevice device = e_host;
 			std::mutex stream_mutex;
 
-			Stream():nx(0), ny(0), nxy(0), nstream(0), n_act_stream(0), stream(nullptr){}
+			Stream(): nx(0), ny(0), nxy(0), nstream(0), n_act_stream(0), stream(nullptr){}
+
+			Stream(int new_nstream): nx(0), ny(0), nxy(0), nstream(0), n_act_stream(0), stream(nullptr)
+			{
+				resize(new_nstream);
+			}
 
 			~Stream(){ destroy(); nstream = 0; n_act_stream = 0; }
 
@@ -45,8 +50,10 @@ namespace multem
 				return nstream;
 			}
 
-			void resize(const int &new_nstream)
+			void resize(int new_nstream)
 			{
+				new_nstream = max(1, new_nstream);
+
 				destroy();
 
 				nstream = new_nstream;
@@ -101,10 +108,18 @@ namespace multem
 			template<class TFn>
 			void exec(TFn &fn)
 			{
-				for(auto istream = 0; istream < n_act_stream; istream++)
+				if(n_act_stream<=0)
+				{
+					return;
+				}
+
+				for(auto istream = 0; istream < n_act_stream-1; istream++)
 				{
 					stream[istream] = std::thread(fn, get_range(istream));
 				}
+
+				fn(get_range(n_act_stream-1));
+
 				synchronize();
 			}
 
@@ -144,6 +159,11 @@ namespace multem
 
 			Stream(): nx(0), ny(0), nxy(0), n_act_stream(0){}
 
+			Stream(int new_nstream): nx(0), ny(0), nxy(0), n_act_stream(0)
+			{
+				resize(new_nstream);
+			}
+
 			~Stream(){ destroy(); n_act_stream = 0; }
 
 			int size() const
@@ -151,8 +171,10 @@ namespace multem
 				return stream.size();
 			}
 
-			void resize(const int &new_nstream)
+			void resize(int new_nstream)
 			{
+				new_nstream = max(1, new_nstream);
+
 				destroy();
 
 				stream.resize(new_nstream);
@@ -209,11 +231,11 @@ namespace multem
 			template<class TFn>
 			void exec(TFn &fn)
 			{
-				//for(auto istream = 0; istream < n_act_stream; istream++)
-				//{
-				//	stream[istream] = std::thread(fn, get_range(istream));
-				//}
-				//synchronize();
+				// for(auto istream = 0; istream < n_act_stream; istream++)
+				// {
+				// 	stream[istream] = std::thread(fn, get_range(istream));
+				// }
+				// synchronize();
 			}
 
 			int n_act_stream;
