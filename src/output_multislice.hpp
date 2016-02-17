@@ -57,7 +57,7 @@ namespace multem
 					{
 						image_tot.resize(this->thickness.size());
 						image_coh.resize(this->thickness.size());
-						for(auto ithk =0; ithk < this->thickness.size(); ithk++)
+						for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
 						{
 							image_tot[ithk].image.resize(ndetector);
 							image_coh[ithk].image.resize(ndetector);
@@ -68,7 +68,7 @@ namespace multem
 					case 2:
 					{
 						image_tot.resize(this->thickness.size());
-						for(auto ithk =0; ithk < this->thickness.size(); ithk++)
+						for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
 						{
 							image_tot[ithk].image.resize(ndetector);
 						}
@@ -116,13 +116,13 @@ namespace multem
 
 				if(is_vector)
 				{
-					for(auto ithk =0; ithk < this->thickness.size(); ithk++)
+					for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
 					{
 						switch(output_type)
 						{
 							case 1:
 							{
-								for(auto idet =0; idet < ndetector; idet++)
+								for(auto idet = 0; idet < ndetector; idet++)
 								{
 									image_tot[ithk].image[idet].resize(nxy());
 									image_coh[ithk].image[idet].resize(nxy());
@@ -132,7 +132,7 @@ namespace multem
 							break;
 							case 2:
 							{
-								for(auto idet =0; idet < ndetector; idet++)
+								for(auto idet = 0; idet < ndetector; idet++)
 								{
 									image_tot[ithk].image[idet].resize(nxy());
 								}
@@ -183,7 +183,7 @@ namespace multem
 				{
 					if((output_type == 1)||(output_type == 3))
 					{
-						for(auto ithk =0; ithk < this->thickness.size(); ithk++)
+						for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
 						{
 							psi_coh[ithk].resize(nxy());
 						}
@@ -193,13 +193,13 @@ namespace multem
 
 			void init()
 			{ 
-				for(auto ithk =0; ithk < this->thickness.size(); ithk++)
+				for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
 				{
 					switch(output_type)
 					{
 						case 1:
 						{
-							for(auto idet =0; idet < image_tot[ithk].image.size(); idet++)
+							for(auto idet = 0; idet < image_tot[ithk].image.size(); idet++)
 							{
 								multem::fill(stream, image_tot[ithk].image[idet], 0);
 								multem::fill(stream, image_coh[ithk].image[idet], 0);
@@ -209,7 +209,7 @@ namespace multem
 						break;
 						case 2:
 						{
-							for(auto idet =0; idet < image_tot[ithk].image.size(); idet++)
+							for(auto idet = 0; idet < image_tot[ithk].image.size(); idet++)
 							{
 								multem::fill(stream, image_tot[ithk].image[idet], 0);
 							}
@@ -258,7 +258,7 @@ namespace multem
 
 			void shift()
 			{ 
-				for(auto ithk =0; ithk < this->thickness.size(); ithk++)
+				for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
 				{
 					switch(output_type)
 					{
@@ -307,7 +307,7 @@ namespace multem
 			{
 				if((output_type == 1)||(output_type == 3))
 				{
-					for(auto ithk =0; ithk < this->thickness.size(); ithk++)
+					for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
 					{
 						psi_coh[ithk].clear();
 					}
@@ -383,8 +383,6 @@ namespace multem
 
 				this->microscope_effect = input_multislice.microscope_effect;
 				this->spatial_temporal_effect = input_multislice.spatial_temporal_effect;
-				this->zero_defocus_type = input_multislice.zero_defocus_type;
-				this->zero_defocus_plane = input_multislice.zero_defocus_plane;
 				this->thickness_type = input_multislice.thickness_type;
 				this->thickness = input_multislice.thickness;
 				this->operation_mode = input_multislice.operation_mode;
@@ -400,7 +398,8 @@ namespace multem
 				// this->iw_psi = input_multislice.iw_psi;
 				this->iw_x = input_multislice.iw_x;
 				this->iw_y = input_multislice.iw_y;
-				this->lens = input_multislice.lens;
+				this->cond_lens = input_multislice.cond_lens;
+				this->obj_lens = input_multislice.obj_lens;
 				this->is_crystal = input_multislice.is_crystal;
 				// this->atoms = input_multislice.atoms;
 				this->eels_fr = input_multislice.eels_fr;
@@ -459,11 +458,11 @@ namespace multem
 					x.resize(nx);
 					y.resize(ny);
 
-					for(auto ix =0; ix<nx; ix++)
+					for(auto ix = 0; ix<nx; ix++)
 					{
 						x[ix] = (is_grid_RS())?this->grid.Rx(ix):this->grid.gx(ix);
 					}
-					for(auto iy =0; iy<ny; iy++)
+					for(auto iy = 0; iy<ny; iy++)
 					{
 						y[iy] = (is_grid_RS())?this->grid.Ry(iy):this->grid.gy(iy);
 					}

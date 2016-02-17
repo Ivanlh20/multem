@@ -318,6 +318,23 @@ namespace multem
 		assign(stream, M_i, *M_i_h);
 		M_o.assign(M_i_h->begin(), M_i_h->end());
 	}
+
+	template<class TVector_1, class TVector_2>
+	typename std::enable_if<is_host_vector_and_rmatrix<TVector_1, TVector_2>::value && is_complex<Value_type<TVector_1>>::value, void>::type
+	assign_real(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h =nullptr)
+	{
+		auto thr_assign_real = [&](const Range &range)
+		{
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				M_o[ixy] = M_i[ixy].real();
+			}
+		};
+
+		stream.set_n_act_stream(M_o.size());
+		stream.set_grid(1, M_o.size());
+		stream.exec(thr_assign_real);
+	}
 	
 	template<class TVector>
 	enable_if_rmatrix<TVector, void>
@@ -423,6 +440,36 @@ namespace multem
 		stream.set_n_act_stream(grid.nxh);
 		stream.set_grid(grid.nxh, grid.nyh);
 		stream.exec(thr_fft2_shift);
+	}
+
+	template<class TVector>
+	enable_if_rmatrix_r<TVector, Value_type<TVector>>
+	sum(Stream<e_host> &stream, TVector &M_i)
+	{
+		using value_type = Value_type<TVector>;
+
+		value_type sum_total = 0;
+		auto thr_sum = [&](const Range &range)
+		{
+			auto sum_partial = thrust::reduce(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e);
+
+			stream.stream_mutex.lock();
+			sum_total += sum_partial;
+			stream.stream_mutex.unlock();
+		};
+
+		stream.set_n_act_stream(M_i.size());
+		stream.set_grid(1, M_i.size());
+		stream.exec(thr_sum);
+
+		return sum_total;
+	}
+
+	template<class TVector>
+	enable_if_rmatrix_r<TVector, Value_type_r<TVector>>
+	mean(Stream<e_host> &stream, TVector &M_i)
+	{
+		return sum(stream, M_i)/M_i.size();
 	}
 
 	/***************************************************************************/

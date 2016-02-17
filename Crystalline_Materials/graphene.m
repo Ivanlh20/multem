@@ -9,7 +9,7 @@ CrysPar.nuLayer = 1;
 charge = 0;
 % C = 6
 % Z charge x y z rms3d occupancy
-CrysPar.uLayer(1).atoms = [6, charge, 0.0, 0.0, 0.0, rms, 1; 6, charge, 1/3, 0.0, 0.0, rms, 1; 6, charge, 1/2, 1/2, 0.0, rms, 1; 6, charge, 5/6, 1/2, 0.0, rms, 1];
+CrysPar.uLayer(1).atoms = [6, 0.0, 0.0, 0.0, rms, 1, charge; 6, 1/3, 0.0, 0.0, rms, 1, charge; 6, 1/2, 1/2, 0.0, rms, 1, charge; 6, 5/6, 1/2, 0.0, rms, 1, charge];
 
 Crys3D = il_crystal_by_layers(CrysPar);
 lx = CrysPar.a*CrysPar.na;

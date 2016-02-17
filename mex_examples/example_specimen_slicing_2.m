@@ -37,7 +37,7 @@ toc;
 [nslice, ~] = size(Slice);
 
 figure(1); clf;
-plot(atoms(:, 3), atoms(:, 5), '*k');   
+plot(atoms(:, 2), atoms(:, 4), 'ok');   
 set(gca,'FontSize',12,'LineWidth',1,'PlotBoxAspectRatio',[1.25 1 1]);
 title('Atomic positions');
 ylabel('y','FontSize',14);

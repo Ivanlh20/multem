@@ -139,7 +139,7 @@ namespace multem
 		}
 
 		__device__ __forceinline__ 
-			double __shfl_down(double var, unsigned int srcLane, int width =32)
+			double __shfl_down(double var, unsigned int srcLane, int width = 32)
 		{
 			int2 a = *reinterpret_cast<int2*>(&var);
 			a.x = __shfl_down(a.x, srcLane, width);
@@ -149,7 +149,7 @@ namespace multem
 
 		// modify
 		template<class T>
-		__global__ void atom_cost_function(Grid<T> grid, Atom_Ip<T> atom_Ip, rVector<T> M_i, rVector<T> Mp_o)
+		__global__ void atom_cost_function(Grid<T> grid, Atom_Sa<T> atom_Ip, rVector<T> M_i, rVector<T> Mp_o)
 		{ 
 			__shared__ T Mshare[c_thrnxny*c_thrnxny];
 
@@ -187,7 +187,7 @@ namespace multem
 		}
 
 		template<class T>
-		__global__ void subtract_atom(Grid<T> grid, Atom_Ip<T> atom_Ip, rVector<T> M_i)
+		__global__ void subtract_atom(Grid<T> grid, Atom_Sa<T> atom_Ip, rVector<T> M_i)
 		{ 
 			int ix0 = threadIdx.y + blockIdx.y*blockDim.y;
 			while (ix0 < atom_Ip.ixn)
@@ -213,9 +213,11 @@ namespace multem
 		}
 
 		// Linear projected potential: V and zV
-		template<ePotential_Type potential_type, int charge, class T> 
-		__global__ void linear_Vz(rQ1<T> qz, Atom_Vp<T> atom_Vp)
+		template<ePotential_Type potential_type, int charge, class TAtom> 
+		__global__ void linear_Vz(rQ1<Value_type<TAtom>> qz, TAtom atom)
 		{	
+			using T = Value_type<TAtom>;
+
 			__shared__ T V0s[c_nqz];
 			__shared__ T dV0s[c_nqz];
 
@@ -223,25 +225,25 @@ namespace multem
 
 			T x = qz.x[ix];
 			T w = qz.w[ix];
-			T R2 = atom_Vp.R2[iR];
+			T R2 = atom.R2[iR];
 			T V, dVir;
 
-			T a = (atom_Vp.split)?(-atom_Vp.z0h):(atom_Vp.zeh-atom_Vp.z0h);
-			T b = (atom_Vp.split)?(atom_Vp.z0h):(atom_Vp.zeh+atom_Vp.z0h);
+			T a = (atom.split)?(-atom.z0h):(atom.zeh-atom.z0h);
+			T b = (atom.split)?(atom.z0h):(atom.zeh+atom.z0h);
 			T z = a*x + b;
 			T r = sqrt(z*z + R2);
-			Vr_dVrir<potential_type, charge, T>(r, atom_Vp.cl, atom_Vp.cnl, a*w, V, dVir);
+			Vr_dVrir<potential_type, charge, T>(r, atom.cl, atom.cnl, a*w, V, dVir);
 
 			V0s[ix] = V; 
 			dV0s[ix] = dVir;
 
-			if (atom_Vp.split)
+			if (atom.split)
 			{
-				a = atom_Vp.zeh;
-				b = atom_Vp.zeh;
+				a = atom.zeh;
+				b = atom.zeh;
 				z = a*x + b; 
 				r = sqrt(z*z + R2);
-				Vr_dVrir<potential_type, charge, T>(r, atom_Vp.cl, atom_Vp.cnl, a*w, V, dVir);
+				Vr_dVrir<potential_type, charge, T>(r, atom.cl, atom.cnl, a*w, V, dVir);
 
 				V = V0s[ix] += V; 
 				dVir = dV0s[ix] += dVir;
@@ -300,46 +302,65 @@ namespace multem
 
 			if(ix == 0 )
 			{
-				atom_Vp.c0[iR] = V; 		// V_0
-				atom_Vp.c1[iR] = 0.5*dVir; 	// dR2V0
+				dVir = 0.5*dVir;
+
+				auto R2_tap = atom.R2_tap;
+				auto tap_cf = atom.tap_cf;
+				host_device_detail::apply_tapering(R2_tap, tap_cf, R2, V, dVir);
+				atom.c0[iR] = V;			// V_0
+				atom.c1[iR] = dVir; 		// dR2V0
 			}
 		}
 
 		// Get Local interpolation coefficients
-		template<class T> 
-		__global__ void cubic_poly_coef(Atom_Vp<T> atom_Vp)
+		template<class TAtom> 
+		__global__ void cubic_poly_coef(TAtom atom)
 		{
 			int iR = threadIdx.x;
 
 			if (iR < c_nR-1)
 			{
-				host_device_detail::cubic_poly_coef(iR, atom_Vp);
+				host_device_detail::cubic_poly_coef(iR, atom);
 			}
 		}
 
 		// Cubic polynomial evaluation
-		template<class T> 
-		__global__ void eval_cubic_poly(Grid<T> grid, Atom_Vp<T> atom_Vp, rVector<T> V0g)
+		template<bool TShift, class TAtom> 
+		__global__ void eval_cubic_poly(Grid<Value_type<TAtom>> grid, TAtom atom, rVector<Value_type<TAtom>> M_o)
 		{
+			using T = Value_type<TAtom>;
+
 			int iy0 = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix0 = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if ((ix0 < atom_Vp.ixn)&&(iy0 < atom_Vp.iyn))
+			if ((ix0 < atom.ixn)&&(iy0 < atom.iyn))
 			{
-				int ix = ix0 + atom_Vp.ix0;
-				int iy = iy0 + atom_Vp.iy0;
+				int ix = ix0 + atom.ix0;
+				int iy = iy0 + atom.iy0;
 
-				T R2 = grid.R2(ix, iy, atom_Vp.x, atom_Vp.y);
-				if (R2 < atom_Vp.R2_max)
+				T R2 = grid.R2(ix, iy, atom.x, atom.y);
+				if (R2 < atom.R2_max)
 				{
 					int ixy;
-					T V = host_device_detail::eval_cubic_poly(ix, iy, grid, R2, atom_Vp, ixy);
+					T V = host_device_detail::eval_cubic_poly<TShift>(ix, iy, grid, R2, atom, ixy);
 
-					atomicAdd<T>(&(V0g.V[ixy]), V);
+					atomicAdd<T>(&(M_o.V[ixy]), V);
 				}
 			}
 		}
 		
+		// Linear Gaussian
+		template<class TAtom> 
+		__global__ void linear_Gaussian(TAtom atom)
+		{
+			int iR = threadIdx.x;
+
+			if (iR < c_nR-1)
+			{
+				host_device_detail::linear_Gaussian(iR, atom);
+			}
+		}
+
 		// Shift matrix respect to (nxh, nyh)
 		template<class TGrid, class T>
 		__global__ void fft2_shift(TGrid grid, rVector<T> M_io)
@@ -460,14 +481,26 @@ namespace multem
 
 		// Anti-Aliasing, scale with cut-off (2/3)g_max
 		template<class TGrid, class T>
-		__global__ void bandwidth_limit(TGrid grid, Value_type<TGrid> g2_min, Value_type<TGrid> g2_max, T w, rVector<T> M_io)
+		__global__ void bandwidth_limit(TGrid grid, rVector<T> M_io)
 		{
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				host_device_detail::bandwidth_limit(ix, iy, grid, g2_min, g2_max, w, M_io);
+				host_device_detail::bandwidth_limit(ix, iy, grid, M_io);
+			}
+		}
+
+		template<class TGrid, class T>
+		__global__ void hard_aperture(TGrid grid, Value_type<TGrid> g2_max, Value_type<TGrid> w, rVector<T> M_io)
+		{
+			int iy = threadIdx.x + blockIdx.x*blockDim.x;
+			int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+			if((ix < grid.nx)&&(iy < grid.ny))
+			{
+				host_device_detail::hard_aperture(ix, iy, grid, g2_max, w, M_io);
 			}
 		}
 
@@ -871,7 +904,7 @@ namespace multem
 
 	template<class TGrid, class TVector_r>
 	enable_if_device_vector<TVector_r, Value_type<TVector_r>>
-	atom_cost_function(TGrid &grid, const Atom_Ip<Value_type<TGrid>> &atom_Ip, TVector_r &M_i)
+	atom_cost_function(TGrid &grid, const Atom_Sa<Value_type<TGrid>> &atom_Ip, TVector_r &M_i)
 	{
 		TVector_r sum_v(1);
 
@@ -885,9 +918,9 @@ namespace multem
 
 	template<class TGrid, class TVector_r>
 	enable_if_device_vector<TVector_r, void>
-	subtract_atom(Stream<e_device> &stream, TGrid &grid, Vector<Atom_Ip<Value_type<TGrid>>, e_host> &atom_Ip, TVector_r &M_i)
+	subtract_atom(Stream<e_device> &stream, TGrid &grid, Vector<Atom_Sa<Value_type<TGrid>>, e_host> &atom_Ip, TVector_r &M_i)
 	{
-		if(stream.n_act_stream<=0)
+		if(stream.n_act_stream<= 0)
 		{
 			return;
 		}
@@ -902,39 +935,41 @@ namespace multem
 		}
 	}
 
-	template<class TQ1>
+	// Linear projected potential: V and zV
+	template<class TQ1, class TVAtom>
 	enable_if_device<TQ1, void>
-	get_cubic_poly_coef_Vz(Stream<e_device> &stream, ePotential_Type potential_type, 
-	TQ1 &qz, Vector<Atom_Vp<Value_type<TQ1>>, e_host> &atom_Vp)
-	{
-		if(stream.n_act_stream<=0)
+	linear_Vz(Stream<e_device> &stream, ePotential_Type potential_type, TQ1 &qz, TVAtom &vatom)
+	{	
+		using TAtom = Value_type<TVAtom>;
+
+		if(stream.n_act_stream<= 0)
 		{
 			return;
 		}
 
-		for(auto istream = 0; istream < stream.n_act_stream; istream++)
+		auto str_linear_Vz = [](cudaStream_t &stream, const ePotential_Type &potential_type, TQ1 &qz, TAtom &atom)
 		{
-			if(atom_Vp[istream].charge==0)
+			if(atom.charge== 0)
 			{
 				switch(potential_type)
 				{
 					case ePT_Doyle_0_4:
-						device_detail::linear_Vz<ePT_Doyle_0_4, 0, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Doyle_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 					case ePT_Peng_0_4:
-						device_detail::linear_Vz<ePT_Peng_0_4, 0, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Peng_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 					case ePT_Peng_0_12:
-						device_detail::linear_Vz<ePT_Peng_0_12, 0, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Peng_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 					case ePT_Kirkland_0_12:
-						device_detail::linear_Vz<ePT_Kirkland_0_12, 0, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Kirkland_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 					case ePT_Weickenmeier_0_12:
-						device_detail::linear_Vz<ePT_Weickenmeier_0_12, 0, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Weickenmeier_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 					case ePT_Lobato_0_12:
-						device_detail::linear_Vz<ePT_Lobato_0_12, 0, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Lobato_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 				}
 			}
@@ -943,44 +978,85 @@ namespace multem
 				switch(potential_type)
 				{
 					case ePT_Doyle_0_4:
-						device_detail::linear_Vz<ePT_Doyle_0_4, 1, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Doyle_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 					case ePT_Peng_0_4:
-						device_detail::linear_Vz<ePT_Peng_0_4, 1, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Peng_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 					case ePT_Peng_0_12:
-						device_detail::linear_Vz<ePT_Peng_0_12, 1, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Peng_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 					case ePT_Kirkland_0_12:
-						device_detail::linear_Vz<ePT_Kirkland_0_12, 1, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Kirkland_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 					case ePT_Weickenmeier_0_12:
-						device_detail::linear_Vz<ePT_Weickenmeier_0_12, 1, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Weickenmeier_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 					case ePT_Lobato_0_12:
-						device_detail::linear_Vz<ePT_Lobato_0_12, 1, typename TQ1::value_type><<<dim3(c_nR), dim3(c_nqz), 0, stream[istream]>>>(qz, atom_Vp[istream]);
+						device_detail::linear_Vz<ePT_Lobato_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 						break;
 				}		
 			}
-			device_detail::cubic_poly_coef<typename TQ1::value_type><<<dim3(1), dim3(c_nR), 0, stream[istream]>>>(atom_Vp[istream]);
+		};
+
+		for(auto istream = 0; istream < stream.n_act_stream; istream++)
+		{
+			str_linear_Vz(stream[istream], potential_type, qz, vatom[istream]);
 		}
 	}
 
-	template<class TGrid, class TVector_r>
-	enable_if_device_vector<TVector_r, void>
-	eval_cubic_poly(Stream<e_device> &stream, TGrid &grid, 
-	Vector<Atom_Vp<Value_type<TGrid>>, e_host> &atom_Vp, TVector_r &V_0)
+	// Get Local interpolation coefficients
+	template<class TVAtom> 
+	enable_if_device<typename TVAtom::value_type, void>
+	cubic_poly_coef(Stream<e_device> &stream, TVAtom &vatom)
 	{
-		if(stream.n_act_stream<=0)
+		using TAtom = Value_type<TVAtom>;
+
+		if(stream.n_act_stream<= 0)
 		{
 			return;
 		}
 
 		for(auto istream = 0; istream < stream.n_act_stream; istream++)
 		{
-			GridBT gridBT = atom_Vp[istream].get_eval_cubic_poly_gridBT();
+			device_detail::cubic_poly_coef<TAtom><<<dim3(1), dim3(c_nR), 0, stream[istream]>>>(vatom[istream]);
+		}
+	}
 
-			device_detail::eval_cubic_poly<typename TVector_r::value_type><<<gridBT.Blk, gridBT.Thr, 0, stream[istream]>>>(grid, atom_Vp[istream], V_0);
+	template<bool TShift, class TGrid, class TVAtom, class TVector_r>
+	enable_if_device_vector<TVector_r, void>
+	eval_cubic_poly(Stream<e_device> &stream, TGrid &grid, TVAtom &vatom, TVector_r &M_o)
+	{
+		using TAtom = Value_type<TVAtom>;
+
+		if(stream.n_act_stream<= 0)
+		{
+			return;
+		}
+
+		for(auto istream = 0; istream < stream.n_act_stream; istream++)
+		{
+			GridBT gridBT = vatom[istream].get_eval_cubic_poly_gridBT();
+
+			device_detail::eval_cubic_poly<TShift, TAtom><<<gridBT.Blk, gridBT.Thr, 0, stream[istream]>>>(grid, vatom[istream], M_o);
+		}
+	}
+
+	// Get linear Gaussian
+	template<class TVAtom> 
+	enable_if_device<typename TVAtom::value_type, void>
+	linear_Gaussian(Stream<e_device> &stream, TVAtom &vatom)
+	{
+		using TAtom = Value_type<TVAtom>;
+
+		if(stream.n_act_stream<= 0)
+		{
+			return;
+		}
+
+		for(auto istream = 0; istream < stream.n_act_stream; istream++)
+		{
+			device_detail::linear_Gaussian<TAtom><<<dim3(1), dim3(c_nR), 0, stream[istream]>>>(vatom[istream]);
 		}
 	}
 
@@ -1033,11 +1109,20 @@ namespace multem
 
 	template<class TGrid, class TVector_c>
 	enable_if_device_vector<TVector_c, void>
-	bandwidth_limit(Stream<e_device> &stream, TGrid &grid, Value_type<TGrid> g_min, Value_type<TGrid> g_max, Value_type<TVector_c> w, TVector_c &M_io)
+	bandwidth_limit(Stream<e_device> &stream, TGrid &grid, TVector_c &M_io)
 	{
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::bandwidth_limit<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, pow(g_min, 2), pow(g_max, 2), w, M_io); 
+		device_detail::bandwidth_limit<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, M_io); 
+	}
+
+	template<class TGrid, class TVector_c>
+	enable_if_device_vector<TVector_c, void>
+	hard_aperture(Stream<e_device> &stream, TGrid &grid, Value_type<TGrid> g_max, Value_type<TGrid> w, TVector_c &M_io)
+	{
+		auto gridBT = device_detail::get_grid_nxny(grid);
+
+		device_detail::hard_aperture<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, pow(g_max, 2), w, M_io); 
 	}
 
 	template<class TGrid, class TVector_c>

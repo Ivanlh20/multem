@@ -45,7 +45,7 @@ namespace multem
 
 				psi.resize(input_multislice->grid.nxy());
 
-				if(input_multislice->microscope_effect == eME_Partial_Coherent)
+				if((input_multislice->microscope_effect == eME_Coherent)||(input_multislice->microscope_effect == eME_Partial_Coherent))
 				{
 					return;
 				}
@@ -53,23 +53,23 @@ namespace multem
 				Stream<e_host> stream_host(input_multislice->nstream);
 				/*********************Temporal quadrature**********************/
 				Quadrature quadrature;
-				quadrature.get(8, input_multislice->lens.nsf, qt); // 8: int_-infty^infty f(x) Exp[-x^2] dx
+				quadrature.get(8, input_multislice->obj_lens.nsf, qt); // 8: int_-infty^infty f(x) Exp[-x^2] dx
 				multem::scale(stream_host, 1.0/c_Pii2, qt.w);
 
 				/*********************Spatial quadrature**********************/
-				qs.resize((2*input_multislice->lens.ngxs+1)*(2*input_multislice->lens.ngys+1));
+				qs.resize((2*input_multislice->obj_lens.ngxs+1)*(2*input_multislice->obj_lens.ngys+1));
 				int nqs = 0; 
 				value_type_r sum_w = 0;
-				value_type_r alpha = 0.5/pow(input_multislice->lens.sggs, 2);
+				value_type_r alpha = 0.5/pow(input_multislice->obj_lens.sggs, 2);
 
-				for(auto ix =-input_multislice->lens.ngxs; ix <= input_multislice->lens.ngxs; ix++)
+				for(auto ix =-input_multislice->obj_lens.ngxs; ix <= input_multislice->obj_lens.ngxs; ix++)
 				 {
-					 for(auto iy =-input_multislice->lens.ngys; iy <= input_multislice->lens.ngys; iy++)
+					 for(auto iy =-input_multislice->obj_lens.ngys; iy <= input_multislice->obj_lens.ngys; iy++)
 					 {
-						 value_type_r gxs = input_multislice->lens.gxs(ix);
-						 value_type_r gys = input_multislice->lens.gys(iy);
+						 value_type_r gxs = input_multislice->obj_lens.gxs(ix);
+						 value_type_r gys = input_multislice->obj_lens.gys(iy);
 						 value_type_r g2s = gxs*gxs + gys*gys;
-						if(g2s < input_multislice->lens.g2_maxs)
+						if(g2s < input_multislice->obj_lens.g2_maxs)
 						{
 							qs.x[nqs] = gxs;
 							qs.y[nqs] = gys;
@@ -86,9 +86,14 @@ namespace multem
 			{
 				switch(input_multislice->microscope_effect)
 				{
+					case eME_Coherent:
+					{
+						CTF_TEM(input_multislice->spatial_temporal_effect, fpsi, m2psi_tot);
+					}
+					break;
 					case eME_Partial_Coherent:
 					{
-						PC_LI_WPO_TEM(input_multislice->spatial_temporal_effect, fpsi, m2psi_tot);
+						PCTF_LI_WPO_TEM(input_multislice->spatial_temporal_effect, fpsi, m2psi_tot);
 					}
 					break;
 					case eME_Transmission_Cross_Coefficient:
@@ -115,37 +120,43 @@ namespace multem
 			}
 
 		private:
-			void PC_LI_WPO_TEM(const eSpatial_Temporal_Effect &spatial_temporal_effect, Vector<value_type_c, dev> &fpsi, Vector<value_type_r, dev> &m2psi_tot)
+			void CTF_TEM(const eSpatial_Temporal_Effect &spatial_temporal_effect, Vector<value_type_c, dev> &fpsi, Vector<value_type_r, dev> &m2psi_tot)
 			{
-				value_type_r sf = input_multislice->lens.sf;
-				value_type_r beta = input_multislice->lens.beta;
+				multem::apply_CTF(*stream, input_multislice->grid, input_multislice->obj_lens, 0, 0, fpsi, psi);
+				fft2->inverse(psi);
+				multem::square(*stream, psi, m2psi_tot);
+			}
+
+			void PCTF_LI_WPO_TEM(const eSpatial_Temporal_Effect &spatial_temporal_effect, Vector<value_type_c, dev> &fpsi, Vector<value_type_r, dev> &m2psi_tot)
+			{
+				value_type_r sf = input_multislice->obj_lens.sf;
+				value_type_r beta = input_multislice->obj_lens.beta;
 
 				switch(spatial_temporal_effect)
 				{
 					case eSTE_Temporal:	// Temporal
 					{
-						input_multislice->lens.beta = 0;
+						input_multislice->obj_lens.beta = 0;
 					}
 					break;
 					case eSTE_Spatial:	// Spatial
 					{
-						input_multislice->lens.sf = 0;
+						input_multislice->obj_lens.sf = 0;
 					}
 					break;
 				}
 
-				multem::apply_PCTF(*stream, input_multislice->grid, input_multislice->lens, fpsi, psi);
+				multem::apply_PCTF(*stream, input_multislice->grid, input_multislice->obj_lens, fpsi, psi);
 				fft2->inverse(psi);
-				square(*stream, psi, m2psi_tot);
+				multem::square(*stream, psi, m2psi_tot);
 
-				input_multislice->lens.sf = sf;
-				input_multislice->lens.beta = beta;
+				input_multislice->obj_lens.sf = sf;
+				input_multislice->obj_lens.beta = beta;
 			}
 
 			void TCC_TEM(const eSpatial_Temporal_Effect &spatial_temporal_effect, Vector<value_type_c, dev> &fpsi, Vector<value_type_r, dev> &m2psi_tot)
 			{
-				value_type_r f_0 = input_multislice->lens.f;
-				value_type_r cf_0 = input_multislice->lens.cf;
+				value_type_r f_0 = input_multislice->obj_lens.f;
 
 				fill(*stream, m2psi_tot, 0.0);
 				switch(spatial_temporal_effect)
@@ -154,12 +165,12 @@ namespace multem
 					{
 						for(auto i = 0; i<qs.size(); i++)
 						{
-							for(auto j =0; j<qt.size(); j++)
+							for(auto j = 0; j<qt.size(); j++)
 							{
-								input_multislice->lens.f = input_multislice->lens.sf*qt.x[j]+f_0; 
-								input_multislice->lens.cf = c_Pi*input_multislice->lens.lambda*input_multislice->lens.f;
+								auto f = input_multislice->obj_lens.sf*qt.x[j]+f_0;
+								input_multislice->obj_lens.set_defocus(f); 
 								
-								multem::apply_CTF(*stream, input_multislice->grid, input_multislice->lens, qs.x[i], qs.y[i], fpsi, psi);
+								multem::apply_CTF(*stream, input_multislice->grid, input_multislice->obj_lens, qs.x[i], qs.y[i], fpsi, psi);
 								fft2->inverse(psi);
 								multem::add_square_scale(*stream, qs.w[i]*qt.w[j], psi, m2psi_tot);
 							}
@@ -168,12 +179,12 @@ namespace multem
 					break;
 					case 2:	// Temporal
 					{
-						for(auto j =0; j<qt.size(); j++)
+						for(auto j = 0; j<qt.size(); j++)
 						{
-							input_multislice->lens.f = input_multislice->lens.sf*qt.x[j]+f_0; 
-							input_multislice->lens.cf = c_Pi*input_multislice->lens.lambda*input_multislice->lens.f;
-								
-							multem::apply_CTF(*stream, input_multislice->grid, input_multislice->lens, 0.0, 0.0, fpsi, psi);
+							auto f = input_multislice->obj_lens.sf*qt.x[j]+f_0;
+							input_multislice->obj_lens.set_defocus(f); 
+
+							multem::apply_CTF(*stream, input_multislice->grid, input_multislice->obj_lens, 0.0, 0.0, fpsi, psi);
 							fft2->inverse(psi);
 							multem::add_square_scale(*stream, qt.w[j], psi, m2psi_tot);
 						}
@@ -183,15 +194,14 @@ namespace multem
 					{
 						for(auto i = 0; i<qs.size(); i++)
 						{
-							multem::apply_CTF(*stream, input_multislice->grid, input_multislice->lens, qs.x[i], qs.y[i], fpsi, psi);
+							multem::apply_CTF(*stream, input_multislice->grid, input_multislice->obj_lens, qs.x[i], qs.y[i], fpsi, psi);
 							fft2->inverse(psi);
 							multem::add_square_scale(*stream, qs.w[i], psi, m2psi_tot);
 						}
 					}
 				}
 
-				input_multislice->lens.f = f_0;
-				input_multislice->lens.cf = cf_0;
+				input_multislice->obj_lens.set_defocus(f_0);
 			}
 			
 			Input_Multislice<value_type_r> *input_multislice;

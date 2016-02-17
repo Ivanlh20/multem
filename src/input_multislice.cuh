@@ -73,10 +73,7 @@ namespace multem
 
 			eMicroscope_Effect microscope_effect; 				// 1: Partial coherente mode, 2: transmission cross coefficient
 			eSpatial_Temporal_Effect spatial_temporal_effect; 	// 1: Spatial and temporal, 2: Temporal, 3: Spatial
-			
-			eZero_Defocus_Type zero_defocus_type; 				// 1: First atom, 2: Middle point, 3: Last atom, 4: Fix Plane
-			T zero_defocus_plane; 								// Zero defocus plane
-			
+
 			eThickness_Type thickness_type; 					// eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 			Vector<T, e_host> thickness; 						// Array of thicknesses
 
@@ -85,6 +82,7 @@ namespace multem
 			bool slice_storage;									// true , false
 
 			T E_0; 												// Acceleration volatage in KeV
+			T lambda;											// lambda
 			T theta; 											// incident tilt (in spherical coordinates) (rad)
 			T phi; 												// incident tilt (in spherical coordinates) (rad)
 			int nrot; 											// Total number of rotations
@@ -94,12 +92,16 @@ namespace multem
 			T Vrl; 												// Atomic potential cut-off
 			int nR; 											// Number of gridBT points
 
-			eIncident_Wave_Type iw_type; 						// 1: Plane_Wave, 2: Convergent_wave, 3:User_Define(options 1 and 2 are only active for EWRS or EWFS)
+			eIncident_Wave_Type iw_type; 						// 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
 			Vector<complex<T>, e_host> iw_psi; 					// user define incident wave
 			T iw_x;												// x position
 			T iw_y; 											// y position
 
-			Lens<T> lens; 										// Aberrations
+			Lens<T> cond_lens; 									// Condenser lens
+			Lens<T> obj_lens; 									// Objective lens
+
+			eLens_Var_Type cdl_var_type; 						// eLVT_off = 0, eLVT_m = 1, eLVT_f = 2, eLVT_Cs3 = 3, eLVT_Cs5 = 4, eLVT_mfa2 = 5, eLVT_afa2 = 6, eLVT_mfa3 = 7, eLVT_afa3 = 8, eLVT_inner_aper_ang = 9, eLVT_outer_aper_ang = 10
+			Vector<T, e_host> cdl_var; 							// Array of thicknesses
 
 			bool is_crystal;
 			Atom_Data<T> atoms; 								// atoms
@@ -122,10 +124,10 @@ namespace multem
 						potential_slicing(ePS_Planes), potential_type(ePT_Lobato_0_12), fp_dist(1), fp_seed(300183), 
 						fp_single_conf(false), fp_nconf(1), fp_iconf_0(1), tm_active(false), tm_theta(0), tm_u0(0, 0, 1), 
 						tm_rot_point_type(eRPT_geometric_center), tm_p0(1, 0, 0), microscope_effect(eME_Partial_Coherent), 
-						spatial_temporal_effect(eSTE_Spatial_Temporal), zero_defocus_type(eZDT_Last), zero_defocus_plane(0), 
-						thickness_type(eTT_Whole_Specimen), operation_mode(eOM_Normal), coherent_contribution(false), 
-						slice_storage(false), E_0(300), theta(0), phi(0), nrot(1), Vrl(c_Vrl), nR(c_nR), iw_type(eIWT_Plane_Wave), 
-						iw_x(0), iw_y(0), is_crystal(false), beam_x(0), beam_y(0), iscan(0), islice(0), dp_Shift(false), nstream(cpu_nthread){};
+						spatial_temporal_effect(eSTE_Spatial_Temporal), thickness_type(eTT_Whole_Specimen), 
+						operation_mode(eOM_Normal), coherent_contribution(false), slice_storage(false), E_0(300), lambda(0), 
+						theta(0), phi(0), nrot(1), Vrl(c_Vrl), nR(c_nR), iw_type(eIWT_Plane_Wave), iw_x(0), iw_y(0), 
+						is_crystal(false), beam_x(0), beam_y(0), iscan(0), islice(0), dp_Shift(false), nstream(cpu_nthread){};
 
 			void validate_parameters()
 			{
@@ -188,7 +190,14 @@ namespace multem
 				}
 				scanning.set_grid();
 
-				lens.set_input_data(E_0, grid);
+				lambda = get_lambda(E_0);
+
+				cond_lens.set_input_data(E_0, grid);
+				if(!cond_lens.is_zero_defocus_type_First())
+				{
+					cond_lens.zero_defocus_type = eZDT_User_Define;
+				}
+				obj_lens.set_input_data(E_0, grid);
 
 				theta = set_incident_angle(theta);
 				nrot = max(1, nrot);
@@ -197,21 +206,14 @@ namespace multem
 					nrot = 1;
 				}
 
-				// Set Incident wave type
-				if(is_plane_wave())
-				{
-					iw_type = eIWT_Plane_Wave;
-				}
-				else if(is_convergent_wave())
-				{
-					iw_type = eIWT_Convergent_Wave;
-				}
+				// set beam position
 				set_beam_position(iw_x, iw_y);
 
 				if(is_EELS() || is_EFTEM())
 				{
 					coherent_contribution = false;
 					interaction_model = multem::eESIM_Multislice;
+					microscope_effect = eME_Coherent;
 				}
 
 				if(is_EWFS_EWRS())
@@ -290,14 +292,33 @@ namespace multem
 				return thickness_type == eTT_Through_Thickness;
 			}
 			/**************************************************************************************/
+			void set_incident_wave_type(eIncident_Wave_Type iw_type_i)
+			{
+				if(iw_type_i == eIWT_Auto)
+				{
+					if(is_scanning() || is_CBED_CBEI() || ((is_EWFS_EWRS() || is_IWFS_IWRS()) && (iw_type == eIWT_Convergent_Wave)))
+					{
+						iw_type = eIWT_Convergent_Wave;
+					}
+					else
+					{
+						iw_type = eIWT_Plane_Wave;
+					}
+				}
+				else
+				{
+					iw_type = iw_type_i;
+				}
+			}
+
 			bool is_plane_wave() const
 			{
-				return !(is_user_define_wave() || is_convergent_wave());
+				return iw_type == eIWT_Plane_Wave;
 			}
 
 			bool is_convergent_wave() const
 			{
-				return is_scanning() || is_CBED_CBEI() || ((is_EWFS_EWRS() || is_IWFS_IWRS() )&& (iw_type == eIWT_Convergent_Wave));
+				return iw_type == eIWT_Convergent_Wave;
 			}
 
 			bool is_user_define_wave() const
@@ -347,8 +368,8 @@ namespace multem
 
 			T set_incident_angle(const T &theta) const
 			{
-				T n = round(sin(theta)/(lens.lambda*grid.dg_min()));
-				return (isZero(theta))?0:asin(n*lens.lambda*grid.dg_min());
+				T n = round(sin(theta)/(lambda*grid.dg_min()));
+				return (isZero(theta))?0:asin(n*lambda*grid.dg_min());
 			}
 
 			T get_weight() const
@@ -361,6 +382,12 @@ namespace multem
 				phi = (irot == 0)?0.0:(c_2Pi*static_cast<T>(irot))/static_cast<T>(nrot);
 			}
 
+			inline
+			T get_propagator_factor(const T &z) const 
+			{ 
+				return -c_Pi*lambda*z; 
+			}
+
 			T Vr_factor() const
 			{
 				return get_Vr_factor(E_0, theta);
@@ -368,12 +395,12 @@ namespace multem
 
 			T gx_0() const
 			{
-				return sin(theta)*cos(phi)/lens.lambda;
+				return sin(theta)*cos(phi)/lambda;
 			}
 
 			T gy_0() const
 			{
-				return sin(theta)*sin(phi)/lens.lambda;
+				return sin(theta)*sin(phi)/lambda;
 			}
 
 			void set_eels_fr_atom(const int &iatom, const Atom_Data<T> &atoms)
@@ -382,6 +409,59 @@ namespace multem
 				eels_fr.y = get_Ry_pos_shift(atoms.y[iatom]);
 				eels_fr.occ = atoms.occ[iatom];
 			}
+
+			/**************************************************************************************/
+			bool is_lvt_off() const
+			{
+				return cdl_var == eLVT_off;
+			}
+
+			bool is_lvt_m() const
+			{
+				return cdl_var == eLVT_m;
+			}
+
+			bool is_lvt_Cs3() const
+			{
+				return cdl_var == eLVT_Cs3;
+			}
+
+			bool is_lvt_Cs5() const
+			{
+				return cdl_var == eLVT_Cs5;
+			}
+
+			bool is_lvt_mfa2() const
+			{
+				return cdl_var == eLVT_mfa2;
+			}
+
+			bool is_lvt_afa2() const
+			{
+				return cdl_var == eLVT_afa2;
+			}
+
+			bool is_lvt_mfa3() const
+			{
+				return cdl_var == eLVT_mfa3;
+			}
+
+			bool is_lvt_afa3 () const
+			{
+				return cdl_var == eLVT_afa3;
+			}
+
+			bool is_lvt_inner_aper_ang() const
+			{
+				return cdl_var == eLVT_inner_aper_ang;
+			}
+
+			bool is_lvt_outer_aper_ang () const
+			{
+				return cdl_var == eLVT_outer_aper_ang;
+			}
+
+			/**************************************************************************************/
 
 			bool is_Still_Atom() const
 			{
@@ -614,14 +694,14 @@ namespace multem
 				return !is_simulation_type_FS();
 			}
 
-			bool is_HRTEM_HCI_EFTEM() const
+			bool is_ISTEM_CBEI_HRTEM_HCI_EFTEM() const
 			{
-				return is_HRTEM() || is_HCI() || is_EFTEM(); 
+				return is_ISTEM() || is_CBEI() || is_HRTEM() || is_HCI() || is_EFTEM(); 
 			}
 
 			eSpace get_simulation_space() const
 			{
-				return (is_simulation_type_FS() || is_HRTEM_HCI_EFTEM())?eS_Reciprocal:eS_Real; 
+				return (is_simulation_type_FS() || is_ISTEM_CBEI_HRTEM_HCI_EFTEM())?eS_Reciprocal:eS_Real; 
 			}
 			bool is_scanning() const
 			{

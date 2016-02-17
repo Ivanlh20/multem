@@ -10,14 +10,13 @@ CrysPar.nuLayer = 2;
 charge = 0;
 % Au = 79
 % x y z Z sigma occupancy
-CrysPar.uLayer(1).atoms = [79, charge, 0.0, 0.0, 0.0, 0.084, 1; 79, charge, 0.5, 0.5, 0.0, 0.084, 1]; 
-CrysPar.uLayer(2).atoms = [79, charge, 0.0, 0.5, 0.5, 0.084, 1; 79, charge, 0.5, 0.0, 0.5, 0.084, 1];
+rmsd_3d = 0.085;
+CrysPar.uLayer(1).atoms = [79, 0.0, 0.0, 0.0, rmsd_3d, 1, charge; 79, 0.5, 0.5, 0.0, rmsd_3d, 1, charge]; 
+CrysPar.uLayer(2).atoms = [79, 0.0, 0.5, 0.5, rmsd_3d, 1, charge; 79, 0.5, 0.0, 0.5, rmsd_3d, 1, charge];
 
 tic;
 Crys3D = il_crystal_by_layers(CrysPar);
 toc;
 
-figure(1);
-plot3(Crys3D(:, 3), Crys3D(:, 4), Crys3D(:, 5), '*r');
-axis equal;
-length(Crys3D)
+% show crystal
+show_crystal(1, Crys3D);

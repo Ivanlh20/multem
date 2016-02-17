@@ -64,6 +64,8 @@ namespace multem
 				atoms_u.Sort_by_z();
 				atoms_u.get_z_layer();
 
+				//convergent beam
+				input_multislice->cond_lens.zero_defocus_plane = input_multislice->cond_lens.get_zero_defocus_plane(atoms_u.z.front(), atoms_u.z.back());
 				/***************************************************************************/
 				if((atoms_u.s_z_Int < 2.0*input_multislice->grid.dz) || ((atoms_u.z_layer.size() == 1) && input_multislice->is_slicing_by_planes()))
 				{
@@ -79,7 +81,8 @@ namespace multem
 				}
 
 				atoms.set_Atoms(atoms_u, false, &atom_type);
-
+				// This is needed for memory preallocation in Transmission function
+				get_slicing(slice);
 				/***************************************************************************/
 				rand.set_input_data(input_multislice->fp_seed, input_multislice->fp_dim);
 			}
@@ -156,34 +159,6 @@ namespace multem
 			// get thickness
 			void get_thickness(const Vector<T, e_host> &z_slice, Thickness<T, e_host> &thickness)
 			{
-				auto get_zero_defocus_plane = [&](const T &z_min, const T &z_max)->T
-				{
-					T defocus_plane = 0;
-					switch(input_multislice->zero_defocus_type)
-					{
-						case eZDT_First:
-						{
-							defocus_plane = z_min;
-						}
-						break;
-						case eZDT_Middle:
-						{
-							defocus_plane = 0.5*(z_min + z_max);
-						}
-						break;
-						case eZDT_Last:
-						{
-							defocus_plane = z_max;
-						}
-						break;
-						default:
-						{
-							defocus_plane = input_multislice->zero_defocus_plane;
-						}
-					}
-					return defocus_plane;
-				};
-
 				auto get_islice = [&](const Vector<T, e_host> &z_slice, const T &z)->int
 				{
 					if(input_multislice->is_through_slices())
@@ -220,7 +195,7 @@ namespace multem
 					auto iatom_e = atoms_u.find_by_z(z_slice[islice+1], false);
 					thickness.iatom_e[i] = iatom_e;
 
-					thickness.z_zero_def_plane[i] = get_zero_defocus_plane(atoms_u.z[0], atoms_u.z[iatom_e]);
+					thickness.z_zero_def_plane[i] = input_multislice->obj_lens.get_zero_defocus_plane(atoms_u.z[0], atoms_u.z[iatom_e]);
 					if(input_multislice->is_through_slices())
 					{
 						thickness.z_back_prop[i] = 0;
@@ -246,7 +221,7 @@ namespace multem
 					slice.resize(thickness.size());
 					std::fill(slice.ithk.begin(), slice.ithk.end(), -1);
 
-					for(auto islice =0; islice<slice.size(); islice++)
+					for(auto islice = 0; islice<slice.size(); islice++)
 					{
 						thickness.islice[islice] = islice;
 						thickness.z_back_prop[islice] = thickness.z_zero_def_plane[islice] - thickness.z[islice];
@@ -263,11 +238,11 @@ namespace multem
 
 				slice.resize(z_slice.size()-1);
 				std::fill(slice.ithk.begin(), slice.ithk.end(), -1);
-				for(auto ithk =0; ithk<thickness.size(); ithk++)
+				for(auto ithk = 0; ithk<thickness.size(); ithk++)
 				{
 					slice.ithk[thickness.islice[ithk]] = ithk;
 				}
-				for(auto islice =0; islice<slice.size(); islice++)
+				for(auto islice = 0; islice<slice.size(); islice++)
 				{
 					slice.z_0[islice] = z_slice[islice]; 
 					slice.z_e[islice] = z_slice[islice + 1];

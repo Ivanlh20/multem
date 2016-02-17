@@ -78,7 +78,7 @@ namespace multem
 				if(this->input_multislice->grid.bwl)
 				{
 					fft2->forward(Trans_o);
-					multem::bandwidth_limit(*(this->stream), this->input_multislice->grid, 0, this->input_multislice->grid.gl_max, this->input_multislice->grid.inxy, Trans_o);
+					multem::bandwidth_limit(*(this->stream), this->input_multislice->grid, Trans_o);
 					fft2->inverse(Trans_o);
 				}
 			}
@@ -123,7 +123,7 @@ namespace multem
 				Projected_Potential<T, dev>::move_atoms(fp_iconf);
 
 				// Calculate transmission functions
-				for(auto islice =0; islice< memory_slice.n_slice_cur(this->slice.size()); islice++)
+				for(auto islice = 0; islice< memory_slice.n_slice_cur(this->slice.size()); islice++)
 				{
 					if(memory_slice.is_potential())
 					{

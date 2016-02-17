@@ -1,10 +1,10 @@
 function [atoms] = center_specimen(atoms, lx, ly, lz)
-atoms(:, 2) = atoms(:, 2) - min(atoms(:, 2));
 atoms(:, 3) = atoms(:, 3) - min(atoms(:, 3));
 atoms(:, 4) = atoms(:, 4) - min(atoms(:, 4));
-lxs = 0.5*(lx-max(atoms(:, 2)));
-lys = 0.5*(ly-max(atoms(:, 3)));
-lzs = 0.5*(lz-max(atoms(:, 4)));
-atoms(:, 2) = atoms(:, 2) + lxs;
-atoms(:, 3) = atoms(:, 3) + lys;
-atoms(:, 4) = atoms(:, 4) + lzs;
+atoms(:, 5) = atoms(:, 5) - min(atoms(:, 5));
+lxs = 0.5*(lx-max(atoms(:, 3)));
+lys = 0.5*(ly-max(atoms(:, 4)));
+lzs = 0.5*(lz-max(atoms(:, 5)));
+atoms(:, 3) = atoms(:, 3) + lxs;
+atoms(:, 4) = atoms(:, 4) + lys;
+atoms(:, 5) = atoms(:, 5) + lzs;

@@ -105,10 +105,32 @@ namespace multem
 				return range;
 			}
 
+			Range get_range_yx(const int &istream)
+			{
+				Range range;
+				
+				int qnxy = nxy/n_act_stream;
+				range.ixy_0 = istream*qnxy;
+				range.ixy_e = (istream+1)*qnxy;
+
+				int qny = ny/n_act_stream;
+				range.iy_0 = istream*qny;
+				range.iy_e = (istream+1)*qny;
+				range.ix_0 = 0;
+				range.ix_e = nx;
+
+				if(istream == n_act_stream-1)
+				{
+					range.iy_e += (ny - qny*n_act_stream);
+					range.ixy_e += (nxy - qnxy*n_act_stream);
+				}
+				return range;
+			}
+
 			template<class TFn>
 			void exec(TFn &fn)
 			{
-				if(n_act_stream<=0)
+				if(n_act_stream<= 0)
 				{
 					return;
 				}

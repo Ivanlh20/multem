@@ -49,7 +49,7 @@ namespace multem
 				{
 					energy_loss.set_input_data(input_multislice, &stream, &fft2);
 					psi_thk.resize(input_multislice->grid.nxy());
-					if(input_multislice->eels_fr.is_Double_Channelling_FOMS_SOMS())
+					if(input_multislice->eels_fr.is_Mixed_Channelling())
 					{
 						trans_thk.resize(input_multislice->grid.nxy());
 					}
@@ -93,6 +93,7 @@ namespace multem
 			}
 
 		private:
+
 			template<class TOutput_multislice>
 			void STEM_ISTEM(TOutput_multislice &output_multislice)
 			{
@@ -102,13 +103,13 @@ namespace multem
 
 				if(input_multislice->is_STEM() && input_multislice->coherent_contribution)
 				{
-					for(auto iscan =0; iscan < input_multislice->scanning.size(); iscan++)
+					for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
 					{	
 						input_multislice->set_beam_position(iscan);					
-						for(auto iconf =input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+						for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 						{
 							wave_function.move_atoms(iconf);		
-							wave_function.incident_wave(wave_function.psi_z);
+							wave_function.set_incident_wave(wave_function.psi_z);
 							wave_function.psi(w, wave_function.psi_z, output_multislice);
 						}
 
@@ -117,13 +118,13 @@ namespace multem
 				}
 				else
 				{
-					for(auto iconf =input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 					{
-						wave_function.move_atoms(iconf);		
-						for(auto iscan =0; iscan < input_multislice->scanning.size(); iscan++)
+						wave_function.move_atoms(iconf);	
+						for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
 						{
 							input_multislice->set_beam_position(iscan);
-							wave_function.incident_wave(wave_function.psi_z);
+							wave_function.set_incident_wave(wave_function.psi_z);
 							wave_function.psi(w, wave_function.psi_z, output_multislice);
 						}
 					}
@@ -154,13 +155,13 @@ namespace multem
 
 				output_multislice.init();
 
-				for(auto iconf =input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+				for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 				{
 					wave_function.move_atoms(iconf);		
-					for(auto irot =0; irot < input_multislice->nrot; irot++)
+					for(auto irot = 0; irot < input_multislice->nrot; irot++)
 					{
 						input_multislice->set_phi(irot);
-						wave_function.incident_wave(wave_function.psi_z);
+						wave_function.set_incident_wave(wave_function.psi_z);
 						wave_function.psi(w, wave_function.psi_z, output_multislice);
 					}
 				}
@@ -178,10 +179,10 @@ namespace multem
 
 				output_multislice.init();
 
-				for(auto iconf =input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+				for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 				{
 					wave_function.move_atoms(iconf);		
-					wave_function.incident_wave(wave_function.psi_z);
+					wave_function.set_incident_wave(wave_function.psi_z);
 					wave_function.psi(w, wave_function.psi_z, output_multislice);
 				}
 
@@ -201,21 +202,21 @@ namespace multem
 					value_type_r gx_0 = input_multislice->gx_0();
 					value_type_r gy_0 = input_multislice->gy_0();
 
-					for(auto islice =0; islice < wave_function.slice.size(); islice++)
+					for(auto islice = 0; islice < wave_function.slice.size(); islice++)
 					{
-						if(input_multislice->eels_fr.is_Double_Channelling_FOMS_SOMS())
+						if(input_multislice->eels_fr.is_Mixed_Channelling())
 						{
 							wave_function.trans(islice, wave_function.slice.size()-1, trans_thk);
 						}			
 
-						for(auto iatom =wave_function.slice.iatom_0[islice]; iatom <= wave_function.slice.iatom_e[islice]; iatom++)
+						for(auto iatom = wave_function.slice.iatom_0[islice]; iatom <= wave_function.slice.iatom_e[islice]; iatom++)
 						{
 							if(wave_function.atoms.Z[iatom] == input_multislice->eels_fr.Z)
 							{
 								input_multislice->set_eels_fr_atom(iatom, wave_function.atoms);
 								energy_loss.set_atom_type(input_multislice->eels_fr);
 
-								for(auto ikn =0; ikn < energy_loss.kernel.size(); ikn++)
+								for(auto ikn = 0; ikn < energy_loss.kernel.size(); ikn++)
 								{
 									multem::multiply(stream, energy_loss.kernel[ikn], psi_z, wave_function.psi_z);
 									wave_function.psi(islice, wave_function.slice.size()-1, w, trans_thk, output_multislice);
@@ -230,23 +231,23 @@ namespace multem
 
 				if(input_multislice->is_EELS())
 				{
-					for(auto iconf =input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 					{
 						wave_function.move_atoms(iconf);		
-						for(auto iscan =0; iscan < input_multislice->scanning.size(); iscan++)
+						for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
 						{
 							input_multislice->set_beam_position(iscan);
-							wave_function.incident_wave(psi_thk);
+							wave_function.set_incident_wave(psi_thk);
 							psi(w, psi_thk, output_multislice);
 						}
 					}
 				}
 				else
 				{
-					for(auto iconf =input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
 					{
 						wave_function.move_atoms(iconf);		
-						wave_function.incident_wave(psi_thk);
+						wave_function.set_incident_wave(psi_thk);
 						psi(w, psi_thk, output_multislice);
 					}
 				}

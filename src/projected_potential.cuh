@@ -85,7 +85,7 @@ namespace multem
 					stream->set_n_act_stream(iatom_e-iatom+1);
 					set_atom_Vp(z_0, z_e, iatom, *stream, atom_Vp);
 					get_cubic_poly_coef_Vz(*stream, atom_Vp);
-					multem::eval_cubic_poly(*stream, this->input_multislice->grid, atom_Vp, V);
+					multem::eval_cubic_poly<true>(*stream, this->input_multislice->grid, atom_Vp, V);
 					iatom += stream->n_act_stream;
 				}
 
@@ -159,7 +159,7 @@ namespace multem
 				Vector<Vector<T, dev>, e_host> c3; 		// third coefficient
 			};
 
-			void set_atom_Vp(const value_type_r &z_0, const value_type_r &z_e, int iatom, Stream<dev> &stream, Vector<Atom_Vp<value_type_r>, e_host> &atom_Vp)
+			void set_atom_Vp(const value_type_r &z_0, const value_type_r &z_e, int iatom, Stream<dev> &stream, Vector<Atom_Vp<value_type_r, dev>, e_host> &atom_Vp)
 			{
 				for(auto istream = 0; istream < stream.n_act_stream; istream++)
 				{
@@ -177,6 +177,8 @@ namespace multem
 					atom_Vp[istream].R2 = raw_pointer_cast(coef.R2.data());
 					atom_Vp[istream].set_ix0_ixn(this->input_multislice->grid, coef.R_max);
 					atom_Vp[istream].set_iy0_iyn(this->input_multislice->grid, coef.R_max);
+					atom_Vp[istream].R2_tap = coef.R2_tap();
+					atom_Vp[istream].tap_cf = coef.tap_cf;
 					atom_Vp[istream].iv = raw_pointer_cast(stream_data.iv[istream].data());
 					atom_Vp[istream].v = raw_pointer_cast(stream_data.v[istream].data());
 
@@ -203,11 +205,12 @@ namespace multem
 				}
 			}
 			
-			void get_cubic_poly_coef_Vz(Stream<dev> &stream, Vector<Atom_Vp<value_type_r>, e_host> &atom_Vp)
+			void get_cubic_poly_coef_Vz(Stream<dev> &stream, Vector<Atom_Vp<value_type_r, dev>, e_host> &atom_Vp)
 			{
 				if(this->input_multislice->is_subslicing())
 				{
-					multem::get_cubic_poly_coef_Vz(stream, this->input_multislice->potential_type, qz, atom_Vp);
+					multem::linear_Vz(stream, this->input_multislice->potential_type, qz, atom_Vp);
+					multem::cubic_poly_coef(stream, atom_Vp);
 				}
 			}
 
@@ -215,7 +218,7 @@ namespace multem
 			Vector<Atom_Type<value_type_r, dev>, e_host> atom_type; // Atom types
 
 			Stream_Data stream_data;
-			Vector<Atom_Vp<value_type_r>, e_host> atom_Vp;
+			Vector<Atom_Vp<value_type_r, dev>, e_host> atom_Vp;
 	};
 
 } // namespace multem

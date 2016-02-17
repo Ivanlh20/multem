@@ -27,7 +27,7 @@ namespace multem
 	class Quadrature{
 		public:
 			template<class TQ1>
-			void get(const int &Quad_Type, const int &nQuad, TQ1 &Q, const double &tai =4.0)
+			void get(const int &Quad_Type, const int &nQuad, TQ1 &Q, const double &tai = 4.0)
 			{
 				using value_type = Value_type<TQ1>;
 

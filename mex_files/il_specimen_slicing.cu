@@ -60,7 +60,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 
 	auto atoms = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "atoms");
 
-	input_multislice.atoms.set_Atoms(atoms.rows, atoms.real, lx, ly);
+	input_multislice.atoms.set_Atoms(atoms.rows, atoms.cols, atoms.real, lx, ly);
 	input_multislice.grid.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
 	input_multislice.validate_parameters();
  }
@@ -82,12 +82,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	for(auto i = 0; i<atomsM.rows; i++)
 	{
 		atomsM.real[0*atomsM.rows+i] = specimen.atoms.Z[i];
-		atomsM.real[1*atomsM.rows+i] = specimen.atoms.charge[i];
-		atomsM.real[2*atomsM.rows+i] = specimen.atoms.x[i];
-		atomsM.real[3*atomsM.rows+i] = specimen.atoms.y[i];
-		atomsM.real[4*atomsM.rows+i] = specimen.atoms.z[i];
-		atomsM.real[5*atomsM.rows+i] = specimen.atoms.sigma[i];
-		atomsM.real[6*atomsM.rows+i] = specimen.atoms.occ[i];
+		atomsM.real[1*atomsM.rows+i] = specimen.atoms.x[i];
+		atomsM.real[2*atomsM.rows+i] = specimen.atoms.y[i];
+		atomsM.real[3*atomsM.rows+i] = specimen.atoms.z[i];
+		atomsM.real[4*atomsM.rows+i] = specimen.atoms.sigma[i];
+		atomsM.real[5*atomsM.rows+i] = specimen.atoms.occ[i];
+		atomsM.real[6*atomsM.rows+i] = specimen.atoms.charge[i];
 	}
 
 	for(auto i = 0; i<sliceM.rows; i++)

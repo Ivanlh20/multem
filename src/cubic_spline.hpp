@@ -66,7 +66,7 @@ namespace multem
 			m_mu[0] = 0;
 			m_z[0] = 0;
 
-			for(auto i =1; i < n; i++)
+			for(auto i = 1; i < n; i++)
 			{
 				m_l[i] = 2*(m_x[i+1]-m_x[i-1])-m_h[i-1]*m_mu[i-1];
 				m_mu[i] = m_h[i]/m_l[i];
@@ -89,7 +89,7 @@ namespace multem
 		T operator() (T x) const
 		{
 			size_t n =m_x.size();
-			// find the closest point m_x[idx] < x, idx =0 even if x<m_x[0]
+			// find the closest point m_x[idx] < x, idx = 0 even if x<m_x[0]
 			//std::vector<T>::const_iterator it;
 			auto it =std::lower_bound(m_x.begin(), m_x.end(), x);
 			int idx =std::max(int(it-m_x.begin())-1, 0);

@@ -64,7 +64,9 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.grid.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
 
 	/****************************** Incident wave ********************************/
-	input_multislice.iw_type = mx_get_scalar_field<multem::eIncident_Wave_Type>(mx_input_multislice, "iw_type");
+	auto iw_type = mx_get_scalar_field<multem::eIncident_Wave_Type>(mx_input_multislice, "iw_type");
+	input_multislice.set_incident_wave_type(iw_type);
+
 	if(input_multislice.is_user_define_wave() && full)
 	{
 		auto iw_psi = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "iw_psi");
@@ -72,8 +74,8 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 		multem::assign(stream, iw_psi, input_multislice.iw_psi);
 	}
 
-	input_multislice.lens.f = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_f"); 									// defocus(Angstrom)
-	input_multislice.lens.set_input_data(input_multislice.E_0, input_multislice.grid);
+	input_multislice.obj_lens.f = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_f"); 									// defocus(Angstrom)
+	input_multislice.obj_lens.set_input_data(input_multislice.E_0, input_multislice.grid);
 
 	input_multislice.validate_parameters();
  }
@@ -115,7 +117,7 @@ void il_propagate(const mxArray *mxB, multem::Output_Multislice_Matlab &output_m
 	T gx_0 = input_multislice.gx_0();
 	T gy_0 = input_multislice.gy_0();
 
-	propagator.propagate(multem::eS_Real, gx_0, gy_0, input_multislice.lens.f, output_multislice);
+	propagator.propagate(multem::eS_Real, gx_0, gy_0, input_multislice.obj_lens.f, output_multislice);
 
 	fft2.cleanup();
 }

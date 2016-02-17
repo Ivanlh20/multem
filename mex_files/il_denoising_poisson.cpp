@@ -39,7 +39,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	multem::Stream<e_host> stream;
 	stream.resize(4);
 	multem::anscombe_forward(stream, Im, Im_d);
-	multem::filter_wiener(stream, Im_d.rows, Im_d.cols, Im_d, nkr_w, Im_d);
-	multem::filter_median(stream, Im_d.rows, Im_d.cols, Im_d, nkr_m, Im_d);
+	multem::filter_wiener_2d(stream, Im_d.rows, Im_d.cols, Im_d, nkr_w, Im_d);
+	if(nkr_m>0)
+	{
+		multem::filter_median_2d(stream, Im_d.rows, Im_d.cols, Im_d, nkr_m, Im_d);
+	}
 	multem::anscombe_inverse(stream, Im_d, Im_d);
 }

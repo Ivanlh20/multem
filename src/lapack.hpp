@@ -110,7 +110,7 @@ namespace lapack
 
 				//query optimal size of work array
 				int lwork = -1;
-				T work_query=0;
+				T work_query= 0;
 				gels(trans, m, n, nrhs, A, lda, bv.data(), ldb, &work_query, lwork, info);
 
 				//set arrays
@@ -120,7 +120,7 @@ namespace lapack
 				//perform minimum-norm solution
 				gels(trans, m, n, nrhs, A, lda, bv.data(), ldb, work.data(), lwork, info);
 
-				for(auto ix=0; ix<nrhs; ix++)
+				for(auto ix= 0; ix<nrhs; ix++)
 				{
 					std::copy(bv.begin()+ix*m, bv.begin()+ix*m+n, x+ix*n);
 				}
@@ -167,8 +167,8 @@ namespace lapack
 
 				//query optimal size of work array
 				int lwork = -1;
-				T work_query=0;
-				int iwork_query=0;
+				T work_query= 0;
+				int iwork_query= 0;
 				gelsd(m, n, nrhs, A, lda, bv.data(), ldb, S.data(), rcond, rank, &work_query, lwork, &iwork_query, info);
 
 				//set arrays
@@ -181,7 +181,7 @@ namespace lapack
 				//perform minimum-norm solution
 				gelsd(m, n, nrhs, A, lda, bv.data(), ldb, S.data(), rcond, rank, work.data(), lwork, iwork.data(), info);
 
-				for(auto ix=0; ix<nrhs; ix++)
+				for(auto ix= 0; ix<nrhs; ix++)
 				{
 					std::copy(bv.begin()+ix*m, bv.begin()+ix*m+n, x+ix*n);
 				}

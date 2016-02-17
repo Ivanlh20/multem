@@ -133,7 +133,7 @@ namespace multem
 	{
 		template<class TFn, class T>
 		inline
-		T Root_Finder(TFn fn, T x0, T xe, const T Tol =1e-8, const int itMax =200)
+		T Root_Finder(TFn fn, T x0, T xe, const T Tol = 1e-8, const int itMax = 200)
 		{
 			int it = 0;
 			T x, fx, fxe = fn(xe);
@@ -1391,28 +1391,11 @@ namespace multem
 
 		template<class T>
 		DEVICE_CALLABLE FORCEINLINE 
-		T eval_cubic_poly(const T &R2, const Atom_Ip<T> &atom_Ip)
+		T eval_cubic_poly(const T &R2, const Atom_Sa<T> &atom_Ip)
 		{
 			int iR = unrolledBinarySearch_c_nR<T>(R2, atom_Ip.R2);
 			T dx = R2 - atom_Ip.R2[iR]; 
 			return ((atom_Ip.c3[iR]*dx + atom_Ip.c2[iR])*dx + atom_Ip.c1[iR])*dx + atom_Ip.c0[iR];
-		}
-
-		// Get Local interpolation coefficients
-		template<class T>
-		DEVICE_CALLABLE FORCEINLINE 
-		void cubic_poly_coef(const int &iR, Atom_Vp<T> &atom_Vp)
-		{
-			T idR = 1.0/(atom_Vp.R2[iR+1]-atom_Vp.R2[iR]);
-			T V = atom_Vp.c0[iR]; 
-			T Vn = atom_Vp.c0[iR+1];
-			T dV = atom_Vp.c1[iR]; 
-			T dVn = atom_Vp.c1[iR+1];
-			T m = (Vn-V)*idR; 
-			T n = dV+dVn;
-			atom_Vp.c0[iR] = V-atom_Vp.c0[c_nR-1];
-			atom_Vp.c2[iR] = (3.0*m-n-dV)*idR;
-			atom_Vp.c3[iR] = (n-2.0*m)*idR*idR;
 		}
 
 		// cosine tapering
@@ -1429,25 +1412,58 @@ namespace multem
 			}
 		}
 
-		// Cubic polynomial evaluation
-		template<class T> 
+		// Get Local interpolation coefficients
+		template<class TAtom>
 		DEVICE_CALLABLE FORCEINLINE 
-		T eval_cubic_poly(int ix, int iy, const Grid<T> &grid, T R2, const Atom_Vp<T> &atom_Vp, int &ixy)
+		void cubic_poly_coef(const int &iR, TAtom &atom)
+		{
+			auto idR = 1.0/(atom.R2[iR+1]-atom.R2[iR]);
+			auto V = atom.c0[iR]; 
+			auto Vn = atom.c0[iR+1];
+			auto dV = atom.c1[iR]; 
+			auto dVn = atom.c1[iR+1];
+			auto m = (Vn-V)*idR; 
+			auto n = dV+dVn;
+			atom.c2[iR] = (3.0*m-n-dV)*idR;
+			atom.c3[iR] = (n-2.0*m)*idR*idR;
+		}
+
+		// Cubic polynomial evaluation
+		template<bool TShift, class T, class TAtom> 
+		DEVICE_CALLABLE FORCEINLINE 
+		T eval_cubic_poly(int ix, int iy, const Grid<T> &grid, T R2, const TAtom &atom, int &ixy)
 		{
 			// R2 = max(R2, atom_Vp.R2_min);
 
 			ix -= static_cast<int>(floor(grid.Rx(ix)/grid.lx))*grid.nx;
 			iy -= static_cast<int>(floor(grid.Ry(iy)/grid.ly))*grid.ny;
 
-			ix = grid.iRx_shift(ix);
-			iy = grid.iRy_shift(iy);
+			if(TShift)
+			{
+				ix = grid.iRx_shift(ix);
+				iy = grid.iRy_shift(iy);
+			}
 			ixy = grid.ind_col(ix, iy);
 
-			ix = unrolledBinarySearch_c_nR<T>(R2, atom_Vp.R2);
+			ix = unrolledBinarySearch_c_nR<T>(R2, atom.R2);
 
-			T dx = R2 - atom_Vp.R2[ix]; 
-			T V = ((atom_Vp.c3[ix]*dx + atom_Vp.c2[ix])*dx + atom_Vp.c1[ix])*dx + atom_Vp.c0[ix];
-			return atom_Vp.occ*V;
+			T dx = R2 - atom.R2[ix]; 
+			T V = ((atom.c3[ix]*dx + atom.c2[ix])*dx + atom.c1[ix])*dx + atom.c0[ix];
+			return atom.occ*V;
+		}
+
+		// get linear Gaussian
+		template<class TAtom> 
+		DEVICE_CALLABLE FORCEINLINE 
+		void linear_Gaussian(int iR, const TAtom &atom)
+		{
+			auto alpha = atom.alpha;
+			auto x = atom.R2[iR] = -log(1+iR*atom.dtR)/alpha;
+			auto y = atom.a*exp(-alpha*x);
+			auto dy = -alpha*y;
+			apply_tapering(atom.R2_tap, atom.tap_cf, x, y, dy);
+			atom.c0[iR] = y;
+			atom.c1[iR] = dy;
 		}
 
 		template<class TGrid, class TVector>
@@ -1500,19 +1516,22 @@ namespace multem
 
 		template<class TGrid, class TVector_c>
 		DEVICE_CALLABLE FORCEINLINE 
-		void bandwidth_limit(const int &ix, const int &iy, const TGrid &grid, const Value_type<TGrid> &g2_min, const Value_type<TGrid> &g2_max, const Value_type<TVector_c> &w, TVector_c &M_io)
+		void bandwidth_limit(const int &ix, const int &iy, const TGrid &grid, TVector_c &M_io)
 		{
+			int ixy = grid.ind_col(ix, iy); 
+			auto f = grid.bwl_factor(ix, iy);
+			M_io[ixy] *= f;
+		}
+
+		template<class TGrid, class TVector_c>
+		DEVICE_CALLABLE FORCEINLINE 
+		void hard_aperture(const int &ix, const int &iy, const TGrid &grid, const Value_type<TGrid> &g2_max, const Value_type<TGrid> &w, TVector_c &M_io)
+		{
+			using T = Value_type<TVector_c>;
 			int ixy = grid.ind_col(ix, iy); 
 			auto g2 = grid.g2_shift(ix, iy);
 
-			if((g2_min <= g2)&&(g2 <= g2_max))
-			{
-				M_io[ixy] *= w;
-			}
-			else
-			{
- 				M_io[ixy] = 0;
-			}
+			M_io[ixy] = ((g2 <= g2_max))?(T(w)*M_io[ixy]):0;
 		}
 
 		template<class TGrid, class TVector_c>
@@ -1532,16 +1551,8 @@ namespace multem
 			using value_type_r = Value_type_r<TVector_c>;
 
 			int ixy = grid.ind_col(ix, iy);
-			value_type_r g2 = grid.g2_shift(ix, iy);
-
-			if((!grid.bwl)||(g2 < grid.gl2_max))
-			{
-				psi_o[ixy] = grid.inxy*psi_i[ixy]*prop_x_i[ix]*prop_y_i[iy];
-			}
-			else
-			{
- 				psi_o[ixy] = 0;
-			}
+			auto v = psi_i[ixy]*prop_x_i[ix]*prop_y_i[iy];
+			psi_o[ixy] = (grid.bwl)?(grid.bwl_factor(ix, iy)*v):(grid.inxy*v);
 		}
 
 		template<class TGrid, class TVector_c>
@@ -1594,19 +1605,18 @@ namespace multem
 			using value_type_r = Value_type<TGrid>;
 
 			int ixy = grid.ind_col(ix, iy);
-			value_type_r gx = grid.gx_shift(ix);
-			value_type_r gy = grid.gy_shift(iy);
+			value_type_r gx = grid.gx_shift(ix)+gxu;
+			value_type_r gy = grid.gy_shift(iy)+gyu;
 			value_type_r g2 = gx*gx + gy*gy;
 
 			if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
 			{
-				g2 = (gx-gxu)*(gx-gxu) + (gy-gyu)*(gy-gyu);
 				value_type_r chi = g2*(lens.cCs5*g2*g2+lens.cCs3*g2+lens.cf);
-				if(nonZero(lens.cmfa2)||nonZero(lens.cmfa3))
+				if(nonZero(lens.m)||nonZero(lens.cmfa2)||nonZero(lens.cmfa3))
 				{
 					value_type_r g = sqrt(g2);
 					value_type_r phi = atan2(gy, gx);
-					chi += lens.cmfa2*g2*sin(2*(phi-lens.afa2)) + lens.cmfa3*g*g2*sin(3*(phi-lens.afa3)); 			
+					chi += lens.m*phi + lens.cmfa2*g2*sin(2*(phi-lens.afa2)) + lens.cmfa3*g*g2*sin(3*(phi-lens.afa3)); 		
 				}
 				fPsi_o[ixy] = fPsi_i[ixy]*euler(chi);
 			}
@@ -1849,7 +1859,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void feg(const ePotential_Type &potential_type, const int &charge, const T &g, const rPP_Coef<T> &c_feg, T &y)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -1890,7 +1900,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void feg_dfeg(const ePotential_Type &potential_type, const int &charge, const T &g, const rPP_Coef<T> &c_feg, T &y, T &dy)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -1931,7 +1941,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void fxg(const ePotential_Type &potential_type, const int &charge, const int &Z, const T &g, const rPP_Coef<T> &c_fxg, T &y)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -1972,7 +1982,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void fxg_dfxg(const ePotential_Type &potential_type, const int &charge, const int &Z, const T &g, const rPP_Coef<T> &c_fxg, T &y, T &dy)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -2013,7 +2023,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void Pr(const ePotential_Type &potential_type, const int &charge, const T &r, const rPP_Coef<T> &c_Pr, T &y)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -2054,7 +2064,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void Pr_dPr(const ePotential_Type &potential_type, const int &charge, const T &r, const rPP_Coef<T> &c_Pr, T &y, T &dy)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -2095,7 +2105,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void Vr(const ePotential_Type &potential_type, const int &charge, const T &r, const rPP_Coef<T> &c_Vr, T &y)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -2135,7 +2145,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void Vr_dVr(const ePotential_Type &potential_type, const int &charge, const T &r, const rPP_Coef<T> &c_Vr, T &y, T &dy)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -2176,7 +2186,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void VR(const ePotential_Type &potential_type, const int &charge, const T &R, const rPP_Coef<T> &c_VR, const rQ1<T> &Qz_0_I, T &y)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -2217,7 +2227,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void VR_dVR(const ePotential_Type &potential_type, const int &charge, const T &R, const rPP_Coef<T> &c_VR, const rQ1<T> &Qz_0_I, T &y, T &dy)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -2258,7 +2268,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void Vz(const ePotential_Type &potential_type, const int &charge, const T &z0, const T &ze, const T &R, const rPP_Coef<T> &c_Vr, const rQ1<T> &Qz_a_b, T &y)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -2299,7 +2309,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE 
 	void Vz_dVz(const ePotential_Type &potential_type, const int &charge, const T &z0, const T &ze, const T &R, const rPP_Coef<T> &c_Vr, const rQ1<T> &Qz_a_b, T &y, T &dy)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{
@@ -2339,7 +2349,7 @@ namespace multem
 	DEVICE_CALLABLE FORCEINLINE
 	void Vr_dVrir(const T &r, T *cl, T *cnl, T f, T &Vr, T &dVrir)
 	{
-		if(charge==0)
+		if(charge== 0)
 		{
 			switch(potential_type)
 			{

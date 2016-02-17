@@ -51,7 +51,7 @@ namespace multem
 					kernel.resize(1);
 				}
 
-				for(auto ikn =0; ikn<kernel.size(); ikn++)
+				for(auto ikn = 0; ikn<kernel.size(); ikn++)
 				{
 					kernel[ikn].resize(input_multislice->grid.nxy());
 				}

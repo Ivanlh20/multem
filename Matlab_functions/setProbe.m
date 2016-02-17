@@ -1,7 +1,7 @@
 function[Probe]=setProbe(x0, y0, input_multislice)
 Probe.gpu = input_multislice.gpu;            % Gpu card
 Probe.E_0 = input_multislice.E_0;
-Probe.theta = 0.0; Probe.phi = 0; % Till ilumination (degrees)
+Probe.theta = 0.0; Probe.phi = 0; % Till ilumination (º)
 Probe.lx = input_multislice.lx; Probe.ly = input_multislice.ly;
 Probe.nx =input_multislice.nx; Probe.ny = input_multislice.ny;
 Probe.x0 = x0; Probe.y0 = y0;

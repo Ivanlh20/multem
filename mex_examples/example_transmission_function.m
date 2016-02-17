@@ -25,7 +25,7 @@ input_multislice.E_0 = 300;
 input_multislice.theta = 0.0; 
 input_multislice.phi = 0.0;
 
-na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc =2; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...

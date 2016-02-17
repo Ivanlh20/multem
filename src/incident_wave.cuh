@@ -53,7 +53,7 @@ namespace multem
 				}
 			}
 
-			void operator()(Vector<value_type_c, dev> &psi)
+			void operator()(Vector<value_type_c, dev> &psi, value_type_r z_init=0)
 			{
 				switch(input_multislice->iw_type)
 				{
@@ -67,8 +67,14 @@ namespace multem
 						value_type_r x = input_multislice->get_Rx_pos_shift();
 						value_type_r y = input_multislice->get_Ry_pos_shift();
 
-						multem::probe(*stream, input_multislice->grid, input_multislice->lens, x, y, psi);
+						auto f_0 = input_multislice->cond_lens.f;
+						auto f_s = f_0 - (input_multislice->cond_lens.zero_defocus_plane-z_init);
+						input_multislice->cond_lens.set_defocus(f_s);
+
+						multem::probe(*stream, input_multislice->grid, input_multislice->cond_lens, x, y, psi);
 						fft2->inverse(psi);
+
+						input_multislice->cond_lens.set_defocus(f_0);
 					}
 					break;
 					case eIWT_User_Define_Wave:

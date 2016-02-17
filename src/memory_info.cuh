@@ -81,8 +81,8 @@ task_info(targetTask, TASK_BASIC_INFO_64, (task_info_t) &ti, &count);
 		totalPhysMem *= memInfo.mem_unit;
 		long long physMemFree = memInfo.freeram;
 		physMemFree *= memInfo.mem_unit;
-		free = static_cast<double>(physMemFree)/(1048576.0);	// check if division by 1MB =1048576 is necessary
-		total = static_cast<double>(totalPhysMem)/(1048576.0);	// check if division by 1MB =1048576 is necessary
+		free = static_cast<double>(physMemFree)/(1048576.0);	// check if division by 1MB = 1048576 is necessary
+		total = static_cast<double>(totalPhysMem)/(1048576.0);	// check if division by 1MB = 1048576 is necessary
 #endif
 	}
 

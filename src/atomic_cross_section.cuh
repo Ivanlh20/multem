@@ -96,7 +96,7 @@ namespace multem
 				std::vector<double> r2_c(grid.nyh);
 				std::vector<double> fr_c(grid.nyh);
 				int ix = grid.nxh;
-				int ir =0;
+				int ir = 0;
 				for(auto iy =grid.nyh; iy<grid.ny; iy++)
 				{
 					r2_c[ir] = grid.R2(ix, iy, x, y);

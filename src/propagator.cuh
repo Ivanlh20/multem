@@ -58,7 +58,7 @@ namespace multem
 					if(input_multislice->grid.bwl)
 					{
 						fft2->forward(psi_i, psi_o); 
-						multem::bandwidth_limit(*stream, input_multislice->grid, 0, input_multislice->grid.gl_max, input_multislice->grid.inxy, psi_o);
+						multem::bandwidth_limit(*stream, input_multislice->grid, psi_o);
 						
 						if(space_out == eS_Real)
 						{
@@ -77,7 +77,7 @@ namespace multem
 				else
 				{
 					fft2->forward(psi_i, psi_o); 
-					multem::propagator_components(*stream, input_multislice->grid, gxu, gyu, input_multislice->lens.prop_factor(z), prop_x, prop_y);
+					multem::propagator_components(*stream, input_multislice->grid, gxu, gyu, input_multislice->get_propagator_factor(z), prop_x, prop_y);
 					multem::propagator_multiplication(*stream, input_multislice->grid, prop_x, prop_y, psi_o, psi_o);
 
 					if(space_out == eS_Real)

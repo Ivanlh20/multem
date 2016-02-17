@@ -44,7 +44,7 @@ namespace multem
 		T dv = (v_max-v_min)/nbins;
 
 		thrust::fill(y.begin(), y.end(), 0);
-		for(auto iv =0; iv<v.size(); iv++)
+		for(auto iv = 0; iv<v.size(); iv++)
 		{
 			int iy = min(static_cast<int>(floor((v[iv]-v_min)/dv)), nbins-1);
 			y[iy]++;
@@ -52,7 +52,7 @@ namespace multem
 
 		if(x!=nullptr)
 		{
-			for(auto ix =0; ix<nbins; ix++)
+			for(auto ix = 0; ix<nbins; ix++)
 			{
 				(*x)[ix] = v_min + ix*dv;
 			}
@@ -79,7 +79,7 @@ namespace multem
 		histogram(v, nbins, v_hist, &v_rang);
 
 		T sum_I = 0;
-		for (auto ibins =0; ibins<nbins; ibins++)
+		for (auto ibins = 0; ibins<nbins; ibins++)
 		{
 			sum_I += v_rang[ibins]*v_hist[ibins];
 		}
@@ -91,7 +91,7 @@ namespace multem
 		T var_Max = 0;
 		T threshold = 0;
 
-		for (int ibins =0; ibins<nbins; ibins++)
+		for (int ibins = 0; ibins<nbins; ibins++)
 		{
 			w_B += v_hist[ibins]; // Weight Background
 
@@ -248,10 +248,129 @@ namespace multem
 		stream.set_grid(nx_o, ny_o);
 		stream.exec(thr_scale_image);
 	}
+	
+	// wiener1
+	template<class TVector>
+	void filter_wiener_1d(Stream<e_host> &stream, int nx_i, TVector &Im_i, int nkr, TVector &Im_o)
+	{
+		using T = Value_type<TVector>;
+		int nk0 = -nkr;
+		int nke = nkr+1;
+		Vector<T, e_host> Im_mean(nx_i);
+		Vector<T, e_host> Im_var(nx_i);
+
+		auto thr_mean_var = [&](const Range &range)
+		{
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				int ix0 = max(ixy+nk0, 0);
+				int ixe = min(ixy+nke, nx_i);
+
+				T nxy = (ixe-ix0);
+				T x_mean = 0;
+				T x_var = 0;
+				for (auto ix = ix0; ix < ixe; ix++)
+				{
+					T x = Im_i[ix];
+					x_mean += x;
+					x_var += x*x;
+				}
+				x_mean = x_mean/nxy;
+				x_var = x_var/nxy - x_mean*x_mean;
+
+				Im_mean[ixy] = x_mean;
+				Im_var[ixy] = x_var;
+			}
+		};
+
+		stream.set_n_act_stream(nx_i);
+		stream.set_grid(nx_i, 1);
+		stream.exec(thr_mean_var);
+
+		auto v2 = multem::mean(stream, Im_var);
+
+		auto thr_filter_wiener = [&](const Range &range)
+		{
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				Im_o[ixy] = Im_mean[ixy] + ::fmax(T(0), Im_var[ixy]-v2)*(Im_i[ixy]-Im_mean[ixy])/::fmax(Im_var[ixy], v2);
+			}
+		};
+
+		stream.set_n_act_stream(nx_i);
+		stream.set_grid(nx_i, 1);
+		stream.exec(thr_filter_wiener);
+	}
+	
+	// wiener1
+	template<class TVector>
+	void filter_wiener_by_row(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr, TVector &Im_o)
+	{
+		using T = Value_type<TVector>;
+		int nk0 = -nkr;
+		int nke = nkr+1;
+		Vector<T, e_host> Im_mean(nx_i*ny_i);
+		Vector<T, e_host> Im_var(nx_i*ny_i);
+
+		auto krn_mean_var = [&](const int &ix_i, const int &iy_i, TVector &Im_i, Vector<T, e_host> &Im_mean, Vector<T, e_host> &Im_var)
+		{
+			int ix0 = max(ix_i+nk0, 0);
+			int ixe = min(ix_i+nke, nx_i);
+
+			T nxy = (ixe-ix0);
+			T x_mean = 0;
+			T x_var = 0;
+			for (auto ix = ix0; ix < ixe; ix++)
+			{
+				T x = Im_i[ix*ny_i+iy_i];
+				x_mean += x;
+				x_var += x*x;
+			}
+			x_mean = x_mean/nxy;
+			x_var = x_var/nxy - x_mean*x_mean;
+
+			int ixy = ix_i*ny_i+iy_i;
+			Im_mean[ixy] = x_mean;
+			Im_var[ixy] = x_var;
+		};
+
+		auto thr_mean_var = [&](const Range &range)
+		{
+			host_detail::matrix_iter(range, krn_mean_var, Im_i, Im_mean, Im_var);
+		};
+
+		stream.set_n_act_stream(nx_i);
+		stream.set_grid(nx_i, ny_i);
+		stream.exec(thr_mean_var);
+
+		auto thr_filter_wiener = [&](const Range &range)
+		{
+			for(auto iy = range.ixy_0; iy < range.ixy_e; iy++)
+			{
+				T v2 = 0;
+				for(auto ix = 0; ix < nx_i; ix++)
+				{
+					auto ixy = ix*ny_i+iy;
+					v2 = v2 + Im_var[ixy];
+				}
+				v2 /= nx_i;
+
+				for(auto ix = 0; ix < nx_i; ix++)
+				{
+					auto ixy = ix*ny_i+iy;
+					Im_o[ixy] = Im_mean[ixy] + ::fmax(T(0), Im_var[ixy]-v2)*(Im_i[ixy]-Im_mean[ixy])/::fmax(Im_var[ixy], v2);
+				}
+			}
+		};
+
+		stream.set_n_act_stream(ny_i);
+		stream.set_grid(ny_i, 1);
+		stream.exec(thr_filter_wiener);
+	}
 
 	// wiener2
 	template<class TVector>
-	void filter_wiener(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr, TVector &Im_o)
+	void filter_wiener_2d(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr, TVector &Im_o)
 	{
 		using T = Value_type<TVector>;
 		int nk0 = -nkr;
@@ -380,7 +499,77 @@ namespace multem
 	}
 
 	template<class TVector>
-	void filter_median(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr, TVector &Im_o)
+	void filter_median_1d(Stream<e_host> &stream, int nx_i, TVector &Im_i, int nkr, TVector &Im_o)
+	{
+		using T = Value_type<TVector>;
+		int nk0 = -nkr;
+		int nke = nkr+1;
+
+		Vector<T, e_host> Im(nx_i);
+		auto thr_filter_median = [&](const Range &range)
+		{
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				int ix0 = max(ixy+nk0, 0);
+				int ixe = min(ixy+nke, nx_i);
+
+				T nxy = (ixe-ix0);
+				Vector<T, e_host> v(nxy);
+				int iv = 0;
+				for (auto ix = ix0; ix < ixe; ix++)
+				{
+					v[iv++] = Im_i[ix];
+				}
+				auto median = v.begin() + nxy/2;
+				std::nth_element(v.begin(), median, v.end());
+				Im[ixy] = *median;
+			}
+		};
+
+		stream.set_n_act_stream(nx_i);
+		stream.set_grid(nx_i, 1);
+		stream.exec(thr_filter_median);
+		Im_o.assign(Im.begin(), Im.end());
+	}
+
+	template<class TVector>
+	void filter_median_by_row(Stream<e_host> &stream, int nx_i, int ny_i, TVector &Im_i, int nkr, TVector &Im_o)
+	{
+		using T = Value_type<TVector>;
+		int nk0 = -nkr;
+		int nke = nkr+1;
+
+		Vector<T, e_host> Im(nx_i*ny_i);
+		auto krn_filter_median = [&](const int &ix_i, const int &iy_i, TVector &Im_i, Vector<T, e_host> &Im_o)
+		{
+			int ix0 = max(ix_i+nk0, 0);
+			int ixe = min(ix_i+nke, nx_i);
+
+			T nxy = (ixe-ix0);
+			Vector<T, e_host> v(nxy);
+			int iv = 0;
+			for (auto ix = ix0; ix < ixe; ix++)
+			{
+				v[iv++] = Im_i[ix*ny_i+iy_i];
+			}
+			auto median = v.begin() + nxy/2;
+			std::nth_element(v.begin(), median, v.end());
+			Im_o[ix_i*ny_i+iy_i] = *median;
+		};
+
+		auto thr_filter_median = [&](const Range &range)
+		{
+			host_detail::matrix_iter(range, krn_filter_median, Im_i, Im);
+		};
+
+		stream.set_n_act_stream(nx_i);
+		stream.set_grid(nx_i, ny_i);
+		stream.exec(thr_filter_median);
+		Im_o.assign(Im.begin(), Im.end());
+	}
+
+	template<class TVector>
+	void filter_median_2d(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr, TVector &Im_o)
 	{
 		using T = Value_type<TVector>;
 		int nk0 = -nkr;
@@ -517,7 +706,7 @@ namespace multem
 
 		// copy real matrix to complex matrix
 		Vector<complex<T>, e_host> Im_c(Im_o.size());
-		for(auto ixy =0; ixy<Im_c.size(); ixy++)
+		for(auto ixy = 0; ixy<Im_c.size(); ixy++)
 		{
 			Im_c[ixy] = complex<T>(Im_o[ixy], 0);
 		}
@@ -530,7 +719,7 @@ namespace multem
 		multem::fft2_shift(stream, grid, Im_c);
 
 		// binarization
-		for(auto ixy =0; ixy<Im_o.size(); ixy++)
+		for(auto ixy = 0; ixy<Im_o.size(); ixy++)
 		{
 			Im_o[ixy] = (Im_c[ixy].real()<0.01)?0:1;
 		}

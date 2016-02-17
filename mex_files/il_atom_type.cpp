@@ -65,7 +65,7 @@ void set_output_data(TAtom_Types &atom_type, mxArray *&mx_atom_type)
 		mx_field_Coef = mxCreateStructArray(2, dims_Coef, number_of_fields_Coef, field_names_Coef);
 		mxSetField(mx_atom_type, i, "coef", mx_field_Coef);
 
-		for(auto j=0; j<atom_type[i].coef.size(); j++)
+		for(auto j= 0; j<atom_type[i].coef.size(); j++)
 		{
 			auto &coef = atom_type[i].coef[j];
 			mx_create_set_scalar_field<rmatrix_r>(mx_field_Coef, j, "charge", coef.charge);

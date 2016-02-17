@@ -20,19 +20,16 @@ input_multislice.fp_dim = 110;                      % phonon dimensions
 input_multislice.fp_seed = 300183;                  % Random seed(frozen phonon)
 input_multislice.fp_nconf = 5;                      % true: phonon configuration, false: number of frozen phonon configurations
 
-input_multislice.zero_defocus_type = 3;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
-input_multislice.zero_defocus_plane = 0;
-
 input_multislice.thickness_type = 1;                % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 input_multislice.thickness = 0;                     % Array of thicknesses
 
 input_multislice.bwl = 1;
 
-input_multislice.E_0 = 300;
+input_multislice.E_0 = 100;
 input_multislice.theta = 0.0;
 input_multislice.phi = 0.0;
 
-na = 12; nb = 12; nc = 40; ncu = 2; rms3d = 0.085;
+na = 12; nb = 12; nc = 10; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
@@ -45,26 +42,46 @@ input_multislice.nx = 2048;
 input_multislice.ny = 2048;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.iw_type = 3;       % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define. (options 1 and 2 are only active for EWRS or EWFS)
+input_multislice.iw_type = 1;       % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
 input_multislice.iw_psi = read_psi_0_multem(input_multislice.nx, input_multislice.ny);    % user define incident wave
 input_multislice.iw_x = 0.5*input_multislice.lx;          % x position 
 input_multislice.iw_y = 0.5*input_multislice.ly;          % y position
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% lens aberrations %%%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.lens_m = 0;            %mm
-input_multislice.lens_f = 15.836;       %Angs
-input_multislice.lens_Cs3 = 1e-03;      %mm
-input_multislice.lens_Cs5 = 0.00;       %mm
-input_multislice.lens_mfa2 = 0.0; 
-input_multislice.lens_afa2 = 0.0;       %(Angs, degrees)
-input_multislice.lens_mfa3 = 0.0; 
-input_multislice.lens_afa3 = 0.0;       %(Angs, degrees)
-input_multislice.lens_aobjl = 0.0; 
-input_multislice.lens_aobju = 24.0;     %(mrad, mrad)
-input_multislice.lens_sf = 32; 
-input_multislice.lens_nsf = 10;         % (Angs, number of steps)
-input_multislice.lens_beta = 0.2; 
-input_multislice.lens_nbeta = 10;       %(mrad, half number of steps)
+%%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
+input_multislice.cond_lens_m = 0;                  % Momentum of the vortex
+input_multislice.cond_lens_f = 1110;               % Defocus (Å)
+input_multislice.cond_lens_Cs3 = 3.3;              % Third order spherical aberration (mm)
+input_multislice.cond_lens_Cs5 = 0.00;             % Fifth order spherical aberration (mm)
+input_multislice.cond_lens_mfa2 = 0.0;             % Twofold astigmatism (Å)
+input_multislice.cond_lens_afa2 = 0.0;             % Azimuthal angle of the twofold astigmatism (º)
+input_multislice.cond_lens_mfa3 = 0.0;             % Threefold astigmatism (Å)
+input_multislice.cond_lens_afa3 = 0.0;             % Azimuthal angle of the threefold astigmatism (º)
+input_multislice.cond_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad) 
+input_multislice.cond_lens_outer_aper_ang = 7.50;  % Outer aperture (mrad)
+input_multislice.cond_lens_sf = 32;                % Defocus Spread (Å)
+input_multislice.cond_lens_nsf = 10;               % Number of integration steps for the defocus Spread
+input_multislice.cond_lens_beta = 0.2;             % Divergence semi-angle (mrad)
+input_multislice.cond_lens_nbeta = 10;             % Number of integration steps for the divergence semi-angle
+input_multislice.cond_lens_zero_defocus_type = 1;  % eZDT_First = 1, eZDT_User_Define = 2
+input_multislice.cond_lens_zero_defocus_plane = 0
+
+%%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
+input_multislice.obj_lens_m = 0;                  % Momentum of the vortex
+input_multislice.obj_lens_f = 15.836;             % Defocus (Å)
+input_multislice.obj_lens_Cs3 = 1e-03;            % Third order spherical aberration (mm)
+input_multislice.obj_lens_Cs5 = 0.00;             % Fifth order spherical aberration (mm)
+input_multislice.obj_lens_mfa2 = 0.0;             % Twofold astigmatism (Å)
+input_multislice.obj_lens_afa2 = 0.0;             % Azimuthal angle of the twofold astigmatism (º)
+input_multislice.obj_lens_mfa3 = 0.0;             % Threefold astigmatism (Å)
+input_multislice.obj_lens_afa3 = 0.0;             % Azimuthal angle of the threefold astigmatism (º)
+input_multislice.obj_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad) 
+input_multislice.obj_lens_outer_aper_ang = 24.0;  % Outer aperture (mrad)
+input_multislice.obj_lens_sf = 32;                % Defocus Spread (Å)
+input_multislice.obj_lens_nsf = 10;               % Number of integration steps for the defocus Spread
+input_multislice.obj_lens_beta = 0.2;             % Divergence semi-angle (mrad)
+input_multislice.obj_lens_nbeta = 10;             % Number of integration steps for the divergence semi-angle
+input_multislice.obj_lens_zero_defocus_type = 3;  % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
+input_multislice.obj_lens_zero_defocus_plane = 0;
 
 clear il_wave_function;
 tic;

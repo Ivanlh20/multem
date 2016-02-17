@@ -61,9 +61,6 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.potential_slicing = multem::ePS_dz_Sub;
 	input_multislice.potential_type = multem::ePT_Lobato_0_12;
 
-	input_multislice.zero_defocus_type = multem::eZDT_Last;
-	input_multislice.zero_defocus_plane = 0.0;
-
 	input_multislice.E_0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "E_0");
 	int Z = mx_get_scalar_field<int>(mx_input_multislice, "Z");
 	double rms3d = mx_get_scalar_field<double>(mx_input_multislice, "rms3d");
@@ -90,17 +87,23 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.atoms.set_Atoms(natoms, atoms, lx, ly);
 	input_multislice.grid.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
 
-	/******************************* aberrations *********************************/
-	input_multislice.lens.m = mx_get_scalar_field<int>(mx_input_multislice, "lens_m"); 											// momentum of the vortex
-	input_multislice.lens.f = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_f"); 									// defocus(Angstrom)
-	input_multislice.lens.Cs3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_Cs3")*multem::c_mm_2_Ags; 			// spherical aberration(mm-->Angstrom)
-	input_multislice.lens.Cs5 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_Cs5")*multem::c_mm_2_Ags; 			// spherical aberration(mm-->Angstrom)
-	input_multislice.lens.mfa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_mfa2"); 							// magnitude 2-fold astigmatism(Angstrom)
-	input_multislice.lens.afa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_afa2")*multem::c_deg_2_rad; 		// angle 2-fold astigmatism(degrees-->rad)
-	input_multislice.lens.mfa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_mfa3"); 							// magnitude 3-fold astigmatism(Angstrom)
-	input_multislice.lens.afa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_afa3")*multem::c_deg_2_rad; 		// angle 3-fold astigmatism(degrees-->rad)
-	input_multislice.lens.aobjl = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_aobjl")*multem::c_mrad_2_rad; 	// lower objective aperture(mrad-->rad)
-	input_multislice.lens.aobju = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lens_aobju")*multem::c_mrad_2_rad; 	// upper objective aperture(mrad-->rad)
+	/****************************** Objective lens ********************************/
+	input_multislice.obj_lens.m = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_m"); 												// momentum of the vortex
+	input_multislice.obj_lens.f = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_f"); 									// defocus(Angstrom)
+	input_multislice.obj_lens.Cs3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_Cs3")*multem::c_mm_2_Ags; 				// third order spherical aberration(mm-->Angstrom)
+	input_multislice.obj_lens.Cs5 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_Cs5")*multem::c_mm_2_Ags; 				// fifth order aberration(mm-->Angstrom)
+	input_multislice.obj_lens.mfa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_mfa2"); 								// magnitude 2-fold astigmatism(Angstrom)
+	input_multislice.obj_lens.afa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_afa2")*multem::c_deg_2_rad; 			// angle 2-fold astigmatism(degrees-->rad)
+	input_multislice.obj_lens.mfa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_mfa3"); 								// magnitude 3-fold astigmatism(Angstrom)
+	input_multislice.obj_lens.afa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_afa3")*multem::c_deg_2_rad; 			// angle 3-fold astigmatism(degrees-->rad)
+	input_multislice.obj_lens.inner_aper_ang = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_inner_aper_ang")*multem::c_mrad_2_rad; 		// inner aperture(mrad-->rad)
+	input_multislice.obj_lens.outer_aper_ang = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_outer_aper_ang")*multem::c_mrad_2_rad; 		// outer aperture(mrad-->rad)
+	input_multislice.obj_lens.sf = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_sf"); 									// defocus spread(Angstrom)
+	input_multislice.obj_lens.nsf = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_nsf"); 											// Number of integration steps for the defocus Spread
+	input_multislice.obj_lens.beta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_beta")*multem::c_mrad_2_rad; 			// divergence semi-angle(mrad-->rad)
+	input_multislice.obj_lens.nbeta = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_nbeta"); 										// Number of integration steps for the divergence semi-angle
+	input_multislice.obj_lens.zero_defocus_type = multem::eZDT_Last;
+	input_multislice.obj_lens.zero_defocus_plane = 0.0;	
 	input_multislice.lens.set_input_data(input_multislice.E_0, input_multislice.grid);
 
 	/********************************* Detectors ********************************/
@@ -109,8 +112,10 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.detector.type = multem::eDT_Circular;
 	mx_detector = mxGetField(mx_detector, 0, "cir");
 	input_multislice.detector.resize(1);
-	input_multislice.detector.g_inner[0] = mx_get_scalar_field<value_type_r>(mx_detector, 0, "ang_inner")*multem::c_mrad_2_rad/lambda;
-	input_multislice.detector.g_outer[0] = mx_get_scalar_field<value_type_r>(mx_detector, 0, "ang_outer")*multem::c_mrad_2_rad/lambda;
+	auto inner_ang = mx_get_scalar_field<value_type_r>(mx_detector, 0, "inner_ang")*multem::c_mrad_2_rad;
+	input_multislice.detector.g_inner[0] = sin(inner_ang)/lambda;
+	auto outer_ang = mx_get_scalar_field<value_type_r>(mx_detector, 0, "outer_ang")*multem::c_mrad_2_rad;
+	input_multislice.detector.g_outer[0] = sin(outer_ang)/lambda;
 
 	/********************************* Scanning ********************************/
 	multem::Atom_Cal<double> atom_cal;

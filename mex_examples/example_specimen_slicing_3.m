@@ -21,7 +21,7 @@ input_multislice.lz = 10;
 input_multislice.dz = 0.5;
 
 charge = 0;
-input_multislice.atoms = [29, charge, 2, 2, 0.0, 0.8, 1.0; 29, charge, 6, 2, 0.0, 0.8, 1.0];
+input_multislice.atoms = [29, 2, 2, 0.0, 0.8, 1.0, charge; 29, 6, 2, 0.0, 0.8, 1.0, charge];
 [input_multislice.atoms, input_multislice.lx, input_multislice.ly, lz] = graphene(1, 1.42, sqrt(0.5/(8*pi^2)));
 input_multislice.dz = 0.5;
 
@@ -41,7 +41,7 @@ toc;
 [nslice, ~] = size(Slice);
 
 figure(1); clf;
-plot(atoms(:, 3), atoms(:, 5), '*k');   
+plot(atoms(:, 2), atoms(:, 4), '*k');   
 set(gca,'FontSize',12,'LineWidth',1,'PlotBoxAspectRatio',[1.25 1 1]);
 title('Atomic positions');
 ylabel('y','FontSize',14);

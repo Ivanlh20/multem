@@ -58,7 +58,7 @@ namespace multem
 			T rTemp;
 
 			eInput_Atoms input_atoms;
-			Atom_SA<T> atoms;
+			Atom_Data_Sa<T> atoms;
 
 			int Z;
 			Vector<T, e_host> r;
@@ -95,12 +95,12 @@ namespace multem
 					atoms.set_range(Z, r_min, r_max);
 				}
 
-				if(r0_min<=0)
+				if(r0_min<= 0)
 				{
 					r0_min = 0.75;
 				}
 
-				if((rTemp<=0)||(rTemp>=1))
+				if((rTemp<= 0)||(rTemp>= 1))
 				{
 					rTemp = 0.8;
 				}

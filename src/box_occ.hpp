@@ -74,7 +74,7 @@ namespace multem
 			}
 
 			template<class T>
-			inline bool check_r_min(const Atom_SA<T> &atoms, const r3d<T> &r_i)
+			inline bool check_r_min(const Atom_Data_Sa<T> &atoms, const r3d<T> &r_i)
 			{
 				int ix_i = static_cast<int>(floor(r_i.x/a_min));
 				int iy_i = static_cast<int>(floor(r_i.y/a_min));
@@ -99,11 +99,11 @@ namespace multem
 				int iz_0, iz_e;
 				get_limits(iz_i, nz, iz_0, iz_e);
 
-				for(auto iz =iz_0; iz<iz_e; iz++)
+				for(auto iz = iz_0; iz<iz_e; iz++)
 				{
-					for(auto iy =iy_0; iy<iy_e; iy++)
+					for(auto iy = iy_0; iy<iy_e; iy++)
 					{
-						for(auto ix =ix_0; ix<ix_e; ix++)
+						for(auto ix = ix_0; ix<ix_e; ix++)
 						{
 							auto iatom = occ[xyz_2_ind(ix, iy, iz)];
 							if((iatom>-1)&&(norm(atoms.r_n[iatom]-r_i)<r2_min))

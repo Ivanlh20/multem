@@ -37,5 +37,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 
 	multem::Stream<e_host> stream;
 	stream.resize(4);
-	multem::filter_median(stream, Im.rows, Im.cols, Im, nkr, Im_d);
+	multem::filter_median_2d(stream, Im.rows, Im.cols, Im, nkr, Im_d);
 }

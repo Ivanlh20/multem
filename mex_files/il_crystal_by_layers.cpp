@@ -45,7 +45,7 @@ void read_input_data(const mxArray *mxCrystal, int &na, int &nb, int &nc, double
 	for(auto i = 0; i < uLayer.size(); i++)
 	{
 		auto atoms = mx_get_matrix_field<rmatrix_r>(mexuLayer, i, "atoms");
-		uLayer[i].set_Atoms(atoms.rows, atoms.real, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+		uLayer[i].set_Atoms(atoms.rows, atoms.cols, atoms.real, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 	}
 }
 
@@ -66,11 +66,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	for(auto i = 0; i<atomsM.rows; i++)
 	{		
 		atomsM.real[0*atomsM.rows + i] = atoms.Z[i]; 		// Atomic number
-		atomsM.real[1*atomsM.rows + i] = atoms.charge[i]; 	// charge
-		atomsM.real[2*atomsM.rows + i] = atoms.x[i]; 		// x-position
-		atomsM.real[3*atomsM.rows + i] = atoms.y[i]; 		// y-position
-		atomsM.real[4*atomsM.rows + i] = atoms.z[i]; 		// z-position
-		atomsM.real[5*atomsM.rows + i] = atoms.sigma[i]; 	// Standard deviation
-		atomsM.real[6*atomsM.rows + i] = atoms.occ[i]; 		// Occupancy
+		atomsM.real[1*atomsM.rows + i] = atoms.x[i]; 		// x-position
+		atomsM.real[2*atomsM.rows + i] = atoms.y[i]; 		// y-position
+		atomsM.real[3*atomsM.rows + i] = atoms.z[i]; 		// z-position
+		atomsM.real[4*atomsM.rows + i] = atoms.sigma[i]; 	// Standard deviation
+		atomsM.real[5*atomsM.rows + i] = atoms.occ[i]; 		// Occupancy
+		atomsM.real[6*atomsM.rows + i] = atoms.charge[i]; 	// charge
 	}
 }

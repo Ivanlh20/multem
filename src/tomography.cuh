@@ -58,7 +58,7 @@ namespace multem
 
 				chi2_0 = 0;
 				T IA_exp = 0;
-				for(auto irot =0; irot< image.size(); irot++)
+				for(auto irot = 0; irot< image.size(); irot++)
 				{
 					chi2_0 += multem::sum_square(input_tomography->grid, image[irot]);
 					IA_exp += multem::sum(input_tomography->grid, image[irot]);
@@ -66,7 +66,7 @@ namespace multem
 				IA_exp = IA_exp*input_tomography->grid.dRx*input_tomography->grid.dRy/(atoms.size()*image.size());
 
 				T IA_sim = 0;
-				for(auto ir =0; ir<input_tomography->r.size(); ir++)
+				for(auto ir = 0; ir<input_tomography->r.size(); ir++)
 				{
 					T &r = input_tomography->r[ir];
 					T &fr = input_tomography->fr[ir];
@@ -76,7 +76,7 @@ namespace multem
 
 				T IA_factor = IA_exp/(c_2Pi*IA_sim);
 
-				for(auto ir =0; ir<input_tomography->r.size(); ir++)
+				for(auto ir = 0; ir<input_tomography->r.size(); ir++)
 				{
 					T &fr = input_tomography->fr[ir];
 					fr = fr*IA_factor;
@@ -129,7 +129,7 @@ namespace multem
 
 				chi2 = chi2_0;
 				set_atoms_range();
-				for(auto itrial =0; itrial<ntrial; itrial++)
+				for(auto itrial = 0; itrial<ntrial; itrial++)
 				{
 					move_atoms();
 					chi2_n = cost_function();
@@ -155,10 +155,10 @@ namespace multem
 				// T Temp = Temp_max;
 				// while (Temp>Temp_min)
 				// {
-				// 	for(auto itemp =0; itemp<ntemp; itemp++)
+				// 	for(auto itemp = 0; itemp<ntemp; itemp++)
 				// 	{
 				// 		T p = 0;
-				// 		for(auto ip =0; ip<np; ip++)
+				// 		for(auto ip = 0; ip<np; ip++)
 				// 		{
 				// 			move_atoms();
 				// 			chi2_n = cost_function();
@@ -196,7 +196,7 @@ namespace multem
 				// 	atoms.r = atoms.r_opt;
 				// }
 
-				for(auto iatoms =0; iatoms<atoms.size(); iatoms++)
+				for(auto iatoms = 0; iatoms<atoms.size(); iatoms++)
 				{
 					output_tomography.Z[iatoms] = atoms.Z[iatoms];
 					auto r = atoms.r[iatoms];
@@ -229,7 +229,7 @@ namespace multem
 				Vector<Vector<T, dev>, e_host> v;
 			};
 
-			void set_atom_Ip(int Z_i, const r3d<T> &r_i, Stream<dev> &stream, Vector<Atom_Ip<T>, e_host> &atom_Ip)
+			void set_atom_Ip(int Z_i, const r3d<T> &r_i, Stream<dev> &stream, Vector<Atom_Sa<T>, e_host> &atom_Ip)
 			{
 				for(auto istream = 0; istream < stream.n_act_stream; istream++)
 				{
@@ -259,7 +259,7 @@ namespace multem
 
 			r3d<T> move_atom(const r3d<T> &r_0, const r3d<T> &r_d)
 			{
-				for(auto itrial =0; itrial < rand_trial; itrial++)
+				for(auto itrial = 0; itrial < rand_trial; itrial++)
 				{
 					auto r = r_0+r_d*rand();
 					if(box.check_r_min(atoms, r))
@@ -274,7 +274,7 @@ namespace multem
 			{
 				stream.set_n_act_stream(1);
 				T chi2 = 0;
-				for(auto irot =0; irot<input_tomography->angle.size(); irot++)
+				for(auto irot = 0; irot<input_tomography->angle.size(); irot++)
 				{
 					auto Rm = get_rotation_matrix(input_tomography->angle[irot], input_tomography->tm_u0);
 					auto r = r_i.rotate(Rm, input_tomography->tm_p0);
@@ -287,7 +287,7 @@ namespace multem
 			void subtract_atom_in_all_rot(const r3d<T> &r_i)
 			{
 				stream.set_n_act_stream(1);
-				for(auto irot =0; irot<input_tomography->angle.size(); irot++)
+				for(auto irot = 0; irot<input_tomography->angle.size(); irot++)
 				{
 					auto Rm = get_rotation_matrix(input_tomography->angle[irot], input_tomography->tm_u0);
 					auto r = r_i.rotate(Rm, input_tomography->tm_p0);
@@ -320,7 +320,7 @@ namespace multem
 				stream.set_n_act_stream(1);
 				assign_input_image();
 				T chi2 = 0;
-				for(auto irot =0; irot<input_tomography->angle.size(); irot++)
+				for(auto irot = 0; irot<input_tomography->angle.size(); irot++)
 				{
 					auto Rm = get_rotation_matrix(input_tomography->angle[irot], input_tomography->tm_u0);
 					for(int iatoms = 0; iatoms<atoms.size(); iatoms++)
@@ -337,7 +337,7 @@ namespace multem
 
 			void assign_input_image()
 			{
-				for(auto irot =0; irot< image.size(); irot++)
+				for(auto irot = 0; irot< image.size(); irot++)
 				{
 					multem::assign(input_tomography->image[irot], image[irot]);
 				}
@@ -380,9 +380,9 @@ namespace multem
 			T chi2_n;
 			T chi2_opt;
 
-			Atom_SA<T> atoms;
+			Atom_Data_Sa<T> atoms;
 			Vector<Vector<T, dev>, e_host> image;
-			Vector<Atom_Ip<T>, e_host> atom_Ip;
+			Vector<Atom_Sa<T>, e_host> atom_Ip;
 			Stream_Data stream_data;
 
 			Vector<Atom_Type<T, e_host>, e_host> atom_type_host; // Atom types

@@ -1,10 +1,12 @@
 *.mexw64
 *.mexa64
+*.mexmaci64
 *.pdb
+*.o
 *.ilk
-*.mat
 *.asv
 *.deps
 *.wisdom
 *.dll
 *.exe
+*.7z

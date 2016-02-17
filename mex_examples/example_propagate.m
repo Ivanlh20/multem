@@ -22,7 +22,7 @@ input_multislice.fp_seed = 300183;
 input_multislice.fp_single_conf = 0;                % 1: true, 0:false
 input_multislice.fp_nconf = 5;
 
-input_multislice.microscope_effect = 1;             % 1: Partial coherente mode, 2: transmission_fun cross coefficient
+input_multislice.microscope_effect = 2;             % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient
 input_multislice.spatial_temporal_effect = 1;       % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
 input_multislice.zero_defocus_type = 4;             % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
@@ -31,8 +31,8 @@ input_multislice.zero_defocus_plane = 0;
 input_multislice.bwl = 0;
 
 input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
-input_multislice.theta = 0.0;                       % Till ilumination (degrees)
-input_multislice.phi = 0.0;                         % Till ilumination (degrees)
+input_multislice.theta = 0.0;                       % Till ilumination (º)
+input_multislice.phi = 0.0;                         % Till ilumination (º)
 
 na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
 
@@ -44,7 +44,7 @@ input_multislice.nx = 1024;
 input_multislice.ny = 1024;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.iw_type = 1;                      % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define. (options 1 and 2 are only active for EWRS or EWFS)
+input_multislice.iw_type = 4;                      % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
 input_multislice.iw_psi = 0;                       % user define incident wave
 input_multislice.iw_x = input_multislice.lx/2;     % x position 
 input_multislice.iw_y = input_multislice.ly/2;     % y position
@@ -55,10 +55,10 @@ tic;
 output_multislice = il_MULTEM(input_multislice); 
 toc;
 
-input_multislice.lens_f = +15;                      %Angs
+input_multislice.obj_lens_f = +15;                      %Angs
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.iw_type = 3;                      % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define. (options 1 and 2 are only active for EWRS or EWFS)
+input_multislice.iw_type = 3;                      % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
 input_multislice.iw_psi = output_multislice.data.psi_coh;  % user define incident wave
 
 clear il_MULTEM;

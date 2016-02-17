@@ -76,7 +76,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	auto atoms = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "atoms");
 	if(full)
 	{
-		input_multislice.atoms.set_Atoms(atoms.rows, atoms.real, lx, ly);
+		input_multislice.atoms.set_Atoms(atoms.rows, atoms.cols, atoms.real, lx, ly);
 	}
 	input_multislice.grid.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
 	input_multislice.validate_parameters();

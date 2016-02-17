@@ -67,7 +67,7 @@ namespace multem
 				plan_backward = plan_forward = nullptr;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread =1)
+			void create_plan(const int &ny, const int &nx, int nThread = 1)
 			{
 				destroy_plan();
 
@@ -156,7 +156,7 @@ namespace multem
 				plan_backward = plan_forward = nullptr;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread =1)
+			void create_plan(const int &ny, const int &nx, int nThread = 1)
 			{
 				destroy_plan();
 
@@ -244,7 +244,7 @@ namespace multem
 				plan_backward = plan_forward = 0;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread =1)
+			void create_plan(const int &ny, const int &nx, int nThread = 1)
 			{
 				destroy_plan();
 
@@ -315,7 +315,7 @@ namespace multem
 				plan_backward = plan_forward = 0;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread =1)
+			void create_plan(const int &ny, const int &nx, int nThread = 1)
 			{
 				destroy_plan();
 

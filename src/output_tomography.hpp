@@ -80,6 +80,7 @@ namespace multem
 
 	template<class T>
 	using Output_Tomography_Vector = Output_Tomography<Vector<T, e_host>>;
+
 } // namespace multem
 
 #endif

@@ -140,7 +140,7 @@ namespace multem
 	/******************************Microscope effects*****************************/
 	enum eMicroscope_Effect
 	{
-		eME_Partial_Coherent = 1, eME_Transmission_Cross_Coefficient = 2, eME_Full_Calculation = 3, eME_none = 4
+		eME_Coherent = 1, eME_Partial_Coherent = 2, eME_Transmission_Cross_Coefficient = 3, eME_Full_Calculation = 4, eME_none = 5
 	};
 
 	/******************************Spatial and temporal***************************/
@@ -167,22 +167,30 @@ namespace multem
 		eOM_Normal = 1, eOM_Advanced = 2
 	};
 
+	/*****************************lens variable type*********************************/
+	enum eLens_Var_Type
+	{
+		eLVT_off = 0, eLVT_m = 1, eLVT_f = 2, eLVT_Cs3 = 3, eLVT_Cs5 = 4, 
+		eLVT_mfa2 = 5, eLVT_afa2 = 6, eLVT_mfa3 = 7, eLVT_afa3 = 8,
+		eLVT_inner_aper_ang = 9, eLVT_outer_aper_ang = 10
+	};
+
 	/*****************************simulation type*********************************/
 	enum eSimulation_Type
 	{
-		eST_STEM =11, eST_ISTEM =12, 
-		eST_CBED =21, eST_CBEI =22, 
-		eST_ED =31, eST_HRTEM =32, 
-		eST_PED =41, eST_HCI =42, 
-		eST_EWFS =51, eST_EWRS =52, 
-		eST_EELS =61, eST_EFTEM =62, 
-		eST_IWFS =71, eST_IWRS =72, 
-		eST_PPFS =81, eST_PPRS =82, 			// projected potential
-		eST_TFFS =91, eST_TFRS =92, 			// transmission function
-		eST_PropFS =101, eST_PropRS =102		// propagate
+		eST_STEM = 11, eST_ISTEM = 12, 
+		eST_CBED = 21, eST_CBEI = 22, 
+		eST_ED = 31, eST_HRTEM = 32, 
+		eST_PED = 41, eST_HCI = 42, 
+		eST_EWFS = 51, eST_EWRS = 52, 
+		eST_EELS = 61, eST_EFTEM = 62, 
+		eST_IWFS = 71, eST_IWRS = 72, 
+		eST_PPFS = 81, eST_PPRS = 82, 			// projected potential
+		eST_TFFS = 91, eST_TFRS = 92, 			// transmission function
+		eST_PropFS = 101, eST_PropRS = 102		// propagate
 	};
 
-	/********************************Projected_Potential model****************************/
+	/***************************Projected_Potential model************************/
 	enum ePhonon_Model
 	{
 		ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
@@ -227,7 +235,7 @@ namespace multem
 	/**********************************Incident Wave Type********************************/
 	enum eIncident_Wave_Type
 	{
-		eIWT_Plane_Wave = 1, eIWT_Convergent_Wave = 2, eIWT_User_Define_Wave = 3
+		eIWT_Plane_Wave = 1, eIWT_Convergent_Wave = 2, eIWT_User_Define_Wave = 3, eIWT_Auto = 4
 	};
 
 	/******************************thickness Type*******************************/
@@ -253,11 +261,10 @@ namespace multem
 		eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
 	};
 
-
 	/**********************************Channelling type********************************/
 	enum eChannelling_Type
 	{
-		eCT_Single_Channelling = 1, eCT_Double_Channelling = 2, eCT_Double_Channelling_FOMS = 3, eCT_Double_Channelling_SOMS = 4
+		eCT_Single_Channelling = 1, eCT_Mixed_Channelling = 2, eCT_Double_Channelling = 3
 	};
 
 	/****************************Output type*****************************/
@@ -266,6 +273,9 @@ namespace multem
 		eOT_Matlab = 1, eOT_Vector = 2
 	};
 
+	template<class T>
+	void get_bn(const T &R, const int &nR, const T &dR, const T &R_max, const bool &pbc, int &iR0, int &iRn);
+	
 	/*********************************Epsilon***********************************/
 	template <class T>
 	struct Epsilon
@@ -895,10 +905,21 @@ namespace multem
 		template<class TDetector> 
 		void assign(TDetector &detector)
 		{
+			type = detector.type;
 			g_inner.assign(detector.g_inner.begin(), detector.g_inner.end());
 			g_outer.assign(detector.g_outer.begin(), detector.g_outer.end());
-			fx.assign(detector.fx.begin(), detector.fx.end());
-			fR.assign(detector.fR.begin(), detector.fR.end());
+
+			fx.resize(detector.fx.size());
+			for(auto i= 0; i<detector.fx.size(); i++)
+			{
+				fx[i].assign(detector.fx[i].begin(), detector.fx[i].end());
+			}
+
+			fR.resize(detector.fR.size());
+			for(auto i= 0; i<detector.fR.size(); i++)
+			{
+				fR[i].assign(detector.fR[i].begin(), detector.fR[i].end());
+			}
 		}
 
 		eDetector_Type type;					// eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
@@ -1055,14 +1076,13 @@ namespace multem
 		T dgx; 					// x-sampling in reciprocal space
 		T dgy; 					// y-sampling in reciprocal space
 
-		T gl_max; 				// Maximun limited frequency 
 		T gl2_max; 				// Squared of the maximun limited frequency
-		T alpha;
+		T alpha;				// 1/(1+exp(alpha*(x^2-x_c^2)))
 
 		inline
 		Grid(): nx(0), ny(0), nxh(0), nyh(0), inxy(0), 
 			lx(0), ly(0), dz(0), pbc_xy(true), bwl(true), 
-			dRx(0), dRy(0), dgx(0), dgy(0), gl_max(0), gl2_max(0){}
+			dRx(0), dRy(0), dgx(0), dgy(0), gl2_max(0){}
 
 		inline
 		void set_input_data(int nx_i, int ny_i, T lx_i, T ly_i, T dz_i, bool BWL_i, bool PBC_xy_i)
@@ -1081,13 +1101,13 @@ namespace multem
 			dRy = multem::Div(ly, ny);
 			dgx = multem::Div(1.0, lx);
 			dgy = multem::Div(1.0, ly);
-			gl_max = 2.0*g_max()/3.0;
-			gl2_max = pow(gl_max, 2);
+			gl2_max = pow(gl_max(), 2);
 
-			T dg0 = 0.02, fg0 = 0.99;
-			alpha = log(1.0/fg0-1.0)/(pow(gl_max-dg0, 2)-gl2_max);
+			// y = 1/(1+exp(alpha*(x^2-x_c^2)))
+			T dg0 = 0.25, fg0 = 1e-02;
+			alpha = log(1.0/fg0-1.0)/(pow(gl_max()+dg0, 2)-gl2_max);
 		}
-	
+
 		template<class TGrid> 
 		void assign(TGrid &grid)
 		{
@@ -1100,6 +1120,12 @@ namespace multem
 			assign(grid);
 			return *this; 
 		}
+		// Maximun limited frequency
+		DEVICE_CALLABLE FORCEINLINE
+		T gl_max() const
+		{
+			return 2.0*g_max()/3.0;
+		}	
 
 		DEVICE_CALLABLE FORCEINLINE
 		int nxy() const { return nx*ny; }
@@ -1228,14 +1254,7 @@ namespace multem
 		DEVICE_CALLABLE FORCEINLINE
 		T bwl_factor(const int &ix, const int &iy) const 
 		{ 
-			if(bwl)
-			{
-				return inxy/(1.0+exp(alpha*(g2(ix, iy)-gl2_max)));
-			}
-			else
-			{
-				return inxy;
-			}
+			return inxy/(1.0+exp(alpha*(g2_shift(ix, iy)-gl2_max)));
 		}
 
 		/*********************************************************/
@@ -1319,45 +1338,48 @@ namespace multem
 	{
 		using value_type = T;
 
-		int m; 		// vortex momentum
-		T f; 		// defocus
-		T Cs3; 	// spherical aberration(Angstrom)
-		T Cs5; 	// spherical aberration(Angstrom)
-		T mfa2; 	// magnitude 2-fold astigmatism
-		T afa2; 	// angle 2-fold astigmatism(rad)
-		T mfa3; 	// magnitude 3-fold astigmatism
-		T afa3; 	// angle 3-fold astigmatism(rad)
-		T aobjl; 	// lower objective aperture(rad);
-		T aobju; 	// upper objective aperture(rad);
+		int m; 					// Momentum of the vortex
+		T f; 					// Defocus (Å)
+		T Cs3; 					// Third order spherical aberration (Å)
+		T Cs5; 					// Fifth order spherical aberration (Å)
+		T mfa2; 				// Twofold astigmatism (Å)
+		T afa2; 				// Azimuthal angle of the twofold astigmatism (rad)
+		T mfa3; 				// Threefold astigmatism (Å)
+		T afa3; 				// Azimuthal angle of the threefold astigmatism (rad)
+		T inner_aper_ang; 		// Inner aperture (rad);
+		T outer_aper_ang; 		// Outer aperture (rad);
 
-		T sf; 		// defocus spread
-		int nsf; 	// Number of defocus sampling points
+		T sf; 					// Defocus Spread (Å)
+		int nsf; 				// Number of integration steps for the defocus Spread
 
-		T beta; 	// semi-convergence angle
-		int nbeta; 	// Number of semi-convergence angle sampling points
+		T beta; 				// Divergence semi-angle (rad)
+		int nbeta; 				// Number of integration steps for the divergence semi-angle
 
-		T gamma; 	// Relativistic factor
-		T lambda; 	// wavelength(Angstrom)
-		T lambda2; 	// wavelength(Angstrom)^2
+		eZero_Defocus_Type zero_defocus_type; 	// Defocus type: eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
+		T zero_defocus_plane; 	// plane
 
-		T cf; 		// pi*f*lambda
-		T cCs3; 	// -0.5*pi*Cs3*lambda^3
-		T cCs5; 	// -pi*Cs5*lambda^5/3
-		T cmfa2; 	// -pi*lambda
-		T cmfa3; 	// -2*pi*lambda^3/3
-		T g2_min; 	// aobjl/lambda
-		T g2_max; 	// aobju/lambda
+		T gamma; 				// Relativistic factor
+		T lambda; 				// wavelength(Angstrom)
+		T lambda2; 				// wavelength(Angstrom)^2
 
-		T sggs; 	// Standard deviation
-		int ngxs; 	// Number of source sampling points x
-		int ngys; 	// Number of source sampling points y
-		T dgxs; 	// source sampling m_size;
-		T dgys; 	// source sampling m_size;
-		T g2_maxs; 	// q maximum square;
+		T cf; 					// pi*f*lambda
+		T cCs3; 				// -0.5*pi*Cs3*lambda^3
+		T cCs5; 				// -pi*Cs5*lambda^5/3
+		T cmfa2; 				// -pi*lambda
+		T cmfa3; 				// -2*pi*lambda^3/3
+		T g2_min; 				// inner_aper_ang/lambda
+		T g2_max; 				// outer_aper_ang/lambda
+
+		T sggs; 				// Standard deviation
+		int ngxs; 				// Number of source sampling points x
+		int ngys; 				// Number of source sampling points y
+		T dgxs; 				// source sampling m_size;
+		T dgys; 				// source sampling m_size;
+		T g2_maxs; 				// q maximum square;
 
 		Lens(): gamma(0), lambda(0), m(0), f(0), Cs3(0), Cs5(0), 
-				mfa2(0), afa2(0), mfa3(0), afa3(0), aobjl(0), 
-				aobju(0), sf(0), nsf(0), beta(0), nbeta(0), 
+				mfa2(0), afa2(0), mfa3(0), afa3(0), inner_aper_ang(0), 
+				outer_aper_ang(0), sf(0), nsf(0), beta(0), nbeta(0), 
 				lambda2(0), cf(0), cCs3(0), 	cCs5(0), cmfa2(0), 
 				cmfa3(0), g2_min(0), g2_max(0), sggs(0), ngxs(0), 
 				ngys(0), dgxs(0), dgys(0), g2_maxs(0){}
@@ -1374,10 +1396,10 @@ namespace multem
 			cCs5 = (isZero(Cs5))?0:-c_Pi*Cs5*pow(lambda, 5)/3.0;
 			cmfa2 = (isZero(mfa2))?0:-c_Pi*mfa2*lambda;
 			cmfa3 = (isZero(mfa3))?0:-2.0*c_Pi*mfa3*pow(lambda, 2)/3.0;
-			g2_min = (isZero(aobjl)||(aobjl<0))?0:pow(aobjl/lambda, 2);
-			g2_max = (isZero(aobju)||(aobju<0))?grid.g2_max(): pow(aobju/lambda, 2);
+			g2_min = (isZero(inner_aper_ang)||(inner_aper_ang<0))?0:pow(sin(inner_aper_ang)/lambda, 2);
+			g2_max = (isZero(outer_aper_ang)||(outer_aper_ang<0))?grid.g2_max(): pow(sin(outer_aper_ang)/lambda, 2);
 
-			T g0s = beta/lambda;
+			T g0s = sin(beta)/lambda;
 			sggs = g0s/c_2i2;
 			T gmaxs = 3.5*sggs;
 			g2_maxs = gmaxs*gmaxs;
@@ -1393,6 +1415,60 @@ namespace multem
 			dgys = gmaxs/ngys;
 		}
 
+		void set_defocus(T f_i)
+		{
+			f = f_i;
+			cf = (isZero(f))?0:c_Pi*f*lambda;
+		}
+
+		T get_zero_defocus_plane(const T &z_min, const T &z_max)
+		{
+			T z = 0;
+			switch(zero_defocus_type)
+			{
+				case eZDT_First:
+				{
+					z = z_min;
+				}
+				break;
+				case eZDT_Middle:
+				{
+					z = 0.5*(z_min + z_max);
+				}
+				break;
+				case eZDT_Last:
+				{
+					z = z_max;
+				}
+				break;
+				default:
+				{
+					z = zero_defocus_plane;
+				}
+			}
+			return z;
+		};
+
+		bool is_zero_defocus_type_First()
+		{
+			return zero_defocus_type == eZDT_First;
+		}
+
+		bool is_zero_defocus_type_Middle()
+		{
+			return zero_defocus_type == eZDT_Middle;
+		}
+
+		bool is_zero_defocus_type_Last()
+		{
+			return zero_defocus_type == eZDT_Last;
+		}
+
+		bool is_zero_defocus_type_User_Define()
+		{
+			return zero_defocus_type == eZDT_User_Define;
+		}
+
 		template<class TLens> 
 		void assign(TLens &lens)
 		{
@@ -1404,8 +1480,8 @@ namespace multem
 			afa2 = lens.afa2;
 			mfa3 = lens.mfa3;
 			afa3 = lens.afa3;
-			aobjl = lens.aobjl;
-			aobju = lens.aobju;
+			inner_aper_ang = lens.inner_aper_ang;
+			outer_aper_ang = lens.outer_aper_ang;
 
 			sf = lens.sf;
 			nsf = lens.nsf;
@@ -1439,15 +1515,6 @@ namespace multem
 			assign(lens);
 			return *this; 
 		}
-
-		void set_defocus(T f_i)
-		{
-			f = f_i;
-			cf = (isZero(f))?0:c_Pi*f_i*lambda;
-		}
-
-		inline
-		T prop_factor(const T &z) const { return -c_Pi*lambda*z; }
 
 		inline
 		T gxs(const int &ix) const { return static_cast<T>(ix)*dgxs; }
@@ -1530,24 +1597,14 @@ namespace multem
 			return channelling_type == eCT_Single_Channelling;
 		}
 
+		bool is_Mixed_Channelling() const
+		{
+			return channelling_type == eCT_Mixed_Channelling;
+		}
+
 		bool is_Double_Channelling() const
 		{
 			return channelling_type == eCT_Double_Channelling;
-		}
-
-		bool is_Double_Channelling_FOMS() const
-		{
-			return channelling_type == eCT_Double_Channelling_FOMS;
-		}
-
-		bool is_Double_Channelling_SOMS() const
-		{
-			return channelling_type == eCT_Double_Channelling_SOMS;
-		}
-
-		bool is_Double_Channelling_FOMS_SOMS() const
-		{
-			return is_Double_Channelling_FOMS() || is_Double_Channelling_SOMS();
 		}
 
 		eSpace space;
@@ -1570,7 +1627,273 @@ namespace multem
 	};
 
 	template<class T>
-	class Atom_SA{
+	struct Atom
+	{
+		int Z;
+		T x;
+		T y;
+		T z;
+		T sigma;
+		T occ;
+		int charge;
+
+		Atom():Z(0), x(0), y(0), z(0), sigma(0), occ(0), charge(0){};
+	};
+
+	/**************************atoms for Superposition**************************/
+	template<class T>
+	class Atom_Data_Sp{
+		public:
+			using value_type = T;
+			using size_type = std::size_t;
+
+			Atom_Data_Sp(): l_x(0), l_y(0), 
+				x_min(0), x_max(0), 
+				y_min(0), y_max(0),
+				a_min(0), a_max(0), 
+				sigma_min(0), sigma_max(0), 
+				x_mean(0), y_mean(0), 
+				x_std(0), y_std(0), 
+				s_x(0), s_y(0){}
+
+			size_type size() const
+			{
+				return x.size();
+			}
+
+			bool empty() const
+			{
+				return size() == 0;
+			}
+
+			// resize number of atoms
+			void resize(const size_type &new_size, const value_type &value = value_type())
+			{
+				x.resize(new_size, value);
+				x.shrink_to_fit();
+
+				y.resize(new_size, value);
+				y.shrink_to_fit();
+
+				a.resize(new_size, value);
+				a.shrink_to_fit();
+
+				sigma.resize(new_size, value);
+				sigma.shrink_to_fit();
+			}
+
+			// set atoms
+			void set_Atoms(const size_type &nr_atoms_i, double *atoms_i, T l_x_i = 0, T l_y_i = 0, bool PBC_xy_i =false)
+			{
+				resize(nr_atoms_i);
+
+				l_x = l_x_i;
+				l_y = l_y_i;
+
+				T dl = 1e-04;
+				T lx_b = l_x - dl;
+				T ly_b = l_y - dl;
+
+				size_type j = 0;
+				for(auto i = 0; i < size(); i++)
+				{
+					auto xi = atoms_i[0*nr_atoms_i + i]; 		// x-position
+					auto yi = atoms_i[1*nr_atoms_i + i]; 		// y-position
+					if((!PBC_xy_i)||((xi<lx_b)&&(yi<ly_b)))
+					{
+						x[j] = xi; 								// x-position
+						y[j] = yi; 								// y-position
+						a[j] = atoms_i[2*nr_atoms_i + i]; 		// height
+						sigma[j] = atoms_i[3*nr_atoms_i + i];	// Standard deviation
+						j++;
+					}
+				}
+
+				resize(j);
+
+				get_Statistic();
+			}
+
+			// set atoms
+			void set_Atoms(const Atom_Data_Sp<T> &atoms, bool PBC_xy_i=false)
+			{
+				resize(atoms.size());
+
+				l_x = atoms.l_x;
+				l_y = atoms.l_y;
+
+				T dl = 1e-04;
+				T lx_b = l_x - dl;
+				T ly_b = l_y - dl;
+
+				size_type j = 0;
+				for(auto i = 0; i < size(); i++)
+				{
+					auto xi = atoms.x[i]; 		// x-position
+					auto yi = atoms.y[i]; 		// y-position
+					if((!PBC_xy_i)||((xi<lx_b)&&(yi<ly_b)))
+					{
+						x[j] = xi; 				// x-position
+						y[j] = yi; 				// y-position
+						a[j] = atoms.a[i];
+						sigma[j] = atoms.sigma[i];
+						j++;
+					}
+				}
+
+				resize(j);
+
+				get_Statistic();
+			}
+		
+			// get statistic
+			void get_Statistic()
+			{
+				if(empty())
+				{
+					return;
+				}
+
+				x_min = x_max = x[0];
+				y_min = y_max = y[0];
+				a_min = a_max = a[0];
+				sigma_min = sigma_max = sigma[0];
+
+				x_mean = y_mean = 0.0;
+				x_std = y_std = 0.0;
+
+				for(auto iAtom = 0; iAtom < size(); iAtom++)
+				{
+					x_min = min(x[iAtom], x_min);
+					x_max = max(x[iAtom], x_max);
+
+					y_min = min(y[iAtom], y_min);
+					y_max = max(y[iAtom], y_max);
+
+					a_min = min(a[iAtom], a_min);
+					a_max = max(a[iAtom], a_max);
+
+					sigma_min = min(sigma[iAtom], sigma_min);
+					sigma_max = max(sigma[iAtom], sigma_max);
+
+					x_mean += x[iAtom];
+					y_mean += y[iAtom];
+
+					x_std += x[iAtom]*x[iAtom];
+					y_std += y[iAtom]*y[iAtom];
+				}
+
+				T nAtoms = static_cast<T>(size());
+
+				x_mean /= nAtoms;
+				y_mean /= nAtoms;
+
+				x_std = sqrt(x_std/nAtoms - x_mean*x_mean);
+				y_std = sqrt(y_std/nAtoms - y_mean*y_mean);
+
+				s_x = x_max - x_min;
+				s_y = y_max - y_min;
+
+				if(isZero(l_x))
+				{
+					l_x = s_x;
+				}
+
+				if(isZero(l_y))
+				{
+					l_y = s_y;
+				}
+			}
+
+			T l_x; 			// Box m_size-x
+			T l_y; 			// Box m_size-y
+
+			Vector<T, e_host> x;
+			Vector<T, e_host> y;
+			Vector<T, e_host> a;
+			Vector<T, e_host> sigma;
+
+			T x_min;
+			T x_max;
+
+			T y_min;
+			T y_max;
+
+			T a_min;
+			T a_max;
+
+			T sigma_min;
+			T sigma_max;
+
+			T x_mean;
+			T y_mean;
+
+			T x_std;
+			T y_std;
+
+			T s_x; 			// m_size-x
+			T s_y; 			// m_size-y
+	};
+
+	template<class T, eDevice dev>
+	struct Atom_Sp
+	{
+		public:
+			using value_type = T;
+			static const eDevice device = dev;
+
+			T x;
+			T y;
+			T occ;
+			T R2_max;
+			T *R2;
+			T *c3;
+			T *c2;
+			T *c1;
+			T *c0;
+
+			int ix0;
+			int ixn;
+			int iy0;
+			int iyn;
+
+			T a;
+			T alpha;
+			T dtR;
+			T R2_tap;
+			T tap_cf;
+
+			int *iv;
+			T *v;
+
+			Atom_Sp(): x(0), y(0), R2_max(0), R2(nullptr), c3(nullptr), c2(nullptr), c1(nullptr), 
+			c0(nullptr), ix0(1), ixn(0), iy0(0), a(0), alpha(0), dtR(0), R2_tap(0), tap_cf(0), iyn(0), iv(nullptr), v(nullptr){}
+
+			inline
+			void set_ix0_ixn(const Grid<T> &grid, const T &R_max)
+			{
+				get_bn(x, grid.nx, grid.dRx, R_max, grid.pbc_xy, ix0, ixn);
+			}
+
+			inline
+			void set_iy0_iyn(const Grid<T> &grid, const T &R_max)
+			{
+				get_bn(y, grid.ny, grid.dRy, R_max, grid.pbc_xy, iy0, iyn);
+			}
+
+			inline
+			GridBT get_eval_cubic_poly_gridBT()
+			{
+				GridBT gridBT;
+				gridBT.Blk = dim3((iyn+c_thrnxny-1)/c_thrnxny, (ixn+c_thrnxny-1)/c_thrnxny);
+				gridBT.Thr = dim3(c_thrnxny, c_thrnxny);
+				return gridBT;
+			}
+	};
+
+	/***********************atoms for simulated annealing***********************/
+	template<class T>
+	class Atom_Data_Sa{
 		public:
 			using value_type = T;
 			using size_type = std::size_t;
@@ -1710,7 +2033,55 @@ namespace multem
 			Vector<T, e_host> df;
 	};
 
-	/*****************************Atomic Coefficients****************************/
+	template<class T>
+	struct Atom_Sa
+	{
+		public:
+			using value_type = T;
+
+			T x;
+			T y;
+			T R2_max;
+			T *R2;
+			T *c3;
+			T *c2;
+			T *c1;
+			T *c0;
+
+			int ix0;
+			int ixn;
+			int iy0;
+			int iyn;
+
+			int *iv;
+			T *v;
+
+			Atom_Sa(): x(0), y(0), R2_max(0), R2(nullptr), c3(nullptr), c2(nullptr), c1(nullptr), 
+			c0(nullptr), ix0(1), ixn(0), iy0(0), iyn(0), iv(nullptr), v(nullptr){}
+
+			inline
+			void set_ix0_ixn(const Grid<T> &grid, const T &R_max)
+			{
+				get_bn(x, grid.nx, grid.dRx, R_max, grid.pbc_xy, ix0, ixn);
+			}
+
+			inline
+			void set_iy0_iyn(const Grid<T> &grid, const T &R_max)
+			{
+				get_bn(y, grid.ny, grid.dRy, R_max, grid.pbc_xy, iy0, iyn);
+			}
+
+			inline
+			GridBT get_eval_cubic_poly_gridBT()
+			{
+				GridBT gridBT;
+				gridBT.Blk = dim3((iyn+c_thrnxny-1)/c_thrnxny, (ixn+c_thrnxny-1)/c_thrnxny);
+				gridBT.Thr = dim3(c_thrnxny, c_thrnxny);
+				return gridBT;
+			}
+	};
+
+	/*****************************Atomic Coefficients**************************/
 	template<class T, eDevice dev>
 	struct Atom_Coef
 	{
@@ -1780,7 +2151,7 @@ namespace multem
 
 	};
 
-	/*****************************Atomic type****************************/
+	/********************************Atomic type*******************************/
 	template<class T, eDevice dev>
 	struct Atom_Type
 	{
@@ -1803,7 +2174,7 @@ namespace multem
 			ra_c = atom_type.ra_c;
 
 			coef.resize(atom_type.coef.size());
-			for(auto i=0; i<atom_type.coef.size(); i++)
+			for(auto i= 0; i<atom_type.coef.size(); i++)
 			{
 				coef[i].assign(atom_type.coef[i]);
 			}
@@ -1818,7 +2189,7 @@ namespace multem
 
 		int check_charge(const int &charge) const
 		{ 
-			for(auto i=0; i<coef.size(); i++)
+			for(auto i= 0; i<coef.size(); i++)
 			{
 				if(coef[i].charge==charge)
 				{
@@ -1831,7 +2202,7 @@ namespace multem
 		int charge_to_idx(const int &charge) const
 		{ 
 			int icharge = 0;
-			for(auto i=0; i<coef.size(); i++)
+			for(auto i= 0; i<coef.size(); i++)
 			{
 				if(coef[i].charge==charge)
 				{
@@ -1883,12 +2254,13 @@ namespace multem
 		Vector<Atom_Coef<T, dev>, e_host> coef;		// atomic coefficients
 	};
 
-	/******************************Atom_Vp*******************************/
-	template<class T>
+	/*********************************Atom_Vp**********************************/
+	template<class T, eDevice dev>
 	struct Atom_Vp
 	{
 		public:
 			using value_type = T;
+			static const eDevice device = dev;
 
 			int charge;
 			T x;
@@ -1911,12 +2283,15 @@ namespace multem
 			int iy0;
 			int iyn;
 
+			T R2_tap;
+			T tap_cf;
+
 			int *iv;
 			T *v;
 
 			Atom_Vp(): charge(0), x(0), y(0), z0h(0), zeh(0), split(false), occ(1), R2_min(0), R2_max(0), 
 			R2(nullptr), cl(nullptr), cnl(nullptr), c3(nullptr), c2(nullptr), c1(nullptr), 
-			c0(nullptr), ix0(1), ixn(0), iy0(0), iyn(0), iv(nullptr), v(nullptr){}
+			c0(nullptr), ix0(1), ixn(0), iy0(0), iyn(0), R2_tap(0), tap_cf(0), iv(nullptr), v(nullptr){}
 
 			inline
 			void set_ix0_ixn(const Grid<T> &grid, const T &R_max)
@@ -1941,56 +2316,7 @@ namespace multem
 
 	};
 
-	/******************************Atom_Ip*******************************/
-	template<class T>
-	struct Atom_Ip
-	{
-		public:
-			using value_type = T;
-
-			T x;
-			T y;
-			T R2_max;
-			T *R2;
-			T *c3;
-			T *c2;
-			T *c1;
-			T *c0;
-
-			int ix0;
-			int ixn;
-			int iy0;
-			int iyn;
-
-			int *iv;
-			T *v;
-
-			Atom_Ip(): x(0), y(0), R2_max(0), R2(nullptr), c3(nullptr), c2(nullptr), c1(nullptr), 
-			c0(nullptr), ix0(1), ixn(0), iy0(0), iyn(0), iv(nullptr), v(nullptr){}
-
-			inline
-			void set_ix0_ixn(const Grid<T> &grid, const T &R_max)
-			{
-				get_bn(x, grid.nx, grid.dRx, R_max, grid.pbc_xy, ix0, ixn);
-			}
-
-			inline
-			void set_iy0_iyn(const Grid<T> &grid, const T &R_max)
-			{
-				get_bn(y, grid.ny, grid.dRy, R_max, grid.pbc_xy, iy0, iyn);
-			}
-
-			inline
-			GridBT get_eval_cubic_poly_gridBT()
-			{
-				GridBT gridBT;
-				gridBT.Blk = dim3((iyn+c_thrnxny-1)/c_thrnxny, (ixn+c_thrnxny-1)/c_thrnxny);
-				gridBT.Thr = dim3(c_thrnxny, c_thrnxny);
-				return gridBT;
-			}
-	};
-
-	/******************************Scanning******************************/
+	/********************************Scanning**********************************/
 	template<class T>
 	struct Scanning
 	{
@@ -2000,7 +2326,8 @@ namespace multem
 
 			eScanning_Type type;			// 1: Line, 2: Area, 
 			eGrid_Type grid_type;			// 1: regular, 2: quadratic
-			int ns; 						// Sampling points
+			bool pbc;						// periodic boundary conditions
+			int ns; 						// Number of sampling points
 			int nx;
 			int ny;
 			T x0; 							// Initial scanning position in x
@@ -2019,14 +2346,15 @@ namespace multem
 				return x.size();
 			}
 
-			Scanning(): type(eST_Line), grid_type(eGT_Regular), ns(1), nx(0), dRx(0), dRy(0), 
-				ny(0), x0(0), y0(0), xe(0), ye(0){};
+			Scanning(): type(eST_Line), grid_type(eGT_Regular), pbc(false), ns(1), 
+				nx(0), dRx(0), dRy(0), ny(0), x0(0), y0(0), xe(0), ye(0) {};
 
 			template<class TScanning> 
 			void assign(TScanning &scanning)
 			{
 				type = scanning.type;
 				grid_type = scanning.grid_type;
+				pbc = scanning.pbc; 
 				ns = scanning.ns;
 				nx = scanning.nx;
 				ny = scanning.ny;
@@ -2053,6 +2381,7 @@ namespace multem
 			{
 				type = eST_Line;
 				grid_type = eGT_Regular;
+				pbc = false;
 				ns = 1;
 				x0 = y0 = 0;
 				xe = ye = 0;
@@ -2061,7 +2390,7 @@ namespace multem
 			int nxy() const { return nx*ny; }
 
 			T Rx(const int &ix) const 
-			{ 
+			{
 				T x = 0;
 				switch (grid_type)
 				{
@@ -2125,14 +2454,14 @@ namespace multem
 					{
 						case eGT_Regular:
 						{
-							dRx = ds*cos_theta/ns;
-							dRy = ds*sin_theta/ns;
+							dRx = ds*cos_theta/((pbc)?ns:(ns-1));
+							dRy = ds*sin_theta/((pbc)?ns:(ns-1));
 						}
 						break;
 						case eGT_Quadratic:
 						{
-							dRx = sqrt(ds*cos_theta)/ns;
-							dRy = sqrt(ds*sin_theta)/ns;
+							dRx = sqrt(ds*cos_theta)/((pbc)?ns:(ns-1));
+							dRy = sqrt(ds*sin_theta)/((pbc)?ns:(ns-1));
 						}
 						break;
 					}
@@ -2154,23 +2483,25 @@ namespace multem
 					T yu = ye-y0;
 					if(fabs(xu)>fabs(yu))
 					{
-						dRx = xu/ns;
+						dRx = xu/((pbc)?ns:(ns-1));
 						dRy = std::copysign(dRx, yu);
 						ny = int(floor(yu/dRy+Epsilon<T>::rel+0.5));
+						ny += (pbc)?0:1;
 					}
 					else
 					{
-						dRy = yu/ns;
+						dRy = yu/((pbc)?ns:(ns-1));
 						dRx = std::copysign(dRy, xu);
 						nx = int(floor(xu/dRx+Epsilon<T>::rel+0.5));
+						nx += (pbc)?0:1;
 					}
 
 					x.resize(nxy());
 					y.resize(nxy());
 
-					for(auto ix =0; ix<nx; ix++)
+					for(auto ix = 0; ix<nx; ix++)
 					{
-						for(auto iy =0; iy<ny; iy++)
+						for(auto iy = 0; iy<ny; iy++)
 						{
 							x[ix*ny+iy] = Rx(ix);
 							y[ix*ny+iy] = Ry(iy);
@@ -2196,7 +2527,7 @@ namespace multem
 		private:
 	};
 
-	/********************Radial Schrodinger equation*********************/
+	/*************************Radial Schrodinger equation**********************/
 	template<class T>
 	struct In_Rad_Schr
 	{
@@ -2208,7 +2539,7 @@ namespace multem
 		T *atomsM; 			// atoms
 	};
 
-	/***************************e_device properties*************************/
+	/*****************************e_device properties**************************/
 	struct Device_Properties
 	{
 		int id;
@@ -2221,7 +2552,7 @@ namespace multem
 			total_memory_size(0), free_memory_size(0){}
 	};
 
-	/***************************e_device properties*************************/
+	/*****************************e_device properties**************************/
 	struct Host_Properties
 	{
 		int nprocessors;

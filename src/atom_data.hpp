@@ -83,31 +83,48 @@ namespace multem
 				occ.shrink_to_fit();
 			}
 
-			// set atoms
-			void set_Atoms(const size_type &natomsM_i, double *atomsM_i, T l_x_i =0, T l_y_i =0, T l_z_i =0, T a_i =1.0, T b_i =1.0, T c_i =1.0)
+
+			template<class TOut, class TIn>
+			Atom<TOut> read_atom(const int &nr, const int &nc, TIn *atoms, const int &iatom)
 			{
-				resize(natomsM_i);
+				Atom<TOut> atom;
+				atom.Z = static_cast<int>(atoms[0*nr + iatom]); 						// Atomic number
+				atom.x = atoms[1*nr + iatom]; 										// x-position
+				atom.y = atoms[2*nr + iatom]; 										// y-position
+				atom.z = atoms[3*nr + iatom]; 										// z-position
+				atom.sigma = static_cast<float>((nc>4)?(atoms[4*nr + iatom]):0.085);	// Standard deviation
+				atom.occ = static_cast<float>((nc>5)?(atoms[5*nr + iatom]):1.0); 		// Occupancy
+				atom.charge = static_cast<int>((nc>6)?(atoms[6*nr + iatom]):0);		// charge
+
+				return atom;
+			}
+
+			// set atoms
+			void set_Atoms(const size_type &nr_atoms_i, const size_type &nc_atoms_i, double *atoms_i, T l_x_i = 0, T l_y_i = 0, T l_z_i = 0, T a_i = 1.0, T b_i = 1.0, T c_i = 1.0)
+			{
+				resize(nr_atoms_i);
 
 				l_x = l_x_i;
 				l_y = l_y_i;
 				l_z = l_z_i;
 
-				for(auto i = 0; i < natomsM_i; i++)
+				for(auto i = 0; i < nr_atoms_i; i++)
 				{	
-					Z[i] = static_cast<int>(atomsM_i[0*natomsM_i + i]); 		// Atomic number
-					charge[i] = static_cast<int>(atomsM_i[1*natomsM_i + i]); 	// charge
-					x[i] = a_i*atomsM_i[2*natomsM_i + i]; 						// x-position
-					y[i] = b_i*atomsM_i[3*natomsM_i + i]; 						// y-position
-					z[i] = c_i*atomsM_i[4*natomsM_i + i]; 						// z-position
-					sigma[i] = static_cast<float>(atomsM_i[5*natomsM_i + i]);	// Standard deviation
-					occ[i] = static_cast<float>(atomsM_i[6*natomsM_i + i]); 	// Occupancy
+					auto atom = read_atom<T>(nr_atoms_i, nc_atoms_i, atoms_i, i);
+					Z[i] = atom.Z; 				// Atomic number
+					charge[i] = atom.charge; 	// charge
+					x[i] = a_i*atom.x; 			// x-position
+					y[i] = b_i*atom.y; 			// y-position
+					z[i] = c_i*atom.z; 			// z-position
+					sigma[i] = atom.sigma;		// Standard deviation
+					occ[i] = atom.occ; 			// Occupancy
 				}
 
 				get_Statistic();
 			}
 
 			// set atoms
-			void set_Atoms(const Atom_Data<T> &atoms, bool PBC_xy_i =false, Vector<Atom_Type<T, e_host>, e_host> *atom_type =0)
+			void set_Atoms(const Atom_Data<T> &atoms, bool PBC_xy_i =false, Vector<Atom_Type<T, e_host>, e_host> *atom_type = 0)
 			{
 				resize(atoms.size());
 
@@ -374,7 +391,7 @@ namespace multem
 						{
 							z_slice[j++] = layer_0-(nz_Bot-i)*dz_Bot;
 						}
-						for(auto i =1; i<z_layer.size(); i++)
+						for(auto i = 1; i<z_layer.size(); i++)
 						{
 							T dz = get_spacing(i, z_layer);
 							z_slice[j++] = z_layer[i-1] + 0.5*dz;
@@ -395,7 +412,7 @@ namespace multem
 						z_slice.resize(nz+nz_Bot+nz_Top+1);
 		
 						z_slice[0] = layer_0-nz_Bot*dz_i;
-						for(auto i =1; i < z_slice.size(); i++)
+						for(auto i = 1; i < z_slice.size(); i++)
 						{
 							z_slice[i] = z_slice[i-1] + dz_i;
 						}
@@ -417,7 +434,7 @@ namespace multem
 						z_slice.resize(quot(atoms.s_z_Int-dz_Bot-dz_Top, dz_i) + 3);
 						/*******************************************************************/
 						z_slice[0] = atoms.z_Int_min;
-						for(auto i =1; i<z_slice.size(); i++)
+						for(auto i = 1; i<z_slice.size(); i++)
 						{
 							T dz = (i == 1)?dz_Bot:(i == z_slice.size()-1)?dz_Top:dz_i;
 							z_slice[i] = z_slice[i-1] + dz;
@@ -459,7 +476,7 @@ namespace multem
 					}
 				}
 
-				int counter =0;
+				int counter = 0;
 				for(auto i = 0; i<hist.size(); i++)
 				{
 					if(hist[i]>0)

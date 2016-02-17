@@ -15,7 +15,7 @@ input_multislice.tm_u0 = [1 0 0]; 					% unitary vector
 input_multislice.tm_rot_point_type = 1; 			% 1: geometric center, 2: User define		
 input_multislice.tm_p0 = [0 0 0];					% rotation point
 
-na = 4; nb = 4; nc = 5; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc = 40; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...
@@ -32,7 +32,7 @@ toc;
 for i = 1:nslice
     figure(1); clf;
     i1 = Slice(i, 5); i2 = Slice(i, 6); ii = i1:1:i2;
-    plot3(atoms(:, 3), atoms(:, 4), atoms(:, 5), '.k', atoms(ii, 3), atoms(ii, 4), atoms(ii, 5), '*r');
+    plot3(atoms(:, 2), atoms(:, 3), atoms(:, 4), '.k', atoms(ii, 2), atoms(ii, 3), atoms(ii, 4), 'or');
     set(gca,'FontSize',12,'LineWidth',1,'PlotBoxAspectRatio',[1.25 1 1]);
     title('Atomic positions');
     ylabel('y','FontSize',14);
