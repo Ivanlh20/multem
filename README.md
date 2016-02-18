@@ -20,9 +20,9 @@ The following steps work using Matlab R2015a and CUDA 7.5. It assume that Visual
 - First of all, you have to add to the matlab path the following folders: Crystalline_Materials, Matlab_functions and mex_executables.
 
 - Then you need to modified the `mex_CUDA_xxxx` file locate in the 'mex_files' folder, which corresponds to your operating system:
-> for Windows `mex_CUDA_win64`
-> for Linux `mex_CUDA_glnxa64`
-> for Mac `mex_CUDA_maci64`
+  1. for Windows `mex_CUDA_win64`
+  2. for Linux `mex_CUDA_glnxa64`
+  3. for Mac `mex_CUDA_maci64`
 
 - Go the the line which contains the following definition`NVCCFLAGS="$xxxxx"` and replace 'xxxxx' by 'SINGLE_CARD' or 'MULTI_CARD'. 'SINGLE_CARD'/'MULTI_CARD' defines the compute capability of your Nvidia graphic card.
 
