@@ -1644,12 +1644,12 @@ namespace multem
 				value_type_r u = 1.0 + c*c*g2;
 
 				c = c_Pi*lens.sf*lens.lambda*g2;
-				value_type_r si_exp = c*c/(4*u);
+				value_type_r spa_inc = 0.25*c*c;
 
 				c = c_Pi*lens.beta*(lens.Cs3*lens.lambda2*g2-lens.f);
-				value_type_r ti_exp = c*c*g2;
+				value_type_r temp_inc = c*c*g2;
 
-				value_type_r st_inc = exp(-(si_exp+ti_exp))/sqrt(u);
+				value_type_r st_inc = exp(-(spa_inc+temp_inc)/u)/sqrt(u);
 
 				fPsi_o[ixy] = fPsi_i[ixy]*thrust::polar(st_inc, chi);
 			}

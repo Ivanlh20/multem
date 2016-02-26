@@ -1362,14 +1362,20 @@ namespace multem
 	inline
 	bool is_gpu_available()
 	{
-		int device_count = 0;
-		cudaError_t error_id = cudaGetDeviceCount(&device_count);
-
-		if ((error_id != cudaSuccess)||(device_count == 0))
+		bool is_available = false;
+		try
 		{
-			return false;
+			int device_count = 0;
+			cudaError_t error_id = cudaGetDeviceCount(&device_count);
+
+			is_available = !((error_id != cudaSuccess)||(device_count == 0));
 		}
-		return true;
+		catch(...)
+		{
+			is_available = false;
+		}
+
+		return is_available;
 	}
 
 	inline

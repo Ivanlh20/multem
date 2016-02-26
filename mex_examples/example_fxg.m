@@ -1,7 +1,7 @@
 clear all;
 clc;
 Z = 79;
-charge = 1;
+charge = 0;
 
 gmin = 0; gmax = 20; ng = 512;
 dg = (gmax-gmin)/(ng-1); 
