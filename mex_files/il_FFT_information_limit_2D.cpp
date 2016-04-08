@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,5 +30,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 
 	auto radius = mx_create_scalar<rmatrix_r>(plhs[0]);
 
-	*(radius.real) = multem::FFT_information_limit_2D(fI.rows, fI.cols, shift, fI.real);
+	*(radius.real) = multem::FFT_information_limit_2d(fI.rows, fI.cols, shift, fI.real);
 }

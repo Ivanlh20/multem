@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,25 @@ using multem::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
-	auto Im = mx_get_matrix<rmatrix_r>(prhs[0]);
-	auto nkr_w = mx_get_scalar<int>(prhs[1]);
+	auto rIm_i = mx_get_matrix<rmatrix_r>(prhs[0]);
+	auto nkr = mx_get_scalar<int>(prhs[1]);
 
-	auto Im_d = mx_create_matrix<rmatrix_r>(Im.rows, Im.cols, plhs[0]);
+	/******************************************************************/
+	auto rIm_o = mx_create_matrix<rmatrix_r>(rIm_i.rows, rIm_i.cols, plhs[0]);
 
-	multem::Stream<e_host> stream;
-	stream.resize(4);
-	multem::filter_wiener_by_row(stream, Im_d.rows, Im_d.cols, Im, nkr_w, Im_d);
+	vector<float> Im(rIm_i.begin(), rIm_i.end());
+
+	multem::Stream<e_host> stream(4);
+
+	if(min(rIm_i.rows, rIm_i.cols) == 1)
+	{
+		Im = multem::filter_wiener_1d(stream, Im, nkr);
+	}
+	else
+	{
+		multem::Grid<float> grid(rIm_i.cols, rIm_i.rows);
+		Im = multem::filter_wiener_2d_by_row(stream, grid, Im, nkr);
+	}
+
+	rIm_o.assign(Im.begin(), Im.end());
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ namespace multem
 				resize(new_nstream);
 			}
 
-			~Stream(){ destroy(); nstream = 0; n_act_stream = 0; }
+			~Stream(){ destroy(); nstream = 1; n_act_stream = 1; }
 
 			int size() const
 			{
@@ -57,7 +57,12 @@ namespace multem
 				destroy();
 
 				nstream = new_nstream;
-				stream = new std::thread[nstream];
+				if(nstream > 1)
+				{
+					stream = new std::thread[nstream-1];
+				}
+
+				set_n_act_stream(size());
 			}
 
 			std::thread& operator[](const int i){ return stream[i]; }
@@ -68,7 +73,10 @@ namespace multem
 			{
 				destroy();
 
-				stream = new std::thread[nstream];
+				if(nstream > 1)
+				{
+					stream = new std::thread[nstream-1];
+				}
 			}
 
 			void set_n_act_stream(const int &new_n_act_stream)
@@ -130,7 +138,7 @@ namespace multem
 			template<class TFn>
 			void exec(TFn &fn)
 			{
-				if(n_act_stream<= 0)
+				if(n_act_stream < 1)
 				{
 					return;
 				}
@@ -156,12 +164,12 @@ namespace multem
 
 			void destroy()
 			{
-				if(nstream == 0)
+				if(nstream < 0)
 				{
 					return;
 				}
 
-				for(auto i = 0; i < nstream; i++)
+				for(auto i = 0; i < nstream-1; i++)
 				{
 					if(stream[i].joinable())
 					{
@@ -190,7 +198,7 @@ namespace multem
 
 			int size() const
 			{
-				return stream.size();
+				return static_cast<int>(stream.size());
 			}
 
 			void resize(int new_nstream)
@@ -205,6 +213,8 @@ namespace multem
 				{
 					cudaStreamCreate(&(stream[i]));
 				}
+
+				set_n_act_stream(size());
 			}
 
 			cudaStream_t& operator[](const int i){ return stream[i]; }

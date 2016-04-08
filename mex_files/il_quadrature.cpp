@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	auto q_type = mx_get_scalar<int>(prhs[0]);
 	auto nq = mx_get_scalar<int>(prhs[1]);
 
-	/*****************************************************************************/
+	/*******************************************************************/
 	multem::Q1<double, multem::e_host> q;
 	multem::Quadrature quadrature;
 	quadrature.get(q_type, nq, q);

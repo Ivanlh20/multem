@@ -1,6 +1,6 @@
 /**
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,7 +132,7 @@ void il_microscope_aberrations(const mxArray *mxB, multem::Output_Multislice_Mat
 	multem::Microscope_Effects<T, dev> microscope_effects;
 
 	stream.resize(input_multislice.nstream);
-	fft2.create_plan(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
+	fft2.create_plan_2d(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
 	microscope_effects.set_input_data(&input_multislice, &stream, &fft2);
 
 	microscope_effects.apply(output_multislice);

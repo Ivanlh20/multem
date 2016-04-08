@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ namespace multem
 				multem::Stream<e_host> stream(input_multislice->cpu_nthread);
 
 				multem::FFT2<double, e_host> fft2;
-				fft2.create_plan(grid.ny, grid.nx, input_multislice->cpu_nthread);
+				fft2.create_plan_2d(grid.ny, grid.nx, input_multislice->cpu_nthread);
 
 				multem::fft2_shift(stream, grid, M);
 				multem::gaussian_convolution(stream, fft2, grid, sigma, M);

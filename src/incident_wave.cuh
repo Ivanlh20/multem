@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,7 +82,7 @@ namespace multem
 						value_type_r x = input_multislice->get_Rx_pos_shift();
 						value_type_r y = input_multislice->get_Ry_pos_shift();
 
-						multem::phase_factor_2D(*stream, input_multislice->grid, x, y, fpsi_0, psi);
+						multem::phase_factor_2d(*stream, input_multislice->grid, x, y, fpsi_0, psi);
 						fft2->inverse(psi);
 					}
 					break;

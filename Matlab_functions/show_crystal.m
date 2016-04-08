@@ -4,7 +4,7 @@ function[]=show_crystal(fig, atoms)
     for iZ=1:length(aZ)
         hold all;
         ii = find(atoms(:, 1)==aZ(iZ));
-        plot3(atoms(ii, 2), atoms(ii, 3), atoms(ii, 4), 'o');
+        plot3(atoms(ii, 2), atoms(ii, 3), atoms(ii, 4), 'o', 'MarkerSize', 2, 'MarkerFaceColor', 'auto');
     end;
     axis equal;
     view([1 1 1]);

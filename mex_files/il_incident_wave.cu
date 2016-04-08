@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,7 +122,7 @@ void il_incident_wave(const mxArray *mxB, multem::Output_Multislice_Matlab &outp
 	multem::Incident_Wave<T, dev> incident_wave;
 
 	stream.resize(input_multislice.nstream);
-	fft2.create_plan(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
+	fft2.create_plan_2d(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
 
 	incident_wave.set_input_data(&input_multislice, &stream, &fft2);
 

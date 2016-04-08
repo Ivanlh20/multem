@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,7 +119,7 @@ void il_transmission_function(const mxArray *mxB, multem::Output_Multislice_Matl
 	multem::Transmission_Function<T, dev> transmission_function;
 
 	stream.resize(input_multislice.nstream);
-	fft2.create_plan(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
+	fft2.create_plan_2d(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
 	transmission_function.set_input_data(&input_multislice, &stream, &fft2);
 
 	transmission_function.move_atoms(input_multislice.fp_nconf);

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	auto rA = mx_get_matrix<rmatrix_r>(prhs[0]);
 	auto rb = mx_get_matrix<rmatrix_r>(prhs[1]);
 
-	/*****************************************************************************/
+	/*******************************************************************/
 	auto rx = mx_create_matrix<rmatrix_r>(rA.cols, rb.cols, plhs[0]);
 
 	lapack::GELSD<double> gelsd;

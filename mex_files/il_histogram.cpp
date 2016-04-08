@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,13 +29,18 @@ using multem::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
-	auto Im = mx_get_matrix<rmatrix_r>(prhs[0]);
+	auto rIm_i = mx_get_matrix<rmatrix_r>(prhs[0]);
 	auto nbins = mx_get_scalar<int>(prhs[1]);
 
-	auto x = mx_create_matrix<rmatrix_r>(nbins, 1, plhs[0]);
-	auto y = mx_create_matrix<rmatrix_r>(nbins, 1, plhs[1]);
+	/******************************************************************/
+	auto rx = mx_create_matrix<rmatrix_r>(nbins, 1, plhs[0]);
+	auto ry = mx_create_matrix<rmatrix_r>(nbins, 1, plhs[1]);
 
-	multem::Vector<int, e_host> hist(nbins);
-	multem::histogram(Im, nbins, hist, &x);
-	std::copy(hist.begin(), hist.end(), y.begin());
+	vector<float> Im(rIm_i.begin(), rIm_i.end());
+	vector<float> x(nbins);
+	vector<float> y(nbins);
+	multem::histogram(Im, nbins, y, &x);
+
+	rx.assign(x.begin(), x.end());
+	ry.assign(y.begin(), y.end());
 }

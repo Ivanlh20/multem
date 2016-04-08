@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,41 +30,37 @@
 using multem::rmatrix_r;
 using multem::rmatrix_c;
 using multem::e_host;
+using multem::r2d;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
 	auto rIm_i = mx_get_matrix<rmatrix_r>(prhs[0]);
-	auto dy_i = mx_get_scalar<double>(prhs[1]);
-	auto dx_i = mx_get_scalar<double>(prhs[2]);
+	double lx_i = rIm_i.cols*mx_get_scalar<double>(prhs[1]);
+	double ly_i = rIm_i.rows*mx_get_scalar<double>(prhs[2]);
 	auto peaks_i = mx_get_matrix<rmatrix_r>(prhs[3]);
 	auto radius_i = mx_get_scalar<double>(prhs[4]);
 	auto niter_i = mx_get_scalar<double>(prhs[5]);
 
-	double lx = rIm_i.cols*dx_i;
-	double ly = rIm_i.rows*dy_i;
-	bool bwl = false;
-	bool pbc_xy = false;
-	double dz = 0.5;
-
-	multem::Grid<double> grid;
-	grid.set_input_data(rIm_i.cols, rIm_i.rows, lx, ly, dz, bwl, pbc_xy);
-
-	multem::Stream<e_host> stream(4);
-	multem::Vector<double, e_host> Im(rIm_i.size());
-	multem::assign(stream, rIm_i, Im);
-
-	/*****************************************************************************/
+	/*******************************************************************/
 	auto peaks_o = mx_create_matrix<rmatrix_r>(peaks_i.rows, peaks_i.cols, plhs[0]);
+
+	vector<float> Im(rIm_i.begin(), rIm_i.end());
+
+	multem::Grid<float> grid(rIm_i.cols, rIm_i.rows, lx_i, ly_i);
+
 	auto npeaks = peaks_i.rows;
 
 	peaks_o.assign(peaks_i.begin(), peaks_i.end());
 	for(auto iter= 0; iter<niter_i; iter++)
 	{
-		for(auto i= 0; i<npeaks; i++)
+		for(auto i = 0; i<npeaks; i++)
 		{
 			double &x = peaks_o[0*npeaks+i];
 			double &y = peaks_o[1*npeaks+i];
-			multem::Rx_Ry_fit(grid, Im, x, y, radius_i, x, y);
+			auto fit = multem::Rx_Ry_fit(grid, Im, r2d<float>(x, y), radius_i, true);
+
+			x = fit[0];
+			y = fit[1];
 		}
 	}
 }

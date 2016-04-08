@@ -41,7 +41,7 @@
           IVAN_CARD="-gencode=arch=compute_20,code=sm_20 -gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot;"          
           SINGLE_CARD="-gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot;"
 		  MULTI_CARD="-gencode=arch=compute_20,code=sm_20 -gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot; -gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot;"		
-		  NVCCFLAGS="$MULTI_CARD"
+		  NVCCFLAGS="$SINGLE_CARD"
           
           COMPDEFINES="--compiler-options=/D_CRT_SECURE_NO_DEPRECATE,/D_SCL_SECURE_NO_DEPRECATE,/D_SECURE_SCL=0,$MATLABMEX"
           COMPFLAGS="--compiler-options=/Zp8,/bigobj,/GR,/W3,/EHs,/nologo,/MD $NVCCFLAGS"         

@@ -1,3 +1,11 @@
+% output_multislice = il_MULTEM(input_multislice) perform TEM simulation
+% 
+% Precession electron diffraction (PED) simulation
+% 
+% All parameters of the input_multislice structure are explained in multem_default_values()
+% 
+% Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+
 clear all; clc;
 
 input_multislice = multem_default_values();         % Load default values;

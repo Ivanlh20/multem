@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,24 +35,23 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	auto rM_1i = mx_get_matrix<rmatrix_r>(prhs[0]);
 	auto rM_2i = mx_get_matrix<rmatrix_r>(prhs[1]);
-	auto k = mx_get_scalar<double>(prhs[2]);
-	auto sigma = mx_get_scalar<double>(prhs[3]);
-	double lx = rM_1i.cols;
-	double ly = rM_1i.rows;
-	bool bwl = false;
-	bool pbc_xy = true;
-	double dz = 0.5;
+	double lx = rM_1i.cols*mx_get_scalar<double>(prhs[2]);
+	double ly = rM_1i.rows*mx_get_scalar<double>(prhs[3]);
+	auto k = mx_get_scalar<double>(prhs[4]);
+	auto sigma = mx_get_scalar<double>(prhs[5]);
 
-	multem::Grid<double> grid;
-	grid.set_input_data(rM_1i.cols, rM_1i.rows, lx, ly, dz, bwl, pbc_xy);
+	/******************************************************************/
+	auto rM_o = mx_create_matrix<rmatrix_r>(rM_1i.rows, rM_1i.cols, plhs[0]);
 
+	vector<float> M1_i(rM_1i.begin(), rM_1i.end());
+	vector<float> M2_i(rM_2i.begin(), rM_2i.end());
+
+	multem::Grid<float> grid(rM_1i.cols, rM_1i.rows, lx, ly);
 	multem::Stream<e_host> stream(4);
-	multem::FFT2<double, e_host> fft2;
-	fft2.create_plan(grid.ny, grid.nx, 4);
+	multem::FFT2<float, e_host> fft2;
 
-	/*****************************************************************************/
-	auto rM_o = mx_create_matrix<rmatrix_r>(grid.ny, grid.nx, plhs[0]);
-
-	multem::PCF(stream, fft2, grid, rM_1i, rM_2i, k, sigma, rM_o);
+	auto M_o = multem::PCF(stream, fft2, grid, M1_i, M2_i, k, sigma);
 	fft2.cleanup();
+
+	rM_o.assign(M_o.begin(), M_o.end());
 }

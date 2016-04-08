@@ -5,24 +5,36 @@ I = double(rgb2gray(RGB));
 J = I + 15*randn(ny, nx);
 
 figure(1);
-subplot(1, 3, 1);
+subplot(1, 4, 1);
 imagesc(J);
 axis image;
 colormap gray;
 
 tic;
-K = wiener2(J,[5 5]);
+L = il_filter_median(J,2);
 toc;
-subplot(1, 3, 2);
-imagesc(K);
+subplot(1, 4, 2);
+imagesc(L);
 axis image;
 colormap gray;
 
 tic;
-L = il_filter_median(J,2);
-% L = medfilt2(J,[5 5]);
+Lr = il_filter_median_by_row(J, 2);
 toc;
-subplot(1, 3, 3);
+subplot(1, 4, 3);
+imagesc(Lr);
+axis image;
+colormap gray;
+
+tic;
+L = J;
+for iy =1:ny
+    L(iy,:) = il_filter_median(J(iy,:), 2);
+end;
+toc;
+subplot(1, 4, 4);
 imagesc(L);
 axis image;
 colormap gray;
+
+sum(abs(L(:)-Lr(:)))

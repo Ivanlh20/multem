@@ -43,7 +43,7 @@ namespace multem
 			{
 				input_multislice = input_multislice_i;
 				stream.resize(input_multislice->nstream);
-				fft2.create_plan(input_multislice->grid.ny, input_multislice->grid.nx, input_multislice->nstream);
+				fft2.create_plan_2d(input_multislice->grid.ny, input_multislice->grid.nx, input_multislice->nstream);
 
 				if(input_multislice->is_EELS_EFTEM())
 				{

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,11 +67,29 @@ namespace multem
 				plan_backward = plan_forward = nullptr;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread = 1)
+			void create_plan_1d(const int &nx, int nThread)
 			{
 				destroy_plan();
 
-				fftwf_import_wisdom_from_filename("fft2f.wisdom");
+				fftwf_import_wisdom_from_filename("fftwf_1d.wisdom");
+
+				fftwf_plan_with_nthreads(nThread);
+
+				TVector_c M(nx);
+
+				fftwf_complex *V = reinterpret_cast<fftwf_complex*>(M.data());
+
+				plan_forward = fftwf_plan_dft_1d(nx, V, V, FFTW_FORWARD, FFTW_MEASURE);
+				plan_backward = fftwf_plan_dft_1d(nx, V, V, FFTW_BACKWARD, FFTW_MEASURE);
+
+				fftwf_export_wisdom_to_filename("fftwf_1d.wisdom");
+			}
+
+			void create_plan_2d(const int &ny, const int &nx, int nThread)
+			{
+				destroy_plan();
+
+				fftwf_import_wisdom_from_filename("fftwf_2d.wisdom");
 
 				fftwf_plan_with_nthreads(nThread);
 
@@ -82,22 +100,25 @@ namespace multem
 				plan_forward = fftwf_plan_dft_2d(nx, ny, V, V, FFTW_FORWARD, FFTW_MEASURE);
 				plan_backward = fftwf_plan_dft_2d(nx, ny, V, V, FFTW_BACKWARD, FFTW_MEASURE);
 
-				fftwf_export_wisdom_to_filename("fft2f.wisdom");
+				fftwf_export_wisdom_to_filename("fftwf_2d.wisdom");
 			}
 
-			void forward(TVector_c &M_io)
+			template<class TVector>
+			void forward(TVector &M_io)
 			{
 				fftwf_complex *V_io = reinterpret_cast<fftwf_complex*>(M_io.data());
 				fftwf_execute_dft(plan_forward, V_io, V_io);
 			}
 
-			void inverse(TVector_c &M_io)
+			template<class TVector>
+			void inverse(TVector &M_io)
 			{
 				fftwf_complex *V_io = reinterpret_cast<fftwf_complex*>(M_io.data());
 				fftwf_execute_dft(plan_backward, V_io, V_io);
 			}
 
-			void forward(TVector_c &M_i, TVector_c &M_o)
+			template<class TVector>
+			void forward(TVector &M_i, TVector &M_o)
 			{
 				if (M_i.data() != M_o.data())
 				{
@@ -107,7 +128,8 @@ namespace multem
 				forward(M_o);
 			}
 
-			void inverse(TVector_c &M_i, TVector_c &M_o)
+			template<class TVector>
+			void inverse(TVector &M_i, TVector &M_o)
 			{
 				if (M_i.data() != M_o.data())
 				{
@@ -156,11 +178,29 @@ namespace multem
 				plan_backward = plan_forward = nullptr;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread = 1)
+			void create_plan_1d(const int &nx, int nThread)
 			{
 				destroy_plan();
 
-				fftw_import_wisdom_from_filename("fft2.wisdom");
+				fftw_import_wisdom_from_filename("fftw_1d.wisdom");
+
+				fftw_plan_with_nthreads(nThread);
+
+				TVector_c M(nx);
+
+				fftw_complex *V = reinterpret_cast<fftw_complex*>(M.data());
+
+				plan_forward = fftw_plan_dft_1d(nx, V, V, FFTW_FORWARD, FFTW_MEASURE);
+				plan_backward = fftw_plan_dft_1d(nx, V, V, FFTW_BACKWARD, FFTW_MEASURE);
+
+				fftw_export_wisdom_to_filename("fftw_1d.wisdom");
+			}
+
+			void create_plan_2d(const int &ny, const int &nx, int nThread)
+			{
+				destroy_plan();
+
+				fftw_import_wisdom_from_filename("fftw_2d.wisdom");
 
 				fftw_plan_with_nthreads(nThread);
 
@@ -171,22 +211,25 @@ namespace multem
 				plan_forward = fftw_plan_dft_2d(nx, ny, V, V, FFTW_FORWARD, FFTW_MEASURE);
 				plan_backward = fftw_plan_dft_2d(nx, ny, V, V, FFTW_BACKWARD, FFTW_MEASURE);
 
-				fftw_export_wisdom_to_filename("fft2.wisdom");
+				fftw_export_wisdom_to_filename("fftw_2d.wisdom");
 			}
 
-			void forward(TVector_c &M_io)
+			template<class TVector>
+			void forward(TVector &M_io)
 			{
 				fftw_complex *V_io = reinterpret_cast<fftw_complex*>(M_io.data());
 				fftw_execute_dft(plan_forward, V_io, V_io);
 			}
 
-			void inverse(TVector_c &M_io)
+			template<class TVector>
+			void inverse(TVector &M_io)
 			{
 				fftw_complex *V_io = reinterpret_cast<fftw_complex*>(M_io.data());
 				fftw_execute_dft(plan_backward, V_io, V_io);
 			}
 
-			void forward(TVector_c &M_i, TVector_c &M_o)
+			template<class TVector>
+			void forward(TVector &M_i, TVector &M_o)
 			{
 				if (M_i.data() != M_o.data())
 				{
@@ -196,7 +239,8 @@ namespace multem
 				forward(M_o);
 			}
 
-			void inverse(TVector_c &M_i, TVector_c &M_o)
+			template<class TVector>
+			void inverse(TVector &M_i, TVector &M_o)
 			{
 				if (M_i.data() != M_o.data())
 				{
@@ -244,7 +288,16 @@ namespace multem
 				plan_backward = plan_forward = 0;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread = 1)
+			void create_plan_1d(const int &nx, int nThread)
+			{
+				destroy_plan();
+
+				cufftPlan1d(&plan_forward, nx, CUFFT_C2C, 1);
+
+				plan_backward = plan_forward;
+			}
+
+			void create_plan_2d(const int &ny, const int &nx, int nThread)
 			{
 				destroy_plan();
 
@@ -315,7 +368,16 @@ namespace multem
 				plan_backward = plan_forward = 0;
 			}
 
-			void create_plan(const int &ny, const int &nx, int nThread = 1)
+			void create_plan_1d(const int &nx, int nThread)
+			{
+				destroy_plan();
+
+				cufftPlan1d(&plan_forward, nx, CUFFT_Z2Z, 1);
+
+				plan_backward = plan_forward;
+			}
+
+			void create_plan_2d(const int &ny, const int &nx, int nThread)
 			{
 				destroy_plan();
 

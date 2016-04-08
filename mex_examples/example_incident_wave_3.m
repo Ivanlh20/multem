@@ -13,8 +13,8 @@ input_multislice.E_0 = 300;                          % Acceleration Voltage (keV
 input_multislice.theta = 0.0;
 input_multislice.phi = 0.0;
 
-input_multislice.lx = 20;
-input_multislice.ly = 20;
+input_multislice.lx = 32;
+input_multislice.ly = 32;
 
 input_multislice.nx = 1024; 
 input_multislice.ny = 1024;
@@ -45,7 +45,7 @@ input_multislice.iw_x = 0.5*input_multislice.lx;
 input_multislice.iw_y = 0.5*input_multislice.ly;
 
 df0 = 14.836;
-for df = (df0-100):10:(df0+100)
+for df = (df0+200)
     input_multislice.cond_lens_f = df;      %Angs
     clear il_incident_wave;
     tic;

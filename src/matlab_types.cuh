@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,7 +107,7 @@ namespace multem
 
 		void resize(const size_type &new_size)
 		{
-			m_size = new_size;
+			m_size = static_cast<int>(new_size);
 			delete [] real;
 			real = new double [new_size];
 		}
@@ -183,7 +183,7 @@ namespace multem
 
 		void resize(const size_type &new_size)
 		{
-			m_size = new_size;
+			m_size = static_cast<int>(new_size);
 			delete [] real;
 			real = new double [new_size];
 			delete [] imag;

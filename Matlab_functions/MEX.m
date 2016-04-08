@@ -12,10 +12,10 @@ if(isempty(CUDA_PATH))
     elseif(ismac)
         setenv('CUDA_PATH', '/Developer/NVIDIA/CUDA-7.5');
     else
-%         % scientific linux
-%         setenv('CUDA_PATH', '/usr/local/cuda-7.5');
-        % ubuntu
-        setenv('CUDA_PATH', '/usr/local/cuda-7.5');        
+        % scientific linux
+        setenv('CUDA_PATH', '/usr/local/cuda-7.5');
+%         % ubuntu
+%         setenv('CUDA_PATH', '/usr/local/cuda-7.5');        
     end;    
 end;
 
@@ -31,12 +31,12 @@ elseif(ismac)
     FFTW_LIB = ' -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';
     LAPACK_LIB = ' -lblas -llapack';
 else
-%     % scientific linux
-%     FFTW_LIB = '-L/opt/local/lib -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';  
-%     LAPACK_LIB = '-L/opt/local/lib -lblas -llapack';
-    % ubuntu
-    FFTW_LIB = '-L/usr/lib/x86_64-linux-gnu -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';  
-    LAPACK_LIB = '-L/usr/lib/x86_64-linux-gnu -lblas -llapack';
+    % scientific linux
+    FFTW_LIB = '-L/opt/local/lib -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';  
+    LAPACK_LIB = '-L/opt/local/lib -lblas -llapack';
+%     % ubuntu
+%     FFTW_LIB = '-L/usr/lib/x86_64-linux-gnu -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';  
+%     LAPACK_LIB = '-L/usr/lib/x86_64-linux-gnu -lblas -llapack';
 end;
 
 ADD_INC = strcat('-I', path);

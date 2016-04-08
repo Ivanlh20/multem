@@ -1,46 +1,42 @@
+% Anscombe transform is a variance-stabilizing transformation 
+% that transforms a random variable with a Poisson distribution 
+% into one with an approximately standard Gaussian distribution
+% https://en.wikipedia.org/wiki/Anscombe_transform
+% 
+% J = il_anscombe_forward(I) Direct Anscombe transform
+% J = il_anscombe_inverse(I) Inverse Anscombe transform
+% 
+% Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+
 clc; clear all;
-RGB = imread('saturn.png');
-I = 0.75*double(rgb2gray(RGB));
-[ny, nx] = size(I);
 
-J = poissrnd(I);
-% J = I + 25*randn(ny, nx);
+Im = double(rgb2gray(imread('saturn.png')));
 
-[min(I(:)), max(I(:))]
+SNR = 5;
+[Im_n, k] = il_add_poisson_noise(Im, SNR);
+
+tic;
+Im_d = il_anscombe_forward(Im_n);
+Im_d = il_filter_wiener(Im_d, 2);
+Im_d = il_filter_median(Im_d, 2);
+Im_d = il_anscombe_inverse(Im_d);
+toc;
 
 figure(1);
-subplot(2, 2, 1);
-imagesc(I);
+subplot(1, 3, 1);
+imagesc(Im);
 axis image;
 colormap gray;
+title('original image');
 
-subplot(2, 2, 2);
-imagesc(J);
+subplot(1, 3, 2);
+imagesc(Im_n);
 axis image;
 colormap gray;
+title('Noise image');
 
-tic;
-K = wiener2(J,[7 7]);
-toc;
-[min(K(:)), max(K(:))]
-subplot(2, 2, 3);
-imagesc(K);
+subplot(1, 3, 3);
+imagesc(Im_d);
 axis image;
 colormap gray;
-
-tic;
-L = il_anscombe_forward(J);
-L = il_filter_wiener(L, 2);
-L = il_filter_median(L, 2);
-L = il_anscombe_inverse(L);
-toc;
-[min(L(:)), max(L(:))]
-
-subplot(2, 2, 4);
-imagesc(L);
-axis image;
-colormap gray;
-
-figure(2);
-x = 1:nx;
-plot(x, J(700, :), '-k', x, K(700, :), '-b', x, L(700, :), '-c', x, I(700, :), '-r');
+title('denoise image');

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,17 +29,16 @@ using multem::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
-	auto mIm = mx_get_matrix<rmatrix_r>(prhs[0]);
-	auto mshrink = mx_get_scalar<double>(prhs[1]);
-	multem::Vector<double, e_host> Im(mIm.begin(), mIm.end());
+	auto rIm_i = mx_get_matrix<rmatrix_r>(prhs[0]);
+	auto shrink_f = mx_get_scalar<double>(prhs[1]);
+
+	multem::Vector<double, e_host> Im_i(rIm_i.begin(), rIm_i.end());
 
 	int nx, ny;
-	multem::Vector<double, e_host> Im_d;
 
-	multem::Stream<e_host> stream;
-	stream.resize(4);
-	multem::scale_image_mean(stream, mIm.rows, mIm.cols, Im, mshrink, ny, nx, Im_d);
+	multem::Stream<e_host> stream(4);
+	auto Im_o = multem::scale_image_mean(stream, rIm_i.rows, rIm_i.cols, Im_i, shrink_f, ny, nx);
 
-	auto mIm_d = mx_create_matrix<rmatrix_r>(ny, nx, plhs[0]);
-	thrust::copy(Im_d.begin(), Im_d.end(), mIm_d.begin());
+	auto rIm_o = mx_create_matrix<rmatrix_r>(ny, nx, plhs[0]);
+	thrust::copy(Im_o.begin(), Im_o.end(), rIm_o.begin());
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,10 +24,11 @@
 #include "traits.cuh"
 #include "stream.cuh"
 #include "quadrature.hpp"
+#include "memory_info.cuh"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
 #include "projected_potential.cuh"
-#include "memory_info.cuh"
+
 
 namespace multem
 {

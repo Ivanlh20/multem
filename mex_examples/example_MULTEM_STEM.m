@@ -1,3 +1,11 @@
+% output_multislice = il_MULTEM(input_multislice) perform TEM simulation
+% 
+% Scanning transmission electron microscopy (STEM) simulation
+% 
+% All parameters of the input_multislice structure are explained in multem_default_values()
+% 
+% Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+
 clear all; clc;
 
 input_multislice = multem_default_values();         % Load default values;
@@ -66,16 +74,22 @@ input_multislice.scanning_ye = 3*b;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Detector %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.detector.type = 1;  % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
-input_multislice.detector.cir(1).inner_ang = 60;  % Inner angle(mrad) 
-input_multislice.detector.cir(1).outer_ang = 150; % Outer angle(mrad)
-input_multislice.detector.cir(2).inner_ang = 70;  % Inner angle(mrad) 
-input_multislice.detector.cir(2).outer_ang = 165; % Outer angle(mrad)
-input_multislice.detector.cir(3).inner_ang = 80;  % Inner angle(mrad) 
-input_multislice.detector.cir(3).outer_ang = 175; % Outer angle(mrad)
-input_multislice.detector.radial(1).x = 0;          % radial detector angle(mrad)
-input_multislice.detector.radial(1).fx = 0;         % radial sensitivity value
-input_multislice.detector.matrix(1).R = 0;          % 2D detector angle(mrad)
-input_multislice.detector.matrix(1).fR = 0;         % 2D sensitivity value
+ic = 1;
+for theta =20:10:150;
+    input_multislice.detector.cir(ic).inner_ang = theta;  % Inner angle(mrad) 
+    input_multislice.detector.cir(ic).outer_ang = theta+10; % Outer angle(mrad)    
+    ic = ic + 1;
+end;
+% input_multislice.detector.cir(1).inner_ang = 60;  % Inner angle(mrad) 
+% input_multislice.detector.cir(1).outer_ang = 150; % Outer angle(mrad)
+% input_multislice.detector.cir(2).inner_ang = 70;  % Inner angle(mrad) 
+% input_multislice.detector.cir(2).outer_ang = 165; % Outer angle(mrad)
+% input_multislice.detector.cir(3).inner_ang = 80;  % Inner angle(mrad) 
+% input_multislice.detector.cir(3).outer_ang = 175; % Outer angle(mrad)
+% input_multislice.detector.radial(1).x = 0;          % radial detector angle(mrad)
+% input_multislice.detector.radial(1).fx = 0;         % radial sensitivity value
+% input_multislice.detector.matrix(1).R = 0;          % 2D detector angle(mrad)
+% input_multislice.detector.matrix(1).fR = 0;         % 2D sensitivity value
 
 input_multislice.thickness_type = 2;             % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 input_multislice.thickness = 0:c:1000;           % Array of thicknesses

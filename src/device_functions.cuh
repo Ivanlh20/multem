@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -534,14 +534,14 @@ namespace multem
 
 		// shift function in Fourier space
 		template<class TGrid, class T>
-		__global__ void phase_factor_2D(TGrid grid, Value_type<TGrid> x, Value_type<TGrid> y, rVector<T> psi_i, rVector<T> psi_o)
+		__global__ void phase_factor_2d(TGrid grid, Value_type<TGrid> x, Value_type<TGrid> y, rVector<T> psi_i, rVector<T> psi_o)
 		{
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid.nx)&&(iy < grid.ny))
 			{
-				host_device_detail::phase_factor_2D(ix, iy, grid, x, y, psi_i, psi_o);
+				host_device_detail::phase_factor_2d(ix, iy, grid, x, y, psi_i, psi_o);
 			}
 		}
 
@@ -858,30 +858,30 @@ namespace multem
 
 	template<class TVector>
 	enable_if_device_vector<TVector, void>
-	mean_std(Stream<e_device> &stream, TVector &M_i, Value_type_r<TVector> &x_mean, Value_type_r<TVector> &x_std)
+	mean_var(Stream<e_device> &stream, TVector &M_i, Value_type_r<TVector> &x_mean, Value_type_r<TVector> &x_var)
 	{
 		using value_type_r = Value_type_r<TVector>;
 
 		x_mean = mean(stream, M_i);
-		x_std = thrust::transform_reduce(M_i.begin(), M_i.begin(), functor::square_dif<value_type_r>(x_mean), value_type_r(0), functor::add<value_type_r>());
+		x_var = thrust::transform_reduce(M_i.begin(), M_i.begin(), functor::square_dif<value_type_r>(x_mean), value_type_r(0), functor::add<value_type_r>());
 
-		x_std = sqrt(x_std/M_i.size());
+		x_var = x_var/M_i.size();
 	}
 
 	template<class TVector>
 	enable_if_device_vector<TVector, Value_type_r<TVector>>
-	std(Stream<e_device> &stream, TVector &M_i)
+	variance(Stream<e_device> &stream, TVector &M_i)
 	{
 		using value_type_r = Value_type_r<TVector>;
 
-		value_type_r x_mean , x_std;
-		mean_std(stream, M_i, x_mean, x_std);
-		return x_std;
+		value_type_r x_mean, x_var;
+		mean_var(stream, M_i, x_mean, x_var);
+		return x_var;
 	}
 
 	template<class TGrid, class TVector_c>
 	enable_if_device_vector<TVector_c, void>
-	phase_factor_1D(Stream<e_device> &stream, TGrid &grid, Value_type<TGrid> x, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	phase_factor_1d(Stream<e_device> &stream, TGrid &grid, Value_type<TGrid> x, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		thrust::counting_iterator<int> first(0);
 		thrust::counting_iterator<int> last = first + grid.nx;
@@ -893,13 +893,13 @@ namespace multem
 
 	template<class TGrid, class TVector_c>
 	enable_if_device_vector<TVector_c, void>
-	phase_factor_2D(Stream<e_device> &stream, TGrid &grid, Value_type<TGrid> x, Value_type<TGrid> y, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	phase_factor_2d(Stream<e_device> &stream, TGrid &grid, Value_type<TGrid> x, Value_type<TGrid> y, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
 		using value_type_r = Value_type<TGrid>;
 
 		auto gridBT = device_detail::get_grid_nxny(grid);
 
-		device_detail::phase_factor_2D<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, x, y, fPsi_i, fPsi_o);
+		device_detail::phase_factor_2d<TGrid, typename TVector_c::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, x, y, fPsi_i, fPsi_o);
 	}
 
 	template<class TGrid, class TVector_r>

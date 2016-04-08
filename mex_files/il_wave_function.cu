@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -192,7 +192,7 @@ void il_wave_function(const mxArray *mxB, multem::Output_Multislice_Matlab &outp
 	multem::Wave_Function<T, dev> wave_function;
 
 	stream.resize(input_multislice.nstream);
-	fft2.create_plan(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
+	fft2.create_plan_2d(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
 	wave_function.set_input_data(&input_multislice, &stream, &fft2);
 
 	wave_function.move_atoms(input_multislice.fp_nconf);

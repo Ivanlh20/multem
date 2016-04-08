@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,9 @@ namespace multem
 
 	template<class T>
 	struct is_double: std::integral_constant<bool, std::is_same<T, double>::value> {};
+
+	template<class T>
+	struct is_real: std::integral_constant<bool, is_float<T>::value || is_double<T>::value> {};
 
 	template<class T>
 	struct is_complex: std::integral_constant<bool, std::is_same<T, complex<float>>::value || std::is_same<T, complex<double>>::value> {};
@@ -150,7 +153,19 @@ namespace multem
 	struct is_device_vector_and_device_vector: std::integral_constant<bool, is_device_vector<T1>::value && is_device_vector<T2>::value> {};
 
 	template <class T, class U>
+	using enable_if_real_host_vector = typename std::enable_if<is_host_vector<T>::value && is_real<typename T::value_type>::value, U>::type;
+
+	template <class T, class U>
+	using enable_if_complex_host_vector = typename std::enable_if<is_host_vector<T>::value && is_complex<typename T::value_type>::value, U>::type;
+
+	template <class T, class U>
 	using enable_if_host_vector = typename std::enable_if<is_host_vector<T>::value, U>::type;
+
+	template <class T, class U>
+	using enable_if_real_device_vector = typename std::enable_if<is_device_vector<T>::value && is_real<typename T::value_type>::value, U>::type;
+
+	template <class T, class U>
+	using enable_if_complex_device_vector = typename std::enable_if<is_device_vector<T>::value && is_complex<typename T::value_type>::value, U>::type;
 
 	template <class T, class U>
 	using enable_if_device_vector = typename std::enable_if<is_device_vector<T>::value, U>::type;

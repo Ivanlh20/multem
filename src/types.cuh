@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,11 +34,12 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <thread>
 #include <mutex>
 
 #include "math.cuh"
-#include "r3d.cuh"
+#include "lin_alg_def.cuh"
 
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
@@ -271,6 +272,18 @@ namespace multem
 	enum eOutput_Type
 	{
 		eOT_Matlab = 1, eOT_Vector = 2
+	};
+
+	/******************Data selection type**********************/
+	enum eDat_Sel_Type
+	{
+		eDST_Closest = 1, eDST_Less_Than = 2, eDST_Greater_Than = 3
+	};
+
+	/******************structuring element**********************/
+	enum eStr_Ele
+	{
+		eSE_Disk = 1, eSE_Square = 2
 	};
 
 	template<class T>
@@ -1049,6 +1062,87 @@ namespace multem
 		}
 	};
 
+	/**********************closest prime factorization**********************/
+	struct Prime_Num
+	{
+		public:
+			Prime_Num()
+			{
+				int64_t b_2 = 2, b_3 = 3, b_5 = 5, b_7 = 7;
+				int np2 = 16, np3 = 7, np5 = 5, np7 = 4;
+				int64_t prime_0 = 64;
+				int64_t prime_e = static_cast<int64_t>(std::pow(b_2, 16));
+
+
+				number.reserve(np2*np3*np5*np7);
+				for(auto ie=1; ie<7; ie++)
+				{
+					auto p = static_cast<int64_t>(std::pow(b_2, ie));
+					number.push_back(p);
+				}
+
+				for(auto ip7=0; ip7<np7; ip7++)
+				{
+					auto p7 = static_cast<int64_t>(std::pow(b_7, ip7));
+
+					for(auto ip5=0; ip5<np5; ip5++)
+					{
+						auto p5 = static_cast<int64_t>(std::pow(b_5, ip5));
+
+						for(auto ip3=0; ip3<np3; ip3++)
+						{
+							auto p3 = static_cast<int64_t>(std::pow(b_3, ip3));
+
+							for(auto ip2=0; ip2<np2; ip2++)
+							{
+								auto p2 = static_cast<int64_t>(std::pow(b_2, ip2));
+
+								auto p = p7*p5*p3*p2;
+
+								if((prime_0<p)&&(p<=prime_e))
+								{
+									number.push_back(p);
+								}
+							}
+						}
+					}
+				}
+				number.shrink_to_fit();
+				std::sort(number.begin(), number.end()); 
+			}
+
+			int operator()(int64_t n, eDat_Sel_Type dst = eDST_Closest)
+			{
+				auto idx = std::min_element(number.begin(), number.end(), [&n](int64_t p0, int64_t pe){ return std::abs(n-p0)<std::abs(n-pe);});
+
+				auto pn = static_cast<int>(*idx);
+
+				switch(dst)
+				{
+					case eDST_Less_Than:
+					{
+						if(pn>n)
+						{
+							pn = static_cast<int>(*(idx-1));
+						}
+					}
+					break;
+					case eDST_Greater_Than:
+					{
+						if(pn<n)
+						{
+							pn = static_cast<int>(*(idx+1));
+						}
+					}
+					break;
+				}
+				return pn;
+			}
+
+		private:
+			std::vector<int64_t> number;
+	};
+
 	/***************************grid****************************/
 	template<class T>
 	struct Grid
@@ -1084,6 +1178,21 @@ namespace multem
 			lx(0), ly(0), dz(0), pbc_xy(true), bwl(true), 
 			dRx(0), dRy(0), dgx(0), dgy(0), gl2_max(0){}
 
+		Grid(int nx, int ny)
+		{
+			lx = nx;
+			ly = ny;
+			dz = 0.5;
+			bwl = false;
+			pbc_xy = false;
+			set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
+		}
+
+		Grid(int nx, int ny, T lx, T ly, T dz = 0.5, bool bwl = false, bool pbc_xy = false)
+		{
+			set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
+		}
+
 		inline
 		void set_input_data(int nx_i, int ny_i, T lx_i, T ly_i, T dz_i, bool BWL_i, bool PBC_xy_i)
 		{
@@ -1091,7 +1200,7 @@ namespace multem
 			ny = ny_i;
 			nxh = nx/2;
 			nyh = ny/2;
-			inxy = multem::Div(1.0, nxy());
+			inxy = static_cast<T>(multem::Div(1.0, nxy()));
 			lx = lx_i;
 			ly = ly_i;
 			dz = dz_i;
@@ -1148,6 +1257,19 @@ namespace multem
 
 		DEVICE_CALLABLE FORCEINLINE
 		T lyh() const { return 0.5*ly; }
+
+		DEVICE_CALLABLE FORCEINLINE
+		int lxh_lyh_min() const { return min(lxh(), lyh()); }
+
+		DEVICE_CALLABLE FORCEINLINE
+		int lxh_lyh_max() const { return max(lxh(), lyh()); }
+
+		/*********************************************************/
+		DEVICE_CALLABLE FORCEINLINE
+		int floor_dRx(const T &x) const { return static_cast<int>(floor(x/dRx)); }
+
+		DEVICE_CALLABLE FORCEINLINE
+		int floor_dRy(const T &y) const { return static_cast<int>(floor(y/dRy)); }
 
 		/*********************************************************/
 		// Maximun frequency
@@ -1303,6 +1425,23 @@ namespace multem
 
 		DEVICE_CALLABLE FORCEINLINE
 		T R_shift(const int &ix, const int &iy) const { return sqrt(R2_shift(ix, iy)); }
+
+		DEVICE_CALLABLE FORCEINLINE
+		T Rx_shift(const int &ix, const T &x) const { return Rx_shift(ix)-x; }
+
+		DEVICE_CALLABLE FORCEINLINE
+		T Ry_shift(const int &iy, const T &y) const { return Ry_shift(iy)-y; }
+
+		DEVICE_CALLABLE FORCEINLINE
+		T R2_shift(const int &ix, const int &iy, const T &x, const T &y) const 
+		{ 
+			T Rxi = Rx_shift(ix, x);
+			T Ryi = Ry_shift(iy, y);
+			return (Rxi*Rxi + Ryi*Ryi);
+		}
+
+		DEVICE_CALLABLE FORCEINLINE
+		T R_shift(const int &ix, const int &iy, const T &x, const T &y) const { return sqrt(R2_shift(ix, iy, x, y)); }
 
 		DEVICE_CALLABLE FORCEINLINE
 		T bwl_factor_shift(const int &ix, const int &iy) const 

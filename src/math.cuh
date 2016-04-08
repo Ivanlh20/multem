@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -434,9 +434,9 @@
 	DEVICE_CALLABLE FORCEINLINE
 	complex<T> euler(const T &x)
 	{
-		T sprt, cptr;
-		sincos(x, &sprt, &cptr);
-		return complex<T>(cptr, sprt);
+		T sptr, cptr;
+		sincos(x, &sptr, &cptr);
+		return complex<T>(cptr, sptr);
 	}
 
 	template<class T>

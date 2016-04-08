@@ -1,3 +1,11 @@
+% output_multislice = il_MULTEM(input_multislice) perform TEM simulation
+% 
+% Convergent beam electron diffraction (CBED) simulation
+% 
+% All parameters of the input_multislice structure are explained in multem_default_values()
+% 
+% Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+
 clear all; clc;
 
 input_multislice = multem_default_values();         % Load default values;
@@ -68,7 +76,7 @@ clear il_MULTEM;
 tic;
 output_multislice = il_MULTEM(input_multislice); 
 toc;
-% clear il_MULTEM;
+clear il_MULTEM;
 
 figure(1);
 for i=1:length(output_multislice.data)

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ namespace multem
 
 			value_type_r integrated_intensity_over_det(value_type_r w_i, const int &iDet, Vector<value_type_c, dev> &psi_z)
 			{
-				value_type_r  int_val = 0;
+				value_type_r int_val = 0;
 				switch (detector.type)
 				{
 					case multem::eDT_Circular:

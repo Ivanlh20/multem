@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "fft2.cuh"
 #include "host_device_functions.cuh"
 #include "host_functions.hpp"
+#include "image_functions.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -33,33 +34,23 @@ using multem::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
-	auto rM_i = mx_get_matrix<rmatrix_r>(prhs[0]);
-	double lx = rM_i.cols*mx_get_scalar<double>(prhs[1]);
-	double ly = rM_i.rows*mx_get_scalar<double>(prhs[2]);
+	auto rIm_i = mx_get_matrix<rmatrix_r>(prhs[0]);
+	auto lx = rIm_i.cols*mx_get_scalar<double>(prhs[1]);
+	auto ly = rIm_i.rows*mx_get_scalar<double>(prhs[2]);
 	auto sigma = mx_get_scalar<double>(prhs[3]);
-	bool bwl = false;
-	bool pbc_xy = true;
-	double dz = 0.5;
 
-	multem::Grid<double> grid;
-	grid.set_input_data(rM_i.cols, rM_i.rows, lx, ly, dz, bwl, pbc_xy);
+	/*******************************************************************/
+	auto rIm_o = mx_create_matrix<rmatrix_r>(rIm_i.rows, rIm_i.cols, plhs[0]);
 
+	vector<float> Im(rIm_i.begin(), rIm_i.end());
+
+	multem::Grid<float> grid(rIm_i.cols, rIm_i.rows, lx, ly);
 	multem::Stream<e_host> stream(4);
+	multem::FFT2<float, e_host> fft2;
 
-	multem::Vector<complex<double>, e_host> M(grid.nxy());
-	multem::assign(stream, rM_i, M);
-	multem::fft2_shift(stream, grid, M);
-
-	/*****************************************************************************/
-	auto rM_o = mx_create_matrix<rmatrix_r>(grid.ny, grid.nx, plhs[0]);
-
-	multem::FFT2<double, e_host> fft2;
-	fft2.create_plan(grid.ny, grid.nx, 4);
-
-	multem::gaussian_convolution(stream, fft2, grid, sigma, M);
-
-	multem::copy_to_host(stream, M, rM_o);
-	multem::fft2_shift(stream, grid, rM_o);
+	Im = multem::gaussian_convolution(stream, fft2, grid, sigma, Im);
 
 	fft2.cleanup();
+
+	rIm_o.assign(Im.begin(), Im.end());
 }

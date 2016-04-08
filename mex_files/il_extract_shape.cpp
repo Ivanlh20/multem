@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,34 +30,36 @@ using multem::e_host;
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
 	// read input data from matlab
-	auto mIm = mx_get_matrix<rmatrix_r>(prhs[0]);
-	auto mdR = mx_get_scalar<double>(prhs[1]);
+	auto rIm_i = mx_get_matrix<rmatrix_r>(prhs[0]);
+	auto dR = mx_get_scalar<double>(prhs[1]);
+	double lx = rIm_i.cols*dR;
+	double ly = rIm_i.rows*dR;
+	bool bwl = false;
+	bool pbc_xy = true;
+	double dz = 0.5;
 
-	// create output data to matlab
-	auto mIm_s = mx_create_matrix<rmatrix_r>(mIm.rows, mIm.cols, plhs[0]);
 
-	// create grid
 	multem::Grid<float> grid;
-	grid.set_input_data(mIm_s.cols, mIm_s.rows, mdR*mIm_s.cols, mdR*mIm_s.rows, 0.5, false, true);
+	grid.set_input_data(rIm_i.cols, rIm_i.rows, lx, ly, dz, bwl, pbc_xy);
 
-	// crate stream
-	multem::Stream<e_host> stream;
-	stream.resize(4);
+	multem::Stream<e_host> stream(4);
 
 	// create fourier transform plan
 	multem::FFT2<float, e_host> fft2;
-	fft2.create_plan(grid.ny, grid.nx, 4);
+	fft2.create_plan_2d(grid.ny, grid.nx, 4);
 
 	// create vectors
-	multem::Vector<float, e_host> Im(mIm.begin(), mIm.end());
-	multem::Vector<float, e_host> Im_s(mIm.size());
+	multem::Vector<float, e_host> Im_i(rIm_i.begin(), rIm_i.end());
 
 	// extract shape
-	multem::extract_shape(stream, fft2, grid, Im, Im_s);
+	auto Im_o = multem::extract_shape(stream, fft2, grid, Im_i);
 
 	// clean fft2 plan
 	fft2.cleanup();
 
+	// create output data to matlab
+	auto rIm_o = mx_create_matrix<rmatrix_r>(rIm_i.rows, rIm_i.cols, plhs[0]);
+
 	// copy to matlab output
-	multem::copy_to_host(stream, Im_s, mIm_s);
+	multem::copy_to_host(stream, Im_o, rIm_o);
 }

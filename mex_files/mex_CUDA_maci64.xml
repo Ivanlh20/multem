@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!-- Copyright 2015 The MathWorks, Inc. -->
+<!-- Copyright 2016 The MathWorks, Inc. -->
 <config
     Name="nvcc"
     ShortName="nvcc"

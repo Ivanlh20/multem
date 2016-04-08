@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	std::vector<double> x(xr.begin(), xr.end());
 	std::vector<double> y(yr.begin(), yr.end());
 
-	/*****************************************************************************/
+	/*******************************************************************/
 	auto yi = mx_create_matrix<rmatrix_r>(xi.rows, xi.cols, plhs[0]);
 
 	multem::Cubic_Spline<double> spline;

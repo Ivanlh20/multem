@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include "math.cuh"
 #include "types.cuh"
 #include "traits.cuh"
-#include "r3d.cuh"
+#include "lin_alg_def.cuh"
 
 #include <thrust/complex.h>
 #include <thrust/swap.h>
@@ -127,6 +127,23 @@ namespace multem
 		Rm[7] = u0.y*u0.z*alpha - u0.x*beta;
 		Rm[8] = 1.0 + alpha*(u0.z*u0.z-1);
 		return Rm;
+	}
+
+	// distance from point to line
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	T get_dist_from_p2l(const T &a, const T &b, const T &c, const T &x0, const T &y0)
+	{
+		return abs(a*x0+b*y0+c)/sqrt(a*a+b*b);
+	}
+
+	// calculate intersection points
+	template<class T>
+	DEVICE_CALLABLE FORCEINLINE 
+	void get_int_pt_from_p2l(const T &a, const T &b, const T &c, const T &x0, const T &y0, const T &x, const T &y)
+	{
+		x = (b*(b*x0-a*y0)-a*c)/(a*a+b*b);
+		y = -(a*(b*x0-a*y0)-b*c)/(a*a+b*b);
 	}
 
 	namespace host_device_detail
@@ -1557,7 +1574,7 @@ namespace multem
 
 		template<class TGrid, class TVector_c>
 		DEVICE_CALLABLE FORCEINLINE 
-		void phase_factor_2D(const int &ix, const int &iy, const TGrid &grid, 
+		void phase_factor_2d(const int &ix, const int &iy, const TGrid &grid, 
 		const Value_type<TGrid> &x, const Value_type<TGrid> &y, TVector_c &psi_i, TVector_c &psi_o)
 		{
 			using value_type_r = Value_type_r<TVector_c>;
@@ -2628,6 +2645,17 @@ namespace multem
 		};
 
 		template<class T>
+		struct thresholding
+		{
+			const T threshold;
+			thresholding(T threshold_i = T()): threshold(threshold_i){}
+
+			template<class U>
+			__host__ __device__
+			T operator()(const U &x) const { return (x<threshold)?threshold:x; }
+		};
+
+		template<class T>
 		struct anscombe_forward 
 		{
 			const T xs;
@@ -2635,7 +2663,7 @@ namespace multem
 
 			template<class U>
 			__host__ __device__
-			T operator()(const U &x) const { return 2*sqrt(x+xs); }
+			T operator()(const U &x) const { return (x<0)?0:2*sqrt(x+xs); }
 		};
 
 		template<class T>

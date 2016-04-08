@@ -1,4 +1,24 @@
-%Ivan lobato - 26/06/2012-6.30pm
+% S = il_atom_type(PotPar) get atomic properties
+% 
+% Pot_Par is an integer number which is link to the atomic potential parameterization
+% 
+%     1: Doyle_0_4
+%     2: Peng_0_4
+%     3: Peng_0_12
+%     4: Kirkland_0_12
+%     5: Weickenmeier_0_12
+%     6: Lobato_0_12
+% 
+% Dim is the dimension with possible values 2 and 3
+% 
+% Vrl is the atomic potential threshold in eV
+% 
+% r(:, 1) = integral {r^2 V(r)dr} / integral{V(r)dr}
+% r(:, 2) are calculated by solving the equation V(r) = Vrl
+% r(:, 3) are the experimental values
+% 
+% Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+
 clear all;
 clc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

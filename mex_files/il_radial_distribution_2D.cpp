@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2015 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,19 +25,16 @@ using multem::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
-	rmatrix_r R, fR, Rl;
-	rmatrix_r rl, frl, cfrl;
-
-	R = mx_get_matrix<rmatrix_r>(prhs[0]);
-	fR = mx_get_matrix<rmatrix_r>(prhs[1]);
-	Rl = mx_get_matrix<rmatrix_r>(prhs[2]);
+	auto R = mx_get_matrix<rmatrix_r>(prhs[0]);
+	auto fR = mx_get_matrix<rmatrix_r>(prhs[1]);
+	auto Rl = mx_get_matrix<rmatrix_r>(prhs[2]);
 
 	int typ = mx_get_scalar<int>(prhs[3]);
 
 	/**************************************************************/
-	rl = mx_create_matrix<rmatrix_r>(Rl.m_size-1, 1, plhs[0]);
-	frl = mx_create_matrix<rmatrix_r>(Rl.m_size-1, 1, plhs[1]);
-	cfrl = mx_create_matrix<rmatrix_r>(Rl.m_size-1, 1, plhs[2]);
+	auto rl = mx_create_matrix<rmatrix_r>(Rl.size()-1, 1, plhs[0]);
+	auto frl = mx_create_matrix<rmatrix_r>(Rl.size()-1, 1, plhs[1]);
+	auto cfrl = mx_create_matrix<rmatrix_r>(Rl.size()-1, 1, plhs[2]);
 
-	multem::radial_distribution_2D(R.m_size, R.real, fR.real, Rl.m_size, Rl.real, rl.real, frl.real, cfrl.real, true, typ);
+	multem::radial_distribution_2d(R.size(), R.real, fR.real, Rl.size(), Rl.real, rl.real, frl.real, cfrl.real, true, typ);
 }
