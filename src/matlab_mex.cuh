@@ -29,9 +29,9 @@
 #include "matlab_types.cuh"
 #include <mex.h>
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::r3d;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::r3d;
 
 /**************************************************************************/
 template <class TVector>
@@ -82,7 +82,7 @@ T mx_get_matrix(const mxArray *mxB){};
 template <>
 rmatrix_r mx_get_matrix<rmatrix_r>(const mxArray *mxB)
 {
-	multem::rmatrix_r matrix;
+	mt::rmatrix_r matrix;
 	matrix.rows = static_cast<int>(mxGetM(mxB));
 	matrix.cols = static_cast<int>(mxGetN(mxB));
 	matrix.m_size = matrix.rows*matrix.cols;
@@ -94,7 +94,7 @@ rmatrix_r mx_get_matrix<rmatrix_r>(const mxArray *mxB)
 template <>
 rmatrix_c mx_get_matrix<rmatrix_c>(const mxArray *mxB)
 {
-	multem::rmatrix_c matrix;
+	mt::rmatrix_c matrix;
 	matrix.rows = static_cast<int>(mxGetM(mxB));
 	matrix.cols = static_cast<int>(mxGetN(mxB));
 	matrix.m_size = matrix.rows*matrix.cols;

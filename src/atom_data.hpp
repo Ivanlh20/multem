@@ -28,7 +28,7 @@
 
 #include <thrust/sort.h>
 
-namespace multem
+namespace mt
 {
 	template<class T>
 	class Atom_Data{
@@ -592,6 +592,6 @@ namespace multem
 			};
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

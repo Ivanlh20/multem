@@ -23,9 +23,9 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -39,7 +39,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	vector<float> Im(rIm_i.begin(), rIm_i.end());
 	vector<float> x(nbins);
 	vector<float> y(nbins);
-	multem::histogram(Im, nbins, y, &x);
+	mt::histogram(Im, nbins, y, &x);
 
 	rx.assign(x.begin(), x.end());
 	ry.assign(y.begin(), y.end());

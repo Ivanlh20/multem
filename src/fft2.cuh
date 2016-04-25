@@ -27,7 +27,7 @@
 #include <cuda_runtime.h>
 #include <cufft.h>
 
-namespace multem
+namespace mt
 {
 	template<class T, eDevice dev>
 	struct FFT2;
@@ -413,6 +413,6 @@ namespace multem
 			cufftHandle plan_forward;
 			cufftHandle plan_backward;
 	};
-} // namespace multem
+} // namespace mt
 
 #endif

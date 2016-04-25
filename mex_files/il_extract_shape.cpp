@@ -23,9 +23,9 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -39,20 +39,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	double dz = 0.5;
 
 
-	multem::Grid<float> grid;
+	mt::Grid<float> grid;
 	grid.set_input_data(rIm_i.cols, rIm_i.rows, lx, ly, dz, bwl, pbc_xy);
 
-	multem::Stream<e_host> stream(4);
+	mt::Stream<e_host> stream(4);
 
 	// create fourier transform plan
-	multem::FFT2<float, e_host> fft2;
+	mt::FFT2<float, e_host> fft2;
 	fft2.create_plan_2d(grid.ny, grid.nx, 4);
 
 	// create vectors
-	multem::Vector<float, e_host> Im_i(rIm_i.begin(), rIm_i.end());
+	mt::Vector<float, e_host> Im_i(rIm_i.begin(), rIm_i.end());
 
 	// extract shape
-	auto Im_o = multem::extract_shape(stream, fft2, grid, Im_i);
+	auto Im_o = mt::extract_shape(stream, fft2, grid, Im_i);
 
 	// clean fft2 plan
 	fft2.cleanup();
@@ -61,5 +61,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	auto rIm_o = mx_create_matrix<rmatrix_r>(rIm_i.rows, rIm_i.cols, plhs[0]);
 
 	// copy to matlab output
-	multem::copy_to_host(stream, Im_o, rIm_o);
+	mt::copy_to_host(stream, Im_o, rIm_o);
 }

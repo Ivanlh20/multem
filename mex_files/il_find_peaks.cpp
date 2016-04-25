@@ -23,9 +23,9 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::Vector;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::Vector;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -35,7 +35,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 
 	std::vector<double> x(rx_i.begin(), rx_i.end());
 	std::vector<double> y(ry_i.begin(), ry_i.end());
-	auto peaks = multem::find_peaks_vector_typ_1(x, y, y_thr);
+	auto peaks = mt::find_peaks_vector_typ_1(x, y, y_thr);
 
 	/*******************************************************************/
 	auto rpeaks = mx_create_matrix<rmatrix_r>(peaks.size(), 1, plhs[0]);

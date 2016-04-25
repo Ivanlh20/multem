@@ -23,21 +23,21 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
 	auto rIm_i = mx_get_matrix<rmatrix_r>(prhs[0]);
 	auto shrink_f = mx_get_scalar<double>(prhs[1]);
 
-	multem::Vector<double, e_host> Im_i(rIm_i.begin(), rIm_i.end());
+	mt::Vector<double, e_host> Im_i(rIm_i.begin(), rIm_i.end());
 
 	int nx, ny;
 
-	multem::Stream<e_host> stream(4);
-	auto Im_o = multem::scale_image_mean(stream, rIm_i.rows, rIm_i.cols, Im_i, shrink_f, ny, nx);
+	mt::Stream<e_host> stream(4);
+	auto Im_o = mt::scale_image_mean(stream, rIm_i.rows, rIm_i.cols, Im_i, shrink_f, ny, nx);
 
 	auto rIm_o = mx_create_matrix<rmatrix_r>(ny, nx, plhs[0]);
 	thrust::copy(Im_o.begin(), Im_o.end(), rIm_o.begin());

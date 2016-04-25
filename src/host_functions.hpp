@@ -35,7 +35,7 @@
 
 #include "host_device_functions.cuh"
 
-namespace multem
+namespace mt
 {
 	// median filter 1d
 	template<class TVector>
@@ -1153,7 +1153,7 @@ namespace multem
 		stream.exec(thr_probe);
 
 		auto total = sum_square(stream, fPsi_o);
-		multem::scale(stream, sqrt(1.0/total), fPsi_o);
+		mt::scale(stream, sqrt(1.0/total), fPsi_o);
 	}
 
 	template<class TGrid, class TVector_c>
@@ -1301,7 +1301,7 @@ namespace multem
 	copy_to_host(Stream<e_host> &stream, TVector_i &M_i, TVector_o &M_o, 
 	Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
 	{
-		multem::assign(stream, M_i, M_o, M_i_h);
+		mt::assign(stream, M_i, M_o, M_i_h);
 	}
 
 	template<class TVector_i, class TVector_o>
@@ -1309,7 +1309,7 @@ namespace multem
 	add_scale_to_host(Stream<e_host> &stream, Value_type<TVector_i> w_i, 
 	TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
 	{
-		multem::add_scale(stream, w_i, M_i, M_o);
+		mt::add_scale(stream, w_i, M_i, M_o);
 	}
 
 	template<class TVector_i, class TVector_o>
@@ -1317,7 +1317,7 @@ namespace multem
 	add_square_scale_to_host(Stream<e_host> &stream, Value_type<TVector_o> w_i, 
 	TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
 	{
-		multem::add_square_scale(stream, w_i, M_i, M_o);
+		mt::add_square_scale(stream, w_i, M_i, M_o);
 	}
 
 	template<class TVector_c_i, class TVector_r_o, class TVector_c_o>
@@ -1325,8 +1325,8 @@ namespace multem
 	add_scale_m2psi_psi_to_host(Stream<e_host> &stream, Value_type<TVector_r_o> w_i, 
 	TVector_c_i &psi_i, TVector_r_o &m2psi_o, TVector_c_o &psi_o, Vector<Value_type<TVector_c_i>, e_host> *psi_i_h =nullptr)
 	{
-		multem::add_scale(stream, w_i, psi_i, psi_o);
-		multem::add_square_scale(stream, w_i, psi_i, m2psi_o);
+		mt::add_scale(stream, w_i, psi_i, psi_o);
+		mt::add_square_scale(stream, w_i, psi_i, m2psi_o);
 	}
 
 	/***************************************************************************/
@@ -3386,6 +3386,6 @@ namespace multem
 		A_idx.shrink_to_fit();
 	}
 
-} // namespace multem
+} // namespace mt
 
 #endif

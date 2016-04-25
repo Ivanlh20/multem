@@ -23,7 +23,7 @@
 #include "math.cuh"
 #include "types.cuh"
 
-namespace multem
+namespace mt
 {
 	template<class T>
 	struct is_bool: std::integral_constant<bool, std::is_same<T, bool>::value> {};
@@ -213,46 +213,46 @@ namespace multem
 	using enable_if_pointer = typename std::enable_if<std::is_pointer<T>::value, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_STEM = typename std::enable_if<simulation_type == eST_STEM, U>::type;
+	using enable_if_STEM = typename std::enable_if<simulation_type == eTEMST_STEM, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_ISTEM = typename std::enable_if<simulation_type == eST_ISTEM, U>::type;
+	using enable_if_ISTEM = typename std::enable_if<simulation_type == eTEMST_ISTEM, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_CBED = typename std::enable_if<simulation_type == eST_CBED, U>::type;
+	using enable_if_CBED = typename std::enable_if<simulation_type == eTEMST_CBED, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_CBEI = typename std::enable_if<simulation_type == eST_CBEI, U>::type;
+	using enable_if_CBEI = typename std::enable_if<simulation_type == eTEMST_CBEI, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_ED = typename std::enable_if<simulation_type == eST_ED, U>::type;
+	using enable_if_ED = typename std::enable_if<simulation_type == eTEMST_ED, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_HRTEM = typename std::enable_if<simulation_type == eST_HRTEM, U>::type;
+	using enable_if_HRTEM = typename std::enable_if<simulation_type == eTEMST_HRTEM, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_PED = typename std::enable_if<simulation_type == eST_PED, U>::type;
+	using enable_if_PED = typename std::enable_if<simulation_type == eTEMST_PED, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_HCI = typename std::enable_if<simulation_type == eST_HCI, U>::type;
+	using enable_if_HCI = typename std::enable_if<simulation_type == eTEMST_HCI, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_EWFS = typename std::enable_if<simulation_type == eST_EWFS, U>::type;
+	using enable_if_EWFS = typename std::enable_if<simulation_type == eTEMST_EWFS, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_EWRS = typename std::enable_if<simulation_type == eST_EWRS, U>::type;
+	using enable_if_EWRS = typename std::enable_if<simulation_type == eTEMST_EWRS, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_EELS = typename std::enable_if<simulation_type == eST_EELS, U>::type;
+	using enable_if_EELS = typename std::enable_if<simulation_type == eTEMST_EELS, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_EFTEM = typename std::enable_if<simulation_type == eST_EFTEM, U>::type;
+	using enable_if_EFTEM = typename std::enable_if<simulation_type == eTEMST_EFTEM, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_ProbeFS = typename std::enable_if<simulation_type == eST_IWFS, U>::type;
+	using enable_if_ProbeFS = typename std::enable_if<simulation_type == eTEMST_IWFS, U>::type;
 
 	template <int simulation_type, class U>
-	using enable_if_ProbeRS = typename std::enable_if<simulation_type == eST_IWRS, U>::type;
-} // namespace multem
+	using enable_if_ProbeRS = typename std::enable_if<simulation_type == eTEMST_IWRS, U>::type;
+} // namespace mt
 
 #endif

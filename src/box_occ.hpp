@@ -24,7 +24,7 @@
 #include "lin_alg_def.cuh"
 #include "atom_data.hpp"
 
-namespace multem
+namespace mt
 {
 	class Box_Occ
 	{
@@ -46,7 +46,7 @@ namespace multem
 			{	
 				r_min = r_min_i;
 				r2_min = pow(r_min, 2);
-				a_min = r_min/multem::c_3i2;
+				a_min = r_min/mt::c_3i2;
 				lx = lx_i;
 				ly = ly_i;
 				lz = lz_i;
@@ -132,5 +132,5 @@ namespace multem
 			Vector<int, e_host> occ;
 	};
 
-} // namespace multem
+} // namespace mt
 #endif

@@ -22,7 +22,7 @@
 #include "types.cuh"
 #include "traits.cuh"
 
-namespace multem
+namespace mt
 {
 	class Quadrature{
 		public:
@@ -13307,6 +13307,6 @@ namespace multem
 			Q1<double, e_host> cQ;
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

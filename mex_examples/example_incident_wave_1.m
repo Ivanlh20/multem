@@ -27,7 +27,7 @@ input_multislice.iw_y = 0.5*input_multislice.ly;    % y position
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.cond_lens_m = 0;                  % Momentum of the vortex
-input_multislice.cond_lens_f = 15.836;             % Defocus (Å)
+input_multislice.cond_lens_f = 20.4346;             % Defocus (Å)
 input_multislice.cond_lens_Cs3 = 1e-03;            % Third order spherical aberration (mm)
 input_multislice.cond_lens_Cs5 = 0.00;             % Fifth order spherical aberration (mm)
 input_multislice.cond_lens_mfa2 = 0.0;             % Twofold astigmatism (Å)
@@ -35,11 +35,13 @@ input_multislice.cond_lens_afa2 = 0.0;             % Azimuthal angle of the twof
 input_multislice.cond_lens_mfa3 = 0.0;             % Threefold astigmatism (Å)
 input_multislice.cond_lens_afa3 = 0.0;             % Azimuthal angle of the threefold astigmatism (º)
 input_multislice.cond_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad) 
-input_multislice.cond_lens_outer_aper_ang = 21.0;  % Outer aperture (mrad)
+input_multislice.cond_lens_outer_aper_ang = 24.0;  % Outer aperture (mrad)
 input_multislice.cond_lens_sf = 32;                % Defocus Spread (Å)
 input_multislice.cond_lens_nsf = 10;               % Number of integration steps for the defocus Spread
 input_multislice.cond_lens_beta = 0.2;             % Divergence semi-angle (mrad)
 input_multislice.cond_lens_nbeta = 10;             % Number of integration steps for the divergence semi-angle
+input_multislice.cond_lens_zero_defocus_type = 2;  % eZDT_First = 1, eZDT_User_Define = 2
+input_multislice.cond_lens_zero_defocus_plane = 95;
 
 for x = (0.4:0.025:0.6)*input_multislice.lx
     for y = (0.4:0.025:0.6)*input_multislice.ly

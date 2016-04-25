@@ -26,12 +26,13 @@
 #include "types.cuh"
 #include "traits.cuh"
 #include "stream.cuh"
+#include "matlab_types.cuh"
 #include "atom_data.hpp"
 #include "input_multislice.cuh"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 
-namespace multem
+namespace mt
 {
 	template<class TVector_r, class TVector_c>
 	class Output_Multislice: public Input_Multislice<Value_type<TVector_r>>
@@ -201,55 +202,55 @@ namespace multem
 						{
 							for(auto idet = 0; idet < image_tot[ithk].image.size(); idet++)
 							{
-								multem::fill(stream, image_tot[ithk].image[idet], 0);
-								multem::fill(stream, image_coh[ithk].image[idet], 0);
+								mt::fill(stream, image_tot[ithk].image[idet], 0);
+								mt::fill(stream, image_coh[ithk].image[idet], 0);
 							}
-							multem::fill(stream, psi_coh[ithk], 0);
+							mt::fill(stream, psi_coh[ithk], 0);
 						}
 						break;
 						case 2:
 						{
 							for(auto idet = 0; idet < image_tot[ithk].image.size(); idet++)
 							{
-								multem::fill(stream, image_tot[ithk].image[idet], 0);
+								mt::fill(stream, image_tot[ithk].image[idet], 0);
 							}
 						}
 						break;
 						case 3:
 						{
-							multem::fill(stream, m2psi_tot[ithk], 0);
-							multem::fill(stream, psi_coh[ithk], 0);
+							mt::fill(stream, m2psi_tot[ithk], 0);
+							mt::fill(stream, psi_coh[ithk], 0);
 						}
 						break;
 						case 4:
 						{
-							multem::fill(stream, m2psi_tot[ithk], 0);
+							mt::fill(stream, m2psi_tot[ithk], 0);
 						}
 						break;
 						case 5:
 						{
-							multem::fill(stream, m2psi_tot[ithk], 0);
-							multem::fill(stream, psi_coh[ithk], 0);
+							mt::fill(stream, m2psi_tot[ithk], 0);
+							mt::fill(stream, psi_coh[ithk], 0);
 						}
 						break;
 						case 6:
 						{
-							multem::fill(stream, psi_coh[ithk], 0);							
+							mt::fill(stream, psi_coh[ithk], 0);							
 						}
 						break;
 						case 7:
 						{
-							multem::fill(stream, psi_0[ithk], 0);
+							mt::fill(stream, psi_0[ithk], 0);
 						}
 						break;
 						case 8:
 						{
-							multem::fill(stream, V[ithk], 0);
+							mt::fill(stream, V[ithk], 0);
 						}
 						break;
 						case 9:
 						{
-							multem::fill(stream, trans[ithk], 0);
+							mt::fill(stream, trans[ithk], 0);
 						}
 						break;
 					}
@@ -264,39 +265,39 @@ namespace multem
 					{
 						case 3:
 						{
-							multem::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
-							multem::fft2_shift(stream, this->grid, m2psi_coh[ithk]);
+							mt::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
+							mt::fft2_shift(stream, this->grid, m2psi_coh[ithk]);
 						}
 						break;
 						case 4:
 						{
-							multem::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
+							mt::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
 						}
 						break;
 						case 5:
 						{
-							multem::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
-							multem::fft2_shift(stream, this->grid, psi_coh[ithk]);
+							mt::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
+							mt::fft2_shift(stream, this->grid, psi_coh[ithk]);
 						}
 						break;
 						case 6:
 						{
-							multem::fft2_shift(stream, this->grid, psi_coh[ithk]);							
+							mt::fft2_shift(stream, this->grid, psi_coh[ithk]);							
 						}
 						break;
 						case 7:
 						{
-							multem::fft2_shift(stream, this->grid, psi_0[ithk]);
+							mt::fft2_shift(stream, this->grid, psi_0[ithk]);
 						}
 						break;
 						case 8:
 						{
-							multem::fft2_shift(stream, this->grid, V[ithk]);
+							mt::fft2_shift(stream, this->grid, V[ithk]);
 						}
 						break;
 						case 9:
 						{
-							multem::fft2_shift(stream, this->grid, trans[ithk]);
+							mt::fft2_shift(stream, this->grid, trans[ithk]);
 						}
 						break;
 					}
@@ -505,6 +506,6 @@ namespace multem
 
 	template<class T>
 	using Output_Multislice_Vector = Output_Multislice<Vector<T, e_host>, Vector<complex<T>, e_host>>;
-} // namespace multem
+} // namespace mt
 
 #endif

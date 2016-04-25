@@ -29,7 +29,7 @@
 #include "cubic_spline.hpp"
 #include <thrust/transform.h>
 
-namespace multem
+namespace mt
 {
 	template<class T, eDevice dev>
 	class Atomic_Cross_Section{
@@ -48,10 +48,10 @@ namespace multem
 			void get(TVector &r_o, TVector &fr_o)
 			{
 				/**************************multislice calculation*******************************/
-				multem::Output_Multislice_Vector<T> output_multislice;
+				mt::Output_Multislice_Vector<T> output_multislice;
 				output_multislice.set_input_data(input_multislice);
 
-				multem::Multislice<T, dev> multislice;
+				mt::Multislice<T, dev> multislice;
 				multislice.set_input_data(input_multislice);
 
 				multislice.run(output_multislice);
@@ -59,10 +59,10 @@ namespace multem
 				multislice.cleanup();
 
 				/******************************* Cross section ********************************/
-				multem::Grid<double> grid;
+				mt::Grid<double> grid;
 				grid.assign(input_multislice->grid);
 
-				multem::Cubic_Spline<double> spline;
+				mt::Cubic_Spline<double> spline;
 				auto sigma = input_multislice->atoms.sigma[0];
 
 				auto pr = &(output_multislice.scanning.r);
@@ -73,7 +73,7 @@ namespace multem
 				std::vector<double> fr2(pr->size());
 				fr2.assign(pfr2->begin(), pfr2->begin()+fr2.size());
 
-				multem::Vector<complex<double>, e_host> M(grid.nxy());
+				mt::Vector<complex<double>, e_host> M(grid.nxy());
 				T x = 0.5*grid.lx;
 				T y = 0.5*grid.ly;
 
@@ -82,14 +82,14 @@ namespace multem
 				spline.eval_radial_function(grid, x, y, M);
 
 				// Convolution
-				multem::Stream<e_host> stream(input_multislice->cpu_nthread);
+				mt::Stream<e_host> stream(input_multislice->cpu_nthread);
 
-				multem::FFT2<double, e_host> fft2;
+				mt::FFT2<double, e_host> fft2;
 				fft2.create_plan_2d(grid.ny, grid.nx, input_multislice->cpu_nthread);
 
-				multem::fft2_shift(stream, grid, M);
-				multem::gaussian_convolution(stream, fft2, grid, sigma, M);
-				multem::fft2_shift(stream, grid, M);
+				mt::fft2_shift(stream, grid, M);
+				mt::gaussian_convolution(stream, fft2, grid, sigma, M);
+				mt::fft2_shift(stream, grid, M);
 				fft2.cleanup();
 
 				// extract radial values
@@ -116,6 +116,6 @@ namespace multem
 			Input_Multislice<value_type_r> *input_multislice;
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

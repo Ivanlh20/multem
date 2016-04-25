@@ -23,7 +23,7 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 	
-using multem::rmatrix_r;
+using mt::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -31,8 +31,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	auto nq = mx_get_scalar<int>(prhs[1]);
 
 	/*******************************************************************/
-	multem::Q1<double, multem::e_host> q;
-	multem::Quadrature quadrature;
+	mt::Q1<double, mt::e_host> q;
+	mt::Quadrature quadrature;
 	quadrature.get(q_type, nq, q);
 
 	rmatrix_r x = mx_create_matrix<rmatrix_r>(nq, 1, plhs[0]);

@@ -32,7 +32,7 @@
 #include "box_occ.hpp"
 #include "cubic_spline.hpp"
 
-namespace multem
+namespace mt
 {
 	template<class T, eDevice dev>
 	class Superposition
@@ -69,7 +69,7 @@ namespace multem
 
 			void exec(Vector<T, dev> &Im)
 			{
-				multem::fill(stream, Im, 0.0);
+				mt::fill(stream, Im, 0.0);
 
 				int iatom_0 = 0;
 				int iatom_e = input_superposition->atoms.size()-1;
@@ -80,9 +80,9 @@ namespace multem
 					stream.set_n_act_stream(iatom_e-iatom+1);
 					set_atom_sp(iatom, stream, atom_sp);
 
-					multem::linear_Gaussian(stream, atom_sp);
-					multem::cubic_poly_coef(stream, atom_sp);
-					multem::eval_cubic_poly<false>(stream, input_superposition->grid, atom_sp, Im);
+					mt::linear_Gaussian(stream, atom_sp);
+					mt::cubic_poly_coef(stream, atom_sp);
+					mt::eval_cubic_poly<false>(stream, input_superposition->grid, atom_sp, Im);
 					iatom += stream.n_act_stream;
 				}
 
@@ -93,7 +93,7 @@ namespace multem
 			void run(Output_Superposition &output_superposition)
 			{
 				exec(Im);
-				multem::copy_to_host(output_superposition.stream, Im, output_superposition.Im);
+				mt::copy_to_host(output_superposition.stream, Im, output_superposition.Im);
 			}
 
 			Input_Superposition<T> *input_superposition;
@@ -165,5 +165,5 @@ namespace multem
 			Vector<Atom_Sp<T, dev>, e_host> atom_sp;
 	};
 
-} // namespace multem
+} // namespace mt
 #endif

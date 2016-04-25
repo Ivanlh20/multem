@@ -31,7 +31,7 @@
 #include "host_device_functions.cuh"
 #include "host_functions.hpp"
 
-namespace multem
+namespace mt
 {
 	template<class T>
 	class Specimen
@@ -351,6 +351,6 @@ namespace multem
 			Vector<T, e_host> z_slice;
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

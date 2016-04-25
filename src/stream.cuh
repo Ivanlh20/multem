@@ -24,7 +24,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-namespace multem
+namespace mt
 {
 	template< eDevice dev>
 	struct Stream;
@@ -293,6 +293,6 @@ namespace multem
 				}
 			}
 	};
-} // namespace multem
+} // namespace mt
 
 #endif

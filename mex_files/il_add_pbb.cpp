@@ -27,9 +27,9 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -42,19 +42,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	bool pbc_xy = true;
 	double dz = 0.5;
 
-	multem::Grid<double> grid_i, grid_o;
+	mt::Grid<double> grid_i, grid_o;
 	grid_i.set_input_data(rM_i.cols, rM_i.rows, lx, ly, dz, bwl, pbc_xy);
 
-	multem::Stream<e_host> stream(4);
+	mt::Stream<e_host> stream(4);
 
-	multem::Vector<double, e_host> M_i(grid_i.nxy()), M_o;
-	multem::assign(stream, rM_i, M_i);
+	mt::Vector<double, e_host> M_i(grid_i.nxy()), M_o;
+	mt::assign(stream, rM_i, M_i);
 
 	/*******************************************************************/
-	multem::add_PB_border(grid_i, M_i, border_x, border_y, grid_o, M_o);
+	mt::add_PB_border(grid_i, M_i, border_x, border_y, grid_o, M_o);
 
 	auto rM_o = mx_create_matrix<rmatrix_r>(grid_o.ny, grid_o.nx, plhs[0]);
 
-	multem::copy_to_host(stream, M_o, rM_o);
+	mt::copy_to_host(stream, M_o, rM_o);
 
 }

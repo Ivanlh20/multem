@@ -59,6 +59,8 @@ for islice = 1:nslice
     imagesc(ouput_multislice_2.V);
     colormap gray;
     axis image; 
-    
+    min(ouput_multislice_1.V(:))
+    min(ouput_multislice_1.V(:))
     pause(0.10);
+
 end;

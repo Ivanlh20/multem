@@ -24512,7 +24512,7 @@ class fxeg_Tabulated_Data{
 				g2[i] = g[i]*g[i];
 				if(i>0)
 				{
-					feg[i] = (Z-fxg[i])/(multem::c_2Pi2a0*g2[i]);
+					feg[i] = (Z-fxg[i])/(mt::c_2Pi2a0*g2[i]);
 				}
 			}
 
@@ -24527,10 +24527,10 @@ class fxeg_Tabulated_Data{
 
 		}
 
-		multem::Vector<double, multem::e_host> g;
-		multem::Vector<double, multem::e_host> g2;
-		multem::Vector<double, multem::e_host> feg;
-		multem::Vector<double, multem::e_host> fxg;
+		mt::Vector<double, mt::e_host> g;
+		mt::Vector<double, mt::e_host> g2;
+		mt::Vector<double, mt::e_host> feg;
+		mt::Vector<double, mt::e_host> fxg;
 };
 
 #endif

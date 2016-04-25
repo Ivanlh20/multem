@@ -25,10 +25,10 @@
 #ifndef DEVICE_CALLABLE
 	#ifdef __CUDACC__
 		#define DEVICE_CALLABLE __host__ __device__
-		#define FORCEINLINE __forceinline__
+		#define FORCE_INLINE __forceinline__
 	#else
 		#define DEVICE_CALLABLE
-		#define FORCEINLINE inline
+		#define FORCE_INLINE inline
 	#endif
 #endif
 
@@ -373,42 +373,42 @@
 	using thrust::norm;
 
 	template<class T> 
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_j0(const T &x)
 	{
 		return j0(x);
 	}
 
 	template<class T> 
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_j1(const T &x)
 	{
 		return j1(x);
 	}
 
 	template<class T> 
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_jn(const int &n, const T &x)
 	{
 		return jn(n, x);
 	}
 
 	template<class T> 
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_y0(const T &x)
 	{
 		return y0(x);
 	}
 
 	template<class T> 
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_y1(const T &x)
 	{
 		return y1(x);
 	}
 
 	template<class T> 
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_yn(const int &n, const T &x)
 	{
 		return yn(n, x);
@@ -423,7 +423,7 @@
 	namespace thrust
 	{
 		template<class T>
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T norm(const T &x)
 		{
 			return x*x;
@@ -431,7 +431,7 @@
 	}
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	complex<T> euler(const T &x)
 	{
 		T sptr, cptr;
@@ -440,7 +440,7 @@
 	}
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_i0(const T &x)
 	{
 		T ax, ans;
@@ -464,7 +464,7 @@
 	}
 
 	template<class T> 
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_i1(const T &x)
 	{
 		T ax, ans;
@@ -489,7 +489,7 @@
 	}
 
 	template<class T> 
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_in(const int &n, const T &x)
 	{
 		const T ACC = 40.0;
@@ -539,7 +539,7 @@
 	}
 
 	template<class T> 
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_k0(const T &x)
 	{
 		T y, ans;
@@ -562,7 +562,7 @@
 	}
 
 	template<class T> 
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_k1(const T &x)
 	{
 		T y, ans;
@@ -585,7 +585,7 @@
 	}
 
 	template<class T> 
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_kn(const int &n, const T &x)
 	{
 		int j;

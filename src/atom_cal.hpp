@@ -26,7 +26,7 @@
 #include "quadrature.hpp"
 #include "host_device_functions.cuh"
 
-namespace multem
+namespace mt
 {
 	template<class T>
 	class Atom_Cal{
@@ -56,7 +56,7 @@ namespace multem
 			// Electron scattering factors calculation (feg)
 			inline void feg(const T &g, T &y)
 			{
-				multem::feg<T>(potential_type, charge, g, *pr_feg, y);
+				mt::feg<T>(potential_type, charge, g, *pr_feg, y);
 			}
 
 			void feg(const int &ng, T *g, T *y)
@@ -70,7 +70,7 @@ namespace multem
 			// Electron scattering factor(feg, dfeg) where dfg is the first derivative along g
 			inline void feg_dfeg(const T &g, T &y, T &dy)
 			{
-				multem::feg_dfeg<T>(potential_type, charge, g, *pr_feg, y, dy);
+				mt::feg_dfeg<T>(potential_type, charge, g, *pr_feg, y, dy);
 			}
 
 			void feg_dfeg(const int &ng, T *g, T *y, T *dy)
@@ -84,7 +84,7 @@ namespace multem
 			// Electron scattering factor(fg)
 			inline void fxg(const T &g, T &y)
 			{
-				multem::fxg<T>(potential_type, charge, atom_type->Z, g, *pr_fxg, y);
+				mt::fxg<T>(potential_type, charge, atom_type->Z, g, *pr_fxg, y);
 			}
 
 			void fxg(const int &ng, T *g, T *y)
@@ -98,7 +98,7 @@ namespace multem
 			// Electron scattering factor(fg, dfg) where dfg is the first derivative along g
 			inline void fxg_dfxg(const T &g, T &y, T &dy)
 			{
-				multem::fxg_dfxg<T>(potential_type, charge, atom_type->Z, g, *pr_fxg, y, dy);
+				mt::fxg_dfxg<T>(potential_type, charge, atom_type->Z, g, *pr_fxg, y, dy);
 			}
 
 			void fxg_dfxg(const int &ng, T *g, T *y, T *dy)
@@ -112,7 +112,7 @@ namespace multem
 			// Electron density (Pr)
 			inline void Pr(const T &r, T &y)
 			{
-				multem::Pr<T>(potential_type, charge, r, *pr_Pr, y);
+				mt::Pr<T>(potential_type, charge, r, *pr_Pr, y);
 			}
 
 			void Pr(const int &nr, T *r, T *y)
@@ -126,7 +126,7 @@ namespace multem
 			// Electron density (Pr, dPr) where dPr is the first derivative along r
 			inline void Pr_dPr(const T &r, T &y, T &dy)
 			{
-				multem::Pr_dPr<T>(potential_type, charge, r, *pr_Pr, y, dy);
+				mt::Pr_dPr<T>(potential_type, charge, r, *pr_Pr, y, dy);
 			}
 
 			void Pr_dPr(const int &nr, T *r, T *y, T *dy)
@@ -140,7 +140,7 @@ namespace multem
 			// Projected_Potential calculation(Vr)
 			inline void Vr(const T &r, T &y)
 			{
-				multem::Vr<T>(potential_type, charge, r, *pr_Vr, y);
+				mt::Vr<T>(potential_type, charge, r, *pr_Vr, y);
 			}
 
 			void Vr(const int &nr, T *r, T *y)
@@ -154,7 +154,7 @@ namespace multem
 			// Projected_Potential calculation (Vr, dVr) where dVr is the first derivative along r
 			inline void Vr_dVr(const T &r, T &y, T &dy)
 			{
-				multem::Vr_dVr<T>(potential_type, charge, r, *pr_Vr, y, dy);
+				mt::Vr_dVr<T>(potential_type, charge, r, *pr_Vr, y, dy);
 			}
 
 			void Vr_dVr(const int &nr, T *r, T *y, T *dy)
@@ -168,7 +168,7 @@ namespace multem
 			// Projected potential (VR)
 			inline void VR(const T &R, T &y)
 			{
-				multem::VR<T>(potential_type, charge, R, *pr_VR, Qz_0_I, y);
+				mt::VR<T>(potential_type, charge, R, *pr_VR, Qz_0_I, y);
 			}
 
 			void VR(const int &nR, T *R, T *y)
@@ -182,7 +182,7 @@ namespace multem
 			// Projected potential (VR, dVR) where dVr is the first derivative along R
 			inline void VR_dVR(const T &R, T &y, T &dy)
 			{
-				multem::VR_dVR<T>(potential_type, charge, R, *pr_VR, Qz_0_I, y, dy);
+				mt::VR_dVR<T>(potential_type, charge, R, *pr_VR, Qz_0_I, y, dy);
 			}
 
 			void VR_dVR(const int &nR, T *R, T *y, T *dy)
@@ -196,7 +196,7 @@ namespace multem
 			// Projected potential (Vz)[z0, ze]
 			inline void Vz(const T &z0, const T &ze, const T &R, T &y)
 			{
-				multem::Vz<T>(potential_type, charge, z0, ze, R, *pr_Vr, Qz_a_b, y);
+				mt::Vz<T>(potential_type, charge, z0, ze, R, *pr_Vr, Qz_a_b, y);
 			}
 
 			void Vz(const T &z0, const T &ze, const int &nR, T *R, T *y)
@@ -210,7 +210,7 @@ namespace multem
 			// Projected potential (Vz, dVz)[z0, ze] where dVr is the first derivative along R
 			inline void Vz_dVz(const T &z0, const T &ze, const T &R, T &y, T &dy)
 			{
-				multem::Vz_dVz<T>(potential_type, charge, z0, ze, R, *pr_Vr, Qz_a_b, y, dy);
+				mt::Vz_dVz<T>(potential_type, charge, z0, ze, R, *pr_Vr, Qz_a_b, y, dy);
 			}
 
 			void Vz_dVz(const T &z0, const T &ze, const int &nR, T *R, T *y, T *dy)
@@ -306,6 +306,6 @@ namespace multem
 			Q1<T, e_host> Qz_0_I;
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

@@ -23,11 +23,11 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
+using mt::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	auto potential_type = mx_get_scalar<multem::ePotential_Type>(prhs[0]);
+	auto potential_type = mx_get_scalar<mt::ePotential_Type>(prhs[0]);
 	auto Z = mx_get_scalar<int>(prhs[1]);
 	auto charge = mx_get_scalar<int>(prhs[2]);
 	auto z0 = mx_get_scalar<double>(prhs[3]);
@@ -37,11 +37,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	auto VR = mx_create_matrix<rmatrix_r>(R.rows, R.cols, plhs[0]);
 	auto dVR = mx_create_matrix<rmatrix_r>(R.rows, R.cols, plhs[1]);
 
-	multem::Atom_Type<double, multem::e_host> atom_type;
-	multem::Atomic_Data atomic_data(potential_type);
-	atomic_data.To_atom_type_CPU(Z, multem::c_Vrl, multem::c_nR, 0.0, atom_type);
+	mt::Atom_Type<double, mt::e_host> atom_type;
+	mt::Atomic_Data atomic_data(potential_type);
+	atomic_data.To_atom_type_CPU(Z, mt::c_Vrl, mt::c_nR, 0.0, atom_type);
 
-	multem::Atom_Cal<double> atom_cal;
+	mt::Atom_Cal<double> atom_cal;
 	atom_cal.Set_Atom_Type(potential_type, charge, &atom_type);
 	atom_cal.Vz_dVz(z0, ze, R.m_size, R.real, VR.real, dVR.real);
 }

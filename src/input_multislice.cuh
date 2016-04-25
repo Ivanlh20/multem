@@ -28,12 +28,12 @@
 #include "atom_data.hpp"
 #include "memory_info.cuh"
 
-namespace multem
+namespace mt
 {
 	bool is_gpu_available();
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	T get_Vr_factor(const T &E_0, const T &theta);
 
 	template<class InputIterator, class TVector>
@@ -52,7 +52,7 @@ namespace multem
 			int gpu_device; 									// GPU device
 			int gpu_nstream; 									// Number of streams
 
-			eSimulation_Type simulation_type; 					// 11: Scanning, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
+			eTEM_Sim_Type simulation_type; 					// 11: Scanning, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
 			ePhonon_Model phonon_model; 						// 1: Still atom model, 2: Absorptive potential model, 3: Frozen phonon
 			eElec_Spec_Int_Model interaction_model; 			// eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
 			ePotential_Slicing potential_slicing; 				// ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
@@ -120,7 +120,7 @@ namespace multem
 			int nstream;
 
 			Input_Multislice(): precision(eP_double), device(e_host), cpu_ncores(1), cpu_nthread(4), gpu_device(0), gpu_nstream(8), 
-						simulation_type(eST_EWRS), phonon_model(ePM_Still_Atom), interaction_model(eESIM_Multislice), 
+						simulation_type(eTEMST_EWRS), phonon_model(ePM_Still_Atom), interaction_model(eESIM_Multislice), 
 						potential_slicing(ePS_Planes), potential_type(ePT_Lobato_0_12), fp_dist(1), fp_seed(300183), 
 						fp_single_conf(false), fp_nconf(1), fp_iconf_0(1), tm_active(false), tm_theta(0), tm_u0(0, 0, 1), 
 						tm_rot_point_type(eRPT_geometric_center), tm_p0(1, 0, 0), microscope_effect(eME_Partial_Coherent), 
@@ -212,7 +212,7 @@ namespace multem
 				if(is_EELS() || is_EFTEM())
 				{
 					coherent_contribution = false;
-					interaction_model = multem::eESIM_Multislice;
+					interaction_model = mt::eESIM_Multislice;
 					microscope_effect = eME_Coherent;
 				}
 
@@ -262,7 +262,7 @@ namespace multem
 					fp_dim.z = false;
 					atoms.Sort_by_z();
 					atoms.get_z_layer();			
-					multem::match_vectors(atoms.z_layer.begin(), atoms.z_layer.end(), thickness);
+					mt::match_vectors(atoms.z_layer.begin(), atoms.z_layer.end(), thickness);
 				}
 				else if(is_through_slices())
 				{
@@ -272,7 +272,7 @@ namespace multem
 
 					Vector<T, e_host> z_slice;
 					atoms.get_z_slice(potential_slicing, grid.dz, atoms, z_slice);
-					multem::match_vectors(z_slice.begin()+1, z_slice.end(), thickness);
+					mt::match_vectors(z_slice.begin()+1, z_slice.end(), thickness);
 				}
 			}
 
@@ -485,32 +485,32 @@ namespace multem
 
 			bool is_multislice() const
 			{
-				return interaction_model == multem::eESIM_Multislice;
+				return interaction_model == mt::eESIM_Multislice;
 			}
 
 			bool is_phase_object() const
 			{
-				return interaction_model == multem::eESIM_Phase_Object;
+				return interaction_model == mt::eESIM_Phase_Object;
 			}
 
 			bool is_weak_phase_object() const
 			{
-				return interaction_model == multem::eESIM_Weak_Phase_Object;
+				return interaction_model == mt::eESIM_Weak_Phase_Object;
 			}
 
 			bool is_slicing_by_planes() const
 			{
-				return is_multislice() && (potential_slicing == multem::ePS_Planes);
+				return is_multislice() && (potential_slicing == mt::ePS_Planes);
 			}
 
 			bool is_slicing_by_dz() const
 			{
-				return is_multislice() && (potential_slicing == multem::ePS_dz_Proj);
+				return is_multislice() && (potential_slicing == mt::ePS_dz_Proj);
 			}
 
 			bool is_subslicing() const
 			{
-				return is_multislice() && (potential_slicing == multem::ePS_dz_Sub);
+				return is_multislice() && (potential_slicing == mt::ePS_dz_Sub);
 			}
 
 			bool is_subslicing_whole_specimen() const
@@ -520,52 +520,52 @@ namespace multem
 
 			bool is_STEM() const
 			{
-				return simulation_type == multem::eST_STEM;
+				return simulation_type == mt::eTEMST_STEM;
 			}
 
 			bool is_ISTEM() const
 			{
-				return simulation_type == multem::eST_ISTEM;
+				return simulation_type == mt::eTEMST_ISTEM;
 			}
 
 			bool is_CBED() const
 			{
-				return simulation_type == multem::eST_CBED;
+				return simulation_type == mt::eTEMST_CBED;
 			}
 
 			bool is_CBEI() const
 			{
-				return simulation_type == multem::eST_CBEI;
+				return simulation_type == mt::eTEMST_CBEI;
 			}
 
 			bool is_ED() const
 			{
-				return simulation_type == multem::eST_ED;
+				return simulation_type == mt::eTEMST_ED;
 			}
 
 			bool is_HRTEM() const
 			{
-				return simulation_type == multem::eST_HRTEM;
+				return simulation_type == mt::eTEMST_HRTEM;
 			}
 
 			bool is_PED() const
 			{
-				return simulation_type == multem::eST_PED;
+				return simulation_type == mt::eTEMST_PED;
 			}
 
 			bool is_HCI() const
 			{
-				return simulation_type == multem::eST_HCI;
+				return simulation_type == mt::eTEMST_HCI;
 			}
 
 			bool is_EWFS() const
 			{
-				return simulation_type == multem::eST_EWFS;
+				return simulation_type == mt::eTEMST_EWFS;
 			}
 
 			bool is_EWRS() const
 			{
-				return simulation_type == multem::eST_EWRS;
+				return simulation_type == mt::eTEMST_EWRS;
 			}
 
 			bool is_EWFS_SC() const
@@ -580,52 +580,52 @@ namespace multem
 
 			bool is_EELS() const
 			{
-				return simulation_type == multem::eST_EELS;
+				return simulation_type == mt::eTEMST_EELS;
 			}
 
 			bool is_EFTEM() const
 			{
-				return simulation_type == multem::eST_EFTEM;
+				return simulation_type == mt::eTEMST_EFTEM;
 			}
 
 			bool is_IWFS() const
 			{
-				return simulation_type == multem::eST_IWFS;
+				return simulation_type == mt::eTEMST_IWFS;
 			}
 
 			bool is_IWRS() const
 			{
-				return simulation_type == multem::eST_IWRS;
+				return simulation_type == mt::eTEMST_IWRS;
 			}
 
 			bool is_PPFS() const
 			{
-				return simulation_type == multem::eST_PPFS;
+				return simulation_type == mt::eTEMST_PPFS;
 			}
 
 			bool is_PPRS() const
 			{
-				return simulation_type == multem::eST_PPRS;
+				return simulation_type == mt::eTEMST_PPRS;
 			}
 
 			bool is_TFFS() const
 			{
-				return simulation_type == multem::eST_TFFS;
+				return simulation_type == mt::eTEMST_TFFS;
 			}
 
 			bool is_TFRS() const
 			{
-				return simulation_type == multem::eST_TFRS;
+				return simulation_type == mt::eTEMST_TFRS;
 			}
 
 			bool is_PropFS() const
 			{
-				return simulation_type == multem::eST_PropFS;
+				return simulation_type == mt::eTEMST_PropFS;
 			}
 
 			bool is_PropRS() const
 			{
-				return simulation_type == multem::eST_PropRS;
+				return simulation_type == mt::eTEMST_PropRS;
 			}
 
 			bool is_STEM_ISTEM() const
@@ -729,7 +729,7 @@ namespace multem
 				{
 					if(!is_gpu_available())
 					{
-						device = multem::e_host;
+						device = mt::e_host;
 					} 
 					else
 					{
@@ -740,28 +740,28 @@ namespace multem
 				}
 				else
 				{
-					device = multem::e_host;
+					device = mt::e_host;
 				}
 			}
 
 			bool is_host() const
 			{
-				return device == multem::e_host;
+				return device == mt::e_host;
 			}
 
 			bool is_device() const
 			{
-				return device == multem::e_device;
+				return device == mt::e_device;
 			}
 
 			bool is_float() const
 			{
-				return precision == multem::eP_float;
+				return precision == mt::eP_float;
 			}
 
 			bool is_double() const
 			{
-				return precision == multem::eP_double;
+				return precision == mt::eP_double;
 			}
 
 			bool is_float_host() const
@@ -795,6 +795,6 @@ namespace multem
 			}
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

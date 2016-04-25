@@ -29,25 +29,25 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
+using mt::rmatrix_r;
 
 template<class TInput_Multislice>
 void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice)
 {
-	using value_type_r = multem::Value_type<TInput_Multislice>;
+	using value_type_r = mt::Value_type<TInput_Multislice>;
 
-	input_multislice.phonon_model = mx_get_scalar_field<multem::ePhonon_Model>(mx_input_multislice, "phonon_model"); 
-	input_multislice.interaction_model = mx_get_scalar_field<multem::eElec_Spec_Int_Model>(mx_input_multislice, "interaction_model");
-	input_multislice.potential_slicing = mx_get_scalar_field<multem::ePotential_Slicing>(mx_input_multislice, "potential_slicing");
+	input_multislice.phonon_model = mx_get_scalar_field<mt::ePhonon_Model>(mx_input_multislice, "phonon_model"); 
+	input_multislice.interaction_model = mx_get_scalar_field<mt::eElec_Spec_Int_Model>(mx_input_multislice, "interaction_model");
+	input_multislice.potential_slicing = mx_get_scalar_field<mt::ePotential_Slicing>(mx_input_multislice, "potential_slicing");
 	input_multislice.fp_dim.set(mx_get_scalar_field<int>(mx_input_multislice, "fp_dim"));
 	input_multislice.fp_seed = mx_get_scalar_field<int>(mx_input_multislice, "fp_seed");
 	input_multislice.fp_single_conf = true;
 	input_multislice.fp_nconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_nconf");
 
 	input_multislice.tm_active = mx_get_scalar_field<bool>(mx_input_multislice, "tm_active");
-	input_multislice.tm_theta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "tm_theta")*multem::c_deg_2_rad;
+	input_multislice.tm_theta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "tm_theta")*mt::c_deg_2_rad;
 	input_multislice.tm_u0 = mx_get_r3d_field<value_type_r>(mx_input_multislice, "tm_u0");
-	input_multislice.tm_rot_point_type = mx_get_scalar_field<multem::eRot_Point_Type>(mx_input_multislice, "tm_rot_point_type");
+	input_multislice.tm_rot_point_type = mx_get_scalar_field<mt::eRot_Point_Type>(mx_input_multislice, "tm_rot_point_type");
 	input_multislice.tm_p0 = mx_get_r3d_field<value_type_r>(mx_input_multislice, "tm_p0");
 
 	int nx = 1024;
@@ -68,10 +68,10 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {	
 	/*************************Input data**************************/
-	multem::Input_Multislice<double> input_multislice;
+	mt::Input_Multislice<double> input_multislice;
 	read_input_multislice(prhs[0], input_multislice);
 
-	multem::Specimen<double> specimen;
+	mt::Specimen<double> specimen;
 	specimen.set_input_data(&input_multislice);
 	specimen.move_atoms(input_multislice.fp_nconf);
 

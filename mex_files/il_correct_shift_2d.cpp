@@ -27,9 +27,9 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
@@ -41,18 +41,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	auto sigma = mx_get_scalar<double>(prhs[5]);
 
 	/*******************************************************************/
-	auto rM_2o = mx_create_matrix<rmatrix_r>(rM_1i.cols, rM_1i.rows, plhs[0]);
+	auto rM_2o = mx_create_matrix<rmatrix_r>(rM_1i.rows, rM_1i.cols, plhs[0]);
 	auto rdx_o = mx_create_matrix<rmatrix_r>(1, 1, plhs[1]);
 	auto rdy_o = mx_create_matrix<rmatrix_r>(1, 1, plhs[2]);
 
 	vector<float> M1_i(rM_1i.begin(), rM_1i.end());
 	vector<float> M2_i(rM_2i.begin(), rM_2i.end());
 
-	multem::Grid<float> grid(rM_1i.cols, rM_1i.rows, lx, ly);
-	multem::Stream<e_host> stream(4);
-	multem::FFT2<float, e_host> fft2;
+	mt::Grid<float> grid(rM_1i.cols, rM_1i.rows, lx, ly);
+	mt::Stream<e_host> stream(4);
+	mt::FFT2<float, e_host> fft2;
 
-	auto dr = multem::correct_shift_2d(stream, fft2, grid, M1_i, M2_i, k, sigma);
+	auto dr = mt::correct_shift_2d(stream, fft2, grid, M1_i, M2_i, k, sigma);
 
 	fft2.cleanup();
 

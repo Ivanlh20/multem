@@ -25,8 +25,8 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -40,9 +40,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	vector<float> M(rM_i.begin(), rM_i.end());
 	float scf_o = 0;
 
-	multem::Stream<e_host> stream(4);
+	mt::Stream<e_host> stream(4);
 
-	M = multem::add_poisson_noise_by_SNR(stream, M, SNR_i, scf_o);
+	M = mt::add_poisson_noise_by_SNR(stream, M, SNR_i, scf_o);
 
 	rM_o.assign(M.begin(), M.end());
 	rk[0] = scf_o;

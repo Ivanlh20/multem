@@ -32,7 +32,7 @@
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 
-namespace multem
+namespace mt
 {
 	bool is_gpu_available();
 
@@ -109,17 +109,17 @@ namespace multem
 
 			bool is_input_atoms() const
 			{
-				return input_atoms == multem::eIA_yes;
+				return input_atoms == mt::eIA_yes;
 			}
 
 			bool is_host() const
 			{
-				return device == multem::e_host;
+				return device == mt::e_host;
 			}
 
 			bool is_device() const
 			{
-				return device == multem::e_device;
+				return device == mt::e_device;
 			}
 
 			void set_device()
@@ -128,7 +128,7 @@ namespace multem
 				{
 					if(!is_gpu_available())
 					{
-						device = multem::e_host;
+						device = mt::e_host;
 					} 
 					else
 					{
@@ -139,18 +139,18 @@ namespace multem
 				}
 				else
 				{
-					device = multem::e_host;
+					device = mt::e_host;
 				}
 			}
 
 			bool is_float() const
 			{
-				return precision == multem::eP_float;
+				return precision == mt::eP_float;
 			}
 
 			bool is_double() const
 			{
-				return precision == multem::eP_double;
+				return precision == mt::eP_double;
 			}
 
 			bool is_float_host() const
@@ -174,6 +174,6 @@ namespace multem
 			}
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

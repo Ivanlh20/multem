@@ -29,7 +29,7 @@
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 
-namespace multem
+namespace mt
 {
 	template<class T, eDevice dev>
 	class Incident_Wave{
@@ -48,7 +48,7 @@ namespace multem
 				if(input_multislice->is_user_define_wave())
 				{
 					fpsi_0.assign(input_multislice->iw_psi.begin(), input_multislice->iw_psi.end());
-					multem::fft2_shift(*stream, input_multislice->grid, fpsi_0);
+					mt::fft2_shift(*stream, input_multislice->grid, fpsi_0);
 					fft2->forward(fpsi_0);
 				}
 			}
@@ -59,7 +59,7 @@ namespace multem
 				{
 					case eIWT_Plane_Wave:
 					{
-						multem::fill(*stream, psi, value_type_c(1.0, 0.0));
+						mt::fill(*stream, psi, value_type_c(1.0, 0.0));
 					}
 					break;
 					case eIWT_Convergent_Wave:
@@ -71,7 +71,7 @@ namespace multem
 						auto f_s = f_0 - (input_multislice->cond_lens.zero_defocus_plane-z_init);
 						input_multislice->cond_lens.set_defocus(f_s);
 
-						multem::probe(*stream, input_multislice->grid, input_multislice->cond_lens, x, y, psi);
+						mt::probe(*stream, input_multislice->grid, input_multislice->cond_lens, x, y, psi);
 						fft2->inverse(psi);
 
 						input_multislice->cond_lens.set_defocus(f_0);
@@ -82,7 +82,7 @@ namespace multem
 						value_type_r x = input_multislice->get_Rx_pos_shift();
 						value_type_r y = input_multislice->get_Ry_pos_shift();
 
-						multem::phase_factor_2d(*stream, input_multislice->grid, x, y, fpsi_0, psi);
+						mt::phase_factor_2d(*stream, input_multislice->grid, x, y, fpsi_0, psi);
 						fft2->inverse(psi);
 					}
 					break;
@@ -98,10 +98,10 @@ namespace multem
 				if(space == eS_Reciprocal)
 				{
 					fft2->forward(psi);
-					multem::scale(*stream, input_multislice->grid.inxy, psi);
+					mt::scale(*stream, input_multislice->grid.inxy, psi);
 				}
 
-				multem::copy_to_host(output_multislice.stream, psi, output_multislice.psi_0[0]);
+				mt::copy_to_host(output_multislice.stream, psi, output_multislice.psi_0[0]);
 				output_multislice.shift();
 				output_multislice.clear_temporal_data();
 			}
@@ -114,6 +114,6 @@ namespace multem
 			Vector<value_type_c, dev> fpsi_0;
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

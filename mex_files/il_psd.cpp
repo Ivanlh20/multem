@@ -24,9 +24,9 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::Vector;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::Vector;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -39,13 +39,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	/*******************************************************************/
 	vector<float> Im(rIm_i.begin(), rIm_i.end());
 
-	multem::Grid<float> grid(rIm_i.cols, rIm_i.rows);
-	multem::Stream<e_host> stream(4);
+	mt::Grid<float> grid(rIm_i.cols, rIm_i.rows);
+	mt::Stream<e_host> stream(4);
 
 	vector<float> angle;
 	vector<float> psd;
-	multem::PSD(stream, grid, Im, np_min, d_delta_0, d_delta_e, d_delta, angle, psd);
-	auto peaks = multem::PSD_find_peaks(stream, grid, Im, np_min, angle, psd);
+	mt::PSD(stream, grid, Im, np_min, d_delta_0, d_delta_e, d_delta, angle, psd);
+	auto peaks = mt::PSD_find_peaks(stream, grid, Im, np_min, angle, psd);
 
 	/*******************************************************************/
 	auto rangle = mx_create_matrix<rmatrix_r>(angle.size(), 1, plhs[0]);

@@ -30,7 +30,7 @@
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
 
-namespace multem
+namespace mt
 {
 	template<class T, eDevice dev>
 	class Propagator{
@@ -58,7 +58,7 @@ namespace multem
 					if(input_multislice->grid.bwl)
 					{
 						fft2->forward(psi_i, psi_o); 
-						multem::bandwidth_limit(*stream, input_multislice->grid, psi_o);
+						mt::bandwidth_limit(*stream, input_multislice->grid, psi_o);
 						
 						if(space_out == eS_Real)
 						{
@@ -70,15 +70,15 @@ namespace multem
 						if(space_out == eS_Reciprocal)
 						{
 							fft2->forward(psi_i, psi_o);
-							multem::scale(*stream, input_multislice->grid.inxy, psi_o);
+							mt::scale(*stream, input_multislice->grid.inxy, psi_o);
 						}
 					}
 				}
 				else
 				{
 					fft2->forward(psi_i, psi_o); 
-					multem::propagator_components(*stream, input_multislice->grid, gxu, gyu, input_multislice->get_propagator_factor(z), prop_x, prop_y);
-					multem::propagator_multiplication(*stream, input_multislice->grid, prop_x, prop_y, psi_o, psi_o);
+					mt::propagator_components(*stream, input_multislice->grid, gxu, gyu, input_multislice->get_propagator_factor(z), prop_x, prop_y);
+					mt::propagator_multiplication(*stream, input_multislice->grid, prop_x, prop_y, psi_o, psi_o);
 
 					if(space_out == eS_Real)
 					{
@@ -98,9 +98,9 @@ namespace multem
 			value_type_r z, TOutput_multislice &output_multislice)
 			{
 				Vector<value_type_c, dev> psi(input_multislice->iw_psi.begin(), input_multislice->iw_psi.end());
-				multem::fft2_shift(*stream, input_multislice->grid, psi);
+				mt::fft2_shift(*stream, input_multislice->grid, psi);
 				propagate(space_out, gxu, gyu, z, psi);
-				multem::copy_to_host(output_multislice.stream, psi, output_multislice.psi_coh[0]);
+				mt::copy_to_host(output_multislice.stream, psi, output_multislice.psi_coh[0]);
 				output_multislice.shift();
 				output_multislice.clear_temporal_data();
 			}
@@ -114,6 +114,6 @@ namespace multem
 			Vector<value_type_c, dev> prop_y;
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

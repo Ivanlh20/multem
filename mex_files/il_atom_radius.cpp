@@ -22,25 +22,25 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
+using mt::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
-	auto potential_type = mx_get_scalar<multem::ePotential_Type>(prhs[0]);
+	auto potential_type = mx_get_scalar<mt::ePotential_Type>(prhs[0]);
 	auto Dim = mx_get_scalar<int>(prhs[1]);
 	auto Vrl = mx_get_scalar<double>(prhs[2]);
 
-	auto r = mx_create_matrix<rmatrix_r>(multem::c_nAtomsTypes, 3, plhs[0]);
+	auto r = mx_create_matrix<rmatrix_r>(mt::c_nAtomsTypes, 3, plhs[0]);
 
-	multem::Atom_Cal<double> atom_cal;
-	multem::Atomic_Data atomic_data;
+	mt::Atom_Cal<double> atom_cal;
+	mt::Atomic_Data atomic_data;
 	atomic_data.Load_Data(potential_type);
-	multem::Atom_Type<double, multem::e_host> atom_type;
+	mt::Atom_Type<double, mt::e_host> atom_type;
 
 	int charge = 0;
 	for(auto i = 0; i<r.rows; i++)
 	{
-		atomic_data.To_atom_type_CPU(i+1, multem::c_Vrl, multem::c_nR, 0.0, atom_type);
+		atomic_data.To_atom_type_CPU(i+1, mt::c_Vrl, mt::c_nR, 0.0, atom_type);
 		atom_cal.Set_Atom_Type(potential_type, charge, &atom_type);
 		r.real[i+0*r.rows] = atom_cal.AtomicRadius_rms(Dim);
 		r.real[i+1*r.rows] = atom_cal.AtomicRadius_Cutoff(Dim, Vrl);

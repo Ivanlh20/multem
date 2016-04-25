@@ -21,7 +21,7 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
+using mt::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -30,5 +30,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 
 	auto radius = mx_create_scalar<rmatrix_r>(plhs[0]);
 
-	*(radius.real) = multem::FFT_information_limit_2d(fI.rows, fI.cols, shift, fI.real);
+	*(radius.real) = mt::FFT_information_limit_2d(fI.rows, fI.cols, shift, fI.real);
 }

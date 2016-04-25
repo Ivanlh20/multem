@@ -27,9 +27,9 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
@@ -47,11 +47,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	vector<float> M1_i(rM_1i.begin(), rM_1i.end());
 	vector<float> M2_i(rM_2i.begin(), rM_2i.end());
 
-	multem::Grid<float> grid(rM_1i.cols, rM_1i.rows, lx, ly);
-	multem::Stream<e_host> stream(4);
-	multem::FFT2<float, e_host> fft2;
+	mt::Grid<float> grid(rM_1i.cols, rM_1i.rows, lx, ly);
+	mt::Stream<e_host> stream(4);
+	mt::FFT2<float, e_host> fft2;
 
-	auto R = multem::find_shift_2d(stream, fft2, grid, M1_i, M2_i, k, sigma);
+	auto R = mt::find_shift_2d(stream, fft2, grid, M1_i, M2_i, k, sigma);
 
 	fft2.cleanup();
 

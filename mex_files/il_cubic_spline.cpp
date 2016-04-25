@@ -24,8 +24,8 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -39,7 +39,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	/*******************************************************************/
 	auto yi = mx_create_matrix<rmatrix_r>(xi.rows, xi.cols, plhs[0]);
 
-	multem::Cubic_Spline<double> spline;
+	mt::Cubic_Spline<double> spline;
 	spline.set_points(x, y);
 	spline.eval_function(xi, yi);
 }

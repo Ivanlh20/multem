@@ -23,8 +23,8 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -40,12 +40,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	auto ry_o = mx_create_matrix<rmatrix_r>(1, 1, plhs[1]);
 
 	vector<float> Im_i(rIm_i.begin(), rIm_i.end());
-	multem::r2d<float> R(x, y);
+	mt::r2d<float> R(x, y);
 
-	multem::Grid<float> grid(rIm_i.cols, rIm_i.rows, lx, ly);
-	multem::Stream<e_host> stream(4);
+	mt::Grid<float> grid(rIm_i.cols, rIm_i.rows, lx, ly);
+	mt::Stream<e_host> stream(4);
 
-	R = multem::max_pos(stream, grid, Im_i, R, radius);
+	R = mt::max_pos(stream, grid, Im_i, R, radius);
 
 	rx_o[0] = R.x + 1;
 	ry_o[0] = R.y + 1;

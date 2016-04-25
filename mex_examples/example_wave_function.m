@@ -9,7 +9,7 @@ input_multislice.cpu_nthread = 6;
 input_multislice.gpu_device = 0;
 input_multislice.gpu_nstream = 8;
 
-% eST_EWFS=51, eST_EWRS=52
+% eTEMST_EWFS=51, eTEMST_EWRS=52
 input_multislice.simulation_type = 52;             
 input_multislice.phonon_model = 1;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multislice.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3

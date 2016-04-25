@@ -25,7 +25,7 @@
 #include "types.cuh"
 #include "atom_data.hpp"
 
-namespace multem
+namespace mt
 {
 	template<class T>
 	class Crystal{
@@ -151,6 +151,6 @@ namespace multem
 			Vector<Atom_Data<T>, e_host> Layers;
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

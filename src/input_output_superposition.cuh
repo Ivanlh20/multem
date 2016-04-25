@@ -31,7 +31,7 @@
 #include "host_functions.hpp"
 #include "device_functions.cuh"
 
-namespace multem
+namespace mt
 {
 	bool is_gpu_available();
 
@@ -86,19 +86,19 @@ namespace multem
 			// maximum number of pixels
 			int get_nv()
 			{
-				auto l_x = atoms.l_x + 2*atoms.sigma_max;
-				auto l_y = atoms.l_y + 2*atoms.sigma_max;
+				auto l_x = atoms.l_x + 2*ff_sigma*atoms.sigma_max;
+				auto l_y = atoms.l_y + 2*ff_sigma*atoms.sigma_max;
 				return max(grid.nx_dRx(l_x), grid.ny_dRy(l_y));
 			}
 
 			bool is_host() const
 			{
-				return device == multem::e_host;
+				return device == mt::e_host;
 			}
 
 			bool is_device() const
 			{
-				return device == multem::e_device;
+				return device == mt::e_device;
 			}
 
 			void set_device()
@@ -107,7 +107,7 @@ namespace multem
 				{
 					if(!is_gpu_available())
 					{
-						device = multem::e_host;
+						device = mt::e_host;
 					} 
 					else
 					{
@@ -118,18 +118,18 @@ namespace multem
 				}
 				else
 				{
-					device = multem::e_host;
+					device = mt::e_host;
 				}
 			}
 
 			bool is_float() const
 			{
-				return precision == multem::eP_float;
+				return precision == mt::eP_float;
 			}
 
 			bool is_double() const
 			{
-				return precision == multem::eP_double;
+				return precision == mt::eP_double;
 			}
 
 			bool is_float_host() const
@@ -187,6 +187,6 @@ namespace multem
 
 	template<class T>
 	using Output_Superposition_Vector = Output_Superposition<Vector<T, e_host>>;
-} // namespace multem
+} // namespace mt
 
 #endif

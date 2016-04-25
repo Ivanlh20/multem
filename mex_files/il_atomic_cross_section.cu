@@ -33,10 +33,10 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::Vector;
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
+using mt::Vector;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
 
 class Output_Cross_section
 {
@@ -53,40 +53,40 @@ class Output_Cross_section
 
 		void init()
 		{ 
-			multem::fill(stream, r, 0);
-			multem::fill(stream, fr, 0);
+			mt::fill(stream, r, 0);
+			mt::fill(stream, fr, 0);
 		}
 
 		int nr;
 		rmatrix_r r;
 		rmatrix_r fr;
 
-		multem::Stream<e_host> stream;
+		mt::Stream<e_host> stream;
 };
 
 template<class TInput_Multislice>
 void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice)
 {
-	using value_type_r = multem::Value_type<TInput_Multislice>;
+	using value_type_r = mt::Value_type<TInput_Multislice>;
 
-	input_multislice.precision = multem::eP_float;
-	input_multislice.device = multem::e_device; 
+	input_multislice.precision = mt::eP_float;
+	input_multislice.device = mt::e_device; 
 	input_multislice.cpu_ncores = 1; 
 	input_multislice.cpu_nthread = 4; 
 	input_multislice.gpu_device = 0;
 	input_multislice.gpu_nstream = 1;
 	input_multislice.set_device();
 
-	input_multislice.simulation_type = multem::eST_STEM ;
-	input_multislice.phonon_model = multem::ePM_Still_Atom;
-	input_multislice.interaction_model = multem::eESIM_Multislice;
-	input_multislice.potential_slicing = multem::ePS_dz_Sub;
-	input_multislice.potential_type = multem::ePT_Lobato_0_12;
+	input_multislice.simulation_type = mt::eTEMST_STEM ;
+	input_multislice.phonon_model = mt::ePM_Still_Atom;
+	input_multislice.interaction_model = mt::eESIM_Multislice;
+	input_multislice.potential_slicing = mt::ePS_dz_Sub;
+	input_multislice.potential_type = mt::ePT_Lobato_0_12;
 
 	input_multislice.E_0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "E_0");
 	int Z = mx_get_scalar_field<int>(mx_input_multislice, "Z");
 	double rms3d = mx_get_scalar_field<double>(mx_input_multislice, "rms3d");
-	double fwsig = mx_get_scalar_field<double>(mx_input_multislice, "fwhm")*multem::c_fwhm2sigma;
+	double fwsig = mx_get_scalar_field<double>(mx_input_multislice, "fwhm")*mt::c_fwhm2sigma;
 
 	bool bwl = false;
 	bool pbc_xy = false;
@@ -112,46 +112,46 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	/****************************** Condenser lens ********************************/
 	input_multislice.cond_lens.m = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_m"); 											// momentum of the vortex
 	input_multislice.cond_lens.f = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_f"); 									// defocus(Angstrom)
-	input_multislice.cond_lens.Cs3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_Cs3")*multem::c_mm_2_Ags; 			// third order spherical aberration(mm-->Angstrom)
-	input_multislice.cond_lens.Cs5 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_Cs5")*multem::c_mm_2_Ags; 			// fifth order aberration(mm-->Angstrom)
+	input_multislice.cond_lens.Cs3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_Cs3")*mt::c_mm_2_Ags; 			// third order spherical aberration(mm-->Angstrom)
+	input_multislice.cond_lens.Cs5 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_Cs5")*mt::c_mm_2_Ags; 			// fifth order aberration(mm-->Angstrom)
 	input_multislice.cond_lens.mfa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_mfa2"); 							// magnitude 2-fold astigmatism(Angstrom)
-	input_multislice.cond_lens.afa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_afa2")*multem::c_deg_2_rad; 		// angle 2-fold astigmatism(degrees-->rad)
+	input_multislice.cond_lens.afa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_afa2")*mt::c_deg_2_rad; 		// angle 2-fold astigmatism(degrees-->rad)
 	input_multislice.cond_lens.mfa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_mfa3"); 							// magnitude 3-fold astigmatism(Angstrom)
-	input_multislice.cond_lens.afa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_afa3")*multem::c_deg_2_rad; 		// angle 3-fold astigmatism(degrees-->rad)
-	input_multislice.cond_lens.inner_aper_ang = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_inner_aper_ang")*multem::c_mrad_2_rad; 		// inner aperture(mrad-->rad)
-	input_multislice.cond_lens.outer_aper_ang = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_outer_aper_ang")*multem::c_mrad_2_rad; 		// outer aperture(mrad-->rad)
+	input_multislice.cond_lens.afa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_afa3")*mt::c_deg_2_rad; 		// angle 3-fold astigmatism(degrees-->rad)
+	input_multislice.cond_lens.inner_aper_ang = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_inner_aper_ang")*mt::c_mrad_2_rad; 		// inner aperture(mrad-->rad)
+	input_multislice.cond_lens.outer_aper_ang = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_outer_aper_ang")*mt::c_mrad_2_rad; 		// outer aperture(mrad-->rad)
 	input_multislice.cond_lens.sf = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_sf"); 								// defocus spread(Angstrom)
 	input_multislice.cond_lens.nsf = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_nsf"); 										// Number of integration steps for the defocus Spread
-	input_multislice.cond_lens.beta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_beta")*multem::c_mrad_2_rad; 		// divergence semi-angle(mrad-->rad)
+	input_multislice.cond_lens.beta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_beta")*mt::c_mrad_2_rad; 		// divergence semi-angle(mrad-->rad)
 	input_multislice.cond_lens.nbeta = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_nbeta");									// Number of integration steps for the divergence semi-angle
-	input_multislice.cond_lens.zero_defocus_type = mx_get_scalar_field<multem::eZero_Defocus_Type>(mx_input_multislice, "cond_lens_zero_defocus_type");
+	input_multislice.cond_lens.zero_defocus_type = mx_get_scalar_field<mt::eZero_Defocus_Type>(mx_input_multislice, "cond_lens_zero_defocus_type");
 	input_multislice.cond_lens.zero_defocus_plane = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_zero_defocus_plane");	
 	input_multislice.cond_lens.set_input_data(input_multislice.E_0, input_multislice.grid);
 
 	/********************************* Detectors ********************************/
-	value_type_r lambda = multem::get_lambda(input_multislice.E_0);
+	value_type_r lambda = mt::get_lambda(input_multislice.E_0);
 	mxArray *mx_detector = mxGetField(mx_input_multislice, 0, "detector");
-	input_multislice.detector.type = multem::eDT_Circular;
+	input_multislice.detector.type = mt::eDT_Circular;
 	mx_detector = mxGetField(mx_detector, 0, "cir");
 	input_multislice.detector.resize(1);
-	auto inner_ang = mx_get_scalar_field<value_type_r>(mx_detector, 0, "inner_ang")*multem::c_mrad_2_rad;
+	auto inner_ang = mx_get_scalar_field<value_type_r>(mx_detector, 0, "inner_ang")*mt::c_mrad_2_rad;
 	input_multislice.detector.g_inner[0] = sin(inner_ang)/lambda;
-	auto outer_ang = mx_get_scalar_field<value_type_r>(mx_detector, 0, "outer_ang")*multem::c_mrad_2_rad;
+	auto outer_ang = mx_get_scalar_field<value_type_r>(mx_detector, 0, "outer_ang")*mt::c_mrad_2_rad;
 	input_multislice.detector.g_outer[0] = sin(outer_ang)/lambda;
 
 	/********************************* Scanning ********************************/
-	multem::Atom_Cal<double> atom_cal;
-	multem::Atomic_Data atomic_data;
+	mt::Atom_Cal<double> atom_cal;
+	mt::Atomic_Data atomic_data;
 	atomic_data.Load_Data(input_multislice.potential_type);
-	multem::Atom_Type<double, multem::e_host> atom_type;
+	mt::Atom_Type<double, mt::e_host> atom_type;
 
-	atomic_data.To_atom_type_CPU(Z, multem::c_Vrl, multem::c_nR, 0.0, atom_type);
+	atomic_data.To_atom_type_CPU(Z, mt::c_Vrl, mt::c_nR, 0.0, atom_type);
 	atom_cal.Set_Atom_Type(input_multislice.potential_type, &atom_type);
 	auto rmax = atom_cal.AtomicRadius_Cutoff(3, 0.005);
 
-	input_multislice.scanning.type = multem::eST_Line;
-	input_multislice.scanning.grid_type = multem::eGT_Regular;
-	input_multislice.scanning.ns = multem::c_nR;
+	input_multislice.scanning.type = mt::eST_Line;
+	input_multislice.scanning.grid_type = mt::eGT_Regular;
+	input_multislice.scanning.ns = mt::c_nR;
 	input_multislice.scanning.x0 = 0.5*lx;
 	input_multislice.scanning.y0 = 0.5*ly;
 	input_multislice.scanning.xe = 0.5*lx;
@@ -164,7 +164,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 template<class TOutput_Cross_Section>
 void set_output_cross_section(const mxArray *mx_input_cross_section, mxArray *&mx_output_cross_section, TOutput_Cross_Section &output_cross_section)
 {
-	multem::Input_Multislice<double> input_multislice;
+	mt::Input_Multislice<double> input_multislice;
 	read_input_multislice(mx_input_cross_section, input_multislice);
 	output_cross_section.set_input_data(&input_multislice);
 
@@ -177,14 +177,14 @@ void set_output_cross_section(const mxArray *mx_input_cross_section, mxArray *&m
 	output_cross_section.fr = mx_create_matrix_field<rmatrix_r>(mx_output_cross_section, "fr", 1, output_cross_section.nr);
 }
 
-template<class T, multem::eDevice dev, class TOutput_Cross_Section>
+template<class T, mt::eDevice dev, class TOutput_Cross_Section>
 void get_cross_section(const mxArray *mxB, TOutput_Cross_Section &output_cross_section)
 {
 	/**************************multislice calculation*******************************/
-	multem::Input_Multislice<T> input_multislice;
+	mt::Input_Multislice<T> input_multislice;
 	read_input_multislice(mxB, input_multislice);
 
-	multem::Atomic_Cross_Section<T, dev> atomic_cross_section;
+	mt::Atomic_Cross_Section<T, dev> atomic_cross_section;
 	atomic_cross_section.set_input_data(&input_multislice);
 
 	atomic_cross_section.get(output_cross_section.r, output_cross_section.fr);
@@ -195,5 +195,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	Output_Cross_section output_cross_section;
 	set_output_cross_section(prhs[0], plhs[0], output_cross_section);
 
-	get_cross_section<float, multem::e_device>(prhs[0], output_cross_section);
+	get_cross_section<float, mt::e_device>(prhs[0], output_cross_section);
 }

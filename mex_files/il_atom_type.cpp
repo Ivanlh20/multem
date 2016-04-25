@@ -23,9 +23,9 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::e_host;
-using multem::Atom_Type;
+using mt::rmatrix_r;
+using mt::e_host;
+using mt::Atom_Type;
 
 template<class TAtom_Types>
 void set_output_data(TAtom_Types &atom_type, mxArray *&mx_atom_type)
@@ -116,14 +116,14 @@ void set_output_data(TAtom_Types &atom_type, mxArray *&mx_atom_type)
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	auto potential_type = mx_get_scalar<multem::ePotential_Type>(prhs[0]);
+	auto potential_type = mx_get_scalar<mt::ePotential_Type>(prhs[0]);
 
-	multem::Atomic_Data atomic_data(potential_type);
-	multem::Vector<Atom_Type<double, e_host>, e_host> atom_type(multem::c_nAtomsTypes);
+	mt::Atomic_Data atomic_data(potential_type);
+	mt::Vector<Atom_Type<double, e_host>, e_host> atom_type(mt::c_nAtomsTypes);
 
 	for(auto i = 0; i<atom_type.size(); i++)
 	{
-		atomic_data.To_atom_type_CPU(i+1, multem::c_Vrl, multem::c_nR, 0.0, atom_type[i]);
+		atomic_data.To_atom_type_CPU(i+1, mt::c_Vrl, mt::c_nR, 0.0, atom_type[i]);
 	}
 
 	set_output_data(atom_type, plhs[0]);

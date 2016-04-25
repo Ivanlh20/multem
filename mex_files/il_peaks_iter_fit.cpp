@@ -27,10 +27,10 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
-using multem::r2d;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
+using mt::r2d;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
@@ -46,7 +46,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	vector<float> Im(rIm_i.begin(), rIm_i.end());
 
-	multem::Grid<float> grid(rIm_i.cols, rIm_i.rows, lx_i, ly_i);
+	mt::Grid<float> grid(rIm_i.cols, rIm_i.rows, lx_i, ly_i);
 
 	auto npeaks = peaks_i.rows;
 
@@ -57,7 +57,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		{
 			double &x = peaks_o[0*npeaks+i];
 			double &y = peaks_o[1*npeaks+i];
-			auto fit = multem::Rx_Ry_fit(grid, Im, r2d<float>(x, y), radius_i, true);
+			auto fit = mt::Rx_Ry_fit(grid, Im, r2d<float>(x, y), radius_i, true);
 
 			x = fit[0];
 			y = fit[1];

@@ -27,7 +27,7 @@
 #include "device_functions.cuh"
 #include "host_device_functions.cuh"
 
-namespace multem
+namespace mt
 {
 	template<class T, eDevice dev>
 	class Energy_Loss
@@ -62,27 +62,27 @@ namespace multem
 			{
 				if(eels.m_selection>2)
 				{
-					multem::kernel_xyz(*stream, input_multislice->grid, eels, *fft2, kernel[0], kernel[1], kernel[2]);
+					mt::kernel_xyz(*stream, input_multislice->grid, eels, *fft2, kernel[0], kernel[1], kernel[2]);
 				}
 				else if(eels.m_selection == -2)
 				{
-					multem::kernel_x(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
+					mt::kernel_x(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
 				}
 				else if(eels.m_selection == -1)
 				{
-					multem::kernel_mn1(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
+					mt::kernel_mn1(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
 				}
 				else if(eels.m_selection == 0)
 				{
-					multem::kernel_z(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
+					mt::kernel_z(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
 				}
 				else if(eels.m_selection == 1)
 				{
-					multem::kernel_mp1(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
+					mt::kernel_mp1(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
 				}
 				else if(eels.m_selection == 2)
 				{
-					multem::kernel_y(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
+					mt::kernel_y(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
 				}
 			}
 
@@ -93,6 +93,6 @@ namespace multem
 			FFT2<value_type_r, dev> *fft2;
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

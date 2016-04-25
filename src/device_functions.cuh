@@ -29,14 +29,13 @@
 #include "stream.cuh"
 #include "fft2.cuh"
 
-#include "host_device_functions.cuh"
-#include "host_functions.hpp"
-
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_functions.h>
-#include <device_atomic_functions.h>
 #include <cufft.h>
+
+#include "host_device_functions.cuh"
+#include "host_functions.hpp"
 
 #define reduce_array_256(tid, sum, Mshare)						\
 	{															\
@@ -84,7 +83,22 @@
 		__syncthreads();										\
 	}
 
-namespace multem
+__device__ __forceinline__
+double atomicAdd(double *address, double val)
+{
+    unsigned long long int* address_as_ull = (unsigned long long int*)address;
+    unsigned long long int old = *address_as_ull, assumed;
+
+    do
+    {
+        assumed = old;
+        old = atomicCAS(address_as_ull, assumed, __double_as_longlong(val +__longlong_as_double(assumed)));
+    } while (assumed != old);
+
+    return __longlong_as_double(old);
+}
+
+namespace mt
 {
 	namespace device_detail
 	{
@@ -110,41 +124,6 @@ namespace multem
 			}
 
 			return gridBT;
-		}
-
-		template<class T>
-		__device__ __forceinline__ 
-		void atomicAdd(T *address, T val)
-		{
-		}
-
-		template<>
-		__device__ __forceinline__ 
-		void atomicAdd<float>(float *address, float val)
-		{
-			::atomicAdd(address, val);
-		}
-
-		template<>
-		__device__ __forceinline__ 
-		void atomicAdd<double>(double *address, double val)
-		{
-			unsigned long long int* address_as_ull = (unsigned long long int*)address;
-			unsigned long long int old = *address_as_ull, assumed;
-
-			do {
-				assumed = old;
-				old = atomicCAS(address_as_ull, assumed, __double_as_longlong(val +__longlong_as_double(assumed)));
-			} while (assumed != old);
-		}
-
-		__device__ __forceinline__ 
-			double __shfl_down(double var, unsigned int srcLane, int width = 32)
-		{
-			int2 a = *reinterpret_cast<int2*>(&var);
-			a.x = __shfl_down(a.x, srcLane, width);
-			a.y = __shfl_down(a.y, srcLane, width);
-			return *reinterpret_cast<double*>(&a);
 		}
 
 		// modify
@@ -204,7 +183,8 @@ namespace multem
 						int ixy = grid.ind_col(ix, iy);
 						T V = host_device_detail::eval_cubic_poly<T>(R2, atom_Ip);
 
-						atomicAdd<T>(&(M_i.V[ixy]), V);
+						atomicAdd(&(M_i.V[ixy]), V);
+						//atomicAdd<T>(&(M_i.V[ixy]), V);
 					}
 					iy0 += blockDim.y*gridDim.y;
 				}
@@ -344,7 +324,8 @@ namespace multem
 					int ixy;
 					T V = host_device_detail::eval_cubic_poly<TShift>(ix, iy, grid, R2, atom, ixy);
 
-					atomicAdd<T>(&(M_o.V[ixy]), V);
+					atomicAdd(&(M_o.V[ixy]), V);
+					//atomicAdd<T>(&(M_o.V[ixy]), V);
 				}
 			}
 		}
@@ -355,10 +336,7 @@ namespace multem
 		{
 			int iR = threadIdx.x;
 
-			if (iR < c_nR-1)
-			{
-				host_device_detail::linear_Gaussian(iR, atom);
-			}
+			host_device_detail::linear_Gaussian(iR, atom);
 		}
 
 		// Shift matrix respect to (nxh, nyh)
@@ -1080,7 +1058,7 @@ namespace multem
 		auto gridBT = device_detail::get_grid_nxny(grid, dim3(c_thrnxny, c_thrnxny));
 
 		device_detail::sum_over_Det<TGrid, typename TVector::value_type><<<gridBT.Blk, gridBT.Thr>>>(grid, pow(g_min, 2), pow(g_max, 2), M_i, sum_v);
-		return multem::sum(stream, sum_v);
+		return mt::sum(stream, sum_v);
 	}
 
 	template<class TGrid, class TVector>
@@ -1325,7 +1303,7 @@ namespace multem
 		M_i_h->assign(M_i.begin(), M_i.end());
 
 		// add and scale
-		multem::add_scale_to_host(stream, w_i, *M_i_h, M_o);
+		mt::add_scale_to_host(stream, w_i, *M_i_h, M_o);
 	}
 
 	template<class TVector_i, class TVector_o>
@@ -1339,7 +1317,7 @@ namespace multem
 		// data transfer from GPU to CPU
 		M_i_h->assign(M_i.begin(), M_i.end());
 
-		multem::add_square_scale_to_host(stream, w_i, *M_i_h, M_o);
+		mt::add_square_scale_to_host(stream, w_i, *M_i_h, M_o);
 	}
 
 	template<class TVector_c_i, class TVector_r_o, class TVector_c_o>
@@ -1353,7 +1331,7 @@ namespace multem
 		// data transfer from GPU to CPU
 		psi_i_h->assign(psi_i.begin(), psi_i.end());
 
-		multem::add_scale_m2psi_psi_to_host(stream, w_i, *psi_i_h, m2psi_o, psi_o);
+		mt::add_scale_m2psi_psi_to_host(stream, w_i, *psi_i_h, m2psi_o, psi_o);
 	}
 
 	/***************************************************************************/
@@ -1390,6 +1368,6 @@ namespace multem
 		}
 		return (device_count>0)?device_count:0;
 	}
-} // namespace multem
+} // namespace mt
 
 #endif

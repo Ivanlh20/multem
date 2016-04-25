@@ -30,7 +30,7 @@
 #include "projected_potential.cuh"
 
 
-namespace multem
+namespace mt
 {
 	template<class T, eDevice dev>
 	class Transmission_Function: public Projected_Potential<T, dev>
@@ -74,12 +74,12 @@ namespace multem
 
 			void trans(value_type_r w, Vector<value_type_r, dev> &V0_i, Vector<value_type_c, dev> &Trans_o)
 			{	
-				multem::transmission_function(*(this->stream), this->input_multislice->grid, this->input_multislice->interaction_model, w, V0_i, Trans_o);
+				mt::transmission_function(*(this->stream), this->input_multislice->grid, this->input_multislice->interaction_model, w, V0_i, Trans_o);
 
 				if(this->input_multislice->grid.bwl)
 				{
 					fft2->forward(Trans_o);
-					multem::bandwidth_limit(*(this->stream), this->input_multislice->grid, Trans_o);
+					mt::bandwidth_limit(*(this->stream), this->input_multislice->grid, Trans_o);
 					fft2->inverse(Trans_o);
 				}
 			}
@@ -94,7 +94,7 @@ namespace multem
 					}
 					else if(memory_slice.is_transmission())
 					{
-						multem::assign(*(this->stream), trans_v[islice], trans_0);
+						mt::assign(*(this->stream), trans_v[islice], trans_0);
 					}
 				}
 				else
@@ -114,7 +114,7 @@ namespace multem
 			void trans(const int &islice, TOutput_multislice &output_multislice)
 			{
 				trans(islice, trans_0);
-				multem::copy_to_host(output_multislice.stream, trans_0, output_multislice.trans[0]);
+				mt::copy_to_host(output_multislice.stream, trans_0, output_multislice.trans[0]);
 				output_multislice.shift();
 				output_multislice.clear_temporal_data();
 			}
@@ -141,7 +141,7 @@ namespace multem
 			void transmit(const int &islice, Vector<value_type_c, dev> &psi_io)
 			{
 				trans(islice, trans_0);
-				multem::multiply(*(this->stream), trans_0, psi_io);
+				mt::multiply(*(this->stream), trans_0, psi_io);
 			}
 
 			Vector<value_type_c, dev> trans_0;
@@ -213,7 +213,7 @@ namespace multem
 					template<class U>
 					int number_slices(const double &memory, const int &nxy)
 					{
-						return static_cast<int>(floor(memory/multem::sizeMb<U>(nxy)));
+						return static_cast<int>(floor(memory/mt::sizeMb<U>(nxy)));
 					}
 			};
 
@@ -226,6 +226,6 @@ namespace multem
 			FFT2<value_type_r, dev> *fft2;
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

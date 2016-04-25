@@ -30,7 +30,7 @@
 #include "energy_loss.cuh"
 #include "wave_function.cuh"
 
-namespace multem
+namespace mt
 {
 	template<class T, eDevice dev>
 	class Multislice
@@ -218,7 +218,7 @@ namespace multem
 
 								for(auto ikn = 0; ikn < energy_loss.kernel.size(); ikn++)
 								{
-									multem::multiply(stream, energy_loss.kernel[ikn], psi_z, wave_function.psi_z);
+									mt::multiply(stream, energy_loss.kernel[ikn], psi_z, wave_function.psi_z);
 									wave_function.psi(islice, wave_function.slice.size()-1, w, trans_thk, output_multislice);
 								}
 							}
@@ -267,6 +267,6 @@ namespace multem
 			Vector<value_type_c, dev> trans_thk;
 		};
 
-} // namespace multem
+} // namespace mt
 
 #endif

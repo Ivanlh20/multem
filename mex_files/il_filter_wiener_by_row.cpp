@@ -24,9 +24,9 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -38,16 +38,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 
 	vector<float> Im(rIm_i.begin(), rIm_i.end());
 
-	multem::Stream<e_host> stream(4);
+	mt::Stream<e_host> stream(4);
 
 	if(min(rIm_i.rows, rIm_i.cols) == 1)
 	{
-		Im = multem::filter_wiener_1d(stream, Im, nkr);
+		Im = mt::filter_wiener_1d(stream, Im, nkr);
 	}
 	else
 	{
-		multem::Grid<float> grid(rIm_i.cols, rIm_i.rows);
-		Im = multem::filter_wiener_2d_by_row(stream, grid, Im, nkr);
+		mt::Grid<float> grid(rIm_i.cols, rIm_i.rows);
+		Im = mt::filter_wiener_2d_by_row(stream, grid, Im, nkr);
 	}
 
 	rIm_o.assign(Im.begin(), Im.end());

@@ -30,15 +30,15 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
+using mt::rmatrix_r;
 
 template<class TInput_Superposition>
 void read_input_superposition(const mxArray *mx_input_superposition, TInput_Superposition &input_superposition, bool full =true)
 {
-	using value_type_r = multem::Value_type<TInput_Superposition>;
+	using value_type_r = mt::Value_type<TInput_Superposition>;
 
-	input_superposition.precision = mx_get_scalar_field<multem::ePrecision>(mx_input_superposition, "precision");
-	input_superposition.device = mx_get_scalar_field<multem::eDevice>(mx_input_superposition, "device");
+	input_superposition.precision = mx_get_scalar_field<mt::ePrecision>(mx_input_superposition, "precision");
+	input_superposition.device = mx_get_scalar_field<mt::eDevice>(mx_input_superposition, "device");
 	input_superposition.cpu_nthread = mx_get_scalar_field<int>(mx_input_superposition, "cpu_nthread"); 
 	input_superposition.gpu_device = mx_get_scalar_field<int>(mx_input_superposition, "gpu_device"); 
 	input_superposition.gpu_nstream = mx_get_scalar_field<int>(mx_input_superposition, "gpu_nstream"); 
@@ -65,45 +65,45 @@ void read_input_superposition(const mxArray *mx_input_superposition, TInput_Supe
 	input_superposition.validate_parameters();
  }
 
-void set_superposition(const mxArray *mx_input_superposition, mxArray *&mx_output_superposition, multem::Output_Superposition_Matlab &output_superposition)
+void set_superposition(const mxArray *mx_input_superposition, mxArray *&mx_output_superposition, mt::Output_Superposition_Matlab &output_superposition)
 {
-	multem::Input_Superposition<double> input_superposition;
+	mt::Input_Superposition<double> input_superposition;
 	read_input_superposition(mx_input_superposition, input_superposition, false);
 	output_superposition.set_input_data(&input_superposition);
 
 	output_superposition.Im = mx_create_matrix<rmatrix_r>(input_superposition.grid.ny, input_superposition.grid.nx, mx_output_superposition);
 }
 
-template<class T, multem::eDevice dev>
-void il_superposition(const mxArray *mxB, multem::Output_Superposition_Matlab &output_superposition)
+template<class T, mt::eDevice dev>
+void il_superposition(const mxArray *mxB, mt::Output_Superposition_Matlab &output_superposition)
 {
-	multem::Input_Superposition<T> input_superposition;
+	mt::Input_Superposition<T> input_superposition;
 	read_input_superposition(mxB, input_superposition);
 
-	multem::Superposition<T, dev> superposition;
+	mt::Superposition<T, dev> superposition;
 	superposition.set_input_data(&input_superposition);
 	superposition.run(output_superposition);
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	multem::Output_Superposition_Matlab output_superposition;
+	mt::Output_Superposition_Matlab output_superposition;
 	set_superposition(prhs[0], plhs[0], output_superposition);
 
 	if(output_superposition.is_float_host())
 	{
-		il_superposition<float, multem::e_host>(prhs[0], output_superposition);
+		il_superposition<float, mt::e_host>(prhs[0], output_superposition);
 	}
 	else if(output_superposition.is_double_host())
 	{
-		il_superposition<double, multem::e_host>(prhs[0], output_superposition);
+		il_superposition<double, mt::e_host>(prhs[0], output_superposition);
 	}
 	if(output_superposition.is_float_device())
 	{
-		il_superposition<float, multem::e_device>(prhs[0], output_superposition);
+		il_superposition<float, mt::e_device>(prhs[0], output_superposition);
 	}
 	else if(output_superposition.is_double_device())
 	{
-		il_superposition<double, multem::e_device>(prhs[0], output_superposition);
+		il_superposition<double, mt::e_device>(prhs[0], output_superposition);
 	}
 }

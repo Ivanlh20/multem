@@ -31,7 +31,7 @@
 #include "host_device_functions.cuh"
 #include "specimen.hpp"
 
-namespace multem
+namespace mt
 {
 	template<class T, eDevice dev>
 	class Projected_Potential: public Specimen<T>{
@@ -77,7 +77,7 @@ namespace multem
 
 			void projected_potential(const value_type_r &z_0, const value_type_r &z_e, const int &iatom_0, const int &iatom_e, Vector<value_type_r, dev> &V)
 			{
-				multem::fill(*stream, V, 0.0);
+				mt::fill(*stream, V, 0.0);
 
 				int iatom = iatom_0;
 				while (iatom <= iatom_e)
@@ -85,7 +85,7 @@ namespace multem
 					stream->set_n_act_stream(iatom_e-iatom+1);
 					set_atom_Vp(z_0, z_e, iatom, *stream, atom_Vp);
 					get_cubic_poly_coef_Vz(*stream, atom_Vp);
-					multem::eval_cubic_poly<true>(*stream, this->input_multislice->grid, atom_Vp, V);
+					mt::eval_cubic_poly<true>(*stream, this->input_multislice->grid, atom_Vp, V);
 					iatom += stream->n_act_stream;
 				}
 
@@ -96,7 +96,7 @@ namespace multem
 			{
 				if((islice_0<0) || (islice_e>=this->slice.size()))
 				{
-					multem::fill(*stream, V, 0.0);
+					mt::fill(*stream, V, 0.0);
 					return;
 				}
 				projected_potential(this->slice.z_0[islice_0], this->slice.z_e[islice_e], this->slice.iatom_0[islice_0], this->slice.iatom_e[islice_e], V);
@@ -121,7 +121,7 @@ namespace multem
 			void projected_potential(const int &islice, TOutput_multislice &output_multislice)
 			{
 				projected_potential(islice, islice, V_0);
-				multem::copy_to_host(output_multislice.stream, V_0, output_multislice.V[0]);
+				mt::copy_to_host(output_multislice.stream, V_0, output_multislice.V[0]);
 				output_multislice.shift();
 				output_multislice.clear_temporal_data();
 			}
@@ -209,8 +209,8 @@ namespace multem
 			{
 				if(this->input_multislice->is_subslicing())
 				{
-					multem::linear_Vz(stream, this->input_multislice->potential_type, qz, atom_Vp);
-					multem::cubic_poly_coef(stream, atom_Vp);
+					mt::linear_Vz(stream, this->input_multislice->potential_type, qz, atom_Vp);
+					mt::cubic_poly_coef(stream, atom_Vp);
 				}
 			}
 
@@ -221,5 +221,5 @@ namespace multem
 			Vector<Atom_Vp<value_type_r, dev>, e_host> atom_Vp;
 	};
 
-} // namespace multem
+} // namespace mt
 #endif

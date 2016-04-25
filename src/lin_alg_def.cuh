@@ -23,7 +23,7 @@
 
 #include "math.cuh"
 
-namespace multem
+namespace mt
 {
 	template<class T>
 	struct r3d;
@@ -605,8 +605,7 @@ namespace multem
 		{
 			r3d<T> r(x, y, z); 
 			r -= p0;
-			r3d<T> r_o;
-			return (apply_matrix(Rm) + p0);
+			return (r.apply_matrix(Rm) + p0);
 		}
 
 	};
@@ -741,5 +740,5 @@ namespace multem
 	{
 		return acos(dot(lhs, rhs)/(lhs.module()*rhs.module()));
 	}
-} // namespace multem
+} // namespace mt
 #endif

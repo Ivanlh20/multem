@@ -22,10 +22,10 @@
 #ifndef DEVICE_CALLABLE
 	#ifdef __CUDACC__
 		#define DEVICE_CALLABLE __host__ __device__
-		#define FORCEINLINE __forceinline__
+		#define FORCE_INLINE __forceinline__
 	#else
 		#define DEVICE_CALLABLE
-		#define FORCEINLINE inline
+		#define FORCE_INLINE inline
 	#endif
 #endif
 
@@ -51,7 +51,7 @@ using thrust::device_vector;
 using thrust::host_vector;
 using thrust::raw_pointer_cast;
 
-namespace multem
+namespace mt
 {
 	const double c_Ha = 27.2113850656389; 					// Hartree to electron-Volt
 	const double c_a0 = 0.52917721077817892; 				// Bohr radius
@@ -177,18 +177,18 @@ namespace multem
 	};
 
 	/*****************************simulation type*********************************/
-	enum eSimulation_Type
+	enum eTEM_Sim_Type
 	{
-		eST_STEM = 11, eST_ISTEM = 12, 
-		eST_CBED = 21, eST_CBEI = 22, 
-		eST_ED = 31, eST_HRTEM = 32, 
-		eST_PED = 41, eST_HCI = 42, 
-		eST_EWFS = 51, eST_EWRS = 52, 
-		eST_EELS = 61, eST_EFTEM = 62, 
-		eST_IWFS = 71, eST_IWRS = 72, 
-		eST_PPFS = 81, eST_PPRS = 82, 			// projected potential
-		eST_TFFS = 91, eST_TFRS = 92, 			// transmission function
-		eST_PropFS = 101, eST_PropRS = 102		// propagate
+		eTEMST_STEM = 11, eTEMST_ISTEM = 12, 
+		eTEMST_CBED = 21, eTEMST_CBEI = 22, 
+		eTEMST_ED = 31, eTEMST_HRTEM = 32, 
+		eTEMST_PED = 41, eTEMST_HCI = 42, 
+		eTEMST_EWFS = 51, eTEMST_EWRS = 52, 
+		eTEMST_EELS = 61, eTEMST_EFTEM = 62, 
+		eTEMST_IWFS = 71, eTEMST_IWRS = 72, 
+		eTEMST_PPFS = 81, eTEMST_PPRS = 82, 			// projected potential
+		eTEMST_TFFS = 91, eTEMST_TFRS = 92, 			// transmission function
+		eTEMST_PropFS = 101, eTEMST_PropRS = 102		// propagate
 	};
 
 	/***************************Projected_Potential model************************/
@@ -337,15 +337,15 @@ namespace multem
 	struct is_fundamental;
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	T get_lambda(const T &E_0);
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	T get_sigma(const T &E_0);
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	T get_gamma(const T &E_0);
 
 	/**************************vector**************************/
@@ -377,15 +377,15 @@ namespace multem
 			V = raw_pointer_cast(vector.data());
 		}
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T& operator[](const int i){ return V[i]; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		const T& operator[](const int i) const { return V[i]; }
 	};
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	double sizeMb(const int &n)
 	{
 		return static_cast<double>(n*sizeof(T)/1048576.0);
@@ -393,18 +393,18 @@ namespace multem
 
 	// static member function are not support for the cuda compiler
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	bool isEqual(const T &a, const T &b);
 
 	template<>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	bool isEqual<int>(const int &a, const int &b)
 	{
 		return a == b;
 	}
 
 	template<>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	bool isEqual<float>(const float &a, const float &b)
 	{
 		const float eps_abs = 1e-5f;
@@ -420,7 +420,7 @@ namespace multem
 	}
 
 	template<>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	bool isEqual<double>(const double &a, const double &b)
 	{
 		const double eps_abs = 1e-13;
@@ -436,49 +436,49 @@ namespace multem
 	}
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	bool isZero(const T &x)
 	{
 		return isEqual<T>(x, 0);
 	}
 
 	template<class T, class U>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	bool isZero(const T &x, const U &y)
 	{
 		return isEqual<T>(x, 0) && isEqual<U>(y, 0);
 	}
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	bool nonZero(const T &x)
 	{
 		return !isEqual<T>(x, 0);
 	}
 
 	template<class T, class U>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	bool nonZero(const T &x, const U &y)
 	{
 		return !(isEqual<T>(x, 0) || isEqual<U>(y, 0));
 	}
 
 	template<class T, class U>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	T Div(const T &x, const U &y)
 	{
 		return (isEqual<U>(y, 0))?0:static_cast<T>(x)/static_cast<T>(y);
 	}
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	bool Check_Bound(const T &x, const T &x_min, const T &x_max)
 	{
 		return (x_min <= x)&&(x <= x_max);
 	}
 
 	template<class T, class U>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	bool Check_Bound(const T &x, const T &x_min, const T &x_max, const U &y, const U &y_min, const U &y_max)
 	{
 		return (x_min <= x)&&(x <= x_max)&&(y_min <= y)&&(y <= y_max);
@@ -1200,16 +1200,16 @@ namespace multem
 			ny = ny_i;
 			nxh = nx/2;
 			nyh = ny/2;
-			inxy = static_cast<T>(multem::Div(1.0, nxy()));
+			inxy = static_cast<T>(mt::Div(1.0, nxy()));
 			lx = lx_i;
 			ly = ly_i;
 			dz = dz_i;
 			bwl = BWL_i;
 			pbc_xy = PBC_xy_i;
-			dRx = multem::Div(lx, nx);
-			dRy = multem::Div(ly, ny);
-			dgx = multem::Div(1.0, lx);
-			dgy = multem::Div(1.0, ly);
+			dRx = mt::Div(lx, nx);
+			dRy = mt::Div(ly, ny);
+			dgx = mt::Div(1.0, lx);
+			dgy = mt::Div(1.0, ly);
 			gl2_max = pow(gl_max(), 2);
 
 			// y = 1/(1+exp(alpha*(x^2-x_c^2)))
@@ -1230,82 +1230,82 @@ namespace multem
 			return *this; 
 		}
 		// Maximun limited frequency
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T gl_max() const
 		{
 			return 2.0*g_max()/3.0;
 		}	
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int nxy() const { return nx*ny; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int nx_ny_min() const { return min(nx, ny); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int nx_ny_max() const { return max(nx, ny); }
 
 		/*********************************************************/
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int lx_ly_min() const { return min(lx, ly); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int lx_ly_max() const { return max(lx, ly); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T lxh() const { return 0.5*lx; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T lyh() const { return 0.5*ly; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int lxh_lyh_min() const { return min(lxh(), lyh()); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int lxh_lyh_max() const { return max(lxh(), lyh()); }
 
 		/*********************************************************/
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int floor_dRx(const T &x) const { return static_cast<int>(floor(x/dRx)); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int floor_dRy(const T &y) const { return static_cast<int>(floor(y/dRy)); }
 
 		/*********************************************************/
 		// Maximun frequency
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T g_max() const { return ::fmin(static_cast<T>(nxh)*dgx, static_cast<T>(nyh)*dgy); }
 
 		// Squared of the maximun frequency
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T g2_max() const { return pow(g_max(), 2); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T dR_min() const { return ::fmin(dRx, dRy); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T dg_min() const { return ::fmin(dgx, dgy); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int nx_dRx(const T &lx) const { return static_cast<int>(ceil(lx/dRx)); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int ny_dRy(const T &ly) const { return static_cast<int>(ceil(ly/dRy)); }
 
 		/*********************************************************/
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int igx(const int &ix) const { return ix-nxh; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int igy(const int &iy) const { return iy-nyh; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T gx(const int &ix) const { return igx(ix)*dgx; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T gy(const int &iy) const { return igy(iy)*dgy; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T g2(const int &ix, const int &iy) const 
 		{ 
 			T gxi = gx(ix);
@@ -1313,16 +1313,16 @@ namespace multem
 			return (gxi*gxi + gyi*gyi);
 		}
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T g(const int &ix, const int &iy) const { return sqrt(g2(ix, iy)); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T gx(const int &ix, const T &x) const { return gx(ix)-x; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T gy(const int &iy, const T &y) const { return gy(iy)-y; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T g2(const int &ix, const int &iy, const T &x, const T &y) const 
 		{ 
 			T gxi = gx(ix, x);
@@ -1330,22 +1330,22 @@ namespace multem
 			return (gxi*gxi + gyi*gyi);
 		}
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T g(const int &ix, const int &iy, const T &x, const T &y) const { return sqrt(g2(ix, iy, x, y)); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int iRx(const int &ix) const { return ix; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int iRy(const int &iy) const { return iy; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T Rx(const int &ix) const { return iRx(ix)*dRx; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T Ry(const int &iy) const { return iRy(iy)*dRy; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T R2(const int &ix, const int &iy) const 
 		{ 
 			T Rxi = Rx(ix);
@@ -1353,16 +1353,16 @@ namespace multem
 			return (Rxi*Rxi + Ryi*Ryi);
 		}
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T R(const int &ix, const int &iy) const { return sqrt(R2(ix, iy)); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T Rx(const int &ix, const T &x) const { return Rx(ix)-x; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T Ry(const int &iy, const T &y) const { return Ry(iy)-y; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T R2(const int &ix, const int &iy, const T &x, const T &y) const 
 		{ 
 			T Rxi = Rx(ix, x);
@@ -1370,29 +1370,29 @@ namespace multem
 			return (Rxi*Rxi + Ryi*Ryi);
 		}
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T R(const int &ix, const int &iy, const T &x, const T &y) const { return sqrt(R2(ix, iy, x, y)); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T bwl_factor(const int &ix, const int &iy) const 
 		{ 
 			return inxy/(1.0+exp(alpha*(g2_shift(ix, iy)-gl2_max)));
 		}
 
 		/*********************************************************/
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int igx_shift(const int &ix) const { return (ix<nxh)?ix:ix-nx; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int igy_shift(const int &iy) const { return (iy<nyh)?iy:iy-ny; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T gx_shift(const int &ix) const { return static_cast<T>(igx_shift(ix))*dgx; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T gy_shift(const int &iy) const { return static_cast<T>(igy_shift(iy))*dgy; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T g2_shift(const int &ix, const int &iy) const 
 		{ 
 			T gxi = gx_shift(ix);
@@ -1400,22 +1400,22 @@ namespace multem
 			return gxi*gxi + gyi*gyi;
 		}
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T g_shift(const int &ix, const int &iy) const { return sqrt(g2_shift(ix, iy)); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int iRx_shift(const int &ix) const { return (ix<nxh)?ix+nxh:ix-nxh; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int iRy_shift(const int &iy) const { return (iy<nyh)?iy+nyh:iy-nyh; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T Rx_shift(const int &ix) const { return static_cast<T>(iRx_shift(ix))*dRx; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T Ry_shift(const int &iy) const { return static_cast<T>(iRy_shift(iy))*dRy; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T R2_shift(const int &ix, const int &iy) const 
 		{ 
 			T Rxi = Rx_shift(ix);
@@ -1423,16 +1423,16 @@ namespace multem
 			return Rxi*Rxi + Ryi*Ryi;
 		}
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T R_shift(const int &ix, const int &iy) const { return sqrt(R2_shift(ix, iy)); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T Rx_shift(const int &ix, const T &x) const { return Rx_shift(ix)-x; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T Ry_shift(const int &iy, const T &y) const { return Ry_shift(iy)-y; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T R2_shift(const int &ix, const int &iy, const T &x, const T &y) const 
 		{ 
 			T Rxi = Rx_shift(ix, x);
@@ -1440,10 +1440,10 @@ namespace multem
 			return (Rxi*Rxi + Ryi*Ryi);
 		}
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T R_shift(const int &ix, const int &iy, const T &x, const T &y) const { return sqrt(R2_shift(ix, iy, x, y)); }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		T bwl_factor_shift(const int &ix, const int &iy) const 
 		{ 
 			if(bwl)
@@ -1456,13 +1456,13 @@ namespace multem
 			}
 		}
 		/*********************************************************/
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int ind_row(const int &ix, const int &iy) const { return iy*nx+ix; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		int ind_col(const int &ix, const int &iy) const { return ix*ny+iy; }
 
-		DEVICE_CALLABLE FORCEINLINE
+		DEVICE_CALLABLE FORCE_INLINE
 		void row_col(const int &ixy, int &ix, int &iy) const 
 		{ 
 			ix = ixy/ny;
@@ -2703,6 +2703,6 @@ namespace multem
 			free_memory_size(0){}
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

@@ -24,7 +24,7 @@
 #include "atom_cal.hpp"
 #include "host_device_functions.cuh"
 
-namespace multem
+namespace mt
 {
 	class Atomic_Data{
 		public:
@@ -1353,5 +1353,5 @@ namespace multem
 			Atom_Type<double, e_host> c_atom_type;
 	};
 
-} // namespace multem
+} // namespace mt
 #endif

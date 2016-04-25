@@ -97,7 +97,7 @@ namespace lapack
 		public:
 			using value_type = T;
 
-			static const multem::eDevice device = multem::e_host;
+			static const mt::eDevice device = mt::e_host;
 
 			void operator()(int A_rows, int A_cols, T *A, int b_cols, T *b, T *x)
 			{
@@ -111,7 +111,7 @@ namespace lapack
 				T rcond = -1;
 				int info = 0;
 
-				multem::Vector<T, multem::e_host> bv(b, b+m*b_cols);
+				mt::Vector<T, mt::e_host> bv(b, b+m*b_cols);
 
 				//query optimal size of work array
 				int lwork = -1;
@@ -144,7 +144,7 @@ namespace lapack
 				dgels_(&trans, &m, &n, &nrhs, a, &lda, b, &ldb, work, &lwork, &info);
 			}
 
-			multem::Vector<T, multem::e_host> work;
+			mt::Vector<T, mt::e_host> work;
 	};
 
 	template<class T>
@@ -153,7 +153,7 @@ namespace lapack
 		public:
 			using value_type = T;
 
-			static const multem::eDevice device = multem::e_host;
+			static const mt::eDevice device = mt::e_host;
 
 			void operator()(int A_rows, int A_cols, T *A, int b_cols, T *b, T *x)
 			{
@@ -167,7 +167,7 @@ namespace lapack
 				T rcond = -1;
 				int info = 0;
 
-				multem::Vector<T, multem::e_host> bv(b, b+m*b_cols);
+				mt::Vector<T, mt::e_host> bv(b, b+m*b_cols);
 				S.resize(min_mn);
 
 				//query optimal size of work array
@@ -207,9 +207,9 @@ namespace lapack
 				dgelsd_(&m, &n, &nrhs, a, &lda, b, &ldb, s, &rcond, &rank, work, &lwork, iwork, &info);
 			}
 
-			multem::Vector<int, multem::e_host> iwork;
-			multem::Vector<T, multem::e_host> work;
-			multem::Vector<T, multem::e_host> S;
+			mt::Vector<int, mt::e_host> iwork;
+			mt::Vector<T, mt::e_host> work;
+			mt::Vector<T, mt::e_host> S;
 	};
 } // namespace lapack
 

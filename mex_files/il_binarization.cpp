@@ -23,22 +23,22 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
 	auto rIm_i = mx_get_matrix<rmatrix_r>(prhs[0]);
 	auto threshold = mx_get_scalar<double>(prhs[1]);
 
-	multem::Stream<e_host> stream(4);
+	mt::Stream<e_host> stream(4);
 	/*******************************************************************/
 	auto rIm_o = mx_create_matrix<rmatrix_r>(rIm_i.rows, rIm_i.cols, plhs[0]);
 
 	vector<double> Im_i(rIm_i.begin(), rIm_i.end());
 
-	auto Im_o = multem::binarization(stream, Im_i, threshold);
+	auto Im_o = mt::binarization(stream, Im_i, threshold);
 	rIm_o.assign(Im_o.begin(), Im_o.end());
 
 }

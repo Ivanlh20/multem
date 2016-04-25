@@ -8,10 +8,10 @@ ly = 20;
 dx = lx/nx;
 dy = ly/ny;
 
-dx = lx/nx; dy = ly/ny; Sigma = 1; shift = 0;
+dx = lx/nx; dy = ly/ny; sigma = 1; shift = 0;
 
 tic;
-Im = il_func_gaussian(nx, ny, dx, dy, Sigma, shift);
+Im = il_func_gaussian(nx, ny, dx, dy, sigma, shift);
 
 
 figure(1);

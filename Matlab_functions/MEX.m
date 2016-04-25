@@ -22,7 +22,7 @@ end;
 % NVCC compiler location
 setenv('MW_NVCC_PATH', strcat(CUDA_PATH, filesep, 'bin'));
 % Cuda libraries
-CUDA_INC = strcat('-I"', CUDA_PATH, filesep, 'include"');
+CUDA_INCLUDE = strcat('-I"', CUDA_PATH, filesep, 'include"');
 
 if(ispc)
     FFTW_LIB = ['-L' path ' -lfftw3f -lfftw3'];
@@ -45,9 +45,9 @@ OUTDIR = strcat('..', filesep, 'mex_executables');
 if (strcmpi(option, 'debug'))
     mex_comand = 'mex -g -largeArrayDims -outdir';
 else
-    mex_comand = 'mex -largeArrayDims -outdir';   
+    mex_comand = 'mex -v -largeArrayDims -outdir';   
 end;
 
-textcommands = strjoin({mex_comand, OUTDIR, ADD_INC, CUDA_INC, mfile, strjoin(varargin), LAPACK_LIB, FFTW_LIB});  
+textcommands = strjoin({mex_comand, OUTDIR, ADD_INC, CUDA_INCLUDE, mfile, strjoin(varargin), LAPACK_LIB, FFTW_LIB});  
 disp(textcommands);
 eval(textcommands);

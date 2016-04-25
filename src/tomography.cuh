@@ -33,7 +33,7 @@
 #include "box_occ.hpp"
 #include "cubic_spline.hpp"
 
-namespace multem
+namespace mt
 {
 	template<class T, eDevice dev>
 	class Tomography
@@ -60,8 +60,8 @@ namespace multem
 				T IA_exp = 0;
 				for(auto irot = 0; irot< image.size(); irot++)
 				{
-					chi2_0 += multem::sum_square(input_tomography->grid, image[irot]);
-					IA_exp += multem::sum(input_tomography->grid, image[irot]);
+					chi2_0 += mt::sum_square(input_tomography->grid, image[irot]);
+					IA_exp += mt::sum(input_tomography->grid, image[irot]);
 				}
 				IA_exp = IA_exp*input_tomography->grid.dRx*input_tomography->grid.dRy/(atoms.size()*image.size());
 
@@ -88,15 +88,15 @@ namespace multem
 
 				atom_type_host.resize(c_nAtomsTypes); 
 				atom_type.resize(c_nAtomsTypes); 
-				multem::Cubic_Spline spline;
+				mt::Cubic_Spline spline;
 				for(auto i = 0; i<c_nAtomsTypes; i++)
 				{
 					auto Z = i+1;
 					atomic_data.To_atom_type_CPU(Z, c_Vrl, c_nR, input_tomography->grid.dR_min(), atom_type_host[i]);
 					if(input_tomography->Z == Z)
 					{
-						multem::assign(input_tomography->r, atom_type_host[i].R);
-						multem::square(input_tomography->r, atom_type_host[i].R2);
+						mt::assign(input_tomography->r, atom_type_host[i].R);
+						mt::square(input_tomography->r, atom_type_host[i].R2);
 						spline.set_points(atom_type_host[i].R2, input_tomography->fr);
 						spline.get_coeff(atom_type_host[i].ciVR);
 						atom_type_host[i].R_min = 0;
@@ -279,7 +279,7 @@ namespace multem
 					auto Rm = get_rotation_matrix(input_tomography->angle[irot], input_tomography->tm_u0);
 					auto r = r_i.rotate(Rm, input_tomography->tm_p0);
 					set_atom_Ip(input_tomography->Z, r, stream, atom_Ip);
-					chi2 += multem::atom_cost_function(input_tomography->grid, atom_Ip[0], image[irot]);
+					chi2 += mt::atom_cost_function(input_tomography->grid, atom_Ip[0], image[irot]);
 				}
 				return chi2;
 			}
@@ -292,7 +292,7 @@ namespace multem
 					auto Rm = get_rotation_matrix(input_tomography->angle[irot], input_tomography->tm_u0);
 					auto r = r_i.rotate(Rm, input_tomography->tm_p0);
 					set_atom_Ip(input_tomography->Z, r, stream, atom_Ip);
-					multem::subtract_atom(stream, input_tomography->grid, atom_Ip, image[irot]);
+					mt::subtract_atom(stream, input_tomography->grid, atom_Ip, image[irot]);
 				}
 			}
 
@@ -328,9 +328,9 @@ namespace multem
 						auto r = atoms.r_n[iatoms].rotate(Rm, input_tomography->tm_p0);
 						// r = r.rotate(Rm, input_tomography->tm_p0);
 						set_atom_Ip(input_tomography->Z, r, stream, atom_Ip);
-						multem::subtract_atom(stream, input_tomography->grid, atom_Ip, image[irot]);
+						mt::subtract_atom(stream, input_tomography->grid, atom_Ip, image[irot]);
 					}
-					chi2 += multem::sum_square(input_tomography->grid, image[irot]);
+					chi2 += mt::sum_square(input_tomography->grid, image[irot]);
 				}
 				return chi2;
 			}
@@ -339,7 +339,7 @@ namespace multem
 			{
 				for(auto irot = 0; irot< image.size(); irot++)
 				{
-					multem::assign(input_tomography->image[irot], image[irot]);
+					mt::assign(input_tomography->image[irot], image[irot]);
 				}
 			}
 
@@ -389,5 +389,5 @@ namespace multem
 			Vector<Atom_Type<T, dev>, e_host> atom_type;			// Atom types
 	};
 
-} // namespace multem
+} // namespace mt
 #endif

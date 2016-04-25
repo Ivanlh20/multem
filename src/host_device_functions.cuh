@@ -41,11 +41,11 @@
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/tuple.h>
 
-namespace multem
+namespace mt
 {
 	// Input: E_0(keV), Output: lambda (electron wave)
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	T get_lambda(const T &E_0)
 	{
 		T emass = 510.99906;
@@ -56,7 +56,7 @@ namespace multem
 
 	// Input: E_0(keV), Output: sigma (Interaction parameter)
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	T get_sigma(const T &E_0)
 	{
 		T emass = 510.99906;
@@ -68,7 +68,7 @@ namespace multem
 
 	// Input: E_0(keV), Output: gamma(relativistic factor)
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	T get_gamma(const T &E_0)
 	{
 		T emass = 510.99906;
@@ -78,7 +78,7 @@ namespace multem
 
 	// Input: E_0(keV), Output: gamma*lambda/c_Potf
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	T get_Vr_factor(const T &E_0, const T &theta)
 	{
 		T c_Potf = 47.877645145863056;
@@ -87,7 +87,7 @@ namespace multem
 	}
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	T get_Scherzer_focus(const T &E_0, const T &Cs3)
 	{
 		T lambda = get_lambda(E_0);
@@ -95,7 +95,7 @@ namespace multem
 	}
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	T get_Scherzer_aperture(const T &E_0, const T &Cs3)
 	{
 		T lambda = get_lambda(E_0);
@@ -103,7 +103,7 @@ namespace multem
 	}
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void get_Scherzer_conditions(const T &E_0, const T &Cs3, T &defocus, T &aperture)
 	{
 		defocus = get_Scherzer_focus(E_0, Cs3);
@@ -111,7 +111,7 @@ namespace multem
 	}
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	Vector<T, e_host> get_rotation_matrix(const T &theta, const r3d<T> &u0)
 	{
 		Vector<T, e_host> Rm(9);
@@ -131,7 +131,7 @@ namespace multem
 
 	// distance from point to line
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	T get_dist_from_p2l(const T &a, const T &b, const T &c, const T &x0, const T &y0)
 	{
 		return abs(a*x0+b*y0+c)/sqrt(a*a+b*b);
@@ -139,7 +139,7 @@ namespace multem
 
 	// calculate intersection points
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void get_int_pt_from_p2l(const T &a, const T &b, const T &c, const T &x0, const T &y0, const T &x, const T &y)
 	{
 		x = (b*(b*x0-a*y0)-a*c)/(a*a+b*b);
@@ -176,7 +176,7 @@ namespace multem
 		}
 
 		template<class TFn, class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void int_fx_x0_xe(TFn fn, const Value_type<TrPP_Coef> &x0, const Value_type<TrPP_Coef> &xe, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y)
 		{
 			Value_type<TrPP_Coef> a = 0.5*(xe-x0); 
@@ -193,7 +193,7 @@ namespace multem
 		}
 
 		template<class TFn, class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void int_fx_x0_xe(TFn fn, const Value_type<TrPP_Coef> &x0, const Value_type<TrPP_Coef> &xe, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y1, Value_type<TrPP_Coef> &y2)
 		{
 			Value_type<TrPP_Coef> a = 0.5*(xe-x0); 
@@ -211,7 +211,7 @@ namespace multem
 		}
 
 		template<class TFn, class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void int_fx_x0_pInfty(TFn fn, const Value_type<TrPP_Coef> &x0, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, TrQ1&rq1, Value_type<TrPP_Coef> &y)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -227,7 +227,7 @@ namespace multem
 		}
 
 		template<class TFn, class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void int_fx_x0_pInfty(TFn fn, const Value_type<TrPP_Coef> &x0, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y1, Value_type<TrPP_Coef> &y2)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -244,7 +244,7 @@ namespace multem
 		}
 
 		template<class TFn, class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void int_Vz_z0_ze(TFn fn, const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -276,7 +276,7 @@ namespace multem
 		}
 
 		template<class TFn, class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void int_Vz_dVz_z0_ze(TFn fn, const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -310,7 +310,7 @@ namespace multem
 		}
 
 		template<class TFn, class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void int_VR(TFn fn, const Value_type<TrPP_Coef> &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -327,7 +327,7 @@ namespace multem
 		}
 
 		template<class TFn, class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void int_VR_dVR(TFn fn, const Value_type<TrPP_Coef> &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -346,7 +346,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void add_Exponential_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, bool reset =true)
 		{
 			if(reset)
@@ -360,7 +360,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void add_Exponential_dExponential_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy, bool reset =true)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -377,7 +377,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void add_Gaussian_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, bool reset =true)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -393,7 +393,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void add_Gaussian_dGaussian_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy, bool reset =true)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -410,7 +410,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void add_Lorentzian_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, bool reset =true)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -426,7 +426,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void add_Lorentzian_dLorentzian_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy, bool reset =true)
 		{
 			Value_type<TrPP_Coef> t, yt, x2 = x*x;
@@ -443,7 +443,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void add_Yukawa_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, bool reset =true)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -459,7 +459,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void add_Yukawa_dYukawa_Fn(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy, bool reset =true)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -476,7 +476,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_Gaussian_feg(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, bool reset =true)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -492,7 +492,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_dPr_Gaussian_feg(const Value_type<TrPP_Coef> &x, const int &n_0, const int &n_e, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy, bool reset =true)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -513,49 +513,49 @@ namespace multem
 		/***************************************************************************/
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_Doyle_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 4, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_dfeg_Doyle_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 4, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_Peng_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_dfeg_Peng_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_Peng_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_dfeg_Peng_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_Kirkland_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Lorentzian_Fn(x, 0, 3, rcoef, y);
@@ -563,7 +563,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_dfeg_Kirkland_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Lorentzian_dLorentzian_Fn(x, 0, 3, rcoef, y, dy);
@@ -571,7 +571,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -596,7 +596,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_dfeg_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -623,7 +623,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -637,7 +637,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_dfeg_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -652,7 +652,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_Peng_ion_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
@@ -661,7 +661,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void feg_dfeg_Peng_ion_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -675,7 +675,7 @@ namespace multem
 		/***************************************************************************/
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_Doyle_neutral_0_4(const int &Z, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			feg_Doyle_neutral_0_4(x, rcoef, y);
@@ -683,7 +683,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_dfxg_Doyle_neutral_0_4(const int &Z, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			feg_dfeg_Doyle_neutral_0_4(x, rcoef, y, dy);
@@ -692,7 +692,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_Peng_neutral_0_4(const int &Z, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			feg_Peng_neutral_0_4(x, rcoef, y);
@@ -700,7 +700,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_dfxg_Peng_neutral_0_4(const int &Z, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			feg_dfeg_Peng_neutral_0_4(x, rcoef, y, dy);
@@ -709,7 +709,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_Peng_neutral_0_12(const int &Z, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			feg_Peng_neutral_0_12(x, rcoef, y);
@@ -717,7 +717,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_dfxg_Peng_neutral_0_12(const int &Z, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			feg_dfeg_Peng_neutral_0_12(x, rcoef, y, dy);
@@ -726,7 +726,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_Kirkland_neutral_0_12(const int &Z, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			feg_Kirkland_neutral_0_12(x, rcoef, y);
@@ -734,7 +734,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_dfxg_Kirkland_neutral_0_12(const int &Z, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			feg_dfeg_Kirkland_neutral_0_12(x, rcoef, y, dy);
@@ -743,21 +743,21 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 6, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_dfxg_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 6, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -771,7 +771,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_dfxg_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -787,7 +787,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_Peng_ion_0_4(const int &Z, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			feg_Peng_neutral_0_4(x, rcoef, y);
@@ -795,7 +795,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fxg_dfxg_Peng_ion_0_4(const int &Z, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			feg_dfeg_Peng_neutral_0_4(x, rcoef, y, dy);
@@ -806,49 +806,49 @@ namespace multem
 		/***************************************************************************/
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_Doyle_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			Pr_Gaussian_feg(x, 0, 4, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_dPr_Doyle_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			Pr_dPr_Gaussian_feg(x, 0, 4, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_Peng_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			Pr_Gaussian_feg(x, 0, 5, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_dPr_Peng_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			Pr_dPr_Gaussian_feg(x, 0, 5, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_Peng_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_dPr_Peng_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			Pr_dPr_Gaussian_feg(x, 0, 5, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_Kirkland_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Yukawa_Fn(x, 0, 3, rcoef, y);
@@ -856,7 +856,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_dPr_Kirkland_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Yukawa_dYukawa_Fn(x, 0, 3, rcoef, y, dy);
@@ -864,42 +864,42 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 6, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_dPr_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 6, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Exponential_Fn(x, 0, 5, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_dPr_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Exponential_dExponential_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_Peng_ion_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			Pr_Gaussian_feg(x, 0, 5, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Pr_dPr_Peng_ion_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			Pr_dPr_Gaussian_feg(x, 0, 5, rcoef, y, dy);
@@ -909,49 +909,49 @@ namespace multem
 		/***************************************************************************/
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_Doyle_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 4, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVr_Doyle_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 4, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_Peng_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVr_Peng_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_Peng_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVr_Peng_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_Kirkland_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Yukawa_Fn(x, 0, 3, rcoef, y);
@@ -959,7 +959,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVr_Kirkland_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Yukawa_dYukawa_Fn(x, 0, 3, rcoef, y, dy);
@@ -967,7 +967,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -981,7 +981,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVr_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -997,7 +997,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -1010,7 +1010,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVr_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -1026,7 +1026,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_Peng_ion_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
@@ -1034,7 +1034,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVr_Peng_ion_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -1048,49 +1048,49 @@ namespace multem
 		/***************************************************************************/
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_Doyle_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 4, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_dVR_Doyle_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 4, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_Peng_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_dVR_Peng_neutral_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_Peng_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			 add_Gaussian_Fn(x, 0, 5, rcoef, y);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_dVR_Peng_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_Kirkland_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			y = 0;
@@ -1103,7 +1103,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_dVR_Kirkland_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			y = dy = 0;
@@ -1117,21 +1117,21 @@ namespace multem
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
 			int_VR(Vr_Weickenmeier_neutral_0_12<TrPP_Coef>, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_dVR_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			int_VR_dVR(Vr_dVr_Weickenmeier_neutral_0_12<TrPP_Coef>, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			y = 0;
@@ -1142,7 +1142,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_dVR_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			using T = Value_type<TrPP_Coef>;
@@ -1157,7 +1157,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_Peng_ion_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y)
 		{
 			add_Gaussian_Fn(x, 0, 5, rcoef, y);
@@ -1165,7 +1165,7 @@ namespace multem
 		}
 
 		template<class TrPP_Coef>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void VR_dVR_Peng_ion_0_4(const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			add_Gaussian_dGaussian_Fn(x, 0, 5, rcoef, y, dy);
@@ -1177,98 +1177,98 @@ namespace multem
 		/***************************************************************************/
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_Doyle_neutral_0_4(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
 			int_Vz_z0_ze(Vr_Doyle_neutral_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_dVz_Doyle_neutral_0_4(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			int_Vz_dVz_z0_ze(Vr_dVr_Doyle_neutral_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_Peng_neutral_0_4(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
 			int_Vz_z0_ze(Vr_Peng_neutral_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_dVz_Peng_neutral_0_4(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			int_Vz_dVz_z0_ze(Vr_dVr_Peng_neutral_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_Peng_neutral_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
 			int_Vz_z0_ze(Vr_Peng_neutral_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_dVz_Peng_neutral_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			int_Vz_dVz_z0_ze(Vr_dVr_Peng_neutral_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_Kirkland_neutral_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
 			int_Vz_z0_ze(Vr_Kirkland_neutral_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_dVz_Kirkland_neutral_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			int_Vz_dVz_z0_ze(Vr_dVr_Kirkland_neutral_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
 			int_Vz_z0_ze(Vr_Weickenmeier_neutral_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_dVz_Weickenmeier_neutral_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			int_Vz_dVz_z0_ze(Vr_dVr_Weickenmeier_neutral_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
 			int_Vz_z0_ze(Vr_Lobato_neutral_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_dVz_Lobato_neutral_0_12(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			int_Vz_dVz_z0_ze(Vr_dVr_Lobato_neutral_0_12<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_Peng_ion_0_4(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y)
 		{
 			int_Vz_z0_ze(Vr_Peng_ion_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y);
 		}
 
 		template<class TrPP_Coef, class TrQ1>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vz_dVz_Peng_ion_0_4(const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &x, const TrPP_Coef &rcoef, const TrQ1 &rqz, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			int_Vz_dVz_z0_ze(Vr_dVr_Peng_ion_0_4<TrPP_Coef>, z0, ze, x, rcoef, rqz, y, dy);
@@ -1277,7 +1277,7 @@ namespace multem
 		/***************************************************************************/
 
 		template<class T> 
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVrir_Doyle_neutral_0_4(const T &r, T *cl, T *cnl, T &Vr, T &dVrir)
 		{
 			T r2 = r*r;
@@ -1292,7 +1292,7 @@ namespace multem
 		}
 
 		template<class T> 
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVrir_Peng_neutral_0_4_12(const T &r, T *cl, T *cnl, T &Vr, T &dVrir)
 		{
 			T r2 = r*r;
@@ -1308,7 +1308,7 @@ namespace multem
 		}
 
 		template<class T> 
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVrir_Kirkland_neutral_0_12(const T &r, T *cl, T *cnl, T &Vr, T &dVrir)
 		{
 			T ir = 1/r; 
@@ -1326,7 +1326,7 @@ namespace multem
 		}
 
 		template<class T> 
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVrir_Weickenmeier_neutral_0_12(const T &r, T *cl, T *cnl, T &Vr, T &dVrir)
 		{
 			T r2 = r*r;
@@ -1346,7 +1346,7 @@ namespace multem
 		}
 
 		template<class T> 
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVrir_Lobato_neutral_0_12(const T &r, T *cl, T *cnl, T &Vr, T &dVrir)
 		{
 			T cnl0r = cnl[0]*r; 
@@ -1366,7 +1366,7 @@ namespace multem
 		}
 
 		template<class T> 
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Vr_dVrir_Peng_ion_0_4(const T &r, T *cl, T *cnl, T &Vr, T &dVrir)
 		{
 			T ir = 1/r; 
@@ -1384,7 +1384,7 @@ namespace multem
 		}
 
 		template<class T> 
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		int unrolledBinarySearch_c_nR(const T &x0, const T *x)
 		{
 			int i0 = 0, ie = c_nR-1;
@@ -1407,7 +1407,7 @@ namespace multem
 		}
 
 		template<class T>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		T eval_cubic_poly(const T &R2, const Atom_Sa<T> &atom_Ip)
 		{
 			int iR = unrolledBinarySearch_c_nR<T>(R2, atom_Ip.R2);
@@ -1417,7 +1417,7 @@ namespace multem
 
 		// cosine tapering
 		template<class T>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void apply_tapering(const T &x_tap, const T &alpha, const T &x, T &y, T &dy)
 		{
 			if(x_tap<x)
@@ -1431,7 +1431,7 @@ namespace multem
 
 		// Get Local interpolation coefficients
 		template<class TAtom>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void cubic_poly_coef(const int &iR, TAtom &atom)
 		{
 			auto idR = 1.0/(atom.R2[iR+1]-atom.R2[iR]);
@@ -1447,7 +1447,7 @@ namespace multem
 
 		// Cubic polynomial evaluation
 		template<bool TShift, class T, class TAtom> 
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		T eval_cubic_poly(int ix, int iy, const Grid<T> &grid, T R2, const TAtom &atom, int &ixy)
 		{
 			// R2 = max(R2, atom_Vp.R2_min);
@@ -1471,7 +1471,7 @@ namespace multem
 
 		// get linear Gaussian
 		template<class TAtom> 
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void linear_Gaussian(int iR, const TAtom &atom)
 		{
 			auto alpha = atom.alpha;
@@ -1484,7 +1484,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void fft2_shift(const int &ix, const int &iy, const TGrid &grid, TVector &M_io)
 		{
 			int ixy = grid.ind_col(ix, iy); 
@@ -1497,7 +1497,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void sum_over_Det(const int &ix, const int &iy, const TGrid &grid, 
 		const Value_type<TGrid> &g2_min, const Value_type<TGrid> &g2_max, const TVector &M_i, Value_type<TGrid> &sum)
 		{
@@ -1510,7 +1510,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void sum_square_over_Det(const int &ix, const int &iy, const TGrid &grid, 
 		const Value_type<TGrid> &g2_min, const Value_type<TGrid> &g2_max, const TVector &M_i, Value_type<TGrid> &sum)
 		{
@@ -1523,7 +1523,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_1, class TVector_2>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void sum_square_over_Det(const int &ix, const int &iy, const TGrid &grid, 
 		const TVector_1 &S_i, const TVector_2 &M_i, Value_type<TGrid> &sum)
 		{
@@ -1532,7 +1532,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void bandwidth_limit(const int &ix, const int &iy, const TGrid &grid, TVector_c &M_io)
 		{
 			int ixy = grid.ind_col(ix, iy); 
@@ -1541,7 +1541,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void hard_aperture(const int &ix, const int &iy, const TGrid &grid, const Value_type<TGrid> &g2_max, const Value_type<TGrid> &w, TVector_c &M_io)
 		{
 			using T = Value_type<TVector_c>;
@@ -1552,7 +1552,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void phase_multiplication(const int &ix, const int &iy, const TGrid &grid, 
 		const TVector_c &exp_x_i, const TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
 		{
@@ -1561,7 +1561,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void propagator_multiplication(const int &ix, const int &iy, const TGrid &grid, 
 		const TVector_c &prop_x_i, const TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &psi_o)
 		{
@@ -1573,7 +1573,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void phase_factor_2d(const int &ix, const int &iy, const TGrid &grid, 
 		const Value_type<TGrid> &x, const Value_type<TGrid> &y, TVector_c &psi_i, TVector_c &psi_o)
 		{
@@ -1586,7 +1586,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void probe(const int &ix, const int &iy, const TGrid &grid, const Lens<Value_type<TGrid>> &lens, 
 		const Value_type<TGrid> &x, const Value_type<TGrid> &y, TVector_c &fPsi_o)
 		{
@@ -1615,7 +1615,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void apply_CTF(const int &ix, const int &iy, const TGrid &grid, const Lens<Value_type<TGrid>> &lens, 
 		const Value_type<TGrid> &gxu, const Value_type<TGrid> &gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
 		{
@@ -1644,7 +1644,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void apply_PCTF(const int &ix, const int &iy, const TGrid &grid, const Lens<Value_type<TGrid>> &lens, 
 		TVector_c &fPsi_i, TVector_c &fPsi_o)
 		{
@@ -1677,7 +1677,7 @@ namespace multem
 		}
 
 		template<class TGrid>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void Lorentz_factor(const int &ix, const int &iy, const TGrid &grid, const Value_type<TGrid> &gc2, const Value_type<TGrid> &ge2, Value_type<TGrid> &sum)
 		{
 			using value_type_r = Value_type<TGrid>;
@@ -1690,7 +1690,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void kernel_xyz(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_x, TVector_c &k_y, TVector_c &k_z)
 		{
 			using value_type_r = Value_type<TGrid>;
@@ -1718,7 +1718,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void kernel_x(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_x)
 		{
 			using value_type_r = Value_type<TGrid>;
@@ -1742,7 +1742,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void kernel_y(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_y)
 		{
 			using value_type_r = Value_type<TGrid>;
@@ -1766,7 +1766,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void kernel_z(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_z)
 		{
 			using value_type_r = Value_type<TGrid>;
@@ -1790,7 +1790,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void kernel_mn1(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_mn1)
 		{
 			using value_type_r = Value_type<TGrid>;
@@ -1818,7 +1818,7 @@ namespace multem
 		}
 
 		template<class TGrid, class TVector_c>
-		DEVICE_CALLABLE FORCEINLINE 
+		DEVICE_CALLABLE FORCE_INLINE 
 		void kernel_mp1(const int &ix, const int &iy, const TGrid &grid, const EELS<Value_type<TGrid>> &eels, TVector_c &k_mp1)
 		{
 			using value_type_r = Value_type<TGrid>;
@@ -1847,7 +1847,7 @@ namespace multem
 
 
 		//template<class TGrid, class TVector>
-		//DEVICE_CALLABLE FORCEINLINE 
+		//DEVICE_CALLABLE FORCE_INLINE 
 		//void dilate(const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_o)
 		//{
 		//	int ix0 = max(ix_i+nk0, 0);
@@ -1873,7 +1873,7 @@ namespace multem
 
 	// Electron scattering factors calculation (feg)
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void feg(const ePotential_Type &potential_type, const int &charge, const T &g, const rPP_Coef<T> &c_feg, T &y)
 	{
 		if(charge== 0)
@@ -1914,7 +1914,7 @@ namespace multem
 
 	// Electron scattering factor(c_feg, dfeg) where dfg is the first derivative along g
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void feg_dfeg(const ePotential_Type &potential_type, const int &charge, const T &g, const rPP_Coef<T> &c_feg, T &y, T &dy)
 	{
 		if(charge== 0)
@@ -1955,7 +1955,7 @@ namespace multem
 
 	// Electron scattering factor(fg)
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void fxg(const ePotential_Type &potential_type, const int &charge, const int &Z, const T &g, const rPP_Coef<T> &c_fxg, T &y)
 	{
 		if(charge== 0)
@@ -1996,7 +1996,7 @@ namespace multem
 
 	// Electron scattering factor(fg, dfg) where dfg is the first derivative along g
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void fxg_dfxg(const ePotential_Type &potential_type, const int &charge, const int &Z, const T &g, const rPP_Coef<T> &c_fxg, T &y, T &dy)
 	{
 		if(charge== 0)
@@ -2037,7 +2037,7 @@ namespace multem
 
 	// Electron density (Pr)
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void Pr(const ePotential_Type &potential_type, const int &charge, const T &r, const rPP_Coef<T> &c_Pr, T &y)
 	{
 		if(charge== 0)
@@ -2078,7 +2078,7 @@ namespace multem
 
 	// Electron density (c_Pr, dPr) where dPr is the first derivative along r
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void Pr_dPr(const ePotential_Type &potential_type, const int &charge, const T &r, const rPP_Coef<T> &c_Pr, T &y, T &dy)
 	{
 		if(charge== 0)
@@ -2119,7 +2119,7 @@ namespace multem
 
 	// Projected_Potential calculation(Vr)
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void Vr(const ePotential_Type &potential_type, const int &charge, const T &r, const rPP_Coef<T> &c_Vr, T &y)
 	{
 		if(charge== 0)
@@ -2159,7 +2159,7 @@ namespace multem
 	}
 
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void Vr_dVr(const ePotential_Type &potential_type, const int &charge, const T &r, const rPP_Coef<T> &c_Vr, T &y, T &dy)
 	{
 		if(charge== 0)
@@ -2200,7 +2200,7 @@ namespace multem
 
 	// Projected potential (VR)
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void VR(const ePotential_Type &potential_type, const int &charge, const T &R, const rPP_Coef<T> &c_VR, const rQ1<T> &Qz_0_I, T &y)
 	{
 		if(charge== 0)
@@ -2241,7 +2241,7 @@ namespace multem
 
 	// Projected potential (c_VR, dVR) where dVr is the first derivative along R
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void VR_dVR(const ePotential_Type &potential_type, const int &charge, const T &R, const rPP_Coef<T> &c_VR, const rQ1<T> &Qz_0_I, T &y, T &dy)
 	{
 		if(charge== 0)
@@ -2282,7 +2282,7 @@ namespace multem
 
 	// Projected potential (Vz)[z0, ze]
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void Vz(const ePotential_Type &potential_type, const int &charge, const T &z0, const T &ze, const T &R, const rPP_Coef<T> &c_Vr, const rQ1<T> &Qz_a_b, T &y)
 	{
 		if(charge== 0)
@@ -2323,7 +2323,7 @@ namespace multem
 
 	// Projected potential (Vz, dVz)[z0, ze] where dVr is the first derivative along R
 	template<class T>
-	DEVICE_CALLABLE FORCEINLINE 
+	DEVICE_CALLABLE FORCE_INLINE 
 	void Vz_dVz(const ePotential_Type &potential_type, const int &charge, const T &z0, const T &ze, const T &R, const rPP_Coef<T> &c_Vr, const rQ1<T> &Qz_a_b, T &y, T &dy)
 	{
 		if(charge== 0)
@@ -2363,7 +2363,7 @@ namespace multem
 	}
 
 	template<ePotential_Type potential_type, int charge, class T>
-	DEVICE_CALLABLE FORCEINLINE
+	DEVICE_CALLABLE FORCE_INLINE
 	void Vr_dVrir(const T &r, T *cl, T *cnl, T f, T &Vr, T &dVrir)
 	{
 		if(charge== 0)
@@ -2694,6 +2694,6 @@ namespace multem
 		};
 	} // namespace functor
 
-} // namespace multem
+} // namespace mt
 
 #endif

@@ -10,12 +10,12 @@ input_multislice.fp_seed = 300183;
 input_multislice.fp_nconf = 3;
 
 input_multislice.tm_active = 0;						% 1: true, 0:false
-input_multislice.tm_theta = 45; 					% final angle
+input_multislice.tm_theta = 5; 					% final angle
 input_multislice.tm_u0 = [1 0 0]; 					% unitary vector			
 input_multislice.tm_rot_point_type = 1; 			% 1: geometric center, 2: User define		
 input_multislice.tm_p0 = [0 0 0];					% rotation point
 
-na = 4; nb = 4; nc = 40; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc = 20; ncu = 2; rms3d = 0.085;
 
 [input_multislice.atoms, input_multislice.lx...
 , input_multislice.ly, input_multislice.lz...

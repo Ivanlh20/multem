@@ -24,8 +24,8 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -40,19 +40,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	auto rf = mx_create_matrix<rmatrix_r>(ny, nx, plhs[0]);
 
 	using TVector = vector<float>;
-	multem::Stream<e_host> stream(4);
+	mt::Stream<e_host> stream(4);
 
 	TVector f;
 	if(min(nx, ny) == 1)
 	{
 		auto nr = (nx>ny)?nx:ny;
 		auto dr = (nx>ny)?dx:dy;
-		f = multem::func_gaussian_1d<TVector>(stream, nr, dr, sigma, shift);
+		f = mt::func_gaussian_1d<TVector>(stream, nr, dr, sigma, shift);
 	}
 	else
 	{
-		multem::Grid<float> grid(nx, ny, nx*dx, ny*dy);
-		f = multem::func_gaussian_2d<TVector>(stream, grid, sigma, shift);
+		mt::Grid<float> grid(nx, ny, nx*dx, ny*dy);
+		f = mt::func_gaussian_2d<TVector>(stream, grid, sigma, shift);
 	}
 
 	rf.assign(f.begin(), f.end());

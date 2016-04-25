@@ -23,9 +23,9 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -37,8 +37,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 
 	vector<double> Im(rIm_i.begin(), rIm_i.end());
 
-	multem::Stream<e_host> stream(4);
-	Im = multem::morp_g_open(stream, rIm_i.rows, rIm_i.cols, Im, multem::eSE_Square, nkr);
+	mt::Stream<e_host> stream(4);
+	Im = mt::morp_g_open(stream, rIm_i.rows, rIm_i.cols, Im, mt::eSE_Square, nkr);
 
 	rIm_o.assign(Im.begin(), Im.end());
 }

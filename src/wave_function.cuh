@@ -30,7 +30,7 @@
 #include "propagator.cuh"
 #include "microscope_effects.cuh"
 
-namespace multem
+namespace mt
 {
 	template<class T, eDevice dev>
 	class Wave_Function: public Transmission_Function<T, dev>
@@ -63,7 +63,7 @@ namespace multem
 					{
 						for(auto i = 0; i<detector.size(); i++)
 						{
-							multem::fft2_shift(*stream_i, input_multislice_i->grid, detector.fR[i]);
+							mt::fft2_shift(*stream_i, input_multislice_i->grid, detector.fR[i]);
 						}
 					}
 				}
@@ -91,8 +91,8 @@ namespace multem
 					return;
 				}
 
-				multem::phase_components(*(this->stream), this->input_multislice->grid, gxu, gyu, exp_x, exp_y);
-				multem::phase_multiplication(*(this->stream), this->input_multislice->grid, exp_x, exp_y, psi_i, psi_o);
+				mt::phase_components(*(this->stream), this->input_multislice->grid, gxu, gyu, exp_x, exp_y);
+				mt::phase_multiplication(*(this->stream), this->input_multislice->grid, exp_x, exp_y, psi_i, psi_o);
 			}	
 
 			void phase_multiplication(const value_type_r &gxu, const value_type_r &gyu, Vector<value_type_c, dev> &psi_io)
@@ -115,22 +115,22 @@ namespace multem
 				value_type_r int_val = 0;
 				switch (detector.type)
 				{
-					case multem::eDT_Circular:
+					case mt::eDT_Circular:
 					{
 						auto g_inner = detector.g_inner[iDet];
 						auto g_outer = detector.g_outer[iDet];
 							
-						int_val = w_i*multem::sum_square_over_Det(*(this->stream), this->input_multislice->grid, g_inner, g_outer, psi_z);
+						int_val = w_i*mt::sum_square_over_Det(*(this->stream), this->input_multislice->grid, g_inner, g_outer, psi_z);
 					}
 					break;
-					case multem::eDT_Radial:
+					case mt::eDT_Radial:
 					{
 						int_val = 0;
 					}
 					break;
-					case multem::eDT_Matrix:
+					case mt::eDT_Matrix:
 					{
-						int_val = w_i*multem::sum_square_over_Det(*(this->stream), this->input_multislice->grid, detector.fR[iDet], psi_z);
+						int_val = w_i*mt::sum_square_over_Det(*(this->stream), this->input_multislice->grid, detector.fR[iDet], psi_z);
 					}
 					break;
 				}
@@ -157,33 +157,33 @@ namespace multem
 
 						if(this->input_multislice->coherent_contribution)
 						{
-							multem::add_scale_to_host(output_multislice.stream, w_i, *psi_z_o, output_multislice.psi_coh[ithk], &psi_zh);
+							mt::add_scale_to_host(output_multislice.stream, w_i, *psi_z_o, output_multislice.psi_coh[ithk], &psi_zh);
 						}
 					}
 					else if(this->input_multislice->is_EWFS_EWRS_SC())
 					{
-						multem::copy_to_host(output_multislice.stream, *psi_z_o, output_multislice.psi_coh[ithk], &psi_zh);
+						mt::copy_to_host(output_multislice.stream, *psi_z_o, output_multislice.psi_coh[ithk], &psi_zh);
 					}
 					else if(this->input_multislice->is_ISTEM_CBEI_HRTEM_HCI_EFTEM())
 					{
 						microscope_effects.apply(*psi_z_o, m2psi_z);
-						multem::add_scale_to_host(output_multislice.stream, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
+						mt::add_scale_to_host(output_multislice.stream, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
 
 						if(this->input_multislice->coherent_contribution)
 						{
-							multem::add_scale_to_host(output_multislice.stream, w_i, *psi_z_o, output_multislice.psi_coh[ithk], &psi_zh);
+							mt::add_scale_to_host(output_multislice.stream, w_i, *psi_z_o, output_multislice.psi_coh[ithk], &psi_zh);
 						}
 					}
 					else
 					{
 						if(this->input_multislice->coherent_contribution)
 						{
-							multem::add_scale_m2psi_psi_to_host(output_multislice.stream, w_i, *psi_z_o, output_multislice.m2psi_tot[ithk], output_multislice.psi_coh[ithk], &psi_zh);
+							mt::add_scale_m2psi_psi_to_host(output_multislice.stream, w_i, *psi_z_o, output_multislice.m2psi_tot[ithk], output_multislice.psi_coh[ithk], &psi_zh);
 						}
 						else
 						{
-							multem::square(*(this->stream), *psi_z_o, m2psi_z);
-							multem::add_scale_to_host(output_multislice.stream, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
+							mt::square(*(this->stream), *psi_z_o, m2psi_z);
+							mt::add_scale_to_host(output_multislice.stream, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
 						}
 					}
 				}
@@ -201,7 +201,7 @@ namespace multem
 				{
 					for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
 					{
-						multem::assign(output_multislice.stream, output_multislice.psi_coh[ithk], psi_z, &psi_zh);
+						mt::assign(output_multislice.stream, output_multislice.psi_coh[ithk], psi_z, &psi_zh);
 						for(auto iDet = 0; iDet<detector.size(); iDet++)
 						{
 							auto iscan = this->input_multislice->iscan;
@@ -213,16 +213,16 @@ namespace multem
 				{
 					for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
 					{
-						multem::assign(output_multislice.stream, output_multislice.psi_coh[ithk], psi_z, &psi_zh);
+						mt::assign(output_multislice.stream, output_multislice.psi_coh[ithk], psi_z, &psi_zh);
 						microscope_effects.apply(psi_z, m2psi_z);
-						multem::copy_to_host(output_multislice.stream, m2psi_z, output_multislice.m2psi_coh[ithk], &m2psi_zh);
+						mt::copy_to_host(output_multislice.stream, m2psi_z, output_multislice.m2psi_coh[ithk], &m2psi_zh);
 					}
 				}
 				else
 				{
 					for(auto ithk =0; ithk < this->thickness.size(); ithk++)
 					{
-						multem::square(output_multislice.stream, output_multislice.psi_coh[ithk], output_multislice.m2psi_coh[ithk]);
+						mt::square(output_multislice.stream, output_multislice.psi_coh[ithk], output_multislice.m2psi_coh[ithk]);
 					}
 				}
 			}
@@ -268,7 +268,7 @@ namespace multem
 					{
 						value_type_r dz = 0.5*this->dz_m(islice_0, islice_e);
 						this->prog.propagate(eS_Real, gx_0, gy_0, dz, psi_z);
-						multem::multiply(*(this->stream), trans, psi_z);
+						mt::multiply(*(this->stream), trans, psi_z);
 						prog.propagate(eS_Real, gx_0, gy_0, dz, psi_z);
 					}
 					else if(this->input_multislice->eels_fr.is_Double_Channelling())
@@ -285,13 +285,13 @@ namespace multem
 					if(this->input_multislice->is_EELS())
 					{
 						int iscan = this->input_multislice->iscan;
-						output_multislice.image_tot[ithk].image[0][iscan] += w_i*multem::sum_square_over_Det(*(this->stream), this->input_multislice->grid, 0, this->input_multislice->eels_fr.g_collection, psi_z);
+						output_multislice.image_tot[ithk].image[0][iscan] += w_i*mt::sum_square_over_Det(*(this->stream), this->input_multislice->grid, 0, this->input_multislice->eels_fr.g_collection, psi_z);
 					}
 					else
 					{
-						multem::hard_aperture(*(this->stream), this->input_multislice->grid, this->input_multislice->eels_fr.g_collection, 1.0, psi_z);
+						mt::hard_aperture(*(this->stream), this->input_multislice->grid, this->input_multislice->eels_fr.g_collection, 1.0, psi_z);
 						microscope_effects.apply(psi_z, m2psi_z);
-						multem::add_scale_to_host(output_multislice.stream, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
+						mt::add_scale_to_host(output_multislice.stream, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
 					}
 				}
 			}
@@ -317,6 +317,6 @@ namespace multem
 			Incident_Wave<value_type_r, dev> incident_wave;
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

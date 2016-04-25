@@ -21,7 +21,7 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
+using mt::rmatrix_r;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -36,5 +36,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	auto frl = mx_create_matrix<rmatrix_r>(Rl.size()-1, 1, plhs[1]);
 	auto cfrl = mx_create_matrix<rmatrix_r>(Rl.size()-1, 1, plhs[2]);
 
-	multem::radial_distribution_2d(R.size(), R.real, fR.real, Rl.size(), Rl.real, rl.real, frl.real, cfrl.real, true, typ);
+	mt::radial_distribution_2d(R.size(), R.real, fR.real, Rl.size(), Rl.real, rl.real, frl.real, cfrl.real, true, typ);
 }

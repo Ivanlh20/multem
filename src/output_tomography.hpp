@@ -24,7 +24,7 @@
 #include "atom_data.hpp"
 #include "input_tomography.cuh"
 
-namespace multem
+namespace mt
 {
 	template<class TVector_r>
 	class Output_Tomography: public Input_Tomography<Value_type<TVector_r>>
@@ -81,6 +81,6 @@ namespace multem
 	template<class T>
 	using Output_Tomography_Vector = Output_Tomography<Vector<T, e_host>>;
 
-} // namespace multem
+} // namespace mt
 
 #endif

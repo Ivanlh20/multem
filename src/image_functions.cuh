@@ -31,7 +31,7 @@
 #include "host_device_functions.cuh"
 #include "host_functions.hpp"
 
-namespace multem
+namespace mt
 {
 	// histogram
 	template<class TVector>
@@ -683,7 +683,7 @@ namespace multem
 		stream.set_grid(grid.nx, grid.ny);
 		stream.exec(thr_mean_var);
 
-		auto v2 = multem::mean(stream, Im_var);
+		auto v2 = mt::mean(stream, Im_var);
 
 		auto thr_filter_wiener = [&](const Range &range)
 		{
@@ -754,7 +754,7 @@ namespace multem
 		stream.set_grid(nx_i, ny_i);
 		stream.exec(thr_median_var);
 
-		auto v2 = multem::mean(stream, Im_var);
+		auto v2 = mt::mean(stream, Im_var);
 
 		auto thr_filter_mwiener = [&](const Range &range)
 		{
@@ -1062,7 +1062,7 @@ namespace multem
 
 		// Otsu threshold
 		int nbins = 256;
-		auto threshold = multem::otsu_threshold(Im_d, nbins);
+		auto threshold = mt::otsu_threshold(Im_d, nbins);
 
 		// binarization
 		Im_d = binarization(stream, Im_d, threshold);
@@ -1093,6 +1093,6 @@ namespace multem
 		return Im_o;
 	}
 
-} // namespace multem
+} // namespace mt
 
 #endif

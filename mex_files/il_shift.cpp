@@ -25,10 +25,10 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::Vector;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::Vector;
+using mt::e_host;
 
 #include "traits.cuh"
 
@@ -44,13 +44,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	auto rIm_o = mx_create_matrix<rmatrix_r>(rIm_i.rows, rIm_i.cols, plhs[0]);
 
 	vector<float> Im(rIm_i.begin(), rIm_i.end());
-	multem::r2d<float> r(x,y);
+	mt::r2d<float> r(x,y);
 
-	multem::Grid<float> grid(rIm_i.cols, rIm_i.rows, lx, ly);
-	multem::Stream<e_host> stream(4);
-	multem::FFT2<float, e_host> fft2;
+	mt::Grid<float> grid(rIm_i.cols, rIm_i.rows, lx, ly);
+	mt::Stream<e_host> stream(4);
+	mt::FFT2<float, e_host> fft2;
 	
-	multem::shift_2d(stream, fft2, grid, r, Im);
+	mt::shift_2d(stream, fft2, grid, r, Im);
 	fft2.cleanup();
 
 	rIm_o.assign(Im.begin(), Im.end());

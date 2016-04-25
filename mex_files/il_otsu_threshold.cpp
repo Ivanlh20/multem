@@ -24,9 +24,9 @@
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using multem::rmatrix_r;
-using multem::rmatrix_c;
-using multem::e_host;
+using mt::rmatrix_r;
+using mt::rmatrix_c;
+using mt::e_host;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ]) 
 {
@@ -37,5 +37,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	auto threshold = mx_create_scalar<rmatrix_r>(plhs[0]);
 
 	vector<float> Im(rIm_i.begin(), rIm_i.end());
-	threshold[0] = multem::otsu_threshold(Im, nbins);
+	threshold[0] = mt::otsu_threshold(Im, nbins);
 }

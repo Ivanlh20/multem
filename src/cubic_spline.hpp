@@ -26,7 +26,7 @@
 
 #include "traits.cuh"
 
-namespace multem
+namespace mt
 {
 	// Cubic_Spline interpolation
 	template<class T>
@@ -144,6 +144,6 @@ namespace multem
 		}
 	};
 
-} // namespace multem
+} // namespace mt
 
 #endif

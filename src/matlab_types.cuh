@@ -26,7 +26,7 @@
 #include "stream.cuh"
 #include "host_functions.hpp"
 
-namespace multem
+namespace mt
 {
 	template<class T>
 	struct complex_s
@@ -504,7 +504,7 @@ namespace multem
 		M_i_h->assign(M_i.begin(), M_i.end());
 
 		// copy data from host to host
-		multem::copy_to_host(stream, *M_i_h, M_o);
+		mt::copy_to_host(stream, *M_i_h, M_o);
 	}
 
 
@@ -540,7 +540,7 @@ namespace multem
 		M_i_h->assign(M_i.begin(), M_i.end());
 
 		// add and scale
-		multem::add_scale_to_host(stream, w_i, *M_i_h, M_o);
+		mt::add_scale_to_host(stream, w_i, *M_i_h, M_o);
 	}
 
 
@@ -574,7 +574,7 @@ namespace multem
 		// data transfer from GPU to CPU
 		M_i_h->assign(M_i.begin(), M_i.end());
 
-		multem::add_square_scale_to_host(stream, w_i, *M_i_h, M_o);
+		mt::add_square_scale_to_host(stream, w_i, *M_i_h, M_o);
 	}
 
 
@@ -612,9 +612,9 @@ namespace multem
 		// data transfer from GPU to CPU
 		psi_i_h->assign(psi_i.begin(), psi_i.end());
 
-		multem::add_scale_m2psi_psi_to_host(stream, w_i, *psi_i_h, m2psi_o, psi_o);
+		mt::add_scale_m2psi_psi_to_host(stream, w_i, *psi_i_h, m2psi_o, psi_o);
 	}
 
-} // namespace multem
+} // namespace mt
 
 #endif
