@@ -105,7 +105,6 @@ namespace mt
 				for(int iatoms = 0; iatoms<atoms_u.size(); iatoms++)
 				{
 					atoms.Z[iatoms] = atoms_u.Z[iatoms];
-					atoms.charge[iatoms] = atoms_u.charge[iatoms];
 					r3d<T> r = atoms_u.to_r3d(iatoms);
 
 					if(input_multislice->is_tomography())
@@ -122,6 +121,7 @@ namespace mt
 					atoms.z[iatoms] = r.z;
 					atoms.sigma[iatoms] = atoms_u.sigma[iatoms];
 					atoms.occ[iatoms] = atoms_u.occ[iatoms];
+					atoms.charge[iatoms] = atoms_u.charge[iatoms];
 				}
 				// get atom information
 				atoms.get_Statistic(&atom_type);

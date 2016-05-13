@@ -106,6 +106,7 @@ namespace mt
 				Vector<value_type_c, dev> *psi_o = &(this->trans_0);
 				phase_multiplication(gxu, gyu, psi_i, *psi_o);
 				prog.propagate(space, gxu, gyu, z, *psi_o);
+				//prog.propagate(space, 0, 0, z, *psi_o);
 
 				return psi_o;
 			}

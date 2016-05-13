@@ -45,7 +45,7 @@ OUTDIR = strcat('..', filesep, 'mex_executables');
 if (strcmpi(option, 'debug'))
     mex_comand = 'mex -g -largeArrayDims -outdir';
 else
-    mex_comand = 'mex -v -largeArrayDims -outdir';   
+    mex_comand = 'mex -largeArrayDims -outdir';   
 end;
 
 textcommands = strjoin({mex_comand, OUTDIR, ADD_INC, CUDA_INCLUDE, mfile, strjoin(varargin), LAPACK_LIB, FFTW_LIB});  

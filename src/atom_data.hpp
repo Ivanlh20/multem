@@ -64,9 +64,6 @@ namespace mt
 				Z.resize(new_size, value);
 				Z.shrink_to_fit();
 
-				charge.resize(new_size, value);
-				charge.shrink_to_fit();
-
 				x.resize(new_size, value);
 				x.shrink_to_fit();
 
@@ -81,22 +78,9 @@ namespace mt
 
 				occ.resize(new_size, static_cast<float>(value));
 				occ.shrink_to_fit();
-			}
 
-
-			template<class TOut, class TIn>
-			Atom<TOut> read_atom(const int &nr, const int &nc, TIn *atoms, const int &iatom)
-			{
-				Atom<TOut> atom;
-				atom.Z = static_cast<int>(atoms[0*nr + iatom]); 						// Atomic number
-				atom.x = atoms[1*nr + iatom]; 										// x-position
-				atom.y = atoms[2*nr + iatom]; 										// y-position
-				atom.z = atoms[3*nr + iatom]; 										// z-position
-				atom.sigma = static_cast<float>((nc>4)?(atoms[4*nr + iatom]):0.085);	// Standard deviation
-				atom.occ = static_cast<float>((nc>5)?(atoms[5*nr + iatom]):1.0); 		// Occupancy
-				atom.charge = static_cast<int>((nc>6)?(atoms[6*nr + iatom]):0);		// charge
-
-				return atom;
+				charge.resize(new_size, value);
+				charge.shrink_to_fit();
 			}
 
 			// set atoms
@@ -110,14 +94,14 @@ namespace mt
 
 				for(auto i = 0; i < nr_atoms_i; i++)
 				{	
-					auto atom = read_atom<T>(nr_atoms_i, nc_atoms_i, atoms_i, i);
+					auto atom = read_atom(nr_atoms_i, nc_atoms_i, atoms_i, i);
 					Z[i] = atom.Z; 				// Atomic number
-					charge[i] = atom.charge; 	// charge
 					x[i] = a_i*atom.x; 			// x-position
 					y[i] = b_i*atom.y; 			// y-position
 					z[i] = c_i*atom.z; 			// z-position
-					sigma[i] = atom.sigma;		// Standard deviation
+					sigma[i] = atom.sigma;		// standard deviation
 					occ[i] = atom.occ; 			// Occupancy
+					charge[i] = atom.charge; 	// charge
 				}
 
 				get_Statistic();
@@ -590,6 +574,34 @@ namespace mt
 					return thrust::get<4>(t1) < thrust::get<4>(t2);
 				}
 			};
+
+			struct Atom
+			{
+				int Z;
+				T x;
+				T y;
+				T z;
+				T sigma;
+				T occ;
+				int charge;
+
+				Atom():Z(0), x(0), y(0), z(0), sigma(0), occ(0), charge(0){};
+			};
+
+			template<class TIn>
+			Atom read_atom(const int &nr, const int &nc, TIn *atoms, const int &iatom)
+			{
+				Atom atom;
+				atom.Z = static_cast<int>(atoms[0*nr + iatom]); 						// Atomic number
+				atom.x = atoms[1*nr + iatom]; 											// x-position
+				atom.y = atoms[2*nr + iatom]; 											// y-position
+				atom.z = atoms[3*nr + iatom]; 											// z-position
+				atom.sigma = static_cast<float>((nc>4)?(atoms[4*nr + iatom]):0.085);	// standard deviation
+				atom.occ = static_cast<float>((nc>5)?(atoms[5*nr + iatom]):1.0); 		// Occupancy
+				atom.charge = static_cast<int>((nc>6)?(atoms[6*nr + iatom]):0);			// charge
+
+				return atom;
+			}
 	};
 
 } // namespace mt

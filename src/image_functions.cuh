@@ -472,6 +472,47 @@ namespace mt
 		add_scale(stream, 1, Im_i, -1, Im, Im);
 		return Im;
 	}
+	
+	/******************************************************************************/
+	// forward anscombe transform
+	template<class TVector>
+	TVector anscombe_forward(Stream<e_host> &stream, TVector &v_i)
+	{
+		using value_type = Value_type<TVector>;
+		TVector v_o(v_i.size());
+
+		auto thr_anscombe_forward = [&](const Range &range)
+		{
+			thrust::transform(v_i.begin()+range.ixy_0, v_i.begin()+range.ixy_e, 
+			v_o.begin()+range.ixy_0, functor::anscombe_forward<value_type>());
+		};
+
+		stream.set_n_act_stream(v_i.size());
+		stream.set_grid(1, v_i.size());
+		stream.exec(thr_anscombe_forward);
+
+		return v_o;
+	}
+
+	// forward anscombe transform
+	template<class TVector>
+	TVector anscombe_inverse(Stream<e_host> &stream, TVector &v_i)
+	{
+		using value_type = Value_type<TVector>;
+		TVector v_o(v_i.size());
+
+		auto thr_anscombe_inverse = [&](const Range &range)
+		{
+			thrust::transform(v_i.begin()+range.ixy_0, v_i.begin()+range.ixy_e, 
+			v_o.begin()+range.ixy_0, functor::anscombe_inverse<value_type>());
+		};
+
+		stream.set_n_act_stream(v_i.size());
+		stream.set_grid(1, v_i.size());
+		stream.exec(thr_anscombe_inverse);
+
+		return v_o;
+	}
 
 	/******************************************************************************/
 	// wiener filter 1d
@@ -916,6 +957,92 @@ namespace mt
 	}
 
 	/******************************************************************************/
+	// denoising poisson 
+	template<class TVector>
+	TVector filter_denoising_poisson_1d(Stream<e_host> &stream, TVector &Im_i, int nkr_w, int nkr_m)
+	{
+		if((nkr_w==0)&&(nkr_m==0))
+		{
+		 return Im_i;
+		}
+
+		auto Im = anscombe_forward(stream, Im_i);
+		if(nkr_w>0)
+		{
+			Im = filter_wiener_1d(stream, Im, nkr_w);
+		}
+		if(nkr_m>0)
+		{
+			Im = filter_median_1d(stream, Im, nkr_m);
+		}
+		Im = anscombe_inverse(stream, Im);
+
+		return Im;
+	}
+	
+	// denoising poisson 
+	template<class TGrid, class TVector>
+	TVector filter_denoising_poisson_2d_by_row(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr_w, int nkr_m)
+	{
+		if((nkr_w==0)&&(nkr_m==0))
+		{
+			return Im_i;
+		}
+
+		auto Im = anscombe_forward(stream, Im_i);
+		if(nkr_w>0)
+		{
+			Im = filter_wiener_2d_by_row(stream, grid, Im, nkr_w);
+		}
+		if(nkr_m>0)
+		{
+			Im = filter_median_2d_by_row(stream, grid, Im, nkr_m);
+		}
+		Im = anscombe_inverse(stream, Im);
+
+		return Im;
+	}
+
+	// denoising poisson 
+	template<class TGrid, class TVector>
+	TVector filter_denoising_poisson_2d(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr_w, int nkr_m)
+	{
+		if((nkr_w==0)&&(nkr_m==0))
+		{
+			return Im_i;
+		}
+
+		auto Im = anscombe_forward(stream, Im_i);
+		if(nkr_w>0)
+		{
+			Im = filter_wiener_2d(stream, grid, Im, nkr_w);
+		}
+		if(nkr_m>0)
+		{
+			Im = filter_median_2d(stream, grid, Im, nkr_m);
+		}
+		Im = anscombe_inverse(stream, Im);
+
+		return Im;
+	}
+
+	/******************************************************************************/
+
+	// get peak signal to noise ratio PSNR 
+	template<class TGrid, class TVector>
+	Value_type<TVector> get_PSNR(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr_w, int nkr_m)
+	{
+		auto Im_s = filter_denoising_poisson_2d(stream, grid, Im_i, nkr_w, nkr_m);
+
+		auto var_signal = variance(stream, Im_s);
+
+		add_scale(stream, 1, Im_i, -1, Im_s, Im_s);
+		auto var_noise = variance(stream, Im_s);
+
+		// peak signal to noise ratio
+		return var_noise/var_signal;
+	}
+
 	// scale_image
 	template<class TVector>
 	TVector scale_image_mean(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, Value_type<TVector> shrink_factor, int &ny_o, int &nx_o)
@@ -972,46 +1099,6 @@ namespace mt
 		return Im_o;
 	}
 
-	// forward anscombe transform
-	template<class TVector>
-	TVector anscombe_forward(Stream<e_host> &stream, TVector &v_i)
-	{
-		using value_type = Value_type<TVector>;
-		TVector v_o(v_i.size());
-
-		auto thr_anscombe_forward = [&](const Range &range)
-		{
-			thrust::transform(v_i.begin()+range.ixy_0, v_i.begin()+range.ixy_e, 
-			v_o.begin()+range.ixy_0, functor::anscombe_forward<value_type>());
-		};
-
-		stream.set_n_act_stream(v_i.size());
-		stream.set_grid(1, v_i.size());
-		stream.exec(thr_anscombe_forward);
-
-		return v_o;
-	}
-
-	// forward anscombe transform
-	template<class TVector>
-	TVector anscombe_inverse(Stream<e_host> &stream, TVector &v_i)
-	{
-		using value_type = Value_type<TVector>;
-		TVector v_o(v_i.size());
-
-		auto thr_anscombe_inverse = [&](const Range &range)
-		{
-			thrust::transform(v_i.begin()+range.ixy_0, v_i.begin()+range.ixy_e, 
-			v_o.begin()+range.ixy_0, functor::anscombe_inverse<value_type>());
-		};
-
-		stream.set_n_act_stream(v_i.size());
-		stream.set_grid(1, v_i.size());
-		stream.exec(thr_anscombe_inverse);
-
-		return v_o;
-	}
-
 	// copy image
 	template<class TVector>
 	TVector copy_image(Stream<e_host> &stream, int ny_src, int nx_src, TVector &Im_src, int iy0, int ix0, int iye, int ixe, int ny_dst, int nx_dst)
@@ -1026,15 +1113,15 @@ namespace mt
 		iye = (iye<ny)?iye+1:ny;
 		ny = iye-iy0;
 
-		auto krn_copy_image = [&](const int &ix, const int &iy, TVector &Im_src, TVector &Im_dst)
-		{
-
-			Im_dst[ix*ny_dst+iy] = Im_src[(ix+ix0)*ny_src+(iy+iy0)];
-		};
-
 		auto thr_copy_image = [&](const Range &range)
 		{
-			host_detail::matrix_iter(range, krn_copy_image, Im_src, Im_dst);
+			for (auto ix = range.ix_0; ix < range.ix_e; ix++)
+			{
+				for (auto iy = range.iy_0; iy < range.iy_e; iy++)
+				{
+					Im_dst[ix*ny_dst+iy] = Im_src[(ix+ix0)*ny_src+(iy+iy0)];
+				}
+			}
 		};
 
 		stream.set_n_act_stream(nx);
@@ -1076,7 +1163,7 @@ namespace mt
 
 		// gaussian convolution
 		grid.set_input_data(grid.nx, grid.ny, 2*grid.lx, 2*grid.ly, 0.5, false, true);
-		Im_o = gaussian_convolution(stream, fft2, grid, sigma, Im_o);
+		Im_o = gaussian_conv(stream, fft2, grid, sigma, Im_o);
 
 		// binarization
 		Im_o = binarization(stream, Im_o, 0.01);

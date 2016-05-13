@@ -88,7 +88,7 @@ namespace mt
 				fft2.create_plan_2d(grid.ny, grid.nx, input_multislice->cpu_nthread);
 
 				mt::fft2_shift(stream, grid, M);
-				mt::gaussian_convolution(stream, fft2, grid, sigma, M);
+				mt::gaussian_conv(stream, fft2, grid, sigma, M);
 				mt::fft2_shift(stream, grid, M);
 				fft2.cleanup();
 

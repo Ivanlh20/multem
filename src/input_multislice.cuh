@@ -32,6 +32,8 @@ namespace mt
 {
 	bool is_gpu_available();
 
+	int number_of_gpu_available();
+
 	template<class T>
 	DEVICE_CALLABLE FORCE_INLINE 
 	T get_Vr_factor(const T &E_0, const T &theta);
@@ -71,8 +73,8 @@ namespace mt
 			eRot_Point_Type tm_rot_point_type; 					// 1: geometric center, 2: User define		
 			r3d<T> tm_p0; 										// rotation point
 
-			eMicroscope_Effect microscope_effect; 				// 1: Partial coherente mode, 2: transmission cross coefficient
-			eSpatial_Temporal_Effect spatial_temporal_effect; 	// 1: Spatial and temporal, 2: Temporal, 3: Spatial
+			eIllumination_Model illumination_model; 				// 1: Partial coherente mode, 2: transmission cross coefficient
+			eTemporal_Spatial_Incoh temporal_spatial_incoh; 	// 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
 			eThickness_Type thickness_type; 					// eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 			Vector<T, e_host> thickness; 						// Array of thicknesses
@@ -123,8 +125,8 @@ namespace mt
 						simulation_type(eTEMST_EWRS), phonon_model(ePM_Still_Atom), interaction_model(eESIM_Multislice), 
 						potential_slicing(ePS_Planes), potential_type(ePT_Lobato_0_12), fp_dist(1), fp_seed(300183), 
 						fp_single_conf(false), fp_nconf(1), fp_iconf_0(1), tm_active(false), tm_theta(0), tm_u0(0, 0, 1), 
-						tm_rot_point_type(eRPT_geometric_center), tm_p0(1, 0, 0), microscope_effect(eME_Partial_Coherent), 
-						spatial_temporal_effect(eSTE_Spatial_Temporal), thickness_type(eTT_Whole_Specimen), 
+						tm_rot_point_type(eRPT_geometric_center), tm_p0(1, 0, 0), illumination_model(eIM_Partial_Coherent), 
+						temporal_spatial_incoh(eTSI_Temporal_Spatial), thickness_type(eTT_Whole_Specimen), 
 						operation_mode(eOM_Normal), coherent_contribution(false), slice_storage(false), E_0(300), lambda(0), 
 						theta(0), phi(0), nrot(1), Vrl(c_Vrl), nR(c_nR), iw_type(eIWT_Plane_Wave), iw_x(0), iw_y(0), 
 						is_crystal(false), beam_x(0), beam_y(0), iscan(0), islice(0), dp_Shift(false), nstream(cpu_nthread){};
@@ -213,7 +215,7 @@ namespace mt
 				{
 					coherent_contribution = false;
 					interaction_model = mt::eESIM_Multislice;
-					microscope_effect = eME_Coherent;
+					illumination_model = eIM_Coherent;
 				}
 
 				if(is_EWFS_EWRS())

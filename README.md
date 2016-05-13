@@ -17,7 +17,7 @@ Using MULTEM with Matlab
 =================================
 The following steps work using Matlab R2015a and CUDA 7.5. It assumes that Visual studio 2013, g++4.7 or Clang compiler is installed in your operating system:
 
-- First of all, you have to add to the Matlab path the following folders: Crystalline_Materials, Matlab_functions and mex_executables.
+- First of all, you have to add to the Matlab path the following folders: crystalline_materials, matlab_functions and mex_executables_multem.
 
 - Then you need to modify the `mex_CUDA_xxxx` file located in the 'mex_files' folder, which corresponds to your operating system:
   1. for Windows `mex_CUDA_win64`
@@ -26,4 +26,4 @@ The following steps work using Matlab R2015a and CUDA 7.5. It assumes that Visua
 
 - Go to the line which contains the following definition`NVCCFLAGS="$xxxxx"` and replace 'xxxxx' by 'SINGLE_CARD' or 'MULTI_CARD'. 'SINGLE_CARD'/'MULTI_CARD' defines the compute capability of your Nvidia graphic card.
 
-- Run the `compile_multem.m` script. This will create the required executable files to run the examples.
+- Run the `compile_mex_multem.m` script. This will create the required executable files to run the examples.

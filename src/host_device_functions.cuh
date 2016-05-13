@@ -146,6 +146,13 @@ namespace mt
 		y = -(a*(b*x0-a*y0)-b*c)/(a*a+b*b);
 	}
 
+	template<class T>
+	DEVICE_CALLABLE FORCE_INLINE 
+	T m_bound(const T &x_0, const T &x, const T &x_e)
+	{
+		return max(x_0, min(x, x_e));
+	}
+
 	namespace host_device_detail
 	{
 		template<class TFn, class T>

@@ -125,7 +125,7 @@ namespace lapack
 				//perform minimum-norm solution
 				gels(trans, m, n, nrhs, A, lda, bv.data(), ldb, work.data(), lwork, info);
 
-				for(auto ix= 0; ix<nrhs; ix++)
+				for(auto ix=0; ix<nrhs; ix++)
 				{
 					std::copy(bv.begin()+ix*m, bv.begin()+ix*m+n, x+ix*n);
 				}

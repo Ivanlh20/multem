@@ -201,8 +201,9 @@ inline T mx_create_scalar_field(mxArray *mx_struct, const char *field_name)
 }
 
 /**************************************************************************/
-template <class T>
-inline void mx_create_set_matrix_field(mxArray *mx_struct, const int &idx, const char *field_name, const int &rows, const int &cols, double *field_value)
+template <class T, class TField>
+inline void mx_create_set_matrix_field(mxArray *mx_struct, const int &idx, 
+const char *field_name, const int &rows, const int &cols, TField *field_value)
 {
 	mxArray *mxfield;
 	T matrix = mx_create_matrix<T>(rows, cols, mxfield);
@@ -210,14 +211,16 @@ inline void mx_create_set_matrix_field(mxArray *mx_struct, const int &idx, const
 	mxSetField(mx_struct, idx, field_name, mxfield);
 }
 
-template <class T>
-inline void mx_create_set_matrix_field(mxArray *mx_struct, const char *field_name, const int &rows, const int &cols, double *field_value)
+template <class T, class TField>
+inline void mx_create_set_matrix_field(mxArray *mx_struct, const char *field_name, 
+const int &rows, const int &cols, TField *field_value)
 {
 	mx_create_set_matrix_field<T>(mx_struct, 0, field_name, rows, cols, field_value);
 }
 
 template <class T>
-inline void mx_create_set_scalar_field(mxArray *mx_struct, const int &idx, const char *field_name, const double &field_value)
+inline void mx_create_set_scalar_field(mxArray *mx_struct, const int &idx, 
+const char *field_name, const double &field_value)
 {
 	mxArray *mxfield;
 	T matrix = mx_create_scalar<T>(mxfield);
@@ -226,7 +229,8 @@ inline void mx_create_set_scalar_field(mxArray *mx_struct, const int &idx, const
 }
 
 template <class T>
-inline void mx_create_set_scalar_field(mxArray *mx_struct, const char *field_name, const double &field_value)
+inline void mx_create_set_scalar_field(mxArray *mx_struct, const char *field_name, 
+const double &field_value)
 {
 	 mx_create_set_scalar_field<T>(mx_struct, 0, field_name, field_value);
 }

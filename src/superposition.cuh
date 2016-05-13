@@ -100,7 +100,6 @@ namespace mt
 			Stream<dev> stream;
 			Vector<value_type_r, dev> Im;
 		private:
-
 			struct Stream_Data
 			{
 				using value_type = T;
@@ -139,9 +138,10 @@ namespace mt
 				{
 					atom_sp[istream].x = input_superposition->atoms.x[iatom];
 					atom_sp[istream].y = input_superposition->atoms.y[iatom];
-					atom_sp[istream].occ = 1;
+					atom_sp[istream].occ = 1.0;
 					atom_sp[istream].a = input_superposition->atoms.a[iatom];
 					atom_sp[istream].alpha = input_superposition->alpha(iatom);
+					atom_sp[istream].b = input_superposition->atoms.b[iatom];
 					auto R_max = input_superposition->R_max(iatom);
 					auto R2_max = R_max*R_max;
 					atom_sp[istream].dtR = (exp(-atom_sp[istream].alpha*R2_max)-1)/T(c_nR-1);

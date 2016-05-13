@@ -45,7 +45,7 @@ namespace mt
 
 				psi.resize(input_multislice->grid.nxy());
 
-				if((input_multislice->microscope_effect == eME_Coherent)||(input_multislice->microscope_effect == eME_Partial_Coherent))
+				if((input_multislice->illumination_model == eIM_Coherent)||(input_multislice->illumination_model == eIM_Partial_Coherent))
 				{
 					return;
 				}
@@ -84,21 +84,21 @@ namespace mt
 
 			void apply(Vector<value_type_c, dev> &fpsi, Vector<value_type_r, dev> &m2psi_tot)
 			{
-				switch(input_multislice->microscope_effect)
+				switch(input_multislice->illumination_model)
 				{
-					case eME_Coherent:
+					case eIM_Coherent:
 					{
-						CTF_TEM(input_multislice->spatial_temporal_effect, fpsi, m2psi_tot);
+						CTF_TEM(input_multislice->temporal_spatial_incoh, fpsi, m2psi_tot);
 					}
 					break;
-					case eME_Partial_Coherent:
+					case eIM_Partial_Coherent:
 					{
-						PCTF_LI_WPO_TEM(input_multislice->spatial_temporal_effect, fpsi, m2psi_tot);
+						PCTF_LI_WPO_TEM(input_multislice->temporal_spatial_incoh, fpsi, m2psi_tot);
 					}
 					break;
-					case eME_Transmission_Cross_Coefficient:
+					case eIM_Trans_Cross_Coef:
 					{
-						TCC_TEM(input_multislice->spatial_temporal_effect, fpsi, m2psi_tot);
+						TCC_TEM(input_multislice->temporal_spatial_incoh, fpsi, m2psi_tot);
 					}
 					break;
 				}
@@ -120,26 +120,26 @@ namespace mt
 			}
 
 		private:
-			void CTF_TEM(const eSpatial_Temporal_Effect &spatial_temporal_effect, Vector<value_type_c, dev> &fpsi, Vector<value_type_r, dev> &m2psi_tot)
+			void CTF_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<value_type_c, dev> &fpsi, Vector<value_type_r, dev> &m2psi_tot)
 			{
 				mt::apply_CTF(*stream, input_multislice->grid, input_multislice->obj_lens, 0, 0, fpsi, psi);
 				fft2->inverse(psi);
 				mt::square(*stream, psi, m2psi_tot);
 			}
 
-			void PCTF_LI_WPO_TEM(const eSpatial_Temporal_Effect &spatial_temporal_effect, Vector<value_type_c, dev> &fpsi, Vector<value_type_r, dev> &m2psi_tot)
+			void PCTF_LI_WPO_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<value_type_c, dev> &fpsi, Vector<value_type_r, dev> &m2psi_tot)
 			{
 				value_type_r sf = input_multislice->obj_lens.sf;
 				value_type_r beta = input_multislice->obj_lens.beta;
 
-				switch(spatial_temporal_effect)
+				switch(temporal_spatial_incoh)
 				{
-					case eSTE_Temporal:	// Temporal
+					case eTSI_Temporal:	// Temporal
 					{
 						input_multislice->obj_lens.beta = 0;
 					}
 					break;
-					case eSTE_Spatial:	// Spatial
+					case eTSI_Spatial:	// Spatial
 					{
 						input_multislice->obj_lens.sf = 0;
 					}
@@ -154,12 +154,12 @@ namespace mt
 				input_multislice->obj_lens.beta = beta;
 			}
 
-			void TCC_TEM(const eSpatial_Temporal_Effect &spatial_temporal_effect, Vector<value_type_c, dev> &fpsi, Vector<value_type_r, dev> &m2psi_tot)
+			void TCC_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<value_type_c, dev> &fpsi, Vector<value_type_r, dev> &m2psi_tot)
 			{
 				value_type_r f_0 = input_multislice->obj_lens.f;
 
 				fill(*stream, m2psi_tot, 0.0);
-				switch(spatial_temporal_effect)
+				switch(temporal_spatial_incoh)
 				{
 					case 1:	// Temporal and Spatial
 					{

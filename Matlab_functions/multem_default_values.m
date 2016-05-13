@@ -1,7 +1,7 @@
 function [input_multislice] = multem_default_values()
 
 input_multislice.precision = 1;                     % eP_Float = 1, eP_double = 2
-input_multislice.device = 1;                        % eD_CPU = 1, eD_GPU = 2
+input_multislice.device = 2;                        % eD_CPU = 1, eD_GPU = 2
 input_multislice.cpu_ncores = 1;                    % Number of Cores CPU
 input_multislice.cpu_nthread = 4;                   % Number of threads 
 input_multislice.gpu_device = 0;                    % GPU device
@@ -26,8 +26,8 @@ input_multislice.tm_u0 = [0 0 1]; 					% unitary vector
 input_multislice.tm_rot_point_type = 1; 			% 1: geometric center, 2: User define		
 input_multislice.tm_p0 = [0 0 0];					% rotation point
 
-input_multislice.microscope_effect = 2;             % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient
-input_multislice.spatial_temporal_effect = 1;       % 1: Spatial and temporal, 2: Temporal, 3: Spatial
+input_multislice.illumination_model = 2;             % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient
+input_multislice.temporal_spatial_incoh = 1;       % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
 input_multislice.thickness_type = 1;                % eTT_Whole_Specimen = 1, eTT_Through_Thickness = 2, eTT_Through_Slices = 3
 input_multislice.thickness = 0;                     % Array of thicknesses(Å)

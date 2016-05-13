@@ -139,15 +139,15 @@ namespace mt
 	};
 
 	/******************************Microscope effects*****************************/
-	enum eMicroscope_Effect
+	enum eIllumination_Model
 	{
-		eME_Coherent = 1, eME_Partial_Coherent = 2, eME_Transmission_Cross_Coefficient = 3, eME_Full_Calculation = 4, eME_none = 5
+		eIM_Coherent = 1, eIM_Partial_Coherent = 2, eIM_Trans_Cross_Coef = 3, eIM_Full_Integration = 4, eIM_none = 5
 	};
 
 	/******************************Spatial and temporal***************************/
-	enum eSpatial_Temporal_Effect
+	enum eTemporal_Spatial_Incoh
 	{
-		eSTE_Spatial_Temporal = 1, eSTE_Temporal = 2, eSTE_Spatial = 3, eSTE_none = 4
+		eTSI_Temporal_Spatial = 1, eTSI_Temporal = 2, eTSI_Spatial = 3, eTSI_none = 4
 	};
 
 	/********************************MULTEM type**********************************/
@@ -527,7 +527,7 @@ namespace mt
 		}
 
 		Vector<int, dev> islice; 			// slice position
-		Vector<int, dev> iatom_e; 			// Last Atom index
+		Vector<int, dev> iatom_e; 			// Last atom index
 		Vector<T, dev> z; 					// z
 		Vector<T, dev> z_zero_def_plane; 	// z: Zero defocus
 		Vector<T, dev> z_back_prop; 		// z: Back propagation
@@ -1266,11 +1266,50 @@ namespace mt
 
 		/*********************************************************/
 		DEVICE_CALLABLE FORCE_INLINE
+		int floor_dR_min(const T &x) const { return static_cast<int>(floor(x/dR_min())); }
+
+		DEVICE_CALLABLE FORCE_INLINE
 		int floor_dRx(const T &x) const { return static_cast<int>(floor(x/dRx)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
 		int floor_dRy(const T &y) const { return static_cast<int>(floor(y/dRy)); }
 
+		DEVICE_CALLABLE FORCE_INLINE
+		int ceil_dR_min(const T &x) const { return static_cast<int>(ceil(x/dR_min())); }
+
+		DEVICE_CALLABLE FORCE_INLINE
+		int ceil_dRx(const T &x) const { return static_cast<int>(ceil(x/dRx)); }
+
+		DEVICE_CALLABLE FORCE_INLINE
+		int ceil_dRy(const T &y) const { return static_cast<int>(ceil(y/dRy)); }
+
+		// lower bound
+		DEVICE_CALLABLE FORCE_INLINE
+		int lb_index_x(const T &x) const 
+		{ 
+			return max(0, static_cast<int>(floor(x/dRx)));
+		}
+
+		// upper bound
+		DEVICE_CALLABLE FORCE_INLINE
+		int ub_index_x(const T &x) const 
+		{ 
+			return min(nx, static_cast<int>(ceil(x/dRx)));
+		}
+
+		// lower bound
+		DEVICE_CALLABLE FORCE_INLINE
+		int lb_index_y(const T &y) const 
+		{ 
+			return max(0, static_cast<int>(floor(y/dRy)));
+		}
+
+		// upper bound
+		DEVICE_CALLABLE FORCE_INLINE
+		int ub_index_y(const T &y) const 
+		{ 
+			return min(ny, static_cast<int>(ceil(y/dRy)));
+		}
 		/*********************************************************/
 		// Maximun frequency
 		DEVICE_CALLABLE FORCE_INLINE
@@ -1509,7 +1548,7 @@ namespace mt
 		T g2_min; 				// inner_aper_ang/lambda
 		T g2_max; 				// outer_aper_ang/lambda
 
-		T sggs; 				// Standard deviation
+		T sggs; 				// standard deviation
 		int ngxs; 				// Number of source sampling points x
 		int ngys; 				// Number of source sampling points y
 		T dgxs; 				// source sampling m_size;
@@ -1765,20 +1804,6 @@ namespace mt
 		T g_collection;
 	};
 
-	template<class T>
-	struct Atom
-	{
-		int Z;
-		T x;
-		T y;
-		T z;
-		T sigma;
-		T occ;
-		int charge;
-
-		Atom():Z(0), x(0), y(0), z(0), sigma(0), occ(0), charge(0){};
-	};
-
 	/**************************atoms for Superposition**************************/
 	template<class T>
 	class Atom_Data_Sp{
@@ -1791,6 +1816,7 @@ namespace mt
 				y_min(0), y_max(0),
 				a_min(0), a_max(0), 
 				sigma_min(0), sigma_max(0), 
+				b_min(0), b_max(0), 
 				x_mean(0), y_mean(0), 
 				x_std(0), y_std(0), 
 				s_x(0), s_y(0){}
@@ -1819,10 +1845,13 @@ namespace mt
 
 				sigma.resize(new_size, value);
 				sigma.shrink_to_fit();
+
+				b.resize(new_size, value);
+				b.shrink_to_fit();
 			}
 
 			// set atoms
-			void set_Atoms(const size_type &nr_atoms_i, double *atoms_i, T l_x_i = 0, T l_y_i = 0, bool PBC_xy_i =false)
+			void set_Atoms(const size_type &nr_atoms_i, const size_type &nc_atoms_i, double *atoms_i, T l_x_i = 0, T l_y_i = 0, bool PBC_xy_i =false)
 			{
 				resize(nr_atoms_i);
 
@@ -1836,14 +1865,14 @@ namespace mt
 				size_type j = 0;
 				for(auto i = 0; i < size(); i++)
 				{
-					auto xi = atoms_i[0*nr_atoms_i + i]; 		// x-position
-					auto yi = atoms_i[1*nr_atoms_i + i]; 		// y-position
-					if((!PBC_xy_i)||((xi<lx_b)&&(yi<ly_b)))
+					auto atom = read_atom(nr_atoms_i, nc_atoms_i, atoms_i, i);
+					if((!PBC_xy_i)||((atom.x<lx_b)&&(atom.y<ly_b)))
 					{
-						x[j] = xi; 								// x-position
-						y[j] = yi; 								// y-position
-						a[j] = atoms_i[2*nr_atoms_i + i]; 		// height
-						sigma[j] = atoms_i[3*nr_atoms_i + i];	// Standard deviation
+						x[j] = atom.x; 				// x-position
+						y[j] = atom.y; 				// y-position
+						a[j] = atom.a; 				// height
+						sigma[j] = atom.sigma;		// standard deviation
+						b[j] = atom.b;				// background
 						j++;
 					}
 				}
@@ -1868,14 +1897,13 @@ namespace mt
 				size_type j = 0;
 				for(auto i = 0; i < size(); i++)
 				{
-					auto xi = atoms.x[i]; 		// x-position
-					auto yi = atoms.y[i]; 		// y-position
-					if((!PBC_xy_i)||((xi<lx_b)&&(yi<ly_b)))
+					if((!PBC_xy_i)||((atoms.x[i]<lx_b)&&(atoms.y[i]<ly_b)))
 					{
-						x[j] = xi; 				// x-position
-						y[j] = yi; 				// y-position
-						a[j] = atoms.a[i];
-						sigma[j] = atoms.sigma[i];
+						x[j] = atoms.x[i]; 				// x-position
+						y[j] = atoms.y[i]; 				// y-position
+						a[j] = atoms.a[i];				// height
+						sigma[j] = atoms.sigma[i];		// standard deviation
+						b[j] = atoms.b[i];				// background
 						j++;
 					}
 				}
@@ -1897,6 +1925,7 @@ namespace mt
 				y_min = y_max = y[0];
 				a_min = a_max = a[0];
 				sigma_min = sigma_max = sigma[0];
+				b_min = b_max = b[0];
 
 				x_mean = y_mean = 0.0;
 				x_std = y_std = 0.0;
@@ -1914,6 +1943,9 @@ namespace mt
 
 					sigma_min = min(sigma[iAtom], sigma_min);
 					sigma_max = max(sigma[iAtom], sigma_max);
+
+					b_min = min(b[iAtom], b_min);
+					b_max = max(b[iAtom], b_max);
 
 					x_mean += x[iAtom];
 					y_mean += y[iAtom];
@@ -1951,6 +1983,7 @@ namespace mt
 			Vector<T, e_host> y;
 			Vector<T, e_host> a;
 			Vector<T, e_host> sigma;
+			Vector<T, e_host> b;
 
 			T x_min;
 			T x_max;
@@ -1964,6 +1997,9 @@ namespace mt
 			T sigma_min;
 			T sigma_max;
 
+			T b_min;
+			T b_max;
+
 			T x_mean;
 			T y_mean;
 
@@ -1972,6 +2008,31 @@ namespace mt
 
 			T s_x; 			// m_size-x
 			T s_y; 			// m_size-y
+
+		private:
+			struct Atom
+			{
+				T x;
+				T y;
+				T a;
+				T sigma;
+				T b;
+
+				Atom():x(0), y(0), a(0), sigma(0), b(0){};
+			};
+
+			template<class TIn>
+			Atom read_atom(const int &nr, const int &nc, TIn *atoms, const int &iatom)
+			{
+				Atom atom;
+				atom.x = atoms[0*nr + iatom]; 						// x-position
+				atom.y = atoms[1*nr + iatom]; 						// y-position
+				atom.a = (nc>2)?atoms[2*nr + iatom]:1.0;			// height
+				atom.sigma = (nc>3)?atoms[3*nr + iatom]:1.0;		// standard deviation
+				atom.b = (nc>4)?atoms[4*nr + iatom]:0.0; 			// background
+
+				return atom;
+			}
 	};
 
 	template<class T, eDevice dev>
@@ -1998,6 +2059,7 @@ namespace mt
 
 			T a;
 			T alpha;
+			T b;
 			T dtR;
 			T R2_tap;
 			T tap_cf;
@@ -2005,8 +2067,9 @@ namespace mt
 			int *iv;
 			T *v;
 
-			Atom_Sp(): x(0), y(0), R2_max(0), R2(nullptr), c3(nullptr), c2(nullptr), c1(nullptr), 
-			c0(nullptr), ix0(1), ixn(0), iy0(0), a(0), alpha(0), dtR(0), R2_tap(0), tap_cf(0), iyn(0), iv(nullptr), v(nullptr){}
+			Atom_Sp(): x(0), y(0), occ(1), R2_max(0), R2(nullptr), c3(nullptr), c2(nullptr), 
+			c1(nullptr), c0(nullptr), ix0(1), ixn(0), iy0(0), a(0), alpha(0), b(0), 
+			dtR(0), R2_tap(0), tap_cf(0), iyn(0), iv(nullptr), v(nullptr){}
 
 			inline
 			void set_ix0_ixn(const Grid<T> &grid, const T &R_max)
@@ -2220,6 +2283,68 @@ namespace mt
 			}
 	};
 
+	/*****************************Potential**************************/
+	template<class T, eDevice dev>
+	struct Atom_Vp
+	{
+	public:
+		using value_type = T;
+		static const eDevice device = dev;
+
+		int charge;
+		T x;
+		T y;
+		T z0h;
+		T zeh;
+		bool split;
+		T occ;
+		T R2_min;
+		T R2_max;
+		T *R2;
+		T *cl;
+		T *cnl;
+		T *c3;
+		T *c2;
+		T *c1;
+		T *c0;
+		int ix0;
+		int ixn;
+		int iy0;
+		int iyn;
+
+		T R2_tap;
+		T tap_cf;
+
+		int *iv;
+		T *v;
+
+		Atom_Vp() : charge(0), x(0), y(0), z0h(0), zeh(0), split(false), occ(1), R2_min(0), R2_max(0),
+			R2(nullptr), cl(nullptr), cnl(nullptr), c3(nullptr), c2(nullptr), c1(nullptr),
+			c0(nullptr), ix0(1), ixn(0), iy0(0), iyn(0), R2_tap(0), tap_cf(0), iv(nullptr), v(nullptr){}
+
+		inline
+			void set_ix0_ixn(const Grid<T> &grid, const T &R_max)
+		{
+			get_bn(x, grid.nx, grid.dRx, R_max, grid.pbc_xy, ix0, ixn);
+		}
+
+		inline
+			void set_iy0_iyn(const Grid<T> &grid, const T &R_max)
+		{
+			get_bn(y, grid.ny, grid.dRy, R_max, grid.pbc_xy, iy0, iyn);
+		}
+
+		inline
+			GridBT get_eval_cubic_poly_gridBT()
+		{
+			GridBT gridBT;
+			gridBT.Blk = dim3((iyn + c_thrnxny - 1) / c_thrnxny, (ixn + c_thrnxny - 1) / c_thrnxny);
+			gridBT.Thr = dim3(c_thrnxny, c_thrnxny);
+			return gridBT;
+		}
+
+	};
+
 	/*****************************Atomic Coefficients**************************/
 	template<class T, eDevice dev>
 	struct Atom_Coef
@@ -2391,68 +2516,6 @@ namespace mt
 		T ra_c; 									// Calculated atomic radius
 
 		Vector<Atom_Coef<T, dev>, e_host> coef;		// atomic coefficients
-	};
-
-	/*********************************Atom_Vp**********************************/
-	template<class T, eDevice dev>
-	struct Atom_Vp
-	{
-		public:
-			using value_type = T;
-			static const eDevice device = dev;
-
-			int charge;
-			T x;
-			T y;
-			T z0h;
-			T zeh;
-			bool split;
-			T occ;
-			T R2_min;
-			T R2_max;
-			T *R2;
-			T *cl;
-			T *cnl;
-			T *c3;
-			T *c2;
-			T *c1;
-			T *c0;
-			int ix0;
-			int ixn;
-			int iy0;
-			int iyn;
-
-			T R2_tap;
-			T tap_cf;
-
-			int *iv;
-			T *v;
-
-			Atom_Vp(): charge(0), x(0), y(0), z0h(0), zeh(0), split(false), occ(1), R2_min(0), R2_max(0), 
-			R2(nullptr), cl(nullptr), cnl(nullptr), c3(nullptr), c2(nullptr), c1(nullptr), 
-			c0(nullptr), ix0(1), ixn(0), iy0(0), iyn(0), R2_tap(0), tap_cf(0), iv(nullptr), v(nullptr){}
-
-			inline
-			void set_ix0_ixn(const Grid<T> &grid, const T &R_max)
-			{
-				get_bn(x, grid.nx, grid.dRx, R_max, grid.pbc_xy, ix0, ixn);
-			}
-
-			inline
-			void set_iy0_iyn(const Grid<T> &grid, const T &R_max)
-			{
-				get_bn(y, grid.ny, grid.dRy, R_max, grid.pbc_xy, iy0, iyn);
-			}
-
-			inline
-			GridBT get_eval_cubic_poly_gridBT()
-			{
-				GridBT gridBT;
-				gridBT.Blk = dim3((iyn+c_thrnxny-1)/c_thrnxny, (ixn+c_thrnxny-1)/c_thrnxny);
-				gridBT.Thr = dim3(c_thrnxny, c_thrnxny);
-				return gridBT;
-			}
-
 	};
 
 	/********************************Scanning**********************************/

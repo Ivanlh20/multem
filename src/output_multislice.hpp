@@ -382,8 +382,8 @@ namespace mt
 				this->tm_rot_point_type = input_multislice.tm_rot_point_type;
 				this->tm_p0 = input_multislice.tm_p0;
 
-				this->microscope_effect = input_multislice.microscope_effect;
-				this->spatial_temporal_effect = input_multislice.spatial_temporal_effect;
+				this->illumination_model = input_multislice.illumination_model;
+				this->temporal_spatial_incoh = input_multislice.temporal_spatial_incoh;
 				this->thickness_type = input_multislice.thickness_type;
 				this->thickness = input_multislice.thickness;
 				this->operation_mode = input_multislice.operation_mode;
