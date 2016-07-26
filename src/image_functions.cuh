@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef IMAGE_FUNCTIONS_H
@@ -21,7 +21,7 @@
 
 #include <thread>
 #include <algorithm>
-
+#include <deque>
 #include "math.cuh"
 #include "types.cuh"
 #include "matlab_types.cuh"
@@ -166,309 +166,183 @@ namespace mt
 	}
 
 	/******************************************************************************/
-	// structuring element
-	template<class TVector>
-	TVector struct_element(eStr_Ele e_sel, int nsel)
-	{
-		using T = Value_type<TVector>;
-
-		int nrows = 2*nsel+1;
-		int ncols = 2*nsel+1;
-
-		TVector se(nrows*ncols);
-
-		switch (e_sel)
-		{
-			case eSE_Disk:
-			{
-				for (auto ix = 0; ix < ncols; ix++)
-				{
-					for (auto iy = 0; iy < nrows; iy++)
-					{
-						se[ix*nrows+iy] = (hypot(T(ix-nsel), T(iy-nsel))>nsel)?1:0;
-					}
-				}
-			}
-			break;
-			case eSE_Square:
-			{
-				for (auto ix = 0; ix < ncols; ix++)
-				{
-					for (auto iy = 0; iy < nrows; iy++)
-					{
-						se[ix*nrows+iy] = 1;
-					}
-				}
-			}
-			break;
-		}
-
-		return se;
-	}
-
-	// binary dilation
-	template<class TVector>
-	TVector morp_b_dilate(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, eStr_Ele e_sel, int nsel)
-	{
-		using T = Value_type<TVector>;
-
-		TVector Im_o(Im_i.size());
-
-		int nk0 = -nsel;
-		int nke = nsel+1;
-		int nrsel = 2*nsel+1;
-
-		auto sel = struct_element<TVector>(e_sel, nsel);
-
-		auto krn_dilate = [&](const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_o)
-		{
-			const T Im_thr = 0.5;
-			auto ixy_i = ix_i*ny_i+iy_i;
-
-			if(Im_i[ixy_i]>Im_thr)
-			{
-				Im_o[ixy_i] = 1;
-				return;
-			}
-
-			int ix0 = max(ix_i+nk0, 0);
-			int ixe = min(ix_i+nke, nx_i);
-
-			int iy0 = max(iy_i+nk0, 0);
-			int iye = min(iy_i+nke, ny_i);
-
-			for (auto ix = ix0; ix < ixe; ix++)
-			{
-				for (auto iy = iy0; iy < iye; iy++)
-				{
-					if((Im_i[ix*ny_i+iy]>Im_thr)&&(sel[(ix-ix0)*nrsel+(iy-iy0)]>Im_thr))
-					{		
-						Im_o[ixy_i] = 1;
-						return;
-					}
-				}
-			}
-			Im_o[ixy_i] = 0;
-		};
-
-		auto thr_dilate = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, krn_dilate, Im_i, Im_o);
-		};
-
-		stream.set_n_act_stream(nx_i);
-		stream.set_grid(nx_i, ny_i);
-		stream.exec(thr_dilate);
-
-		return Im_o;
-	}
-
 	// gray dilation
 	template<class TVector>
-	TVector morp_g_dilate(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, eStr_Ele e_sel, int nsel)
+	TVector morp_g_dilate(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr)
 	{
 		using T = Value_type<TVector>;
 
 		TVector Im_o(Im_i.size());
 
-		int nk0 = -nsel;
-		int nke = nsel+1;
-		int nrsel = 2*nsel+1;
-
-		auto sel = struct_element<vector<T>>(e_sel, nsel);
-
-		auto krn_dilate = [&](const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_o)
+		auto thr_dilate = [nkr](const Range &range, TVector &Im_i, TVector &Im_o)
 		{
-			auto ixy_i = ix_i*ny_i+iy_i;
+			std::deque<int> wd;
 
-			int ix0 = max(ix_i+nk0, 0);
-			int ixe = min(ix_i+nke, nx_i);
+			const int ny = range.iy_e-range.iy_0;
+			const int wkr = 2*nkr+1;
 
-			int iy0 = max(iy_i+nk0, 0);
-			int iye = min(iy_i+nke, ny_i);
-
-			auto I_max = Im_i[ixy_i]+sel[nsel*nrsel+nsel];
-
-			for (auto ix = ix0; ix < ixe; ix++)
+			auto wedge_push = [ny](const int &ix, const int &iy, TVector &Im_i, std::deque<int> &wd)
 			{
-				for (auto iy = iy0; iy < iye; iy++)
+				while((!wd.empty())&&(Im_i[ix*ny+wd.back()]<= Im_i[ix*ny+iy]))
 				{
-					auto I_sel = sel[(ix-ix0)*nrsel+(iy-iy0)];
-					if(I_sel>0)
+					wd.pop_back();
+				}
+				wd.push_back(iy);
+			};
+
+			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
+			{
+				int iy = 0;
+				int iy_tk = 0;
+				int iy_o = 0;
+
+				for (; iy < nkr; iy++)
+				{
+					wedge_push(ix, iy, Im_i, wd);
+				}
+
+				for (; iy < ny; iy++, iy_o++)
+				{
+					wedge_push(ix, iy, Im_i, wd);
+
+					Im_o[ix*ny+iy_o] = Im_i[ix*ny+wd.front()];
+					if (iy + 1 >= wkr)
 					{
-						I_max = max(I_max, Im_i[ix*ny_i+iy]+I_sel);
+						if (wd.front() == iy_tk)
+						{
+							wd.pop_front();
+						}
+						iy_tk++;
 					}
 				}
-			}
-			Im_o[ixy_i] = I_max;
-		};
 
-		auto thr_dilate = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, krn_dilate, Im_i, Im_o);
-		};
-
-		stream.set_n_act_stream(nx_i);
-		stream.set_grid(nx_i, ny_i);
-		stream.exec(thr_dilate);
-
-		return Im_o;
-	}
-
-	// binary erosion
-	template<class TVector>
-	TVector morp_b_erode(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, eStr_Ele e_sel, int nsel)
-	{
-		using T = Value_type<TVector>;
-
-		TVector Im_o(Im_i.size());
-
-		const T Im_thr = 0.5;
-
-		int nk0 = -nsel;
-		int nke = nsel+1;
-		int nrsel = 2*nsel+1;
-
-		auto sel = struct_element<vector<T>>(e_sel, nsel);
-
-		int c_m = 0;
-		for (auto ix = 0; ix < sel.size(); ix++)
-		{
-			c_m += (sel[ix]>Im_thr)?1:0;
-		}
-
-		auto krn_erode = [&](const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_o)
-		{
-			auto ixy_i = ix_i*ny_i+iy_i;
-
-			int ix0 = max(ix_i+nk0, 0);
-			int ixe = min(ix_i+nke, nx_i);
-
-			int iy0 = max(iy_i+nk0, 0);
-			int iye = min(iy_i+nke, ny_i);
-
-			int c = 0;
-			for (auto ix = ix0; ix < ixe; ix++)
-			{
-				for (auto iy = iy0; iy < iye; iy++)
+				for (; iy_o < ny; iy_o++)
 				{
-
-					c += ((Im_i[ix*ny_i+iy]>Im_thr)&&(sel[(ix-ix0)*nrsel+(iy-iy0)]>Im_thr))?1:0;
+					Im_o[ix*ny+iy_o] = Im_i[ix*ny+wd.front()];
+					if (wd.front() == iy_tk)
+					{
+						wd.pop_front();
+					}
+					iy_tk++;
 				}
+				wd.clear();
 			}
-			Im_o[ixy_i] = (c==c_m)?1:0;
-		};
-
-		auto thr_erode = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, krn_erode, Im_i, Im_o);
 		};
 
 		stream.set_n_act_stream(nx_i);
 		stream.set_grid(nx_i, ny_i);
-		stream.exec(thr_erode);
+		stream.exec(thr_dilate, Im_i, Im_o);
 
-		return Im_o;
+		auto Im_t = transpose(stream, ny_i, nx_i, Im_o);
+
+		stream.set_n_act_stream(ny_i);
+		stream.set_grid(ny_i, nx_i);
+		stream.exec(thr_dilate, Im_t, Im_o);
+
+		Im_t = transpose(stream, nx_i, ny_i, Im_o);
+
+		return Im_t;
 	}
 
 	// gray erosion
 	template<class TVector>
-	TVector morp_g_erode(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, eStr_Ele e_sel, int nsel)
+	TVector morp_g_erode(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr)
 	{
 		using T = Value_type<TVector>;
 
 		TVector Im_o(Im_i.size());
 
-		int nk0 = -nsel;
-		int nke = nsel+1;
-		int nrsel = 2*nsel+1;
-
-		auto sel = struct_element<vector<T>>(e_sel, nsel);
-
-		auto krn_erode = [&](const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_o)
+		auto thr_erode = [nkr](const Range &range, TVector &Im_i, TVector &Im_o)
 		{
-			auto ixy_i = ix_i*ny_i+iy_i;
+			std::deque<int> wd;
 
-			int ix0 = max(ix_i+nk0, 0);
-			int ixe = min(ix_i+nke, nx_i);
+			const int ny = range.iy_e-range.iy_0;
+			const int wkr = 2*nkr+1;
 
-			int iy0 = max(iy_i+nk0, 0);
-			int iye = min(iy_i+nke, ny_i);
-
-			auto I_min = Im_i[ixy_i]+sel[nsel*nrsel+nsel];
-
-			for (auto ix = ix0; ix < ixe; ix++)
+			auto wedge_push = [ny](const int &ix, const int &iy, TVector &Im_i, std::deque<int> &wd)
 			{
-				for (auto iy = iy0; iy < iye; iy++)
+				while((!wd.empty())&&(Im_i[ix*ny+wd.back()]>= Im_i[ix*ny+iy]))
 				{
-					auto I_sel = sel[(ix-ix0)*nrsel+(iy-iy0)];
-					if(I_sel>0)
+					wd.pop_back();
+				}
+				wd.push_back(iy);
+			};
+
+			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
+			{
+				int iy = 0;
+				int iy_tk = 0;
+				int iy_o = 0;
+
+				for (; iy < nkr; iy++)
+				{
+					wedge_push(ix, iy, Im_i, wd);
+				}
+
+				for (; iy < ny; iy++, iy_o++)
+				{
+					wedge_push(ix, iy, Im_i, wd);
+
+					Im_o[ix*ny+iy_o] = Im_i[ix*ny+wd.front()];
+					if (iy + 1 >= wkr)
 					{
-						I_min = min(I_min, Im_i[ix*ny_i+iy]-I_sel);
+						if (wd.front() == iy_tk)
+						{
+							wd.pop_front();
+						}
+						iy_tk++;
 					}
 				}
-			}
-			Im_o[ixy_i] = I_min;
-		};
 
-		auto thr_erode = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, krn_erode, Im_i, Im_o);
+				for (; iy_o < ny; iy_o++)
+				{
+					Im_o[ix*ny+iy_o] = Im_i[ix*ny+wd.front()];
+					if (wd.front() == iy_tk)
+					{
+						wd.pop_front();
+					}
+					iy_tk++;
+				}
+				wd.clear();
+			}
 		};
 
 		stream.set_n_act_stream(nx_i);
 		stream.set_grid(nx_i, ny_i);
-		stream.exec(thr_erode);
+		stream.exec(thr_erode, Im_i, Im_o);
+
+		auto Im_t = transpose(stream, ny_i, nx_i, Im_o);
+
+		stream.set_n_act_stream(ny_i);
+		stream.set_grid(ny_i, nx_i);
+		stream.exec(thr_erode, Im_t, Im_o);
+
+		Im_o = transpose(stream, nx_i, ny_i, Im_o);
 
 		return Im_o;
 	}
 
-	// binary opening
-	template<class TVector>
-	TVector morp_b_open(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, eStr_Ele e_sel, int nsel)
-	{
-		auto Im = morp_b_erode(stream, ny_i, nx_i, Im_i, e_sel, nsel);
-		return morp_b_dilate(stream, ny_i, nx_i, Im, e_sel, nsel);
-	}
-
 	// gray opening
 	template<class TVector>
-	TVector morp_g_open(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, eStr_Ele e_sel, int nsel)
+	TVector morp_g_open(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr)
 	{
-		auto Im = morp_g_erode(stream, ny_i, nx_i, Im_i, e_sel, nsel);
-		return morp_g_dilate(stream, ny_i, nx_i, Im, e_sel, nsel);
-	}
-
-	// binary closing
-	template<class TVector>
-	TVector morp_b_close(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, eStr_Ele e_sel, int nsel)
-	{
-		auto Im = morp_b_dilate(stream, ny_i, nx_i, Im_i, e_sel, nsel);
-		return morp_b_erode(stream, ny_i, nx_i, Im, e_sel, nsel);
+		auto Im = morp_g_erode(stream, ny_i, nx_i, Im_i, nkr);
+		return morp_g_dilate(stream, ny_i, nx_i, Im, nkr);
 	}
 
 	// gray closing
 	template<class TVector>
-	TVector morp_g_close(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, eStr_Ele e_sel, int nsel)
+	TVector morp_g_close(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr)
 	{
-		auto Im = morp_g_dilate(stream, ny_i, nx_i, Im_i, e_sel, nsel);
-		return morp_g_erode(stream, ny_i, nx_i, Im, e_sel, nsel);
-	}
-
-	// binary tophat
-	template<class TVector>
-	TVector morp_b_tophat(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, eStr_Ele e_sel, int nsel)
-	{
-		auto Im = morp_b_open(stream, ny_i, nx_i, Im_i, e_sel, nsel);
-		add_scale(stream, 1, Im_i, -1, Im, Im);
-		return Im;
+		auto Im = morp_g_dilate(stream, ny_i, nx_i, Im_i, nkr);
+		return morp_g_erode(stream, ny_i, nx_i, Im, nkr);
 	}
 
 	// gray tophat
 	template<class TVector>
-	TVector morp_g_tophat(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, eStr_Ele e_sel, int nsel)
+	TVector morp_g_tophat(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr)
 	{
-		auto Im = morp_g_open(stream, ny_i, nx_i, Im_i, e_sel, nsel);
+		auto Im = morp_g_open(stream, ny_i, nx_i, Im_i, nkr);
 		add_scale(stream, 1, Im_i, -1, Im, Im);
 		return Im;
 	}
@@ -670,59 +544,150 @@ namespace mt
 		}
 
 		using T = Value_type<TVector>;
-		TVector Im_o(Im_i.size());
+		TVector Im_mean(Im_i.size());
+		TVector Im_var(Im_i.size());
+		TVector Im_t(Im_i.size());
 
-		int nk0 = -nkr;
-		int nke = nkr+1;
-		auto R2_max = pow(nkr*grid.dRx, 2) + Epsilon<T>::abs;
-
-		TVector Im_mean(grid.nxy());
-		TVector Im_var(grid.nxy());
-
-		auto krn_mean_var = [&](const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_mean, TVector &Im_var)
+		// Kahan summation algorithm
+		// https:// en.wikipedia.org/wiki/Kahan_summation_algorithm
+		auto kh_sum = [](T &sum_v, T v, T &error)
 		{
-			auto x_i = grid.Rx(ix_i);
-			auto y_i = grid.Ry(iy_i);
+			v = v - error;
+			T t = sum_v + v;
+			error = (t-sum_v)-v;
+			sum_v = t;
+		};
 
-			int ix0 = max(ix_i+nk0, 0);
-			int ixe = min(ix_i+nke, grid.nx);
+		auto thr_sum = [nkr, kh_sum](const Range &range, TVector &Im_i, TVector &Im_sum)
+		{
+			const int ny = range.iy_e-range.iy_0;
+			const int wkr = 2*nkr+1;
 
-			int iy0 = max(iy_i+nk0, 0);
-			int iye = min(iy_i+nke, grid.ny);
-
-			int nxy = 0;
-			T x_mean = 0;
-			T x_var = 0;
-			for (auto ix = ix0; ix < ixe; ix++)
+			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
 			{
-				for (auto iy = iy0; iy < iye; iy++)
+				int iy = 0;
+				int iy_tk = 0;
+				int iy_o = 0;
+
+				T sum_v = 0;
+				T c = 0; 
+				for (; iy < nkr; iy++)
 				{
-					auto R2 = grid.R2(ix, iy, x_i, y_i);
-					if(R2 < R2_max)
+					T v = Im_i[ix*ny+iy];
+					kh_sum(sum_v, v, c);
+				}
+
+				for (; iy < ny; iy++, iy_o++)
+				{
+					T v = Im_i[ix*ny+iy];
+					kh_sum(sum_v, v, c);
+
+					Im_sum[ix*ny+iy_o] = sum_v;
+					if (iy + 1 >= wkr)
 					{
-						T x = Im_i[grid.ind_col(ix, iy)];
-						x_mean += x;
-						x_var += x*x;
-						nxy++;
+						T v = Im_i[ix*ny+iy_tk];
+						kh_sum(sum_v, -v, c);
+						iy_tk++;
 					}
 				}
+
+				for (; iy_o < ny; iy_o++)
+				{
+					Im_sum[ix*ny+iy_o] = sum_v;
+
+					T v = Im_i[ix*ny+iy_tk];
+					kh_sum(sum_v, -v, c);
+					iy_tk++;
+				}
 			}
-			x_mean = x_mean/nxy;
-			x_var = x_var/nxy - x_mean*x_mean;
-
-			int ixy = grid.ind_col(ix_i, iy_i);
-			Im_mean[ixy] = x_mean;
-			Im_var[ixy] = x_var;
 		};
 
-		auto thr_mean_var = [&](const Range &range)
+		auto thr_sum2 = [nkr, kh_sum](const Range &range, TVector &Im_i, TVector &Im_sum2)
 		{
-			host_detail::matrix_iter(range, krn_mean_var, Im_i, Im_mean, Im_var);
+			const int ny = range.iy_e-range.iy_0;
+			const int wkr = 2*nkr+1;
+
+			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
+			{
+				int iy = 0;
+				int iy_tk = 0;
+				int iy_o = 0;
+
+				T sum_v2 = 0;
+				T c = 0; 
+				for (; iy < nkr; iy++)
+				{
+					T v = Im_i[ix*ny+iy];
+					kh_sum(sum_v2, v*v, c);
+				}
+
+				for (; iy < ny; iy++, iy_o++)
+				{
+					T v = Im_i[ix*ny+iy];
+					kh_sum(sum_v2, v*v, c);
+
+					Im_sum2[ix*ny+iy_o] = sum_v2;
+					if (iy + 1 >= wkr)
+					{
+						T v = Im_i[ix*ny+iy_tk];
+						kh_sum(sum_v2, -v*v, c);
+						iy_tk++;
+					}
+				}
+
+				for (; iy_o < ny; iy_o++)
+				{
+					Im_sum2[ix*ny+iy_o] = sum_v2;
+
+					T v = Im_i[ix*ny+iy_tk];
+					kh_sum(sum_v2, -v*v, c);
+					iy_tk++;
+				}
+			}
 		};
 
+		// sum
 		stream.set_n_act_stream(grid.nx);
 		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_mean_var);
+		stream.exec(thr_sum, Im_i, Im_mean);
+
+		Im_t = transpose(stream, grid.ny, grid.nx, Im_mean);
+
+		stream.set_n_act_stream(grid.ny);
+		stream.set_grid(grid.ny, grid.nx);
+		stream.exec(thr_sum, Im_t, Im_mean);
+
+		Im_mean = transpose(stream, grid.nx, grid.ny, Im_mean);
+
+		// sum^2
+		stream.set_n_act_stream(grid.nx);
+		stream.set_grid(grid.nx, grid.ny);
+		stream.exec(thr_sum2, Im_i, Im_var);
+
+		Im_t = transpose(stream, grid.ny, grid.nx, Im_var);
+
+		stream.set_n_act_stream(grid.ny);
+		stream.set_grid(grid.ny, grid.nx);
+		stream.exec(thr_sum, Im_t, Im_var);
+
+		Im_var = transpose(stream, grid.nx, grid.ny, Im_var);
+
+		for(auto ix=0; ix<grid.nx; ix++)
+		{
+			for(auto iy=0; iy<grid.ny; iy++)
+			{
+				int nx = min(ix+nkr+1, grid.nx)-max(ix-nkr, 0);
+				int ny = min(iy+nkr+1, grid.ny)-max(iy-nkr, 0);
+
+				int ixy = grid.ind_col(ix, iy);
+
+				T x_mean = Im_mean[ixy]/(nx*ny);
+				T x_var = Im_var[ixy]/(nx*ny) - x_mean*x_mean;
+
+				Im_mean[ixy] = x_mean;
+				Im_var[ixy] = x_var;
+			}
+		}
 
 		auto v2 = mt::mean(stream, Im_var);
 
@@ -730,7 +695,7 @@ namespace mt
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
-				Im_o[ixy] = Im_mean[ixy] + ::fmax(T(0), Im_var[ixy]-v2)*(Im_i[ixy]-Im_mean[ixy])/::fmax(Im_var[ixy], v2);
+				Im_t[ixy] = Im_mean[ixy] + ::fmax(T(0), Im_var[ixy]-v2)*(Im_i[ixy]-Im_mean[ixy])/::fmax(Im_var[ixy], v2);
 			}
 		};
 
@@ -738,7 +703,7 @@ namespace mt
 		stream.set_grid(grid.nx, grid.ny);
 		stream.exec(thr_filter_wiener);
 
-		return Im_o;
+		return Im_t;
 	}
 
 	/******************************************************************************/	
@@ -1043,6 +1008,19 @@ namespace mt
 		return var_noise/var_signal;
 	}
 
+	// get peak signal to noise ratio PSNR 
+	template<class TVector>
+	Value_type<TVector> get_PSNR(Stream<e_host> &stream, TVector &Im_i, TVector &Im_d)
+	{
+		auto var_signal = variance(stream, Im_d);
+		TVector Im_n(Im_d.size());
+		add_scale(stream, 1, Im_i, -1, Im_d, Im_n);
+		auto var_noise = variance(stream, Im_n);
+
+		// peak signal to noise ratio
+		return var_noise/var_signal;
+	}
+
 	// scale_image
 	template<class TVector>
 	TVector scale_image_mean(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, Value_type<TVector> shrink_factor, int &ny_o, int &nx_o)
@@ -1159,7 +1137,7 @@ namespace mt
 
 		// dilate binary image
 		int nkr = static_cast<int>(0.5*sigma/dR);
-		Im_o = morp_b_dilate(stream, grid.ny, grid.nx, Im_o, eSE_Square, nkr);
+		Im_o = morp_g_dilate(stream, grid.ny, grid.nx, Im_o, nkr);
 
 		// gaussian convolution
 		grid.set_input_data(grid.nx, grid.ny, 2*grid.lx, 2*grid.ly, 0.5, false, true);

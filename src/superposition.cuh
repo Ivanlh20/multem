@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef SUPERPOSITION_H
@@ -141,7 +141,6 @@ namespace mt
 					atom_sp[istream].occ = 1.0;
 					atom_sp[istream].a = input_superposition->atoms.a[iatom];
 					atom_sp[istream].alpha = input_superposition->alpha(iatom);
-					atom_sp[istream].b = input_superposition->atoms.b[iatom];
 					auto R_max = input_superposition->R_max(iatom);
 					auto R2_max = R_max*R_max;
 					atom_sp[istream].dtR = (exp(-atom_sp[istream].alpha*R2_max)-1)/T(c_nR-1);

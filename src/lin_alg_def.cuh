@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef LIN_ALG_DEF_H
@@ -58,217 +58,217 @@ namespace mt
 			std::uniform_real_distribution<T> rand_temp;
 	};
 
-	///*******************************mxn matrix*********************************/
-	//template<class T>
-	//struct Mmxn
-	//{		
-	//	using value_type = T;
+	// /*******************************mxn matrix*********************************/
+	// template<class T>
+	// struct Mmxn
+	// {		
+	// 	using value_type = T;
 
-	//	int m;
-	//	int n;
+	// 	int m;
+	// 	int n;
 
-	//	Vector<T, e_host> data;
-
-
-	//	DEVICE_CALLABLE
-	//	inline Mmxn(const int &m_i = 1, const int &n_i = 1)
-	//	{
-	//		m = m_i;
-	//		n = n_i;
-
-	//		data.resize(m*n);
-	//	} 
-
-	//	DEVICE_CALLABLE
-	//	inline Mmxn<T>& operator+=(const Mmxn<T> r)
-	//	{
-	//		
-	//		for(auto i=0; i<data.size(); i++)
-	//		{
-	//			data[i] += r.data[i];		
-	//		}
-
-	//		return *this;
-	//	}
-
-	//	DEVICE_CALLABLE
-	//	inline Mmxn<T>& operator-=(const Mmxn<T> r)
-	//	{
-	//		for(auto i=0; i<data.size(); i++)
-	//		{
-	//			data[i] -= r.data[i];		
-	//		}
-
-	//		return *this;
-	//	}
-
-	//	DEVICE_CALLABLE
-	//	inline Mmxn<T>& operator*=(const T r)
-	//	{
-	//		if(this->n!=r.m)
-	//		{
-	//			return;
-	//		}
-
-	//		for(auto ir=0; ir<m; ir++)
-	//		{
-	//			for(auto ic=0; ic<r.n; ic++)
-	//			{
-	//				irc = r.n*ir + ic;
-	//				for(auto i=0; i<n; i++)
-	//				{
-	//					data[irc] += r.data[i];		
-	//				}	
-	//			}
-	//		}
-
-	//		return *this;
-	//	}
-
-	//	DEVICE_CALLABLE
-	//	inline Mmxn<T>& operator/=(const T r)
-	//	{
-	//		for(auto i=0; i<data.size(); i++)
-	//		{
-	//			data[i] /= r.data[i];		
-	//		}
-
-	//		return *this;
-	//	}
-
-	//};
-
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> operator+(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
-	//{
-	//	return Mmxn<X>(lhs.x+rhs.x, lhs.y+rhs.y, lhs.z+rhs.z);
-	//}
-
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> operator+(const Mmxn<X> &lhs, const X &rhs)
-	//{
-	//	return Mmxn<X>(lhs.x+rhs, lhs.y+rhs, lhs.z+rhs);
-	//}
-
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> operator+(const X &lhs, const Mmxn<X> &rhs)
-	//{
-	//	return Mmxn<X>(lhs+rhs.x, lhs+rhs.y, lhs+rhs.z);
-	//}
+	// 	Vector<T, e_host> data;
 
 
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> operator-(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
-	//{
-	//	return Mmxn<X>(lhs.x-rhs.x, lhs.y-rhs.y, lhs.z-rhs.z);
-	//}
+	// 	DEVICE_CALLABLE
+	// 	inline Mmxn(const int &m_i = 1, const int &n_i = 1)
+	// 	{
+	// 		m = m_i;
+	// 		n = n_i;
 
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> operator-(const Mmxn<X> &lhs, const X &rhs)
-	//{
-	//	return Mmxn<X>(lhs.x-rhs, lhs.y-rhs, lhs.z-rhs);
-	//}
+	// 		data.resize(m*n);
+	// 	} 
 
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> operator-(const X &lhs, const Mmxn<X> &rhs)
-	//{
-	//	return Mmxn<X>(lhs-rhs.x, lhs-rhs.y, lhs-rhs.z);
-	//}
+	// 	DEVICE_CALLABLE
+	// 	inline Mmxn<T>& operator+=(const Mmxn<T> r)
+	// 	{
+	// 		
+	// 		for(auto i=0; i<data.size(); i++)
+	// 		{
+	// 			data[i] += r.data[i];		
+	// 		}
 
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> operator*(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
-	//{
-	//	return Mmxn<X>(lhs.x*rhs.x, lhs.y*rhs.y, lhs.z*rhs.z);
-	//}
+	// 		return *this;
+	// 	}
 
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> operator*(const Mmxn<X> &lhs, const X &rhs)
-	//{
-	//	return Mmxn<X>(lhs.x*rhs, lhs.y*rhs, lhs.z*rhs);
-	//}
+	// 	DEVICE_CALLABLE
+	// 	inline Mmxn<T>& operator-=(const Mmxn<T> r)
+	// 	{
+	// 		for(auto i=0; i<data.size(); i++)
+	// 		{
+	// 			data[i] -= r.data[i];		
+	// 		}
 
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> operator*(const X &lhs, const Mmxn<X> &rhs)
-	//{
-	//	return Mmxn<X>(lhs*rhs.x, lhs*rhs.y, lhs*rhs.z);
-	//}
+	// 		return *this;
+	// 	}
 
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> operator/(const Mmxn<X> &lhs, const X &rhs)
-	//{
-	//	return Mmxn<X>(lhs.x/rhs, lhs.y/rhs, lhs.z/rhs);
-	//}
+	// 	DEVICE_CALLABLE
+	// 	inline Mmxn<T>& operator*=(const T r)
+	// 	{
+	// 		if(this->n!=r.m)
+	// 		{
+	// 			return;
+	// 		}
 
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> fmin(const Mmxn<X> lhs, const Mmxn<X> rhs)
-	//{
-	//	return Mmxn<X>(::fmin(lhs.x, rhs.x), ::fmin(lhs.y, rhs.y), ::fmin(lhs.z, rhs.z));
-	//}
+	// 		for(auto ir=0; ir<m; ir++)
+	// 		{
+	// 			for(auto ic=0; ic<r.n; ic++)
+	// 			{
+	// 				irc = r.n*ir + ic;
+	// 				for(auto i=0; i<n; i++)
+	// 				{
+	// 					data[irc] += r.data[i];		
+	// 				}	
+	// 			}
+	// 		}
 
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline Mmxn<X> fmax(const Mmxn<X> lhs, const Mmxn<X> rhs)
-	//{
-	//	return Mmxn<X>(::fmax(lhs.x, rhs.x), ::fmax(lhs.y, rhs.y), ::fmax(lhs.z, rhs.z));
-	//}
+	// 		return *this;
+	// 	}
 
-	//template <typename X>
-	//DEVICE_CALLABLE
-	//inline X norm(const Mmxn<X>& r)
-	//{
-	//	return r.x*r.x + r.y*r.y + r.z*r.z;
-	//}
+	// 	DEVICE_CALLABLE
+	// 	inline Mmxn<T>& operator/=(const T r)
+	// 	{
+	// 		for(auto i=0; i<data.size(); i++)
+	// 		{
+	// 			data[i] /= r.data[i];		
+	// 		}
 
-	//template <typename X>
-	//DEVICE_CALLABLE
-	//inline X module(const Mmxn<X>& r)
-	//{
-	//	return sqrt(norm(r));
-	//}
+	// 		return *this;
+	// 	}
 
-	//template <typename X>
-	//DEVICE_CALLABLE
-	//inline X normalized(const Mmxn<X>& r)
-	//{
-	//	return r/r.module();
-	//}
+	// };
+
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> operator+(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
+	// {
+	// 	return Mmxn<X>(lhs.x+rhs.x, lhs.y+rhs.y, lhs.z+rhs.z);
+	// }
+
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> operator+(const Mmxn<X> &lhs, const X &rhs)
+	// {
+	// 	return Mmxn<X>(lhs.x+rhs, lhs.y+rhs, lhs.z+rhs);
+	// }
+
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> operator+(const X &lhs, const Mmxn<X> &rhs)
+	// {
+	// 	return Mmxn<X>(lhs+rhs.x, lhs+rhs.y, lhs+rhs.z);
+	// }
 
 
-	////template<class TVector>
-	////DEVICE_CALLABLE
-	////inline Mmxn<T> matrix_prod(const TVector &Rm)
-	////{
-	////	Mmxn<T> r_o;
-	////	r_o.x = Rm[0]*x + Rm[3]*y + Rm[6]*z;
-	////	r_o.y = Rm[1]*x + Rm[4]*y + Rm[7]*z;
-	////	r_o.z = Rm[2]*x + Rm[5]*y + Rm[8]*z;
-	////	return r_o;
-	////}
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> operator-(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
+	// {
+	// 	return Mmxn<X>(lhs.x-rhs.x, lhs.y-rhs.y, lhs.z-rhs.z);
+	// }
 
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline X dot(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
-	//{
-	//	return lhs.x*rhs.x + lhs.y*rhs.y + lhs.z*rhs.z;
-	//}
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> operator-(const Mmxn<X> &lhs, const X &rhs)
+	// {
+	// 	return Mmxn<X>(lhs.x-rhs, lhs.y-rhs, lhs.z-rhs);
+	// }
 
-	//template<class X>
-	//DEVICE_CALLABLE
-	//inline X angle(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
-	//{
-	//	return acos(dot(lhs, rhs)/(lhs.module()*rhs.module()));
-	//}
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> operator-(const X &lhs, const Mmxn<X> &rhs)
+	// {
+	// 	return Mmxn<X>(lhs-rhs.x, lhs-rhs.y, lhs-rhs.z);
+	// }
+
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> operator*(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
+	// {
+	// 	return Mmxn<X>(lhs.x*rhs.x, lhs.y*rhs.y, lhs.z*rhs.z);
+	// }
+
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> operator*(const Mmxn<X> &lhs, const X &rhs)
+	// {
+	// 	return Mmxn<X>(lhs.x*rhs, lhs.y*rhs, lhs.z*rhs);
+	// }
+
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> operator*(const X &lhs, const Mmxn<X> &rhs)
+	// {
+	// 	return Mmxn<X>(lhs*rhs.x, lhs*rhs.y, lhs*rhs.z);
+	// }
+
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> operator/(const Mmxn<X> &lhs, const X &rhs)
+	// {
+	// 	return Mmxn<X>(lhs.x/rhs, lhs.y/rhs, lhs.z/rhs);
+	// }
+
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> fmin(const Mmxn<X> lhs, const Mmxn<X> rhs)
+	// {
+	// 	return Mmxn<X>(::fmin(lhs.x, rhs.x), ::fmin(lhs.y, rhs.y), ::fmin(lhs.z, rhs.z));
+	// }
+
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> fmax(const Mmxn<X> lhs, const Mmxn<X> rhs)
+	// {
+	// 	return Mmxn<X>(::fmax(lhs.x, rhs.x), ::fmax(lhs.y, rhs.y), ::fmax(lhs.z, rhs.z));
+	// }
+
+	// template <typename X>
+	// DEVICE_CALLABLE
+	// inline X norm(const Mmxn<X>& r)
+	// {
+	// 	return r.x*r.x + r.y*r.y + r.z*r.z;
+	// }
+
+	// template <typename X>
+	// DEVICE_CALLABLE
+	// inline X module(const Mmxn<X>& r)
+	// {
+	// 	return sqrt(norm(r));
+	// }
+
+	// template <typename X>
+	// DEVICE_CALLABLE
+	// inline Mmxn<X> normalized(const Mmxn<X>& r)
+	// {
+	// 	return r/r.module();
+	// }
+
+
+	// // template<class TVector>
+	// // DEVICE_CALLABLE
+	// // inline Mmxn<T> matrix_prod(const TVector &Rm)
+	// // {
+	// // 	Mmxn<T> r_o;
+	// // 	r_o.x = Rm[0]*x + Rm[3]*y + Rm[6]*z;
+	// // 	r_o.y = Rm[1]*x + Rm[4]*y + Rm[7]*z;
+	// // 	r_o.z = Rm[2]*x + Rm[5]*y + Rm[8]*z;
+	// // 	return r_o;
+	// // }
+
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline X dot(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
+	// {
+	// 	return lhs.x*rhs.x + lhs.y*rhs.y + lhs.z*rhs.z;
+	// }
+
+	// template<class X>
+	// DEVICE_CALLABLE
+	// inline X angle(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
+	// {
+	// 	return acos(dot(lhs, rhs)/(lhs.module()*rhs.module()));
+	// }
 
 	/******************************2d vector*********************************/
 	template<class T>
@@ -476,22 +476,21 @@ namespace mt
 
 	template <typename X>
 	DEVICE_CALLABLE
-	inline X normalized(const r2d<X>& r)
+	inline r2d<X> normalized(const r2d<X>& r)
 	{
-		return r/r.module();
+		return r/module(r);
 	}
 
-
-	//template<class TVector>
-	//DEVICE_CALLABLE
-	//inline r2d<T> matrix_prod(const TVector &Rm)
-	//{
-	//	r2d<T> r_o;
-	//	r_o.x = Rm[0]*x + Rm[3]*y + Rm[6]*z;
-	//	r_o.y = Rm[1]*x + Rm[4]*y + Rm[7]*z;
-	//	r_o.z = Rm[2]*x + Rm[5]*y + Rm[8]*z;
-	//	return r_o;
-	//}
+	// template<class TVector>
+	// DEVICE_CALLABLE
+	// inline r2d<T> matrix_prod(const TVector &Rm)
+	// {
+	// 	r2d<T> r_o;
+	// 	r_o.x = Rm[0]*x + Rm[3]*y + Rm[6]*z;
+	// 	r_o.y = Rm[1]*x + Rm[4]*y + Rm[7]*z;
+	// 	r_o.z = Rm[2]*x + Rm[5]*y + Rm[8]*z;
+	// 	return r_o;
+	// }
 
 	template<class X>
 	DEVICE_CALLABLE
@@ -710,22 +709,22 @@ namespace mt
 
 	template <typename X>
 	DEVICE_CALLABLE
-	inline X normalized(const r3d<X>& r)
+	inline r3d<X> normalized(const r3d<X>& r)
 	{
 		return r/r.module();
 	}
 
 
-	//template<class TVector>
-	//DEVICE_CALLABLE
-	//inline r3d<T> matrix_prod(const TVector &Rm)
-	//{
-	//	r3d<T> r_o;
-	//	r_o.x = Rm[0]*x + Rm[3]*y + Rm[6]*z;
-	//	r_o.y = Rm[1]*x + Rm[4]*y + Rm[7]*z;
-	//	r_o.z = Rm[2]*x + Rm[5]*y + Rm[8]*z;
-	//	return r_o;
-	//}
+	// template<class TVector>
+	// DEVICE_CALLABLE
+	// inline r3d<T> matrix_prod(const TVector &Rm)
+	// {
+	// 	r3d<T> r_o;
+	// 	r_o.x = Rm[0]*x + Rm[3]*y + Rm[6]*z;
+	// 	r_o.y = Rm[1]*x + Rm[4]*y + Rm[7]*z;
+	// 	r_o.z = Rm[2]*x + Rm[5]*y + Rm[8]*z;
+	// 	return r_o;
+	// }
 
 	template<class X>
 	DEVICE_CALLABLE

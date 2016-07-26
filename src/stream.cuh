@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef STREAM_H
@@ -135,8 +135,8 @@ namespace mt
 				return range;
 			}
 
-			template<class TFn>
-			void exec(TFn &fn)
+			template<class TFn, class... TArgs>
+			void exec(TFn &fn, TArgs &...arg)
 			{
 				if(n_act_stream < 1)
 				{
@@ -145,10 +145,10 @@ namespace mt
 
 				for(auto istream = 0; istream < n_act_stream-1; istream++)
 				{
-					stream[istream] = std::thread(fn, get_range(istream));
+					stream[istream] = std::thread(std::bind(fn, get_range(istream), std::ref<TArgs>(arg)...));
 				}
 
-				fn(get_range(n_act_stream-1));
+				fn(get_range(n_act_stream-1), std::ref<TArgs>(arg)...);
 
 				synchronize();
 			}

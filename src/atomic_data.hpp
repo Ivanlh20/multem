@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef ATOMIC_DATA_H
@@ -131,7 +131,7 @@ namespace mt
 				data_table.resize(c_nAtomsTypes);
 				for(auto i = 0; i < data_table.size(); i++)
 				{
-					data_table[i].feg.resize(c_nAtomsIons); //-7:1:7
+					data_table[i].feg.resize(c_nAtomsIons); // -7:1:7
 					for(auto j = 0; j < data_table[i].feg.size(); j++)
 					{
 						data_table[i].feg[j].resize(6, 0);

@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef HOST_DEVICE_FUNCTIONS_H
@@ -155,6 +155,17 @@ namespace mt
 
 	namespace host_device_detail
 	{
+		// Kahan summation algorithm
+		// https:// en.wikipedia.org/wiki/Kahan_summation_algorithm
+		template<class T>
+		void kh_sum(T &sum_v, T v, T &error)
+		{
+			v = v - error;
+			T t = sum_v + v;
+			error = (t-sum_v)-v;
+			sum_v = t;
+		};
+
 		template<class TFn, class T>
 		inline
 		T Root_Finder(TFn fn, T x0, T xe, const T Tol = 1e-8, const int itMax = 200)
@@ -1853,29 +1864,29 @@ namespace mt
 		}
 
 
-		//template<class TGrid, class TVector>
-		//DEVICE_CALLABLE FORCE_INLINE 
-		//void dilate(const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_o)
-		//{
-		//	int ix0 = max(ix_i+nk0, 0);
-		//	int ixe = min(ix_i+nke, nx_i);
+		// template<class TGrid, class TVector>
+		// DEVICE_CALLABLE FORCE_INLINE 
+		// void dilate(const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_o)
+		// {
+		// 	int ix0 = max(ix_i+nk0, 0);
+		// 	int ixe = min(ix_i+nke, nx_i);
 
-		//	int iy0 = max(iy_i+nk0, 0);
-		//	int iye = min(iy_i+nke, ny_i);
+		// 	int iy0 = max(iy_i+nk0, 0);
+		// 	int iye = min(iy_i+nke, ny_i);
 
-		//	for (auto ix = ix0; ix < ixe; ix++)
-		//	{
-		//		for (auto iy = iy0; iy < iye; iy++)
-		//		{
-		//			if(Im_i[ix*ny_i+iy]>0.5)
-		//			{	
-		//				Im_o[ix_i*ny_i+iy_i] = 1;
-		//				return;
-		//			}
-		//		}
-		//	}
-		//	Im_o[ix_i*ny_i+iy_i] = 0;
-		//}
+		// 	for (auto ix = ix0; ix < ixe; ix++)
+		// 	{
+		// 		for (auto iy = iy0; iy < iye; iy++)
+		// 		{
+		// 			if(Im_i[ix*ny_i+iy]>0.5)
+		// 			{	
+		// 				Im_o[ix_i*ny_i+iy_i] = 1;
+		// 				return;
+		// 			}
+		// 		}
+		// 	}
+		// 	Im_o[ix_i*ny_i+iy_i] = 0;
+		// }
 	} // host_device_detail
 
 	// Electron scattering factors calculation (feg)

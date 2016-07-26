@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef HOST_FUNCTIONS_H
@@ -41,21 +41,36 @@ namespace mt
 	template<class TVector>
 	TVector filter_median_1d(Stream<e_host> &stream, TVector &Im_i, int nkr);
 
+	// median filter 2d
+	template<class TGrid, class TVector>
+	TVector filter_median_2d(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr);
+
 	// wiener filter 1d
 	template<class TVector>
 	TVector filter_wiener_1d(Stream<e_host> &stream, TVector &Im_i, int nkr);
+
+	// wiener filter 2d
+	template<class TGrid, class TVector>
+	TVector filter_wiener_2d(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr);
 
 	// denoising poisson 
 	template<class TVector>
 	TVector filter_denoising_poisson_1d(Stream<e_host> &stream, TVector &Im_i, int nkr_w, int nkr_m);
 
 	// get peak signal to noise ratio PSNR 
-	template<class TGrid, class TVector>
-	Value_type<TVector> get_PSNR(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr_w, int nkr_m);
+	template<class TVector>
+	Value_type<TVector> get_PSNR(Stream<e_host> &stream, TVector &Im_i, TVector &Im_d);
+
+	// gray opening
+	template<class TVector>
+	TVector morp_g_open(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr);
 
 	// thresholding
 	template<class TVector>
 	TVector thresholding(Stream<e_host> &stream, TVector &v_i, Value_type<TVector> threshold);
+
+	template<class T>
+	class Neigh_2d;
 
 	namespace host_detail
 	{
@@ -277,6 +292,219 @@ namespace mt
 				host_device_detail::linear_Gaussian(iR, atom);
 			}
 		}
+
+		template<class TVector>
+		void fit_log_gaussian_a_sigma(const TVector &x2_i, const TVector &y_i, Value_type<TVector> &a1, Value_type<TVector> &a0)
+		{
+			using T = Value_type<TVector>;
+
+			// get a, sigma
+			T sx1x1 = 0;
+			T sx2x2 = 0;
+			T sx1x2 = 0;
+			T sx1y = 0;
+			T sx2y = 0;
+			for (auto ix = 0; ix < x2_i.size(); ix++)
+			{
+				T f = x2_i[ix];
+				T x1 = f;
+				T x2 = 1;
+				T y = y_i[ix];
+
+				sx1x1 += x1*x1;
+				sx2x2 += x2*x2;
+				sx1x2 += x1*x2;
+				sx1y += x1*y;
+				sx2y += x2*y;
+			}
+
+			T det = sx1x1*sx2x2-sx1x2*sx1x2;
+			a1 = (sx2x2*sx1y-sx1x2*sx2y)/det;
+			a0 = (sx1x1*sx2y-sx1x2*sx1y)/det;
+		}
+
+		template<class TVector>
+		void fit_gaussian_a_c(const TVector &x2_i, const TVector &y_i, Value_type<TVector> lambdai, 
+		Value_type<TVector> sigma, Value_type<TVector> &a, Value_type<TVector> &c)
+		{
+			using T = Value_type<TVector>;
+
+			// get a, c
+			T c_0 = 0.5/pow(sigma, 2);
+			T sx1x1 = 0;
+			T sx2x2 = 0;
+			T sx1x2 = 0;
+			T sx1y = 0;
+			T sx2y = 0;
+			for (auto ix = 0; ix < x2_i.size(); ix++)
+			{
+				T f = exp(-c_0*x2_i[ix]);
+				T x1 = f;
+				T x2 = 1;
+				T y = y_i[ix];
+
+				sx1x1 += x1*x1;
+				sx2x2 += x2*x2;
+				sx1x2 += x1*x2;
+				sx1y += x1*y;
+				sx2y += x2*y;
+			}
+			T lambda = lambdai*(sx1x1+sx2x2);
+			sx1x1 += lambda;
+			sx2x2 += lambda;
+
+			T det = sx1x1*sx2x2-sx1x2*sx1x2;
+			a = (sx2x2*sx1y-sx1x2*sx2y)/det;
+			c = (sx1x1*sx2y-sx1x2*sx1y)/det;
+		}
+
+		template<class TVector>
+		Value_type<TVector> fit_gaussian_a(const TVector &x2_i, const TVector &y_i, Value_type<TVector> sigma)
+		{
+			using T = Value_type<TVector>;
+
+			// get a = sum xy/sum x^2
+			T c_0 = 0.5/pow(sigma, 2);
+
+			T sx1x1 = 0;
+			T sx1y = 0;
+			for (auto ix = 0; ix < x2_i.size(); ix++)
+			{
+				T x1 = exp(-c_0*x2_i[ix]);
+				T y = y_i[ix];
+
+				sx1x1 += x1*x1;
+				sx1y += x1*y;
+			}
+
+			return sx1y/sx1x1;
+		}
+
+		template<class TVector>
+		Value_type<TVector> fit_gaussian_sigma(const TVector &x2_i, const TVector &y_i, Value_type<TVector> a, 
+		Value_type<TVector> &sigma, Value_type<TVector> sigma_min, Value_type<TVector> sigma_max,
+		int nit, Value_type<TVector> d_sigma_error)
+		{
+			using T = Value_type<TVector>;
+
+			T sigma_o = sigma;
+			// get b = sum xy/sum x^2
+			for (auto it = 0; it < nit; it++)
+			{
+				T c_0 = 0.5/pow(sigma, 2);
+				T c_1 = a/pow(sigma, 3);
+
+				T sx1x1 = 0;
+				T sx1y = 0;
+				for (auto ix = 0; ix < x2_i.size(); ix++)
+				{
+					T f = exp(-c_0*x2_i[ix]);
+					T x1 = c_1*x2_i[ix]*f;
+					T y = y_i[ix]-a*f;
+
+					sx1x1 += x1*x1;
+					sx1y += x1*y;
+				}
+				T d_sigma = sx1y/sx1x1;
+				sigma += d_sigma;
+				//sigma = min(max(sigma, sigma_min), sigma_max);
+
+				if(sigma <= sigma_min)
+				{
+					sigma = sigma_min;
+					break;
+				}
+
+				if(sigma >= sigma_max)
+				{
+					sigma = sigma_max;
+					break;
+				}
+
+				if (abs(d_sigma/sigma)<d_sigma_error)
+				{
+					break;
+				}
+			}
+
+			return sigma-sigma_o;
+		}
+
+		template<class TVector>
+		Value_type<TVector> fit_gaussian_w_a(const TVector &x2_i, const TVector &y_i, Value_type<TVector> sigma)
+		{
+			using T = Value_type<TVector>;
+
+			// get a = sum xy/sum x^2
+			T c_0 = 0.5/pow(sigma, 2);
+
+			T sx1x1 = 0;
+			T sx1y = 0;
+			for (auto ix = 0; ix < x2_i.size(); ix++)
+			{
+				//T w = 1/::fmax(x2_i[ix], 0.001);
+				T w = x2_i[ix];
+				T x1 = exp(-c_0*x2_i[ix]);
+				T y = w*y_i[ix];
+
+				sx1x1 += w*x1*x1;
+				sx1y += x1*y;
+			}
+
+			return sx1y/sx1x1;
+		}
+
+		template<class TVector>
+		Value_type<TVector> fit_gaussian_w_sigma(const TVector &x2_i, const TVector &y_i, Value_type<TVector> a, 
+		Value_type<TVector> &sigma, Value_type<TVector> sigma_min, Value_type<TVector> sigma_max,
+		int nit, Value_type<TVector> d_sigma_error)
+		{
+			using T = Value_type<TVector>;
+
+			T sigma_o = sigma;
+			// get b = sum xy/sum x^2
+			for (auto it = 0; it < nit; it++)
+			{
+				T c_0 = 0.5/pow(sigma, 2);
+				T c_1 = a/pow(sigma, 3);
+
+				T sx1x1 = 0;
+				T sx1y = 0;
+				for (auto ix = 0; ix < x2_i.size(); ix++)
+				{
+					//T w = 1/::fmax(x2_i[ix], 0.001);
+					T w = x2_i[ix];
+					T f = exp(-c_0*x2_i[ix]);
+					T x1 = c_1*x2_i[ix]*f;
+					T y = y_i[ix]-a*f;
+
+					sx1x1 += w*x1*x1;
+					sx1y += w*x1*y;
+				}
+				T d_sigma = sx1y/sx1x1;
+				sigma += d_sigma;
+
+				if(sigma <= sigma_min)
+				{
+					sigma = sigma_min;
+					break;
+				}
+
+				if(sigma >= sigma_max)
+				{
+					sigma = sigma_max;
+					break;
+				}
+
+				if (abs(d_sigma/sigma)<d_sigma_error)
+				{
+					break;
+				}
+			}
+
+			return sigma-sigma_o;
+		}
+
 	} // host_detail
 
 	/***************************************************************************/
@@ -724,6 +952,56 @@ namespace mt
 		return x_var;
 	}
 
+	template<class TVector>
+	void rescale_data(const Value_type<TVector> &x_mean, const Value_type<TVector> &x_std, TVector &x)
+	{
+		using T = Value_type<TVector>;
+		std::for_each(x.begin(), x.end(), [=](T &v){ v = (v-x_mean)/x_std; });
+	}
+
+	template<class TVector, class ...TArg>
+	void rescale_data(const Value_type<TVector> &x_mean, const Value_type<TVector> &x_std, TVector &x, TArg &...arg)
+	{
+		rescale_data(x_mean, x_std, x);
+		rescale_data(x_mean, x_std, arg...);
+	}
+
+	template<class TVector>
+	Value_type<TVector> min_data(TVector &x)
+	{
+		return *std::min_element(x.begin(), x.end());
+	}
+
+	template<class TVector, class ...TArg>
+	Value_type<TVector> min_data(TVector &x, TArg &...arg)
+	{
+		return ::fmin(min_data(x), min_data(arg...));
+	}
+
+	template<class TVector>
+	Value_type<TVector> max_data(TVector &x)
+	{
+		return *std::max_element(x.begin(), x.end());
+	}
+
+	template<class TVector, class ...TArg>
+	Value_type<TVector> max_data(TVector &x, TArg &...arg)
+	{
+		return ::fmax(max_data(x), max_data(arg...));
+	}
+
+	template<class TVector>
+	Value_type<TVector> max_std_data(TVector &x)
+	{
+		return sqrt(variance(x));
+	}
+
+	template<class TVector, class ...TArg>
+	Value_type<TVector> max_std_data(TVector &x, TArg &...arg)
+	{
+		return ::fmax(max_std_data(x), max_std_data(arg...));
+	}
+	
 	template<class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
 	phase_factor_1d(Stream<e_host> &stream, TGrid &grid, Value_type<TGrid> x, TVector_c &fPsi_i, TVector_c &fPsi_o)
@@ -1324,6 +1602,33 @@ namespace mt
 	/***************************************************************************/
 	/***************************************************************************/
 
+	template <class TVector>
+	TVector transpose(Stream<e_host> &stream, const int &nrows, const int &ncols, TVector &M)
+	{
+		TVector M_t(nrows*ncols);
+		auto thr_transpose = [nrows, ncols](const Range &range, TVector &M, TVector &M_t)
+		{
+			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
+			{
+				for(auto iy = range.iy_0; iy < range.iy_e; iy++)
+				{
+					int ixy = ix*nrows+iy;
+					int ixy_t = iy*ncols+ix;
+					M_t[ixy_t] = M[ixy];
+				}
+			}
+		};
+
+		stream.set_n_act_stream(ncols);
+		stream.set_grid(ncols, nrows);
+		stream.exec(thr_transpose, M, M_t);
+
+		return M_t;
+	}
+
+	/***************************************************************************/
+	/***************************************************************************/
+
 	// get index (with typ = 0: bottom index for equal values and typ = 1: upper index for equal values)
 	int getIndex(int ixmin, int ixmax, double *x, int typ, double x0)
 	{
@@ -1418,19 +1723,25 @@ namespace mt
 	/********************************************************************/
 	// get one dimensional Hanning Filter
 	template<class TVector>
-	TVector func_hanning_1d(Stream<e_host> &stream, int nx, Value_type<TVector> dx, Value_type<TVector> k, bool shift)
+	TVector func_hanning_1d(Stream<e_host> &stream, int nx, Value_type<TVector> dx, Value_type<TVector> k, bool shift,
+	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
 	{	
-		TVector f(nx);
+		using T = Value_type<TVector>;
 
 		int nxh = nx/2;
-		auto cx = c_2Pi/(dx*nx);
+
+		const T lx = dx*nx - (x_0 + x_e);
+		const T cx = c_2Pi/lx;
+		x_e = lx + x_0;
+
+		TVector f(nx);
 
 		auto thr_hanning = [&](const Range &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
-				auto Rx = RSC(ixy, nxh, shift)*dx; 
-				auto v = 0.5*(1.0-cos(cx*Rx));
+				T Rx = RSC(ixy, nxh, shift)*dx; 
+				T v = ((Rx<x_0)||(Rx>x_e))?0:0.5*(1.0-cos(cx*(Rx-x_0)));
 				f[ixy] = (v>k)?1.0:v/k;
 			}
 		};
@@ -1444,19 +1755,23 @@ namespace mt
 
 	// get two dimensional Hanning by row
 	template<class TVector, class TGrid>
-	TVector func_hanning_2d_by_row(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> k, bool shift)
+	TVector func_hanning_2d_by_row(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> k, bool shift, 
+	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
 	{	
 		using T = Value_type<TVector>;
 
-		const T cx = c_2Pi/grid.lx;
+		const T lx = grid.lx - (x_0 + x_e);
+		const T cx = c_2Pi/lx;
+		x_e = lx + x_0;
 
 		TVector fx;
 		fx.reserve(grid.nx);
 
 		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			auto Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix); 
-			fx.push_back(0.5*(1.0-cos(cx*Rx)));
+			T Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix);
+			T v = ((Rx<x_0)||(Rx>x_e))?0:0.5*(1.0-cos(cx*(Rx-x_0)));
+			fx.push_back(v);
 		}
 
 		TVector f(grid.nxy());
@@ -1467,7 +1782,7 @@ namespace mt
 			{
 				for(auto ix = 0; ix < grid.nx; ix++)
 				{
-					auto v = fx[ix];
+					T v = fx[ix];
 					f[grid.ind_col(ix, iy)] = (v>k)?1.0:v/k;
 				}
 			}
@@ -1482,12 +1797,17 @@ namespace mt
 
 	// get two dimensional Hanning Filter
 	template<class TVector, class TGrid>
-	TVector func_hanning_2d(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> k, bool shift)
+	TVector func_hanning_2d(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> k, bool shift, 
+	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0, Value_type<TVector> y_0=0, Value_type<TVector> y_e=0)
 	{	
 		using T = Value_type<TVector>;
 
-		const T cx = c_2Pi/grid.lx;
-		const T cy = c_2Pi/grid.ly;
+		const T lx = grid.lx - (x_0+x_e);
+		const T ly = grid.ly - (y_0+y_e);
+		const T cx = c_2Pi/lx;
+		const T cy = c_2Pi/ly;
+		x_e = lx + x_0;
+		y_e = ly + y_0;
 
 		TVector fx;
 		fx.reserve(grid.nx);
@@ -1495,7 +1815,8 @@ namespace mt
 		for(auto ix = 0; ix < grid.nx; ix++)
 		{
 			auto Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix); 
-			fx.push_back(0.5*(1.0-cos(cx*Rx)));
+			T v = ((Rx<x_0)||(Rx>x_e))?0:0.5*(1.0-cos(cx*(Rx-x_0)));
+			fx.push_back(v);
 		}
 
 		TVector fy;
@@ -1504,9 +1825,9 @@ namespace mt
 		for(auto iy = 0; iy < grid.ny; iy++)
 		{
 			auto Ry = (shift)?grid.Ry_shift(iy):grid.Ry(iy); 
-			fy.push_back(0.5*(1.0-cos(cy*Ry)));
+			T v = ((Ry<y_0)||(Ry>y_e))?0:0.5*(1.0-cos(cy*(Ry-y_0)));
+			fy.push_back(v);
 		}
-
 		TVector f(grid.nxy());
 
 		auto thr_hanning = [&](const Range &range)
@@ -1531,19 +1852,25 @@ namespace mt
 	/********************************************************************/
 	// get two dimensional Gaussian by row
 	template<class TVector>
-	TVector func_gaussian_1d(Stream<e_host> &stream, int nx, Value_type<TVector> dx, Value_type<TVector> sigma, bool shift)
+	TVector func_gaussian_1d(Stream<e_host> &stream, int nx, Value_type<TVector> dx, Value_type<TVector> sigma, bool shift,
+	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
 	{	
-		TVector f(nx);
-
+		using T = Value_type<TVector>;
 		int nxh = nx/2;
-		auto cx = 0.5/(sigma*sigma);
 
+		const T lx = dx*nx - (x_0 + x_e);
+		auto alpha_x = 0.5/(sigma*sigma);
+		x_e = x_0 + lx;
+		const T x_c = x_0 + 0.5*lx;
+
+		TVector f(nx);
 		auto thr_gaussian = [&](const Range &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
-				auto Rx = FSC(ixy, nxh, shift)*dx; 
-				f[ixy] = exp(-cx*Rx*Rx);
+				auto Rx = RSC(ixy, nxh, shift)*dx; 
+				T v = ((Rx<x_0)||(Rx>x_e))?0:exp(-alpha_x*pow(Rx-x_c, 2));
+				f[ixy] = v;
 			}
 		};
 
@@ -1556,21 +1883,24 @@ namespace mt
 	
 	// get two dimensional Gaussian Filter
 	template<class TVector, class TGrid>
-	TVector func_gaussian_2d_by_row(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> sigma, bool shift)
+	TVector func_gaussian_2d_by_row(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> sigma, bool shift, 
+	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
 	{	
 		using T = Value_type<TVector>;
 
-		const T alpha_x = 0.5/(sigma*sigma);
-
-		const r2d<T> rc(grid.lx/2, grid.ly/2);
+		const T lx = grid.lx - (x_0 + x_e);
+		auto alpha_x = 0.5/(sigma*sigma);
+		x_e = x_0 + lx;
+		const T x_c = x_0 + 0.5*lx;
 
 		TVector fx;
 		fx.reserve(grid.nx);
 
 		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			auto Rx = (shift)?grid.Rx_shift(ix, rc.x):grid.Rx(ix, rc.x); 
-			fx.push_back(exp(-alpha_x*Rx*Rx));
+			auto Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix); 
+			T v = ((Rx<x_0)||(Rx>x_e))?0:exp(-alpha_x*pow(Rx-x_c, 2));
+			fx.push_back(v);
 		}
 
 		TVector f(grid.nxy());
@@ -1595,22 +1925,28 @@ namespace mt
 
 	// get two dimensional Gaussian Filter
 	template<class TVector, class TGrid>
-	TVector func_gaussian_2d(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> sigma, bool shift)
+	TVector func_gaussian_2d(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> sigma, bool shift, 
+	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0, Value_type<TVector> y_0=0, Value_type<TVector> y_e=0)
 	{	
 		using T = Value_type<TVector>;
 
+		const T lx = grid.lx - (x_0 + x_e);
+		const T ly = grid.ly - (y_0 + y_e);
 		const T alpha_x = 0.5/(sigma*sigma);
 		const T alpha_y = 0.5/(sigma*sigma);
-
-		const r2d<T> rc(grid.lx/2, grid.ly/2);
+		x_e = x_0 + lx;
+		y_e = y_0 + ly;
+		const T x_c = x_0 + 0.5*lx;
+		const T y_c = y_0 + 0.5*ly;
 
 		TVector fx;
 		fx.reserve(grid.nx);
 
 		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			auto Rx = (shift)?grid.Rx_shift(ix, rc.x):grid.Rx(ix, rc.x); 
-			fx.push_back(exp(-alpha_x*Rx*Rx));
+			auto Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix); 
+			T v = ((Rx<x_0)||(Rx>x_e))?0:exp(-alpha_x*pow(Rx-x_c, 2));
+			fx.push_back(v);
 		}
 
 		TVector fy;
@@ -1618,8 +1954,9 @@ namespace mt
 
 		for(auto iy = 0; iy < grid.ny; iy++)
 		{
-			auto Ry = (shift)?grid.Ry_shift(iy, rc.y):grid.Ry(iy, rc.y); 
-			fy.push_back(exp(-alpha_y*Ry*Ry));
+			auto Ry = (shift)?grid.Ry_shift(iy):grid.Ry(iy); 
+			T v = ((Ry<y_0)||(Ry>y_e))?0:exp(-alpha_y*pow(Ry-y_c, 2));
+			fy.push_back(v);
 		}
 
 		TVector f(grid.nxy());
@@ -1645,19 +1982,26 @@ namespace mt
 	/********************************************************************/
 	// get one dimensional Butterworth Filter
 	template<class TVector>
-	TVector func_butterworth_1d(Stream<e_host> &stream, int nx, Value_type<TVector> dx, Value_type<TVector> Radius, int n, bool shift)
+	TVector func_butterworth_1d(Stream<e_host> &stream, int nx, Value_type<TVector> dx, Value_type<TVector> Radius, 
+	int n, bool shift, Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
 	{
-		TVector f(nx);
-
+		using T = Value_type<TVector>;
+		
 		int nxh = nx/2;
-		auto R02 = pow(Radius, 2);
 
+		const T lx = dx*nx - (x_0 + x_e);
+		auto R02 = pow(Radius, 2);
+		x_e = x_0 + lx;
+		const T x_c = x_0 + 0.5*lx;
+
+		TVector f(nx);
 		auto thr_butterworth = [&](const Range &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
-				auto Rx = FSC(ixy, nxh, shift)*dx; 
-				f[ixy] = 1.0/(1.0+pow(Rx*Rx/R02, n));
+				auto Rx = RSC(ixy, nxh, shift)*dx;
+				T v = ((Rx<x_0)||(Rx>x_e))?0:1.0/(1.0+pow((Rx-x_c)*(Rx-x_c)/R02, n));
+				f[ixy] = v;
 			}
 		};
 
@@ -1670,21 +2014,24 @@ namespace mt
 
 	// get two dimensional Butterworth Filter
 	template<class TVector, class TGrid>
-	TVector func_butterworth_2d_by_row(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> Radius, int n, bool shift)
+	TVector func_butterworth_2d_by_row(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> Radius, 
+	int n, bool shift, Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
 	{
 		using T = Value_type<TVector>;
 
+		const T lx = grid.lx - (x_0 + x_e);
 		const T R02 = pow(Radius, 2);
-
-		const r2d<T> rc(grid.lx/2, grid.ly/2);
+		x_e = x_0 + lx;
+		const T x_c = x_0 + 0.5*lx;
 
 		TVector fx;
 		fx.reserve(grid.nx);
 
 		for(auto ix = 0; ix < grid.nx; ix++)
 		{
-			auto Rx = (shift)?grid.Rx_shift(ix, rc.x):grid.Rx(ix, rc.x);
-			fx.push_back(1.0/(1.0+pow((Rx*Rx)/R02, n)));
+			auto Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix); 
+			T v = ((Rx<x_0)||(Rx>x_e))?0:1.0/(1.0+pow((Rx-x_c)*(Rx-x_c)/R02, n));
+			fx.push_back(v);
 		}
 
 		TVector f(grid.nxy());
@@ -1709,13 +2056,19 @@ namespace mt
 
 	// get two dimensional Butterworth Filter
 	template<class TVector, class TGrid>
-	TVector func_butterworth_2d(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> Radius, int n, bool shift)
+	TVector func_butterworth_2d(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> Radius, 
+	int n, bool shift, Value_type<TVector> x_0=0, Value_type<TVector> x_e=0, Value_type<TVector> y_0=0, 
+	Value_type<TVector> y_e=0)
 	{
 		using T = Value_type<TVector>;
 
+		const T lx = grid.lx - (x_0 + x_e);
+		const T ly = grid.ly - (y_0 + y_e);
 		const T R02 = pow(Radius, 2);
-
-		const r2d<T> rc(grid.lx/2, grid.ly/2);
+		x_e = x_0 + lx;
+		y_e = y_0 + ly;
+		const T x_c = x_0 + 0.5*lx;
+		const T y_c = y_0 + 0.5*ly;
 
 		TVector f(grid.nxy());
 
@@ -1725,8 +2078,10 @@ namespace mt
 			{
 				for(auto iy = range.iy_0; iy < range.iy_e; iy++)
 				{
-					auto R2 = (shift)?grid.R2_shift(ix, iy, rc.x, rc.y):grid.R2(ix, iy, rc.x, rc.y); 
-					f[grid.ind_col(ix, iy)] = 1.0/(1.0+pow(R2/R02, n));
+					auto Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix); 
+					auto Ry = (shift)?grid.Ry_shift(iy):grid.Ry(iy); 
+					T v = ((Rx<x_0)||(Rx>x_e)||(Ry<y_0)||(Ry>y_e))?0:1.0/(1.0+pow((pow(Rx-x_c, 2)+pow(Ry-y_c, 2))/R02, n));
+					f[grid.ind_col(ix, iy)] = v;
 				}
 			}
 		};
@@ -2131,7 +2486,79 @@ namespace mt
 
 		return points;
 	}
-	
+
+	/*******************************************************************/
+	// add periodic boundary border to the image
+	template <class TGrid, class TVector>
+	void set_const_border(TGrid &grid, TVector &image, Value_type<TVector> xb_0, Value_type<TVector> xb_e, 
+	Value_type<TVector> yb_0, Value_type<TVector> yb_e)
+	{
+		using T = Value_type<TVector>;
+
+		int ix_0 = grid.ceil_dRx(xb_0);
+		int ix_e = grid.nx-grid.ceil_dRx(xb_e);
+
+		int iy_0 = grid.ceil_dRy(yb_0);
+		int iy_e = grid.ny-grid.ceil_dRy(yb_e);
+
+		//get average value
+		int ix_i0 = ix_0 + max(10, (ix_e-ix_0)/10);
+		int ix_ie = ix_e-ix_i0;
+		int iy_i0 = iy_0 + max(10, (iy_e-iy_0)/10);
+		int iy_ie = iy_e-iy_i0;
+
+		T val = 0;
+		T cval = 0;
+		for(auto ix=ix_0; ix<ix_e; ix++)
+		{
+			for(auto iy=iy_0; iy<iy_e; iy++)
+			{
+				if((ix<=ix_i0)||(ix>=ix_ie)||(iy<=iy_i0)||(iy>=iy_ie))
+				{
+					val += image[grid.ind_col(ix, iy)];
+					cval++;
+				}
+			}
+		}
+		val /= cval;
+
+		// left
+		for(auto ix=0; ix<ix_0; ix++)
+		{
+			for(auto iy=0; iy<grid.ny; iy++)
+			{
+				image[grid.ind_col(ix, iy)] = val;
+			}
+		}
+
+		// right
+		for(auto ix=ix_e; ix<grid.nx; ix++)
+		{
+			for(auto iy=0; iy<grid.ny; iy++)
+			{
+				image[grid.ind_col(ix, iy)] = val;
+			}
+		}
+
+		// top
+		for(auto ix=0; ix<grid.nx; ix++)
+		{
+			for(auto iy=0; iy<iy_0; iy++)
+			{
+				image[grid.ind_col(ix, iy)] = val;
+			}
+		}
+
+		// bottom
+		for(auto ix=0; ix<grid.nx; ix++)
+		{
+			for(auto iy=iy_e; iy<grid.ny; iy++)
+			{
+				image[grid.ind_col(ix, iy)] = val;
+			}
+		}
+	}
+
 	/*******************************************************************/	
 	// extract region ix0<=x<ixe
 	template<class TVector_o, class TVector_i>
@@ -2161,6 +2588,75 @@ namespace mt
 		return Im_dst;
 	}
 
+	// extract real part of vector
+	template<class TVector_o, class TVector_i>
+	TVector_o extract_real_part(Stream<e_host> &stream, TVector_i &Im_src)
+	{
+		TVector_o Im_dst(Im_src.size());
+
+		auto thr_extract_real = [](const Range &range, TVector_i &Im_src, TVector_o &Im_dst)
+		{
+			for (auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				Im_dst[ixy] = Im_src[ixy].real();
+			}
+		};
+
+		stream.set_n_act_stream(Im_src.size());
+		stream.set_grid(Im_src.size(), 1);
+		stream.exec(thr_extract_real, Im_src, Im_dst);
+
+		return Im_dst;
+	}
+
+	// extract region ix0<=x<ixe
+	template<class TVector_o, class TVector_i>
+	TVector_o extract_region_abs(Stream<e_host> &stream, int nx_src, int ny_src, 
+	TVector_i &Im_src, int ix0_src, int ixe_src, int iy0_src, int iye_src)
+	{
+		auto nx_dst = ixe_src - ix0_src;
+		auto ny_dst = iye_src - iy0_src;
+
+		TVector_o Im_dst(nx_dst*ny_dst);
+
+		auto thr_extract_region = [&](const Range &range)
+		{
+			for (auto ix = range.ix_0; ix < range.ix_e; ix++)
+			{
+				for (auto iy = range.iy_0; iy < range.iy_e; iy++)
+				{
+					Im_dst[ix*ny_dst+iy] = abs(Im_src[(ix0_src+ix)*ny_src+(iy0_src+iy)]);
+				}
+			}
+		};
+
+		stream.set_n_act_stream(nx_dst);
+		stream.set_grid(nx_dst, ny_dst);
+		stream.exec(thr_extract_region);
+
+		return Im_dst;
+	}
+
+	// extract abs of vector
+	template<class TVector_o, class TVector_i>
+	TVector_o extract_abs(Stream<e_host> &stream, TVector_i &Im_src)
+	{
+		TVector_o Im_dst(Im_src.size());
+
+		auto thr_extract_abs = [](const Range &range, TVector_i &Im_src, TVector_o &Im_dst)
+		{
+			for (auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				Im_dst[ixy] = abs(Im_src[ixy]);
+			}
+		};
+
+		stream.set_n_act_stream(Im_src.size());
+		stream.set_grid(Im_src.size(), 1);
+		stream.exec(thr_extract_abs, Im_src, Im_dst);
+
+		return Im_dst;
+	}
 	/*******************************************************************/
 	// analytic convolution
 	template <class TGrid, class TFn, class TVector>
@@ -2228,17 +2724,10 @@ namespace mt
 	// Gaussian deconvolution
 	template <class TGrid, class TVector>
 	TVector gaussian_deconv(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, 
-	TGrid &grid_i, Value_type<TGrid> sigma_r, TVector &image_i)
+	TGrid &grid_i, Value_type<TGrid> sigma_r, Value_type<TGrid> PSNR, TVector &image_i)
 	{	
 		using T = Value_type<TVector>;
 		using TVector_c = vector<complex<T>>;
-
-		// denoise image
-		int nkr_w = max(1, static_cast<int>(floor(sigma_r/2+0.5)));
-		int nkr_m = 0;
-
-		// peak signal to noise ratio
-		auto PSNR = get_PSNR(stream, grid_i, image_i, nkr_w, nkr_m);
 
 		// deconvolution
 		T alpha = 2.0*c_Pi2*sigma_r*sigma_r;
@@ -2251,8 +2740,8 @@ namespace mt
 		// add borders
 		auto pts = add_PB_border(grid_i, image_i, border_x, border_y, grid, image);
 
-		//sigma_r ---> sigma_f = 1/(2*pi*sigma_r)
-		T sigma_f = 4.0/(c_2Pi*sigma_r);
+		// sigma_r ---> sigma_f = 1/(2*pi*sigma_r)
+		T sigma_f = 3.0/(c_2Pi*sigma_r);
 		T g2_lim = pow(min(sigma_f, grid.g_max()), 2);
 		auto krn_dc_gaussian = [=](const int &ix, const int &iy, const TGrid &grid)
 		{
@@ -2283,21 +2772,14 @@ namespace mt
 	// Modified Gaussian deconvolution
 	template <class TGrid, class TVector>
 	TVector mod_gaussian_deconv(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, 
-	TGrid &grid_i, Value_type<TGrid> sigma_r, TVector &image_i)
+	TGrid &grid_i, Value_type<TGrid> sigma_r, Value_type<TGrid> PSNR, TVector &image_i)
 	{	
 		using T = Value_type<TVector>;
 		using TVector_c = vector<complex<T>>;
 
-		// denoise image
-		auto nkr_w = max(1, static_cast<int>(floor(sigma_r/2+0.5)));
-		auto nkr_m = 0;
-
-		// peak signal to noise ratio
-		auto PSNR = get_PSNR(stream, grid_i, image_i, nkr_w, nkr_m);
-
 		// deconvolution
 		T sigma_a = sigma_r;
-		T sigma_b = (0.5)*sigma_r;
+		T sigma_b = 0.25*sigma_r;
 		T alpha_a = 2.0*c_Pi2*pow(sigma_a, 2);
 		T alpha_b = 2.0*c_Pi2*pow(sigma_b, 2);
 
@@ -2308,10 +2790,12 @@ namespace mt
 		TGrid grid;
 		TVector_c image;
 		// add borders
-		auto pts = add_PB_border(grid_i, image_i, border_x, border_y, grid, image);
+		vector<int> pts;
+		
+		pts = add_PB_border(grid_i, image_i, border_x, border_y, grid, image);
 
-		//sigma_r ---> sigma_f = 1/(2*pi*sigma_r)
-		T sigma_f_lim = 4.0*(1.0/(c_2Pi*sigma_r));
+		// sigma_r ---> sigma_f = 1/(2*pi*sigma_r)
+		T sigma_f_lim = 3.0*(1.0/(c_2Pi*sigma_r));
 		T g2_lim = pow(min(sigma_f_lim, grid.g_max()), 2);
 		auto krn_dc_gaussian = [=](const int &ix, const int &iy, const TGrid &grid)
 		{
@@ -2338,6 +2822,7 @@ namespace mt
 		int iy0 = pts[2], iye = pts[3];
 
 		return extract_region_real_part<TVector>(stream, grid.nx, grid.ny, image, ix0, ixe, iy0, iye);
+
 	}
 
 	/*******************************************************************/
@@ -2391,135 +2876,216 @@ namespace mt
 	
 	// get fit position
 	template<class TGrid, class TVector>	
-	TVector Rx_Ry_fit(TGrid &grid, TVector &Im_i, r2d<Value_type<TVector>> p_i, Value_type<TVector> radius_i, bool env)
+	TVector Rx_Ry_fit(TGrid &grid, TVector &Im_i, r2d<Value_type<TVector>> p_i, 
+	Value_type<TVector> sigma_i, Value_type<TVector> radius_i)
 	{
 		using T = Value_type<TVector>;
-		TVector fit_par(6,1);
 
-		auto get_gaussian_parameters = [&](const r2d<T> &p, TVector &Im_i)->T
+		auto select_cir_reg = [](TGrid &grid, TVector &Im, r2d<T> p, 
+		T radius, TVector &Rx, TVector &Ry, TVector &Ixy, T &Rx_sf, T &Ry_sf, T &Rxy_sc, T &Ixy_sc)
 		{
-			T dR = grid.dRx;
-			int nrl = 2;
-			auto R2_max = pow(dR*nrl, 2);
+			T R_max = radius;
+			T R2_max = pow(R_max, 2);
 
-			auto ix_i = grid.floor_dRx(p.x);
-			int ix0 = max(ix_i-nrl, 0);
-			int ixe = min(ix_i+nrl+1, grid.nx);
+			auto range = grid.index_range(p, R_max);
 
-			auto iy_i = grid.floor_dRy(p.y);
-			int iy0 = max(iy_i-nrl, 0);
-			int iye = min(iy_i+nrl+1, grid.ny);
+			Rx.clear();
+			Rx.reserve(range.ixy_e);
+			Ry.clear();
+			Ry.reserve(range.ixy_e);
+			Ixy.clear();
+			Ixy.reserve(range.ixy_e);
 
-			T A = 0;
-			int ic = 0;
-			for(auto ix = ix0; ix < ixe; ix++)
+			// select circular region
+			for (auto ix = range.ix_0; ix < range.ix_e; ix++)
 			{
-				for(auto iy = iy0; iy < iye; iy++)
+				for (auto iy = range.iy_0; iy < range.iy_e; iy++)
 				{
-					auto R2 = grid.R2(ix, iy, p.x, p.y);
-					if(R2 < R2_max)
+					if (grid.R2(ix, iy, p.x, p.y) < R2_max)
 					{
-						A += Im_i[grid.ind_col(ix, iy)];
-						ic++;
+						Rx.push_back(grid.Rx(ix));
+						Ry.push_back(grid.Ry(iy));
+						Ixy.push_back(Im[grid.ind_col(ix, iy)]);
 					}
 				}
 			}
-			return A/ic;
+
+			Rx_sf = p.x;
+			Ry_sf = p.y;
+			Rxy_sc = R_max;
+
+			Ixy_sc = max_data(Ixy);
+			int m = Ixy.size();
+			for (auto ixy = 0; ixy < m; ixy++)
+			{
+				Rx[ixy] = (Rx[ixy]-Rx_sf)/Rxy_sc;
+				Ry[ixy] = (Ry[ixy]-Ry_sf)/Rxy_sc;
+				Ixy[ixy] = Ixy[ixy]/Ixy_sc;
+			}
+
+			Rx.shrink_to_fit();
+			Ry.shrink_to_fit();
+			Ixy.shrink_to_fit();
 		};
 
-		T dR = grid.dRx;
-		int nrl = static_cast<int>(floor(radius_i/dR+0.5));
-		T R_max = dR*nrl;
+		TVector Rx, Ry, Ixy;
+		T Rx_sf, Ry_sf, Rxy_sc, Ixy_sc;
 
-		auto ix_i = grid.floor_dRy(p_i.x);
-		int ix0 = max(ix_i-nrl, 0);
-		int ixe = min(ix_i+nrl+1, grid.nx);
+		select_cir_reg(grid, Im_i, p_i, radius_i, Rx, Ry, Ixy, Rx_sf, Ry_sf, Rxy_sc, Ixy_sc);
 
-		auto iy_i = grid.floor_dRy(p_i.y);
-		int iy0 = max(iy_i-nrl, 0);
-		int iye = min(iy_i+nrl+1, grid.ny);
+		T sigma = sigma_i/Rxy_sc;
 
-		T R2_max = pow(R_max, 2);
-		//get number of elements
-		int m = 0;
+		int m = Ixy.size();
 		int n = 6;
-		for(auto ix = ix0; ix < ixe; ix++)
+
+		TVector J(m*n);
+		TVector d_Ixy(m);
+
+		auto get_chi2 = [](TVector &Rx, TVector &Ry, TVector &Ixy, TVector &coef)->T
 		{
-			for(auto iy = iy0; iy < iye; iy++)
+			T x_0 = coef[0];
+			T y_0 = coef[1];
+
+			T theta = coef[5];
+
+			T A = coef[2];
+
+			T cos_1t = cos(theta);
+			T sin_1t = sin(theta);
+			T cos_2t = cos(2*theta);
+			T sin_2t = sin(2*theta);
+
+			T sx2 = pow(coef[3], 2);
+			T sy2 = pow(coef[4], 2);
+
+			T a = 0.5*(cos_1t*cos_1t/sx2 + sin_1t*sin_1t/sy2);
+			T b = 0.5*(sin_1t*sin_1t/sx2 + cos_1t*cos_1t/sy2);
+			T c = 0.5*(-sin_2t/sx2 + sin_2t/sy2);
+
+			T chi2 = 0;
+			T chi2_ee = 0;
+			const int m = Ixy.size();
+			for (auto im = 0; im < m; im++)
 			{
-				m += (grid.R2(ix, iy, p_i.x, p_i.y) < R2_max)?1:0;
+				T x = Rx[im]-x_0;
+				T y = Ry[im]-y_0;
+				T v = Ixy[im]-A*exp(-a*x*x-b*y*y-c*x*y);
+				host_device_detail::kh_sum(chi2, v*v, chi2_ee);
 			}
-		}
+			return chi2;
+		};
 
-		if(m<7)
+		auto get_dIxy_J = [](TVector &Rx, TVector &Ry, TVector &Ixy, TVector &coef, 
+		TVector &dIxy, TVector &J)
 		{
-			auto p = Rx_Ry_weight(grid, Im_i, p_i, radius_i, env);
-			fit_par[0] = p.x;
-			fit_par[1] = p.y;
-			fit_par[2] = get_gaussian_parameters(p, Im_i);
-			fit_par[3] = 1/(2*pow(radius_i, 2));
-			fit_par[4] = 1/(2*pow(radius_i, 2));
-			fit_par[5] = 0;
-			return fit_par;
-		}
+			T x_0 = coef[0];
+			T y_0 = coef[1];
 
-		T alpha = 0.5/pow(R_max, 2);
-		TVector M(m*n);
-		TVector b(m);
-		int ic = 0;
-		for(auto ix = ix0; ix < ixe; ix++)
-		{
-			for(auto iy = iy0; iy < iye; iy++)
+			T theta = coef[5];
+
+			T A = coef[2];
+
+			T cos_1t = cos(theta);
+			T sin_1t = sin(theta);
+			T cos_2t = cos(2*theta);
+			T sin_2t = sin(2*theta);
+
+			T sx2 = pow(coef[3],2);
+			T sy2 = pow(coef[4],2);
+
+			T sx3 = pow(coef[3],3);
+			T sy3 = pow(coef[4],3);
+
+			T a = 0.5*(cos_1t*cos_1t/sx2 + sin_1t*sin_1t/sy2);
+			T b = 0.5*(sin_1t*sin_1t/sx2 + cos_1t*cos_1t/sy2);
+			T c = 0.5*(-sin_2t/sx2 + sin_2t/sy2);
+
+			const int m = Ixy.size();
+			for (auto im = 0; im < m; im++)
 			{
-				auto R2 = grid.R2(ix, iy, p_i.x, p_i.y);
-				if(R2 < R2_max)
+				T x = Rx[im]-x_0;
+				T y = Ry[im]-y_0;
+
+				T v = exp(-a*x*x-b*y*y-c*x*y);
+				T f = A*v;
+
+				J[0*m+im] = (2*a*x+c*y)*f;
+				J[1*m+im] = (2*b*y+c*x)*f;
+				J[2*m+im] = v;    
+				J[3*m+im] = (pow(cos_1t*x,2)+pow(sin_1t*y,2)-sin_2t*x*y)*f/sx3;
+				J[4*m+im] = (pow(sin_1t*x,2)+pow(cos_1t*y,2)+sin_2t*x*y)*f/sy3;
+				J[5*m+im] = (sin_2t*x*x-sin_2t*y*y+2*cos_2t*x*y)*f*(0.5/sx2-0.5/sy2);
+
+				dIxy[im] = Ixy[im] - f;
+			}
+		};
+
+		TVector coef_0 = {0, 0, 1, sigma, sigma, 0};
+		TVector coef_min = {-sigma/5, -sigma/5, 0.75, sigma/3, sigma/3, -T(c_Pi)};
+		TVector coef_max = {sigma/5, sigma/5, 1.25, 3*sigma, 3*sigma, T(c_Pi)};
+		TVector coef = coef_0;
+
+		T chi2 = get_chi2(Rx, Ry, Ixy, coef);
+
+		T lambda = 2;
+		T lambda_f = 2;
+
+		lapack::FLSF<T> flsf;
+
+		const int niter = 100;
+		for (auto iter = 0; iter<niter; iter++)
+		{
+			get_dIxy_J(Rx, Ry, Ixy, coef, d_Ixy, J);
+
+			TVector d_coef(n);
+			TVector D(n);
+			TVector G(n);
+			flsf(m, n, J.data(), d_Ixy.data(), d_coef.data(), lambda, D.data(), G.data());
+
+			TVector coef_t = coef;
+			T rho_f = 0;
+			T G_max = 0;
+			for(auto ic=0; ic<n; ic++)
+			{
+				coef_t[ic] += d_coef[ic];
+				rho_f += coef_t[ic]*(D[ic]*coef_t[ic]+G[ic]);
+				G_max = ::fmax(G_max, abs(G[ic]));
+			}
+
+			T chi2_t = get_chi2(Rx, Ry, Ixy, coef_t);
+			T rho = (chi2-chi2_t)/rho_f;
+
+			if ((G_max<1e-6)||abs(chi2-chi2_t)<1e-7)
+			{
+				break;
+			}
+
+			if(rho>0)
+			{
+				coef = coef_t;
+
+				for(auto ic=0; ic<n; ic++)
 				{
-					auto Rx = grid.Rx(ix);
-					auto Ry = grid.Ry(iy);
-					//set M values
-					M[0*m+ic] = Rx*Rx;
-					M[1*m+ic] = Ry*Ry;
-					M[2*m+ic] = Rx;
-					M[3*m+ic] = Ry;
-					M[4*m+ic] = Rx*Ry;
-					M[5*m+ic] = 1.0;
-
-					//set b values
-					b[ic] = ((env)?exp(-alpha*R2):1)*Im_i[grid.ind_col(ix, iy)];
-
-					ic++;
+					coef[ic] = min(max(coef[ic], coef_min[ic]), coef_max[ic]);
 				}
+
+				chi2 = get_chi2(Rx, Ry, Ixy, coef);
+
+				lambda = (rho>1e-6)?(::fmax(lambda/lambda_f, 1e-7)):lambda;
+			}
+			else
+			{
+				lambda = ::fmin(lambda*lambda_f, 1e+7);
 			}
 		}
 
-		TVector x(n);
-		lapack::GELS<T> gels;
-		gels(m, n, M.data(), 1, b.data(), x.data());
+		coef[0] = coef[0]*Rxy_sc + Rx_sf;
+		coef[1] = coef[1]*Rxy_sc + Ry_sf;
+		coef[2] = coef[2]*Ixy_sc;
+		coef[3] = coef[3]*Rxy_sc;
+		coef[4] = coef[4]*Rxy_sc;
 
-		auto md = 4*x[0]*x[1]-x[4]*x[4];
-		r2d<T> p(-(2*x[1]*x[2]-x[3]*x[4])/md, -(2*x[0]*x[3]-x[2]*x[4])/md);
-
-		if(module(p-p_i)>=radius_i)
-		{
-			auto p = Rx_Ry_weight(grid, Im_i, p_i, radius_i, env);
-			fit_par[0] = p.x;
-			fit_par[1] = p.y;
-			fit_par[2] = get_gaussian_parameters(p, Im_i);
-			fit_par[3] = 1/(2*pow(max<T>(0.5*radius_i, 2),2));
-			fit_par[4] = 1/(2*pow(max<T>(0.5*radius_i, 2),2));
-			fit_par[5] = 0;
-		}
-		else
-		{
-			fit_par[0] = p.x;
-			fit_par[1] = p.y;
-			fit_par[2] = x[0]*p.x*p.x + x[1]*p.y*p.y + x[2]*p.x + x[3]*p.y+ x[4]*p.x*p.y + x[5];
-			fit_par[3] = x[0];
-			fit_par[4] = x[1];
-			fit_par[5] = x[4];
-		}
-
-		return fit_par;
+		return coef;
 	}
 
 	template<class TGrid, class TVector>
@@ -2590,244 +3156,157 @@ namespace mt
 		return max(2, irm)*dR;
 	}
 
-	// get fit position
+	// select circular region
 	template<class TGrid, class TVector>
-	TVector gaussian_fit(TGrid &grid_i, TVector &Im_i, r2d<Value_type<TVector>> p_i, 
-	Value_type<TVector> sigma_i, int niter, Value_type<TVector> d_error)
+	Value_type<TVector> mean_cir_reg(TGrid &grid_i, TVector &Im_i, r2d<Value_type<TVector>> p_i, 
+	Value_type<TVector> radius_i, Value_type<TVector> bg_i)
 	{
 		using T = Value_type<TVector>;
 
-		T radius_i = 2*sigma_i;
-		T R2_max = pow(radius_i, 2);
+		T R2_max = radius_i*radius_i;
 
-		int ix0 = grid_i.lb_index_x(p_i.x - radius_i);
-		int ixe = grid_i.ub_index_x(p_i.x + radius_i);
+		auto range = grid_i.index_range(p_i, radius_i);
 
-		int iy0 = grid_i.lb_index_y(p_i.y - radius_i);
-		int iye = grid_i.ub_index_y(p_i.y + radius_i);
-
-		int nxy = (ixe-ix0+1)*(iye-iy0+1);
-
-		TVector R2;
-		TVector z;
-
-		R2.reserve(nxy);
-		z.reserve(nxy);
-
-		//get number of elements
-		for (auto ix = ix0; ix < ixe; ix++)
+		// select circular region
+		T I_mean = 0;
+		int Ic = 0;
+		for (auto ix = range.ix_0; ix < range.ix_e; ix++)
 		{
-			for (auto iy = iy0; iy < iye; iy++)
+			for (auto iy = range.iy_0; iy < range.iy_e; iy++)
 			{
 				T R2_d = grid_i.R2(ix, iy, p_i.x, p_i.y);
 				if (R2_d < R2_max)
 				{
-					R2.push_back(R2_d);
-					z.push_back(Im_i[grid_i.ind_col(ix, iy)]);
+					I_mean += Im_i[grid_i.ind_col(ix, iy)]-bg_i;
+					Ic++;
 				}
 			}
 		}
-
-		// set initial guess
-		auto z_min_max = std::minmax_element(z.begin(), z.end());
-
-		int m = R2.size();
-		int n = 3;
-
-		TVector M(m*2);
-		TVector b(m);
-		TVector v(m);
-		TVector theta(n);
-		TVector theta_min(n);
-		TVector theta_max(n);
-		TVector theta_0(n);
-		lapack::GELS<T> gels;
-
-		T f = 0.05;
-		// set min values
-		theta_min[0] = f*(*(z_min_max.second) - *(z_min_max.first));
-		theta_min[1] = ::fmin(0, *(z_min_max.first));
-		theta_min[2] = ::fmax(0.25*grid_i.dRx, f*sigma_i);
-
-		// set max values
-		theta_max[0] = (1.0 + f)*(*(z_min_max.second) - *(z_min_max.first));
-		theta_max[1] = *(z_min_max.second);
-		theta_max[2] = ::fmax(0.25*grid_i.dRx, 2.5*sigma_i);
-
-		// set initial guess
-		theta_0[0] = 0.95*(*(z_min_max.second) - *(z_min_max.first));
-		theta_0[1] = *(z_min_max.first);
-		theta_0[2] = ::fmax(0.25*grid_i.dRx, sigma_i);
-
-
-		auto check_const = [=](TVector &theta)
-		{
-			for (auto in = 0; in<n; in++)
-			{
-				if ((theta[in]<theta_min[in]) || (theta_max[in]<theta[in]))
-				{
-					theta[in] = theta_0[in];
-				}
-			}
-		};
-
-		//a*exp(-r2/(s*b^2)+c)
-
-		theta = theta_0;
-		for (auto iter = 0; iter<niter; iter++)
-		{
-			// get a, c
-			T c_0 = 0.5/pow(theta[2], 2);
-			for (auto im = 0; im < m; im++)
-			{
-				v[im] = exp(-c_0*R2[im]);
-				M[0*m + im] = v[im];
-				M[1*m + im] = 1.0;
-				b[im] = z[im];
-			}
-			gels(m, 2, M.data(), 1, b.data(), theta.data());
-
-			//get b = sum xy/sum x^2
-			T c_1 = theta[0]/pow(theta[2], 3);
-			T sxy = 0;
-			T sxx = 0;
-			for (auto im = 0; im < m; im++)
-			{
-				T x = c_1*R2[im]*v[im];
-				T y = z[im]-(theta[0]*v[im]+theta[1]);
-				sxy += x*y;
-				sxx += x*x;
-			}
-			T d_sigma = sxy/sxx;
-			theta[2] += d_sigma;
-
-			check_const(theta);
-
-			if (abs(d_sigma)<d_error)
-			{
-				break;
-			}
-		}
-		return theta;
+		I_mean /= Ic;
+		return I_mean;
 	}
 
 	/*******************************************************************/
-	// find 2d peaks
 	template<class TGrid, class TVector>
-	void find_fast_peaks_2d(Stream<e_host> &stream, FFT2<Value_type<TVector>, e_host> &fft2, 
-	TGrid &grid, TVector &image_i, Value_type<TVector> sigma_i, Value_type<TVector> thres, 
-	TVector &x_o, TVector &y_o)
+	TVector interp_profile(TGrid &grid, TVector &Im, const r2d<Value_type<TVector>> &p1, const r2d<Value_type<TVector>> &p2, int nr)
 	{
-		using T = Value_type<TVector>;
+		TVector v;
 
-		auto Im_minmax = std::minmax_element(image_i.begin(), image_i.end());
-
-		thres = *(Im_minmax.first) + thres*(*(Im_minmax.second)-*(Im_minmax.first));
-
-		auto image = thresholding(stream, image_i, thres);
-
-		// local maximum
-		auto krn_maximum = [&](const int &ix_i, const int &iy_i, TVector &Im, r2d<T> &peak)->bool
+		if(!(grid.ckb_bound(p1) && grid.ckb_bound(p2)))
 		{
-			auto val_max = Im[grid.ind_col(ix_i, iy_i)];
-			peak = r2d<T>(grid.Rx(ix_i), grid.Ry(iy_i));
+			return v;
+		}
 
-			if(val_max <= thres)
-			{
-				 return false;
-			}
+		if(module(p1-p2)<grid.dR_min())
+		{
+			return v;
+		}
 
-			const int ix0 = ix_i-1;
-			const int ixe = ix_i+2;
+		using T = Value_type<TGrid>;
 
-			const int iy0 = iy_i-1;
-			const int iye = iy_i+2;
+		auto interp_2d = [](const r2d<T> &p, TGrid &grid, TVector &Im)->T
+		{
+			auto ix = grid.lb_index_x(p.x);
+			auto iy = grid.lb_index_y(p.y);
 
-			for (auto ix = ix0; ix < ixe; ix++)
-			{
-				for (auto iy = iy0; iy < iye; iy++)
-				{
-					if(val_max < Im[grid.ind_col(ix, iy)])
-					{
-						return false;
-					}
-				}
-			}
+			T f11 = Im[grid.ind_col(ix, iy)];
+			T f12 = Im[grid.ind_col(ix, iy+1)];
+			T f21 = Im[grid.ind_col(ix+1, iy)];
+			T f22 = Im[grid.ind_col(ix+1, iy+1)];
 
-			return true;
+			T x1 = grid.Rx(ix);
+			T x2 = grid.Rx(ix+1);
+			T y1 = grid.Ry(iy);
+			T y2 = grid.Ry(iy+1);
+					
+			T dx1 = p.x-x1;
+			T dx2 = x2-p.x;
+			T dy1 = p.y-y1;
+			T dy2 = y2-p.y;
+
+			T f = (dx2*(f11*dy2 + f12*dy1)+dx1*(f21*dy2 + f22*dy1))/((x2-x1)*(y2-y1));
+			return f;
+
 		};
 
-		auto npeaks_m = static_cast<int>(ceil(grid.lx*grid.ly/(c_Pi*sigma_i*sigma_i)));
+		r2d<T> p12 = p2-p1;
+		T mp12 = p12.module();
 
-		x_o.reserve(2*npeaks_m);
-		y_o.reserve(2*npeaks_m);
+		nr = (nr<=0)?static_cast<int>(ceil(mp12/grid.dR_min())):nr;
+		nr = max(nr, 2);
+		T dr = mp12/(nr-1);
+		r2d<T> u = dr*normalized(p12);
 
-		// get local peaks
-		auto thr_peaks = [&](const Range &range)
+		v.reserve(nr);
+		for(auto ir=0; ir<nr; ir++)
 		{
-			TVector x, y;
-
-			x.reserve(npeaks_m);
-			y.reserve(npeaks_m);
-
-			auto ix_0 = 1 + range.ix_0;
-			auto ix_e = 1 + range.ix_e;
-			auto iy_0 = 1 + range.iy_0;
-			auto iy_e = 1 + range.iy_e;
-
-			for(auto ix = ix_0; ix < ix_e; ix++)
-			{
-				for(auto iy = iy_0; iy < iy_e; iy++)
-				{
-					r2d<T> peak;
-					if(krn_maximum(ix, iy, image, peak))
-					{
-						x.push_back(peak.x);
-						y.push_back(peak.y);
-					}
-				}
-			}
-
-			stream.stream_mutex.lock();
-			x_o.insert(x_o.end(), x.begin(), x.end());
-			y_o.insert(y_o.end(), y.begin(), y.end());
-			stream.stream_mutex.unlock();
-		};
-
-		stream.set_n_act_stream(grid.nx-2);
-		stream.set_grid(grid.nx-2, grid.ny-2);
-		stream.exec(thr_peaks);
-
-		x_o.shrink_to_fit();
-		y_o.shrink_to_fit();
+			r2d<T> p = p1 + T(ir)*u;
+			v.push_back(interp_2d(p, grid, Im));
+		}
+		return v;
 	}
-
-	// find 2d peaks
+	
 	template<class TGrid, class TVector>
-	void find_peaks_2d(Stream<e_host> &stream, FFT2<Value_type<TVector>, e_host> &fft2, 
-	TGrid &grid, TVector &image_i, Value_type<TVector> sigma, Value_type<TVector> thres, 
-	int niter, TVector &x_o, TVector &y_o, TVector &A_o, TVector &sigma_o)
+	void interp_profile(TGrid &grid, TVector &Im, Value_type<TVector> bg, r2d<Value_type<TVector>> p1, r2d<Value_type<TVector>> p2, 
+	TVector &x, TVector &y)
 	{
-		using T = Value_type<TVector>;
+		x.clear();
+		y.clear();
 
-		auto image = mod_gaussian_deconv(stream, fft2, grid, sigma, image_i);
-
-		find_fast_peaks_2d(stream, fft2, grid, image, sigma, thres, x_o, y_o);
-
-		//lapack::GELS<T> gels;
-
-		T d_error = 1e-4*grid.dR_min();
-
-		A_o.resize(x_o.size());
-		sigma_o.resize(x_o.size());
-		for(auto ipk=0; ipk<x_o.size(); ipk++)
+		if(!(grid.ckb_bound(p1) && grid.ckb_bound(p2)))
 		{
-			r2d<T> p_i(x_o[ipk], y_o[ipk]);
-			//T radius_n = neighbor_radius(grid, image_i, p_i, 5*sigma);
-			auto theta = gaussian_fit(grid, image_i, p_i, sigma, niter, d_error);
-			A_o[ipk] = theta[0];
-			sigma_o[ipk] = theta[2];
-			//sigma_o[ipk] = (theta[2]>radius_n)?radius_n:theta[2];
+			return;
+		}
+
+		if(module(p1-p2)<grid.dR_min())
+		{
+			return;
+		}
+
+		using T = Value_type<TGrid>;
+
+		auto interp_2d = [](const r2d<T> &p, TGrid &grid, TVector &Im)->T
+		{
+			auto ix = grid.lb_index_x(p.x);
+			auto iy = grid.lb_index_y(p.y);
+
+			T f11 = Im[grid.ind_col(ix, iy)];
+			T f12 = Im[grid.ind_col(ix, iy+1)];
+			T f21 = Im[grid.ind_col(ix+1, iy)];
+			T f22 = Im[grid.ind_col(ix+1, iy+1)];
+
+			T x1 = grid.Rx(ix);
+			T x2 = grid.Rx(ix+1);
+			T y1 = grid.Ry(iy);
+			T y2 = grid.Ry(iy+1);
+					
+			T dx1 = p.x-x1;
+			T dx2 = x2-p.x;
+			T dy1 = p.y-y1;
+			T dy2 = y2-p.y;
+
+			T f = (dx2*(f11*dy2 + f12*dy1)+dx1*(f21*dy2 + f22*dy1))/((x2-x1)*(y2-y1));
+			return f;
+
+		};
+
+		int Ixy_1 = Im[grid.ixy(p1.x, p1.y)];
+		int Ixy_2 = Im[grid.ixy(p2.x, p2.y)];
+
+		r2d<T> p12 = p2-p1;
+		T mp12 = p12.module();
+		int nr = grid.ceil_dR_min(mp12);
+		T dr = mp12/(nr-1);
+		r2d<T> u = dr*normalized(p12);
+
+		x.reserve(nr);
+		y.reserve(nr);
+		for(auto ir=0; ir<nr; ir++)
+		{
+			x.push_back(ir*dr);
+			r2d<T> p = p1 + T(ir)*u;
+			T v = interp_2d(p, grid, Im);
+			y.push_back(v-bg);
 		}
 	}
 
@@ -2875,53 +3354,13 @@ namespace mt
 	/*******************************************************************/
 	// find and fit peak position
 	template<class TGrid, class TVector>
-	r2d<Value_type<TVector>> max_pos(Stream<e_host> &stream, TGrid &grid, TVector &Im, 
-	r2d<Value_type<TVector>> p_i, Value_type<TVector> radius_i)
+	r2d<Value_type<TVector>> max_pos(TGrid &grid, TVector &Im, 
+	r2d<Value_type<TVector>> p_i, Value_type<TVector> sigma_i, Value_type<TVector> radius_i)
 	{
 		using T = Value_type<TVector>;
 
-		auto get_rmin = [&](TVector &Im, r2d<T> p_i, T radius_i)->T
-		{
-			// get radial distribution
-			TVector rl;
-			TVector frl;
-			radial_distribution_2d(grid, Im, p_i.x, p_i.y, radius_i, rl, frl);
-
-			// log
-			thrust::transform(frl.begin(), frl.end(), frl.begin(), [](const T &x){return log(x); });
-
-			// smooth
-			int nkr = 1;
-			frl = smooth(stream, frl, nkr);
-
-			// derivative and minimun
-			int idr = 0;
-			T fr_min = frl[1]-frl[0];
-			for(auto ir= 0; ir<frl.size()-1; ir++)
-			{
-				auto fr = frl[ir+1]-frl[ir];
-				if(fr_min>fr)
-				{
-					fr_min = fr;
-					idr = ir;
-				}
-			}
-			return ::fmax(2.0, rl[idr]);
-		};
-
-		//// weighted average position
-		//auto rmin = get_rmin(Im, x_i, y_i, radius_i);
-		//Rx_Ry_weight(grid, Im, x_i, y_i, rmin, x_o, y_o);
-
-		//// fit position
-		//rmin = get_rmin(Im, x_o, y_o, radius_i);
-		//Rx_Ry_fit(grid, Im, x_o, y_o, rmin, x_o, y_o);
-
-		// weighted average position
-		auto rmin = get_rmin(Im, p_i, radius_i);
-		auto p_o = Rx_Ry_weight(grid, Im, p_i, rmin, false);
-
-		return p_o;
+		auto coef = Rx_Ry_fit(grid, Im, p_i, sigma_i, radius_i);
+		return r2d<T>(coef[0], coef[1]);
 	}
 
 	// shift 2d
@@ -2945,75 +3384,93 @@ namespace mt
 	shift_2d(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, TGrid &grid, 
 	r2d<Value_type<TGrid>> p, TVector &Im)
 	{	
-		vector<complex<Value_type<TVector>>> Im_c(Im.begin(), Im.end());
+		using T = Value_type<TVector>;
+		vector<complex<T>> Im_c(Im.begin(), Im.end());
+
+		T Im_min = min_data(Im);
 
 		shift_2d(stream, fft2, grid, p, Im_c);
 		assign_real(stream, Im_c, Im);
+
+		if(Im_min>=0)
+		{
+			std::for_each(Im.begin(), Im.end(), [](T &v){ v = (v<0)?0:v; });
+		}
 	}
 
 	// phase correlation function
 	template <class TGrid, class TVector>
-	TVector PCF(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, TGrid &grid, 
-	TVector &M1_i, TVector &M2_i, Value_type<TGrid> k, Value_type<TGrid> sigma)
+	TVector PCF(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, 
+	TGrid &grid, TVector &M1_i, TVector &M2_i, Value_type<TGrid> sigma_g, Border<Value_type<TGrid>> bd1, 
+	Border<Value_type<TGrid>> bd2)
 	{
 		using T = Value_type<TVector>;
 		using TVector_c = Vector<complex<T>, e_host>;
 
 		// apply Hanning filter and copy data to complex matrix
-		TVector_c M_1(grid.nxy());
-		TVector_c M_2(grid.nxy());
-
-		auto thr_diff_x_Hanning = [&](const Range &range)
+		auto diff_x_Hanning = [&](Grid<T> &grid, TVector &M_i, Border<T> bd)->TVector_c
 		{
-			T cx = c_2Pi/grid.nx;
-			T cy = c_2Pi/grid.ny;
+			const T x_c = bd.x_c();
+			const T y_c = bd.y_c();
 
-			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
+			const T Radius = 0.9*::fmin(bd.lx_wb(), bd.ly_wb())/2;
+			const T R02 = pow(Radius, 2);
+			const int n = 4;
+
+			TVector_c M(grid.nxy());
+
+			auto thr_diff_x_Hanning = [=](const Range &range, Grid<T> &grid, TVector &M_i, TVector_c &M)
 			{
-				for(auto iy = range.iy_0; iy < range.iy_e; iy++)
+				for (auto ix = range.ix_0; ix < range.ix_e; ix++)
 				{
-					int ixy = grid.ind_col(ix, iy);
-					int ix_n = (ix+1<grid.nx)?(ix+1):ix;
-					int ixy_n = grid.ind_col(ix_n, iy);
-					T fxy = 0.25*(1.0-cos(cx*grid.Rx(ix)))*(1.0-cos(cy*grid.Ry(iy)));
-					fxy = (fxy>k)?1.0:fxy/k;
-					M_1[ixy] = complex<T>((M1_i[ixy_n]-M1_i[ixy])*fxy);
-					M_2[ixy] = complex<T>((M2_i[ixy_n]-M2_i[ixy])*fxy);
-				}
+					for (auto iy = range.iy_0; iy < range.iy_e; iy++)
+					{
+						int ixy = grid.ind_col(ix, iy);
+						int ix_n = (ix+1<grid.nx)?(ix+1):ix;
+						int ixy_n = grid.ind_col(ix_n, iy);
+						T Rx = grid.Rx(ix);
+						T Ry = grid.Ry(iy);
+						T fxy = (bd.chk_bound(Rx, Ry))?1.0/(1.0+pow((pow(Rx-x_c, 2)+pow(Ry-y_c, 2))/R02, n)):0;
+						M[ixy] = complex<T>((M_i[ixy_n] - M_i[ixy])*fxy);
+					}
 
-			}
+				}
+			};
+
+			stream.set_n_act_stream(grid.nx);
+			stream.set_grid(grid.nx, grid.ny);
+			stream.exec(thr_diff_x_Hanning, grid, M_i, M);
+
+			return M;
 		};
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_diff_x_Hanning);
+		TVector_c M1 = diff_x_Hanning(grid, M1_i, bd1);
+		TVector_c M2 = diff_x_Hanning(grid, M2_i, bd2);
 
 		// create 2d plan
 		fft2.create_plan_2d(grid.ny, grid.nx, stream.size());
 
 		// shift matrix
-		fft2_shift(stream, grid, M_1);
-		fft2_shift(stream, grid, M_2);
+		fft2_shift(stream, grid, M1);
+		fft2_shift(stream, grid, M2);
 
 		// fft2
-		fft2.forward(M_1);
-		fft2.forward(M_2);
+		fft2.forward(M1);
+		fft2.forward(M2);
 
 		// apply symmetric bandwidth
-		sigma = sigma*grid.dg_min();
-
 		auto thr_PCF = [&](const Range &range)
 		{
-			T alpha = 0.5/(sigma*sigma);
+			T alpha = 0.5/(sigma_g*sigma_g);
 
 			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
 			{
 				for(auto iy = range.iy_0; iy < range.iy_e; iy++)
 				{
 					int ixy = grid.ind_col(ix, iy);
-					complex<T> z = conj(M_1[ixy])*M_2[ixy];
+					complex<T> z = conj(M1[ixy])*M2[ixy];
 					auto mz = abs(z);
-					M_2[ixy] = (isZero(mz))?0:z*exp(-alpha*grid.g2_shift(ix, iy))/mz;
+					M2[ixy] = (isZero(mz))?0:z*exp(-alpha*grid.g2_shift(ix, iy))/mz;
 				}
 			}
 		};
@@ -3022,65 +3479,71 @@ namespace mt
 		stream.set_grid(grid.nx, grid.ny);
 		stream.exec(thr_PCF);
 
-		fft2.inverse(M_2);
+		fft2.inverse(M2);
 
 		TVector M_o(grid.nxy());
-		assign_real(stream, M_2, M_o);
+		assign_real(stream, M2, M_o);
 
 		// shift M
 		fft2_shift(stream, grid, M_o);
 
-		T m_min = min_element(stream, M_o)-1;
-		// subtract minimum value
-		std::for_each(M_o.begin(), M_o.end(), [&](T &v){ v -= m_min; });
+		std::for_each(M_o.begin(), M_o.end(), [&](T &v){ v = ::fmax(v, 0); });
 
 		return M_o;
 	}
 
 	// get shift
 	template <class TGrid, class TVector>
-	r2d<Value_type<TGrid>> find_shift_2d(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, TGrid &grid, 
-	TVector &M1_i, TVector &M2_i, Value_type<TGrid> k, Value_type<TGrid> sigma)
+	r2d<Value_type<TGrid>> find_shift_2d(Stream<e_host> &stream, 
+	FFT2<Value_type<TGrid>, e_host> &fft2, TGrid &grid, TVector &M1_i, 
+	TVector &M2_i, Value_type<TGrid> sigma_g, Border<Value_type<TGrid>> bd1, 
+	Border<Value_type<TGrid>> bd2, int nit=2)
 	{
 		using T = Value_type<TVector>;
 
-		auto M = PCF(stream, fft2, grid, M1_i, M2_i, k, sigma);
+		T sigma_r = ::fmax(3*grid.dR_min(), 1.0/(c_2Pi*sigma_g));
+		T radius = 1.25*sigma_r;
 
-		//get maximum index position
-		int ixy_max = std::max_element(M.begin(), M.end())-M.begin();
+		TVector M = M2_i;
+		r2d<T> dr(0,0);
+		for (auto it=0; it<nit; it++)
+		{
+			auto pcf = PCF(stream, fft2, grid, M1_i, M, sigma_g, bd1, bd2);
 
-		int ix_max, iy_max;
-		grid.row_col(ixy_max, ix_max, iy_max);
+			// get maximum index position
+			int ixy_max = std::max_element(pcf.begin(), pcf.end())-pcf.begin();
 
-		T radius = std::min(grid.lxh(), grid.lyh());
-		r2d<T> r(grid.Rx(ix_max), grid.Ry(iy_max));
+			int ix_max, iy_max;
+			grid.col_row(ixy_max, ix_max, iy_max);
 
-		r = max_pos(stream, grid, M, r, radius);
-		r -= r2d<T>(grid.lxh(), grid.lyh());
+			r2d<T> p(grid.Rx(ix_max), grid.Ry(iy_max));
 
-		return r;
+			p = max_pos(grid, pcf, p, sigma_r, radius);
+			r2d<T> dr_t = p - r2d<T>(grid.lxh(), grid.lyh());
+
+			if(it<nit-1)
+			{
+				shift_2d(stream, fft2, grid, -dr_t, M);
+			}
+			dr += dr_t;
+			//calculated new borders
+			bd1.shift(-dr_t);
+			bd2.shift(-dr_t);
+		}
+
+		return dr;
 	}
 
 	// correct shift
 	template <class TGrid, class TVector>
-	r2d<Value_type<TVector>> correct_shift_2d(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, TGrid &grid, 
-	TVector &M1_i, TVector &M2_io, Value_type<TGrid> k, Value_type<TGrid> sigma)
+	r2d<Value_type<TVector>> correct_shift_2d(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, 
+	TGrid &grid, TVector &M1_i, TVector &M2_io, Value_type<TGrid> sigma_g, Border<Value_type<TGrid>> bd1, 
+	Border<Value_type<TGrid>> bd2, int nit=3)
 	{
 		using T = Value_type<TVector>;
 
-		vector<complex<T>> M_c(M1_i.size());
-		int n_it = 3;
-
-		r2d<T> dr(0,0);
-
-		for (auto it=1; it<n_it; it++)
-		{
-			auto dr_t = find_shift_2d(stream, fft2, grid, M1_i, M2_io, k, sigma);
-			assign(stream, M2_io, M_c);
-			shift_2d(stream, fft2, grid, -dr_t, M_c);
-			assign_real(stream, M_c, M2_io);
-			dr += dr_t;
-		}
+		auto dr = find_shift_2d(stream, fft2, grid, M1_i, M2_io, sigma_g, bd1, bd2, nit);
+		shift_2d(stream, fft2, grid, -dr, M2_io);
 
 		return dr;
 	}

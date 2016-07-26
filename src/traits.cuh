@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef TRAITS_H
@@ -97,6 +97,14 @@ namespace mt
 
 			static const bool value = sizeof(f<Derived>(0)) == 2;
 		}; 
+	}
+
+	template <class TVector>
+	TVector reserve_vector(const std::size_t &new_size)
+	{
+		TVector vector;
+		vector.reserve(new_size);
+		return vector;
 	}
 
 	template <class TVector>

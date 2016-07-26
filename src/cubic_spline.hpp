@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef SPLINE_H
@@ -90,7 +90,7 @@ namespace mt
 		{
 			size_t n =m_x.size();
 			// find the closest point m_x[idx] < x, idx = 0 even if x<m_x[0]
-			//std::vector<T>::const_iterator it;
+			// std::vector<T>::const_iterator it;
 			auto it =std::lower_bound(m_x.begin(), m_x.end(), x);
 			int idx =std::max(int(it-m_x.begin())-1, 0);
 

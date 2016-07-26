@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef SPECIMEN_H
@@ -64,7 +64,7 @@ namespace mt
 				atoms_u.Sort_by_z();
 				atoms_u.get_z_layer();
 
-				//convergent beam
+				// convergent beam
 				input_multislice->cond_lens.zero_defocus_plane = input_multislice->cond_lens.get_zero_defocus_plane(atoms_u.z.front(), atoms_u.z.back());
 				/***************************************************************************/
 				if((atoms_u.s_z_Int < 2.0*input_multislice->grid.dz) || ((atoms_u.z_layer.size() == 1) && input_multislice->is_slicing_by_planes()))

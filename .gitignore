@@ -10,6 +10,9 @@
 *.dll
 *.exe
 *.7z
+*Copy*.cuh
+*Copy*.hpp
+*Copy*.cpp
 compile_mex_general.m
 mex_examples_general
 mex_files_general

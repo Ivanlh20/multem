@@ -1,8 +1,8 @@
 clc;
 clear all;
-CrysPar.na = 8;
-CrysPar.nb = 8;
-CrysPar.nc = 20;
+CrysPar.na = 1;
+CrysPar.nb = 1;
+CrysPar.nc = 1;
 CrysPar.a = 4.0780;
 CrysPar.b = 4.0780;
 CrysPar.c = 4.0780;

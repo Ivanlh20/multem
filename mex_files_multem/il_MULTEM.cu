@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <algorithm>
@@ -45,6 +45,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.cpu_nthread = mx_get_scalar_field<int>(mx_input_multislice, "cpu_nthread"); 
 	input_multislice.gpu_device = mx_get_scalar_field<int>(mx_input_multislice, "gpu_device"); 
 	input_multislice.gpu_nstream = mx_get_scalar_field<int>(mx_input_multislice, "gpu_nstream"); 
+	input_multislice.set_device();
 
 	input_multislice.simulation_type = mx_get_scalar_field<mt::eTEM_Sim_Type>(mx_input_multislice, "simulation_type"); 
 	input_multislice.phonon_model = mx_get_scalar_field<mt::ePhonon_Model>(mx_input_multislice, "phonon_model"); 
@@ -129,13 +130,13 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.cond_lens.zero_defocus_plane = mx_get_scalar_field<value_type_r>(mx_input_multislice, "cond_lens_zero_defocus_plane");	
 	input_multislice.cond_lens.set_input_data(input_multislice.E_0, input_multislice.grid);
 
-	//input_multislice.cdl_var_type = mx_get_scalar_field<mt::eLens_Var_Type>(mx_input_multislice, "cdl_var_type");
-	//if(!input_multislice.is_whole_specimen() && full)
-	//{
-	//	auto thickness = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "thickness");
-	//	input_multislice.thickness.resize(thickness.m_size);
-	//	std::copy(thickness.real, thickness.real + thickness.m_size, input_multislice.thickness.begin());
-	//}
+	// input_multislice.cdl_var_type = mx_get_scalar_field<mt::eLens_Var_Type>(mx_input_multislice, "cdl_var_type");
+	// if(!input_multislice.is_whole_specimen() && full)
+	// {
+	// 	auto thickness = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "thickness");
+	// 	input_multislice.thickness.resize(thickness.m_size);
+	// 	std::copy(thickness.real, thickness.real + thickness.m_size, input_multislice.thickness.begin());
+	// }
 
 	/****************************** Objective lens ********************************/
 	input_multislice.obj_lens.m = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_m"); 												// momentum of the vortex

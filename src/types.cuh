@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef TYPES_H
@@ -483,6 +483,115 @@ namespace mt
 	{
 		return (x_min <= x)&&(x <= x_max)&&(y_min <= y)&&(y <= y_max);
 	}
+
+	/**************************borders**************************/
+	template<class T>
+	struct Border
+	{
+		T lx;
+		T ly;
+
+		T xb_0;
+		T xb_e;
+		T yb_0;
+		T yb_e;
+
+		Border(T lxi, T lyi, T xb_0i=T(), T xb_ei=T(), 
+		T yb_0i=T(), T yb_ei=T()): lx(lxi), ly(lyi), 
+		xb_0(xb_0i), xb_e(xb_ei), yb_0(yb_0i), yb_e(yb_ei){}
+
+		template<class X>
+		Border(T lxi, T lyi, int nptr, X *ptr): lx(lxi), ly(lyi)
+		{
+			if(nptr>0)
+			{
+				xb_0 = ptr[0];
+				xb_e = (nptr>1)?ptr[1]:0;
+				yb_0 = (nptr>2)?ptr[2]:0;
+				yb_e = (nptr>3)?ptr[3]:0;
+			}
+			else
+			{
+				xb_0 = 0;
+				xb_e = 0;
+				yb_0 = 0;
+				yb_e = 0;
+			}
+		}
+
+		Border(T lxi, T lyi, r2d<T> rd): lx(lxi), ly(lyi)
+		{
+			T xb_0 = (rd.x < 0)?0:rd.x;
+			T xb_e = (rd.x < 0)?abs(rd.x):0;
+
+			T yb_0 = (rd.y < 0)?0:rd.y;
+			T yb_e = (rd.y < 0)?abs(rd.y):0;
+		}
+
+		T lx_wb() const 
+		{ 
+			return ::fmax(x_e()-x_0(), T(0)); 
+		}
+
+		T ly_wb() const 
+		{ 
+			return ::fmax(y_e()-y_0(), T(0)); 
+		}
+
+		T x_c() const 
+		{ 
+			return 0.5*(x_e()+x_0()); 
+		}
+
+		T y_c() const 
+		{ 
+			return 0.5*(y_e()+y_0()); 
+		}
+
+		T x_0() const 
+		{ 
+			return xb_0; 
+		}
+
+		T y_0() const 
+		{ 
+			return yb_0; 
+		}
+
+		T x_e() const 
+		{ 
+			return lx-xb_e; 
+		}
+
+		T y_e() const 
+		{ 
+			return ly-yb_e; 
+		}
+
+		bool chk_x_bound(const T &x) const
+		{
+			return (x_0()<=x)&&(x<=x_e());
+		}
+
+		bool chk_y_bound(const T &y) const
+		{
+			return (y_0()<=y)&&(y<=y_e());
+		}
+
+		bool chk_bound(const T &x, const T &y) const
+		{
+			return chk_x_bound(x)&&chk_y_bound(y);
+		}
+
+		void shift(r2d<T> dr)
+		{
+			xb_0 = ::fmax(xb_0+dr.x, T(0));
+			xb_e = ::fmax(xb_e-dr.x, T(0));
+
+			yb_0 = ::fmax(yb_0+dr.y, T(0));
+			yb_e = ::fmax(yb_e-dr.y, T(0));
+		}
+	};
 
 	/************************thickness*************************/
 	template<class T, eDevice dev>
@@ -1113,9 +1222,9 @@ namespace mt
 
 			int operator()(int64_t n, eDat_Sel_Type dst = eDST_Closest)
 			{
-				auto idx = std::min_element(number.begin(), number.end(), [&n](int64_t p0, int64_t pe){ return std::abs(n-p0)<std::abs(n-pe);});
+				auto p_idx = std::min_element(number.begin(), number.end(), [&n](int64_t p0, int64_t pe){ return std::abs(n-p0)<std::abs(n-pe);});
 
-				auto pn = static_cast<int>(*idx);
+				auto pn = static_cast<int>(*p_idx);
 
 				switch(dst)
 				{
@@ -1123,7 +1232,7 @@ namespace mt
 					{
 						if(pn>n)
 						{
-							pn = static_cast<int>(*(idx-1));
+							pn = static_cast<int>(*(p_idx-1));
 						}
 					}
 					break;
@@ -1131,7 +1240,7 @@ namespace mt
 					{
 						if(pn<n)
 						{
-							pn = static_cast<int>(*(idx+1));
+							pn = static_cast<int>(*(p_idx+1));
 						}
 					}
 					break;
@@ -1229,6 +1338,7 @@ namespace mt
 			assign(grid);
 			return *this; 
 		}
+
 		// Maximun limited frequency
 		DEVICE_CALLABLE FORCE_INLINE
 		T gl_max() const
@@ -1287,29 +1397,96 @@ namespace mt
 		DEVICE_CALLABLE FORCE_INLINE
 		int lb_index_x(const T &x) const 
 		{ 
-			return max(0, static_cast<int>(floor(x/dRx)));
+			return min(nx, max(0, static_cast<int>(floor(x/dRx))));
 		}
 
 		// upper bound
 		DEVICE_CALLABLE FORCE_INLINE
 		int ub_index_x(const T &x) const 
 		{ 
-			return min(nx, static_cast<int>(ceil(x/dRx)));
+			return min(nx, max(0, static_cast<int>(ceil(x/dRx))));
 		}
 
 		// lower bound
 		DEVICE_CALLABLE FORCE_INLINE
 		int lb_index_y(const T &y) const 
 		{ 
-			return max(0, static_cast<int>(floor(y/dRy)));
+			return min(ny, max(0, static_cast<int>(floor(y/dRy))));
 		}
 
 		// upper bound
 		DEVICE_CALLABLE FORCE_INLINE
 		int ub_index_y(const T &y) const 
 		{ 
-			return min(ny, static_cast<int>(ceil(y/dRy)));
+			return min(ny, max(0, static_cast<int>(ceil(y/dRy))));
 		}
+		/*********************************************************/
+
+		DEVICE_CALLABLE FORCE_INLINE
+		bool ckb_x_bound(const T &x) const 
+		{ 
+			return ((x<Rx(0))||(x>=Rx(nx-1)))?false:true;
+		}
+
+		DEVICE_CALLABLE FORCE_INLINE
+		bool ckb_y_bound(const T &y) const 
+		{ 
+			return ((y<Ry(0))||(y>=Ry(ny-1)))?false:true;
+		}
+
+		DEVICE_CALLABLE FORCE_INLINE
+		bool ckb_bound(const r2d<T> &p) const 
+		{ 
+			return (ckb_x_bound(p.x) && ckb_y_bound(p.y));
+		}
+
+		/*********************************************************/
+		DEVICE_CALLABLE FORCE_INLINE
+		void set_x_bound(T &x) const 
+		{ 
+			x = ::fmin(::fmax(x, Rx(0)), Rx(nx-1));
+		}
+
+		DEVICE_CALLABLE FORCE_INLINE
+		void set_y_bound(T &y) const 
+		{ 
+			y = ::fmin(::fmax(y, Ry(0)), Ry(ny-1));
+		}
+
+		DEVICE_CALLABLE FORCE_INLINE
+		void set_bound(r2d<T> &p) const 
+		{ 
+			set_x_bound(p.x);
+			set_y_bound(p.y);
+		}
+		/*********************************************************/
+		// index
+		DEVICE_CALLABLE FORCE_INLINE
+		int ixy(const T &x, const T &y) const 
+		{ 
+			auto ix = lb_index_x(x);
+			auto iy = lb_index_y(y);
+			return ind_col(ix, iy);
+		}
+
+		// range
+		DEVICE_CALLABLE FORCE_INLINE
+		Range index_range(r2d<T> p, const T &radius) const 
+		{ 
+			Range r;
+
+			r.ix_0 = lb_index_x(p.x - radius);
+			r.ix_e = ub_index_x(p.x + radius);
+
+			r.iy_0 = lb_index_y(p.y - radius);
+			r.iy_e = ub_index_y(p.y + radius);
+
+			r.ixy_0 = 0;
+			r.ixy_e = (r.ix_e-r.ix_0)*(r.iy_e-r.iy_0);
+
+			return r;
+		}
+
 		/*********************************************************/
 		// Maximun frequency
 		DEVICE_CALLABLE FORCE_INLINE
@@ -1362,6 +1539,18 @@ namespace mt
 		T gy(const int &iy, const T &y) const { return gy(iy)-y; }
 
 		DEVICE_CALLABLE FORCE_INLINE
+		T gx_first() const { return gx(0); }
+
+		DEVICE_CALLABLE FORCE_INLINE
+		T gx_last() const { return gx(nx-1); }
+
+		DEVICE_CALLABLE FORCE_INLINE
+		T gy_first()const { return gy(0); }
+
+		DEVICE_CALLABLE FORCE_INLINE
+		T gy_last()const { return gy(ny-1); }
+
+		DEVICE_CALLABLE FORCE_INLINE
 		T g2(const int &ix, const int &iy, const T &x, const T &y) const 
 		{ 
 			T gxi = gx(ix, x);
@@ -1383,6 +1572,18 @@ namespace mt
 
 		DEVICE_CALLABLE FORCE_INLINE
 		T Ry(const int &iy) const { return iRy(iy)*dRy; }
+
+		DEVICE_CALLABLE FORCE_INLINE
+		T Rx_first() const { return Rx(0); }
+
+		DEVICE_CALLABLE FORCE_INLINE
+		T Rx_last() const { return Rx(nx-1); }
+
+		DEVICE_CALLABLE FORCE_INLINE
+		T Ry_first()const { return Ry(0); }
+
+		DEVICE_CALLABLE FORCE_INLINE
+		T Ry_last()const { return Ry(ny-1); }
 
 		DEVICE_CALLABLE FORCE_INLINE
 		T R2(const int &ix, const int &iy) const 
@@ -1502,7 +1703,7 @@ namespace mt
 		int ind_col(const int &ix, const int &iy) const { return ix*ny+iy; }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		void row_col(const int &ixy, int &ix, int &iy) const 
+		void col_row(const int &ixy, int &ix, int &iy) const 
 		{ 
 			ix = ixy/ny;
 			iy = ixy - ix*ny;
@@ -1816,7 +2017,6 @@ namespace mt
 				y_min(0), y_max(0),
 				a_min(0), a_max(0), 
 				sigma_min(0), sigma_max(0), 
-				b_min(0), b_max(0), 
 				x_mean(0), y_mean(0), 
 				x_std(0), y_std(0), 
 				s_x(0), s_y(0){}
@@ -1845,9 +2045,24 @@ namespace mt
 
 				sigma.resize(new_size, value);
 				sigma.shrink_to_fit();
+			}
 
-				b.resize(new_size, value);
-				b.shrink_to_fit();
+			// reserve
+			void reserve(const size_type &new_size)
+			{
+				x.reserve(new_size);
+				y.reserve(new_size);
+				a.reserve(new_size);
+				sigma.reserve(new_size);
+			}
+
+			// reserve
+			void push_back(T x_i, T y_i, T a_i, T sigma_i)
+			{
+				x.push_back(x_i);
+				y.push_back(y_i);
+				a.push_back(a_i);
+				sigma.push_back(sigma_i);
 			}
 
 			// set atoms
@@ -1872,7 +2087,6 @@ namespace mt
 						y[j] = atom.y; 				// y-position
 						a[j] = atom.a; 				// height
 						sigma[j] = atom.sigma;		// standard deviation
-						b[j] = atom.b;				// background
 						j++;
 					}
 				}
@@ -1903,7 +2117,6 @@ namespace mt
 						y[j] = atoms.y[i]; 				// y-position
 						a[j] = atoms.a[i];				// height
 						sigma[j] = atoms.sigma[i];		// standard deviation
-						b[j] = atoms.b[i];				// background
 						j++;
 					}
 				}
@@ -1925,7 +2138,6 @@ namespace mt
 				y_min = y_max = y[0];
 				a_min = a_max = a[0];
 				sigma_min = sigma_max = sigma[0];
-				b_min = b_max = b[0];
 
 				x_mean = y_mean = 0.0;
 				x_std = y_std = 0.0;
@@ -1943,9 +2155,6 @@ namespace mt
 
 					sigma_min = min(sigma[iAtom], sigma_min);
 					sigma_max = max(sigma[iAtom], sigma_max);
-
-					b_min = min(b[iAtom], b_min);
-					b_max = max(b[iAtom], b_max);
 
 					x_mean += x[iAtom];
 					y_mean += y[iAtom];
@@ -1983,7 +2192,6 @@ namespace mt
 			Vector<T, e_host> y;
 			Vector<T, e_host> a;
 			Vector<T, e_host> sigma;
-			Vector<T, e_host> b;
 
 			T x_min;
 			T x_max;
@@ -1996,9 +2204,6 @@ namespace mt
 
 			T sigma_min;
 			T sigma_max;
-
-			T b_min;
-			T b_max;
 
 			T x_mean;
 			T y_mean;
@@ -2016,9 +2221,8 @@ namespace mt
 				T y;
 				T a;
 				T sigma;
-				T b;
 
-				Atom():x(0), y(0), a(0), sigma(0), b(0){};
+				Atom():x(0), y(0), a(0), sigma(0){};
 			};
 
 			template<class TIn>
@@ -2029,7 +2233,6 @@ namespace mt
 				atom.y = atoms[1*nr + iatom]; 						// y-position
 				atom.a = (nc>2)?atoms[2*nr + iatom]:1.0;			// height
 				atom.sigma = (nc>3)?atoms[3*nr + iatom]:1.0;		// standard deviation
-				atom.b = (nc>4)?atoms[4*nr + iatom]:0.0; 			// background
 
 				return atom;
 			}
@@ -2059,7 +2262,6 @@ namespace mt
 
 			T a;
 			T alpha;
-			T b;
 			T dtR;
 			T R2_tap;
 			T tap_cf;
@@ -2068,7 +2270,7 @@ namespace mt
 			T *v;
 
 			Atom_Sp(): x(0), y(0), occ(1), R2_max(0), R2(nullptr), c3(nullptr), c2(nullptr), 
-			c1(nullptr), c0(nullptr), ix0(1), ixn(0), iy0(0), a(0), alpha(0), b(0), 
+			c1(nullptr), c0(nullptr), ix0(1), ixn(0), iy0(0), a(0), alpha(0), 
 			dtR(0), R2_tap(0), tap_cf(0), iyn(0), iv(nullptr), v(nullptr){}
 
 			inline

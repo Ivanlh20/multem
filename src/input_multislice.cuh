@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef INPUT_MULTISLICE_H
@@ -54,7 +54,7 @@ namespace mt
 			int gpu_device; 									// GPU device
 			int gpu_nstream; 									// Number of streams
 
-			eTEM_Sim_Type simulation_type; 					// 11: Scanning, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
+			eTEM_Sim_Type simulation_type; 						// 11: Scanning, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
 			ePhonon_Model phonon_model; 						// 1: Still atom model, 2: Absorptive potential model, 3: Frozen phonon
 			eElec_Spec_Int_Model interaction_model; 			// eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
 			ePotential_Slicing potential_slicing; 				// ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
@@ -376,7 +376,8 @@ namespace mt
 
 			T get_weight() const
 			{
-				return 1.0/static_cast<T>(fp_nconf*nrot);
+				int nconf = (!is_frozen_phonon()||fp_single_conf)?1:fp_nconf;
+				return 1.0/static_cast<T>(nconf*nrot);
 			}
 
 			void set_phi(const int &irot)

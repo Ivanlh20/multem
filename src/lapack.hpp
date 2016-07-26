@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef LAPACK_H
@@ -21,9 +21,32 @@
 
 #include "math.cuh"
 #include "types.cuh"
+#include "traits.cuh"
 
 namespace lapack
 {
+	extern "C" void sgesv_(
+		const int* n, 
+		const int* nrhs, 
+		float* a, 
+		const int* lda, 
+		int* ipiv,
+ float* b, 
+		const int* ldb, 
+		int* info
+	);
+
+	extern "C" void dgesv_(
+		const int* n, 
+		const int* nrhs, 
+		double* a, 
+		const int* lda, 
+		int* ipiv,
+ double* b, 
+		const int* ldb, 
+		int* info
+	);
+
 	extern "C" void sgels_(
 		const char	*trans,
 		const int *m,
@@ -85,11 +108,172 @@ namespace lapack
 		int *iwork,
 		int *info
 	);
+	/*	Fast least square fitting	*/
+	template<class T>
+	struct FLSF
+	{
+		public:
+			using value_type = T;
+
+			static const mt::eDevice device = mt::e_host;
+
+			void operator()(int A_rows, int A_cols, T *A, T *b, T *x)
+			{
+				using TVector = vector<T>;
+
+				// get ATA
+				auto M = mt::reserve_vector<TVector>(A_cols*A_cols);
+				for(auto ir=0; ir<A_cols; ir++)
+				{
+					for(auto ic=0; ic<A_cols; ic++)
+					{
+						T v = 0;
+						for(auto k=0; k<A_rows; k++)
+						{
+							v += A[ir*A_rows+k]*A[ic*A_rows+k];
+						}
+						M.push_back(v);
+					}
+				}
+
+				// get y
+				auto y = mt::reserve_vector<TVector>(A_cols);
+				for(auto ic=0; ic<A_cols; ic++)
+				{
+					T v = 0;
+					for(auto ir=0; ir<A_rows; ir++)
+					{
+						v += A[ic*A_rows+ir]*b[ir];
+					}
+					y.push_back(v);
+				}
+
+				int n = A_cols;
+				int nrhs = 1;
+				int lda = n;
+				int ldb = n;
+				int info = 0;
+
+				vector<int> ipiv(n);
+
+				gesv(n, nrhs, M.data(), lda, ipiv.data(), y.data(), ldb, info);
+				std::copy(y.begin(), y.end(), x);
+			}
+
+			void operator()(int A_rows, int A_cols, T *A, T *b, T *x, T lambda, T *D, T *G)
+			{
+				using TVector = vector<T>;
+
+				// get ATA
+				auto M = mt::reserve_vector<TVector>(A_cols*A_cols);
+				for(auto ir=0; ir<A_cols; ir++)
+				{
+					for(auto ic=0; ic<A_cols; ic++)
+					{
+						T v = 0;
+						for(auto k=0; k<A_rows; k++)
+						{
+							v += A[ir*A_rows+k]*A[ic*A_rows+k];
+						}
+						T d = 0;
+						if(ir==ic)
+						{
+							d = (v<1e-7)?lambda:lambda*v;
+							D[ir] = d;
+						}
+						M.push_back(v+d);
+					}
+				}
+
+				// get y
+				auto y = mt::reserve_vector<TVector>(A_cols);
+				for(auto ic=0; ic<A_cols; ic++)
+				{
+					T v = 0;
+					for(auto ir=0; ir<A_rows; ir++)
+					{
+						v += A[ic*A_rows+ir]*b[ir];
+					}
+					y.push_back(v);
+					G[ic] = v;
+				}
+
+				int n = A_cols;
+				int nrhs = 1;
+				int lda = n;
+				int ldb = n;
+				int info = 0;
+
+				vector<int> ipiv(n);
+
+				gesv(n, nrhs, M.data(), lda, ipiv.data(), y.data(), ldb, info);
+				std::copy(y.begin(), y.end(), x);
+			}
+
+		private:
+			void gesv(const int &n, const int &nrhs, float *a, const int &lda, 
+			int *ipiv, float *b, const int &ldb, int &info)
+			{
+				sgesv_(&n, &nrhs, a, &lda, ipiv, b, &ldb, &info);
+			}
+
+			void gesv(const int &n, const int &nrhs, double *a, const int &lda, 
+			int *ipiv, double *b, const int &ldb, int &info)
+			{
+				dgesv_(&n, &nrhs, a, &lda, ipiv, b, &ldb, &info);
+			}
+
+			vector<int> ipiv;
+			vector<T> M;
+			vector<T> y;
+	};
 
 	/*	The program computes the solution to the system of linear
 		equations with a square matrix A and multiple right-hand 
 		sides B, where A is the coefficient matrix and b is the 
 		right-hand side matrix:
+	*/
+	template<class T>
+	struct GESV
+	{
+		public:
+			using value_type = T;
+
+			static const mt::eDevice device = mt::e_host;
+
+			void operator()(int A_n, T *A, int b_cols, T *b, T *x)
+			{
+				int n = A_n;
+				int nrhs = b_cols;
+				int lda = n;
+				int ldb = n;
+				int info = 0;
+
+				std::copy(b, b+n, x);
+				ipiv.resize(n);
+
+				gesv(n, nrhs, A, lda, ipiv.data(), x, ldb, info);
+			}
+
+		private:
+			void gesv(const int &n, const int &nrhs, float *a, const int &lda, 
+			int *ipiv, float *b, const int &ldb, int &info)
+			{
+				sgesv_(&n, &nrhs, a, &lda, ipiv, b, &ldb, &info);
+			}
+
+			void gesv(const int &n, const int &nrhs, double *a, const int &lda, 
+			int *ipiv, double *b, const int &ldb, int &info)
+			{
+				dgesv_(&n, &nrhs, a, &lda, ipiv, b, &ldb, &info);
+			}
+
+			vector<int> ipiv;
+	};
+
+	/*	The program solves overdetermined or underdetermined real 
+		linear systems involving an M-by-N matrix A, or its transpose, 
+		using a QR or LQ factorization of A. It is assumed that A has full rank.
 	*/
 	template<class T>
 	struct GELS
@@ -113,16 +297,16 @@ namespace lapack
 
 				mt::Vector<T, mt::e_host> bv(b, b+m*b_cols);
 
-				//query optimal size of work array
+				// query optimal size of work array
 				int lwork = -1;
 				T work_query= 0;
 				gels(trans, m, n, nrhs, A, lda, bv.data(), ldb, &work_query, lwork, info);
 
-				//set arrays
+				// set arrays
 				lwork = max(1, int(work_query));
 				work.resize(lwork);
 
-				//perform minimum-norm solution
+				// perform minimum-norm solution
 				gels(trans, m, n, nrhs, A, lda, bv.data(), ldb, work.data(), lwork, info);
 
 				for(auto ix=0; ix<nrhs; ix++)
@@ -170,20 +354,20 @@ namespace lapack
 				mt::Vector<T, mt::e_host> bv(b, b+m*b_cols);
 				S.resize(min_mn);
 
-				//query optimal size of work array
+				// query optimal size of work array
 				int lwork = -1;
 				T work_query= 0;
 				int iwork_query= 0;
 				gelsd(m, n, nrhs, A, lda, bv.data(), ldb, S.data(), rcond, rank, &work_query, lwork, &iwork_query, info);
 
-				//set arrays
+				// set arrays
 				lwork = max(1, int(work_query));
 				work.resize(lwork);
 
 				int liwork = max(1, iwork_query);
 				iwork.resize(liwork);
 
-				//perform minimum-norm solution
+				// perform minimum-norm solution
 				gelsd(m, n, nrhs, A, lda, bv.data(), ldb, S.data(), rcond, rank, work.data(), lwork, iwork.data(), info);
 
 				for(auto ix= 0; ix<nrhs; ix++)

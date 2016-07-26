@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef DEVICE_FUNCTIONS_H
@@ -86,16 +86,16 @@
 __device__ __forceinline__
 double atomicAdd(double *address, double val)
 {
-    unsigned long long int* address_as_ull = (unsigned long long int*)address;
-    unsigned long long int old = *address_as_ull, assumed;
+ unsigned long long int* address_as_ull = (unsigned long long int*)address;
+ unsigned long long int old = *address_as_ull, assumed;
 
-    do
-    {
-        assumed = old;
-        old = atomicCAS(address_as_ull, assumed, __double_as_longlong(val +__longlong_as_double(assumed)));
-    } while (assumed != old);
+ do
+ {
+ assumed = old;
+ old = atomicCAS(address_as_ull, assumed, __double_as_longlong(val +__longlong_as_double(assumed)));
+ } while (assumed != old);
 
-    return __longlong_as_double(old);
+ return __longlong_as_double(old);
 }
 
 namespace mt
@@ -184,7 +184,7 @@ namespace mt
 						T V = host_device_detail::eval_cubic_poly<T>(R2, atom_Ip);
 
 						atomicAdd(&(M_i.V[ixy]), V);
-						//atomicAdd<T>(&(M_i.V[ixy]), V);
+						// atomicAdd<T>(&(M_i.V[ixy]), V);
 					}
 					iy0 += blockDim.y*gridDim.y;
 				}
@@ -325,7 +325,7 @@ namespace mt
 					T V = host_device_detail::eval_cubic_poly<TShift>(ix, iy, grid, R2, atom, ixy);
 
 					atomicAdd(&(M_o.V[ixy]), V);
-					//atomicAdd<T>(&(M_o.V[ixy]), V);
+					// atomicAdd<T>(&(M_o.V[ixy]), V);
 				}
 			}
 		}
