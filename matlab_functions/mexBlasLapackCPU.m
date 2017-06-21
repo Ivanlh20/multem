@@ -6,7 +6,7 @@ function [] = mexBlasLapackCPU(opt, mfile, path, varargin)
     nVarargs = length(varargin);
     for k = 1:nVarargs
       varargin{k} = strcat('''', strcat(path,'/'), char(varargin{k}), '''');
-    end;
+    end
 
     lapacklib = fullfile(matlabroot, ...
       'extern', 'lib', 'win64', 'microsoft', 'libmwlapack.lib');
@@ -22,7 +22,7 @@ function [] = mexBlasLapackCPU(opt, mfile, path, varargin)
         textcomands = strjoin({qt('-g'), qt('-largeArrayDims'), qt(strcat('-I', path)), qt(CUDA_INC), mfile, strjoin(varargin, ','), blaslib, lapacklib},',');     
     else
         textcomands = strjoin({qt('-largeArrayDims'), qt(strcat('-I', path)), qt(CUDA_INC), mfile, strjoin(varargin, ','), blaslib, lapacklib},',');       
-    end;
+    end
     textcomands = strcat('mex(', textcomands, ')');
     eval(textcomands);
 end

@@ -9,12 +9,12 @@ CrysPar.a = a;
 CrysPar.b = b;
 CrysPar.c = c;
 CrysPar.nuLayer = 2;
-charge = 0;
+occ = 1;region = 0;charge = 0;
 % Mo = 42
-% Z charge x y z rms3d occupancy
-CrysPar.uLayer(1).atoms = [42, 0.0, 0.0, 0.0, rms3d, 1, charge];
-CrysPar.uLayer(2).atoms = [42, 0.5, 0.5, 0.5, rms3d, 1, charge];
-Crys3D = il_crystal_by_layers(CrysPar);
+% Z charge x y z rms3d occupancy region charge
+CrysPar.uLayer(1).atoms = [42, 0.0, 0.0, 0.0, rms3d, occ, region, charge];
+CrysPar.uLayer(2).atoms = [42, 0.5, 0.5, 0.5, rms3d, occ, region, charge];
+Crys3D = il_crystal_by_lays(CrysPar);
 
 dz = CrysPar.c/ncu;
 lx = na*CrysPar.a; ly = nb*CrysPar.b; lz = nc*CrysPar.c;

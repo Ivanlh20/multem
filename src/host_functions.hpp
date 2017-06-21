@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef HOST_FUNCTIONS_H
@@ -24,58 +24,63 @@
 #include <algorithm>
 #include <numeric>
 #include <random>
+#include <iostream>
+#include <fstream>
 
 #include <fftw3.h>
 #include "math.cuh"
 #include "types.cuh"
 #include "traits.cuh"
-#include "fft2.cuh"
+#include "fft.cuh"
 #include "stream.cuh"
 #include "lapack.hpp"
+#include "lin_alg_def.cuh"
+#include "atom_data.hpp"
 
 #include "host_device_functions.cuh"
+#include "quadrature.hpp"
 
 namespace mt
 {
 	// median filter 1d
-	template<class TVector>
-	TVector filter_median_1d(Stream<e_host> &stream, TVector &Im_i, int nkr);
+	template <class TVector>
+	TVector ftr_median_1d(Stream<e_host> &stream, TVector &Im_i, int nkr);
 
 	// median filter 2d
-	template<class TGrid, class TVector>
-	TVector filter_median_2d(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr);
+	template <class TGrid, class TVector>
+	TVector ftr_median_2d(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im_i, int nkr);
 
 	// wiener filter 1d
-	template<class TVector>
-	TVector filter_wiener_1d(Stream<e_host> &stream, TVector &Im_i, int nkr);
+	template <class TVector>
+	TVector ftr_wiener_1d(Stream<e_host> &stream, TVector &Im_i, int nkr);
 
 	// wiener filter 2d
-	template<class TGrid, class TVector>
-	TVector filter_wiener_2d(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr);
+	template <class TGrid, class TVector>
+	TVector ftr_wiener_2d(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im_i, int nkr);
 
-	// denoising poisson 
-	template<class TVector>
-	TVector filter_denoising_poisson_1d(Stream<e_host> &stream, TVector &Im_i, int nkr_w, int nkr_m);
+	// den poiss 
+	template <class TVector>
+	TVector ftr_poiss_dnois_1d(Stream<e_host> &stream, TVector &Im_i, int nkr_w, int nkr_m);
 
 	// get peak signal to noise ratio PSNR 
-	template<class TVector>
+	template <class TVector>
 	Value_type<TVector> get_PSNR(Stream<e_host> &stream, TVector &Im_i, TVector &Im_d);
 
 	// gray opening
-	template<class TVector>
+	template <class TVector>
 	TVector morp_g_open(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr);
 
 	// thresholding
-	template<class TVector>
-	TVector thresholding(Stream<e_host> &stream, TVector &v_i, Value_type<TVector> threshold);
+	template <class TVector>
+	TVector thresholding(Stream<e_host> &stream, TVector &v_i, Value_type<TVector> thr);
 
-	template<class T>
+	template <class T>
 	class Neigh_2d;
 
 	namespace host_detail
 	{
 		template <class TFn, class ...TArg> 
-		void matrix_iter(const Range &range, TFn &fn, TArg &...arg)
+		void matrix_iter(const Range_2d &range, TFn &fn, TArg &...arg)
 		{
 			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
 			{
@@ -87,7 +92,7 @@ namespace mt
 		}
 
 		template <class TFn, class ...TArg> 
-		void matrix_iter_yx(const Range &range, TFn &fn, TArg &...arg)
+		void matrix_iter_yx(const Range_2d &range, TFn &fn, TArg &...arg)
 		{
 			for(auto iy = range.iy_0; iy < range.iy_e; iy++)
 			{
@@ -99,7 +104,7 @@ namespace mt
 		}
 
 		template <class TFn, class ...TArg> 
-		void vector_iter(const Range &range, TFn &fn, TArg &...arg)
+		void vector_iter(const Range_2d &range, TFn &fn, TArg &...arg)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
@@ -107,24 +112,24 @@ namespace mt
 			}
 		}
 
-		template<class T>
-		T atom_cost_function(const Grid<T> &grid, const Atom_Sa<T> &atom_Ip, rVector<T> M_i)
+		template <class T>
+		T atom_cost_function(const Grid_2d<T> &grid_2d, const Atom_Sa<T> &atom_Ip, rVector<T> M_i)
 		{
 			T sum = 0;
 
-			for(auto ix0 = 0; ix0 < atom_Ip.ixn; ix0++)
+			for(auto ix_0 = 0; ix_0 < atom_Ip.ixn; ix_0++)
 			{
-				for(auto iy0 = 0; iy0 < atom_Ip.iyn; iy0++)
+				for(auto iy_0 = 0; iy_0 < atom_Ip.iyn; iy_0++)
 				{
-					int ix = ix0 + atom_Ip.ix0;
-					int iy = iy0 + atom_Ip.iy0;
+					int ix = ix_0 + atom_Ip.ix_0;
+					int iy = iy_0 + atom_Ip.iy_0;
 
-					T R2 = grid.R2(ix, iy, atom_Ip.x, atom_Ip.y);
+					T R2 = grid_2d.R2(ix, iy, atom_Ip.x, atom_Ip.y);
 					if (R2 < atom_Ip.R2_max)
 					{
-						int ixy = grid.ind_col(ix, iy);
+						int ixy = grid_2d.ind_col(ix, iy);
 						T M = M_i[ixy];
-						T V = host_device_detail::eval_cubic_poly<T>(R2, atom_Ip);
+						const T V = host_device_detail::eval_cubic_poly(R2, atom_Ip);
 						sum += (V-2*M)*V;
 					}
 				}
@@ -133,23 +138,23 @@ namespace mt
 			return sum;
 		}
 
-		template<class T>
-		void subtract_atom(Stream<e_host> &stream, const Grid<T> &grid, const Atom_Sa<T> &atom_Ip, rVector<T> M_i)
+		template <class T>
+		void subtract_atom(Stream<e_host> &stream, const Grid_2d<T> &grid_2d, const Atom_Sa<T> &atom_Ip, rVector<T> M_i)
 		{
-			for(auto ix0 = 0; ix0 < atom_Ip.ixn; ix0++)
+			for(auto ix_0 = 0; ix_0 < atom_Ip.ixn; ix_0++)
 			{
 				int iyc = 0;
-				for(auto iy0 = 0; iy0 < atom_Ip.iyn; iy0++)
+				for(auto iy_0 = 0; iy_0 < atom_Ip.iyn; iy_0++)
 				{
-					int ix = ix0 + atom_Ip.ix0;
-					int iy = iy0 + atom_Ip.iy0;
+					int ix = ix_0 + atom_Ip.ix_0;
+					int iy = iy_0 + atom_Ip.iy_0;
 
-					T R2 = grid.R2(ix, iy, atom_Ip.x, atom_Ip.y);
+					T R2 = grid_2d.R2(ix, iy, atom_Ip.x, atom_Ip.y);
 					if (R2 < atom_Ip.R2_max)
 					{
-						int ixy = grid.ind_col(ix, iy);
+						int ixy = grid_2d.ind_col(ix, iy);
 
-						T V = host_device_detail::eval_cubic_poly<T>(R2, atom_Ip);
+						const T V = host_device_detail::eval_cubic_poly(R2, atom_Ip);
 
 						atom_Ip.iv[iyc] = ixy;
 						atom_Ip.v[iyc] = V;
@@ -158,16 +163,16 @@ namespace mt
 				}
 
 				stream.stream_mutex.lock();
-				for(auto iy0 = 0; iy0 < iyc; iy0++)
+				for(auto iy_0 = 0; iy_0 < iyc; iy_0++)
 				{
-					M_i.V[atom_Ip.iv[iy0]] -= atom_Ip.v[iy0];
+					M_i.V[atom_Ip.iv[iy_0]] -= atom_Ip.v[iy_0];
 				}
 				stream.stream_mutex.unlock();
 			}
 		}
 
 		// Linear projected potential: V and zV
-		template<ePotential_Type potential_type, int charge, class TAtom>
+		template <ePotential_Type potential_type, int charge, class TAtom>
 		void linear_Vz(const Q1<Value_type<TAtom>, e_host> &qz, TAtom &atom)
 		{	
 			using T = Value_type<TAtom>;
@@ -216,7 +221,7 @@ namespace mt
 		}
 
 		// Get Local interpolation coefficients
-		template<class TAtom> 
+		template <class TAtom> 
 		void cubic_poly_coef(TAtom &atom)
 		{
 			for(auto iR = 0; iR < c_nR-1; iR++)
@@ -226,24 +231,22 @@ namespace mt
 		}
 
 		// Cubic polynomial evaluation
-		template<bool TShift, class TAtom> 
-		void eval_cubic_poly(Stream<e_host> &stream, const Grid<Value_type<TAtom>> &grid, const TAtom &atom, const rVector<Value_type<TAtom>> &M_o)
+		template <class T> 
+		void eval_cubic_poly(Stream<e_host> &stream, Grid_2d<T> &grid_2d, Atom_Vp<T> &atom, rVector<T> M_o)
 		{	
-			using T = Value_type<TAtom>;
-
-			for(auto ix0 = 0; ix0 < atom.ixn; ix0++)
+			for(auto ix_0 = 0; ix_0 < atom.nx; ix_0++)
 			{
 				int iyc = 0;
-				for(auto iy0 = 0; iy0 < atom.iyn; iy0++)
+				for(auto iy_0 = 0; iy_0 < atom.ny; iy_0++)
 				{
-					int ix = ix0 + atom.ix0;
-					int iy = iy0 + atom.iy0;
+					int ix = ix_0 + atom.ix_0;
+					int iy = iy_0 + atom.iy_0;
+					const auto R2 = grid_2d.R2(ix, iy, atom.x, atom.y);
 
-					T R2 = grid.R2(ix, iy, atom.x, atom.y);
 					if (R2 < atom.R2_max)
 					{
-						int ixy;
-						T V = host_device_detail::eval_cubic_poly<TShift>(ix, iy, grid, R2, atom, ixy);
+						const T V = atom.occ*host_device_detail::eval_cubic_poly(R2, atom);
+						const int ixy = grid_2d.ind_col_pbc_shift(ix, iy);
 						
 						atom.iv[iyc] = ixy;
 						atom.v[iyc] = V;
@@ -252,49 +255,69 @@ namespace mt
 				}
 
 				stream.stream_mutex.lock();
-				for(auto iy0 = 0; iy0 < iyc; iy0++)
+				for(auto iy_0 = 0; iy_0 < iyc; iy_0++)
 				{
-					M_o.V[atom.iv[iy0]] += atom.v[iy0];
+					M_o.V[atom.iv[iy_0]] += atom.v[iy_0];
 				}
 				stream.stream_mutex.unlock();
 			}
 		}
 
-		template<class TGrid>
-		Value_type<TGrid> Lorentz_factor(Stream<e_host> &stream, TGrid &grid, EELS<Value_type<TGrid>> &eels)
-		{
-			using value_type_r = Value_type<TGrid>;
-			value_type_r sum = 0;
-
-			auto thr_Lorentz_factor = [&](const Range &range)
+		// Gaussian evaluation
+		template <class T> 
+		void gauss_eval(Stream<e_host> &stream, Grid_2d<T> &grid_2d, Gauss_Sp<T> &gauss, rVector<T> M_o)
+		{	
+			for(auto ix_0 = 0; ix_0 < gauss.nx; ix_0++)
 			{
-				value_type_r sum_partial = 0;
-				matrix_iter(range, host_device_detail::Lorentz_factor<TGrid>, grid, eels.gc2, eels.ge2, sum_partial);
+				int iyc = 0;
+				for(auto iy_0 = 0; iy_0 < gauss.ny; iy_0++)
+				{
+					int ix = ix_0 + gauss.ix_0;
+					int iy = iy_0 + gauss.iy_0;
+
+					T R2 = grid_2d.R2(ix, iy, gauss.x, gauss.y);
+					if (R2 < gauss.R2_max)
+					{
+						gauss.iv[iyc] = grid_2d.ind_col_pbc(ix, iy);
+						gauss.v[iyc] = gauss(R2);
+						iyc++;
+					}
+				}
+
+				stream.stream_mutex.lock();
+				for(auto iy_0 = 0; iy_0 < iyc; iy_0++)
+				{
+					M_o.V[gauss.iv[iy_0]] += gauss.v[iy_0];
+				}
+				stream.stream_mutex.unlock();
+			}
+		}
+
+		template <class TGrid>
+		Value_type<TGrid> Lorentz_factor(Stream<e_host> &stream, TGrid &grid_2d, EELS<Value_type<TGrid>> &eels)
+		{
+			using T_r = Value_type<TGrid>;
+			T_r sum = 0;
+
+			auto thr_Lorentz_factor = [&](const Range_2d &range)
+			{
+				T_r sum_partial = 0;
+				matrix_iter(range, host_device_detail::Lorentz_factor<TGrid>, grid_2d, eels.gc2, eels.ge2, sum_partial);
 
 				stream.stream_mutex.lock();
 				sum += sum_partial;
 				stream.stream_mutex.unlock();
 			};
 
-			stream.set_n_act_stream(grid.nx);
-			stream.set_grid(grid.nx, grid.ny);
+			stream.set_n_act_stream(grid_2d.nx);
+			stream.set_grid(grid_2d.nx, grid_2d.ny);
 			stream.exec(thr_Lorentz_factor);
 
 			return sqrt(eels.occ)/sum;
 		}
 
-		// Linear Gaussian
-		template<class TAtom>
-		void linear_Gaussian(TAtom &atom)
-		{	
-			for(auto iR = 0; iR < c_nR; iR++)
-			{
-				host_device_detail::linear_Gaussian(iR, atom);
-			}
-		}
-
-		template<class TVector>
-		void fit_log_gaussian_a_sigma(const TVector &x2_i, const TVector &y_i, Value_type<TVector> &a1, Value_type<TVector> &a0)
+		template <class TVector>
+		void fit_log_gauss_a_sigma(const TVector &x2_i, const TVector &y_i, Value_type<TVector> &a1, Value_type<TVector> &a0)
 		{
 			using T = Value_type<TVector>;
 
@@ -323,8 +346,8 @@ namespace mt
 			a0 = (sx1x1*sx2y-sx1x2*sx1y)/det;
 		}
 
-		template<class TVector>
-		void fit_gaussian_a_c(const TVector &x2_i, const TVector &y_i, Value_type<TVector> lambdai, 
+		template <class TVector>
+		void fit_gauss_a_c(const TVector &x2_i, const TVector &y_i, Value_type<TVector> lambdai, 
 		Value_type<TVector> sigma, Value_type<TVector> &a, Value_type<TVector> &c)
 		{
 			using T = Value_type<TVector>;
@@ -358,8 +381,8 @@ namespace mt
 			c = (sx1x1*sx2y-sx1x2*sx1y)/det;
 		}
 
-		template<class TVector>
-		Value_type<TVector> fit_gaussian_a(const TVector &x2_i, const TVector &y_i, Value_type<TVector> sigma)
+		template <class TVector>
+		Value_type<TVector> fit_gauss_a(const TVector &x2_i, const TVector &y_i, Value_type<TVector> sigma)
 		{
 			using T = Value_type<TVector>;
 
@@ -380,9 +403,9 @@ namespace mt
 			return sx1y/sx1x1;
 		}
 
-		template<class TVector>
-		Value_type<TVector> fit_gaussian_sigma(const TVector &x2_i, const TVector &y_i, Value_type<TVector> a, 
-		Value_type<TVector> &sigma, Value_type<TVector> sigma_min, Value_type<TVector> sigma_max,
+		template <class TVector>
+		Value_type<TVector> fit_gauss_sigma(const TVector &x2_i, const TVector &y_i, Value_type<TVector> a, 
+		Value_type<TVector> &sigma, Value_type<TVector> sigma_min, Value_type<TVector> sigma_max, 
 		int nit, Value_type<TVector> d_sigma_error)
 		{
 			using T = Value_type<TVector>;
@@ -407,7 +430,7 @@ namespace mt
 				}
 				T d_sigma = sx1y/sx1x1;
 				sigma += d_sigma;
-				//sigma = min(max(sigma, sigma_min), sigma_max);
+				// sigma = min(max(sigma, sigma_min), sigma_max);
 
 				if(sigma <= sigma_min)
 				{
@@ -421,7 +444,7 @@ namespace mt
 					break;
 				}
 
-				if (abs(d_sigma/sigma)<d_sigma_error)
+				if (fabs(d_sigma/sigma)<d_sigma_error)
 				{
 					break;
 				}
@@ -430,8 +453,8 @@ namespace mt
 			return sigma-sigma_o;
 		}
 
-		template<class TVector>
-		Value_type<TVector> fit_gaussian_w_a(const TVector &x2_i, const TVector &y_i, Value_type<TVector> sigma)
+		template <class TVector>
+		Value_type<TVector> fit_gauss_w_a(const TVector &x2_i, const TVector &y_i, Value_type<TVector> sigma)
 		{
 			using T = Value_type<TVector>;
 
@@ -442,7 +465,7 @@ namespace mt
 			T sx1y = 0;
 			for (auto ix = 0; ix < x2_i.size(); ix++)
 			{
-				//T w = 1/::fmax(x2_i[ix], 0.001);
+				// T w = 1/::fmax(x2_i[ix], 0.001);
 				T w = x2_i[ix];
 				T x1 = exp(-c_0*x2_i[ix]);
 				T y = w*y_i[ix];
@@ -454,9 +477,9 @@ namespace mt
 			return sx1y/sx1x1;
 		}
 
-		template<class TVector>
-		Value_type<TVector> fit_gaussian_w_sigma(const TVector &x2_i, const TVector &y_i, Value_type<TVector> a, 
-		Value_type<TVector> &sigma, Value_type<TVector> sigma_min, Value_type<TVector> sigma_max,
+		template <class TVector>
+		Value_type<TVector> fit_gauss_w_sigma(const TVector &x2_i, const TVector &y_i, Value_type<TVector> a, 
+		Value_type<TVector> &sigma, Value_type<TVector> sigma_min, Value_type<TVector> sigma_max, 
 		int nit, Value_type<TVector> d_sigma_error)
 		{
 			using T = Value_type<TVector>;
@@ -472,7 +495,7 @@ namespace mt
 				T sx1y = 0;
 				for (auto ix = 0; ix < x2_i.size(); ix++)
 				{
-					//T w = 1/::fmax(x2_i[ix], 0.001);
+					// T w = 1/::fmax(x2_i[ix], 0.001);
 					T w = x2_i[ix];
 					T f = exp(-c_0*x2_i[ix]);
 					T x1 = c_1*x2_i[ix]*f;
@@ -496,7 +519,7 @@ namespace mt
 					break;
 				}
 
-				if (abs(d_sigma/sigma)<d_sigma_error)
+				if (fabs(d_sigma/sigma)<d_sigma_error)
 				{
 					break;
 				}
@@ -510,70 +533,41 @@ namespace mt
 	/***************************************************************************/
 	/***************************************************************************/
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
-	assign(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h =nullptr)
+        assign(TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h = nullptr)
 	{
-		M_o.resize(M_i.size());
-		auto thr_assign = [&](const Range &range)
-		{
-			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
-			{
-				M_o[ixy] = M_i[ixy];
-			}
-		};
-
-		stream.set_n_act_stream(M_o.size());
-		stream.set_grid(1, M_o.size());
-		stream.exec(thr_assign);
+		M_o.assign(M_i.begin(), M_i.end());
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	typename std::enable_if<is_host_vector_and_device_vector<TVector_1, TVector_2>::value 
 	&& is_complex<Value_type<TVector_2>>::value && !std::is_same<Value_type<TVector_1>, Value_type<TVector_2>>::value, void>::type
-	assign(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h =nullptr)
+	assign(TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h = nullptr)
 	{
 		Vector<Value_type<TVector_2>, e_host> M_h;
 		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
 
 		// copy data to the same output type
-		assign(stream, M_i, *M_i_h);
+		assign(M_i, *M_i_h);
 
 		// data transfer from CPU to GPU
 		M_o.assign(M_i_h->begin(), M_i_h->end());
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	typename std::enable_if<is_host_vector_and_device_vector<TVector_1, TVector_2>::value 
 	&& (!is_complex<Value_type<TVector_2>>::value || std::is_same<Value_type<TVector_1>, Value_type<TVector_2>>::value), void>::type
-	assign(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h =nullptr)
+	assign(TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h = nullptr)
 	{
 		M_o.assign(M_i.begin(), M_i.end());
 	}
 
-	template<class TVector_1, class TVector_2>
-	typename std::enable_if<is_host_vector_and_host_vector<TVector_1, TVector_2>::value && is_complex<Value_type<TVector_1>>::value, void>::type
-	assign_real(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_2>, e_host> *M_i_h =nullptr)
-	{
-		M_o.resize(M_i.size());
-		auto thr_assign_real = [&](const Range &range)
-		{
-			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
-			{
-				M_o[ixy] = M_i[ixy].real();
-			}
-		};
-
-		stream.set_n_act_stream(M_o.size());
-		stream.set_grid(1, M_o.size());
-		stream.exec(thr_assign_real);
-	}
-
-	template<class TVector>
+	template <class TVector>
 	enable_if_host_vector<TVector, void>
 	fill(Stream<e_host> &stream, TVector &M_io, Value_type<TVector> value_i)
 	{
-		auto thr_fill = [&](const Range &range)
+		auto thr_fill = [&](const Range_2d &range)
 		{
 			thrust::fill(M_io.begin()+range.ixy_0, M_io.begin()+range.ixy_e, value_i);
 		};
@@ -583,12 +577,12 @@ namespace mt
 		stream.exec(thr_fill);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	scale(Stream<e_host> &stream, Value_type<TVector_2> w_i, TVector_1 &M_i, TVector_2 &M_o)
 	{
 		using value_type = Value_type<TVector_2>;
-		auto thr_scale = [&](const Range &range)
+		auto thr_scale = [&](const Range_2d &range)
 		{
 			thrust::transform(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e, 
 				M_o.begin()+range.ixy_0, functor::scale<value_type>(w_i));
@@ -599,19 +593,19 @@ namespace mt
 		stream.exec(thr_scale);
 	}
 
-	template<class TVector>
+	template <class TVector>
 	enable_if_host_vector<TVector, void>
 	scale(Stream<e_host> &stream, Value_type<TVector> w_i, TVector &M_io)
 	{
 		scale(stream, w_i, M_io, M_io);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	square(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_o)
 	{
 		using value_type = Value_type<TVector_2>;
-		auto thr_square = [&](const Range &range)
+		auto thr_square = [&](const Range_2d &range)
 		{
 			thrust::transform(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e, 
 				M_o.begin()+range.ixy_0, functor::square<value_type>());
@@ -622,12 +616,12 @@ namespace mt
 		stream.exec(thr_square);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	square_scale(Stream<e_host> &stream, Value_type<TVector_2> w_i, TVector_1 &M_i, TVector_2 &M_o)
 	{
 		using value_type = Value_type<TVector_2>;
-		auto thr_square_scale = [&](const Range &range)
+		auto thr_square_scale = [&](const Range_2d &range)
 		{
 			thrust::transform(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e, 
 				M_o.begin()+range.ixy_0, functor::square_scale<value_type>(w_i));
@@ -638,12 +632,12 @@ namespace mt
 		stream.exec(thr_square_scale);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	add(Stream<e_host> &stream, TVector_1 &M1_i, TVector_1 &M2_i, TVector_2 &M_o)
 	{
 		using value_type = Value_type<TVector_2>;
-		auto thr_add = [&](const Range &range)
+		auto thr_add = [&](const Range_2d &range)
 		{
 			thrust::transform(M1_i.begin()+range.ixy_0, M1_i.begin()+range.ixy_e, 
 				M2_i.begin()+range.ixy_0, M_o.begin()+range.ixy_0, functor::add<value_type>());
@@ -654,20 +648,20 @@ namespace mt
 		stream.exec(thr_add);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	add(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_io)
 	{
 		add(stream, M_i, M_io, M_io);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	add_scale(Stream<e_host> &stream, Value_type<TVector_2> w1_i, TVector_1 &M1_i, 
 	Value_type<TVector_2> w2_i, TVector_1 &M2_i, TVector_2 &M_o)
 	{
 		using value_type = Value_type<TVector_2>;
-		auto thr_add_scale = [&](const Range &range)
+		auto thr_add_scale = [&](const Range_2d &range)
 		{
 			thrust::transform(M1_i.begin()+range.ixy_0, M1_i.begin()+range.ixy_e, 
 				M2_i.begin()+range.ixy_0, M_o.begin()+range.ixy_0, functor::add_scale_i<value_type>(w1_i, w2_i));
@@ -678,12 +672,12 @@ namespace mt
 		stream.exec(thr_add_scale);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	add_scale(Stream<e_host> &stream, Value_type<TVector_2> w_i, TVector_1 &M_i, TVector_2 &M_io)
 	{
 		using value_type = Value_type<TVector_2>;
-		auto thr_add_scale = [&](const Range &range)
+		auto thr_add_scale = [&](const Range_2d &range)
 		{
 			thrust::transform(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e, 
 				M_io.begin()+range.ixy_0, M_io.begin()+range.ixy_0, functor::add_scale<value_type>(w_i));
@@ -694,12 +688,12 @@ namespace mt
 		stream.exec(thr_add_scale);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	add_square(Stream<e_host> &stream, TVector_1 &M1_i, TVector_1 &M2_i, TVector_2 &M_o)
 	{
 		using value_type = Value_type<TVector_2>;
-		auto thr_add_square = [&](const Range &range)
+		auto thr_add_square = [&](const Range_2d &range)
 		{
 			thrust::transform(M1_i.begin()+range.ixy_0, M1_i.begin()+range.ixy_e, 
 				M2_i.begin()+range.ixy_0, M_o.begin()+range.ixy_0, functor::add_square_i<value_type>());
@@ -710,12 +704,12 @@ namespace mt
 		stream.exec(thr_add_square);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	add_square(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_io)
 	{
 		using value_type = Value_type<TVector_2>;
-		auto thr_add_square = [&](const Range &range)
+		auto thr_add_square = [&](const Range_2d &range)
 		{
 			thrust::transform(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e, 
 				M_io.begin()+range.ixy_0, M_io.begin()+range.ixy_0, functor::add_square<value_type>());
@@ -726,12 +720,12 @@ namespace mt
 		stream.exec(thr_add_square);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	add_square_scale(Stream<e_host> &stream, Value_type<TVector_2> w1_i, TVector_1 &M1_i, Value_type<TVector_2> w2_i, TVector_1 &M2_i, TVector_2 &M_o)
 	{
 		using value_type = Value_type<TVector_2>;
-		auto thr_add_square_scale = [&](const Range &range)
+		auto thr_add_square_scale = [&](const Range_2d &range)
 		{
 			thrust::transform(M1_i.begin()+range.ixy_0, M1_i.begin()+range.ixy_e, 
 				M2_i.begin()+range.ixy_0, M_o.begin()+range.ixy_0, functor::add_square_scale_i<value_type>(w1_i, w2_i));
@@ -742,12 +736,12 @@ namespace mt
 		stream.exec(thr_add_square_scale);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	add_square_scale(Stream<e_host> &stream, Value_type<TVector_2> w_i, TVector_1 &M_i, TVector_2 &M_io)
 	{
 		using value_type = Value_type<TVector_2>;
-		auto thr_add_square_scale = [&](const Range &range)
+		auto thr_add_square_scale = [&](const Range_2d &range)
 		{
 			thrust::transform(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e, 
 				M_io.begin()+range.ixy_0, M_io.begin()+range.ixy_0, functor::add_square_scale<value_type>(w_i));
@@ -758,12 +752,12 @@ namespace mt
 		stream.exec(thr_add_square_scale);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	multiply(Stream<e_host> &stream, TVector_1 &M1_i, TVector_1 &M2_i, TVector_2 &M_o)
 	{
 		using value_type = Value_type<TVector_2>;
-		auto thr_multiply = [&](const Range &range)
+		auto thr_multiply = [&](const Range_2d &range)
 		{
 			thrust::transform(M1_i.begin()+range.ixy_0, M1_i.begin()+range.ixy_e, 
 				M2_i.begin()+range.ixy_0, M_o.begin()+range.ixy_0, functor::multiply<value_type>());
@@ -774,26 +768,27 @@ namespace mt
 		stream.exec(thr_multiply);
 	}
 
-	template<class TVector_1, class TVector_2>
+	template <class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
 	multiply(Stream<e_host> &stream, TVector_1 &M_i, TVector_2 &M_io)
 	{
 		multiply(stream, M_i, M_io, M_io);
 	}
 
-	template<class TVector>
+	template <class TVector>
 	enable_if_host_vector<TVector, Value_type<TVector>>
 	sum(Stream<e_host> &stream, TVector &M_i)
 	{
 		using value_type = Value_type<TVector>;
 
 		value_type sum_total = 0;
-		auto thr_sum = [&](const Range &range)
+		value_type sum_ee = 0;
+		auto thr_sum = [&](const Range_2d &range)
 		{
 			auto sum_partial = thrust::reduce(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e);
 
 			stream.stream_mutex.lock();
-			sum_total += sum_partial;
+			host_device_detail::kh_sum(sum_total, sum_partial, sum_ee);
 			stream.stream_mutex.unlock();
 		};
 
@@ -804,20 +799,21 @@ namespace mt
 		return sum_total;
 	}
 
-	template<class TVector>
+	template <class TVector>
 	enable_if_host_vector<TVector, Value_type_r<TVector>>
 	sum_square(Stream<e_host> &stream, TVector &M_i)
 	{
-		using value_type_r = Value_type_r<TVector>;
+		using T_r = Value_type_r<TVector>;
 
-		value_type_r sum_total = 0;
-		auto thr_sum_square = [&](const Range &range)
+		T_r sum_total = 0;
+		T_r sum_ee = 0;
+		auto thr_sum_square = [&](const Range_2d &range)
 		{
 			auto sum_partial = thrust::transform_reduce(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e, 
-			functor::square<value_type_r>(), value_type_r(0), functor::add<value_type_r>());
+			functor::square<T_r>(), T_r(0), functor::add<T_r>());
 
 			stream.stream_mutex.lock();
-			sum_total += sum_partial;
+			host_device_detail::kh_sum(sum_total, sum_partial, sum_ee);
 			stream.stream_mutex.unlock();
 		};
 
@@ -828,95 +824,27 @@ namespace mt
 		return sum_total;
 	}
 
-	template<class TVector>
+	template <class TVector>
 	enable_if_host_vector<TVector, Value_type<TVector>>
-	min_element(Stream<e_host> &stream, TVector &M_i)
-	{
-		using T = Value_type<TVector>;
-
-		vector<T> v_min;
-		v_min.reserve(stream.size());
-
-		auto thr_min = [&](const Range &range)
-		{
-			auto m_min = *std::min_element(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e);
-			stream.stream_mutex.lock();
-			v_min.push_back(m_min);
-			stream.stream_mutex.unlock();
-		};
-
-		stream.set_n_act_stream(M_i.size());
-		stream.set_grid(1, M_i.size());
-		stream.exec(thr_min);
-
-		return *std::min_element(v_min.begin(), v_min.end());
-	}
-
-	template<class TVector>
-	enable_if_host_vector<TVector, Value_type<TVector>>
-	max_element(Stream<e_host> &stream, TVector &M_i)
-	{
-		using T = Value_type<TVector>;
-
-		vector<T> v_max;
-		v_max.reserve(stream.size());
-
-		auto thr_max = [&](const Range &range)
-		{
-			T m_max = *std::max_element(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e);
-			stream.stream_mutex.lock();
-			v_max.push_back(m_max);
-			stream.stream_mutex.unlock();
-		};
-
-		stream.set_n_act_stream(M_i.size());
-		stream.set_grid(1, M_i.size());
-		stream.exec(thr_max);
-
-		return *std::max_element(v_max.begin(), v_max.end());
-	}
-
-	template<class TVector>
-	enable_if_host_vector<TVector, Value_type_r<TVector>>
-	mean(TVector &M_i)
-	{
-		return thrust::reduce(M_i.begin(), M_i.end())/M_i.size();
-	}
-
-	template<class TVector>
-	enable_if_host_vector<TVector, Value_type_r<TVector>>
 	mean(Stream<e_host> &stream, TVector &M_i)
 	{
 		return sum(stream, M_i)/M_i.size();
 	}
 
-	template<class TVector>
+	template <class TVector>
 	enable_if_host_vector<TVector, void>
-	mean_var(TVector &M_i, Value_type_r<TVector> &x_mean, Value_type_r<TVector> &x_var)
+	mean_var(Stream<e_host> &stream, TVector &M_i, Value_type<TVector> &x_mean, Value_type_r<TVector> &x_var)
 	{
-		using value_type_r = Value_type_r<TVector>;
-
-		x_mean = mean(M_i);
-
-		x_var = thrust::transform_reduce(M_i.begin(), M_i.end(), 
-		functor::square_dif<value_type_r>(x_mean), value_type_r(0), functor::add<value_type_r>());
-
-		x_var = x_var/M_i.size();
-	}
-
-	template<class TVector>
-	enable_if_host_vector<TVector, void>
-	mean_var(Stream<e_host> &stream, TVector &M_i, Value_type_r<TVector> &x_mean, Value_type_r<TVector> &x_var)
-	{
-		using value_type_r = Value_type_r<TVector>;
+		using T = Value_type<TVector>;
+		using T_r = Value_type_r<TVector>;
 
 		x_mean = mean(stream, M_i);
 
 		x_var = 0;
-		auto thr_var = [&](const Range &range)
+		auto thr_var = [&](const Range_2d &range)
 		{
 			auto x_var_partial = thrust::transform_reduce(M_i.begin()+range.ixy_0, M_i.begin()+range.ixy_e, 
-			functor::square_dif<value_type_r>(x_mean), value_type_r(0), functor::add<value_type_r>());
+			functor::square_dif<T, T_r>(x_mean), T_r(0), functor::add<T_r>());
 
 			stream.stream_mutex.lock();
 			x_var += x_var_partial;
@@ -930,121 +858,142 @@ namespace mt
 		x_var = x_var/M_i.size();
 	}
 
-	template<class TVector>
-	enable_if_host_vector<TVector, Value_type_r<TVector>>
-	variance(TVector &M_i)
-	{
-		using value_type_r = Value_type_r<TVector>;
-
-		value_type_r x_mean , x_var;
-		mean_var(M_i, x_mean, x_var);
-		return x_var;
-	}
-
-	template<class TVector>
+	template <class TVector>
 	enable_if_host_vector<TVector, Value_type_r<TVector>>
 	variance(Stream<e_host> &stream, TVector &M_i)
 	{
-		using value_type_r = Value_type_r<TVector>;
+		using T = Value_type<TVector>;
+		using T_r = Value_type_r<TVector>;
 
-		value_type_r x_mean , x_var;
+		T x_mean;
+		T_r x_var;
 		mean_var(stream, M_i, x_mean, x_var);
 		return x_var;
 	}
 
-	template<class TVector>
+	template <class TVector>
 	void rescale_data(const Value_type<TVector> &x_mean, const Value_type<TVector> &x_std, TVector &x)
 	{
 		using T = Value_type<TVector>;
 		std::for_each(x.begin(), x.end(), [=](T &v){ v = (v-x_mean)/x_std; });
 	}
 
-	template<class TVector, class ...TArg>
+	template <class TVector, class ...TArg>
 	void rescale_data(const Value_type<TVector> &x_mean, const Value_type<TVector> &x_std, TVector &x, TArg &...arg)
 	{
 		rescale_data(x_mean, x_std, x);
 		rescale_data(x_mean, x_std, arg...);
 	}
 
-	template<class TVector>
-	Value_type<TVector> min_data(TVector &x)
-	{
-		return *std::min_element(x.begin(), x.end());
-	}
-
-	template<class TVector, class ...TArg>
-	Value_type<TVector> min_data(TVector &x, TArg &...arg)
-	{
-		return ::fmin(min_data(x), min_data(arg...));
-	}
-
-	template<class TVector>
-	Value_type<TVector> max_data(TVector &x)
-	{
-		return *std::max_element(x.begin(), x.end());
-	}
-
-	template<class TVector, class ...TArg>
-	Value_type<TVector> max_data(TVector &x, TArg &...arg)
-	{
-		return ::fmax(max_data(x), max_data(arg...));
-	}
-
-	template<class TVector>
+	template <class TVector>
 	Value_type<TVector> max_std_data(TVector &x)
 	{
 		return sqrt(variance(x));
 	}
 
-	template<class TVector, class ...TArg>
+	template <class TVector, class ...TArg>
 	Value_type<TVector> max_std_data(TVector &x, TArg &...arg)
 	{
 		return ::fmax(max_std_data(x), max_std_data(arg...));
 	}
 	
-	template<class TGrid, class TVector_c>
+	/***********************************************************************/
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	phase_factor_1d(Stream<e_host> &stream, TGrid &grid, Value_type<TGrid> x, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	exp_r_factor_1d(TGrid &grid_1d, Value_type<TGrid> gx, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
-		auto thr_phase_factor_1D = [&](const Range &range)
+		for(auto ix = 0; ix < grid_1d.nx; ix++)
 		{
-			thrust::counting_iterator<int> first(range.ixy_0);
-			thrust::counting_iterator<int> last = first + range.ixy_e;
-			thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(first, fPsi_i.begin()+range.ixy_0, fPsi_o.begin()+range.ixy_0)), 
-							 thrust::make_zip_iterator(thrust::make_tuple(last, fPsi_i.begin()+range.ixy_e, fPsi_o.begin()+range.ixy_e)), 
-							 functor::phase_factor<TGrid>(grid, x));
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(1, grid.nx);
-		stream.exec(thr_phase_factor_1D);
+			host_device_detail::exp_r_factor_1d(ix, grid_1d, gx, fPsi_i, fPsi_o);
+		}
 	}
 
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_r, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	phase_factor_2d(Stream<e_host> &stream, TGrid &grid, Value_type<TGrid> x, Value_type<TGrid> y, 
+	exp_r_factor_2d_bc(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TGrid> alpha, 
+	TVector_r &gy, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	{
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::exp_r_factor_2d_bc<TGrid, TVector_r, TVector_c>, grid_2d, alpha, gy, fPsi_i, fPsi_o);
+	}
+
+	template <class TGrid, class TVector_c>
+	enable_if_host_vector<TVector_c, void>
+	exp_r_factor_2d(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TGrid> gx, Value_type<TGrid> gy, 
 	TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
-		auto thr_phase_factor = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::phase_factor_2d<TGrid, TVector_c>, grid, x, y, fPsi_i, fPsi_o);
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_phase_factor);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::exp_r_factor_2d<TGrid, TVector_c>, grid_2d, gx, gy, fPsi_i, fPsi_o);
 	}
 
-	template<class TGrid, class TVector_r>
-	enable_if_host_vector<TVector_r, Value_type<TVector_r>>
-	atom_cost_function(TGrid &grid, const Atom_Sa<Value_type<TGrid>> &atom_Ip, TVector_r &M_i)
+	template <class TGrid, class TVector_c>
+	enable_if_host_vector<TVector_c, void>
+	mul_exp_r_factor_2d(Stream<e_host> &stream, TGrid &grid_2d, Vector<Value_type<TGrid>, e_host> &gx, 
+	Vector<Value_type<TGrid>, e_host> &gy, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
-		return host_detail::atom_cost_function<typename TVector_r::value_type>(grid, atom_Ip, M_i);
+		using TVector_r = Vector<Value_type<TGrid>, e_host>;
+
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::mul_exp_r_factor_2d<TGrid, TVector_r, TVector_c>, grid_2d, gx, gy, fPsi_i, fPsi_o);
+	}
+	
+	/***********************************************************************/
+	template <class TGrid, class TVector_c>
+	enable_if_host_vector<TVector_c, void>
+	exp_g_factor_1d(TGrid &grid_1d, Value_type<TGrid> x, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	{
+		for(auto ix = 0; ix < grid_1d.nx; ix++)
+		{
+			host_device_detail::exp_g_factor_1d(ix, grid_1d, x, fPsi_i, fPsi_o);
+		}
 	}
 
-	template<class TGrid, class TVector_r>
+	template <class TGrid, class TVector_r, class TVector_c>
+	enable_if_host_vector<TVector_c, void>
+	exp_g_factor_2d_bc(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TGrid> alpha, 
+	TVector_r &y, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	{
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::exp_g_factor_2d_bc<TGrid, TVector_r, TVector_c>, grid_2d, alpha, y, fPsi_i, fPsi_o);
+	}
+
+	template <class TGrid, class TVector_c>
+	enable_if_host_vector<TVector_c, void>
+	exp_g_factor_2d(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TGrid> x, Value_type<TGrid> y, 
+	TVector_c &fPsi_i, TVector_c &fPsi_o)
+	{
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::exp_g_factor_2d<TGrid, TVector_c>, grid_2d, x, y, fPsi_i, fPsi_o);
+	}
+
+	template <class TGrid, class TVector_c>
+	enable_if_host_vector<TVector_c, void>
+	mul_exp_g_factor_2d(Stream<e_host> &stream, TGrid &grid_2d, Vector<Value_type<TGrid>, e_host> &x, 
+	Vector<Value_type<TGrid>, e_host> &y, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	{
+		using TVector_r = Vector<Value_type<TGrid>, e_host>;
+
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::mul_exp_g_factor_2d<TGrid, TVector_r, TVector_c>, grid_2d, x, y, fPsi_i, fPsi_o);
+	}
+
+	/***********************************************************************/
+	template <class TGrid, class TVector_r>
+	enable_if_host_vector<TVector_r, Value_type<TVector_r>>
+	atom_cost_function(TGrid &grid_2d, const Atom_Sa<Value_type<TGrid>> &atom_Ip, TVector_r &M_i)
+	{
+		return host_detail::atom_cost_function<typename TVector_r::value_type>(grid_2d, atom_Ip, M_i);
+	}
+
+	template <class TGrid, class TVector_r>
 	enable_if_host_vector<TVector_r, void>
-	subtract_atom(Stream<e_host> &stream, TGrid &grid, Vector<Atom_Sa<Value_type<TGrid>>, e_host> &atom_Ip, TVector_r &M_i)
+	subtract_atom(Stream<e_host> &stream, TGrid &grid_2d, Vector<Atom_Sa<Value_type<TGrid>>, e_host> &atom_Ip, TVector_r &M_i)
 	{
 		if(stream.n_act_stream<= 0)
 		{
@@ -1053,13 +1002,13 @@ namespace mt
 
 		for(auto istream = 0; istream < stream.n_act_stream; istream++)
 		{
-			stream[istream] = std::thread(std::bind(host_detail::subtract_atom<typename TVector_r::value_type>, std::ref(stream), std::ref(grid), std::ref(atom_Ip[istream]), std::ref(M_i)));
+			stream[istream] = std::thread(std::bind(host_detail::subtract_atom<typename TVector_r::value_type>, std::ref(stream), std::ref(grid_2d), std::ref(atom_Ip[istream]), std::ref(M_i)));
 		}
 		stream.synchronize();
 	}
 
 	// Linear projected potential: V and zV
-	template<class TQ1, class TVAtom>
+	template <class TQ1, class TVAtom>
 	enable_if_host<TQ1, void>
 	linear_Vz(Stream<e_host> &stream, ePotential_Type potential_type, TQ1 &qz, TVAtom &vatom)
 	{
@@ -1072,7 +1021,7 @@ namespace mt
 
 		auto thr_linear_Vz = [](const ePotential_Type &potential_type, TQ1 &qz, TAtom &atom)
 		{
-			if(atom.charge== 0)
+			if(atom.charge == 0)
 			{
 				switch(potential_type)
 				{
@@ -1133,7 +1082,7 @@ namespace mt
 	}
 
 	// Get Local interpolation coefficients
-	template<class TVAtom> 
+	template <class TVAtom> 
 	enable_if_host<typename TVAtom::value_type, void>
 	cubic_poly_coef(Stream<e_host> &stream, TVAtom &vatom)
 	{
@@ -1154,482 +1103,363 @@ namespace mt
 		stream.synchronize();
 	}
 
-	// Cubic polynomial evaluation
-	template<bool TShift, class TGrid, class TVAtom, class TVector_r>
-	enable_if_host_vector<TVector_r, void>
-	eval_cubic_poly(Stream<e_host> &stream, TGrid &grid, TVAtom &vatom, TVector_r &M_o)
-	{
-		using TAtom = Value_type<TVAtom>;
-
-		if(stream.n_act_stream<= 0)
-		{
-			return;
-		}
-
-		for(auto istream = 0; istream < stream.n_act_stream-1; istream++)
-		{
-			stream[istream] = std::thread(std::bind(host_detail::eval_cubic_poly<TShift, TAtom>, std::ref(stream), std::ref(grid), std::ref(vatom[istream]), std::ref(M_o)));
-		}
-
-		host_detail::eval_cubic_poly<TShift, TAtom>(stream, grid, vatom[stream.n_act_stream-1], M_o);
-
-		stream.synchronize();
-	}
-
-	// Get linear Gaussian
-	template<class TVAtom> 
-	enable_if_host<typename TVAtom::value_type, void>
-	linear_Gaussian(Stream<e_host> &stream, TVAtom &vatom)
-	{
-		using TAtom = Value_type<TVAtom>;
-
-		if(stream.n_act_stream<= 0)
-		{
-			return;
-		}
-
-		for(auto istream = 0; istream < stream.n_act_stream-1; istream++)
-		{
-			stream[istream] = std::thread(std::bind(host_detail::linear_Gaussian<TAtom>, std::ref(vatom[istream])));
-		}
-
-		host_detail::linear_Gaussian<TAtom>(vatom[stream.n_act_stream-1]);
-
-		stream.synchronize();
-	}
-
-	template<class TGrid, class TVector>
+	template <class TGrid, class TVector>
 	enable_if_host_vector<TVector, void>
-	fft2_shift(Stream<e_host> &stream, TGrid &grid, TVector &M_io)
+	fft1_shift(TGrid &grid_1d, TVector &M_io)
 	{
-		auto thr_fft2_shift = [&](const Range &range)
+		for(auto ix = 0; ix < grid_1d.nxh; ix++)
 		{
-			host_detail::matrix_iter(range, host_device_detail::fft2_shift<TGrid, TVector>, grid, M_io);
-		};
-
-		stream.set_n_act_stream(grid.nxh);
-		stream.set_grid(grid.nxh, grid.nyh);
-		stream.exec(thr_fft2_shift);
+			host_device_detail::fft1_shift(ix, grid_1d, M_io);
+		}
 	}
 
-	template<class TGrid, class TVector>
-	enable_if_host_vector<TVector, Value_type<TVector>>
-	sum_over_Det(Stream<e_host> &stream, TGrid &grid, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector &M_i)
+	template <class TGrid, class TVector>
+	enable_if_host_vector<TVector, void>
+	fft2_sft_bc(Stream<e_host> &stream, TGrid &grid_2d, TVector &M_io)
 	{
-		using value_type_r = Value_type<TGrid>;
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.nyh);
+		stream.exec_matrix(host_device_detail::fft2_sft_bc<TGrid, TVector>, grid_2d, M_io);
+	}
+
+	template <class TGrid, class TVector>
+	enable_if_host_vector<TVector, void>
+	fft2_shift(Stream<e_host> &stream, TGrid &grid_2d, TVector &M_io)
+	{
+		stream.set_n_act_stream(grid_2d.nxh);
+		stream.set_grid(grid_2d.nxh, grid_2d.nyh);
+		stream.exec_matrix(host_device_detail::fft2_shift<TGrid, TVector>, grid_2d, M_io);
+	}
+
+	template <class TGrid, class TVector>
+	enable_if_host_vector<TVector, Value_type<TVector>>
+	sum_over_Det(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector &M_i)
+	{
+		using T_r = Value_type<TGrid>;
 		using value_type = Value_type<TVector>;
 
-		value_type_r g2_min = pow(g_min, 2);
-		value_type_r g2_max = pow(g_max, 2);
+		T_r g2_min = pow(g_min, 2);
+		T_r g2_max = pow(g_max, 2);
 		value_type sum = 0;
 
-		auto thr_sum_over_Det = [&](const Range &range)
+		auto thr_sum_over_Det = [&](const Range_2d &range)
 		{
 			value_type sum_partial = 0;
-			host_detail::matrix_iter(range, host_device_detail::sum_over_Det<TGrid, TVector>, grid, g2_min, g2_max, M_i, sum_partial);
+			host_detail::matrix_iter(range, host_device_detail::sum_over_Det<TGrid, TVector>, grid_2d, g2_min, g2_max, M_i, sum_partial);
 
 			stream.stream_mutex.lock();
 			sum += sum_partial;
 			stream.stream_mutex.unlock();
 		};
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
 		stream.exec(thr_sum_over_Det);
 
 		return sum;
 	}
 
-	template<class TGrid, class TVector>
+	template <class TGrid, class TVector>
 	enable_if_host_vector<TVector, Value_type<TGrid>>
-	sum_square_over_Det(Stream<e_host> &stream, TGrid &grid, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector &M_i)
+	sum_square_over_Det(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector &M_i)
 	{
-		using value_type_r = Value_type<TGrid>;
+		using T_r = Value_type<TGrid>;
 
-		value_type_r g2_min = pow(g_min, 2);
-		value_type_r g2_max = pow(g_max, 2);
-		value_type_r sum = 0;
+		T_r g2_min = pow(g_min, 2);
+		T_r g2_max = pow(g_max, 2);
+		T_r sum = 0;
 
-		auto thr_sum_square_over_Det = [&](const Range &range)
+		auto thr_sum_square_over_Det = [&](const Range_2d &range)
 		{
-			value_type_r sum_partial = 0;
-			host_detail::matrix_iter(range, host_device_detail::sum_square_over_Det<TGrid, TVector>, grid, g2_min, g2_max, M_i, sum_partial);
+			T_r sum_partial = 0;
+			host_detail::matrix_iter(range, host_device_detail::sum_square_over_Det<TGrid, TVector>, grid_2d, g2_min, g2_max, M_i, sum_partial);
 
 			stream.stream_mutex.lock();
 			sum += sum_partial;
 			stream.stream_mutex.unlock();
 		};
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
 		stream.exec(thr_sum_square_over_Det);
 
 		return sum;
 	}
 
-	template<class TGrid, class TVector_1, class TVector_2>
+	template <class TGrid, class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, Value_type<TGrid>>
-	sum_square_over_Det(Stream<e_host> &stream, TGrid &grid, TVector_1 &S_i, TVector_2 &M_i)
+	sum_square_over_Det(Stream<e_host> &stream, TGrid &grid_2d, TVector_1 &S_i, TVector_2 &M_i)
 	{
-		using value_type_r = Value_type<TGrid>;
+		using T_r = Value_type<TGrid>;
 
-		value_type_r sum = 0;
+		T_r sum = 0;
 
-		auto thr_sum_square_over_Det = [&](const Range &range)
+		auto thr_sum_square_over_Det = [&](const Range_2d &range)
 		{
-			value_type_r sum_partial = 0;
-			host_detail::matrix_iter(range, host_device_detail::sum_square_over_Det<TGrid, TVector_1, TVector_2>, grid, S_i, M_i, sum_partial);
+			T_r sum_partial = 0;
+			host_detail::matrix_iter(range, host_device_detail::sum_square_over_Det<TGrid, TVector_1, TVector_2>, grid_2d, S_i, M_i, sum_partial);
 
 			stream.stream_mutex.lock();
 			sum += sum_partial;
 			stream.stream_mutex.unlock();
 		};
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
 		stream.exec(thr_sum_square_over_Det);
 
 		return sum;
 	}
 
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	bandwidth_limit(Stream<e_host> &stream, TGrid &grid, TVector_c &M_io)
+	bandwidth_limit(Stream<e_host> &stream, TGrid &grid_2d, TVector_c &M_io)
 	{
-		using value_type_r = Value_type<TGrid>;
-
-		auto thr_bandwidth_limit = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::bandwidth_limit<TGrid, TVector_c>, grid, M_io);
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_bandwidth_limit);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::bandwidth_limit<TGrid, TVector_c>, grid_2d, M_io);
 	}
 
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	hard_aperture(Stream<e_host> &stream, TGrid &grid, Value_type<TGrid> g_max, Value_type<TGrid> w, TVector_c &M_io)
+	hard_aperture(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TGrid> g_max, Value_type<TGrid> w, TVector_c &M_io)
 	{
-		using value_type_r = Value_type<TGrid>;
+		auto g2_max = pow(g_max, 2);
 
-		value_type_r g2_max = pow(g_max, 2);
-
-		auto thr_hard_aperture = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::hard_aperture<TGrid, TVector_c>, grid, g2_max, w, M_io);
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_hard_aperture);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::hard_aperture<TGrid, TVector_c>, grid_2d, g2_max, w, M_io);
 	}
 
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	phase_components(Stream<e_host> &stream, TGrid &grid, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &V_x_o, TVector_c &V_y_o)
+	propagate(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TGrid> w, 
+	Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &psi_i, TVector_c &psi_o)
 	{
-		auto thr_phase_components = [&](const Range &range)
-		{
-			thrust::counting_iterator<int> first(range.ixy_0);
-			thrust::counting_iterator<int> last = first + range.ixy_e;
-
-			thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(first, V_x_o.begin()+range.ixy_0, V_y_o.begin()+range.ixy_0)), 
-							 thrust::make_zip_iterator(thrust::make_tuple(last, V_x_o.begin()+range.ixy_e, V_y_o.begin()+range.ixy_e)), 
-							 functor::phase_components<TGrid>(grid, c_2Pi, gxu, gyu));
-		};
-
-		stream.set_n_act_stream(grid.nx_ny_max());
-		stream.set_grid(1, grid.nx_ny_max());
-		stream.exec(thr_phase_components);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::propagate<TGrid, TVector_c>, grid_2d, w, gxu, gyu, psi_i, psi_o);
 	}
 
-	template<class TGrid, class TVector_c>
-	enable_if_host_vector<TVector_c, void>
-	phase_multiplication(Stream<e_host> &stream, TGrid &grid, TVector_c &exp_x_i, TVector_c &exp_y_i, TVector_c &psi_i, TVector_c &psi_o)
-	{
-		auto thr_phase_multiplication = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::phase_multiplication<TGrid, TVector_c>, grid, exp_x_i, exp_y_i, psi_i, psi_o);
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_phase_multiplication);
-	}
-
-	template<class TGrid, class TVector_c>
-	enable_if_host_vector<TVector_c, void>
-	propagator_components(Stream<e_host> &stream, TGrid &grid, Value_type<TGrid> gxu, Value_type<TGrid> gyu, Value_type<TGrid> w, TVector_c &V_x_o, TVector_c &V_y_o)
-	{
-		auto thr_propagator_components = [&](const Range &range)
-		{
-			thrust::counting_iterator<int> first(range.ixy_0);
-			thrust::counting_iterator<int> last = first + range.ixy_e;
-
-			thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(first, V_x_o.begin()+range.ixy_0, V_y_o.begin()+range.ixy_0)), 
-							 thrust::make_zip_iterator(thrust::make_tuple(last, V_x_o.begin()+range.ixy_e, V_y_o.begin()+range.ixy_e)), 
-							 functor::propagator_components<TGrid>(grid, w, gxu, gyu));
-		};
-
-		stream.set_n_act_stream(grid.nx_ny_max());
-		stream.set_grid(1, grid.nx_ny_max());
-		stream.exec(thr_propagator_components);
-	}
-
-	template<class TGrid, class TVector_c>
-	enable_if_host_vector<TVector_c, void>
-	propagator_multiplication(Stream<e_host> &stream, TGrid &grid, TVector_c &prop_x_i, TVector_c &prop_y_i, TVector_c &psi_i, TVector_c &psi_o)
-	{
-		auto thr_propagator_multiplication = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::propagator_multiplication<TGrid, TVector_c>, grid, prop_x_i, prop_y_i, psi_i, psi_o);
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_propagator_multiplication);
-	}
-
-	template<class TGrid, class TVector_1, class TVector_2>
+	template <class TGrid, class TVector_1, class TVector_2>
 	enable_if_host_vector_and_host_vector<TVector_1, TVector_2, void>
-	transmission_function(Stream<e_host> &stream, TGrid &grid, eElec_Spec_Int_Model elec_spec_int_model, Value_type<TGrid> w, TVector_1 &V0_i, TVector_2 &Trans_o)
+	transmission_function(Stream<e_host> &stream, TGrid &grid_2d, eElec_Spec_Int_Model elec_spec_int_model, 
+	Value_type<TGrid> w, TVector_1 &V0_i, TVector_2 &Trans_o)
 	{	
-		using value_type_r = Value_type<TGrid>;
+		using T_r = Value_type<TGrid>;
 
-		auto thr_transmission_funtion = [&](const Range &range)
+		auto thr_transmission_funtion = [&](const Range_2d &range)
 		{
 			thrust::transform(V0_i.begin()+range.ixy_0, V0_i.begin()+range.ixy_e, 
-				Trans_o.begin()+range.ixy_0, functor::transmission_function<value_type_r>(w, elec_spec_int_model));
+				Trans_o.begin()+range.ixy_0, functor::transmission_function<T_r>(w, elec_spec_int_model));
 		};
 
-		stream.set_n_act_stream(grid.nxy());
-		stream.set_grid(grid.nx, grid.ny);
+		stream.set_n_act_stream(grid_2d.nxy());
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
 		stream.exec(thr_transmission_funtion);
 	}
 
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	probe(Stream<e_host> &stream, TGrid &grid, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> x, Value_type<TGrid> y, TVector_c &fPsi_o)
+	probe(Stream<e_host> &stream, TGrid &grid_2d, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> x, 
+	Value_type<TGrid> y, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &fPsi_o)
 	{
-		auto thr_probe = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::probe<TGrid, TVector_c>, grid, lens, x, y, fPsi_o);
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_probe);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::probe<TGrid, TVector_c>, grid_2d, lens, x, y, gxu, gyu, fPsi_o);
 
 		auto total = sum_square(stream, fPsi_o);
 		mt::scale(stream, sqrt(1.0/total), fPsi_o);
 	}
 
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	apply_CTF(Stream<e_host> &stream, TGrid &grid, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	apply_CTF(Stream<e_host> &stream, TGrid &grid_2d, Lens<Value_type<TGrid>> &lens, Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
-		auto thr_apply_CTF = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::apply_CTF<TGrid, TVector_c>, grid, lens, gxu, gyu, fPsi_i, fPsi_o);
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_apply_CTF);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::apply_CTF<TGrid, TVector_c>, grid_2d, lens, gxu, gyu, fPsi_i, fPsi_o);
 	}
 
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	apply_PCTF(Stream<e_host> &stream, TGrid &grid, Lens<Value_type<TGrid>> &lens, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	apply_PCTF(Stream<e_host> &stream, TGrid &grid_2d, Lens<Value_type<TGrid>> &lens, TVector_c &fPsi_i, TVector_c &fPsi_o)
 	{
-		auto thr_apply_PCTF = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::apply_PCTF<TGrid, TVector_c>, grid, lens, fPsi_i, fPsi_o);
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_apply_PCTF);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::apply_PCTF<TGrid, TVector_c>, grid_2d, lens, fPsi_i, fPsi_o);
 	}
 
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	kernel_xyz(Stream<e_host> &stream, TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_host> &fft2, TVector_c &k_x, TVector_c &k_y, TVector_c &k_z)
+	kernel_xyz(Stream<e_host> &stream, TGrid &grid_2d, EELS<Value_type<TGrid>> &eels, FFT<Value_type<TGrid>, e_host> &fft_2d, TVector_c &k_x, TVector_c &k_y, TVector_c &k_z)
 	{
-		eels.factor = host_detail::Lorentz_factor(stream, grid, eels);
+		eels.factor = host_detail::Lorentz_factor(stream, grid_2d, eels);
 
-		auto thr_kernel_xyz = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::kernel_xyz<TGrid, TVector_c>, grid, eels, k_x, k_y, k_z);
-		};
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::kernel_xyz<TGrid, TVector_c>, grid_2d, eels, k_x, k_y, k_z);
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_kernel_xyz);
-
-		fft2.inverse(k_x);
-		fft2.inverse(k_y);
-		fft2.inverse(k_z);
+		fft_2d.inverse(k_x);
+		fft_2d.inverse(k_y);
+		fft_2d.inverse(k_z);
 	}
 	
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	kernel_x(Stream<e_host> &stream, TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_host> &fft2, TVector_c &k_x)
+	kernel_x(Stream<e_host> &stream, TGrid &grid_2d, EELS<Value_type<TGrid>> &eels, FFT<Value_type<TGrid>, e_host> &fft_2d, TVector_c &k_x)
 	{
-		eels.factor = host_detail::Lorentz_factor(stream, grid, eels);
+		eels.factor = host_detail::Lorentz_factor(stream, grid_2d, eels);
 
-		auto thr_kernel_x = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::kernel_x<TGrid, TVector_c>, grid, eels, k_x);
-		};
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::kernel_x<TGrid, TVector_c>, grid_2d, eels, k_x);
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_kernel_x);
-
-		fft2.inverse(k_x);
+		fft_2d.inverse(k_x);
 	}
 	
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	kernel_y(Stream<e_host> &stream, TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_host> &fft2, TVector_c &k_y)
+	kernel_y(Stream<e_host> &stream, TGrid &grid_2d, EELS<Value_type<TGrid>> &eels, FFT<Value_type<TGrid>, e_host> &fft_2d, TVector_c &k_y)
 	{
-		eels.factor = host_detail::Lorentz_factor(stream, grid, eels);
+		eels.factor = host_detail::Lorentz_factor(stream, grid_2d, eels);
 
-		auto thr_kernel_y = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::kernel_y<TGrid, TVector_c>, grid, eels, k_y);
-		};
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::kernel_y<TGrid, TVector_c>, grid_2d, eels, k_y);
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_kernel_y);
-
-		fft2.inverse(k_y);
+		fft_2d.inverse(k_y);
 	}
 	
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	kernel_z(Stream<e_host> &stream, TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_host> &fft2, TVector_c &k_z)
+	kernel_z(Stream<e_host> &stream, TGrid &grid_2d, EELS<Value_type<TGrid>> &eels, FFT<Value_type<TGrid>, e_host> &fft_2d, TVector_c &k_z)
 	{
-		eels.factor = host_detail::Lorentz_factor(stream, grid, eels);
+		eels.factor = host_detail::Lorentz_factor(stream, grid_2d, eels);
 
-		auto thr_kernel_z = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::kernel_z<TGrid, TVector_c>, grid, eels, k_z);
-		};
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::kernel_z<TGrid, TVector_c>, grid_2d, eels, k_z);
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_kernel_z);
-
-		fft2.inverse(k_z);
+		fft_2d.inverse(k_z);
 	}
 
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	kernel_mn1(Stream<e_host> &stream, TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_host> &fft2, TVector_c &k_mn1)
+	kernel_mn1(Stream<e_host> &stream, TGrid &grid_2d, EELS<Value_type<TGrid>> &eels, FFT<Value_type<TGrid>, e_host> &fft_2d, TVector_c &k_mn1)
 	{
-		eels.factor = host_detail::Lorentz_factor(stream, grid, eels);
+		eels.factor = host_detail::Lorentz_factor(stream, grid_2d, eels);
 
-		auto thr_kernel_mn1 = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::kernel_mn1<TGrid, TVector_c>, grid, eels, k_mn1);
-		};
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::kernel_mn1<TGrid, TVector_c>, grid_2d, eels, k_mn1);
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_kernel_mn1);
-
-		fft2.inverse(k_mn1);
+		fft_2d.inverse(k_mn1);
 	}
 
-	template<class TGrid, class TVector_c>
+	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
-	kernel_mp1(Stream<e_host> &stream, TGrid &grid, EELS<Value_type<TGrid>> &eels, FFT2<Value_type<TGrid>, e_host> &fft2, TVector_c &k_mp1)
+	kernel_mp1(Stream<e_host> &stream, TGrid &grid_2d, EELS<Value_type<TGrid>> &eels, FFT<Value_type<TGrid>, e_host> &fft_2d, TVector_c &k_mp1)
 	{
-		eels.factor = host_detail::Lorentz_factor(stream, grid, eels);
+		eels.factor = host_detail::Lorentz_factor(stream, grid_2d, eels);
 
-		auto thr_kernel_mp1 = [&](const Range &range)
-		{
-			host_detail::matrix_iter(range, host_device_detail::kernel_mp1<TGrid, TVector_c>, grid, eels, k_mp1);
-		};
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec_matrix(host_device_detail::kernel_mp1<TGrid, TVector_c>, grid_2d, eels, k_mp1);
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_kernel_mp1);
-
-		fft2.inverse(k_mp1);
+		fft_2d.inverse(k_mp1);
 	}
 
 	/***************************************************************************/
 	/***************************************************************************/
-	template<class TVector_i, class TVector_o>
+	template <class TVector_i, class TVector_o>
 	enable_if_host_vector_and_host_vector<TVector_i, TVector_o, void>
 	copy_to_host(Stream<e_host> &stream, TVector_i &M_i, TVector_o &M_o, 
-	Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
+	TVector_i *M_i_h = nullptr)
 	{
-		mt::assign(stream, M_i, M_o, M_i_h);
+		mt::assign(M_i, M_o, M_i_h);
 	}
 
-	template<class TVector_i, class TVector_o>
+	template <class TVector_i, class TVector_o>
 	enable_if_host_vector_and_host_vector<TVector_i, TVector_o, void>
 	add_scale_to_host(Stream<e_host> &stream, Value_type<TVector_i> w_i, 
-	TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
+	TVector_i &M_i, TVector_o &M_o, TVector_i *M_i_h = nullptr)
 	{
 		mt::add_scale(stream, w_i, M_i, M_o);
 	}
 
-	template<class TVector_i, class TVector_o>
+	template <class TVector_i, class TVector_o>
 	enable_if_host_vector_and_host_vector<TVector_i, TVector_o, void>
 	add_square_scale_to_host(Stream<e_host> &stream, Value_type<TVector_o> w_i, 
-	TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h =nullptr)
+	TVector_i &M_i, TVector_o &M_o, TVector_i *M_i_h = nullptr)
 	{
 		mt::add_square_scale(stream, w_i, M_i, M_o);
 	}
 
-	template<class TVector_c_i, class TVector_r_o, class TVector_c_o>
+	template <class TVector_c_i, class TVector_r_o, class TVector_c_o>
 	enable_if_host_vector_and_host_vector<TVector_c_i, TVector_c_o, void>
 	add_scale_m2psi_psi_to_host(Stream<e_host> &stream, Value_type<TVector_r_o> w_i, 
-	TVector_c_i &psi_i, TVector_r_o &m2psi_o, TVector_c_o &psi_o, Vector<Value_type<TVector_c_i>, e_host> *psi_i_h =nullptr)
+	TVector_c_i &psi_i, TVector_r_o &m2psi_o, TVector_c_o &psi_o, TVector_c_i *psi_i_h = nullptr)
 	{
 		mt::add_scale(stream, w_i, psi_i, psi_o);
 		mt::add_square_scale(stream, w_i, psi_i, m2psi_o);
 	}
 
 	/***************************************************************************/
-	/***************************************************************************/
+	/**********************************Transpose********************************/
 
 	template <class TVector>
-	TVector transpose(Stream<e_host> &stream, const int &nrows, const int &ncols, TVector &M)
+	enable_if_host_vector<TVector, void>
+	trs(Stream<e_host> &stream, const int &nrows, const int &ncols, TVector &M)
 	{
 		TVector M_t(nrows*ncols);
-		auto thr_transpose = [nrows, ncols](const Range &range, TVector &M, TVector &M_t)
-		{
-			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
-			{
-				for(auto iy = range.iy_0; iy < range.iy_e; iy++)
-				{
-					int ixy = ix*nrows+iy;
-					int ixy_t = iy*ncols+ix;
-					M_t[ixy_t] = M[ixy];
-				}
-			}
-		};
-
 		stream.set_n_act_stream(ncols);
 		stream.set_grid(ncols, nrows);
-		stream.exec(thr_transpose, M, M_t);
+		stream.exec_matrix(host_device_detail::trs<TVector>, ncols, nrows, M, M_t);
+		M = M_t;
+	}
 
-		return M_t;
+	/***********************Temporal and Spatial quadratures*********************/
+	template <class T>
+	void temporal_spatial_quadratures(Lens<T> &lens, Q1<T, e_host> &qt, Q2<T, e_host> &qs)
+	{
+		/*********************Temporal quadrature**********************/
+		Quadrature quadrature;
+		quadrature.get(8, lens.nsf, qt); // 8: int_-infty^infty f(x) Exp[-x^2] dx
+		std::for_each(qt.w.begin(), qt.w.end(), [](T &v){ v = v/c_Pii2; });
+
+		/*********************Spatial quadrature**********************/
+		qs.reserve((2*lens.ngxs+1)*(2*lens.ngys+1));
+		int iqs = 0; 
+		T sum_w = 0;
+		T sum_ee = 0;
+		T alpha = 0.5/pow(lens.sggs, 2);
+
+		for(auto ix =-lens.ngxs; ix <= lens.ngxs; ix++)
+		{
+			for(auto iy =-lens.ngys; iy <= lens.ngys; iy++)
+			{
+				T gxs = lens.gxs(ix);
+				T gys = lens.gys(iy);
+				T g2s = gxs*gxs + gys*gys;
+				if(g2s < lens.g2_maxs)
+				{
+					qs.x.push_back(gxs);
+					qs.y.push_back(gys);
+					T v = exp(-alpha*g2s);
+					qs.w.push_back(v);
+					host_device_detail::kh_sum(sum_w, v, sum_ee);
+				}
+			}
+		}
+		qs.resize(iqs);
+		std::for_each(qs.w.begin(), qs.w.end(), [sum_w](T &v){ v = v/sum_w; });
 	}
 
 	/***************************************************************************/
 	/***************************************************************************/
-
 	// get index (with typ = 0: bottom index for equal values and typ = 1: upper index for equal values)
+	inline
 	int getIndex(int ixmin, int ixmax, double *x, int typ, double x0)
 	{
 		int ixmid; 
@@ -1665,7 +1495,7 @@ namespace mt
 			return ixmin;
 	}
 
-	template<class T>
+	template <class T>
 	void get_bn(const T &R, const int &nR, const T &dR, const T &R_max, const bool &pbc, int &iR0, int &iRn)
 	{
 		int iR_0 = static_cast<int>(floor((R-R_max)/dR));
@@ -1682,20 +1512,6 @@ namespace mt
 		iRn = (iR_0 == iR_e)?0:iR_e-iR_0+1;
 	}
 
-	// symmetric coordinates(Fourier space Coordinates)
-	inline
-	int FSC(const int &i, const int &nh, bool shift =false)
-	{
-		return (shift)?((i<nh)?(i):(i-2*nh)):(i-nh);
-	}
-
-	// symmetric coordinates(Fourier space Coordinates)
-	inline
-	int RSC(const int &i, const int &nh, bool shift = false)
-	{
-		return (shift)?((i<nh)?(i+nh):(i-nh)):i;
-	}
-
 	template <class TVector>
 	TVector lsf_poly_n(TVector &x, TVector &y, int n)
 	{
@@ -1709,7 +1525,7 @@ namespace mt
 		{
 			for(auto im = 0; im<m; im++)
 			{
-				M[in*m+im] = (in==0)?1:x[im]*M[(in-1)*m+im];
+				M[in*m+im] = (in == 0)?1:x[im]*M[(in-1)*m+im];
 			}
 		}
 
@@ -1720,382 +1536,306 @@ namespace mt
 		return coef;
 	}
 
-	/********************************************************************/
-	// get one dimensional Hanning Filter
 	template<class TVector>
-	TVector func_hanning_1d(Stream<e_host> &stream, int nx, Value_type<TVector> dx, Value_type<TVector> k, bool shift,
-	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
+	void rdf_3d(Atom_Data<Value_type<TVector>> &atoms, Value_type<TVector> r_max, int nr, TVector &r, TVector &rdf)
+	{		
+		using T = Value_type<TVector>;
+
+		const T dr = r_max/nr;
+		for(auto ir=0; ir<nr; ir++)
+		{
+			r[ir] = ir*dr;
+		}
+		thrust::fill(rdf.begin(), rdf.end(), T(0));
+
+		const T r2_max = pow(r_max, 2);
+
+		const int natoms = atoms.size();
+		for (int iatoms = 0; iatoms < natoms; iatoms++)
+		{
+			const r3d<T> r_i = atoms.to_r3d(iatoms);
+			for (int iatoms_s = 0; iatoms_s < natoms; iatoms_s++)
+			{
+				auto d2 = atoms.norm(iatoms_s, r_i);
+				if((iatoms!=iatoms_s)&&(d2<r2_max))
+				{
+					auto ir = static_cast<int>(floor(sqrt(d2)/dr));
+					rdf[ir] += 1;
+				}
+			}
+		}
+
+		rdf[0] = 0;
+		for(auto ir=1; ir<nr; ir++)
+		{
+			rdf[ir] = rdf[ir]/(4*c_Pi*pow(r[ir], 2)*dr);
+		}
+	}
+	
+	/********************************************************************/
+	// get two dimensional Gaussian by row
+	template <class TVector, class TGrid>
+	TVector func_gauss_1d(TGrid &grid_1d, Value_type<TVector> sigma, bool shift, 
+	Border_1d<Value_type<TVector>> bd, bool nb = true)
 	{	
 		using T = Value_type<TVector>;
 
-		int nxh = nx/2;
+		Gauss_1d<T> gauss(bd, sigma, nb);
+		TVector f(grid_1d.nx);
 
-		const T lx = dx*nx - (x_0 + x_e);
-		const T cx = c_2Pi/lx;
-		x_e = lx + x_0;
-
-		TVector f(nx);
-
-		auto thr_hanning = [&](const Range &range)
+		for(auto ix = 0; ix < grid_1d.nx; ix++)
 		{
-			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			auto Rx2 = (shift)?grid_1d.R2_shift(ix, gauss.x_c):grid_1d.R2(ix, gauss.x_c);
+			f[ix] = gauss.eval_norm(Rx2);
+		}
+
+		return f;
+	}
+	
+	// get two dimensional Gaussian Filter
+	template <class TVector, class TGrid>
+	TVector func_gauss_2d_bc(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TVector> sigma, bool shift, 
+	Border_1d<Value_type<TVector>> bd, bool nb = true)
+	{	
+		using T = Value_type<TVector>;
+
+		Gauss_1d<T> gauss(bd, sigma, nb);
+		TVector fy;
+		fy.reserve(grid_2d.ny);
+
+		for(auto iy = 0; iy < grid_2d.ny; iy++)
+		{
+			auto Ry2 = (shift)?grid_2d.Ry2_shift(iy, gauss.x_c):grid_2d.Ry2(iy, gauss.x_c);
+			fy.push_back(gauss.eval_norm(Ry2));
+		}
+
+		TVector f(grid_2d.nxy());
+
+		auto thr_gaussian = [&](const Range_2d &range)
+		{
+			for(auto ix = range.ixy_0; ix < range.ixy_e; ix++)
 			{
-				T Rx = RSC(ixy, nxh, shift)*dx; 
-				T v = ((Rx<x_0)||(Rx>x_e))?0:0.5*(1.0-cos(cx*(Rx-x_0)));
-				f[ixy] = (v>k)?1.0:v/k;
+				for(auto iy = 0; iy < grid_2d.ny; iy++)
+				{
+					f[grid_2d.ind_col(ix, iy)] = fy[iy];
+				}
 			}
 		};
 
-		stream.set_n_act_stream(nx);
-		stream.set_grid(nx, 1);
-		stream.exec(thr_hanning);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, 1);
+		stream.exec(thr_gaussian);
+
+		return f;
+	}
+
+	// get two dimensional Gaussian Filter
+	template <class TVector, class TGrid>
+	TVector func_gauss_2d(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TVector> sigma, bool shift, 
+	Border_2d<Value_type<TVector>> bd, bool nb = true)
+	{	
+		using T = Value_type<TVector>;
+
+		Gauss_2d<T> gauss(bd, sigma, nb);
+		TVector f(grid_2d.nxy());
+
+		auto thr_gaussian = [&](const Range_2d &range)
+		{
+			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
+			{
+				for(auto iy = range.iy_0; iy < range.iy_e; iy++)
+				{
+					T R2 = (shift)?grid_2d.R2_shift(ix, iy, gauss.x_c, gauss.y_c):grid_2d.R2(ix, iy, gauss.x_c, gauss.y_c);
+					f[grid_2d.ind_col(ix, iy)] = gauss.eval_norm(R2);
+				}
+			}
+		};
+
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec(thr_gaussian);
+
+		return f;
+	}
+
+	/********************************************************************/
+	// get one dimensional Hanning Filter
+	template <class TVector, class TGrid>
+	TVector func_hanning_1d(TGrid &grid_1d, Value_type<TVector> k, bool shift, 
+	Border_1d<Value_type<TVector>> bd, bool nb = true)
+	{	
+		using T = Value_type<TVector>;
+
+		Hanning_1d<T> hann(bd, k, nb);
+		TVector f(grid_1d.nx);
+
+		for(auto ix = 0; ix < grid_1d.nx; ix++)
+		{
+			T Rx = (shift)?grid_1d.Rx_shift(ix, hann.x_c):grid_1d.Rx(ix, hann.x_c);
+			f[ix] = hann.eval_norm(Rx);
+		}
 
 		return f;
 	}
 
 	// get two dimensional Hanning by row
-	template<class TVector, class TGrid>
-	TVector func_hanning_2d_by_row(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> k, bool shift, 
-	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
+	template <class TVector, class TGrid>
+	TVector func_hanning_2d_bc(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TVector> k, bool shift, 
+	Border_1d<Value_type<TVector>> bd, bool nb = true)
 	{	
 		using T = Value_type<TVector>;
 
-		const T lx = grid.lx - (x_0 + x_e);
-		const T cx = c_2Pi/lx;
-		x_e = lx + x_0;
+		Hanning_1d<T> hann(bd, k, nb);
+		TVector fy;
+		fy.reserve(grid_2d.ny);
 
-		TVector fx;
-		fx.reserve(grid.nx);
-
-		for(auto ix = 0; ix < grid.nx; ix++)
+		for(auto iy = 0; iy < grid_2d.ny; iy++)
 		{
-			T Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix);
-			T v = ((Rx<x_0)||(Rx>x_e))?0:0.5*(1.0-cos(cx*(Rx-x_0)));
-			fx.push_back(v);
+			T Ry = (shift)?grid_2d.Ry_shift(iy, hann.x_c):grid_2d.Ry(iy, hann.x_c);
+			fy.push_back(hann.eval_norm(Ry));
 		}
 
-		TVector f(grid.nxy());
+		TVector f(grid_2d.nxy());
 
-		auto thr_hanning = [&](const Range &range)
+		auto thr_hanning = [&](const Range_2d &range)
 		{
-			for(auto iy = range.ixy_0; iy < range.ixy_e; iy++)
+			for(auto ix = range.ixy_0; ix < range.ixy_e; ix++)
 			{
-				for(auto ix = 0; ix < grid.nx; ix++)
+				for(auto iy = 0; iy < grid_2d.ny; iy++)
 				{
-					T v = fx[ix];
-					f[grid.ind_col(ix, iy)] = (v>k)?1.0:v/k;
+					f[grid_2d.ind_col(ix, iy)] = fy[iy];
 				}
 			}
 		};
 
-		stream.set_n_act_stream(grid.ny);
-		stream.set_grid(1, grid.ny);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, 1);
 		stream.exec(thr_hanning);
 
 		return f;
 	}
 
 	// get two dimensional Hanning Filter
-	template<class TVector, class TGrid>
-	TVector func_hanning_2d(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> k, bool shift, 
-	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0, Value_type<TVector> y_0=0, Value_type<TVector> y_e=0)
+	template <class TVector, class TGrid>
+	TVector func_hanning_2d(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TVector> k, bool shift, 
+	Border_2d<Value_type<TVector>> bd, bool nb = true)
 	{	
 		using T = Value_type<TVector>;
 
-		const T lx = grid.lx - (x_0+x_e);
-		const T ly = grid.ly - (y_0+y_e);
-		const T cx = c_2Pi/lx;
-		const T cy = c_2Pi/ly;
-		x_e = lx + x_0;
-		y_e = ly + y_0;
+		Hanning_2d<T> hann(bd, k, nb);
+		TVector f(grid_2d.nxy());
 
-		TVector fx;
-		fx.reserve(grid.nx);
-
-		for(auto ix = 0; ix < grid.nx; ix++)
-		{
-			auto Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix); 
-			T v = ((Rx<x_0)||(Rx>x_e))?0:0.5*(1.0-cos(cx*(Rx-x_0)));
-			fx.push_back(v);
-		}
-
-		TVector fy;
-		fy.reserve(grid.ny);
-
-		for(auto iy = 0; iy < grid.ny; iy++)
-		{
-			auto Ry = (shift)?grid.Ry_shift(iy):grid.Ry(iy); 
-			T v = ((Ry<y_0)||(Ry>y_e))?0:0.5*(1.0-cos(cy*(Ry-y_0)));
-			fy.push_back(v);
-		}
-		TVector f(grid.nxy());
-
-		auto thr_hanning = [&](const Range &range)
+		auto thr_hanning = [&](const Range_2d &range)
 		{
 			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
 			{
 				for(auto iy = range.iy_0; iy < range.iy_e; iy++)
 				{
-					auto v = fx[ix]*fy[iy];
-					f[grid.ind_col(ix, iy)] = (v>k)?1.0:v/k;
+					T R = (shift)?grid_2d.R_shift(ix, iy, hann.x_c, hann.y_c):grid_2d.R(ix, iy, hann.x_c, hann.y_c);
+					f[grid_2d.ind_col(ix, iy)] = hann.eval_norm(R);
 				}
 			}
 		};
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
 		stream.exec(thr_hanning);
 
 		return f;
 	}
 
 	/********************************************************************/
-	// get two dimensional Gaussian by row
-	template<class TVector>
-	TVector func_gaussian_1d(Stream<e_host> &stream, int nx, Value_type<TVector> dx, Value_type<TVector> sigma, bool shift,
-	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
-	{	
-		using T = Value_type<TVector>;
-		int nxh = nx/2;
-
-		const T lx = dx*nx - (x_0 + x_e);
-		auto alpha_x = 0.5/(sigma*sigma);
-		x_e = x_0 + lx;
-		const T x_c = x_0 + 0.5*lx;
-
-		TVector f(nx);
-		auto thr_gaussian = [&](const Range &range)
-		{
-			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
-			{
-				auto Rx = RSC(ixy, nxh, shift)*dx; 
-				T v = ((Rx<x_0)||(Rx>x_e))?0:exp(-alpha_x*pow(Rx-x_c, 2));
-				f[ixy] = v;
-			}
-		};
-
-		stream.set_n_act_stream(nx);
-		stream.set_grid(nx, 1);
-		stream.exec(thr_gaussian);
-
-		return f;
-	}
-	
-	// get two dimensional Gaussian Filter
-	template<class TVector, class TGrid>
-	TVector func_gaussian_2d_by_row(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> sigma, bool shift, 
-	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
-	{	
-		using T = Value_type<TVector>;
-
-		const T lx = grid.lx - (x_0 + x_e);
-		auto alpha_x = 0.5/(sigma*sigma);
-		x_e = x_0 + lx;
-		const T x_c = x_0 + 0.5*lx;
-
-		TVector fx;
-		fx.reserve(grid.nx);
-
-		for(auto ix = 0; ix < grid.nx; ix++)
-		{
-			auto Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix); 
-			T v = ((Rx<x_0)||(Rx>x_e))?0:exp(-alpha_x*pow(Rx-x_c, 2));
-			fx.push_back(v);
-		}
-
-		TVector f(grid.nxy());
-
-		auto thr_gaussian = [&](const Range &range)
-		{
-			for(auto iy = range.ixy_0; iy < range.ixy_e; iy++)
-			{
-				for(auto ix = 0; ix < grid.nx; ix++)
-				{
-					f[grid.ind_col(ix, iy)] = fx[ix];
-				}
-			}
-		};
-
-		stream.set_n_act_stream(grid.ny);
-		stream.set_grid(1, grid.ny);
-		stream.exec(thr_gaussian);
-
-		return f;
-	}
-
-	// get two dimensional Gaussian Filter
-	template<class TVector, class TGrid>
-	TVector func_gaussian_2d(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> sigma, bool shift, 
-	Value_type<TVector> x_0=0, Value_type<TVector> x_e=0, Value_type<TVector> y_0=0, Value_type<TVector> y_e=0)
-	{	
-		using T = Value_type<TVector>;
-
-		const T lx = grid.lx - (x_0 + x_e);
-		const T ly = grid.ly - (y_0 + y_e);
-		const T alpha_x = 0.5/(sigma*sigma);
-		const T alpha_y = 0.5/(sigma*sigma);
-		x_e = x_0 + lx;
-		y_e = y_0 + ly;
-		const T x_c = x_0 + 0.5*lx;
-		const T y_c = y_0 + 0.5*ly;
-
-		TVector fx;
-		fx.reserve(grid.nx);
-
-		for(auto ix = 0; ix < grid.nx; ix++)
-		{
-			auto Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix); 
-			T v = ((Rx<x_0)||(Rx>x_e))?0:exp(-alpha_x*pow(Rx-x_c, 2));
-			fx.push_back(v);
-		}
-
-		TVector fy;
-		fy.reserve(grid.ny);
-
-		for(auto iy = 0; iy < grid.ny; iy++)
-		{
-			auto Ry = (shift)?grid.Ry_shift(iy):grid.Ry(iy); 
-			T v = ((Ry<y_0)||(Ry>y_e))?0:exp(-alpha_y*pow(Ry-y_c, 2));
-			fy.push_back(v);
-		}
-
-		TVector f(grid.nxy());
-
-		auto thr_gaussian = [&](const Range &range)
-		{
-			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
-			{
-				for(auto iy = range.iy_0; iy < range.iy_e; iy++)
-				{
-					f[grid.ind_col(ix, iy)] = fx[ix]*fy[iy];
-				}
-			}
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_gaussian);
-
-		return f;
-	}
-
-	/********************************************************************/
 	// get one dimensional Butterworth Filter
-	template<class TVector>
-	TVector func_butterworth_1d(Stream<e_host> &stream, int nx, Value_type<TVector> dx, Value_type<TVector> Radius, 
-	int n, bool shift, Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
+	template <class TVector, class TGrid>
+	TVector func_butterworth_1d(TGrid &grid_1d, Value_type<TVector> radius, 
+	int n, bool shift, Border_1d<Value_type<TVector>> bd, bool nb = true)
 	{
 		using T = Value_type<TVector>;
-		
-		int nxh = nx/2;
 
-		const T lx = dx*nx - (x_0 + x_e);
-		auto R02 = pow(Radius, 2);
-		x_e = x_0 + lx;
-		const T x_c = x_0 + 0.5*lx;
+		Butterworth_1d<T> butwth(bd, radius, n, nb);
+		TVector f(grid_1d.nx);
 
-		TVector f(nx);
-		auto thr_butterworth = [&](const Range &range)
+		for(auto ix = 0; ix < grid_1d.nx; ix++)
 		{
-			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
-			{
-				auto Rx = RSC(ixy, nxh, shift)*dx;
-				T v = ((Rx<x_0)||(Rx>x_e))?0:1.0/(1.0+pow((Rx-x_c)*(Rx-x_c)/R02, n));
-				f[ixy] = v;
-			}
-		};
-
-		stream.set_n_act_stream(nx);
-		stream.set_grid(nx, 1);
-		stream.exec(thr_butterworth);
+			auto Rx2 = (shift)?grid_1d.R2_shift(ix, butwth.x_c):grid_1d.R2(ix, butwth.x_c);
+			f[ix] = butwth.eval_norm(Rx2);
+		}
 
 		return f;
 	}
 
 	// get two dimensional Butterworth Filter
-	template<class TVector, class TGrid>
-	TVector func_butterworth_2d_by_row(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> Radius, 
-	int n, bool shift, Value_type<TVector> x_0=0, Value_type<TVector> x_e=0)
+	template <class TVector, class TGrid>
+	TVector func_butterworth_2d_bc(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TVector> radius, 
+	int n, bool shift, Border_1d<Value_type<TVector>> bd, bool nb = true)
 	{
 		using T = Value_type<TVector>;
 
-		const T lx = grid.lx - (x_0 + x_e);
-		const T R02 = pow(Radius, 2);
-		x_e = x_0 + lx;
-		const T x_c = x_0 + 0.5*lx;
+		Butterworth_1d<T> butwth(bd, radius, n, nb);
+		TVector fy;
 
-		TVector fx;
-		fx.reserve(grid.nx);
+		fy.reserve(grid_2d.ny);
 
-		for(auto ix = 0; ix < grid.nx; ix++)
+		for(auto iy = 0; iy < grid_2d.ny; iy++)
 		{
-			auto Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix); 
-			T v = ((Rx<x_0)||(Rx>x_e))?0:1.0/(1.0+pow((Rx-x_c)*(Rx-x_c)/R02, n));
-			fx.push_back(v);
+			auto Ry2 = (shift)?grid_2d.Ry2_shift(iy, butwth.x_c):grid_2d.Ry2(iy, butwth.x_c);
+			fy.push_back(butwth.eval_norm(Ry2));
 		}
 
-		TVector f(grid.nxy());
+		TVector f(grid_2d.nxy());
 
-		auto thr_butterworth = [&](const Range &range)
+		auto thr_butterworth = [&](const Range_2d &range)
 		{
-			for(auto iy = range.ixy_0; iy < range.ixy_e; iy++)
+			for(auto ix = range.ixy_0; ix < range.ixy_e; ix++)
 			{
-				for(auto ix = 0; ix < grid.nx; ix++)
+				for(auto iy = 0; iy < grid_2d.ny; iy++)
 				{
-					f[grid.ind_col(ix, iy)] = fx[ix];
+					f[grid_2d.ind_col(ix, iy)] = fy[iy];
 				}
 			}
 		};
 
-		stream.set_n_act_stream(grid.ny);
-		stream.set_grid(1, grid.ny);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, 1);
 		stream.exec(thr_butterworth);
 
 		return f;
 	}
 
 	// get two dimensional Butterworth Filter
-	template<class TVector, class TGrid>
-	TVector func_butterworth_2d(Stream<e_host> &stream, TGrid &grid, Value_type<TVector> Radius, 
-	int n, bool shift, Value_type<TVector> x_0=0, Value_type<TVector> x_e=0, Value_type<TVector> y_0=0, 
-	Value_type<TVector> y_e=0)
+	template <class TVector, class TGrid>
+	TVector func_butterworth_2d(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TVector> radius, 
+	int n, bool shift, Border_2d<Value_type<TVector>> bd, bool nb = true)
 	{
 		using T = Value_type<TVector>;
 
-		const T lx = grid.lx - (x_0 + x_e);
-		const T ly = grid.ly - (y_0 + y_e);
-		const T R02 = pow(Radius, 2);
-		x_e = x_0 + lx;
-		y_e = y_0 + ly;
-		const T x_c = x_0 + 0.5*lx;
-		const T y_c = y_0 + 0.5*ly;
+		Butterworth_2d<T> butwth(bd, radius, n, nb);
 
-		TVector f(grid.nxy());
+		TVector f(grid_2d.nxy());
 
-		auto thr_butterworth = [&](const Range &range)
+		auto thr_butterworth = [&](const Range_2d &range)
 		{
 			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
 			{
 				for(auto iy = range.iy_0; iy < range.iy_e; iy++)
 				{
-					auto Rx = (shift)?grid.Rx_shift(ix):grid.Rx(ix); 
-					auto Ry = (shift)?grid.Ry_shift(iy):grid.Ry(iy); 
-					T v = ((Rx<x_0)||(Rx>x_e)||(Ry<y_0)||(Ry>y_e))?0:1.0/(1.0+pow((pow(Rx-x_c, 2)+pow(Ry-y_c, 2))/R02, n));
-					f[grid.ind_col(ix, iy)] = v;
+					T R2 = (shift)?grid_2d.R2_shift(ix, iy, butwth.x_c, butwth.y_c):grid_2d.R2(ix, iy, butwth.x_c, butwth.y_c);
+					f[grid_2d.ind_col(ix, iy)] = butwth.eval_norm(R2);
 				}
 			}
 		};
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
 		stream.exec(thr_butterworth);
 
 		return f;
 	}
 
 	/********************************************************************/
-	// get two dimensional radial distribution for regular grid
-	void radial_distribution_2d(int nR, double *R, double *fR, int nRl, double *Rl, double *rl, double *frl, double *cfrl, bool reg, int typ)
+	// get two dimensional radial distribution for regular grid_2d
+	inline
+	void rad_dist_2d(int nR, double *R, double *fR, int nRl, double *Rl, double *rl, double *frl, double *cfrl, bool reg, int typ)
 	{	
 		double Rlmin = Rl[0], Rlmax = Rl[nRl-1], dRl = Rl[1]-Rl[0];
  
@@ -2124,23 +1864,23 @@ namespace mt
 			}
 	}
 
-	template<class TGrid, class TVector>
-	void radial_distribution_2d(TGrid &grid, TVector &Im, Value_type<TVector> x_i, 
+	template <class TGrid, class TVector>
+	void rad_dist_2d(TGrid &grid_2d, TVector &Im, Value_type<TVector> x_i, 
 	Value_type<TVector> y_i, Value_type<TVector> radius_i, TVector &rl, TVector &frl)
 	{
 		using T = Value_type<TVector>;
 
-		T dR = grid.dRx;
+		T dR = grid_2d.dRx;
 		int nrl = static_cast<int>(floor(radius_i/dR+0.5));
 		T R_max = dR*nrl;
 
-		int ix0, ixe;
-		get_bn(x_i, grid.nx, grid.dRx, R_max, grid.pbc_xy, ix0, ixe);
-		ixe += ix0;
+		int ix_0, ixe;
+		get_bn(x_i, grid_2d.nx, grid_2d.dRx, R_max, grid_2d.pbc_xy, ix_0, ixe);
+		ixe += ix_0;
 
-		int iy0, iye;
-		get_bn(y_i, grid.ny, grid.dRy, R_max, grid.pbc_xy, iy0, iye);
-		iye += iy0;
+		int iy_0, iye;
+		get_bn(y_i, grid_2d.ny, grid_2d.dRy, R_max, grid_2d.pbc_xy, iy_0, iye);
+		iye += iy_0;
 
 		// get radial distribution
 		rl.resize(nrl);
@@ -2149,20 +1889,20 @@ namespace mt
 
 		for(auto ir = 0; ir < rl.size(); ir++)
 		{
-			rl[ir] = grid.Rx(ir);
+			rl[ir] = grid_2d.Rx(ir);
 			frl[ir] = 0.0;
 			cfrl[ir] = 0.0;
 		}
 
-		for(auto ix = ix0; ix < ixe; ix++)
+		for(auto ix = ix_0; ix < ixe; ix++)
 		{
-			for(auto iy = iy0; iy < iye; iy++)
+			for(auto iy = iy_0; iy < iye; iy++)
 			{
-				T R = grid.R(ix, iy, x_i, y_i);
+				T R = grid_2d.R(ix, iy, x_i, y_i);
 				if(R < R_max)
 				{
 					auto ir = static_cast<int>(floor(R/dR));
-					frl[ir] += Im[grid.ind_col(ix, iy)];
+					frl[ir] += Im[grid_2d.ind_col(ix, iy)];
 					cfrl[ir] += 1.0;
 				}
 			}
@@ -2174,43 +1914,20 @@ namespace mt
 		}
 	}
 
-	// get two dimensional radial distribution for regular grid
-	void getCumRadDist_2d(int ny, int nx, bool shift, double *fI, int nr, double *r, double *fIr)
+	// cumulative radial distribution
+	template <class TGrid, class TVector>
+	void cum_rad_dist_2d(TGrid &grid_2d, TVector &Im, Value_type<TVector> x_i, 
+	Value_type<TVector> y_i, Value_type<TVector> radius_i, TVector &rl, TVector &frl)
 	{	
-		int idx, nxh = nx/2, nyh = ny/2;
-		Vector<double, e_host> cfIr(nr, 0.0);
-		std::fill(fIr, fIr + nr, 0.0);
-
-		double Rx, Ry, R;
-		for(auto ix = 0; ix < nx; ix++)
+		rad_dist_2d(grid_2d, Im, x_i, y_i, radius_i, rl, frl);
+		for(auto ir=1; ir<frl.size(); ir++)
 		{
-			Rx = FSC(ix, nxh, shift);
-			for(auto iy = 0; iy < ny; iy++)
-			{
-				Ry = FSC(iy, nyh, shift);
-				R = sqrt(Rx*Rx + Ry*Ry);
-				if((0 <= R)&&(R<nr))
-				{
-					idx = (int)floor(R);
-					fIr[idx] += fI[ix*ny+iy];
-					cfIr[idx] += 1.0;
-				}
-			}
-		}
-
-		r[0] = 0; 
-		fIr[0] /= cfIr[0];
-		for(auto i = 0; i < nr; i++)
-		{
-			r[i] = i;
-			if(cfIr[i]>0) 
-				fIr[i] /= cfIr[i];
-			fIr[i] += fIr[i-1];
+			frl[ir] += frl[ir-1];
 		}
 	}
 
 	// mean smooth
-	template<class TVector>
+	template <class TVector>
 	TVector smooth(TVector &f_i, Value_type<TVector> nkr)
 	{
 		using T = Value_type<TVector>;
@@ -2239,7 +1956,7 @@ namespace mt
 	}
 
 	// mean smooth
-	template<class TVector>
+	template <class TVector>
 	TVector smooth(Stream<e_host> &stream, TVector &f_i, Value_type<TVector> nkr)
 	{
 		using T = Value_type<TVector>;
@@ -2250,21 +1967,21 @@ namespace mt
 
 		auto krn_mean = [&](const int &ix_i, TVector &f_i, TVector &f_o)
 		{
-			int ix0 = max(ix_i+nk0, 0);
+			int ix_0 = max(ix_i+nk0, 0);
 			int ixe = min(ix_i+nke, nf_i);
 
 			T f_mean = 0;
-			for (auto ix = ix0; ix < ixe; ix++)
+			for (auto ix = ix_0; ix < ixe; ix++)
 			{
 				f_mean += f_i[ix];
 			}
 
-			f_o[ix_i] = f_mean/(ixe-ix0);
+			f_o[ix_i] = f_mean/(ixe-ix_0);
 		};
 
 		TVector fv(nf_i);
 
-		auto thr_mean = [&](const Range &range)
+		auto thr_mean = [&](const Range_2d &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
@@ -2282,15 +1999,16 @@ namespace mt
 	/*******************************************************************/
 	// add Poisson noise
 	template <class TVector>
-	TVector add_poisson_noise(Stream<e_host> &stream, TVector &M_i, 
+	TVector add_poiss_nois(Stream<e_host> &stream, TVector &M_i, 
 	Value_type<TVector> scf)
 	{	
 		using T = Value_type<TVector>;
 
 		TVector M(M_i.size());
-		auto thr_poisson_noise = [&](const Range &range)
+		auto thr_poiss_nois = [&](const Range_2d &range)
 		{
-			std::mt19937_64 gen;
+			std::random_device rd;
+			std::mt19937_64 gen(rd());
 			std::poisson_distribution<int> randp;
 
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
@@ -2303,14 +2021,14 @@ namespace mt
 
 		stream.set_n_act_stream(M_i.size());
 		stream.set_grid(M_i.size(), 1);
-		stream.exec(thr_poisson_noise);
+		stream.exec(thr_poiss_nois);
 
 		return M;
 	};
 
 	// add Poisson noise
 	template <class TVector>
-	TVector add_poisson_noise_by_SNR(Stream<e_host> &stream, TVector &Im_i, 
+	TVector add_poiss_nois_by_SNR(Stream<e_host> &stream, TVector &Im_i, 
 		Value_type<TVector> SNR_i, Value_type<TVector> &scl_o)
 	{	
 		using T = Value_type<TVector>;
@@ -2319,7 +2037,7 @@ namespace mt
 		{
 			T x_mean = 0;
 			T x_var = 0;
-			auto thr_SNR = [&](const Range &range)
+			auto thr_SNR = [&](const Range_2d &range)
 			{
 				std::mt19937_64 gen;
 				std::poisson_distribution<int> rand;
@@ -2396,10 +2114,10 @@ namespace mt
 				k_e = scl_o;
 			}
 			ic++;
-		} while ((fabs(SNR_i-SNR_k)>0.05) && (ic<10));
+		} while ((fabs(SNR_i-SNR_k)>0.1) && (ic<10));
 
 		// add Poisson noise
-		return add_poisson_noise(stream, Im_i, scl_o);
+		return add_poiss_nois(stream, Im_i, scl_o);
 	}
 
 	/*******************************************************************/
@@ -2409,15 +2127,15 @@ namespace mt
 	{
 		Prime_Num CP;
 
-		auto ix0 = border_x;
+		auto ix_0 = border_x;
 		auto nx = CP(grid_i.nx+2*border_x, eDST_Greater_Than);
-		auto ixe = ix0 + grid_i.nx;
+		auto ixe = ix_0 + grid_i.nx;
 		auto bx_l = border_x;
 		auto bx_r = nx - ixe;
 
-		auto iy0 = border_y;
+		auto iy_0 = border_y;
 		auto ny = CP(grid_i.ny+2*border_y, eDST_Greater_Than);
-		auto iye = iy0 + grid_i.ny;
+		auto iye = iy_0 + grid_i.ny;
 		auto by_t = border_y;
 		auto by_b = ny - iye;
 
@@ -2426,37 +2144,37 @@ namespace mt
 		image_o.resize(grid_o.nxy());
 
 		// copy central image
-		for(auto ix_o=ix0; ix_o<ixe; ix_o++)
+		for(auto ix_o=ix_0; ix_o<ixe; ix_o++)
 		{
-			for(auto iy_o=iy0; iy_o<iye; iy_o++)
+			for(auto iy_o=iy_0; iy_o<iye; iy_o++)
 			{
-				auto ix_i = ix_o-ix0;
-				auto iy_i = iy_o-iy0;
+				auto ix_i = ix_o-ix_0;
+				auto iy_i = iy_o-iy_0;
 				auto ixy_i = grid_i.ind_col(ix_i, iy_i);
 				auto ixy_o = grid_o.ind_col(ix_o, iy_o);
-				image_o[ixy_o] = image_i[ixy_i] ;
+				image_o[ixy_o] = image_i[ixy_i];
 			}
 		}
 
 		// left
 		for(auto ix_o=0; ix_o<bx_l; ix_o++)
 		{
-			for(auto iy_o=iy0; iy_o<iye; iy_o++)
+			for(auto iy_o=iy_0; iy_o<iye; iy_o++)
 			{
 				auto ix_i = 2*bx_l-ix_o;
 				auto iy_i = iy_o;
-				image_o[grid_o.ind_col(ix_o, iy_o)] = image_o[grid_o.ind_col(ix_i, iy_i)] ;
+				image_o[grid_o.ind_col(ix_o, iy_o)] = image_o[grid_o.ind_col(ix_i, iy_i)];
 			}
 		}
 
 		// right
 		for(auto ix_o=ixe; ix_o<grid_o.nx; ix_o++)
 		{
-			for(auto iy_o=iy0; iy_o<iye; iy_o++)
+			for(auto iy_o=iy_0; iy_o<iye; iy_o++)
 			{
 				auto ix_i = ixe-2-(ix_o-ixe);
 				auto iy_i = iy_o;
-				image_o[grid_o.ind_col(ix_o, iy_o)] = image_o[grid_o.ind_col(ix_i, iy_i)] ;
+				image_o[grid_o.ind_col(ix_o, iy_o)] = image_o[grid_o.ind_col(ix_i, iy_i)];
 			}
 		}
 
@@ -2467,7 +2185,7 @@ namespace mt
 			{
 				auto ix_i = ix_o;
 				auto iy_i = 2*by_t-iy_o;
-				image_o[grid_o.ind_col(ix_o, iy_o)] = image_o[grid_o.ind_col(ix_i, iy_i)] ;
+				image_o[grid_o.ind_col(ix_o, iy_o)] = image_o[grid_o.ind_col(ix_i, iy_i)];
 			}
 		}
 
@@ -2478,11 +2196,11 @@ namespace mt
 			{
 				auto ix_i = ix_o;
 				auto iy_i = iye-2-(iy_o-iye);
-				image_o[grid_o.ind_col(ix_o, iy_o)] = image_o[grid_o.ind_col(ix_i, iy_i)] ;
+				image_o[grid_o.ind_col(ix_o, iy_o)] = image_o[grid_o.ind_col(ix_i, iy_i)];
 			}
 		}
 
-		vector<int> points = {ix0, ixe, iy0, iye};
+		vector<int> points = {ix_0, ixe, iy_0, iye};
 
 		return points;
 	}
@@ -2490,78 +2208,71 @@ namespace mt
 	/*******************************************************************/
 	// add periodic boundary border to the image
 	template <class TGrid, class TVector>
-	void set_const_border(TGrid &grid, TVector &image, Value_type<TVector> xb_0, Value_type<TVector> xb_e, 
+	void set_const_border(TGrid &grid_2d, TVector &image, Value_type<TVector> xb_0, Value_type<TVector> xb_e, 
 	Value_type<TVector> yb_0, Value_type<TVector> yb_e)
 	{
 		using T = Value_type<TVector>;
 
-		int ix_0 = grid.ceil_dRx(xb_0);
-		int ix_e = grid.nx-grid.ceil_dRx(xb_e);
+		int ix_0 = grid_2d.ceil_dRx(xb_0);
+		int ix_e = grid_2d.nx-grid_2d.ceil_dRx(xb_e);
 
-		int iy_0 = grid.ceil_dRy(yb_0);
-		int iy_e = grid.ny-grid.ceil_dRy(yb_e);
+		int iy_0 = grid_2d.ceil_dRy(yb_0);
+		int iy_e = grid_2d.ny-grid_2d.ceil_dRy(yb_e);
 
-		//get average value
-		int ix_i0 = ix_0 + max(10, (ix_e-ix_0)/10);
-		int ix_ie = ix_e-ix_i0;
-		int iy_i0 = iy_0 + max(10, (iy_e-iy_0)/10);
-		int iy_ie = iy_e-iy_i0;
-
-		T val = 0;
-		T cval = 0;
+		T val_s = 0;
+		T val_ee = 0;
+		int val_c = 0;
 		for(auto ix=ix_0; ix<ix_e; ix++)
 		{
 			for(auto iy=iy_0; iy<iy_e; iy++)
 			{
-				if((ix<=ix_i0)||(ix>=ix_ie)||(iy<=iy_i0)||(iy>=iy_ie))
-				{
-					val += image[grid.ind_col(ix, iy)];
-					cval++;
-				}
+				auto v = image[grid_2d.ind_col(ix, iy)];
+				host_device_detail::kh_sum(val_s, v, val_ee);
+				val_c++;
 			}
 		}
-		val /= cval;
+		val_s = val_s/val_c;
 
 		// left
 		for(auto ix=0; ix<ix_0; ix++)
 		{
-			for(auto iy=0; iy<grid.ny; iy++)
+			for(auto iy=0; iy<grid_2d.ny; iy++)
 			{
-				image[grid.ind_col(ix, iy)] = val;
+				image[grid_2d.ind_col(ix, iy)] = val_s;
 			}
 		}
 
 		// right
-		for(auto ix=ix_e; ix<grid.nx; ix++)
+		for(auto ix=ix_e; ix<grid_2d.nx; ix++)
 		{
-			for(auto iy=0; iy<grid.ny; iy++)
+			for(auto iy=0; iy<grid_2d.ny; iy++)
 			{
-				image[grid.ind_col(ix, iy)] = val;
+				image[grid_2d.ind_col(ix, iy)] = val_s;
 			}
 		}
 
 		// top
-		for(auto ix=0; ix<grid.nx; ix++)
+		for(auto ix=0; ix<grid_2d.nx; ix++)
 		{
 			for(auto iy=0; iy<iy_0; iy++)
 			{
-				image[grid.ind_col(ix, iy)] = val;
+				image[grid_2d.ind_col(ix, iy)] = val_s;
 			}
 		}
 
 		// bottom
-		for(auto ix=0; ix<grid.nx; ix++)
+		for(auto ix=0; ix<grid_2d.nx; ix++)
 		{
-			for(auto iy=iy_e; iy<grid.ny; iy++)
+			for(auto iy=iy_e; iy<grid_2d.ny; iy++)
 			{
-				image[grid.ind_col(ix, iy)] = val;
+				image[grid_2d.ind_col(ix, iy)] = val_s;
 			}
 		}
 	}
 
 	/*******************************************************************/	
-	// extract region ix0<=x<ixe
-	template<class TVector_o, class TVector_i>
+	// extract region ix_0<=x<ixe
+	template <class TVector_o, class TVector_i>
 	TVector_o extract_region_real_part(Stream<e_host> &stream, int nx_src, int ny_src, 
 	TVector_i &Im_src, int ix0_src, int ixe_src, int iy0_src, int iye_src)
 	{
@@ -2570,7 +2281,7 @@ namespace mt
 
 		TVector_o Im_dst(nx_dst*ny_dst);
 
-		auto thr_extract_region = [&](const Range &range)
+		auto thr_extract_region = [&](const Range_2d &range)
 		{
 			for (auto ix = range.ix_0; ix < range.ix_e; ix++)
 			{
@@ -2589,12 +2300,12 @@ namespace mt
 	}
 
 	// extract real part of vector
-	template<class TVector_o, class TVector_i>
+	template <class TVector_o, class TVector_i>
 	TVector_o extract_real_part(Stream<e_host> &stream, TVector_i &Im_src)
 	{
 		TVector_o Im_dst(Im_src.size());
 
-		auto thr_extract_real = [](const Range &range, TVector_i &Im_src, TVector_o &Im_dst)
+		auto thr_extract_real = [](const Range_2d &range, TVector_i &Im_src, TVector_o &Im_dst)
 		{
 			for (auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
@@ -2609,8 +2320,8 @@ namespace mt
 		return Im_dst;
 	}
 
-	// extract region ix0<=x<ixe
-	template<class TVector_o, class TVector_i>
+	// extract region ix_0<=x<ixe
+	template <class TVector_o, class TVector_i>
 	TVector_o extract_region_abs(Stream<e_host> &stream, int nx_src, int ny_src, 
 	TVector_i &Im_src, int ix0_src, int ixe_src, int iy0_src, int iye_src)
 	{
@@ -2619,13 +2330,13 @@ namespace mt
 
 		TVector_o Im_dst(nx_dst*ny_dst);
 
-		auto thr_extract_region = [&](const Range &range)
+		auto thr_extract_region = [&](const Range_2d &range)
 		{
 			for (auto ix = range.ix_0; ix < range.ix_e; ix++)
 			{
 				for (auto iy = range.iy_0; iy < range.iy_e; iy++)
 				{
-					Im_dst[ix*ny_dst+iy] = abs(Im_src[(ix0_src+ix)*ny_src+(iy0_src+iy)]);
+					Im_dst[ix*ny_dst+iy] = fabs(Im_src[(ix0_src+ix)*ny_src+(iy0_src+iy)]);
 				}
 			}
 		};
@@ -2638,16 +2349,16 @@ namespace mt
 	}
 
 	// extract abs of vector
-	template<class TVector_o, class TVector_i>
+	template <class TVector_o, class TVector_i>
 	TVector_o extract_abs(Stream<e_host> &stream, TVector_i &Im_src)
 	{
 		TVector_o Im_dst(Im_src.size());
 
-		auto thr_extract_abs = [](const Range &range, TVector_i &Im_src, TVector_o &Im_dst)
+		auto thr_extract_abs = [](const Range_2d &range, TVector_i &Im_src, TVector_o &Im_dst)
 		{
 			for (auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
-				Im_dst[ixy] = abs(Im_src[ixy]);
+				Im_dst[ixy] = fabs(Im_src[ixy]);
 			}
 		};
 
@@ -2657,192 +2368,25 @@ namespace mt
 
 		return Im_dst;
 	}
-	/*******************************************************************/
-	// analytic convolution
-	template <class TGrid, class TFn, class TVector>
-	void analytic_conv(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2,
-		TGrid &grid, TFn fn, TVector &image)
-	{
-		fft2_shift(stream, grid, image);
-		fft2.forward(image);
-
-		auto thr_analytic_convolution = [&](const Range &range)
-		{
-			for (auto ix = range.ix_0; ix < range.ix_e; ix++)
-			{
-				for (auto iy = range.iy_0; iy < range.iy_e; iy++)
-				{
-					image[grid.ind_col(ix, iy)] *= fn(ix, iy, grid);
-				}
-			}
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_analytic_convolution);
-
-		fft2.inverse(image);
-		fft2_shift(stream, grid, image);
-	}
-
-	/*******************************************************************/
-	// Gaussian convolution
-	template <class TGrid, class TVector>
-	TVector gaussian_conv(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, 
-	TGrid &grid_i, Value_type<TGrid> sigma_r, TVector &image_i)
-	{	
-		using T = Value_type<TVector>;
-		using TVector_c = vector<complex<T>>;
-
-		T alpha = 2.0*c_Pi2*sigma_r*sigma_r;
-		auto sigma_r_lim = 4*sigma_r;
-		auto border_x = grid_i.nx_dRx(sigma_r_lim);
-		auto border_y = grid_i.ny_dRy(sigma_r_lim);
-
-		TGrid grid;
-		TVector_c image;
-		// add borders
-		auto pts = add_PB_border(grid_i, image_i, border_x, border_y, grid, image);
-
-		auto krn_gaussian = [=](const int &ix, const int &iy, const TGrid &grid)
-		{
-			return exp(-alpha*grid.g2_shift(ix, iy))*grid.inxy;
-		};
-
-		// create 2d plan
-		fft2.create_plan_2d(grid.ny, grid.nx, stream.size());
-
-		// perform analytic convolution
-		analytic_conv(stream, fft2, grid, krn_gaussian, image);
-
-		int ix0 = pts[0], ixe = pts[1];
-		int iy0 = pts[2], iye = pts[3];
-
-		return extract_region_real_part<TVector>(stream, grid.nx, grid.ny, image, ix0, ixe, iy0, iye);
-	}
-
-	// Gaussian deconvolution
-	template <class TGrid, class TVector>
-	TVector gaussian_deconv(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, 
-	TGrid &grid_i, Value_type<TGrid> sigma_r, Value_type<TGrid> PSNR, TVector &image_i)
-	{	
-		using T = Value_type<TVector>;
-		using TVector_c = vector<complex<T>>;
-
-		// deconvolution
-		T alpha = 2.0*c_Pi2*sigma_r*sigma_r;
-		auto sigma_r_lim = 4.0*sigma_r;
-		auto border_x = grid_i.nx_dRx(sigma_r_lim);
-		auto border_y = grid_i.ny_dRy(sigma_r_lim);
-
-		TGrid grid;
-		TVector_c image;
-		// add borders
-		auto pts = add_PB_border(grid_i, image_i, border_x, border_y, grid, image);
-
-		// sigma_r ---> sigma_f = 1/(2*pi*sigma_r)
-		T sigma_f = 3.0/(c_2Pi*sigma_r);
-		T g2_lim = pow(min(sigma_f, grid.g_max()), 2);
-		auto krn_dc_gaussian = [=](const int &ix, const int &iy, const TGrid &grid)
-		{
-			auto g2 = grid.g2_shift(ix, iy);
-			if(g2<g2_lim)
-			{
-				auto fg = exp(-alpha*g2);
-				return fg/((fg*fg+PSNR)*grid.nxy());
-			}
-			else
-			{
-				return T(0);
-			}
-		};
-
-		// create 2d plan
-		fft2.create_plan_2d(grid.ny, grid.nx, stream.size());
-
-		// perform analytic convolution
-		analytic_conv(stream, fft2, grid, krn_dc_gaussian, image);
-
-		int ix0 = pts[0], ixe = pts[1];
-		int iy0 = pts[2], iye = pts[3];
-
-		return extract_region_real_part<TVector>(stream, grid.nx, grid.ny, image, ix0, ixe, iy0, iye);
-	}
-
-	// Modified Gaussian deconvolution
-	template <class TGrid, class TVector>
-	TVector mod_gaussian_deconv(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, 
-	TGrid &grid_i, Value_type<TGrid> sigma_r, Value_type<TGrid> PSNR, TVector &image_i)
-	{	
-		using T = Value_type<TVector>;
-		using TVector_c = vector<complex<T>>;
-
-		// deconvolution
-		T sigma_a = sigma_r;
-		T sigma_b = 0.25*sigma_r;
-		T alpha_a = 2.0*c_Pi2*pow(sigma_a, 2);
-		T alpha_b = 2.0*c_Pi2*pow(sigma_b, 2);
-
-		auto sigma_r_lim = 4.0*sigma_a;
-		auto border_x = grid_i.nx_dRx(sigma_r_lim);
-		auto border_y = grid_i.ny_dRy(sigma_r_lim);
-
-		TGrid grid;
-		TVector_c image;
-		// add borders
-		vector<int> pts;
-		
-		pts = add_PB_border(grid_i, image_i, border_x, border_y, grid, image);
-
-		// sigma_r ---> sigma_f = 1/(2*pi*sigma_r)
-		T sigma_f_lim = 3.0*(1.0/(c_2Pi*sigma_r));
-		T g2_lim = pow(min(sigma_f_lim, grid.g_max()), 2);
-		auto krn_dc_gaussian = [=](const int &ix, const int &iy, const TGrid &grid)
-		{
-			auto g2 = grid.g2_shift(ix, iy);
-			if(g2<g2_lim)
-			{
-				auto fg_a = exp(-alpha_a*g2);
-				auto fg_b = exp(-alpha_b*g2);
-				return fg_a*fg_b/((fg_a*fg_a+PSNR)*grid.nxy());
-			}
-			else
-			{
-				return T(0);
-			}
-		};
-
-		// create 2d plan
-		fft2.create_plan_2d(grid.ny, grid.nx, stream.size());
-
-		// perform analytic convolution
-		analytic_conv(stream, fft2, grid, krn_dc_gaussian, image);
-
-		int ix0 = pts[0], ixe = pts[1];
-		int iy0 = pts[2], iye = pts[3];
-
-		return extract_region_real_part<TVector>(stream, grid.nx, grid.ny, image, ix0, ixe, iy0, iye);
-
-	}
 
 	/*******************************************************************/
 	// get weighted position
-	template<class TGrid, class TVector>
-	r2d<Value_type<TVector>> Rx_Ry_weight(TGrid &grid, TVector &Im, r2d<Value_type<TVector>> p_i, Value_type<TVector> radius_i, bool env)
+	template <class TGrid, class TVector>
+	r2d<Value_type<TVector>> Rx_Ry_weight(TGrid &grid_2d, TVector &Im, r2d<Value_type<TVector>> p_i, Value_type<TVector> radius_i, bool env)
 	{
 		using T = Value_type<TVector>;
 
-		T dR = grid.dRx;
+		T dR = grid_2d.dRx;
 		int nrl = static_cast<int>(floor(radius_i/dR+0.5));
 		T R_max = dR*nrl;
 
 		auto ix_i = static_cast<int>(floor(p_i.x/dR));
-		int ix0 = max(ix_i-nrl, 0);
-		int ixe = min(ix_i+nrl+1, grid.nx);
+		int ix_0 = max(ix_i-nrl, 0);
+		int ixe = min(ix_i+nrl+1, grid_2d.nx);
 
 		auto iy_i = static_cast<int>(floor(p_i.y/dR));
-		int iy0 = max(iy_i-nrl, 0);
-		int iye = min(iy_i+nrl+1, grid.ny);
+		int iy_0 = max(iy_i-nrl, 0);
+		int iye = min(iy_i+nrl+1, grid_2d.ny);
 
 		T R2_max = pow(R_max, 2);
 
@@ -2850,16 +2394,16 @@ namespace mt
 
 		T alpha = 0.5/pow(R_max, 2);
 		T wt = 0;
-		for(auto ix = ix0; ix < ixe; ix++)
+		for(auto ix = ix_0; ix < ixe; ix++)
 		{
-			for(auto iy = iy0; iy < iye; iy++)
+			for(auto iy = iy_0; iy < iye; iy++)
 			{
-				auto R2 = grid.R2(ix, iy, p_i.x, p_i.y);
+				auto R2 = grid_2d.R2(ix, iy, p_i.x, p_i.y);
 				if(R2 < R2_max)
 				{
-					int ixy = grid.ind_col(ix, iy);
+					int ixy = grid_2d.ind_col(ix, iy);
 					auto imv = ((env)?exp(-alpha*R2):1)*Im[ixy];
-					p += imv*r2d<T>(grid.Rx(ix), grid.Ry(iy)); 
+					p += imv*r2d<T>(grid_2d.Rx(ix), grid_2d.Ry(iy)); 
 					wt += imv;
 				}
 			}
@@ -2874,74 +2418,333 @@ namespace mt
 		return p;
 	}
 	
-	// get fit position
-	template<class TGrid, class TVector>	
-	TVector Rx_Ry_fit(TGrid &grid, TVector &Im_i, r2d<Value_type<TVector>> p_i, 
+	// fit gaussian 1d
+	template <class TGrid, class TVector>	
+	TVector fit_gauss_1d(TGrid &grid_1d, TVector &Im_i, Value_type<TVector> x_i, 
 	Value_type<TVector> sigma_i, Value_type<TVector> radius_i)
 	{
 		using T = Value_type<TVector>;
 
-		auto select_cir_reg = [](TGrid &grid, TVector &Im, r2d<T> p, 
-		T radius, TVector &Rx, TVector &Ry, TVector &Ixy, T &Rx_sf, T &Ry_sf, T &Rxy_sc, T &Ixy_sc)
+		auto select_cir_reg = [](TGrid &grid_1d, TVector &Im, T x0, 
+		T radius, TVector &Rx, TVector &Ix, T &Rx_sf, T &Rx_sc, T &Ix_sc)
 		{
 			T R_max = radius;
 			T R2_max = pow(R_max, 2);
 
-			auto range = grid.index_range(p, R_max);
+			auto range = grid_1d.index_range(x0, R_max);
 
 			Rx.clear();
 			Rx.reserve(range.ixy_e);
-			Ry.clear();
-			Ry.reserve(range.ixy_e);
-			Ixy.clear();
-			Ixy.reserve(range.ixy_e);
+			Ix.clear();
+			Ix.reserve(range.ixy_e);
 
+			// select circular region
+			for (auto ix = range.ix_0; ix < range.ix_e; ix++)
+			{
+				if (grid_1d.R2(ix, x0) < R2_max)
+				{
+					Rx.push_back(grid_1d.Rx(ix));
+					Ix.push_back(Im[ix]);
+				}
+			}
+
+			Rx_sf = x0;
+			Rx_sc = R_max;
+
+			Ix_sc = max_element(Ix);
+			int m = Ix.size();
+			for (auto ix = 0; ix < m; ix++)
+			{
+				Rx[ix] = (Rx[ix]-Rx_sf)/Rx_sc;
+				Ix[ix] = Ix[ix]/Ix_sc;
+			}
+
+			Rx.shrink_to_fit();
+			Ix.shrink_to_fit();
+		};
+
+		TVector Rx, Ix;
+		T Rx_sf, Rx_sc, Ix_sc;
+
+		select_cir_reg(grid_1d, Im_i, x_i, radius_i, Rx, Ix, Rx_sf, Rx_sc, Ix_sc);
+
+		T sigma = sigma_i/Rx_sc;
+
+		int m = Ix.size();
+		int n = 3;
+
+		TVector J(m*n);
+		TVector d_Ix(m);
+
+		auto get_chi2 = [](TVector &Rx, TVector &Ix, TVector &coef)->T
+		{
+			T x0 = coef[0];
+			T A = coef[1];
+			T alpha = 0.5/pow(coef[2], 2);
+
+			T chi2 = 0;
+			T chi2_ee = 0;
+			const int m = Ix.size();
+			for (auto im = 0; im < m; im++)
+			{
+				T x = Rx[im]-x0;
+				T v = Ix[im]-A*exp(-alpha*x*x);
+				host_device_detail::kh_sum(chi2, v*v, chi2_ee);
+			}
+			return chi2;
+		};
+
+		auto get_dIx_J = [](TVector &Rx, TVector &Ix, TVector &coef, 
+		TVector &dIx, TVector &J)
+		{
+			T x0 = coef[0];
+			T A = coef[1];
+			T alpha = 0.5/pow(coef[2], 2);
+
+			T c_x0 = 1.0/pow(coef[2], 2);
+			T c_A = 1;
+			T c_sx = 1.0/pow(coef[2], 3);
+
+			const int m = Ix.size();
+			for (auto im = 0; im < m; im++)
+			{
+				T x = Rx[im]-x0;
+				T v = exp(-alpha*x*x);
+				T f = A*v;
+
+				J[0*m+im] = c_x0*x*f;
+				J[1*m+im] = c_A*v;
+				J[2*m+im] = c_sx*x*x*f; 
+
+				dIx[im] = Ix[im] - f;
+			}
+		};
+
+		T dx_max = ::fmax(grid_1d.dRx/Rx_sc, 0.25*::fmin(sigma, radius_i/Rx_sc));
+
+		vector<T> c_coef_0 = {0, 1, sigma};
+		vector<T> c_coef_min = {-dx_max, 0.5, sigma/3};
+		vector<T> c_coef_max = {dx_max, 1.25, 3*sigma};
+
+		TVector coef_0 = c_coef_0;
+		TVector coef_min = c_coef_min;
+		TVector coef_max = c_coef_max;
+		TVector coef = coef_0;
+
+		T chi2 = get_chi2(Rx, Ix, coef);
+
+		T lambda = 2;
+		T lambda_f = 2;
+
+		lapack::FLSF<T> flsf;
+
+		const int niter = 100;
+		for (auto iter = 0; iter<niter; iter++)
+		{
+			get_dIx_J(Rx, Ix, coef, d_Ix, J);
+
+			TVector d_coef(n);
+			TVector D(n);
+			TVector G(n);
+			flsf(m, n, J.data(), d_Ix.data(), d_coef.data(), lambda, D.data(), G.data());
+
+			TVector coef_t = coef;
+			T rho_f = 0;
+			T G_max = 0;
+			for(auto ic=0; ic<n; ic++)
+			{
+				coef_t[ic] += d_coef[ic];
+				rho_f += coef_t[ic]*(D[ic]*coef_t[ic]+G[ic]);
+				G_max = ::fmax(G_max, fabs(G[ic]));
+			}
+
+			T chi2_t = get_chi2(Rx, Ix, coef_t);
+			T rho = (chi2-chi2_t)/rho_f;
+
+			if ((G_max<5e-7)||fabs(chi2-chi2_t)<5e-8)
+			{
+				break;
+			}
+
+			if(rho>0)
+			{
+				coef = coef_t;
+
+				for(auto ic=0; ic<n; ic++)
+				{
+					coef[ic] = min(max(coef[ic], coef_min[ic]), coef_max[ic]);
+				}
+
+				chi2 = get_chi2(Rx, Ix, coef);
+
+				lambda = (rho>1e-6)?(::fmax(lambda/lambda_f, 1e-7)):lambda;
+			}
+			else
+			{
+				lambda = ::fmin(lambda*lambda_f, 1e+7);
+			}
+		}
+
+		coef[0] = coef[0]*Rx_sc + Rx_sf;
+		coef[1] = coef[1]*Ix_sc;
+		coef[2] = coef[2]*Rx_sc;
+
+		return coef;
+	}
+
+	// fit gaussian 2d
+	template <class TGrid, class TVector>	
+	TVector fit_ellipt_gauss_2d(TGrid &grid_2d, TVector &Im_i, r2d<Value_type<TVector>> p_i, 
+	Value_type<TVector> sigma_i, Value_type<TVector> radius_i)
+	{
+		using T = Value_type<TVector>;
+		using TRegion = Region<TVector>;
+
+		auto ellipse_var = [](const T &sx, const T &sy, const T &theta, T &a, T &b, T &c)
+		{
+			T cos_1t = cos(theta);
+			T sin_1t = sin(theta);
+			T cos_2t = cos(2*theta);
+			T sin_2t = sin(2*theta);
+
+			T sx2 = pow(sx, 2);
+			T sy2 = pow(sy, 2);
+
+			a = 0.5*(cos_1t*cos_1t/sx2 + sin_1t*sin_1t/sy2);
+			b = 0.5*(sin_1t*sin_1t/sx2 + cos_1t*cos_1t/sy2);
+			c = 0.5*(-sin_2t/sx2 + sin_2t/sy2);
+		};
+
+		auto select_cir_reg = [](TGrid &grid_2d, TVector &Im, r2d<T> p, 
+		T radius, TRegion &region)
+		{
+			T R_max = radius;
+			T R2_max = pow(R_max, 2);
+			T Rl2_max = pow(2.5*grid_2d.dR_min(), 2);
+
+			auto range = grid_2d.index_range(p, R_max);
+
+			region.clear();
+			region.reserve(range.ixy_e);
+
+			T I_m = 0;
+			T I_ee = 0;
+			int I_c = 0;
 			// select circular region
 			for (auto ix = range.ix_0; ix < range.ix_e; ix++)
 			{
 				for (auto iy = range.iy_0; iy < range.iy_e; iy++)
 				{
-					if (grid.R2(ix, iy, p.x, p.y) < R2_max)
+					T R2 = grid_2d.R2(ix, iy, p.x, p.y);
+					if (R2 < R2_max)
 					{
-						Rx.push_back(grid.Rx(ix));
-						Ry.push_back(grid.Ry(iy));
-						Ixy.push_back(Im[grid.ind_col(ix, iy)]);
+						T v = Im[grid_2d.ind_col(ix, iy)];
+						region.Rx.push_back(grid_2d.Rx(ix));
+						region.Ry.push_back(grid_2d.Ry(iy));
+						region.Ixy.push_back(v);
+						if (R2 < Rl2_max)
+						{
+							host_device_detail::kh_sum(I_m, v, I_ee);
+							I_c++;
+						}
 					}
+
+				}
+			}
+			I_m = I_m/I_c;
+
+			region.R_max = R_max;
+			region.Rx_sf = p.x;
+			region.Ry_sf = p.y;
+			region.Rxy_sc = R_max;
+
+			region.Ixy_sc = (I_m+max_element(region.Ixy))/2;
+			int m = region.Ixy.size();
+			for (auto ixy = 0; ixy < m; ixy++)
+			{
+				region.Rx[ixy] = (region.Rx[ixy]-region.Rx_sf)/region.Rxy_sc;
+				region.Ry[ixy] = (region.Ry[ixy]-region.Ry_sf)/region.Rxy_sc;
+				region.Ixy[ixy] = region.Ixy[ixy]/region.Ixy_sc;
+			}
+
+			region.Rx.shrink_to_fit();
+			region.Ry.shrink_to_fit();
+			region.Ixy.shrink_to_fit();
+		};
+
+		auto select_ellip_reg = [&](TGrid &grid_2d, TVector &Im, TVector &coef, 
+		T f0, TRegion &region)
+		{
+			T x_c = coef[0];
+			T y_c = coef[1];
+
+			T a, b, c;
+			ellipse_var(coef[3], coef[4], coef[5], a, b, c);
+
+			T d = log(f0);
+			T dd = c*c-4*a*b;
+
+			T radius_y = sqrt(fabs(4*a*d/dd));
+			T radius_x = sqrt(fabs(4*b*d/dd));
+
+			T x_0 = x_c - radius_x;
+			T x_e = x_c + radius_x;
+			T y_0 = y_c - radius_y;
+			T y_e = y_c + radius_y;
+
+			int ix_0 = grid_2d.ceil_dRx(x_0);
+			int ix_e = grid_2d.floor_dRx(x_e)+1;
+
+			int iy_0 = grid_2d.ceil_dRy(y_0);
+			int iy_e = grid_2d.floor_dRy(y_e)+1;
+
+			region.clear();
+			region.reserve((ix_e-ix_0)*(iy_e-iy_0));
+
+			// select circular region
+			for (auto ix = ix_0; ix < ix_e; ix++)
+			{ 
+				T dx = grid_2d.Rx(ix)-x_c;
+				T ddy = sqrt(fabs(dd*dx*dx-4*b*d));
+
+				T y_0 = (-c*dx-ddy)/(2*b)+y_c;
+				T y_e = (-c*dx+ddy)/(2*b)+y_c;
+
+				int iy_0 = grid_2d.lb_index_y(y_0);
+				int iy_e = grid_2d.ub_index_y(y_e)+1;
+
+				for (auto iy = iy_0; iy < iy_e; iy++)
+				{
+					region.Rx.push_back(grid_2d.Rx(ix));
+					region.Ry.push_back(grid_2d.Ry(iy));
+					region.Ixy.push_back(Im[grid_2d.ind_col(ix, iy)]);
 				}
 			}
 
-			Rx_sf = p.x;
-			Ry_sf = p.y;
-			Rxy_sc = R_max;
+			region.R_max = max(coef[3], coef[4]);
+			region.Rx_sf = x_c;
+			region.Ry_sf = y_c;
+			region.Rxy_sc = region.R_max;
 
-			Ixy_sc = max_data(Ixy);
-			int m = Ixy.size();
+			region.Ixy_sc = max_element(region.Ixy);
+			int m = region.Ixy.size();
 			for (auto ixy = 0; ixy < m; ixy++)
 			{
-				Rx[ixy] = (Rx[ixy]-Rx_sf)/Rxy_sc;
-				Ry[ixy] = (Ry[ixy]-Ry_sf)/Rxy_sc;
-				Ixy[ixy] = Ixy[ixy]/Ixy_sc;
+				region.Rx[ixy] = (region.Rx[ixy]-region.Rx_sf)/region.Rxy_sc;
+				region.Ry[ixy] = (region.Ry[ixy]-region.Ry_sf)/region.Rxy_sc;
+				region.Ixy[ixy] = region.Ixy[ixy]/region.Ixy_sc;
 			}
 
-			Rx.shrink_to_fit();
-			Ry.shrink_to_fit();
-			Ixy.shrink_to_fit();
+			region.shrink_to_fit();
 		};
 
-		TVector Rx, Ry, Ixy;
-		T Rx_sf, Ry_sf, Rxy_sc, Ixy_sc;
+		TRegion region;
 
-		select_cir_reg(grid, Im_i, p_i, radius_i, Rx, Ry, Ixy, Rx_sf, Ry_sf, Rxy_sc, Ixy_sc);
+		select_cir_reg(grid_2d, Im_i, p_i, radius_i, region);
 
-		T sigma = sigma_i/Rxy_sc;
+		T sigma = sigma_i/region.Rxy_sc;
 
-		int m = Ixy.size();
-		int n = 6;
-
-		TVector J(m*n);
-		TVector d_Ixy(m);
-
-		auto get_chi2 = [](TVector &Rx, TVector &Ry, TVector &Ixy, TVector &coef)->T
+		auto get_chi2 = [&](TVector &Rx, TVector &Ry, TVector &Ixy, TVector &coef)->T
 		{
 			T x_0 = coef[0];
 			T y_0 = coef[1];
@@ -2950,17 +2753,9 @@ namespace mt
 
 			T A = coef[2];
 
-			T cos_1t = cos(theta);
-			T sin_1t = sin(theta);
-			T cos_2t = cos(2*theta);
-			T sin_2t = sin(2*theta);
+			T a, b, c;
 
-			T sx2 = pow(coef[3], 2);
-			T sy2 = pow(coef[4], 2);
-
-			T a = 0.5*(cos_1t*cos_1t/sx2 + sin_1t*sin_1t/sy2);
-			T b = 0.5*(sin_1t*sin_1t/sx2 + cos_1t*cos_1t/sy2);
-			T c = 0.5*(-sin_2t/sx2 + sin_2t/sy2);
+			ellipse_var(coef[3], coef[4], coef[5], a, b, c);
 
 			T chi2 = 0;
 			T chi2_ee = 0;
@@ -2990,11 +2785,11 @@ namespace mt
 			T cos_2t = cos(2*theta);
 			T sin_2t = sin(2*theta);
 
-			T sx2 = pow(coef[3],2);
-			T sy2 = pow(coef[4],2);
+			T sx2 = pow(coef[3], 2);
+			T sy2 = pow(coef[4], 2);
 
-			T sx3 = pow(coef[3],3);
-			T sy3 = pow(coef[4],3);
+			T sx3 = pow(coef[3], 3);
+			T sy3 = pow(coef[4], 3);
 
 			T a = 0.5*(cos_1t*cos_1t/sx2 + sin_1t*sin_1t/sy2);
 			T b = 0.5*(sin_1t*sin_1t/sx2 + cos_1t*cos_1t/sy2);
@@ -3011,94 +2806,151 @@ namespace mt
 
 				J[0*m+im] = (2*a*x+c*y)*f;
 				J[1*m+im] = (2*b*y+c*x)*f;
-				J[2*m+im] = v;    
-				J[3*m+im] = (pow(cos_1t*x,2)+pow(sin_1t*y,2)-sin_2t*x*y)*f/sx3;
-				J[4*m+im] = (pow(sin_1t*x,2)+pow(cos_1t*y,2)+sin_2t*x*y)*f/sy3;
+				J[2*m+im] = v; 
+				J[3*m+im] = (pow(cos_1t*x, 2)+pow(sin_1t*y, 2)-sin_2t*x*y)*f/sx3;
+				J[4*m+im] = (pow(sin_1t*x, 2)+pow(cos_1t*y, 2)+sin_2t*x*y)*f/sy3;
 				J[5*m+im] = (sin_2t*x*x-sin_2t*y*y+2*cos_2t*x*y)*f*(0.5/sx2-0.5/sy2);
 
 				dIxy[im] = Ixy[im] - f;
 			}
 		};
 
-		TVector coef_0 = {0, 0, 1, sigma, sigma, 0};
-		TVector coef_min = {-sigma/5, -sigma/5, 0.75, sigma/3, sigma/3, -T(c_Pi)};
-		TVector coef_max = {sigma/5, sigma/5, 1.25, 3*sigma, 3*sigma, T(c_Pi)};
+		T dRx = grid_2d.dRx/region.Rxy_sc;
+		T dRy = grid_2d.dRy/region.Rxy_sc;
+
+		// 0.8 = exp(-0.5*f^2)
+		T dx = ::fmax(0.668*sigma, 1.5*dRx);
+		T dy = ::fmax(0.668*sigma, 1.5*dRy);
+
+		T sigma_x_min = ::fmax(sigma/4, 0.5*dRx);
+		T sigma_y_min = ::fmax(sigma/4, 0.5*dRy);
+
+		T sigma_x_max = ::fmin(20*sigma, grid_2d.lxh()/region.Rxy_sc);
+		T sigma_y_max = ::fmin(20*sigma, grid_2d.lyh()/region.Rxy_sc);
+
+		vector<T> c_coef_0 = {0, 0, 1, sigma, sigma, 0};
+		vector<T> c_coef_min = {-dx, -dy, 0.5, sigma_x_min, sigma_y_min, -T(c_Pi)};
+		vector<T> c_coef_max = {dx, dy, 1.5, sigma_x_max, sigma_y_max, T(c_Pi)};
+
+		TVector coef_0 = c_coef_0;
+		TVector coef_min = c_coef_min;
+		TVector coef_max = c_coef_max;
 		TVector coef = coef_0;
-
-		T chi2 = get_chi2(Rx, Ry, Ixy, coef);
-
-		T lambda = 2;
-		T lambda_f = 2;
 
 		lapack::FLSF<T> flsf;
 
-		const int niter = 100;
-		for (auto iter = 0; iter<niter; iter++)
+		int nit = 4;
+		for(auto it=0; it<nit; it++)
 		{
-			get_dIxy_J(Rx, Ry, Ixy, coef, d_Ixy, J);
+			int m = region.Ixy.size();
+			int n = 6;
 
-			TVector d_coef(n);
-			TVector D(n);
-			TVector G(n);
-			flsf(m, n, J.data(), d_Ixy.data(), d_coef.data(), lambda, D.data(), G.data());
+			TVector J(m*n);
+			TVector d_Ixy(m);
 
-			TVector coef_t = coef;
-			T rho_f = 0;
-			T G_max = 0;
-			for(auto ic=0; ic<n; ic++)
+			T chi2 = get_chi2(region.Rx, region.Ry, region.Ixy, coef);
+
+			T lambda = 2;
+			T lambda_f = 2;
+
+			const int niter = (it==nit-1)?50:12;
+			for (auto iter = 0; iter<niter; iter++)
 			{
-				coef_t[ic] += d_coef[ic];
-				rho_f += coef_t[ic]*(D[ic]*coef_t[ic]+G[ic]);
-				G_max = ::fmax(G_max, abs(G[ic]));
-			}
+				get_dIxy_J(region.Rx, region.Ry, region.Ixy, coef, d_Ixy, J);
 
-			T chi2_t = get_chi2(Rx, Ry, Ixy, coef_t);
-			T rho = (chi2-chi2_t)/rho_f;
+				TVector d_coef(n);
+				TVector D(n);
+				TVector G(n);
+				flsf(m, n, J.data(), d_Ixy.data(), d_coef.data(), lambda, D.data(), G.data());
 
-			if ((G_max<1e-6)||abs(chi2-chi2_t)<1e-7)
-			{
-				break;
-			}
-
-			if(rho>0)
-			{
-				coef = coef_t;
-
+				TVector coef_t = coef;
+				T rho_f = 0;
+				T G_max = 0;
 				for(auto ic=0; ic<n; ic++)
 				{
-					coef[ic] = min(max(coef[ic], coef_min[ic]), coef_max[ic]);
+					coef_t[ic] += d_coef[ic];
+					rho_f += coef_t[ic]*(D[ic]*coef_t[ic]+G[ic]);
+					G_max = ::fmax(G_max, fabs(G[ic]));
 				}
 
-				chi2 = get_chi2(Rx, Ry, Ixy, coef);
+				T chi2_t = get_chi2(region.Rx, region.Ry, region.Ixy, coef_t);
+				T rho = (chi2-chi2_t)/rho_f;
 
-				lambda = (rho>1e-6)?(::fmax(lambda/lambda_f, 1e-7)):lambda;
+				if ((G_max<1e-5)||fabs(chi2-chi2_t)<1e-7)
+				{
+					break;
+				}
+
+				if(rho>0)
+				{
+					coef = coef_t;
+
+					for(auto ic=0; ic<n-1; ic++)
+					{
+						coef[ic] = min(max(coef[ic], coef_min[ic]), coef_max[ic]);
+					}
+					coef[n-1] = acos(cos(coef[n-1]));
+
+					chi2 = get_chi2(region.Rx, region.Ry, region.Ixy, coef);
+
+					lambda = (rho>1e-6)?(::fmax(lambda/lambda_f, 1e-7)):lambda;
+				}
+				else
+				{
+					lambda = ::fmin(lambda*lambda_f, 1e+7);
+				}
 			}
-			else
+
+			coef[0] = coef[0]*region.Rxy_sc + region.Rx_sf;
+			coef[1] = coef[1]*region.Rxy_sc + region.Ry_sf;
+			coef[2] = coef[2]*region.Ixy_sc;
+			coef[3] = coef[3]*region.Rxy_sc;
+			coef[4] = coef[4]*region.Rxy_sc;
+
+			if(it<nit-1)
 			{
-				lambda = ::fmin(lambda*lambda_f, 1e+7);
+				T radius = ::fmax(coef[3], coef[4]);
+				radius = ::fmax(radius_i, radius);
+
+				// select_cir_reg(grid_2d, Im_i, r2d<T>(coef[0], coef[1]), radius, region);
+
+				select_ellip_reg(grid_2d, Im_i, coef, 0.6, region);
+
+				// scale
+				coef[0] = (coef[0]-region.Rx_sf)/region.Rxy_sc;
+				coef[1] = (coef[1]-region.Ry_sf)/region.Rxy_sc;
+				coef[2] = coef[2]/region.Ixy_sc;
+				coef[3] = coef[3]/region.Rxy_sc;
+				coef[4] = coef[4]/region.Rxy_sc;
+
+				coef_min[0] = -coef[3]/4;
+				coef_min[1] = -coef[4]/4;
+				coef_min[2] = 0.75*coef[2];
+				coef_min[3] = coef[3]/2;
+				coef_min[4] = coef[4]/2;
+
+				coef_max[0] = coef[3]/4;
+				coef_max[1] = coef[4]/4;
+				coef_max[2] = 1.25*coef[2];
+				coef_max[3] = 2*coef[3];
+				coef_max[4] = 2*coef[4];
 			}
 		}
-
-		coef[0] = coef[0]*Rxy_sc + Rx_sf;
-		coef[1] = coef[1]*Rxy_sc + Ry_sf;
-		coef[2] = coef[2]*Ixy_sc;
-		coef[3] = coef[3]*Rxy_sc;
-		coef[4] = coef[4]*Rxy_sc;
 
 		return coef;
 	}
 
-	template<class TGrid, class TVector>
+	template <class TGrid, class TVector>
 	Value_type<TVector> neighbor_radius(TGrid &grid_i, TVector &Im_i, r2d<Value_type<TVector>> p_i, Value_type<TVector> radius_i)
 	{
 		using T = Value_type<TVector>;
 
 		T R2_max = pow(radius_i, 2);
 
-		int ix0 = grid_i.lb_index_x(p_i.x - radius_i);
+		int ix_0 = grid_i.lb_index_x(p_i.x - radius_i);
 		int ixe = grid_i.ub_index_x(p_i.x + radius_i);
 
-		int iy0 = grid_i.lb_index_y(p_i.y - radius_i);
+		int iy_0 = grid_i.lb_index_y(p_i.y - radius_i);
 		int iye = grid_i.ub_index_y(p_i.y + radius_i);
 
 		int nrl = grid_i.ceil_dR_min(radius_i);
@@ -3109,9 +2961,9 @@ namespace mt
 
 		T dR = grid_i.dR_min();
 
-		for(auto ix = ix0; ix < ixe; ix++)
+		for(auto ix = ix_0; ix < ixe; ix++)
 		{
-			for(auto iy = iy0; iy < iye; iy++)
+			for(auto iy = iy_0; iy < iye; iy++)
 			{
 				T R2_d = grid_i.R2(ix, iy, p_i.x, p_i.y);
 				if(R2_d < R2_max)
@@ -3157,7 +3009,7 @@ namespace mt
 	}
 
 	// select circular region
-	template<class TGrid, class TVector>
+	template <class TGrid, class TVector>
 	Value_type<TVector> mean_cir_reg(TGrid &grid_i, TVector &Im_i, r2d<Value_type<TVector>> p_i, 
 	Value_type<TVector> radius_i, Value_type<TVector> bg_i)
 	{
@@ -3187,37 +3039,37 @@ namespace mt
 	}
 
 	/*******************************************************************/
-	template<class TGrid, class TVector>
-	TVector interp_profile(TGrid &grid, TVector &Im, const r2d<Value_type<TVector>> &p1, const r2d<Value_type<TVector>> &p2, int nr)
+	template <class TGrid, class TVector>
+	TVector interp_profile(TGrid &grid_2d, TVector &Im, const r2d<Value_type<TVector>> &p1, const r2d<Value_type<TVector>> &p2, int nr)
 	{
 		TVector v;
 
-		if(!(grid.ckb_bound(p1) && grid.ckb_bound(p2)))
+		if(!(grid_2d.ckb_bound(p1) && grid_2d.ckb_bound(p2)))
 		{
 			return v;
 		}
 
-		if(module(p1-p2)<grid.dR_min())
+		if(module(p1-p2)<grid_2d.dR_min())
 		{
 			return v;
 		}
 
 		using T = Value_type<TGrid>;
 
-		auto interp_2d = [](const r2d<T> &p, TGrid &grid, TVector &Im)->T
+		auto interp_2d = [](const r2d<T> &p, TGrid &grid_2d, TVector &Im)->T
 		{
-			auto ix = grid.lb_index_x(p.x);
-			auto iy = grid.lb_index_y(p.y);
+			auto ix = grid_2d.lb_index_x(p.x);
+			auto iy = grid_2d.lb_index_y(p.y);
 
-			T f11 = Im[grid.ind_col(ix, iy)];
-			T f12 = Im[grid.ind_col(ix, iy+1)];
-			T f21 = Im[grid.ind_col(ix+1, iy)];
-			T f22 = Im[grid.ind_col(ix+1, iy+1)];
+			T f11 = Im[grid_2d.ind_col(ix, iy)];
+			T f12 = Im[grid_2d.ind_col(ix, iy+1)];
+			T f21 = Im[grid_2d.ind_col(ix+1, iy)];
+			T f22 = Im[grid_2d.ind_col(ix+1, iy+1)];
 
-			T x1 = grid.Rx(ix);
-			T x2 = grid.Rx(ix+1);
-			T y1 = grid.Ry(iy);
-			T y2 = grid.Ry(iy+1);
+			T x1 = grid_2d.Rx(ix);
+			T x2 = grid_2d.Rx(ix+1);
+			T y1 = grid_2d.Ry(iy);
+			T y2 = grid_2d.Ry(iy+1);
 					
 			T dx1 = p.x-x1;
 			T dx2 = x2-p.x;
@@ -3232,7 +3084,7 @@ namespace mt
 		r2d<T> p12 = p2-p1;
 		T mp12 = p12.module();
 
-		nr = (nr<=0)?static_cast<int>(ceil(mp12/grid.dR_min())):nr;
+		nr = (nr<=0)?static_cast<int>(ceil(mp12/grid_2d.dR_min())):nr;
 		nr = max(nr, 2);
 		T dr = mp12/(nr-1);
 		r2d<T> u = dr*normalized(p12);
@@ -3241,44 +3093,44 @@ namespace mt
 		for(auto ir=0; ir<nr; ir++)
 		{
 			r2d<T> p = p1 + T(ir)*u;
-			v.push_back(interp_2d(p, grid, Im));
+			v.push_back(interp_2d(p, grid_2d, Im));
 		}
 		return v;
 	}
 	
-	template<class TGrid, class TVector>
-	void interp_profile(TGrid &grid, TVector &Im, Value_type<TVector> bg, r2d<Value_type<TVector>> p1, r2d<Value_type<TVector>> p2, 
+	template <class TGrid, class TVector>
+	void interp_profile(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im, Value_type<TVector> bg, r2d<Value_type<TVector>> p1, r2d<Value_type<TVector>> p2, 
 	TVector &x, TVector &y)
 	{
 		x.clear();
 		y.clear();
 
-		if(!(grid.ckb_bound(p1) && grid.ckb_bound(p2)))
+		if(!(grid_2d.ckb_bound(p1) && grid_2d.ckb_bound(p2)))
 		{
 			return;
 		}
 
-		if(module(p1-p2)<grid.dR_min())
+		if(module(p1-p2)<grid_2d.dR_min())
 		{
 			return;
 		}
 
 		using T = Value_type<TGrid>;
 
-		auto interp_2d = [](const r2d<T> &p, TGrid &grid, TVector &Im)->T
+		auto interp_2d = [](const r2d<T> &p, TGrid &grid_2d, TVector &Im)->T
 		{
-			auto ix = grid.lb_index_x(p.x);
-			auto iy = grid.lb_index_y(p.y);
+			auto ix = grid_2d.lb_index_x(p.x);
+			auto iy = grid_2d.lb_index_y(p.y);
 
-			T f11 = Im[grid.ind_col(ix, iy)];
-			T f12 = Im[grid.ind_col(ix, iy+1)];
-			T f21 = Im[grid.ind_col(ix+1, iy)];
-			T f22 = Im[grid.ind_col(ix+1, iy+1)];
+			T f11 = Im[grid_2d.ind_col(ix, iy)];
+			T f12 = Im[grid_2d.ind_col(ix, iy+1)];
+			T f21 = Im[grid_2d.ind_col(ix+1, iy)];
+			T f22 = Im[grid_2d.ind_col(ix+1, iy+1)];
 
-			T x1 = grid.Rx(ix);
-			T x2 = grid.Rx(ix+1);
-			T y1 = grid.Ry(iy);
-			T y2 = grid.Ry(iy+1);
+			T x1 = grid_2d.Rx(ix);
+			T x2 = grid_2d.Rx(ix+1);
+			T y1 = grid_2d.Ry(iy);
+			T y2 = grid_2d.Ry(iy+1);
 					
 			T dx1 = p.x-x1;
 			T dx2 = x2-p.x;
@@ -3290,12 +3142,12 @@ namespace mt
 
 		};
 
-		int Ixy_1 = Im[grid.ixy(p1.x, p1.y)];
-		int Ixy_2 = Im[grid.ixy(p2.x, p2.y)];
+		int Ixy_1 = Im[grid_2d.ixy(p1.x, p1.y)];
+		int Ixy_2 = Im[grid_2d.ixy(p2.x, p2.y)];
 
 		r2d<T> p12 = p2-p1;
 		T mp12 = p12.module();
-		int nr = grid.ceil_dR_min(mp12);
+		int nr = grid_2d.ceil_dR_min(mp12);
 		T dr = mp12/(nr-1);
 		r2d<T> u = dr*normalized(p12);
 
@@ -3305,14 +3157,14 @@ namespace mt
 		{
 			x.push_back(ir*dr);
 			r2d<T> p = p1 + T(ir)*u;
-			T v = interp_2d(p, grid, Im);
+			T v = interp_2d(p, grid_2d, Im);
 			y.push_back(v-bg);
 		}
 	}
 
-	// get fit position
-	template<class TVector>	
-	TVector find_peaks_vector_typ_1(TVector &x, TVector &y, Value_type<TVector> y_thr)
+	// find one maximum in all areas above the thr
+	template <class TVector>	
+	TVector fd_peaks_vector_typ_1(TVector &x, TVector &y, Value_type<TVector> y_thr)
 	{
 		using T = Value_type<TVector>;
 		TVector x_peak(y.size());
@@ -3351,213 +3203,110 @@ namespace mt
 		return x_peak;
 	}
 
+	// find all maximum in all areas above the thr
+	template <class TVector>	
+	TVector fd_peaks_vector_typ_2(TVector &x, TVector &y, Value_type<TVector> y_thr)
+	{
+		using T = Value_type<TVector>;
+		TVector x_peak;
+		x_peak.reserve(y.size());
+
+		for(auto ix=1; ix<y.size()-1; ix++)
+		{
+			if(y[ix]>y_thr)
+			{
+				if((y[ix-1]<y[ix])&&(y[ix+1]<y[ix]))
+				{
+					x_peak.push_back(x[ix]);
+				}
+			}
+		}
+		x_peak.shrink_to_fit();
+
+		return x_peak;
+	}
+
 	/*******************************************************************/
-	// find and fit peak position
-	template<class TGrid, class TVector>
-	r2d<Value_type<TVector>> max_pos(TGrid &grid, TVector &Im, 
-	r2d<Value_type<TVector>> p_i, Value_type<TVector> sigma_i, Value_type<TVector> radius_i)
+	// find peak position 1d
+	template <class TGrid, class TVector>
+	enable_if_host_vector<TVector, Value_type<TVector>>
+	fit_max_pos_1d(TGrid &grid_1d, TVector &Im, Value_type<TVector> p_i, 
+	Value_type<TVector> sigma_i, Value_type<TVector> radius_i)
 	{
 		using T = Value_type<TVector>;
 
-		auto coef = Rx_Ry_fit(grid, Im, p_i, sigma_i, radius_i);
+		auto range = grid_1d.index_range(p_i, radius_i);
+		int ix_c = grid_1d.floor_dRx(p_i);
+
+		int ix_0 = range.ix_0;
+		for(auto ix=ix_c-1; ix>=range.ix_0; ix--)
+		{
+			if(Im[ix-1]>Im[ix])
+			{
+				ix_0 = ix; 
+				break;
+			}
+		}
+
+		int ix_e = range.ix_e;
+		for(auto ix=ix_c+1; ix<=range.ix_e; ix++)
+		{
+			if(Im[ix]<Im[ix+1])
+			{
+				ix_e = ix; 
+				break;
+			}
+		}
+
+		// if there are few points
+		if(fabs(ix_e-ix_0)<=3)
+		{
+			T x = 0;
+			T sI = 0;
+			for(auto ix=ix_0; ix<=ix_e; ix++)
+			{
+				x += Im[ix]*grid_1d.Rx(ix);
+				sI += Im[ix];
+			}
+			x = x/sI;
+
+			return x;
+		}
+
+		if((ix_0=!range.ix_0)||(ix_e=!range.ix_e))
+		{
+			T x_min = grid_1d.Rx(ix_0);
+			T x_max = grid_1d.Rx(ix_e);
+			radius_i = ::fmin(p_i-x_min, x_max-p_i);
+		}
+
+		auto coef = fit_gauss_1d(grid_1d, Im, p_i, sigma_i, radius_i);
+
+		return coef[0];
+	}
+
+	// find peak position 2d
+	template <class TGrid, class TVector>
+	enable_if_host_vector<TVector, r2d<Value_type<TVector>>>
+	fit_max_pos_2d(TGrid &grid_2d, TVector &Im, r2d<Value_type<TVector>> p_i, 
+	Value_type<TVector> sigma_i, Value_type<TVector> radius_i)
+	{
+		using T = Value_type<TVector>;
+
+		auto coef = fit_ellipt_gauss_2d(grid_2d, Im, p_i, sigma_i, radius_i);
 		return r2d<T>(coef[0], coef[1]);
-	}
-
-	// shift 2d
-	template <class TGrid, class TVector>
-	enable_if_complex_host_vector<TVector, void>
-	shift_2d(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, TGrid &grid, 
-	r2d<Value_type<TGrid>> p, TVector &Im)
-	{	
-		fft2.create_plan_2d(grid.ny, grid.nx, stream.size());
-
-		fft2_shift(stream, grid, Im);
-		fft2.forward(Im);
-		phase_factor_2d(stream, grid, -c_2Pi*p.x, -c_2Pi*p.y, Im, Im);
-		fft2.inverse(Im);
-		fft2_shift(stream, grid, Im);
-	}
-
-	// shift 2d
-	template <class TGrid, class TVector>
-	enable_if_real_host_vector<TVector, void>
-	shift_2d(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, TGrid &grid, 
-	r2d<Value_type<TGrid>> p, TVector &Im)
-	{	
-		using T = Value_type<TVector>;
-		vector<complex<T>> Im_c(Im.begin(), Im.end());
-
-		T Im_min = min_data(Im);
-
-		shift_2d(stream, fft2, grid, p, Im_c);
-		assign_real(stream, Im_c, Im);
-
-		if(Im_min>=0)
-		{
-			std::for_each(Im.begin(), Im.end(), [](T &v){ v = (v<0)?0:v; });
-		}
-	}
-
-	// phase correlation function
-	template <class TGrid, class TVector>
-	TVector PCF(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, 
-	TGrid &grid, TVector &M1_i, TVector &M2_i, Value_type<TGrid> sigma_g, Border<Value_type<TGrid>> bd1, 
-	Border<Value_type<TGrid>> bd2)
-	{
-		using T = Value_type<TVector>;
-		using TVector_c = Vector<complex<T>, e_host>;
-
-		// apply Hanning filter and copy data to complex matrix
-		auto diff_x_Hanning = [&](Grid<T> &grid, TVector &M_i, Border<T> bd)->TVector_c
-		{
-			const T x_c = bd.x_c();
-			const T y_c = bd.y_c();
-
-			const T Radius = 0.9*::fmin(bd.lx_wb(), bd.ly_wb())/2;
-			const T R02 = pow(Radius, 2);
-			const int n = 4;
-
-			TVector_c M(grid.nxy());
-
-			auto thr_diff_x_Hanning = [=](const Range &range, Grid<T> &grid, TVector &M_i, TVector_c &M)
-			{
-				for (auto ix = range.ix_0; ix < range.ix_e; ix++)
-				{
-					for (auto iy = range.iy_0; iy < range.iy_e; iy++)
-					{
-						int ixy = grid.ind_col(ix, iy);
-						int ix_n = (ix+1<grid.nx)?(ix+1):ix;
-						int ixy_n = grid.ind_col(ix_n, iy);
-						T Rx = grid.Rx(ix);
-						T Ry = grid.Ry(iy);
-						T fxy = (bd.chk_bound(Rx, Ry))?1.0/(1.0+pow((pow(Rx-x_c, 2)+pow(Ry-y_c, 2))/R02, n)):0;
-						M[ixy] = complex<T>((M_i[ixy_n] - M_i[ixy])*fxy);
-					}
-
-				}
-			};
-
-			stream.set_n_act_stream(grid.nx);
-			stream.set_grid(grid.nx, grid.ny);
-			stream.exec(thr_diff_x_Hanning, grid, M_i, M);
-
-			return M;
-		};
-
-		TVector_c M1 = diff_x_Hanning(grid, M1_i, bd1);
-		TVector_c M2 = diff_x_Hanning(grid, M2_i, bd2);
-
-		// create 2d plan
-		fft2.create_plan_2d(grid.ny, grid.nx, stream.size());
-
-		// shift matrix
-		fft2_shift(stream, grid, M1);
-		fft2_shift(stream, grid, M2);
-
-		// fft2
-		fft2.forward(M1);
-		fft2.forward(M2);
-
-		// apply symmetric bandwidth
-		auto thr_PCF = [&](const Range &range)
-		{
-			T alpha = 0.5/(sigma_g*sigma_g);
-
-			for(auto ix = range.ix_0; ix < range.ix_e; ix++)
-			{
-				for(auto iy = range.iy_0; iy < range.iy_e; iy++)
-				{
-					int ixy = grid.ind_col(ix, iy);
-					complex<T> z = conj(M1[ixy])*M2[ixy];
-					auto mz = abs(z);
-					M2[ixy] = (isZero(mz))?0:z*exp(-alpha*grid.g2_shift(ix, iy))/mz;
-				}
-			}
-		};
-
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_PCF);
-
-		fft2.inverse(M2);
-
-		TVector M_o(grid.nxy());
-		assign_real(stream, M2, M_o);
-
-		// shift M
-		fft2_shift(stream, grid, M_o);
-
-		std::for_each(M_o.begin(), M_o.end(), [&](T &v){ v = ::fmax(v, 0); });
-
-		return M_o;
-	}
-
-	// get shift
-	template <class TGrid, class TVector>
-	r2d<Value_type<TGrid>> find_shift_2d(Stream<e_host> &stream, 
-	FFT2<Value_type<TGrid>, e_host> &fft2, TGrid &grid, TVector &M1_i, 
-	TVector &M2_i, Value_type<TGrid> sigma_g, Border<Value_type<TGrid>> bd1, 
-	Border<Value_type<TGrid>> bd2, int nit=2)
-	{
-		using T = Value_type<TVector>;
-
-		T sigma_r = ::fmax(3*grid.dR_min(), 1.0/(c_2Pi*sigma_g));
-		T radius = 1.25*sigma_r;
-
-		TVector M = M2_i;
-		r2d<T> dr(0,0);
-		for (auto it=0; it<nit; it++)
-		{
-			auto pcf = PCF(stream, fft2, grid, M1_i, M, sigma_g, bd1, bd2);
-
-			// get maximum index position
-			int ixy_max = std::max_element(pcf.begin(), pcf.end())-pcf.begin();
-
-			int ix_max, iy_max;
-			grid.col_row(ixy_max, ix_max, iy_max);
-
-			r2d<T> p(grid.Rx(ix_max), grid.Ry(iy_max));
-
-			p = max_pos(grid, pcf, p, sigma_r, radius);
-			r2d<T> dr_t = p - r2d<T>(grid.lxh(), grid.lyh());
-
-			if(it<nit-1)
-			{
-				shift_2d(stream, fft2, grid, -dr_t, M);
-			}
-			dr += dr_t;
-			//calculated new borders
-			bd1.shift(-dr_t);
-			bd2.shift(-dr_t);
-		}
-
-		return dr;
-	}
-
-	// correct shift
-	template <class TGrid, class TVector>
-	r2d<Value_type<TVector>> correct_shift_2d(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, 
-	TGrid &grid, TVector &M1_i, TVector &M2_io, Value_type<TGrid> sigma_g, Border<Value_type<TGrid>> bd1, 
-	Border<Value_type<TGrid>> bd2, int nit=3)
-	{
-		using T = Value_type<TVector>;
-
-		auto dr = find_shift_2d(stream, fft2, grid, M1_i, M2_io, sigma_g, bd1, bd2, nit);
-		shift_2d(stream, fft2, grid, -dr, M2_io);
-
-		return dr;
 	}
 
 	/*******************************************************************/
 	// get projective standard deviation
 	template <class TGrid, class TVector>
-	TVector projected_intensity(TGrid &grid, TVector &M_i, Value_type<TVector> np_min, Value_type<TVector> delta)
+	TVector projected_intensity(TGrid &grid_2d, TVector &M_i, Value_type<TVector> np_min, Value_type<TVector> delta)
 	{
 		using T = Value_type<TVector>;
 
-		vector<r2d<T>> pts_c = {r2d<T>(0, 0), r2d<T>(grid.nx-1, 0), r2d<T>(grid.nx-1, grid.ny-1), r2d<T>(0, grid.ny-1)};
+		vector<r2d<T>> pts_c = {r2d<T>(0, 0), r2d<T>(grid_2d.nx-1, 0), r2d<T>(grid_2d.nx-1, grid_2d.ny-1), r2d<T>(0, grid_2d.ny-1)};
 
-		auto n_pp = static_cast<int>(ceil(module(r2d<T>(grid.nx, grid.ny))+2));
+		auto n_pp = static_cast<int>(ceil(module(r2d<T>(grid_2d.nx, grid_2d.ny))+2));
 		TVector y_pt(n_pp);
 		TVector c_pt(n_pp);
 
@@ -3581,11 +3330,11 @@ namespace mt
 			}
 		}
 
-		for(auto ix = 0; ix < grid.nx; ix++)
+		for(auto ix = 0; ix < grid_2d.nx; ix++)
 		{
-			for(auto iy = 0; iy < grid.ny; iy++)
+			for(auto iy = 0; iy < grid_2d.ny; iy++)
 			{
-				auto ixy = grid.ind_col(ix, iy);
+				auto ixy = grid_2d.ind_col(ix, iy);
 				auto p_r = krn_proj_point(cos_d, sin_d, r2d<T>(ix, iy))-p_0;
 				auto j = static_cast<int>(floor(p_r.y));
 				y_pt[j] += M_i[ixy];
@@ -3609,7 +3358,7 @@ namespace mt
 
 	// get projective standard deviation
 	template <class TGrid, class TVector>
-	void PSD(Stream<e_host> &stream, TGrid &grid, TVector &M_i, Value_type<TVector> np_min, 
+	void PSD(Stream<e_host> &stream, TGrid &grid_2d, TVector &M_i, Value_type<TVector> np_min, 
 	Value_type<TVector> del_0, Value_type<TVector> del_e, Value_type<TVector> d_del, TVector &x_o, TVector &y_o)
 	{
 		// get number of angles
@@ -3617,14 +3366,14 @@ namespace mt
 		x_o.resize(n_delta);
 		y_o.resize(n_delta);
 
-		auto thr_psd = [&](const Range &range)
+		auto thr_psd = [&](const Range_2d &range)
 		{
 			for(auto idel=range.ixy_0; idel<range.ixy_e; idel++)
 			{
 				auto delta = (del_0 + idel*d_del)*c_Pi/180;
 				x_o[idel] = delta*180/c_Pi;
 
-				auto pIm = projected_intensity(grid, M_i, np_min, delta);
+				auto pIm = projected_intensity(grid_2d, M_i, np_min, delta);
 
 				y_o[idel] = variance(pIm);
 			}
@@ -3637,14 +3386,14 @@ namespace mt
 
 	// get projective standard deviation
 	template <class TGrid, class TVector>
-	TVector PSD_find_peaks(Stream<e_host> &stream, TGrid &grid, TVector &M_i, Value_type<TVector> np_min, 
+	TVector PSD_fd_peaks(Stream<e_host> &stream, TGrid &grid_2d, TVector &M_i, Value_type<TVector> np_min, 
 	TVector x_i, TVector y_i)
 	{
 		using T = Value_type<TVector>;
 
-		T d_del = abs(x_i[1]-x_i[0]);
+		T d_del = fabs(x_i[1]-x_i[0]);
 		int nr = max(1, static_cast<int>(ceil(3.0/d_del)));
-		auto y_f = filter_median_1d(stream, y_i, nr);
+		auto y_f = ftr_median_1d(stream, y_i, nr);
 
 		T y_mean = 0;
 		T y_max = y_i[0] - y_f[0];
@@ -3657,7 +3406,7 @@ namespace mt
 		y_mean /= y_i.size();
 		auto y_thr = y_mean + 0.2*(y_mean + y_max);
 
-		auto x_peaks = find_peaks_vector_typ_1(x_i, y_f, y_thr);
+		auto x_peaks = fd_peaks_vector_typ_1(x_i, y_f, y_thr);
 
 		TVector x_ref, y_ref;
 		for(auto ix=0; ix<x_peaks.size(); ix++)
@@ -3666,7 +3415,7 @@ namespace mt
 			auto delta_0 = delta - d_del;
 			auto delta_e = delta + d_del;
 			auto d_delta = 0.1*d_del;
-			PSD(stream, grid, M_i, np_min, delta_0, delta_e, d_delta, x_ref, y_ref);
+			PSD(stream, grid_2d, M_i, np_min, delta_0, delta_e, d_delta, x_ref, y_ref);
 			std::for_each(y_ref.begin(), y_ref.end(), [](T &y){y = log(1+y);});
 			auto coef = lsf_poly_n(x_ref, y_ref, 2);
 			T px = -coef[1]/(2*coef[2]);
@@ -3682,33 +3431,39 @@ namespace mt
 	}
 
 	// get index to maximun distance
-	int get_dmaxIndex_Point2Line(double x1, double y1, double x2, double y2, int ix1, int ix2, double *x, double *y)
+	template <class TVector>
+	int get_dmaxIndex_Point2Line(r2d<Value_type<TVector>> p1, r2d<Value_type<TVector>> p2, 
+	int ix1, int ix2, TVector &x, TVector &y)
 	{
-		int imax;
-		double x0, y0, dmax;
-		double d, c1, c2, c3;
+		using T = Value_type<TVector>;
 
-		c1 = y2-y1;
-		c2 = -(x2-x1); 
-		c3 = x2*y1-y2*x1;
-		d = sqrt(c1*c1*+c2*c2);
-		c1 /= d; c2 /= d; c3 /= d;
+		T c1 = p2.y-p1.y;
+		T c2 = -(p2.x-p1.x); 
+		T c3 = p2.x*p1.y-p2.y*p1.x;
+		T d = sqrt(c1*c1*+c2*c2);
 
-		imax = 0; dmax = 0;
-		for(auto i = ix1; i < ix2+1; i++)
+		c1 /= d; 
+		c2 /= d; 
+		c3 /= d;
+
+		int ix_max = 0; 
+		T dmax = 0;
+		for(auto ir = ix1; ir < ix2; ir++)
 		{
-			x0 = x[i]; y0 = y[i];
-			d = fabs(c1*x0+c2*y0+c3);
+			T x0 = x[ir]; 
+			T y0 = y[ir];
+			T d = fabs(c1*x0+c2*y0+c3);
 			if(d>dmax)
 			{
 				dmax = d;
-				imax = i;
+				ix_max = ir;
 			}
 		}
 
-		return imax;
+		return ix_max;
 	}
 
+	inline
 	double getLengthCurve(int ix1, int ix2, double *x, double *y)
 	{
 		double x1, y1, x2, y2;
@@ -3724,6 +3479,7 @@ namespace mt
 		return d;
 	}
 
+	inline
 	double getLengthCurve(int ix1, int ix2, double *x, double *y, double lmax, int &il)
 	{
 		double x1, y1, x2, y2;
@@ -3763,229 +3519,270 @@ namespace mt
 		return l;
 	}
 
-	// get information limit for regular gridBT
-	void get_sigma_2d_by_row(int ny, int nx, double *g, double *fg, double *sigma)
+	// get information limit for regular grid
+	template <class TGrid, class TVector>
+	Value_type<TVector> info_limit_2d(TGrid &grid_2d, TVector &fM_i)
 	{
-		int nr = nx/2-1;
-		vector<double> rl, frl, cfrl;
-		double g_min = 0, g_max = nr, dg = fabs(g[1]-g[0]);
+		using T = Value_type<TVector>;
+		
+		TVector r, fr;
 
-		rl.resize(nr);
-		frl.resize(nr);
-		cfrl.resize(nr);
+		// cumulative radial integration
+		cum_rad_dist_2d(grid_2d, fM_i, grid_2d.lxh(), grid_2d.lyh(), grid_2d.lxh_lyh_min(), r, fr);
 
-		for(int i = 0; i < nr; i++)
+		// shift and normalize
+		T r0 = r[0], fIr0 = fr[0];
+		for(auto ir = 0; ir<fr.size(); ir++)
 		{
-			rl[i] = 0.5+i;
+			r[ir] = (r[ir]-r0)/(r.back()-r0);
+			fr[ir] = (fr[ir]-fIr0)/(fr.back()-fIr0);
 		}
 
-		// Shift and Normalize
-		auto shift_normalize = [&](const double &x, const double &x_min, const double &x_max)->double
-		{
-			return (x-x_min)/(x_max-x_min);
-		};
+		// smooth data
+		int nkr = max<int>(5, fr.size()/100);
+		fr = smooth(fr, nkr);
 
-		for(int iy = 0; iy < ny; iy++)
-		{
-			std::fill(frl.begin(), frl.end(), 0.0);
-			std::fill(cfrl.begin(), cfrl.end(), 0.0);
-			for(int ix = 0; ix < nx; ix++)
-			{
-				if((g_min <= g[ix])&&(g[ix]<g_max))
-				{
-					auto j = (int)floor((g[ix]-g_min)/dg);
-					frl[j] += fg[ix];
-					cfrl[j] += 1.0;
-				}
-			}
+		r2d<T> p1(r.front(), fr.front());
+		r2d<T> p2(r.back(), fr.back());
 
-			for(auto i = 0; i < nr; i++)
-			{
-				if(cfrl[i]>0)
-					frl[i] /= cfrl[i];
-			}
+		// get maximum curvature point
+		auto ir_m = get_dmaxIndex_Point2Line(p1, p2, 0, r.size(), r, fr);
 
-			frl[0] = 1.01*frl[1];
-
-			auto rl_min = rl.front();
-			auto rl_max = rl.back();
-			auto frl_min = *std::min_element(frl.begin(), frl.end());
-			auto frl_max = *std::max_element(frl.begin(), frl.end());
-
-			int k0 = 0;
-			auto x = shift_normalize(rl[k0], rl_min, rl_max);
-			auto y = shift_normalize(frl[k0], frl_min, frl_max);
-			auto d2_min = x*x + y*y;
-			for(int i = 1; i < nr; i++)
-			{
-				auto x = shift_normalize(rl[i], rl_min, rl_max);
-				auto y = shift_normalize(frl[i], frl_min, frl_max);
-				auto d2 = x*x + y*y;
-				if(d2 < d2_min)
-				{
-					d2_min = d2;
-					k0 = i;
-				}
-			}
-
-			int ke = static_cast<int>(std::max_element(frl.begin() + k0, frl.end()) - frl.begin());
-
-			sigma[iy] = 0.5*(rl[ke]+rl[k0]);
-		}
+		return grid_2d.Rx(ir_m);
 	}
 
-	// get information limit for regular gridBT
-	double sigma(int ny, int nx, double *g, double *fg)
-	{
-		auto dgx = fabs(g[1]-g[0]);
-		auto dgy = fabs(g[ny]-g[0]);
-		int nr = (nx*dgx < ny*dgy)?(nx/2-1):(ny/2-1);
-		vector<double> gl, rl, frl, cfrl;
-
-		gl.resize(nr+1);	
-		rl.resize(nr);
-		frl.resize(nr);
-		cfrl.resize(nr);
-
-		std::iota(gl.begin(), gl.end(), 0);
-
-		// radial distribution
-		auto nxy = nx*ny;
-		radial_distribution_2d(nxy, g, fg, nr+1, gl.data(), rl.data(), frl.data(), cfrl.data(), true, 0);
-		frl[0] = 1.01*frl[1];
-		auto rl_min = rl.front();
-		auto rl_max = rl.back();
-		auto frl_min = *std::min_element(frl.begin(), frl.end());
-		auto frl_max = *std::max_element(frl.begin(), frl.end());
-
-		// Shift and Normalize
-		auto shift_normalize = [&](const double &x, const double &x_min, const double &x_max)->double
-		{
-			return (x-x_min)/(x_max-x_min);
-		};
-
-		int k0 = 0;
-		auto x = shift_normalize(rl[k0], rl_min, rl_max);
-		auto y = shift_normalize(frl[k0], frl_min, frl_max);
-		auto d2_min = x*x + y*y;
-		for(int i = 1; i < nr; i++)
-		{
-			auto x = shift_normalize(rl[i], rl_min, rl_max);
-			auto y = shift_normalize(frl[i], frl_min, frl_max);
-			auto d2 = x*x + y*y;
-			if(d2 < d2_min)
-			{
-				d2_min = d2;
-				k0 = i;
-			}
-		}
-
-		int ke = static_cast<int>(std::max_element(frl.begin() + k0, frl.end()) - frl.begin());
-
-		return rl[ke];
-	}
-
-	// get information limit for regular gridBT
-	double FFT_information_limit_2d(int ny, int nx, bool shift, double *fI)
-	{
-		int nr = min(nx/2, ny/2)-1;
-		double *r, *fIr;
-
-		r = new double[nr];
-		fIr = new double[nr]; 
-
-		// Cumulative radial integration
-		getCumRadDist_2d(ny, nx, shift, fI, nr, r, fIr);
-
-		// Shift and Normalize
-		double r0 = r[0], fIr0 = fIr[0];
-		for(int i = 0; i < nr; i++)
-		{
-			r[i] = (r[i]-r0)/(r[nr-1]-r0);
-			fIr[i] = (fIr[i]-fIr0)/(fIr[nr-1]-fIr0);
-		}
-
-		int ir1, ir2, irm;
-		double x1, y1, x2, y2;
-
-		ir1 = 0; ir2 = nr-1;
-		x1 = r[ir1]; y1 = fIr[ir1];
-		x2 = r[ir2]; y2 = fIr[ir2];
-	
-		irm = get_dmaxIndex_Point2Line(x1, y1, x2, y2, ir1, ir2, r, fIr);
-		double fIr_lim = 0.45*fIr[irm];
-
-		for(int i = 0; i < nr; i++)
-			if(fIr[i]>fIr_lim)
-			{
-				irm = i-1;
-				break;
-			}
-
-		delete [] r;
-		delete [] fIr;
-
-		return irm;
-	}
-
-	template<class InputIterator, class TVector>
-	void match_vectors(InputIterator A_base_first, InputIterator A_base_last, TVector &A_search)
+	template <class TVector>
+	void unique_vector(TVector &v)
 	{
 		using T = Value_type<TVector>;
 
-		std::size_t A_base_size = static_cast<int>(A_base_last - A_base_first);
-		Vector<bool, e_host> A_base_c(A_base_size, true);
-		int m_size = min(A_base_size, A_search.size());
-		TVector A_d;
-		A_d.reserve(m_size);
-
-		for(auto i = 0; i<A_search.size(); i++)
-		{
-			T val = A_search[i];
-			auto it = std::min_element(A_base_first, A_base_last, [&val](const T &a, const T &b)->bool{ return fabs(a-val+Epsilon<float>::rel)<fabs(b-val); });
-			auto imin = static_cast<int>(it - A_base_first);
-
-			if(A_base_c[imin])
-			{
-				A_base_c[imin] = false;
-				A_d.push_back(*it);
-			}
-		}
-		A_search = A_d;
-		A_search.shrink_to_fit();
+		std::sort(v.begin(), v.end());
+		v.erase(std::unique(v.begin(), v.end(), mt::isEqual<T>), v.end());
+		v.shrink_to_fit();
 	}
 
-	template<class InputIterator, class TVector>
-	void match_vectors(InputIterator A_base_first, InputIterator A_base_last, TVector &A_search, Vector<int, e_host> &A_idx)
+	template <class InputIterator, class TVector>
+	void match_vectors(InputIterator vr_first, InputIterator vr_last, TVector &vs, Value_type<TVector> dv)
 	{
 		using T = Value_type<TVector>;
 
-		std::size_t A_base_size = static_cast<int>(A_base_last - A_base_first);
-		Vector<bool, e_host> A_base_c(A_base_size, true);
-		int m_size = min(A_base_size, A_search.size());
-		A_idx.clear();
-		A_idx.reserve(m_size);
+		dv = ::fmax(dv, 0.1);
+
+		TVector vr(vr_first, vr_last);
+
+		// find min and max values of vr
+		T vr_min, vr_max;
+		minmax_element(vr, vr_min, vr_max);
+		vr_min -= dv;
+		vr_max += dv;
+
+		// remove elements of vs outside the range
+		auto remove = [vr_min, vr_max](T a)->bool
+		{
+			return ((a<vr_min)||(a>vr_max));
+		};
+		vs.erase(std::remove_if(vs.begin(), vs.end(), remove), vs.end());
+
+		Vector<bool, e_host> vr_c(vr.size(), true);
+		int m_size = min(vr.size(), vs.size());
 		TVector A_d;
 		A_d.reserve(m_size);
 
-		for(auto i = 0; i<A_search.size(); i++)
+		for(auto i = 0; i<vs.size(); i++)
 		{
-			T val = A_search[i];
-			auto it = std::min_element(A_base_first, A_base_last, [&val](const T &a, const T &b)->bool{ return fabs(a-val+Epsilon<float>::rel)<fabs(b-val); });
-			auto imin = static_cast<int>(it - A_base_first);
+			T val = vs[i];
+			auto it = std::min_element(vr.begin(), vr.end(), functor::closest_element<T>(val));
+			auto imin = static_cast<int>(it - vr.begin());
 
-			if(A_base_c[imin])
+			if(vr_c[imin])
 			{
-				A_base_c[imin] = false;
-				A_idx.push_back(imin);
+				vr_c[imin] = false;
 				A_d.push_back(*it);
 			}
 		}
-		A_search = A_d;
-		A_search.shrink_to_fit();
-		A_idx.shrink_to_fit();
+		vs = A_d;
+		vs.shrink_to_fit();
 	}
 
+ /************************ read matlab binary file ***********************/
+    template<class T_i, class TVector>
+    enable_if_real<T_i, void>
+    read_mat_matrix(std::ifstream &bin_file, int nxy, TVector &matrix)
+    {
+        using T_o = Value_type<TVector>;
+
+        vector<T_i> vect_r(nxy);
+        bin_file.read(reinterpret_cast<char*>(vect_r.data()), nxy*sizeof(T_i));
+
+        for(auto ik=0; ik<nxy; ik++)
+        {
+        matrix[ik] = T_o(vect_r[ik]);
+        }
+    }
+
+    template<class T_i, class TVector>
+    enable_if_complex<T_i, void>
+    read_mat_matrix(std::ifstream &bin_file, int nxy, TVector &matrix)
+    {
+        using T = Value_type_r<T_i>;
+        using T_o = Value_type_r<TVector>;
+
+        vector<T> vect_r(nxy);
+        bin_file.read(reinterpret_cast<char*>(vect_r.data()), nxy*sizeof(T));
+        vector<T> vect_i(nxy);
+        bin_file.read(reinterpret_cast<char*>(vect_i.data()), nxy*sizeof(T));
+
+        auto matrix_ptr = reinterpret_cast<complex<T_o>*>(matrix.data());
+
+        for(auto ik=0; ik<nxy; ik++)
+        {
+            matrix_ptr[ik].real(vect_r[ik]);
+            matrix_ptr[ik].imag(vect_i[ik]);
+        }
+    }
+
+    template<class TVector>
+    void read_mat_binary_matrix(const char *filename, Grid_2d<Value_type_r<TVector>> &grid_2d, TVector &matrix)
+    {
+    int nx, ny;
+    double dx, dy;
+    int type;
+
+    std::ifstream bin_file(filename, std::ofstream::binary);
+    bin_file.read(reinterpret_cast<char*>(&nx), sizeof(int));
+    bin_file.read(reinterpret_cast<char*>(&ny), sizeof(int));
+    bin_file.read(reinterpret_cast<char*>(&dx), sizeof(double));
+    bin_file.read(reinterpret_cast<char*>(&dy), sizeof(double));
+    bin_file.read(reinterpret_cast<char*>(&type), sizeof(int));
+
+    grid_2d.set_input_data(nx, ny, nx*dx, ny*dy);
+
+        auto nxy = nx*ny;
+    matrix.resize(nxy);
+
+    switch (type)
+    {
+	    case 1:
+	    {
+            read_mat_matrix<float>(bin_file, nxy, matrix);
+	    }
+	    break;
+	    case 2:
+	    {
+            read_mat_matrix<double>(bin_file, nxy, matrix);
+	    }
+	    break;
+	    case 3:
+	    {
+            read_mat_matrix<complex<float>>(bin_file, nxy, matrix);
+        }
+	    break;
+	    case 4:
+	    {
+            read_mat_matrix<complex<double>>(bin_file, nxy, matrix);
+        }
+	    break;
+    }
+    bin_file.close();
+    }
+ /************************ write matlab binary file ***********************/
+    template<class TVector>
+    enable_if_real_host_vector<TVector, void>
+    write_mat_matrix(std::ofstream &bin_file, TVector &matrix)
+    {
+        using T = Value_type<TVector>;
+
+        bin_file.write(reinterpret_cast<char*>(matrix.data()), matrix.size()*sizeof(T));
+    }
+
+    template<class TVector>
+    enable_if_complex_host_vector<TVector, void>
+    write_mat_matrix(std::ofstream &bin_file, TVector &matrix)
+    {
+        using T = Value_type_r<TVector>;
+
+        vector<T> vect_r(nxy);
+        vector<T> vect_i(nxy);
+        for (auto ik = 0; ik<nxy; ik++)
+        {
+            vect_r[ik] = matrix[ik].real();
+            vect_i[ik] = matrix[ik].imag();
+        }
+
+        bin_file.write(reinterpret_cast<char*>(vect_r.data()), matrix.size()*sizeof(T));
+        bin_file.write(reinterpret_cast<char*>(vect_i.data()), matrix.size()*sizeof(T));
+    }
+
+    template<class TVector>
+    void write_mat_binary_matrix(const char *filename, Grid_2d<Value_type_r<TVector>> &grid_2d, TVector &matrix)
+    {
+        int type = matrix_type<TVector>;
+
+        std::ofstream bin_file(filename, std::ofstream::binary);
+        bin_file.write(reinterpret_cast<char*>(&(grid_2d.nx)), sizeof(int));
+        bin_file.write(reinterpret_cast<char*>(&(grid_2d.ny)), sizeof(int));
+        bin_file.write(reinterpret_cast<char*>(&(grid_2d.dRx)), sizeof(double));
+        bin_file.write(reinterpret_cast<char*>(&(grid_2d.dRy)), sizeof(double));
+        bin_file.write(reinterpret_cast<char*>(&type), sizeof(int));
+
+        switch (type)
+        {
+        case 1:
+        {
+            write_mat_matrix<float>(bin_file, matrix);
+        }
+        break;
+        case 2:
+        {
+            write_mat_matrix<double>(bin_file, matrix);
+        }
+        break;
+        case 3:
+        {
+            write_mat_matrix<complex<float>>(bin_file, matrix);
+        }
+        break;
+        case 4:
+        {
+            write_mat_matrix<complex<double>>(bin_file, matrix);
+        }
+        break;
+        }
+        bin_file.close();
+    }
+
+ /************************ extract real vector form complex vector**********************/
+	template<class TVector_c, class TVector_r>
+	void from_complex_to_real(eShow_CData show_data, TVector_c &cdata, TVector_r &data)
+	{
+		switch(show_data)
+		{
+			case eSCD_CReal:
+			{
+				for(auto ixy=0; ixy<cdata.size(); ixy++)
+					data[ixy] = cdata[ixy].real();
+			}
+			break;
+			case eSCD_CImag:
+			{
+				for(auto ixy=0; ixy<cdata.size(); ixy++)
+					data[ixy] = cdata[ixy].imag();
+			}
+			break;
+			case eSCD_CMod:
+			{
+				for(auto ixy=0; ixy<cdata.size(); ixy++)
+					data[ixy] = abs(cdata[ixy]);
+			}
+			break;
+			case eSCD_CPhase:
+			{
+				for(auto ixy=0; ixy<cdata.size(); ixy++)
+				data[ixy] = arg(cdata[ixy]);
+			}
+			break;
+		}
+	}
 } // namespace mt
 
 #endif

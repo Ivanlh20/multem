@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #include "types.cuh"
@@ -23,9 +23,7 @@
 #include "atom_data.hpp"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
-#include "host_functions.hpp"
-#include "device_functions.cuh"
-#include "host_device_functions.cuh"
+
 #include "projected_potential.cuh"
 
 #include <mex.h>
@@ -33,62 +31,86 @@
 
 using mt::rmatrix_r;
 
-template<class TInput_Multislice>
-void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full =true)
+template <class TInput_Multislice>
+void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full = true)
 {
-	using value_type_r = mt::Value_type<TInput_Multislice>;
+	using T_r = mt::Value_type<TInput_Multislice>;
 
-	input_multislice.precision = mx_get_scalar_field<mt::ePrecision>(mx_input_multislice, "precision");
-	input_multislice.device = mx_get_scalar_field<mt::eDevice>(mx_input_multislice, "device");
-	input_multislice.cpu_ncores = mx_get_scalar_field<int>(mx_input_multislice, "cpu_ncores"); 
-	input_multislice.cpu_nthread = mx_get_scalar_field<int>(mx_input_multislice, "cpu_nthread"); 
-	input_multislice.gpu_device = mx_get_scalar_field<int>(mx_input_multislice, "gpu_device"); 
-	input_multislice.gpu_nstream = mx_get_scalar_field<int>(mx_input_multislice, "gpu_nstream"); 
-	
+	/************************ simulation type **************************/
 	input_multislice.simulation_type = mt::eTEMST_PPRS;
-	input_multislice.phonon_model = mx_get_scalar_field<mt::ePhonon_Model>(mx_input_multislice, "phonon_model"); 
+	
+	/*******************************************************************/
 	input_multislice.interaction_model = mx_get_scalar_field<mt::eElec_Spec_Int_Model>(mx_input_multislice, "interaction_model");
-	input_multislice.potential_slicing = mx_get_scalar_field<mt::ePotential_Slicing>(mx_input_multislice, "potential_slicing");
 	input_multislice.potential_type = mx_get_scalar_field<mt::ePotential_Type>(mx_input_multislice, "potential_type");
 
-	input_multislice.fp_dim.set(mx_get_scalar_field<int>(mx_input_multislice, "fp_dim"));
-	input_multislice.fp_seed = mx_get_scalar_field<int>(mx_input_multislice, "fp_seed");
-	input_multislice.fp_single_conf = true;
-	input_multislice.fp_nconf = mx_get_scalar_field<int>(mx_input_multislice, "fp_nconf");
+	/************** Electron-Phonon interaction model ******************/
+	input_multislice.pn_model = mx_get_scalar_field<mt::ePhonon_Model>(mx_input_multislice, "pn_model"); 
+	input_multislice.pn_coh_contrib = true;
+	input_multislice.pn_single_conf = true;
+	input_multislice.pn_nconf = mx_get_scalar_field<int>(mx_input_multislice, "pn_nconf");
+	input_multislice.pn_dim.set(mx_get_scalar_field<int>(mx_input_multislice, "pn_dim"));
+	input_multislice.pn_seed = mx_get_scalar_field<int>(mx_input_multislice, "pn_seed");
 
-	input_multislice.tm_active = mx_get_scalar_field<bool>(mx_input_multislice, "tm_active");
-	input_multislice.tm_theta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "tm_theta")*mt::c_deg_2_rad;
-	input_multislice.tm_u0 = mx_get_r3d_field<value_type_r>(mx_input_multislice, "tm_u0");
-	input_multislice.tm_rot_point_type = mx_get_scalar_field<mt::eRot_Point_Type>(mx_input_multislice, "tm_rot_point_type");
-	input_multislice.tm_p0 = mx_get_r3d_field<value_type_r>(mx_input_multislice, "tm_p0");
+	/**************************** Specimen *****************************/
+	auto atoms = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "spec_atoms");
 
-	input_multislice.islice = mx_get_scalar_field<int>(mx_input_multislice, "islice")-1;
+	auto lx = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_lx");
+	auto ly = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_ly");
+	auto lz = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_lz");
+	auto dz = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_dz");
+	bool pbc_xy = true; 
 
-	bool bwl = false;
-	bool pbc_xy = true; 																
+	auto ct_na = mx_get_scalar_field<int>(mx_input_multislice, "spec_cryst_na");
+	auto ct_nb = mx_get_scalar_field<int>(mx_input_multislice, "spec_cryst_nb");
+	auto ct_nc = mx_get_scalar_field<int>(mx_input_multislice, "spec_cryst_nc");
+	auto ct_a = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_a");
+	auto ct_b = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_b");
+	auto ct_c = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_c");
+	auto ct_x0 = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_x0");
+	auto ct_y0 = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_y0");
 
-	auto nx = mx_get_scalar_field<int>(mx_input_multislice, "nx");
-	auto ny = mx_get_scalar_field<int>(mx_input_multislice, "ny");
-	auto lx = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lx");
-	auto ly = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ly");
-	auto dz = mx_get_scalar_field<value_type_r>(mx_input_multislice, "dz"); 				
+	auto mx_spec_amorp = mxGetField(mx_input_multislice, 0, "spec_amorp");
+	mt::Vector<mt::Amorp_Lay_Info<T_r>, mt::e_host> amorp_lay_info(mxGetN(mx_spec_amorp));
+	for(auto i = 0; i<amorp_lay_info.size(); i++)
+	{
+		amorp_lay_info[i].z_0 = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_0");
+		amorp_lay_info[i].z_e = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_e");
+		amorp_lay_info[i].dz = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "dz");
+	}
 
-	auto atoms = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "atoms");
 	if(full)
 	{
-		input_multislice.atoms.set_Atoms(atoms.rows, atoms.cols, atoms.real, lx, ly);
+		input_multislice.atoms.set_crystal_parameters(ct_na, ct_nb, ct_nc, ct_a, ct_b, ct_c, ct_x0, ct_y0);
+		input_multislice.atoms.set_amorphous_parameters(amorp_lay_info);
+		input_multislice.atoms.set_atoms(atoms.rows, atoms.cols, atoms.real, lx, ly, lz, dz);
 	}
-	input_multislice.grid.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
+
+	/************************ Specimen rotation *************************/
+	input_multislice.spec_rot_theta = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_rot_theta")*mt::c_deg_2_rad;
+	input_multislice.spec_rot_u0 = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_u0");
+	input_multislice.spec_rot_center_type = mx_get_scalar_field<mt::eRot_Point_Type>(mx_input_multislice, "spec_rot_center_type");
+	input_multislice.spec_rot_center_p = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_center_p");
+
+	/************************ Potential slicing ************************/
+	input_multislice.potential_slicing = mx_get_scalar_field<mt::ePotential_Slicing>(mx_input_multislice, "potential_slicing");
+
+	/************************** xy sampling ****************************/
+	auto nx = mx_get_scalar_field<int>(mx_input_multislice, "nx");
+	auto ny = mx_get_scalar_field<int>(mx_input_multislice, "ny");
+	bool bwl = mx_get_scalar_field<bool>(mx_input_multislice, "bwl");
+
+	input_multislice.grid_2d.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
+
+	/************************ simulation type **************************/
+	input_multislice.islice = mx_get_scalar_field<int>(mx_input_multislice, "islice")-1;
+
 	input_multislice.validate_parameters();
  }
 
-void set_projected_potential(const mxArray *mx_input_multislice, mxArray *&mx_output_multislice, mt::Output_Multislice_Matlab &output_multislice)
+template<class TOutput_Multislice>
+void set_struct_projected_potential(TOutput_Multislice &output_multislice, mxArray *&mx_output_multislice)
 {
-	mt::Input_Multislice<double> input_multislice;
-	read_input_multislice(mx_input_multislice, input_multislice, false);
-	output_multislice.set_input_data(&input_multislice);
-
-	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thickness", "V"};
+	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thick", "V"};
 	int number_of_fields_output_multislice = 6;
 	mwSize dims_output_multislice[2] = {1, 1};
 
@@ -96,47 +118,68 @@ void set_projected_potential(const mxArray *mx_input_multislice, mxArray *&mx_ou
 
 	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx);
 	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x.data());
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y.data());
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thickness", 1, output_multislice.thickness.size(), output_multislice.thickness.data());
-	output_multislice.V[0] = mx_create_matrix_field<rmatrix_r>(mx_output_multislice, "V", output_multislice.ny, output_multislice.nx);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thick", 1, output_multislice.thick.size(), output_multislice.thick);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "V", output_multislice.ny, output_multislice.nx, output_multislice.V[0]);
 }
 
-template<class T, mt::eDevice dev>
-void il_projected_potential(const mxArray *mxB, mt::Output_Multislice_Matlab &output_multislice)
+template <class T, mt::eDevice dev>
+void run_projected_potential(mt::System_Configuration &system_conf, const mxArray *mx_input_multislice, mxArray *&mx_output_multislice)
 {
 	mt::Input_Multislice<T> input_multislice;
-	read_input_multislice(mxB, input_multislice);
+	read_input_multislice(mx_input_multislice, input_multislice);
 
-	mt::Stream<dev> stream;
+    mt::Output_Multislice<T> output_multislice;
+    output_multislice.set_input_data(&input_multislice);
+
+	mt::Stream<dev> stream(system_conf.nstream);
 	mt::Projected_Potential<T, dev> projected_potential;
-
-	stream.resize(input_multislice.nstream);
 	projected_potential.set_input_data(&input_multislice, &stream);
+	projected_potential.move_atoms(input_multislice.pn_nconf);
 
-	projected_potential.move_atoms(input_multislice.fp_nconf);
-	projected_potential.projected_potential(input_multislice.islice, output_multislice);
+	//cudaEvent_t start, stop;
+	//cudaEventCreate(&start);
+	//cudaEventCreate(&stop);
+
+	//cudaEventRecord(start, 0);
+
+	projected_potential(input_multislice.islice, output_multislice);
+
+	//cudaEventRecord(stop, 0);
+	//cudaEventSynchronize(stop);
+
+	//float elapsedTime = 0;
+	//cudaEventElapsedTime(&elapsedTime, start, stop);
+	//mexPrintf("Elapsed time = %8.3f ms\n", elapsedTime);
+
+	//cudaEventDestroy(start);
+	//cudaEventDestroy(stop);
+
+	stream.synchronize();
+
+	set_struct_projected_potential(output_multislice, mx_output_multislice);
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	mt::Output_Multislice_Matlab output_multislice;
-	set_projected_potential(prhs[0], plhs[0], output_multislice);
+	auto system_conf = mt::read_system_conf(prhs[0]);
+	int idx_0 = (system_conf.active)?1:0;
 
-	if(output_multislice.is_float_host())
+	if(system_conf.is_float_host())
 	{
-		il_projected_potential<float, mt::e_host>(prhs[0], output_multislice);
+		run_projected_potential<float, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	else if(output_multislice.is_double_host())
+	else if(system_conf.is_double_host())
 	{
-		il_projected_potential<double, mt::e_host>(prhs[0], output_multislice);
+		run_projected_potential<double, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	if(output_multislice.is_float_device())
+	else if(system_conf.is_float_device())
 	{
-		il_projected_potential<float, mt::e_device>(prhs[0], output_multislice);
+		run_projected_potential<float, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	else if(output_multislice.is_double_device())
+	else if(system_conf.is_double_device())
 	{
-		il_projected_potential<double, mt::e_device>(prhs[0], output_multislice);
+		run_projected_potential<double, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef MEMORY_INFO_H
@@ -48,10 +48,11 @@ namespace mt
 {
 	bool is_gpu_available();
 
-	template<eDevice dev>
+	template <eDevice dev>
 	void memory_info(double &total, double &free);
 
-	template<>
+	template <>
+	inline
 	void memory_info<e_host>(double &total, double &free)
 	{
 #if defined(_WIN32)
@@ -87,7 +88,8 @@ namespace mt
 #endif
 	}
 
-	template<>
+	template <>
+	inline
 	void memory_info<e_device>(double &total, double &free)
 	{
 		free = total = 0;
@@ -99,10 +101,11 @@ namespace mt
 		}
 	}
 
-	template<eDevice dev>
+	template <eDevice dev>
 	double get_free_memory(){ return 0; }
 
-	template<>
+	template <>
+	inline
 	double get_free_memory<e_host>()
 	{
 		double total, free;
@@ -110,7 +113,8 @@ namespace mt
 		return free;
 	}
 
-	template<>
+	template <>
+	inline
 	double get_free_memory<e_device>()
 	{
 		double total, free;

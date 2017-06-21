@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef TRANSMISSION_FUNCTION_H
@@ -32,24 +32,22 @@
 
 namespace mt
 {
-	template<class T, eDevice dev>
+	template <class T, eDevice dev>
 	class Transmission_Function: public Projected_Potential<T, dev>
 	{
 		public:
-			using value_type_r = T;
-			using value_type_c = complex<T>;
+			using T_r = T;
+			using T_c = complex<T>;
 			using size_type = std::size_t;
 
-			static const eDevice device = dev;
+			Transmission_Function(): Projected_Potential<T, dev>(), fft_2d(nullptr){}
 
-			Transmission_Function(): fft2(nullptr){}
-
-			void set_input_data(Input_Multislice<value_type_r> *input_multislice_i, Stream<dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
+			void set_input_data(Input_Multislice<T_r> *input_multislice_i, Stream<dev> *stream_i, FFT<T_r, dev> *fft2_i)
 			{
 				Projected_Potential<T, dev>::set_input_data(input_multislice_i, stream_i);
-				fft2 = fft2_i;
+				fft_2d = fft2_i;
 
-				trans_0.resize(this->input_multislice->grid.nxy());
+				trans_0.resize(this->input_multislice->grid_2d.nxy());
 
 				if(!this->input_multislice->slice_storage)
 				{
@@ -57,36 +55,36 @@ namespace mt
 					return;
 				}
 
-				int n_slice_sig = (this->input_multislice->fp_dim.z)?(int)ceil(3.0*this->atoms.sigma_max/this->input_multislice->grid.dz):0;
-				int n_slice_req = this->slice.size() + 2*n_slice_sig;
+				int n_slice_sig = (this->input_multislice->pn_dim.z)?(int)ceil(3.0*this->atoms.sigma_max/this->input_multislice->grid_2d.dz):0;
+				int n_slice_req = this->slicing.slice.size() + 2*n_slice_sig;
 
-				memory_slice.set_input_data(n_slice_req, this->input_multislice->grid.nxy());
+				memory_slice.set_input_data(n_slice_req, this->input_multislice->grid_2d.nxy());
 
 				if(memory_slice.is_potential())
 				{
-					memory_slice.resize_vector(this->input_multislice->grid.nxy(), Vp_v);
+					memory_slice.resize_vector(this->input_multislice->grid_2d.nxy(), Vp_v);
 				}
 				else if(memory_slice.is_transmission())
 				{
-					memory_slice.resize_vector(this->input_multislice->grid.nxy(), trans_v);
+					memory_slice.resize_vector(this->input_multislice->grid_2d.nxy(), trans_v);
 				}
 			}
 
-			void trans(value_type_r w, Vector<value_type_r, dev> &V0_i, Vector<value_type_c, dev> &Trans_o)
+			void trans(T_r w, Vector<T_r, dev> &V0_i, Vector<T_c, dev> &Trans_o)
 			{	
-				mt::transmission_function(*(this->stream), this->input_multislice->grid, this->input_multislice->interaction_model, w, V0_i, Trans_o);
+				mt::transmission_function(*(this->stream), this->input_multislice->grid_2d, this->input_multislice->interaction_model, w, V0_i, Trans_o);
 
-				if(this->input_multislice->grid.bwl)
+				if(this->input_multislice->grid_2d.bwl)
 				{
-					fft2->forward(Trans_o);
-					mt::bandwidth_limit(*(this->stream), this->input_multislice->grid, Trans_o);
-					fft2->inverse(Trans_o);
+					fft_2d->forward(Trans_o);
+					mt::bandwidth_limit(*(this->stream), this->input_multislice->grid_2d, Trans_o);
+					fft_2d->inverse(Trans_o);
 				}
 			}
 
-			void trans(const int &islice, Vector<value_type_c, dev> &trans_0)
+			void trans(const int &islice, Vector<T_c, dev> &trans_0)
 			{
-				if(islice < memory_slice.n_slice_cur(this->slice.size()))
+				if(islice < memory_slice.n_slice_cur(this->slicing.slice.size()))
 				{
 					if(memory_slice.is_potential())
 					{
@@ -94,23 +92,23 @@ namespace mt
 					}
 					else if(memory_slice.is_transmission())
 					{
-						mt::assign(*(this->stream), trans_v[islice], trans_0);
+						mt::assign(trans_v[islice], trans_0);
 					}
 				}
 				else
 				{
-					this->projected_potential(islice, this->V_0);
+					Projected_Potential<T, dev>::operator()(islice, this->V_0);
 					trans(this->input_multislice->Vr_factor(), this->V_0, trans_0);
 				}
 			}
 
-			void trans(const int &islice_0, const int &islice_e, Vector<value_type_c, dev> &trans_0)
+			void trans(const int &islice_0, const int &islice_e, Vector<T_c, dev> &trans_0)
 			{
-				this->projected_potential(islice_0, islice_e, this->V_0);
+				Projected_Potential<T, dev>::operator()(islice_0, islice_e, this->V_0);
 				trans(this->input_multislice->Vr_factor(), this->V_0, trans_0);
 			}
 
-			template<class TOutput_multislice>
+			template <class TOutput_multislice>
 			void trans(const int &islice, TOutput_multislice &output_multislice)
 			{
 				trans(islice, trans_0);
@@ -124,27 +122,27 @@ namespace mt
 				Projected_Potential<T, dev>::move_atoms(fp_iconf);
 
 				// Calculate transmission functions
-				for(auto islice = 0; islice< memory_slice.n_slice_cur(this->slice.size()); islice++)
+				for(auto islice = 0; islice< memory_slice.n_slice_cur(this->slicing.slice.size()); islice++)
 				{
 					if(memory_slice.is_potential())
 					{
-						this->projected_potential(islice, Vp_v[islice]);
+						Projected_Potential<T, dev>::operator()(islice, Vp_v[islice]);
 					}
 					else if(memory_slice.is_transmission())
 					{
-						this->projected_potential(islice, this->V_0);
+						Projected_Potential<T, dev>::operator()(islice, this->V_0);
 						trans(this->input_multislice->Vr_factor(), this->V_0, trans_v[islice]);
 					}
 				}
 			}
 
-			void transmit(const int &islice, Vector<value_type_c, dev> &psi_io)
+			void transmit(const int &islice, Vector<T_c, dev> &psi_io)
 			{
 				trans(islice, trans_0);
 				mt::multiply(*(this->stream), trans_0, psi_io);
 			}
 
-			Vector<value_type_c, dev> trans_0;
+			Vector<T_c, dev> trans_0;
 		private:
 			struct Memory_Slice
 			{
@@ -166,15 +164,15 @@ namespace mt
 						n_slice_req = nSlice_req_i;
 						double free_memory = get_free_memory<dev>() - 10;
 
-						if(number_slices<value_type_c>(free_memory, nxy_i) >= n_slice_req)
+						if(number_slices<T_c>(free_memory, nxy_i) >= n_slice_req)
 						{
 							slice_mem_type = eSMT_Transmission;
-							n_slice_Allow = number_slices<value_type_c>(free_memory, nxy_i);
+							n_slice_Allow = number_slices<T_c>(free_memory, nxy_i);
 						}
 						else
 						{
 							slice_mem_type = eSMT_Potential;
-							n_slice_Allow = number_slices<value_type_r>(free_memory, nxy_i);
+							n_slice_Allow = number_slices<T_r>(free_memory, nxy_i);
 						}
 						n_slice_Allow = min(n_slice_Allow, n_slice_req);
 
@@ -184,7 +182,7 @@ namespace mt
 						}
 					}
 
-					template<class U>
+					template <class U>
 					void resize_vector(const int &nxy_i, U &vector)
 					{
 						vector.resize(n_slice_Allow);
@@ -210,7 +208,7 @@ namespace mt
 					}
 
 				private:
-					template<class U>
+					template <class U>
 					int number_slices(const double &memory, const int &nxy)
 					{
 						return static_cast<int>(floor(memory/mt::sizeMb<U>(nxy)));
@@ -220,10 +218,10 @@ namespace mt
 			Memory_Slice memory_slice;
 
 		protected:
-			Vector<Vector<value_type_c, dev>, e_host> trans_v;
-			Vector<Vector<value_type_r, dev>, e_host> Vp_v;
+			Vector<Vector<T_c, dev>, e_host> trans_v;
+			Vector<Vector<T_r, dev>, e_host> Vp_v;
 
-			FFT2<value_type_r, dev> *fft2;
+			FFT<T_r, dev> *fft_2d;
 	};
 
 } // namespace mt

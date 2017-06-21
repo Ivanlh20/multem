@@ -1,19 +1,19 @@
 /*
- * This file iscan part of MULTEM.
+ * This file is part of MULTEM.
  * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- * MULTEM iscan free software: you can redistribute it and/or modify
+ * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM iscan distributed in the hope that it will be useful, 
+ * MULTEM is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef MULTISLICE_H
@@ -32,34 +32,40 @@
 
 namespace mt
 {
-	template<class T, eDevice dev>
+	template <class T, eDevice dev>
 	class Multislice
 	{
 		public:
-			using value_type_r = T;
-			using value_type_c = complex<T>;
+			using T_r = T;
+			using T_c = complex<T>;
 
-			void set_input_data(Input_Multislice<value_type_r> *input_multislice_i)
+			static const eDevice device = dev;
+
+			static bool ext_stop_sim;
+			static int ext_niter;
+			static int ext_iter;
+
+			void set_input_data(Input_Multislice<T_r> *input_multislice_i, Stream<dev> *stream_i, FFT<T_r, dev> *fft2_i)
 			{
 				input_multislice = input_multislice_i;
-				stream.resize(input_multislice->nstream);
-				fft2.create_plan_2d(input_multislice->grid.ny, input_multislice->grid.nx, input_multislice->nstream);
+				stream = stream_i;
+				fft_2d = fft2_i;
 
 				if(input_multislice->is_EELS_EFTEM())
 				{
-					energy_loss.set_input_data(input_multislice, &stream, &fft2);
-					psi_thk.resize(input_multislice->grid.nxy());
+					energy_loss.set_input_data(input_multislice, stream, fft_2d);
+					psi_thk.resize(input_multislice->grid_2d.nxy());
 					if(input_multislice->eels_fr.is_Mixed_Channelling())
 					{
-						trans_thk.resize(input_multislice->grid.nxy());
+						trans_thk.resize(input_multislice->grid_2d.nxy());
 					}
 				}
 
-				wave_function.set_input_data(input_multislice, &stream, &fft2);
+				wave_function.set_input_data(input_multislice, stream, fft_2d);
 			}
 
-			template<class TOutput_multislice>
-			void run(TOutput_multislice &output_multislice)
+			template <class TOutput_multislice>
+			void operator()(TOutput_multislice &output_multislice)
 			{
 				if(input_multislice->is_STEM_ISTEM())
 				{
@@ -73,9 +79,9 @@ namespace mt
 				{
 					ED_HRTEM(output_multislice);
 				}
-				else if(input_multislice->is_PED_HCI())
+				else if(input_multislice->is_PED_HCTEM())
 				{
-					PED_HCI(output_multislice);
+					PED_HCTEM(output_multislice);
 				}
 				else if(input_multislice->is_EWFS_EWRS())
 				{
@@ -87,46 +93,60 @@ namespace mt
 				}
 			}
 
-			void cleanup()
-			{
-				fft2.cleanup();
-			}
-
 		private:
-
-			template<class TOutput_multislice>
+			template <class TOutput_multislice>
 			void STEM_ISTEM(TOutput_multislice &output_multislice)
 			{
-				value_type_r w = input_multislice->get_weight();
+				ext_niter = input_multislice->scanning.size()*input_multislice->number_conf();
+				ext_iter = 0;
+				/*****************************************************************/
+
+				T_r w = input_multislice->get_weight();
 
 				output_multislice.init();
 
-				if(input_multislice->is_STEM() && input_multislice->coherent_contribution)
+				input_multislice->iscan.resize(1);
+				input_multislice->beam_x.resize(1);
+				input_multislice->beam_y.resize(1);
+
+				
+				if(input_multislice->is_STEM() && input_multislice->pn_coh_contrib)
 				{
 					for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
 					{	
-						input_multislice->set_beam_position(iscan);					
-						for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+						output_multislice.init_psi_coh();
+						input_multislice->iscan[0] = iscan;
+						input_multislice->set_iscan_beam_position();	
+						for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
 						{
-							wave_function.move_atoms(iconf);		
+							wave_function.move_atoms(iconf);
 							wave_function.set_incident_wave(wave_function.psi_z);
 							wave_function.psi(w, wave_function.psi_z, output_multislice);
-						}
 
+							ext_iter++;
+							if(ext_stop_sim) break;
+						}
 						wave_function.set_m2psi_coh(output_multislice);
+
+						if(ext_stop_sim) break;
 					}
 				}
 				else
 				{
-					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
 					{
 						wave_function.move_atoms(iconf);	
 						for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
 						{
-							input_multislice->set_beam_position(iscan);
+							input_multislice->iscan[0] = iscan;
+							input_multislice->set_iscan_beam_position();
 							wave_function.set_incident_wave(wave_function.psi_z);
 							wave_function.psi(w, wave_function.psi_z, output_multislice);
+
+							ext_iter++;
+							if(ext_stop_sim) break;
 						}
+						if(ext_stop_sim) break;
 					}
 
 					wave_function.set_m2psi_coh(output_multislice);
@@ -136,26 +156,77 @@ namespace mt
 				output_multislice.clear_temporal_data();
 			}
 
-			template<class TOutput_multislice>
+			template <class TOutput_multislice>
 			void CBED_CBEI(TOutput_multislice &output_multislice)
 			{
-				EWFS_EWRS(output_multislice);
+				Q1<T_r, e_host> qt;
+				Q2<T_r, e_host> qs;
+
+				// Load quadratures
+				temporal_spatial_quadratures(input_multislice->cond_lens, qt, qs);
+
+                /*****************************************************************/
+
+				T_r w = input_multislice->get_weight();
+				T_r f_0 = input_multislice->cond_lens.c_10 ;
+				// T_r theta_0 = input_multislice->theta;
+				// T_r phi_0 = input_multislice->phi;
+
+				output_multislice.init();
+
+				if(input_multislice->is_illu_mod_full_integration())
+				{
+					ext_niter = qt.size()*input_multislice->number_conf();
+					ext_iter = 0;
+
+					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
+					{
+						wave_function.move_atoms(iconf);		
+
+						for(auto j = 0; j<qt.size(); j++)
+						{
+							auto f = input_multislice->cond_lens.sf*qt.x[j]+f_0;
+							input_multislice->cond_lens.set_defocus(f); 
+							wave_function.set_incident_wave(wave_function.psi_z);
+							wave_function.psi(w*qt.w[j], wave_function.psi_z, output_multislice);
+
+							ext_iter++;
+							if(ext_stop_sim) break;
+						}
+
+						if(ext_stop_sim) break;
+					}
+					wave_function.set_m2psi_coh(output_multislice);
+
+					output_multislice.shift();
+					output_multislice.clear_temporal_data();
+
+					input_multislice->obj_lens.set_defocus(f_0);
+				}
+				else
+				{
+					EWFS_EWRS(output_multislice);
+				}
 			}
 
-			template<class TOutput_multislice>
+			template <class TOutput_multislice>
 			void ED_HRTEM(TOutput_multislice &output_multislice)
 			{
 				EWFS_EWRS(output_multislice);
 			}
 
-			template<class TOutput_multislice>
-			void PED_HCI(TOutput_multislice &output_multislice)
+			template <class TOutput_multislice>
+			void PED_HCTEM(TOutput_multislice &output_multislice)
 			{
-				value_type_r w = input_multislice->get_weight();
+				ext_niter = input_multislice->nrot*input_multislice->number_conf();
+				ext_iter = 0;
+				/*****************************************************************/
+
+				T_r w = input_multislice->get_weight();
 
 				output_multislice.init();
 
-				for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+				for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
 				{
 					wave_function.move_atoms(iconf);		
 					for(auto irot = 0; irot < input_multislice->nrot; irot++)
@@ -163,7 +234,11 @@ namespace mt
 						input_multislice->set_phi(irot);
 						wave_function.set_incident_wave(wave_function.psi_z);
 						wave_function.psi(w, wave_function.psi_z, output_multislice);
+
+						ext_iter++;
+						if(ext_stop_sim) break;
 					}
+					if(ext_stop_sim) break;
 				}
 
 				wave_function.set_m2psi_coh(output_multislice);
@@ -172,18 +247,25 @@ namespace mt
 				output_multislice.clear_temporal_data();
 			}
 
-			template<class TOutput_multislice>
+			template <class TOutput_multislice>
 			void EWFS_EWRS(TOutput_multislice &output_multislice)
 			{
-				value_type_r w = input_multislice->get_weight();
+				ext_niter = input_multislice->number_conf();
+				ext_iter = 0;
+				/*****************************************************************/
+
+				T_r w = input_multislice->get_weight();
 
 				output_multislice.init();
 
-				for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+				for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
 				{
 					wave_function.move_atoms(iconf);		
 					wave_function.set_incident_wave(wave_function.psi_z);
 					wave_function.psi(w, wave_function.psi_z, output_multislice);
+
+					ext_iter++;
+					if(ext_stop_sim) break;
 				}
 
 				wave_function.set_m2psi_coh(output_multislice);
@@ -192,38 +274,52 @@ namespace mt
 				output_multislice.clear_temporal_data();
 			}
 
-			template<class TOutput_multislice>
+			template <class TOutput_multislice>
 			void EELS_EFTEM(TOutput_multislice &output_multislice)
 			{
-				value_type_r w = input_multislice->get_weight();
+				ext_niter = wave_function.slicing.slice.size()*input_multislice->number_conf();
+				ext_iter = 0;
 
-				auto psi = [&](value_type_r w, Vector<value_type_c, dev> &psi_z, TOutput_multislice &output_multislice)
+				if(input_multislice->is_EELS())
 				{
-					value_type_r gx_0 = input_multislice->gx_0();
-					value_type_r gy_0 = input_multislice->gy_0();
+					ext_niter *= input_multislice->scanning.size();
+				}
+				/*****************************************************************/
 
-					for(auto islice = 0; islice < wave_function.slice.size(); islice++)
+				T_r w = input_multislice->get_weight();
+
+				auto psi = [&](T_r w, Vector<T_c, dev> &psi_z, TOutput_multislice &output_multislice)
+				{
+					T_r gx_0 = input_multislice->gx_0();
+					T_r gy_0 = input_multislice->gy_0();
+
+					for(auto islice = 0; islice < wave_function.slicing.slice.size(); islice++)
 					{
 						if(input_multislice->eels_fr.is_Mixed_Channelling())
 						{
-							wave_function.trans(islice, wave_function.slice.size()-1, trans_thk);
+							wave_function.trans(islice, wave_function.slicing.slice.size()-1, trans_thk);
 						}			
 
-						for(auto iatom = wave_function.slice.iatom_0[islice]; iatom <= wave_function.slice.iatom_e[islice]; iatom++)
+						for(auto iatoms = wave_function.slicing.slice[islice].iatom_0; iatoms <= wave_function.slicing.slice[islice].iatom_e; iatoms++)
 						{
-							if(wave_function.atoms.Z[iatom] == input_multislice->eels_fr.Z)
+							if(wave_function.atoms.Z[iatoms] == input_multislice->eels_fr.Z)
 							{
-								input_multislice->set_eels_fr_atom(iatom, wave_function.atoms);
+								input_multislice->set_eels_fr_atom(iatoms, wave_function.atoms);
 								energy_loss.set_atom_type(input_multislice->eels_fr);
 
 								for(auto ikn = 0; ikn < energy_loss.kernel.size(); ikn++)
 								{
-									mt::multiply(stream, energy_loss.kernel[ikn], psi_z, wave_function.psi_z);
-									wave_function.psi(islice, wave_function.slice.size()-1, w, trans_thk, output_multislice);
+									mt::multiply(*stream, energy_loss.kernel[ikn], psi_z, wave_function.psi_z);
+									wave_function.psi(islice, wave_function.slicing.slice.size()-1, w, trans_thk, output_multislice);
 								}
 							}
+
+							if(ext_stop_sim) break;
 						}
 						wave_function.psi_slice(gx_0, gy_0, islice, psi_z);
+
+						ext_iter++;
+						if(ext_stop_sim) break;
 					}
 				};
 
@@ -231,24 +327,31 @@ namespace mt
 
 				if(input_multislice->is_EELS())
 				{
-					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
 					{
 						wave_function.move_atoms(iconf);		
 						for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
 						{
-							input_multislice->set_beam_position(iscan);
+							input_multislice->iscan[0] = iscan;
+							input_multislice->set_iscan_beam_position();
 							wave_function.set_incident_wave(psi_thk);
 							psi(w, psi_thk, output_multislice);
+
+							if(ext_stop_sim) break;
 						}
+
+						if(ext_stop_sim) break;
 					}
 				}
 				else
 				{
-					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->fp_nconf; iconf++)
+					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
 					{
 						wave_function.move_atoms(iconf);		
 						wave_function.set_incident_wave(psi_thk);
 						psi(w, psi_thk, output_multislice);
+
+						if(ext_stop_sim) break;
 					}
 				}
 
@@ -256,16 +359,25 @@ namespace mt
 				output_multislice.clear_temporal_data();
 			}
 
-			Input_Multislice<value_type_r> *input_multislice;
-			Stream<dev> stream;
-			FFT2<value_type_r, dev> fft2;
+			Input_Multislice<T_r> *input_multislice;
+			Stream<dev> *stream;
+			FFT<T_r, dev> *fft_2d;
 
-			Wave_Function<value_type_r, dev> wave_function;
-			Energy_Loss<value_type_r, dev> energy_loss;
+			Wave_Function<T_r, dev> wave_function;
+			Energy_Loss<T_r, dev> energy_loss;
 
-			Vector<value_type_c, dev> psi_thk;
-			Vector<value_type_c, dev> trans_thk;
-		};
+			Vector<T_c, dev> psi_thk;
+			Vector<T_c, dev> trans_thk;
+	};
+
+	template <class T, eDevice dev>
+	bool Multislice<T, dev>::ext_stop_sim = false;
+
+	template <class T, eDevice dev>
+	int Multislice<T, dev>::ext_niter = 0;
+
+	template <class T, eDevice dev>
+	int Multislice<T, dev>::ext_iter = 0;
 
 } // namespace mt
 

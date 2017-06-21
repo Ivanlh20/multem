@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,11 +13,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef ATOM_CAL_H
 #define ATOM_CAL_H
+
+#ifdef _MSC_VER
+#pragma once
+#endif// _MSC_VER
 
 #include <functional>
 
@@ -28,7 +32,7 @@
 
 namespace mt
 {
-	template<class T>
+	template <class T>
 	class Atom_Cal{
 		public:
 			using value_type = T;

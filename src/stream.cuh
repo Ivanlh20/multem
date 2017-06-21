@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef STREAM_H
@@ -26,19 +26,22 @@
 
 namespace mt
 {
-	template< eDevice dev>
+	template <eDevice dev>
 	struct Stream;
 
-	template<>
+	template <>
 	struct Stream<e_host>
 	{
 		public:
 			static const eDevice device = e_host;
+
 			std::mutex stream_mutex;
 
-			Stream(): nx(0), ny(0), nxy(0), nstream(0), n_act_stream(0), stream(nullptr){}
+			Stream(): nx(0), ny(0), nxy(0), nstream(0), n_act_stream(0), 
+			stream(nullptr){}
 
-			Stream(int new_nstream): nx(0), ny(0), nxy(0), nstream(0), n_act_stream(0), stream(nullptr)
+			Stream(int new_nstream): nx(0), ny(0), nxy(0), nstream(0), 
+			n_act_stream(0), stream(nullptr)
 			{
 				resize(new_nstream);
 			}
@@ -91,9 +94,9 @@ namespace mt
 				nxy = nx*ny;
 			}
 
-			Range get_range(const int &istream)
+			Range_2d get_range(const int &istream)
 			{
-				Range range;
+				Range_2d range;
 				
 				int qnxy = nxy/n_act_stream;
 				range.ixy_0 = istream*qnxy;
@@ -113,9 +116,9 @@ namespace mt
 				return range;
 			}
 
-			Range get_range_yx(const int &istream)
+			Range_2d get_range_yx(const int &istream)
 			{
-				Range range;
+				Range_2d range;
 				
 				int qnxy = nxy/n_act_stream;
 				range.ixy_0 = istream*qnxy;
@@ -135,7 +138,7 @@ namespace mt
 				return range;
 			}
 
-			template<class TFn, class... TArgs>
+			template <class TFn, class... TArgs>
 			void exec(TFn &fn, TArgs &...arg)
 			{
 				if(n_act_stream < 1)
@@ -149,6 +152,61 @@ namespace mt
 				}
 
 				fn(get_range(n_act_stream-1), std::ref<TArgs>(arg)...);
+
+				synchronize();
+			}
+
+			template <class TFn, class... TArgs>
+			void exec_matrix(TFn &fn, TArgs &...arg)
+			{
+				if(n_act_stream < 1)
+				{
+					return;
+				}
+
+				auto thr_fn_m = [&](const Range_2d &range, TArgs &...arg)
+				{
+					for(auto ix = range.ix_0; ix < range.ix_e; ix++)
+					{
+						for(auto iy = range.iy_0; iy < range.iy_e; iy++)
+						{
+							fn(ix, iy, arg...);
+						}
+					}
+				};
+
+				for(auto istream = 0; istream < n_act_stream-1; istream++)
+				{
+					stream[istream] = std::thread(std::bind(thr_fn_m, get_range(istream), std::ref<TArgs>(arg)...));
+				}
+
+				thr_fn_m(get_range(n_act_stream-1), std::ref<TArgs>(arg)...);
+
+				synchronize();
+			}
+
+			template <class TFn, class... TArgs>
+			void exec_vector(TFn &fn, TArgs &...arg)
+			{
+				if(n_act_stream < 1)
+				{
+					return;
+				}
+
+				auto thr_fn_v = [&](const Range_2d &range, TArgs &...arg)
+				{
+					for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+					{
+						fn(ixy, arg...);
+					}
+				};
+
+				for(auto istream = 0; istream < n_act_stream-1; istream++)
+				{
+					stream[istream] = std::thread(std::bind(thr_fn_v, get_range(istream), std::ref<TArgs>(arg)...));
+				}
+
+				thr_fn_v(get_range(n_act_stream-1), std::ref<TArgs>(arg)...);
 
 				synchronize();
 			}
@@ -181,7 +239,7 @@ namespace mt
 			};
 	};
 
-	template<>
+	template <>
 	struct Stream<e_device>
 	{
 		public:
@@ -238,9 +296,9 @@ namespace mt
 				nxy = nx*ny;
 			}
 
-			Range get_range(const int &istream)
+			Range_2d get_range(const int &istream)
 			{
-				Range range;
+				Range_2d range;
 				
 				int qnxy = nxy/n_act_stream;
 				range.ixy_0 = istream*qnxy;
@@ -260,7 +318,7 @@ namespace mt
 				return range;
 			}
 
-			template<class TFn>
+			template <class TFn>
 			void exec(TFn &fn)
 			{
 				// for(auto istream = 0; istream < n_act_stream; istream++)

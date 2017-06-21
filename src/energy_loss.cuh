@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef ENERGY_LOSS_H
@@ -21,7 +21,7 @@
 
 #include "types.cuh"
 #include "stream.cuh"
-#include "fft2.cuh"
+#include "fft.cuh"
 #include "input_multislice.cuh"
 #include "host_functions.hpp"
 #include "device_functions.cuh"
@@ -29,18 +29,18 @@
 
 namespace mt
 {
-	template<class T, eDevice dev>
+	template <class T, eDevice dev>
 	class Energy_Loss
 	{
 		public:
-			using value_type_r = T;
-			using value_type_c = complex<T>;
+			using T_r = T;
+			using T_c = complex<T>;
 
-			void set_input_data(Input_Multislice<value_type_r> *input_multislice_i, Stream<dev> *stream_i, FFT2<value_type_r, dev> *fft2_i)
+			void set_input_data(Input_Multislice<T_r> *input_multislice_i, Stream<dev> *stream_i, FFT<T_r, dev> *fft2_i)
 			{
 				input_multislice = input_multislice_i;
 				stream = stream_i;
-				fft2 = fft2_i;
+				fft_2d = fft2_i;
 
 				if(input_multislice->eels_fr.m_selection>2)
 				{
@@ -53,7 +53,7 @@ namespace mt
 
 				for(auto ikn = 0; ikn<kernel.size(); ikn++)
 				{
-					kernel[ikn].resize(input_multislice->grid.nxy());
+					kernel[ikn].resize(input_multislice->grid_2d.nxy());
 				}
 
 			}
@@ -62,35 +62,35 @@ namespace mt
 			{
 				if(eels.m_selection>2)
 				{
-					mt::kernel_xyz(*stream, input_multislice->grid, eels, *fft2, kernel[0], kernel[1], kernel[2]);
+					mt::kernel_xyz(*stream, input_multislice->grid_2d, eels, *fft_2d, kernel[0], kernel[1], kernel[2]);
 				}
 				else if(eels.m_selection == -2)
 				{
-					mt::kernel_x(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
+					mt::kernel_x(*stream, input_multislice->grid_2d, eels, *fft_2d, kernel[0]);
 				}
 				else if(eels.m_selection == -1)
 				{
-					mt::kernel_mn1(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
+					mt::kernel_mn1(*stream, input_multislice->grid_2d, eels, *fft_2d, kernel[0]);
 				}
 				else if(eels.m_selection == 0)
 				{
-					mt::kernel_z(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
+					mt::kernel_z(*stream, input_multislice->grid_2d, eels, *fft_2d, kernel[0]);
 				}
 				else if(eels.m_selection == 1)
 				{
-					mt::kernel_mp1(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
+					mt::kernel_mp1(*stream, input_multislice->grid_2d, eels, *fft_2d, kernel[0]);
 				}
 				else if(eels.m_selection == 2)
 				{
-					mt::kernel_y(*stream, input_multislice->grid, eels, *fft2, kernel[0]);
+					mt::kernel_y(*stream, input_multislice->grid_2d, eels, *fft_2d, kernel[0]);
 				}
 			}
 
-			Vector<Vector<value_type_c, dev>, e_host> kernel;
+			Vector<Vector<T_c, dev>, e_host> kernel;
 		private:
-			Input_Multislice<value_type_r> *input_multislice;
+			Input_Multislice<T_r> *input_multislice;
 			Stream<dev> *stream;
-			FFT2<value_type_r, dev> *fft2;
+			FFT<T_r, dev> *fft_2d;
 	};
 
 } // namespace mt

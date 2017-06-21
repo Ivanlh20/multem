@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef MATH_H
@@ -25,12 +25,18 @@
 #ifndef DEVICE_CALLABLE
 	#ifdef __CUDACC__
 		#define DEVICE_CALLABLE __host__ __device__
-		#define FORCE_INLINE __forceinline__
+ #define FORCE_INLINE __forceinline__
 	#else
 		#define DEVICE_CALLABLE
 		#define FORCE_INLINE inline
 	#endif
 #endif
+
+//#ifdef __CUDACC__
+//	#pragma message("Cuda MATH_H")
+//#else
+//	#pragma message("nonCuda MATH_H")
+//#endif
 
 #ifndef __CUDACC__
 	#include <cmath>
@@ -51,29 +57,32 @@
 	using std::asinh;
 	using std::atanh;
 	using std::norm;
+	using std::polar;
+	using std::arg;
+	using std::abs;
 
-	template<class T> 
+	template <class T> 
 	inline void sincos(const T &x, T *sptr, T *cptr)
 	{
 		*sptr = std::sin(x);
 		*cptr = std::cos(x);
 	}
 
-	template<class T> 
+	template <class T> 
 	inline T cospi(const T &x)
 	{
 		const T c_Pi = 3.141592653589793238463;
 		return std::cos(c_Pi*x);
 	}
 
-	template<class T> 
+	template <class T> 
 	inline T sinpi(const T &x)
 	{
 		const T c_Pi = 3.141592653589793238463;
 		return std::sin(c_Pi*x);
 	}
 
-	template<class T> 
+	template <class T> 
 	inline void sincospi(const T &x, T *sptr, T *cptr)
 	{
 		const T c_Pi = 3.141592653589793238463;
@@ -84,7 +93,7 @@
 	using std::exp;
 	using std::exp2;
 
-	template<class T> 
+	template <class T> 
 	inline T exp10(const T &x)
 	{
 		return std::pow(static_cast<T>(10), x);
@@ -102,7 +111,7 @@
 	using std::pow;
 	using std::sqrt;
 
-	template<class T> 
+	template <class T> 
 	inline T rsqrt(const T &x)
 	{
 		return 1.0/std::sqrt(x);
@@ -111,11 +120,12 @@
 	using std::cbrt;
 	using std::hypot;
 
-	template<class T> 
+	template <class T> 
 	inline T rhypot(const T &x, const T &y)
 	{
 		return 1.0/std::hypot(x, y);
 	}
+
 	using std::erf;
 	using std::erfc;
 	using std::tgamma;
@@ -139,7 +149,7 @@
 	using std::fma;
 	using std::fmod;
 
-	template<class T> 
+	template <class T> 
 	inline T bessel_j0(const T &x)
 	{
 		// host code
@@ -170,7 +180,7 @@
 		return ans;
 	}
 
-	template<class T> 
+	template <class T> 
 	inline T bessel_j1(const T &x)
 	{
 		T ax, z;
@@ -204,7 +214,7 @@
 		return ans;
 	}
 
-	template<class T> 
+	template <class T> 
 	inline T bessel_jn(const int &n, const T &x)
 	{
 		const T ACC = 40.0;
@@ -276,7 +286,7 @@
 		return x < (0.0 && n%2 == 1)?-ans:ans;
 	}
 
-	template<class T> 
+	template <class T> 
 	inline T bessel_y0(const T &x)
 	{
 		T z;
@@ -306,7 +316,7 @@
 		return ans;
 	}
 
-	template<class T> 
+	template <class T> 
 	inline T bessel_y1(const T &x)
 	{
 		T z;
@@ -338,7 +348,7 @@
 		return ans;
 	}
 
-	template<class T> 
+	template <class T> 
 	inline T bessel_yn(const int &n, const T &x)
 	{
 		int j;
@@ -371,43 +381,46 @@
 	#include <thrust/complex.h>
 	using thrust::complex;
 	using thrust::norm;
+	using thrust::polar;
+	using thrust::arg;
+	using thrust::abs;
 
-	template<class T> 
+	template <class T> 
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_j0(const T &x)
 	{
 		return j0(x);
 	}
 
-	template<class T> 
+	template <class T> 
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_j1(const T &x)
 	{
 		return j1(x);
 	}
 
-	template<class T> 
+	template <class T> 
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_jn(const int &n, const T &x)
 	{
 		return jn(n, x);
 	}
 
-	template<class T> 
+	template <class T> 
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_y0(const T &x)
 	{
 		return y0(x);
 	}
 
-	template<class T> 
+	template <class T> 
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_y1(const T &x)
 	{
 		return y1(x);
 	}
 
-	template<class T> 
+	template <class T> 
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_yn(const int &n, const T &x)
 	{
@@ -415,22 +428,22 @@
 	}
 
 #endif
-
-	using std::abs;
 	using std::min;
 	using std::max;
 
-	namespace thrust
+	DEVICE_CALLABLE FORCE_INLINE
+	double norm(const double &x)
 	{
-		template<class T>
-		DEVICE_CALLABLE FORCE_INLINE
-		T norm(const T &x)
-		{
-			return x*x;
-		}
+		return x*x;
 	}
 
-	template<class T>
+	DEVICE_CALLABLE FORCE_INLINE
+	float norm(const float &x)
+	{
+		return x*x;
+	}
+
+	template <class T>
 	DEVICE_CALLABLE FORCE_INLINE
 	complex<T> euler(const T &x)
 	{
@@ -439,7 +452,7 @@
 		return complex<T>(cptr, sptr);
 	}
 
-	template<class T>
+	template <class T>
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_i0(const T &x)
 	{
@@ -463,7 +476,7 @@
 		return ans;
 	}
 
-	template<class T> 
+	template <class T> 
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_i1(const T &x)
 	{
@@ -488,7 +501,7 @@
 		return (x < 0.0)?-ans:ans;
 	}
 
-	template<class T> 
+	template <class T> 
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_in(const int &n, const T &x)
 	{
@@ -538,7 +551,7 @@
 		}
 	}
 
-	template<class T> 
+	template <class T> 
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_k0(const T &x)
 	{
@@ -561,7 +574,7 @@
 		return ans;
 	}
 
-	template<class T> 
+	template <class T> 
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_k1(const T &x)
 	{
@@ -584,7 +597,7 @@
 		return ans;
 	}
 
-	template<class T> 
+	template <class T> 
 	DEVICE_CALLABLE FORCE_INLINE
 	T bessel_kn(const int &n, const T &x)
 	{

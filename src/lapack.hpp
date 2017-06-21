@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef LAPACK_H
@@ -30,7 +30,7 @@ namespace lapack
 		const int* nrhs, 
 		float* a, 
 		const int* lda, 
-		int* ipiv,
+		int* ipiv, 
  float* b, 
 		const int* ldb, 
 		int* info
@@ -41,88 +41,92 @@ namespace lapack
 		const int* nrhs, 
 		double* a, 
 		const int* lda, 
-		int* ipiv,
+		int* ipiv, 
  double* b, 
 		const int* ldb, 
 		int* info
 	);
 
 	extern "C" void sgels_(
-		const char	*trans,
-		const int *m,
-		const int *n,
-		const int *nrhs,
-		float *a,
-		const int *lda,
-		float *b,
-		const int *ldb,
-		float *work,
-		const int *lwork,
+		const char	*trans, 
+		const int *m, 
+		const int *n, 
+		const int *nrhs, 
+		float *a, 
+		const int *lda, 
+		float *b, 
+		const int *ldb, 
+		float *work, 
+		const int *lwork, 
 		int *info
 	);
 
 	extern "C" void dgels_(
-		const char	*trans,
-		const int *m,
-		const int *n,
-		const int *nrhs,
-		double *a,
-		const int *lda,
-		double *b,
-		const int *ldb,
-		double *work,
-		const int *lwork,
+		const char	*trans, 
+		const int *m, 
+		const int *n, 
+		const int *nrhs, 
+		double *a, 
+		const int *lda, 
+		double *b, 
+		const int *ldb, 
+		double *work, 
+		const int *lwork, 
 		int *info
 	);
 
 	extern "C" void sgelsd_(
-		const int *m,
-		const int *n,
-		const int *nrhs,
-		const float *a,
-		const int *lda,
-		float *b,
-		const int *ldb,
-		float *s,
-		const float *rcond,
-		int *rank,
-		float *work,
-		const int *lwork,
-		int *iwork,
+		const int *m, 
+		const int *n, 
+		const int *nrhs, 
+		const float *a, 
+		const int *lda, 
+		float *b, 
+		const int *ldb, 
+		float *s, 
+		const float *rcond, 
+		int *rank, 
+		float *work, 
+		const int *lwork, 
+		int *iwork, 
 		int *info
 	);
 
 	extern "C" void dgelsd_(
-		const int *m,
-		const int *n,
-		const int *nrhs,
-		const double *a,
-		const int *lda,
-		double *b,
-		const int *ldb,
-		double *s,
-		const double *rcond,
-		int *rank,
-		double *work,
-		const int *lwork,
-		int *iwork,
+		const int *m, 
+		const int *n, 
+		const int *nrhs, 
+		const double *a, 
+		const int *lda, 
+		double *b, 
+		const int *ldb, 
+		double *s, 
+		const double *rcond, 
+		int *rank, 
+		double *work, 
+		const int *lwork, 
+		int *iwork, 
 		int *info
 	);
 	/*	Fast least square fitting	*/
-	template<class T>
+	template <class T>
 	struct FLSF
 	{
 		public:
 			using value_type = T;
 
-			static const mt::eDevice device = mt::e_host;
+			const mt::eDevice device;
+
+			FLSF(): device(mt::e_host) {}
 
 			void operator()(int A_rows, int A_cols, T *A, T *b, T *x)
 			{
 				using TVector = vector<T>;
 
 				// get ATA
-				auto M = mt::reserve_vector<TVector>(A_cols*A_cols);
+				TVector M;
+				M.reserve(A_cols*A_cols);
+
 				for(auto ir=0; ir<A_cols; ir++)
 				{
 					for(auto ic=0; ic<A_cols; ic++)
@@ -137,7 +141,9 @@ namespace lapack
 				}
 
 				// get y
-				auto y = mt::reserve_vector<TVector>(A_cols);
+				TVector y;
+				y.reserve(A_cols);
+
 				for(auto ic=0; ic<A_cols; ic++)
 				{
 					T v = 0;
@@ -165,7 +171,9 @@ namespace lapack
 				using TVector = vector<T>;
 
 				// get ATA
-				auto M = mt::reserve_vector<TVector>(A_cols*A_cols);
+				TVector M;
+				M.reserve(A_cols*A_cols);
+
 				for(auto ir=0; ir<A_cols; ir++)
 				{
 					for(auto ic=0; ic<A_cols; ic++)
@@ -176,7 +184,7 @@ namespace lapack
 							v += A[ir*A_rows+k]*A[ic*A_rows+k];
 						}
 						T d = 0;
-						if(ir==ic)
+						if(ir == ic)
 						{
 							d = (v<1e-7)?lambda:lambda*v;
 							D[ir] = d;
@@ -186,7 +194,9 @@ namespace lapack
 				}
 
 				// get y
-				auto y = mt::reserve_vector<TVector>(A_cols);
+				TVector y;
+				y.reserve(A_cols);
+
 				for(auto ic=0; ic<A_cols; ic++)
 				{
 					T v = 0;
@@ -233,13 +243,15 @@ namespace lapack
 		sides B, where A is the coefficient matrix and b is the 
 		right-hand side matrix:
 	*/
-	template<class T>
+	template <class T>
 	struct GESV
 	{
 		public:
 			using value_type = T;
 
-			static const mt::eDevice device = mt::e_host;
+			const mt::eDevice device;
+
+			GESV(): device(mt::e_host) {}
 
 			void operator()(int A_n, T *A, int b_cols, T *b, T *x)
 			{
@@ -272,16 +284,18 @@ namespace lapack
 	};
 
 	/*	The program solves overdetermined or underdetermined real 
-		linear systems involving an M-by-N matrix A, or its transpose, 
+		linear systems involving an M-by-N matrix A, or its trs, 
 		using a QR or LQ factorization of A. It is assumed that A has full rank.
 	*/
-	template<class T>
+	template <class T>
 	struct GELS
 	{
 		public:
 			using value_type = T;
 
-			static const mt::eDevice device = mt::e_host;
+			const mt::eDevice device;
+
+			GELS(): device(mt::e_host) {}
 
 			void operator()(int A_rows, int A_cols, T *A, int b_cols, T *b, T *x)
 			{
@@ -331,13 +345,15 @@ namespace lapack
 			mt::Vector<T, mt::e_host> work;
 	};
 
-	template<class T>
+	template <class T>
 	struct GELSD
 	{
 		public:
 			using value_type = T;
 
-			static const mt::eDevice device = mt::e_host;
+			const mt::eDevice device;
+
+			GELSD(): device(mt::e_host) {}
 
 			void operator()(int A_rows, int A_cols, T *A, int b_cols, T *b, T *x)
 			{

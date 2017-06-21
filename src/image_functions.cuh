@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef IMAGE_FUNCTIONS_H
@@ -27,15 +27,15 @@
 #include "matlab_types.cuh"
 #include "traits.cuh"
 #include "stream.cuh"
-#include "fft2.cuh"
-#include "host_device_functions.cuh"
+#include "fft.cuh"
 #include "host_functions.hpp"
+#include "host_device_classes.cuh"
 
 namespace mt
 {
-	// histogram
-	template<class TVector>
-	void histogram(TVector &v, int nbins, TVector &y, TVector *x =nullptr)
+	// hist
+	template <class TVector>
+	void hist(TVector &v, int nbins, TVector &y, TVector *x = nullptr)
 	{
 		using T = Value_type<TVector>;
 		auto minmax_temp = std::minmax_element(v.begin(), v.end());
@@ -50,7 +50,7 @@ namespace mt
 			y[iy]++;
 		}
 
-		if(x!=nullptr)
+		if(x!= nullptr)
 		{
 			for(auto ix = 0; ix<nbins; ix++)
 			{
@@ -59,24 +59,24 @@ namespace mt
 		}
 	}
 
-	template<class TVector>
-	Vector<int, e_host> histogram(TVector &v, int nbins)
+	template <class TVector>
+	Vector<int, e_host> hist(TVector &v, int nbins)
 	{
 		TVector y(nbins);
-		histogram(v, nbins, y);
+		hist(v, nbins, y);
 		return y;
 	}
 
 	// Thresholding
-	template<class TVector>
-	Value_type<TVector> otsu_threshold(TVector &v, int nbins)
+	template <class TVector>
+	Value_type<TVector> otsu_thr(TVector &v, int nbins)
 	{
 		using T = Value_type<TVector>;
 
 		TVector v_rang(nbins);
 		TVector v_hist(nbins);
 
-		histogram(v, nbins, v_hist, &v_rang);
+		hist(v, nbins, v_hist, &v_rang);
 
 		T sum_I = 0;
 		for (auto ibins = 0; ibins<nbins; ibins++)
@@ -89,7 +89,7 @@ namespace mt
 		int w_F = 0;
 
 		T var_Max = 0;
-		T threshold = 0;
+		T thr = 0;
 
 		for (int ibins = 0; ibins<nbins; ibins++)
 		{
@@ -118,24 +118,24 @@ namespace mt
 			if (var_Between > var_Max) 
 			{
 				var_Max = var_Between;
-				threshold = v_rang[ibins];
+				thr = v_rang[ibins];
 			}
 		}
 
-		return threshold;
+		return thr;
 	}
 
-	// binarization
-	template<class TVector>
-	TVector binarization(Stream<e_host> &stream, TVector &v_i, Value_type<TVector> threshold)
+	// binarize
+	template <class TVector>
+	TVector binarize(Stream<e_host> &stream, TVector &v_i, Value_type<TVector> thr)
 	{
 		using value_type = Value_type<TVector>;
 		TVector v_o(v_i.size());
 
-		auto thr_binarization = [&](const Range &range)
+		auto thr_binarization = [&](const Range_2d &range)
 		{
 			thrust::transform(v_i.begin()+range.ixy_0, v_i.begin()+range.ixy_e, 
-			v_o.begin()+range.ixy_0, functor::binarization<value_type>(threshold));
+			v_o.begin()+range.ixy_0, functor::binarize<value_type>(thr));
 		};
 
 		stream.set_n_act_stream(v_i.size());
@@ -146,35 +146,35 @@ namespace mt
 	}
 
 	// thresholding
-	template<class TVector>
-	TVector thresholding(Stream<e_host> &stream, TVector &v_i, Value_type<TVector> threshold)
+	template <class TVector>
+	TVector thresholding(Stream<e_host> &stream, TVector &v_i, Value_type<TVector> thr)
 	{
 		using value_type = Value_type<TVector>;
 		TVector v_o(v_i.size());
 
-		auto thr_thresholding = [&](const Range &range)
+		auto thr_thring = [&](const Range_2d &range)
 		{
 			thrust::transform(v_i.begin()+range.ixy_0, v_i.begin()+range.ixy_e, 
-			v_o.begin()+range.ixy_0, functor::thresholding<value_type>(threshold));
+			v_o.begin()+range.ixy_0, functor::thresholding<value_type>(thr));
 		};
 
 		stream.set_n_act_stream(v_i.size());
 		stream.set_grid(1, v_i.size());
-		stream.exec(thr_thresholding);
+		stream.exec(thr_thring);
 
 		return v_o;
 	}
 
 	/******************************************************************************/
 	// gray dilation
-	template<class TVector>
+	template <class TVector>
 	TVector morp_g_dilate(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr)
 	{
 		using T = Value_type<TVector>;
 
 		TVector Im_o(Im_i.size());
 
-		auto thr_dilate = [nkr](const Range &range, TVector &Im_i, TVector &Im_o)
+		auto thr_dilate = [nkr](const Range_2d &range, TVector &Im_i, TVector &Im_o)
 		{
 			std::deque<int> wd;
 
@@ -233,26 +233,27 @@ namespace mt
 		stream.set_grid(nx_i, ny_i);
 		stream.exec(thr_dilate, Im_i, Im_o);
 
-		auto Im_t = transpose(stream, ny_i, nx_i, Im_o);
+		auto Im_t = Im_o;
+		trs(stream, ny_i, nx_i, Im_t);
 
 		stream.set_n_act_stream(ny_i);
 		stream.set_grid(ny_i, nx_i);
 		stream.exec(thr_dilate, Im_t, Im_o);
 
-		Im_t = transpose(stream, nx_i, ny_i, Im_o);
+		trs(stream, nx_i, ny_i, Im_o);
 
-		return Im_t;
+		return Im_o;
 	}
 
 	// gray erosion
-	template<class TVector>
+	template <class TVector>
 	TVector morp_g_erode(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr)
 	{
 		using T = Value_type<TVector>;
 
 		TVector Im_o(Im_i.size());
 
-		auto thr_erode = [nkr](const Range &range, TVector &Im_i, TVector &Im_o)
+		auto thr_erode = [nkr](const Range_2d &range, TVector &Im_i, TVector &Im_o)
 		{
 			std::deque<int> wd;
 
@@ -311,19 +312,20 @@ namespace mt
 		stream.set_grid(nx_i, ny_i);
 		stream.exec(thr_erode, Im_i, Im_o);
 
-		auto Im_t = transpose(stream, ny_i, nx_i, Im_o);
+		auto Im_t = Im_o;
+		trs(stream, ny_i, nx_i, Im_t);
 
 		stream.set_n_act_stream(ny_i);
 		stream.set_grid(ny_i, nx_i);
 		stream.exec(thr_erode, Im_t, Im_o);
 
-		Im_o = transpose(stream, nx_i, ny_i, Im_o);
+		trs(stream, nx_i, ny_i, Im_o);
 
 		return Im_o;
 	}
 
 	// gray opening
-	template<class TVector>
+	template <class TVector>
 	TVector morp_g_open(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr)
 	{
 		auto Im = morp_g_erode(stream, ny_i, nx_i, Im_i, nkr);
@@ -331,7 +333,7 @@ namespace mt
 	}
 
 	// gray closing
-	template<class TVector>
+	template <class TVector>
 	TVector morp_g_close(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr)
 	{
 		auto Im = morp_g_dilate(stream, ny_i, nx_i, Im_i, nkr);
@@ -339,7 +341,7 @@ namespace mt
 	}
 
 	// gray tophat
-	template<class TVector>
+	template <class TVector>
 	TVector morp_g_tophat(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr)
 	{
 		auto Im = morp_g_open(stream, ny_i, nx_i, Im_i, nkr);
@@ -349,13 +351,13 @@ namespace mt
 	
 	/******************************************************************************/
 	// forward anscombe transform
-	template<class TVector>
+	template <class TVector>
 	TVector anscombe_forward(Stream<e_host> &stream, TVector &v_i)
 	{
 		using value_type = Value_type<TVector>;
 		TVector v_o(v_i.size());
 
-		auto thr_anscombe_forward = [&](const Range &range)
+		auto thr_anscombe_forward = [&](const Range_2d &range)
 		{
 			thrust::transform(v_i.begin()+range.ixy_0, v_i.begin()+range.ixy_e, 
 			v_o.begin()+range.ixy_0, functor::anscombe_forward<value_type>());
@@ -369,13 +371,13 @@ namespace mt
 	}
 
 	// forward anscombe transform
-	template<class TVector>
+	template <class TVector>
 	TVector anscombe_inverse(Stream<e_host> &stream, TVector &v_i)
 	{
 		using value_type = Value_type<TVector>;
 		TVector v_o(v_i.size());
 
-		auto thr_anscombe_inverse = [&](const Range &range)
+		auto thr_anscombe_inverse = [&](const Range_2d &range)
 		{
 			thrust::transform(v_i.begin()+range.ixy_0, v_i.begin()+range.ixy_e, 
 			v_o.begin()+range.ixy_0, functor::anscombe_inverse<value_type>());
@@ -390,8 +392,8 @@ namespace mt
 
 	/******************************************************************************/
 	// wiener filter 1d
-	template<class TVector>
-	TVector filter_wiener_1d(Stream<e_host> &stream, TVector &Im_i, int nkr)
+	template <class TVector>
+	TVector ftr_wiener_1d(Stream<e_host> &stream, TVector &Im_i, int nkr)
 	{
 		if(nkr<=0)
 		{
@@ -409,24 +411,24 @@ namespace mt
 		TVector Im_var(nx_i);
 
 		T v2 = 0;
-		auto thr_mean_var = [&](const Range &range)
+		auto thr_mean_var = [&](const Range_2d &range)
 		{
 			T v2_partial = 0;
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
-				int ix0 = max(ixy+nk0, 0);
+				int ix_0 = max(ixy+nk0, 0);
 				int ixe = min(ixy+nke, nx_i);
 
 				T x_mean = 0;
 				T x_var = 0;
-				for (auto ix = ix0; ix < ixe; ix++)
+				for (auto ix = ix_0; ix < ixe; ix++)
 				{
 					T x = Im_i[ix];
 					x_mean += x;
 					x_var += x*x;
 				}
-				x_mean = x_mean/(ixe-ix0);
-				x_var = x_var/(ixe-ix0) - x_mean*x_mean;
+				x_mean = x_mean/(ixe-ix_0);
+				x_var = x_var/(ixe-ix_0) - x_mean*x_mean;
 
 				Im_mean[ixy] = x_mean;
 				Im_var[ixy] = x_var;
@@ -445,7 +447,7 @@ namespace mt
 
 		v2 /= nx_i;
 
-		auto thr_filter_wiener = [&](const Range &range)
+		auto thr_ftr_wiener = [&](const Range_2d &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
@@ -455,14 +457,14 @@ namespace mt
 
 		stream.set_n_act_stream(nx_i);
 		stream.set_grid(nx_i, 1);
-		stream.exec(thr_filter_wiener);
+		stream.exec(thr_ftr_wiener);
 
 		return Im_o;
 	}
 	
 	// wiener filter by rows
-	template<class TGrid, class TVector>
-	TVector filter_wiener_2d_by_row(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr)
+	template <class TGrid, class TVector>
+	TVector ftr_wiener_2d_br(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im_i, int nkr)
 	{
 		if(nkr<=0)
 		{
@@ -475,68 +477,68 @@ namespace mt
 		int nk0 = -nkr;
 		int nke = nkr+1;
 
-		TVector Im_mean(grid.nxy());
-		TVector Im_var(grid.nxy());
+		TVector Im_mean(grid_2d.nxy());
+		TVector Im_var(grid_2d.nxy());
 
 		auto krn_mean_var = [&](const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_mean, TVector &Im_var)
 		{
-			int ix0 = max(ix_i+nk0, 0);
-			int ixe = min(ix_i+nke, grid.nx);
+			int ix_0 = max(ix_i+nk0, 0);
+			int ixe = min(ix_i+nke, grid_2d.nx);
 
 			T x_mean = 0;
 			T x_var = 0;
-			for (auto ix = ix0; ix < ixe; ix++)
+			for (auto ix = ix_0; ix < ixe; ix++)
 			{
-				T x = Im_i[grid.ind_col(ix, iy_i)];
+				T x = Im_i[grid_2d.ind_col(ix, iy_i)];
 				x_mean += x;
 				x_var += x*x;
 			}
-			x_mean = x_mean/(ixe-ix0);
-			x_var = x_var/(ixe-ix0) - x_mean*x_mean;
+			x_mean = x_mean/(ixe-ix_0);
+			x_var = x_var/(ixe-ix_0) - x_mean*x_mean;
 
-			int ixy = grid.ind_col(ix_i, iy_i);
+			int ixy = grid_2d.ind_col(ix_i, iy_i);
 			Im_mean[ixy] = x_mean;
 			Im_var[ixy] = x_var;
 		};
 
-		auto thr_mean_var = [&](const Range &range)
+		auto thr_mean_var = [&](const Range_2d &range)
 		{
 			host_detail::matrix_iter(range, krn_mean_var, Im_i, Im_mean, Im_var);
 		};
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
 		stream.exec(thr_mean_var);
 
-		auto thr_filter_wiener = [&](const Range &range)
+		auto thr_ftr_wiener = [&](const Range_2d &range)
 		{
 			for(auto iy = range.ixy_0; iy < range.ixy_e; iy++)
 			{
 				T v2 = 0;
-				for(auto ix = 0; ix < grid.nx; ix++)
+				for(auto ix = 0; ix < grid_2d.nx; ix++)
 				{
-					v2 += Im_var[grid.ind_col(ix, iy)];
+					v2 += Im_var[grid_2d.ind_col(ix, iy)];
 				}
-				v2 /= grid.nx;
+				v2 /= grid_2d.nx;
 
-				for(auto ix = 0; ix < grid.nx; ix++)
+				for(auto ix = 0; ix < grid_2d.nx; ix++)
 				{
-					auto ixy = grid.ind_col(ix, iy);
+					auto ixy = grid_2d.ind_col(ix, iy);
 					Im_o[ixy] = Im_mean[ixy] + ::fmax(T(0), Im_var[ixy]-v2)*(Im_i[ixy]-Im_mean[ixy])/::fmax(Im_var[ixy], v2);
 				}
 			}
 		};
 
-		stream.set_n_act_stream(grid.ny);
-		stream.set_grid(1, grid.ny);
-		stream.exec(thr_filter_wiener);
+		stream.set_n_act_stream(grid_2d.ny);
+		stream.set_grid(1, grid_2d.ny);
+		stream.exec(thr_ftr_wiener);
 
 		return Im_o;
 	}
 
 	// wiener filter 2d
-	template<class TGrid, class TVector>
-	TVector filter_wiener_2d(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr)
+	template <class TGrid, class TVector>
+	TVector ftr_wiener_2d(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im_i, int nkr)
 	{
 		if(nkr<=0)
 		{
@@ -550,15 +552,8 @@ namespace mt
 
 		// Kahan summation algorithm
 		// https:// en.wikipedia.org/wiki/Kahan_summation_algorithm
-		auto kh_sum = [](T &sum_v, T v, T &error)
-		{
-			v = v - error;
-			T t = sum_v + v;
-			error = (t-sum_v)-v;
-			sum_v = t;
-		};
 
-		auto thr_sum = [nkr, kh_sum](const Range &range, TVector &Im_i, TVector &Im_sum)
+		auto thr_sum = [=](const Range_2d &range, TVector &Im_i, TVector &Im_sum)
 		{
 			const int ny = range.iy_e-range.iy_0;
 			const int wkr = 2*nkr+1;
@@ -570,23 +565,23 @@ namespace mt
 				int iy_o = 0;
 
 				T sum_v = 0;
-				T c = 0; 
+				T sum_ee = 0; 
 				for (; iy < nkr; iy++)
 				{
 					T v = Im_i[ix*ny+iy];
-					kh_sum(sum_v, v, c);
+					host_device_detail::kh_sum(sum_v, v, sum_ee);
 				}
 
 				for (; iy < ny; iy++, iy_o++)
 				{
 					T v = Im_i[ix*ny+iy];
-					kh_sum(sum_v, v, c);
+					host_device_detail::kh_sum(sum_v, v, sum_ee);
 
 					Im_sum[ix*ny+iy_o] = sum_v;
 					if (iy + 1 >= wkr)
 					{
 						T v = Im_i[ix*ny+iy_tk];
-						kh_sum(sum_v, -v, c);
+						host_device_detail::kh_sum(sum_v, -v, sum_ee);
 						iy_tk++;
 					}
 				}
@@ -596,13 +591,13 @@ namespace mt
 					Im_sum[ix*ny+iy_o] = sum_v;
 
 					T v = Im_i[ix*ny+iy_tk];
-					kh_sum(sum_v, -v, c);
+					host_device_detail::kh_sum(sum_v, -v, sum_ee);
 					iy_tk++;
 				}
 			}
 		};
 
-		auto thr_sum2 = [nkr, kh_sum](const Range &range, TVector &Im_i, TVector &Im_sum2)
+		auto thr_sum2 = [=](const Range_2d &range, TVector &Im_i, TVector &Im_sum2)
 		{
 			const int ny = range.iy_e-range.iy_0;
 			const int wkr = 2*nkr+1;
@@ -614,23 +609,23 @@ namespace mt
 				int iy_o = 0;
 
 				T sum_v2 = 0;
-				T c = 0; 
+				T sum_ee = 0; 
 				for (; iy < nkr; iy++)
 				{
 					T v = Im_i[ix*ny+iy];
-					kh_sum(sum_v2, v*v, c);
+					host_device_detail::kh_sum(sum_v2, v*v, sum_ee);
 				}
 
 				for (; iy < ny; iy++, iy_o++)
 				{
 					T v = Im_i[ix*ny+iy];
-					kh_sum(sum_v2, v*v, c);
+					host_device_detail::kh_sum(sum_v2, v*v, sum_ee);
 
 					Im_sum2[ix*ny+iy_o] = sum_v2;
 					if (iy + 1 >= wkr)
 					{
 						T v = Im_i[ix*ny+iy_tk];
-						kh_sum(sum_v2, -v*v, c);
+						host_device_detail::kh_sum(sum_v2, -v*v, sum_ee);
 						iy_tk++;
 					}
 				}
@@ -640,46 +635,48 @@ namespace mt
 					Im_sum2[ix*ny+iy_o] = sum_v2;
 
 					T v = Im_i[ix*ny+iy_tk];
-					kh_sum(sum_v2, -v*v, c);
+					host_device_detail::kh_sum(sum_v2, -v*v, sum_ee);
 					iy_tk++;
 				}
 			}
 		};
 
 		// sum
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
 		stream.exec(thr_sum, Im_i, Im_mean);
 
-		Im_t = transpose(stream, grid.ny, grid.nx, Im_mean);
+		Im_t = Im_mean;
+		trs(stream, grid_2d.ny, grid_2d.nx, Im_t);
 
-		stream.set_n_act_stream(grid.ny);
-		stream.set_grid(grid.ny, grid.nx);
+		stream.set_n_act_stream(grid_2d.ny);
+		stream.set_grid(grid_2d.ny, grid_2d.nx);
 		stream.exec(thr_sum, Im_t, Im_mean);
 
-		Im_mean = transpose(stream, grid.nx, grid.ny, Im_mean);
+		trs(stream, grid_2d.nx, grid_2d.ny, Im_mean);
 
 		// sum^2
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
 		stream.exec(thr_sum2, Im_i, Im_var);
 
-		Im_t = transpose(stream, grid.ny, grid.nx, Im_var);
+		Im_t = Im_var;
+		trs(stream, grid_2d.ny, grid_2d.nx, Im_t);
 
-		stream.set_n_act_stream(grid.ny);
-		stream.set_grid(grid.ny, grid.nx);
+		stream.set_n_act_stream(grid_2d.ny);
+		stream.set_grid(grid_2d.ny, grid_2d.nx);
 		stream.exec(thr_sum, Im_t, Im_var);
 
-		Im_var = transpose(stream, grid.nx, grid.ny, Im_var);
+		trs(stream, grid_2d.nx, grid_2d.ny, Im_var);
 
-		for(auto ix=0; ix<grid.nx; ix++)
+		for(auto ix=0; ix<grid_2d.nx; ix++)
 		{
-			for(auto iy=0; iy<grid.ny; iy++)
+			for(auto iy=0; iy<grid_2d.ny; iy++)
 			{
-				int nx = min(ix+nkr+1, grid.nx)-max(ix-nkr, 0);
-				int ny = min(iy+nkr+1, grid.ny)-max(iy-nkr, 0);
+				int nx = min(ix+nkr+1, grid_2d.nx)-max(ix-nkr, 0);
+				int ny = min(iy+nkr+1, grid_2d.ny)-max(iy-nkr, 0);
 
-				int ixy = grid.ind_col(ix, iy);
+				int ixy = grid_2d.ind_col(ix, iy);
 
 				T x_mean = Im_mean[ixy]/(nx*ny);
 				T x_var = Im_var[ixy]/(nx*ny) - x_mean*x_mean;
@@ -691,7 +688,7 @@ namespace mt
 
 		auto v2 = mt::mean(stream, Im_var);
 
-		auto thr_filter_wiener = [&](const Range &range)
+		auto thr_ftr_wiener = [&](const Range_2d &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
@@ -699,17 +696,17 @@ namespace mt
 			}
 		};
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_filter_wiener);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec(thr_ftr_wiener);
 
 		return Im_t;
 	}
 
 	/******************************************************************************/	
 	// median wiener2
-	template<class TVector>
-	void filter_mwiener(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr, TVector &Im_o)
+	template <class TVector>
+	void ftr_mwiener(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, int nkr, TVector &Im_o)
 	{
 		using T = Value_type<TVector>;
 		int nk0 = -nkr;
@@ -719,20 +716,20 @@ namespace mt
 
 		auto krn_median_var = [&](const int &ix_i, const int &iy_i, TVector &Im_i, Vector<T, e_host> &Im_median, Vector<T, e_host> &Im_var)
 		{
-			int ix0 = max(ix_i+nk0, 0);
+			int ix_0 = max(ix_i+nk0, 0);
 			int ixe = min(ix_i+nke, nx_i);
 
-			int iy0 = max(iy_i+nk0, 0);
+			int iy_0 = max(iy_i+nk0, 0);
 			int iye = min(iy_i+nke, ny_i);
 
-			T nxy = (ixe-ix0)*(iye-iy0);
+			T nxy = (ixe-ix_0)*(iye-iy_0);
 			Vector<T, e_host> v(nxy);
 			int iv = 0;
 			T x_mean = 0;
 			T x_var = 0;
-			for (auto ix = ix0; ix < ixe; ix++)
+			for (auto ix = ix_0; ix < ixe; ix++)
 			{
-				for (auto iy = iy0; iy < iye; iy++)
+				for (auto iy = iy_0; iy < iye; iy++)
 				{
 					T x = Im_i[ix*ny_i+iy];
 					v[iv++] = x;
@@ -751,7 +748,7 @@ namespace mt
 			Im_var[ixy] = x_var;
 		};
 
-		auto thr_median_var = [&](const Range &range)
+		auto thr_median_var = [&](const Range_2d &range)
 		{
 			host_detail::matrix_iter(range, krn_median_var, Im_i, Im_median, Im_var);
 		};
@@ -762,7 +759,7 @@ namespace mt
 
 		auto v2 = mt::mean(stream, Im_var);
 
-		auto thr_filter_mwiener = [&](const Range &range)
+		auto thr_ftr_mwiener = [&](const Range_2d &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
@@ -772,13 +769,13 @@ namespace mt
 
 		stream.set_n_act_stream(nx_i);
 		stream.set_grid(nx_i, ny_i);
-		stream.exec(thr_filter_mwiener);
+		stream.exec(thr_ftr_mwiener);
 	}
 
 	/******************************************************************************/
 	// median filter 1d
-	template<class TVector>
-	TVector filter_median_1d(Stream<e_host> &stream, TVector &Im_i, int nkr)
+	template <class TVector>
+	TVector ftr_median_1d(Stream<e_host> &stream, TVector &Im_i, int nkr)
 	{
 		if(nkr<=0)
 		{
@@ -792,17 +789,17 @@ namespace mt
 		int nke = nkr+1;
 		int nx_i = Im_i.size();
 
-		auto thr_filter_median = [&](const Range &range)
+		auto thr_ftr_median = [&](const Range_2d &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
-				int ix0 = max(ixy+nk0, 0);
+				int ix_0 = max(ixy+nk0, 0);
 				int ixe = min(ixy+nke, nx_i);
 
 				TVector v;
-				v.reserve(ixe-ix0);
+				v.reserve(ixe-ix_0);
 
-				for (auto ix = ix0; ix < ixe; ix++)
+				for (auto ix = ix_0; ix < ixe; ix++)
 				{
 					v.push_back(Im_i[ix]);
 				}
@@ -814,14 +811,14 @@ namespace mt
 
 		stream.set_n_act_stream(nx_i);
 		stream.set_grid(nx_i, 1);
-		stream.exec(thr_filter_median);
+		stream.exec(thr_ftr_median);
 
 		return Im_o;
 	}
 
 	// median filter by rows
-	template<class TGrid, class TVector>
-	TVector filter_median_2d_by_row(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr)
+	template <class TGrid, class TVector>
+	TVector ftr_median_2d_br(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im_i, int nkr)
 	{
 		if(nkr<=0)
 		{
@@ -829,43 +826,43 @@ namespace mt
 		}
 
 		using T = Value_type<TVector>;
-		TVector Im_o(grid.nxy());
+		TVector Im_o(grid_2d.nxy());
 
 		int nk0 = -nkr;
 		int nke = nkr+1;
 
-		auto krn_filter_median = [&](const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_o)
+		auto krn_ftr_median = [&](const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_o)
 		{
-			int ix0 = max(ix_i+nk0, 0);
-			int ixe = min(ix_i+nke, grid.nx);
+			int ix_0 = max(ix_i+nk0, 0);
+			int ixe = min(ix_i+nke, grid_2d.nx);
 
 			TVector v;
-			v.reserve(ixe-ix0);
+			v.reserve(ixe-ix_0);
 
-			for (auto ix = ix0; ix < ixe; ix++)
+			for (auto ix = ix_0; ix < ixe; ix++)
 			{
-				v.push_back(Im_i[grid.ind_col(ix, iy_i)]);
+				v.push_back(Im_i[grid_2d.ind_col(ix, iy_i)]);
 			}
 			auto median = v.begin() + v.size()/2;
 			std::nth_element(v.begin(), median, v.end());
-			Im_o[grid.ind_col(ix_i, iy_i)] = *median;
+			Im_o[grid_2d.ind_col(ix_i, iy_i)] = *median;
 		};
 
-		auto thr_filter_median = [&](const Range &range)
+		auto thr_ftr_median = [&](const Range_2d &range)
 		{
-			host_detail::matrix_iter(range, krn_filter_median, Im_i, Im_o);
+			host_detail::matrix_iter(range, krn_ftr_median, Im_i, Im_o);
 		};
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_filter_median);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec(thr_ftr_median);
 
 		return Im_o;
 	}
 
 	// median filter 2d
-	template<class TGrid, class TVector>
-	TVector filter_median_2d(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr)
+	template <class TGrid, class TVector>
+	TVector ftr_median_2d(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im_i, int nkr)
 	{
 		if(nkr<=0)
 		{
@@ -873,60 +870,60 @@ namespace mt
 		}
 
 		using T = Value_type<TVector>;
-		TVector Im_o(grid.nxy());
+		TVector Im_o(grid_2d.nxy());
 
 		int nk0 = -nkr;
 		int nke = nkr+1;
-		auto R2_max = pow(nkr*grid.dRx, 2) + Epsilon<T>::abs;
+		auto R2_max = pow(nkr*grid_2d.dRx, 2) + Epsilon<T>::abs;
 
-		auto krn_filter_median = [&](const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_o)
+		auto krn_ftr_median = [&](const int &ix_i, const int &iy_i, TVector &Im_i, TVector &Im_o)
 		{
-			auto x_i = grid.Rx(ix_i);
-			auto y_i = grid.Ry(iy_i);
+			auto x_i = grid_2d.Rx(ix_i);
+			auto y_i = grid_2d.Ry(iy_i);
 
-			int ix0 = max(ix_i+nk0, 0);
-			int ixe = min(ix_i+nke, grid.nx);
+			int ix_0 = max(ix_i+nk0, 0);
+			int ixe = min(ix_i+nke, grid_2d.nx);
 
-			int iy0 = max(iy_i+nk0, 0);
-			int iye = min(iy_i+nke, grid.ny);
+			int iy_0 = max(iy_i+nk0, 0);
+			int iye = min(iy_i+nke, grid_2d.ny);
 
 			TVector v;
-			v.reserve((ixe-ix0)*(iye-iy0));
+			v.reserve((ixe-ix_0)*(iye-iy_0));
 
-			for (auto ix = ix0; ix < ixe; ix++)
+			for (auto ix = ix_0; ix < ixe; ix++)
 			{
-				for (auto iy = iy0; iy < iye; iy++)
+				for (auto iy = iy_0; iy < iye; iy++)
 				{
-					auto R2 = grid.R2(ix, iy, x_i, y_i);
+					auto R2 = grid_2d.R2(ix, iy, x_i, y_i);
 					if(R2 < R2_max)
 					{
-						v.push_back(Im_i[grid.ind_col(ix, iy)]);
+						v.push_back(Im_i[grid_2d.ind_col(ix, iy)]);
 					}
 				}
 			}
 			auto median = v.begin() + v.size()/2;
 			std::nth_element(v.begin(), median, v.end());
-			Im_o[grid.ind_col(ix_i, iy_i)] = *median;
+			Im_o[grid_2d.ind_col(ix_i, iy_i)] = *median;
 		};
 
-		auto thr_filter_median = [&](const Range &range)
+		auto thr_ftr_median = [&](const Range_2d &range)
 		{
-			host_detail::matrix_iter(range, krn_filter_median, Im_i, Im_o);
+			host_detail::matrix_iter(range, krn_ftr_median, Im_i, Im_o);
 		};
 
-		stream.set_n_act_stream(grid.nx);
-		stream.set_grid(grid.nx, grid.ny);
-		stream.exec(thr_filter_median);
+		stream.set_n_act_stream(grid_2d.nx);
+		stream.set_grid(grid_2d.nx, grid_2d.ny);
+		stream.exec(thr_ftr_median);
 
 		return Im_o;
 	}
 
 	/******************************************************************************/
-	// denoising poisson 
-	template<class TVector>
-	TVector filter_denoising_poisson_1d(Stream<e_host> &stream, TVector &Im_i, int nkr_w, int nkr_m)
+	// den poiss 
+	template <class TVector>
+	TVector ftr_poiss_dnois_1d(Stream<e_host> &stream, TVector &Im_i, int nkr_w, int nkr_m)
 	{
-		if((nkr_w==0)&&(nkr_m==0))
+		if((nkr_w == 0)&&(nkr_m == 0))
 		{
 		 return Im_i;
 		}
@@ -934,22 +931,22 @@ namespace mt
 		auto Im = anscombe_forward(stream, Im_i);
 		if(nkr_w>0)
 		{
-			Im = filter_wiener_1d(stream, Im, nkr_w);
+			Im = ftr_wiener_1d(stream, Im, nkr_w);
 		}
 		if(nkr_m>0)
 		{
-			Im = filter_median_1d(stream, Im, nkr_m);
+			Im = ftr_median_1d(stream, Im, nkr_m);
 		}
 		Im = anscombe_inverse(stream, Im);
 
 		return Im;
 	}
 	
-	// denoising poisson 
-	template<class TGrid, class TVector>
-	TVector filter_denoising_poisson_2d_by_row(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr_w, int nkr_m)
+	// den poiss 
+	template <class TGrid, class TVector>
+	TVector ftr_poiss_dnois_2d_br(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im_i, int nkr_w, int nkr_m)
 	{
-		if((nkr_w==0)&&(nkr_m==0))
+		if((nkr_w == 0)&&(nkr_m == 0))
 		{
 			return Im_i;
 		}
@@ -957,22 +954,22 @@ namespace mt
 		auto Im = anscombe_forward(stream, Im_i);
 		if(nkr_w>0)
 		{
-			Im = filter_wiener_2d_by_row(stream, grid, Im, nkr_w);
+			Im = ftr_wiener_2d_br(stream, grid_2d, Im, nkr_w);
 		}
 		if(nkr_m>0)
 		{
-			Im = filter_median_2d_by_row(stream, grid, Im, nkr_m);
+			Im = ftr_median_2d_br(stream, grid_2d, Im, nkr_m);
 		}
 		Im = anscombe_inverse(stream, Im);
 
 		return Im;
 	}
 
-	// denoising poisson 
-	template<class TGrid, class TVector>
-	TVector filter_denoising_poisson_2d(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr_w, int nkr_m)
+	// den poiss 
+	template <class TGrid, class TVector>
+	TVector ftr_poiss_dnois_2d(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im_i, int nkr_w, int nkr_m)
 	{
-		if((nkr_w==0)&&(nkr_m==0))
+		if((nkr_w == 0)&&(nkr_m == 0))
 		{
 			return Im_i;
 		}
@@ -980,11 +977,11 @@ namespace mt
 		auto Im = anscombe_forward(stream, Im_i);
 		if(nkr_w>0)
 		{
-			Im = filter_wiener_2d(stream, grid, Im, nkr_w);
+			Im = ftr_wiener_2d(stream, grid_2d, Im, nkr_w);
 		}
 		if(nkr_m>0)
 		{
-			Im = filter_median_2d(stream, grid, Im, nkr_m);
+			Im = ftr_median_2d(stream, grid_2d, Im, nkr_m);
 		}
 		Im = anscombe_inverse(stream, Im);
 
@@ -994,35 +991,35 @@ namespace mt
 	/******************************************************************************/
 
 	// get peak signal to noise ratio PSNR 
-	template<class TGrid, class TVector>
-	Value_type<TVector> get_PSNR(Stream<e_host> &stream, TGrid &grid, TVector &Im_i, int nkr_w, int nkr_m)
+	template <class TGrid, class TVector>
+	Value_type<TVector> get_PSNR(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im_i, int nkr_w, int nkr_m)
 	{
-		auto Im_s = filter_denoising_poisson_2d(stream, grid, Im_i, nkr_w, nkr_m);
+		auto Im_s = ftr_poiss_dnois_2d(stream, grid_2d, Im_i, nkr_w, nkr_m);
 
 		auto var_signal = variance(stream, Im_s);
 
 		add_scale(stream, 1, Im_i, -1, Im_s, Im_s);
-		auto var_noise = variance(stream, Im_s);
+		auto var_no = variance(stream, Im_s);
 
 		// peak signal to noise ratio
-		return var_noise/var_signal;
+		return var_no/var_signal;
 	}
 
 	// get peak signal to noise ratio PSNR 
-	template<class TVector>
+	template <class TVector>
 	Value_type<TVector> get_PSNR(Stream<e_host> &stream, TVector &Im_i, TVector &Im_d)
 	{
 		auto var_signal = variance(stream, Im_d);
 		TVector Im_n(Im_d.size());
 		add_scale(stream, 1, Im_i, -1, Im_d, Im_n);
-		auto var_noise = variance(stream, Im_n);
+		auto var_no = variance(stream, Im_n);
 
 		// peak signal to noise ratio
-		return var_noise/var_signal;
+		return var_no/var_signal;
 	}
 
 	// scale_image
-	template<class TVector>
+	template <class TVector>
 	TVector scale_image_mean(Stream<e_host> &stream, int ny_i, int nx_i, TVector &Im_i, Value_type<TVector> shrink_factor, int &ny_o, int &nx_o)
 	{
 		using T = Value_type<TVector>;
@@ -1047,25 +1044,25 @@ namespace mt
 			auto ix_t = static_cast<int>(ix_i/shrink_factor);
 			auto iy_t = static_cast<int>(iy_i/shrink_factor);
 
-			int ix0 = max(ix_t+nk0, 0);
+			int ix_0 = max(ix_t+nk0, 0);
 			int ixe = min(ix_t+nke, nx_i);
 
-			int iy0 = max(iy_t+nk0, 0);
+			int iy_0 = max(iy_t+nk0, 0);
 			int iye = min(iy_t+nke, ny_i);
 
 			T sum = 0;
-			for (auto ix = ix0; ix < ixe; ix++)
+			for (auto ix = ix_0; ix < ixe; ix++)
 			{
-				for (auto iy = iy0; iy < iye; iy++)
+				for (auto iy = iy_0; iy < iye; iy++)
 				{
 					sum += Im_i[ix*ny_i+iy];
 				}
 			}
 
-			Im_o[ix_i*ny_o+iy_i] = sum/((ixe-ix0)*(iye-iy0));
+			Im_o[ix_i*ny_o+iy_i] = sum/((ixe-ix_0)*(iye-iy_0));
 		};
 
-		auto thr_scale_image = [&](const Range &range)
+		auto thr_scale_image = [&](const Range_2d &range)
 		{
 			host_detail::matrix_iter(range, krn_scale_image, Im_i, Im_o);
 		};
@@ -1078,26 +1075,26 @@ namespace mt
 	}
 
 	// copy image
-	template<class TVector>
-	TVector copy_image(Stream<e_host> &stream, int ny_src, int nx_src, TVector &Im_src, int iy0, int ix0, int iye, int ixe, int ny_dst, int nx_dst)
+	template <class TVector>
+	TVector copy_image(Stream<e_host> &stream, int ny_src, int nx_src, TVector &Im_src, int iy_0, int ix_0, int iye, int ixe, int ny_dst, int nx_dst)
 	{
 		TVector Im_dst(nx_dst*ny_dst);
 
 		int nx = min(nx_src, nx_dst);
 		ixe = (ixe<nx)?ixe+1:nx;
-		nx = ixe-ix0;
+		nx = ixe-ix_0;
 
 		int ny = min(ny_src, ny_dst);
 		iye = (iye<ny)?iye+1:ny;
-		ny = iye-iy0;
+		ny = iye-iy_0;
 
-		auto thr_copy_image = [&](const Range &range)
+		auto thr_copy_image = [&](const Range_2d &range)
 		{
 			for (auto ix = range.ix_0; ix < range.ix_e; ix++)
 			{
 				for (auto iy = range.iy_0; iy < range.iy_e; iy++)
 				{
-					Im_dst[ix*ny_dst+iy] = Im_src[(ix+ix0)*ny_src+(iy+iy0)];
+					Im_dst[ix*ny_dst+iy] = Im_src[(ix+ix_0)*ny_src+(iy+iy_0)];
 				}
 			}
 		};
@@ -1110,50 +1107,50 @@ namespace mt
 	}
 
 	// extract shape
-	template<class TGrid, class TVector>
-	TVector extract_shape(Stream<e_host> &stream, FFT2<Value_type<TGrid>, e_host> &fft2, TGrid grid, TVector &Im_i)
+	template <class TGrid, class TVector>
+	TVector extract_shape(Stream<e_host> &stream, FFT<Value_type<TGrid>, e_host> &fft_2d, TGrid grid_2d, TVector &Im_i)
 	{
 		using T = Value_type<TVector>;
 
 		T sigma = 1.0;
 		T shrink = 0.5;
-		T dR = grid.dR_min();
+		T dR = grid_2d.dR_min();
 
 		int nx_d = 1;
 		int ny_d = 1;
 
 		// scale_image image
-		auto Im_d = scale_image_mean(stream, grid.ny, grid.nx, Im_i, shrink, ny_d, nx_d);
+		auto Im_d = scale_image_mean(stream, grid_2d.ny, grid_2d.nx, Im_i, shrink, ny_d, nx_d);
 
-		// Otsu threshold
+		// Otsu thr
 		int nbins = 256;
-		auto threshold = mt::otsu_threshold(Im_d, nbins);
+		auto thr = mt::otsu_thr(Im_d, nbins);
 
-		// binarization
-		Im_d = binarization(stream, Im_d, threshold);
+		// binarize
+		Im_d = binarize(stream, Im_d, thr);
 
 		// copy to the first quadrant
-		auto Im_o = copy_image(stream, ny_d, nx_d, Im_d, 0, 0, ny_d-1, nx_d-1, grid.ny, grid.nx);
+		auto Im_o = copy_image(stream, ny_d, nx_d, Im_d, 0, 0, ny_d-1, nx_d-1, grid_2d.ny, grid_2d.nx);
 
 		// dilate binary image
 		int nkr = static_cast<int>(0.5*sigma/dR);
-		Im_o = morp_g_dilate(stream, grid.ny, grid.nx, Im_o, nkr);
+		Im_o = morp_g_dilate(stream, grid_2d.ny, grid_2d.nx, Im_o, nkr);
 
 		// gaussian convolution
-		grid.set_input_data(grid.nx, grid.ny, 2*grid.lx, 2*grid.ly, 0.5, false, true);
-		Im_o = gaussian_conv(stream, fft2, grid, sigma, Im_o);
+		Gauss_Cv_2d<T, e_host> gauss_cv_2d(&stream, &fft_2d, grid_2d);
+		gauss_cv_2d(sigma, Im_o);
 
-		// binarization
-		Im_o = binarization(stream, Im_o, 0.01);
+		// binarize
+		Im_o = binarize(stream, Im_o, 0.01);
 
 		// copy to the first quadrant
-		Im_d = copy_image(stream, grid.ny, grid.nx, Im_o, 0, 0, ny_d-1, nx_d-1, ny_d, nx_d);
+		Im_d = copy_image(stream, grid_2d.ny, grid_2d.nx, Im_o, 0, 0, ny_d-1, nx_d-1, ny_d, nx_d);
 
 		// scale image
-		Im_o = scale_image_mean(stream, ny_d, nx_d, Im_d, 1.0/shrink, grid.ny, grid.nx);
+		Im_o = scale_image_mean(stream, ny_d, nx_d, Im_d, 1.0/shrink, grid_2d.ny, grid_2d.nx);
 
-		// binarization
-		Im_o = binarization(stream, Im_o, 0.5);
+		// binarize
+		Im_o = binarize(stream, Im_o, 0.5);
 
 		return Im_o;
 	}

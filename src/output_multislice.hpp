@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,14 +13,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef OUTPUT_MULTISLICE_H
 #define OUTPUT_MULTISLICE_H
 
 #include <algorithm>
-#include <vector>
 
 #include "math.cuh"
 #include "types.cuh"
@@ -34,385 +33,172 @@
 
 namespace mt
 {
-	template<class TVector_r, class TVector_c>
-	class Output_Multislice: public Input_Multislice<Value_type<TVector_r>>
+	inline
+	bool is_ot_image_tot_coh(const eTEM_Output_Type &output_type)
+	{
+		return output_type==mt::eTEMOT_image_tot_coh;
+	}
+
+	inline
+	bool is_ot_image_tot(const eTEM_Output_Type &output_type)
+	{
+		return output_type==mt::eTEMOT_image_tot;
+	}
+
+	inline
+	bool is_ot_m2psi_tot_coh(const eTEM_Output_Type &output_type)
+	{
+		return output_type==mt::eTEMOT_m2psi_tot_coh;
+	}
+
+	inline
+	bool is_ot_m2psi_tot(const eTEM_Output_Type &output_type)
+	{
+		return output_type==mt::eTEMOT_m2psi_tot;
+	}
+
+	inline
+	bool is_ot_m2psi_tot_psi_coh(const eTEM_Output_Type &output_type)
+	{
+		return output_type==mt::eTEMOT_m2psi_tot_psi_coh;
+	}
+
+	inline
+	bool is_ot_psi_coh(const eTEM_Output_Type &output_type)
+	{
+		return output_type==mt::eTEMOT_psi_coh;
+	}
+
+	inline
+	bool is_ot_psi_0(const eTEM_Output_Type &output_type)
+	{
+		return output_type==mt::eTEMOT_psi_0;
+	}
+
+	inline
+	bool is_ot_V(const eTEM_Output_Type &output_type)
+	{
+		return output_type==mt::eTEMOT_V;
+	}
+
+	inline
+	bool is_ot_trans(const eTEM_Output_Type &output_type)
+	{
+		return output_type==mt::eTEMOT_trans;
+	}
+
+	/**************************************************************************************/
+	template <class T>
+	class Output_Multislice: public Input_Multislice<T>
 	{
 		public:
-			using value_type_r = Value_type<TVector_r>;
-			using value_type_c = Value_type<TVector_c>;
-			static const bool is_vector = is_host_device_vector<TVector_c>::value;
+			using T_r = T;
+			using T_c = complex<T>;
 
-			Output_Multislice(): Input_Multislice<value_type_r>(), output_type(0), ndetector(0), nx(0), ny(0), dx(0), dy(0), dr(0){}
+			using TVector_r = host_vector<T>;
+			using TVector_c = host_vector<complex<T>>;
 
-			template<class TInput_Multislice>
-			void set_input_data(TInput_Multislice *input_multislice_i)
+			Output_Multislice(): Input_Multislice<T_r>(), output_type(eTEMOT_m2psi_tot), ndetector(0), nx(0), ny(0), dx(0), dy(0), dr(0){}
+
+			template <class TOutput_Multislice>
+			void assign(TOutput_Multislice &output_multislice)
 			{ 
-				set_input_multislice(*input_multislice_i);
+				assign_input_multislice(output_multislice);
 
-				stream.resize(this->cpu_nthread);
+				output_type = output_multislice.output_type;
+				ndetector = output_multislice.ndetector;
+				nx = output_multislice.nx;
+				ny = output_multislice.ny;
+				dx = output_multislice.dx;
+				dy = output_multislice.dy;
+				dr = output_multislice.dr;
 
-				// 1:(image_tot, image_coh); 2:(image_tot); 3:(m2psi_tot, m2psi_coh); 4:(m2psi_tot); 5:(m2psi_tot, psi_coh); 6:(psi_coh); 7:(psi_0); 8:(V); 9:(trans)
-				switch(output_type)
+				x = output_multislice.x;
+				y = output_multislice.y;
+				r = output_multislice.r;
+
+				image_tot.resize(output_multislice.image_tot.size());
+				for(auto ithk = 0; ithk < output_multislice.image_tot.size(); ithk++)
 				{
-					case 1:
-					{
-						image_tot.resize(this->thickness.size());
-						image_coh.resize(this->thickness.size());
-						for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
-						{
-							image_tot[ithk].image.resize(ndetector);
-							image_coh[ithk].image.resize(ndetector);
-						}
-						psi_coh.resize(this->thickness.size());
-					}
-					break;
-					case 2:
-					{
-						image_tot.resize(this->thickness.size());
-						for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
-						{
-							image_tot[ithk].image.resize(ndetector);
-						}
-					}
-					break;
-					case 3:
-					{
-						m2psi_tot.resize(this->thickness.size());
-						m2psi_coh.resize(this->thickness.size());
-						psi_coh.resize(this->thickness.size());
-					}
-					break;
-					case 4:
-					{
-						m2psi_tot.resize(this->thickness.size());
-					}
-					break;
-					case 5:
-					{
-						m2psi_tot.resize(this->thickness.size());
-						psi_coh.resize(this->thickness.size());										
-					}
-					break;
-					case 6:
-					{
-						psi_coh.resize(this->thickness.size());					
-					}
-					break;
-					case 7:
-					{
-						psi_0.resize(this->thickness.size());
-					}
-					break;
-					case 8:
-					{
-						V.resize(this->thickness.size());
-					}
-					break;
-					case 9:
-					{
-						trans.resize(this->thickness.size());
-					}
-					break;
+					 image_tot[ithk].image.resize(output_multislice.image_tot[ithk].image.size());
+					 for(auto idet = 0; idet < output_multislice.image_tot[ithk].image.size(); idet++)
+					 {
+						image_tot[ithk].image[idet] = output_multislice.image_tot[ithk].image[idet];
+					 }
 				}
 
-				if(is_vector)
+				image_coh.resize(output_multislice.image_coh.size());
+				for(auto ithk = 0; ithk < output_multislice.image_coh.size(); ithk++)
 				{
-					for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
+					image_coh[ithk].image.resize(output_multislice.image_coh[ithk].image.size());
+					for(auto idet = 0; idet < output_multislice.image_coh[ithk].image.size(); idet++)
 					{
-						switch(output_type)
-						{
-							case 1:
-							{
-								for(auto idet = 0; idet < ndetector; idet++)
-								{
-									image_tot[ithk].image[idet].resize(nxy());
-									image_coh[ithk].image[idet].resize(nxy());
-								}
-								psi_coh[ithk].resize(nxy());
-							}
-							break;
-							case 2:
-							{
-								for(auto idet = 0; idet < ndetector; idet++)
-								{
-									image_tot[ithk].image[idet].resize(nxy());
-								}
-							}
-							break;
-							case 3:
-							{
-								m2psi_tot[ithk].resize(nxy());
-								m2psi_coh[ithk].resize(nxy());
-								psi_coh[ithk].resize(nxy());
-							}
-							break;
-							case 4:
-							{
-								m2psi_tot[ithk].resize(nxy());
-							}
-							break;
-							case 5:
-							{
-								m2psi_tot[ithk].resize(nxy());
-								psi_coh[ithk].resize(nxy());							
-							}
-							break;
-							case 6:
-							{
-								psi_coh[ithk].resize(nxy());							
-							}
-							break;
-							case 7:
-							{
-								psi_0[ithk].resize(nxy());
-							}
-							break;
-							case 8:
-							{
-								V[ithk].resize(nxy());
-							}
-							break;
-							case 9:
-							{
-								trans[ithk].resize(nxy());
-							}
-							break;
-						}
+						image_coh[ithk].image[idet] = output_multislice.image_coh[ithk].image[idet];
 					}
 				}
-				else
+
+				m2psi_tot.resize(output_multislice.m2psi_tot.size());
+				for(auto ithk = 0; ithk < output_multislice.m2psi_tot.size(); ithk++)
 				{
-					if((output_type == 1)||(output_type == 3))
-					{
-						for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
-						{
-							psi_coh[ithk].resize(nxy());
-						}
-					}
+					m2psi_tot[ithk] = output_multislice.m2psi_tot[ithk];
+				}
+
+				m2psi_coh.resize(output_multislice.m2psi_coh.size());
+				for(auto ithk = 0; ithk < output_multislice.m2psi_coh.size(); ithk++)
+				{
+					m2psi_coh[ithk] = output_multislice.m2psi_coh[ithk];
+				}
+
+				psi_coh.resize(output_multislice.psi_coh.size());
+				for(auto ithk = 0; ithk < output_multislice.psi_coh.size(); ithk++)
+				{
+					psi_coh[ithk] = output_multislice.psi_coh[ithk];
+				}
+
+				V.resize(output_multislice.V.size());
+				for(auto ithk = 0; ithk < output_multislice.V.size(); ithk++)
+				{
+					V[ithk] = output_multislice.V[ithk];
+				}
+
+				trans.resize(output_multislice.trans.size());
+				for(auto ithk = 0; ithk < output_multislice.trans.size(); ithk++)
+				{
+					trans[ithk] = output_multislice.trans[ithk];
+				}
+
+				psi_0.resize(output_multislice.psi_0.size());
+				for(auto ithk = 0; ithk < output_multislice.psi_0.size(); ithk++)
+				{
+					psi_0[ithk] = output_multislice.psi_0[ithk];
 				}
 			}
 
-			void init()
-			{ 
-				for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
-				{
-					switch(output_type)
-					{
-						case 1:
-						{
-							for(auto idet = 0; idet < image_tot[ithk].image.size(); idet++)
-							{
-								mt::fill(stream, image_tot[ithk].image[idet], 0);
-								mt::fill(stream, image_coh[ithk].image[idet], 0);
-							}
-							mt::fill(stream, psi_coh[ithk], 0);
-						}
-						break;
-						case 2:
-						{
-							for(auto idet = 0; idet < image_tot[ithk].image.size(); idet++)
-							{
-								mt::fill(stream, image_tot[ithk].image[idet], 0);
-							}
-						}
-						break;
-						case 3:
-						{
-							mt::fill(stream, m2psi_tot[ithk], 0);
-							mt::fill(stream, psi_coh[ithk], 0);
-						}
-						break;
-						case 4:
-						{
-							mt::fill(stream, m2psi_tot[ithk], 0);
-						}
-						break;
-						case 5:
-						{
-							mt::fill(stream, m2psi_tot[ithk], 0);
-							mt::fill(stream, psi_coh[ithk], 0);
-						}
-						break;
-						case 6:
-						{
-							mt::fill(stream, psi_coh[ithk], 0);							
-						}
-						break;
-						case 7:
-						{
-							mt::fill(stream, psi_0[ithk], 0);
-						}
-						break;
-						case 8:
-						{
-							mt::fill(stream, V[ithk], 0);
-						}
-						break;
-						case 9:
-						{
-							mt::fill(stream, trans[ithk], 0);
-						}
-						break;
-					}
-				}
-			}
-
-			void shift()
-			{ 
-				for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
-				{
-					switch(output_type)
-					{
-						case 3:
-						{
-							mt::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
-							mt::fft2_shift(stream, this->grid, m2psi_coh[ithk]);
-						}
-						break;
-						case 4:
-						{
-							mt::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
-						}
-						break;
-						case 5:
-						{
-							mt::fft2_shift(stream, this->grid, m2psi_tot[ithk]);
-							mt::fft2_shift(stream, this->grid, psi_coh[ithk]);
-						}
-						break;
-						case 6:
-						{
-							mt::fft2_shift(stream, this->grid, psi_coh[ithk]);							
-						}
-						break;
-						case 7:
-						{
-							mt::fft2_shift(stream, this->grid, psi_0[ithk]);
-						}
-						break;
-						case 8:
-						{
-							mt::fft2_shift(stream, this->grid, V[ithk]);
-						}
-						break;
-						case 9:
-						{
-							mt::fft2_shift(stream, this->grid, trans[ithk]);
-						}
-						break;
-					}
-				}
-			}
-
-			void clear_temporal_data()
+			template <class TOutput_Multislice> 
+			Output_Multislice<T>& operator=(TOutput_Multislice &output_multislice)
 			{
-				if((output_type == 1)||(output_type == 3))
-				{
-					for(auto ithk = 0; ithk < this->thickness.size(); ithk++)
-					{
-						psi_coh[ithk].clear();
-					}
-
-					psi_coh.clear();
-					psi_coh.shrink_to_fit();
-				}
+				assign(output_multislice);
+				return *this; 
 			}
 
-			int nxy() const { return nx*ny; }
-
-			bool is_grid_FS() const
-			{
-				return this->is_CBED() || this->is_ED() || this->is_PED() || this->is_EWFS() ||
-					this->is_IWFS() || this->is_PPFS() || this->is_TFFS(); 
-			}
-
-			bool is_grid_RS() const
-			{
-				return !is_grid_FS();
-			}
-
-			// 1:(image_tot, image_coh); 2:(image_tot); 3:(m2psi_tot, m2psi_coh); 4:(m2psi_tot); 5:(m2psi_tot, psi_coh); 6:(psi_coh); 7:(psi_0); 8:(V); 9:(trans)
-			int output_type;	
-			int ndetector;
-			int nx;
-			int ny;
-			value_type_r dx;
-			value_type_r dy;
-			value_type_r dr;
-
-			Vector<value_type_r, e_host> x;
-			Vector<value_type_r, e_host> y;
-			Vector<value_type_r, e_host> r;
-
-			Vector<Det_Int<TVector_r>, e_host> image_tot;
-			Vector<Det_Int<TVector_r>, e_host> image_coh;
-			Vector<TVector_r, e_host> m2psi_tot;
-			Vector<TVector_r, e_host> m2psi_coh;
-			Vector<TVector_c, e_host> psi_coh;
-			Vector<TVector_r, e_host> V;
-			Vector<TVector_c, e_host> trans;
-			Vector<TVector_c, e_host> psi_0;
-
-			Stream<e_host> stream;
-		private:
-			template<class TInput_Multislice>
-			void set_input_multislice(TInput_Multislice &input_multislice)
+			void clear()
 			{ 
-				this->precision = input_multislice.precision;
-				this->device = input_multislice.device;
-				this->cpu_ncores = input_multislice.cpu_ncores;
-				this->cpu_nthread = input_multislice.cpu_nthread;
-				this->gpu_device = input_multislice.gpu_device;
-				this->gpu_nstream = input_multislice.gpu_nstream;
-				this->simulation_type = input_multislice.simulation_type;
-				this->phonon_model = input_multislice.phonon_model;
-				this->interaction_model = input_multislice.interaction_model;
-				this->potential_slicing = input_multislice.potential_slicing;
-				this->potential_type = input_multislice.potential_type;
+				output_type = eTEMOT_m2psi_tot;	
+				ndetector = 0;
+				nx = 0;
+				ny = 0;
+				dx = 0;
+				dy = 0;
+				dr = 0;
 
-				this->fp_dim = input_multislice.fp_dim;
-				this->fp_dist = input_multislice.fp_dist;
-				this->fp_seed = input_multislice.fp_seed;
-				this->fp_single_conf = input_multislice.fp_single_conf;
-				this->fp_nconf = input_multislice.fp_nconf;
+				x.clear();
+				x.shrink_to_fit();
 
-				this->tm_active = input_multislice.tm_active;
-				this->tm_theta = input_multislice.tm_theta;
-				this->tm_u0 = input_multislice.tm_u0;
-				this->tm_rot_point_type = input_multislice.tm_rot_point_type;
-				this->tm_p0 = input_multislice.tm_p0;
+				y.clear();
+				y.shrink_to_fit();
 
-				this->illumination_model = input_multislice.illumination_model;
-				this->temporal_spatial_incoh = input_multislice.temporal_spatial_incoh;
-				this->thickness_type = input_multislice.thickness_type;
-				this->thickness = input_multislice.thickness;
-				this->operation_mode = input_multislice.operation_mode;
-				this->coherent_contribution = input_multislice.coherent_contribution;
-				this->slice_storage = input_multislice.slice_storage;
-				this->E_0 = input_multislice.E_0;
-				this->theta = input_multislice.theta;
-				this->phi = input_multislice.phi;
-				this->grid = input_multislice.grid;
-				this->Vrl = input_multislice.Vrl;
-				this->nR = input_multislice.nR;
-				this->iw_type = input_multislice.iw_type;
-				// this->iw_psi = input_multislice.iw_psi;
-				this->iw_x = input_multislice.iw_x;
-				this->iw_y = input_multislice.iw_y;
-				this->cond_lens = input_multislice.cond_lens;
-				this->obj_lens = input_multislice.obj_lens;
-				this->is_crystal = input_multislice.is_crystal;
-				// this->atoms = input_multislice.atoms;
-				this->eels_fr = input_multislice.eels_fr;
-				this->scanning = input_multislice.scanning;
-				// this->detector = input_multislice.detector;
-				ndetector = (input_multislice.is_EELS())?1:input_multislice.detector.size();
-				this->beam_x = input_multislice.beam_x;
-				this->beam_y = input_multislice.beam_y;
-				this->iscan = input_multislice.iscan;
-				this->islice = input_multislice.islice;
-				this->dp_Shift = input_multislice.dp_Shift;
-				this->nstream = input_multislice.nstream;
+				r.clear();
+				r.shrink_to_fit();
 
 				image_tot.clear();
 				image_tot.shrink_to_fit();
@@ -437,7 +223,483 @@ namespace mt
 
 				psi_0.clear();
 				psi_0.shrink_to_fit();
+			}
+
+			template <class TInput_Multislice>
+			void set_input_data(TInput_Multislice *input_multislice)
+			{ 
+				clear();
+
+				stream.resize(1);
+
+				assign_input_multislice(*input_multislice);
+
+				ndetector = (this->is_EELS())?1:this->detector.size();
 				
+				set_output_grid();
+
+				set_output_type();
+
+				switch(output_type)
+				{
+					case eTEMOT_image_tot_coh:
+					{
+						image_tot.resize(this->thick.size());
+						image_coh.resize(this->thick.size());
+						psi_coh.resize(this->thick.size());
+
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							image_tot[ithk].image.resize(ndetector);
+							image_coh[ithk].image.resize(ndetector);
+
+							for(auto idet = 0; idet < ndetector; idet++)
+							{
+								image_tot[ithk].image[idet].resize(nxy());
+								image_coh[ithk].image[idet].resize(nxy());
+
+								mt::fill(stream, image_tot[ithk].image[idet], T_r(0));
+								mt::fill(stream, image_coh[ithk].image[idet], T_r(0));
+							}
+
+							psi_coh[ithk].resize(this->grid_2d.nxy());
+							mt::fill(stream, psi_coh[ithk], T_c(0));
+						}
+					}
+					break;
+					case eTEMOT_image_tot:
+					{
+						image_tot.resize(this->thick.size());
+
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							image_tot[ithk].image.resize(ndetector);
+
+							for(auto idet = 0; idet < ndetector; idet++)
+							{
+								image_tot[ithk].image[idet].resize(nxy());
+
+								mt::fill(stream, image_tot[ithk].image[idet], T_r(0));
+							}
+						}
+					}
+					break;
+					case eTEMOT_m2psi_tot_coh:
+					{
+						m2psi_tot.resize(this->thick.size());
+						m2psi_coh.resize(this->thick.size());
+						psi_coh.resize(this->thick.size());
+
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							m2psi_tot[ithk].resize(nxy());
+							m2psi_coh[ithk].resize(nxy());
+							psi_coh[ithk].resize(nxy());
+
+							mt::fill(stream, m2psi_tot[ithk], T_r(0));
+							mt::fill(stream, m2psi_coh[ithk], T_r(0));
+							mt::fill(stream, psi_coh[ithk], T_c(0));
+						}
+					}
+					break;
+					case eTEMOT_m2psi_tot:
+					{
+						m2psi_tot.resize(this->thick.size());
+
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							m2psi_tot[ithk].resize(nxy());
+
+							mt::fill(stream, m2psi_tot[ithk], T_r(0));
+						}
+					}
+					break;
+					case eTEMOT_m2psi_tot_psi_coh:
+					{
+						m2psi_tot.resize(this->thick.size());
+						psi_coh.resize(this->thick.size());		
+
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							m2psi_tot[ithk].resize(nxy());
+							psi_coh[ithk].resize(nxy());
+
+							mt::fill(stream, m2psi_tot[ithk], T_r(0));
+							mt::fill(stream, psi_coh[ithk], T_c(0));
+						}
+					}
+					break;
+					case eTEMOT_psi_coh:
+					{
+						psi_coh.resize(this->thick.size());		
+
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							psi_coh[ithk].resize(nxy());
+
+							mt::fill(stream, psi_coh[ithk], T_c(0));
+						}
+					}
+					break;
+					case eTEMOT_psi_0:
+					{
+						psi_0.resize(this->thick.size());
+
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							psi_0[ithk].resize(nxy());
+
+							mt::fill(stream, psi_0[ithk], T_c(0));
+						}
+					}
+					break;
+					case eTEMOT_V:
+					{
+						V.resize(this->thick.size());
+
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							V[ithk].resize(nxy());
+
+							mt::fill(stream, V[ithk], T_r(0));
+						}
+					}
+					break;
+					case eTEMOT_trans:
+					{
+						trans.resize(this->thick.size());
+
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							trans[ithk].resize(nxy());
+
+							mt::fill(stream, trans[ithk], T_c(0));
+						}
+					}
+					break;
+				}
+			}
+
+			void init()
+			{ 
+				switch(output_type)
+				{
+					case eTEMOT_image_tot_coh:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							for(auto idet = 0; idet < image_tot[ithk].image.size(); idet++)
+							{
+								mt::fill(stream, image_tot[ithk].image[idet], T_r(0));
+								mt::fill(stream, image_coh[ithk].image[idet], T_r(0));
+							}
+							mt::fill(stream, psi_coh[ithk], 0);
+						}
+					}
+					break;
+					case eTEMOT_image_tot:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							for(auto idet = 0; idet < image_tot[ithk].image.size(); idet++)
+							{
+								mt::fill(stream, image_tot[ithk].image[idet], T_r(0));
+							}
+						}
+					}
+					break;
+					case eTEMOT_m2psi_tot_coh:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fill(stream, m2psi_tot[ithk], T_r(0));
+							mt::fill(stream, m2psi_coh[ithk], T_r(0));
+							mt::fill(stream, psi_coh[ithk], T_c(0));
+						}
+					}
+					break;
+					case eTEMOT_m2psi_tot:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fill(stream, m2psi_tot[ithk], T_r(0));
+						}
+					}
+					break;
+					case eTEMOT_m2psi_tot_psi_coh:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fill(stream, m2psi_tot[ithk], T_r(0));
+							mt::fill(stream, psi_coh[ithk], T_c(0));
+						}
+					}
+					break;
+					case eTEMOT_psi_coh:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fill(stream, psi_coh[ithk], T_c(0));		
+						}
+					}
+					break;
+					case eTEMOT_psi_0:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fill(stream, psi_0[ithk], T_c(0));
+						}
+					}
+					break;
+					case eTEMOT_V:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fill(stream, V[ithk], T_r(0));
+						}
+					}
+					break;
+					case eTEMOT_trans:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fill(stream, trans[ithk], T_c(0));
+						}
+					}
+					break;
+				}
+			}
+
+			void init_psi_coh()
+			{
+				for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+				{
+					mt::fill(stream, psi_coh[ithk], 0);
+				}
+			}
+
+			void shift()
+			{ 
+				switch(output_type)
+				{
+					case eTEMOT_m2psi_tot_coh:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fft2_shift(stream, this->grid_2d, m2psi_tot[ithk]);
+							mt::fft2_shift(stream, this->grid_2d, m2psi_coh[ithk]);
+						}
+					}
+					break;
+					case eTEMOT_m2psi_tot:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fft2_shift(stream, this->grid_2d, m2psi_tot[ithk]);
+						}
+					}
+					break;
+					case eTEMOT_m2psi_tot_psi_coh:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fft2_shift(stream, this->grid_2d, m2psi_tot[ithk]);
+							mt::fft2_shift(stream, this->grid_2d, psi_coh[ithk]);
+						}
+					}
+					break;
+					case eTEMOT_psi_coh:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fft2_shift(stream, this->grid_2d, psi_coh[ithk]);	
+						}
+					}
+					break;
+					case eTEMOT_psi_0:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fft2_shift(stream, this->grid_2d, psi_0[ithk]);
+						}
+					}
+					break;
+					case eTEMOT_V:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fft2_shift(stream, this->grid_2d, V[ithk]);
+						}
+					}
+					break;
+					case eTEMOT_trans:
+					{
+						for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+						{
+							mt::fft2_shift(stream, this->grid_2d, trans[ithk]);
+						}
+					}
+					break;
+				}
+			}
+
+			void clear_temporal_data()
+			{
+				if(is_ot_image_tot_coh()||is_ot_m2psi_tot_coh())
+				{
+					for(auto ithk = 0; ithk < this->thick.size(); ithk++)
+					{
+						psi_coh[ithk].clear();
+					}
+				}
+			}
+
+			int nxy() const { return nx*ny; }
+
+			/**************************************************************************************/
+			bool is_ot_image_tot_coh() const
+			{
+				return mt::is_ot_image_tot_coh(output_type);
+			}
+
+			inline
+			bool is_ot_image_tot() const
+			{
+				return mt::is_ot_image_tot(output_type);
+			}
+
+			inline
+			bool is_ot_m2psi_tot_coh() const
+			{
+				return mt::is_ot_m2psi_tot_coh(output_type);
+			}
+
+			inline
+			bool is_ot_m2psi_tot() const
+			{
+				return mt::is_ot_m2psi_tot(output_type);
+			}
+
+			inline
+			bool is_ot_m2psi_tot_psi_coh() const
+			{
+				return mt::is_ot_m2psi_tot_psi_coh(output_type);
+			}
+
+			inline
+			bool is_ot_psi_coh() const
+			{
+				return mt::is_ot_psi_coh(output_type);
+			}
+
+			inline
+			bool is_ot_psi_0() const
+			{
+				return mt::is_ot_psi_0(output_type);
+			}
+
+			inline
+			bool is_ot_V() const
+			{
+				return mt::is_ot_V(output_type);
+			}
+
+			inline
+			bool is_ot_trans() const
+			{
+				return mt::is_ot_trans(output_type);
+			}
+
+			host_vector<float> extract_data(ePhonon_Model_Output fp_ctr, eShow_CData show_data, int ithk, int idet=0)
+			{
+				host_vector<float> data(nxy());
+
+				switch(output_type)
+				{
+					case eTEMOT_image_tot_coh:
+					{
+						data = (fp_ctr==eFMO_Total)?image_tot[ithk].image[idet]:image_coh[ithk].image[idet];
+					}
+					break;
+					case eTEMOT_image_tot:
+					{
+						data = image_tot[ithk].image[idet];
+					}
+					break;
+					case eTEMOT_m2psi_tot_coh:
+					{
+						data = (fp_ctr==eFMO_Total)?m2psi_tot[ithk]:m2psi_coh[ithk];
+					}
+					break;
+					case eTEMOT_m2psi_tot:
+					{
+						 data = m2psi_tot[ithk];
+					}
+					break;
+					case eTEMOT_m2psi_tot_psi_coh:
+					{
+						if(fp_ctr==eFMO_Total)
+						{
+							data = m2psi_tot[ithk];
+						}
+						else
+						{
+							from_complex_to_real(show_data, psi_coh[ithk], data);
+						}						
+					}
+					break;
+					case eTEMOT_psi_coh:
+					{
+						from_complex_to_real(show_data, psi_coh[ithk], data);						
+					}
+					break;
+					case eTEMOT_psi_0:
+					{
+						from_complex_to_real(show_data, psi_0[ithk], data);
+					}
+					break;
+					case eTEMOT_V:
+					{
+						data = V[ithk];
+					}
+					break;
+					case eTEMOT_trans:
+					{
+						from_complex_to_real(show_data, trans[ithk], data);	
+					}
+					break;
+				}
+
+				return data;
+			}
+
+			eTEM_Output_Type output_type;	
+
+			int ndetector;
+			int nx;
+			int ny;
+			T_r dx;
+			T_r dy;
+			T_r dr;
+
+			host_vector<T_r> x;
+			host_vector<T_r> y;
+			host_vector<T_r> r;
+
+			host_vector<Det_Int<TVector_r>> image_tot;
+			host_vector<Det_Int<TVector_r>> image_coh;
+			host_vector<TVector_r> m2psi_tot;
+			host_vector<TVector_r> m2psi_coh;
+			host_vector<TVector_c> psi_coh;
+			host_vector<TVector_r> V;
+			host_vector<TVector_c> trans;
+			host_vector<TVector_c> psi_0;
+
+			Stream<e_host> stream;
+		private:
+
+			void set_output_grid()
+			{
 				if(this->is_STEM() || this->is_EELS())
 				{
 					nx = this->scanning.nx;
@@ -451,61 +713,133 @@ namespace mt
 				}
 				else
 				{
-					nx = this->grid.nx;
-					ny = this->grid.ny;
-					dx = (is_grid_RS())?this->grid.dRx:this->grid.dgx;
-					dy = (is_grid_RS())?this->grid.dRy:this->grid.dgy;
+					nx = this->grid_2d.nx;
+					ny = this->grid_2d.ny;
+					const bool is_RS = this->is_grid_RS();
+					dx = (is_RS)?this->grid_2d.dRx:this->grid_2d.dgx;
+					dy = (is_RS)?this->grid_2d.dRy:this->grid_2d.dgy;
 
 					x.resize(nx);
 					y.resize(ny);
 
 					for(auto ix = 0; ix<nx; ix++)
 					{
-						x[ix] = (is_grid_RS())?this->grid.Rx(ix):this->grid.gx(ix);
+						x[ix] = (is_RS)?this->grid_2d.Rx(ix):this->grid_2d.gx(ix);
 					}
+
 					for(auto iy = 0; iy<ny; iy++)
 					{
-						y[iy] = (is_grid_RS())?this->grid.Ry(iy):this->grid.gy(iy);
+						y[iy] = (is_RS)?this->grid_2d.Ry(iy):this->grid_2d.gy(iy);
 					}
 				}
+			}
 
-				// 1:(image_tot, image_coh); 2:(image_tot); 3:(m2psi_tot, m2psi_coh); 4:(m2psi_tot); 5:(m2psi_tot, psi_coh); 6:(psi_coh); 7:(psi_0); 8:(V); 9:(trans)
+			// 1:(image_tot, image_coh); 2:(image_tot); 3:(m2psi_tot, m2psi_coh); 4:(m2psi_tot); 
+			// 5:(m2psi_tot, psi_coh); 6:(psi_coh); 7:(psi_0); 8:(V); 9:(trans)
+			void set_output_type()
+			{
 				if(this->is_STEM() || this->is_EELS())
 				{
-					output_type = (this->coherent_contribution)?1:2;
+					output_type = (this->pn_coh_contrib)?eTEMOT_image_tot_coh:eTEMOT_image_tot;
 				}
-				else if(this->is_ISTEM() || this->is_CBED_CBEI() ||this->is_PED_HCI() || 
-					this->is_ED_HRTEM() || this->is_EFTEM())
+				else if(this->is_ISTEM() || this->is_CBED_CBEI() ||this->is_PED_HCTEM() || 
+				this->is_ED_HRTEM() || this->is_EFTEM())
 				{
-					output_type = (this->coherent_contribution)?3:4;
+					output_type = (this->pn_coh_contrib)?eTEMOT_m2psi_tot_coh:eTEMOT_m2psi_tot;
 				}
 				else if(this->is_EWFS_EWRS())
 				{
-					output_type = (this->is_EWFS_EWRS_SC())?6:5;
+					output_type = (this->is_EWFS_EWRS_SC())?eTEMOT_psi_coh:eTEMOT_m2psi_tot_psi_coh;
 				}
 				else if(this->is_PropFS_PropRS())
 				{
-					output_type = 6;
+					output_type = eTEMOT_psi_coh;
 				}
 				else if(this->is_IWFS_IWRS())
 				{
-					output_type = 7;
+					output_type = eTEMOT_psi_0;
 				}
 				else if(this->is_PPFS_PPRS())
 				{
-					output_type = 8;
+					output_type = eTEMOT_V;
 				}
 				else if(this->is_TFFS_TFRS())
 				{
-					output_type = 9;
+					output_type = eTEMOT_trans;
 				}
+			}
+
+			template <class TInput_Multislice>
+			void assign_input_multislice(TInput_Multislice &input_multislice)
+			{ 
+				this->interaction_model = input_multislice.interaction_model;
+				this->potential_type = input_multislice.potential_type;
+
+				this->operation_mode = input_multislice.operation_mode;
+				this->slice_storage = input_multislice.slice_storage;
+				this->reverse_multislice = input_multislice.reverse_multislice;
+				this->mul_sign = input_multislice.mul_sign;
+				this->Vrl = input_multislice.Vrl;
+				this->nR = input_multislice.nR;
+
+				this->pn_model = input_multislice.pn_model;
+				this->pn_coh_contrib = input_multislice.pn_coh_contrib;
+				this->pn_dim = input_multislice.pn_dim;
+				this->fp_dist = input_multislice.fp_dist;
+				this->pn_seed = input_multislice.pn_seed;
+				this->pn_single_conf = input_multislice.pn_single_conf;
+				this->pn_nconf = input_multislice.pn_nconf;
+
+				this->atoms = input_multislice.atoms;
+				this->is_crystal = input_multislice.is_crystal;
+
+				this->spec_rot_theta = input_multislice.spec_rot_theta;
+				this->spec_rot_u0 = input_multislice.spec_rot_u0;
+				this->spec_rot_center_type = input_multislice.spec_rot_center_type;
+				this->spec_rot_center_p = input_multislice.spec_rot_center_p;
+
+				this->thick_type = input_multislice.thick_type;
+				this->thick = input_multislice.thick;
+
+				this->potential_slicing = input_multislice.potential_slicing;
+
+				this->grid_2d = input_multislice.grid_2d;
+
+				this->simulation_type = input_multislice.simulation_type;
+
+				this->iw_type = input_multislice.iw_type;
+				this->iw_psi = input_multislice.iw_psi;
+				this->iw_x = input_multislice.iw_x;
+				this->iw_y = input_multislice.iw_y;
+
+				this->E_0 = input_multislice.E_0;
+				this->theta = input_multislice.theta;
+				this->phi = input_multislice.phi;
+				this->nrot = input_multislice.nrot;
+
+				this->illumination_model = input_multislice.illumination_model;
+				this->temporal_spatial_incoh = input_multislice.temporal_spatial_incoh;
+
+				this->cond_lens = input_multislice.cond_lens;
+				this->obj_lens = input_multislice.obj_lens;
+
+				this->scanning = input_multislice.scanning;
+				this->detector = input_multislice.detector;
+
+				this->eels_fr = input_multislice.eels_fr;
+
+				this->cdl_var_type = input_multislice.cdl_var_type;
+				this->cdl_var = input_multislice.cdl_var;
+
+				this->iscan = input_multislice.iscan;
+				this->beam_x = input_multislice.beam_x;
+				this->beam_y = input_multislice.beam_y;
+
+				this->islice = input_multislice.islice;
+				this->dp_Shift = input_multislice.dp_Shift;
 			}
 	};
 
-	using Output_Multislice_Matlab = Output_Multislice<rmatrix_r, rmatrix_c>;
-
-	template<class T>
-	using Output_Multislice_Vector = Output_Multislice<Vector<T, e_host>, Vector<complex<T>, e_host>>;
 } // namespace mt
 
 #endif

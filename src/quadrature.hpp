@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,11 +13,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef QUADRATURE_H
 #define QUADRATURE_H
+
+#ifdef _MSC_VER
+#pragma once
+#endif // _MSC_VER
 
 #include "types.cuh"
 #include "traits.cuh"
@@ -26,7 +30,7 @@ namespace mt
 {
 	class Quadrature{
 		public:
-			template<class TQ1>
+			template <class TQ1>
 			void get(const int &Quad_Type, const int &nQuad, TQ1 &Q, const double &tai = 4.0)
 			{
 				using value_type = Value_type<TQ1>;

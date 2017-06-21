@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,36 +13,45 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef ATOMIC_DATA_H
 #define ATOMIC_DATA_H
 
+#ifdef _MSC_VER
+#pragma once
+#endif // _MSC_VER
+
+#include <string>
 #include "math.cuh"
 #include "types.cuh"
 #include "atom_cal.hpp"
-#include "host_device_functions.cuh"
 
 namespace mt
 {
 	class Atomic_Data{
 		public:
-			Atomic_Data()
+			Atomic_Data(ePotential_Type PotPar_i = ePT_none)
 			{
 				init();
-			}
 
-			Atomic_Data(ePotential_Type PotPar_i)
-			{
-				init();
-				Load_Data(PotPar_i);
+				Load_Atomic_Data_names();
+				Load_Atomic_Data();
+				Load_eels_edges();
+
+				if(PotPar_i != ePT_none)
+				{
+					Load_Data(PotPar_i);
+				}
 			}
 
 			// Load data tables and Parameterization
 			void Load_Data(ePotential_Type PotPar_i)
 			{
+				Load_Atomic_Data_names();
 				Load_Atomic_Data();
+				Load_eels_edges();
 
 				potential_type = PotPar_i;
 				switch(potential_type)
@@ -69,7 +78,73 @@ namespace mt
 				Load_feg_Peng_ion_0_4();
 			}
 
-			template<class TAtom_Type>
+			std::string Z_name(const int &Z) const 
+			{ 
+				return (Z_bound(Z))? data_table[Z-1].name:"";
+			}
+
+			Vector<float, e_host> extract_major_edges(const int &Z)
+			{ 
+				Vector<float, e_host> data;
+				data.reserve(5);
+
+				auto &edges = data_table[Z-1].edges;
+				for(auto ik=0; ik<5; ik++)
+				{
+					if(nonZero(edges[ik]))
+					{
+						data.push_back(edges[ik]);
+					}
+				}
+				data.shrink_to_fit();
+
+				return data;
+			}
+
+			Vector<float, e_host> extract_minor_edges(const int &Z)
+			{ 
+				Vector<float, e_host> data;
+				data.reserve(7);
+
+				auto &edges = data_table[Z-1].edges;
+				for(auto ik=5; ik<12; ik++)
+				{
+					if(nonZero(edges[ik]))
+					{
+						data.push_back(edges[ik]);
+					}
+				}
+				data.shrink_to_fit();
+
+				return data;
+			}
+
+			bool Z_bound(const int &Z) const 
+			{ 
+				return (Z >= 1) && (Z <= c_nAtomsTypes);
+			}
+
+			int mass_number(const int &Z) const 
+			{ 
+				return (Z_bound(Z))? data_table[Z-1].A:0;
+			}
+
+			double atomic_mass(const int &Z) const
+			{
+				return (Z_bound(Z))?data_table[Z-1].m:0;
+			}
+
+			double nuclear_radius(const int &Z) const
+			{
+				return (Z_bound(Z))?data_table[Z-1].rn:0;
+			}
+
+			double atomic_radius(const int &Z) const
+			{
+				return (Z_bound(Z))?data_table[Z-1].ra:0;
+			}
+
+			template <class TAtom_Type>
 			void To_atom_type_CPU(int Z_i, double Vrl_i, int nR_i, double R_min_i, TAtom_Type &atom_type)
 			{
 				using value_type = Value_type<decltype(c_atom_type)>;
@@ -102,12 +177,14 @@ namespace mt
 		private:
 			struct Data_Table
 			{
+				std::string name;
 				int Z;						// atomic number
 				double m;					// atomic mass
 				int A;						// mass number	
 				double rn;					// nuclear radius	
 				double ra;					// atomic radius
 				Vector<PP_Coef<double, e_host>, e_host> feg;
+				Vector<double, e_host> edges;
 			};
 
 			// initialization
@@ -131,12 +208,117 @@ namespace mt
 				data_table.resize(c_nAtomsTypes);
 				for(auto i = 0; i < data_table.size(); i++)
 				{
+					data_table[i].edges.resize(12);
+
 					data_table[i].feg.resize(c_nAtomsIons); // -7:1:7
 					for(auto j = 0; j < data_table[i].feg.size(); j++)
 					{
 						data_table[i].feg[j].resize(6, 0);
 					}
 				}
+			}
+
+			// load names
+			void Load_Atomic_Data_names()
+			{
+				data_table[0].name = "H";
+				data_table[1].name = "He";
+				data_table[2].name = "Li";
+				data_table[3].name = "Be";
+				data_table[4].name = "B";
+				data_table[5].name = "C";
+				data_table[6].name = "N";
+				data_table[7].name = "O";
+				data_table[8].name = "F";
+				data_table[9].name = "Ne";
+				data_table[10].name = "Na";
+				data_table[11].name = "Mg";
+				data_table[12].name = "Al";
+				data_table[13].name = "Si";
+				data_table[14].name = "P";
+				data_table[15].name = "S";
+				data_table[16].name = "Cl";
+				data_table[17].name = "Ar";
+				data_table[18].name = "K";
+				data_table[19].name = "Ca";
+				data_table[20].name = "Sc";
+				data_table[21].name = "Ti";
+				data_table[22].name = "V";
+				data_table[23].name = "Cr";
+				data_table[24].name = "Mn";
+				data_table[25].name = "Fe";
+				data_table[26].name = "Co";
+				data_table[27].name = "Ni";
+				data_table[28].name = "Cu";
+				data_table[29].name = "Zn";
+				data_table[30].name = "Ga";
+				data_table[31].name = "Ge";
+				data_table[32].name = "As";
+				data_table[33].name = "Se";
+				data_table[34].name = "Br";
+				data_table[35].name = "Kr";
+				data_table[36].name = "Rb";
+				data_table[37].name = "Sr";
+				data_table[38].name = "Y";
+				data_table[39].name = "Zr";
+				data_table[40].name = "Nb";
+				data_table[41].name = "Mo";
+				data_table[42].name = "Tc";
+				data_table[43].name = "Ru";
+				data_table[44].name = "Rh";
+				data_table[45].name = "Pd";
+				data_table[46].name = "Ag";
+				data_table[47].name = "Cd";
+				data_table[48].name = "In";
+				data_table[49].name = "Sn";
+				data_table[50].name = "Sb";
+				data_table[51].name = "Te";
+				data_table[52].name = "I";
+				data_table[53].name = "Xe";
+				data_table[54].name = "Cs";
+				data_table[55].name = "Ba";
+				data_table[56].name = "La";
+				data_table[57].name = "Ce";
+				data_table[58].name = "Pr";
+				data_table[59].name = "Nd";
+				data_table[60].name = "Pm";
+				data_table[61].name = "Sm";
+				data_table[62].name = "Eu";
+				data_table[63].name = "Gd";
+				data_table[64].name = "Tb";
+				data_table[65].name = "Dy";
+				data_table[66].name = "Ho";
+				data_table[67].name = "Er";
+				data_table[68].name = "Tm";
+				data_table[69].name = "Yb";
+				data_table[70].name = "Lu";
+				data_table[71].name = "Hf";
+				data_table[72].name = "Ta";
+				data_table[73].name = "W";
+				data_table[74].name = "Re";
+				data_table[75].name = "Os";
+				data_table[76].name = "Ir";
+				data_table[77].name = "Pt";
+				data_table[78].name = "Au";
+				data_table[79].name = "Hg";
+				data_table[80].name = "Tl";
+				data_table[81].name = "Pb";
+				data_table[82].name = "Bi";
+				data_table[83].name = "Po";
+				data_table[84].name = "At";
+				data_table[85].name = "Rn";
+				data_table[86].name = "Fr";
+				data_table[87].name = "Ra";
+				data_table[88].name = "Ac";
+				data_table[89].name = "Th";
+				data_table[90].name = "Pa";
+				data_table[91].name = "U";
+				data_table[92].name = "Np";
+				data_table[93].name = "Pu";
+				data_table[94].name = "Am";
+				data_table[95].name = "Cm";
+				data_table[96].name = "Bk";
+				data_table[97].name = "Cf";
 			}
 
 			// Load atomic data tables
@@ -245,6 +427,114 @@ namespace mt
 				data_table[100].Z = 101;	data_table[100].A = 258;	data_table[100].m = 258;		data_table[100].rn = 6.122;		data_table[100].ra = 1.84;
 				data_table[101].Z = 102;	data_table[101].A = 259;	data_table[101].m = 259;		data_table[101].rn = 6.137;		data_table[101].ra = 1.84;
 				data_table[102].Z = 103;	data_table[102].A = 262;	data_table[102].m = 260;		data_table[102].rn = 6.182;		data_table[102].ra = 1.84;
+			}
+
+			// Load eels edges
+			void Load_eels_edges()
+			{
+				data_table[0].edges[0] = 13.00;	data_table[0].edges[1] = 0.00;	data_table[0].edges[2] = 0.00;	data_table[0].edges[3] = 0.00;	data_table[0].edges[4] = 0.00;	data_table[0].edges[5] = 0.00;	data_table[0].edges[6] = 0.00;	data_table[0].edges[7] = 0.00;	data_table[0].edges[8] = 0.00;	data_table[0].edges[9] = 0.00;	data_table[0].edges[10] = 0.00;	data_table[0].edges[11] = 0.00;
+				data_table[1].edges[0] = 22.00;	data_table[1].edges[1] = 0.00;	data_table[1].edges[2] = 0.00;	data_table[1].edges[3] = 0.00;	data_table[1].edges[4] = 0.00;	data_table[1].edges[5] = 0.00;	data_table[1].edges[6] = 0.00;	data_table[1].edges[7] = 0.00;	data_table[1].edges[8] = 0.00;	data_table[1].edges[9] = 0.00;	data_table[1].edges[10] = 0.00;	data_table[1].edges[11] = 0.00;
+				data_table[2].edges[0] = 55.00;	data_table[2].edges[1] = 0.00;	data_table[2].edges[2] = 0.00;	data_table[2].edges[3] = 0.00;	data_table[2].edges[4] = 0.00;	data_table[2].edges[5] = 0.00;	data_table[2].edges[6] = 0.00;	data_table[2].edges[7] = 0.00;	data_table[2].edges[8] = 0.00;	data_table[2].edges[9] = 0.00;	data_table[2].edges[10] = 0.00;	data_table[2].edges[11] = 0.00;
+				data_table[3].edges[0] = 111.00;	data_table[3].edges[1] = 0.00;	data_table[3].edges[2] = 0.00;	data_table[3].edges[3] = 0.00;	data_table[3].edges[4] = 0.00;	data_table[3].edges[5] = 0.00;	data_table[3].edges[6] = 0.00;	data_table[3].edges[7] = 0.00;	data_table[3].edges[8] = 0.00;	data_table[3].edges[9] = 0.00;	data_table[3].edges[10] = 0.00;	data_table[3].edges[11] = 0.00;
+				data_table[4].edges[0] = 188.00;	data_table[4].edges[1] = 0.00;	data_table[4].edges[2] = 0.00;	data_table[4].edges[3] = 0.00;	data_table[4].edges[4] = 0.00;	data_table[4].edges[5] = 0.00;	data_table[4].edges[6] = 0.00;	data_table[4].edges[7] = 0.00;	data_table[4].edges[8] = 0.00;	data_table[4].edges[9] = 0.00;	data_table[4].edges[10] = 0.00;	data_table[4].edges[11] = 0.00;
+				data_table[5].edges[0] = 284.00;	data_table[5].edges[1] = 0.00;	data_table[5].edges[2] = 0.00;	data_table[5].edges[3] = 0.00;	data_table[5].edges[4] = 0.00;	data_table[5].edges[5] = 0.00;	data_table[5].edges[6] = 0.00;	data_table[5].edges[7] = 0.00;	data_table[5].edges[8] = 0.00;	data_table[5].edges[9] = 0.00;	data_table[5].edges[10] = 0.00;	data_table[5].edges[11] = 0.00;
+				data_table[6].edges[0] = 401.00;	data_table[6].edges[1] = 0.00;	data_table[6].edges[2] = 0.00;	data_table[6].edges[3] = 0.00;	data_table[6].edges[4] = 0.00;	data_table[6].edges[5] = 0.00;	data_table[6].edges[6] = 0.00;	data_table[6].edges[7] = 0.00;	data_table[6].edges[8] = 0.00;	data_table[6].edges[9] = 0.00;	data_table[6].edges[10] = 0.00;	data_table[6].edges[11] = 0.00;
+				data_table[7].edges[0] = 532.00;	data_table[7].edges[1] = 0.00;	data_table[7].edges[2] = 0.00;	data_table[7].edges[3] = 0.00;	data_table[7].edges[4] = 0.00;	data_table[7].edges[5] = 0.00;	data_table[7].edges[6] = 0.00;	data_table[7].edges[7] = 0.00;	data_table[7].edges[8] = 0.00;	data_table[7].edges[9] = 0.00;	data_table[7].edges[10] = 0.00;	data_table[7].edges[11] = 0.00;
+				data_table[8].edges[0] = 685.00;	data_table[8].edges[1] = 0.00;	data_table[8].edges[2] = 0.00;	data_table[8].edges[3] = 0.00;	data_table[8].edges[4] = 0.00;	data_table[8].edges[5] = 0.00;	data_table[8].edges[6] = 0.00;	data_table[8].edges[7] = 0.00;	data_table[8].edges[8] = 0.00;	data_table[8].edges[9] = 0.00;	data_table[8].edges[10] = 0.00;	data_table[8].edges[11] = 0.00;
+				data_table[9].edges[0] = 867.00;	data_table[9].edges[1] = 18.00;	data_table[9].edges[2] = 0.00;	data_table[9].edges[3] = 0.00;	data_table[9].edges[4] = 0.00;	data_table[9].edges[5] = 45.00;	data_table[9].edges[6] = 0.00;	data_table[9].edges[7] = 0.00;	data_table[9].edges[8] = 0.00;	data_table[9].edges[9] = 0.00;	data_table[9].edges[10] = 0.00;	data_table[9].edges[11] = 0.00;
+				data_table[10].edges[0] = 1072.00;	data_table[10].edges[1] = 31.00;	data_table[10].edges[2] = 0.00;	data_table[10].edges[3] = 0.00;	data_table[10].edges[4] = 0.00;	data_table[10].edges[5] = 63.00;	data_table[10].edges[6] = 0.00;	data_table[10].edges[7] = 0.00;	data_table[10].edges[8] = 0.00;	data_table[10].edges[9] = 0.00;	data_table[10].edges[10] = 0.00;	data_table[10].edges[11] = 0.00;
+				data_table[11].edges[0] = 1305.00;	data_table[11].edges[1] = 51.00;	data_table[11].edges[2] = 0.00;	data_table[11].edges[3] = 0.00;	data_table[11].edges[4] = 0.00;	data_table[11].edges[5] = 89.00;	data_table[11].edges[6] = 0.00;	data_table[11].edges[7] = 0.00;	data_table[11].edges[8] = 0.00;	data_table[11].edges[9] = 0.00;	data_table[11].edges[10] = 0.00;	data_table[11].edges[11] = 0.00;
+				data_table[12].edges[0] = 1560.00;	data_table[12].edges[1] = 73.00;	data_table[12].edges[2] = 0.00;	data_table[12].edges[3] = 0.00;	data_table[12].edges[4] = 0.00;	data_table[12].edges[5] = 118.00;	data_table[12].edges[6] = 0.00;	data_table[12].edges[7] = 0.00;	data_table[12].edges[8] = 0.00;	data_table[12].edges[9] = 0.00;	data_table[12].edges[10] = 0.00;	data_table[12].edges[11] = 0.00;
+				data_table[13].edges[0] = 1839.00;	data_table[13].edges[1] = 99.00;	data_table[13].edges[2] = 0.00;	data_table[13].edges[3] = 0.00;	data_table[13].edges[4] = 0.00;	data_table[13].edges[5] = 149.00;	data_table[13].edges[6] = 0.00;	data_table[13].edges[7] = 0.00;	data_table[13].edges[8] = 0.00;	data_table[13].edges[9] = 0.00;	data_table[13].edges[10] = 0.00;	data_table[13].edges[11] = 0.00;
+				data_table[14].edges[0] = 2146.00;	data_table[14].edges[1] = 132.00;	data_table[14].edges[2] = 0.00;	data_table[14].edges[3] = 0.00;	data_table[14].edges[4] = 0.00;	data_table[14].edges[5] = 189.00;	data_table[14].edges[6] = 0.00;	data_table[14].edges[7] = 0.00;	data_table[14].edges[8] = 0.00;	data_table[14].edges[9] = 0.00;	data_table[14].edges[10] = 0.00;	data_table[14].edges[11] = 0.00;
+				data_table[15].edges[0] = 2472.00;	data_table[15].edges[1] = 165.00;	data_table[15].edges[2] = 0.00;	data_table[15].edges[3] = 0.00;	data_table[15].edges[4] = 0.00;	data_table[15].edges[5] = 229.00;	data_table[15].edges[6] = 0.00;	data_table[15].edges[7] = 0.00;	data_table[15].edges[8] = 0.00;	data_table[15].edges[9] = 0.00;	data_table[15].edges[10] = 0.00;	data_table[15].edges[11] = 0.00;
+				data_table[16].edges[0] = 2822.00;	data_table[16].edges[1] = 200.00;	data_table[16].edges[2] = 0.00;	data_table[16].edges[3] = 0.00;	data_table[16].edges[4] = 0.00;	data_table[16].edges[5] = 270.00;	data_table[16].edges[6] = 0.00;	data_table[16].edges[7] = 0.00;	data_table[16].edges[8] = 0.00;	data_table[16].edges[9] = 0.00;	data_table[16].edges[10] = 0.00;	data_table[16].edges[11] = 0.00;
+				data_table[17].edges[0] = 3203.00;	data_table[17].edges[1] = 245.00;	data_table[17].edges[2] = 12.00;	data_table[17].edges[3] = 0.00;	data_table[17].edges[4] = 0.00;	data_table[17].edges[5] = 320.00;	data_table[17].edges[6] = 25.00;	data_table[17].edges[7] = 0.00;	data_table[17].edges[8] = 0.00;	data_table[17].edges[9] = 0.00;	data_table[17].edges[10] = 0.00;	data_table[17].edges[11] = 0.00;
+				data_table[18].edges[0] = 3607.00;	data_table[18].edges[1] = 296.00;	data_table[18].edges[2] = 294.00;	data_table[18].edges[3] = 18.00;	data_table[18].edges[4] = 0.00;	data_table[18].edges[5] = 377.00;	data_table[18].edges[6] = 34.00;	data_table[18].edges[7] = 0.00;	data_table[18].edges[8] = 0.00;	data_table[18].edges[9] = 0.00;	data_table[18].edges[10] = 0.00;	data_table[18].edges[11] = 0.00;
+				data_table[19].edges[0] = 4038.00;	data_table[19].edges[1] = 350.00;	data_table[19].edges[2] = 346.00;	data_table[19].edges[3] = 25.00;	data_table[19].edges[4] = 0.00;	data_table[19].edges[5] = 438.00;	data_table[19].edges[6] = 44.00;	data_table[19].edges[7] = 0.00;	data_table[19].edges[8] = 0.00;	data_table[19].edges[9] = 0.00;	data_table[19].edges[10] = 0.00;	data_table[19].edges[11] = 0.00;
+				data_table[20].edges[0] = 4493.00;	data_table[20].edges[1] = 407.00;	data_table[20].edges[2] = 402.00;	data_table[20].edges[3] = 32.00;	data_table[20].edges[4] = 0.00;	data_table[20].edges[5] = 500.00;	data_table[20].edges[6] = 54.00;	data_table[20].edges[7] = 0.00;	data_table[20].edges[8] = 0.00;	data_table[20].edges[9] = 0.00;	data_table[20].edges[10] = 0.00;	data_table[20].edges[11] = 0.00;
+				data_table[21].edges[0] = 4966.00;	data_table[21].edges[1] = 462.00;	data_table[21].edges[2] = 456.00;	data_table[21].edges[3] = 35.00;	data_table[21].edges[4] = 0.00;	data_table[21].edges[5] = 564.00;	data_table[21].edges[6] = 60.00;	data_table[21].edges[7] = 0.00;	data_table[21].edges[8] = 0.00;	data_table[21].edges[9] = 0.00;	data_table[21].edges[10] = 0.00;	data_table[21].edges[11] = 0.00;
+				data_table[22].edges[0] = 521.00;	data_table[22].edges[1] = 513.00;	data_table[22].edges[2] = 38.00;	data_table[22].edges[3] = 0.00;	data_table[22].edges[4] = 0.00;	data_table[22].edges[5] = 628.00;	data_table[22].edges[6] = 66.00;	data_table[22].edges[7] = 0.00;	data_table[22].edges[8] = 0.00;	data_table[22].edges[9] = 0.00;	data_table[22].edges[10] = 0.00;	data_table[22].edges[11] = 0.00;
+				data_table[23].edges[0] = 584.00;	data_table[23].edges[1] = 575.00;	data_table[23].edges[2] = 42.00;	data_table[23].edges[3] = 0.00;	data_table[23].edges[4] = 0.00;	data_table[23].edges[5] = 695.00;	data_table[23].edges[6] = 74.00;	data_table[23].edges[7] = 0.00;	data_table[23].edges[8] = 0.00;	data_table[23].edges[9] = 0.00;	data_table[23].edges[10] = 0.00;	data_table[23].edges[11] = 0.00;
+				data_table[24].edges[0] = 651.00;	data_table[24].edges[1] = 640.00;	data_table[24].edges[2] = 49.00;	data_table[24].edges[3] = 0.00;	data_table[24].edges[4] = 0.00;	data_table[24].edges[5] = 769.00;	data_table[24].edges[6] = 84.00;	data_table[24].edges[7] = 0.00;	data_table[24].edges[8] = 0.00;	data_table[24].edges[9] = 0.00;	data_table[24].edges[10] = 0.00;	data_table[24].edges[11] = 0.00;
+				data_table[25].edges[0] = 721.00;	data_table[25].edges[1] = 708.00;	data_table[25].edges[2] = 54.00;	data_table[25].edges[3] = 0.00;	data_table[25].edges[4] = 0.00;	data_table[25].edges[5] = 846.00;	data_table[25].edges[6] = 93.00;	data_table[25].edges[7] = 0.00;	data_table[25].edges[8] = 0.00;	data_table[25].edges[9] = 0.00;	data_table[25].edges[10] = 0.00;	data_table[25].edges[11] = 0.00;
+				data_table[26].edges[0] = 794.00;	data_table[26].edges[1] = 779.00;	data_table[26].edges[2] = 60.00;	data_table[26].edges[3] = 0.00;	data_table[26].edges[4] = 0.00;	data_table[26].edges[5] = 926.00;	data_table[26].edges[6] = 101.00;	data_table[26].edges[7] = 0.00;	data_table[26].edges[8] = 0.00;	data_table[26].edges[9] = 0.00;	data_table[26].edges[10] = 0.00;	data_table[26].edges[11] = 0.00;
+				data_table[27].edges[0] = 872.00;	data_table[27].edges[1] = 855.00;	data_table[27].edges[2] = 68.00;	data_table[27].edges[3] = 0.00;	data_table[27].edges[4] = 0.00;	data_table[27].edges[5] = 1008.00;	data_table[27].edges[6] = 112.00;	data_table[27].edges[7] = 0.00;	data_table[27].edges[8] = 0.00;	data_table[27].edges[9] = 0.00;	data_table[27].edges[10] = 0.00;	data_table[27].edges[11] = 0.00;
+				data_table[28].edges[0] = 951.00;	data_table[28].edges[1] = 931.00;	data_table[28].edges[2] = 74.00;	data_table[28].edges[3] = 0.00;	data_table[28].edges[4] = 0.00;	data_table[28].edges[5] = 1096.00;	data_table[28].edges[6] = 120.00;	data_table[28].edges[7] = 0.00;	data_table[28].edges[8] = 0.00;	data_table[28].edges[9] = 0.00;	data_table[28].edges[10] = 0.00;	data_table[28].edges[11] = 0.00;
+				data_table[29].edges[0] = 1043.00;	data_table[29].edges[1] = 1020.00;	data_table[29].edges[2] = 0.00;	data_table[29].edges[3] = 0.00;	data_table[29].edges[4] = 0.00;	data_table[29].edges[5] = 1194.00;	data_table[29].edges[6] = 136.00;	data_table[29].edges[7] = 87.00;	data_table[29].edges[8] = 0.00;	data_table[29].edges[9] = 0.00;	data_table[29].edges[10] = 0.00;	data_table[29].edges[11] = 0.00;
+				data_table[30].edges[0] = 1142.00;	data_table[30].edges[1] = 1115.00;	data_table[30].edges[2] = 0.00;	data_table[30].edges[3] = 0.00;	data_table[30].edges[4] = 0.00;	data_table[30].edges[5] = 1298.00;	data_table[30].edges[6] = 158.00;	data_table[30].edges[7] = 103.00;	data_table[30].edges[8] = 0.00;	data_table[30].edges[9] = 0.00;	data_table[30].edges[10] = 0.00;	data_table[30].edges[11] = 0.00;
+				data_table[31].edges[0] = 1248.00;	data_table[31].edges[1] = 1217.00;	data_table[31].edges[2] = 29.00;	data_table[31].edges[3] = 0.00;	data_table[31].edges[4] = 0.00;	data_table[31].edges[5] = 1414.00;	data_table[31].edges[6] = 180.00;	data_table[31].edges[7] = 121.00;	data_table[31].edges[8] = 0.00;	data_table[31].edges[9] = 0.00;	data_table[31].edges[10] = 0.00;	data_table[31].edges[11] = 0.00;
+				data_table[32].edges[0] = 1359.00;	data_table[32].edges[1] = 1323.00;	data_table[32].edges[2] = 41.00;	data_table[32].edges[3] = 0.00;	data_table[32].edges[4] = 0.00;	data_table[32].edges[5] = 1526.00;	data_table[32].edges[6] = 203.00;	data_table[32].edges[7] = 140.00;	data_table[32].edges[8] = 0.00;	data_table[32].edges[9] = 0.00;	data_table[32].edges[10] = 0.00;	data_table[32].edges[11] = 0.00;
+				data_table[33].edges[0] = 1476.00;	data_table[33].edges[1] = 1436.00;	data_table[33].edges[2] = 57.00;	data_table[33].edges[3] = 0.00;	data_table[33].edges[4] = 0.00;	data_table[33].edges[5] = 1654.00;	data_table[33].edges[6] = 231.00;	data_table[33].edges[7] = 162.00;	data_table[33].edges[8] = 0.00;	data_table[33].edges[9] = 0.00;	data_table[33].edges[10] = 0.00;	data_table[33].edges[11] = 0.00;
+				data_table[34].edges[0] = 1596.00;	data_table[34].edges[1] = 1150.00;	data_table[34].edges[2] = 69.00;	data_table[34].edges[3] = 0.00;	data_table[34].edges[4] = 0.00;	data_table[34].edges[5] = 1782.00;	data_table[34].edges[6] = 256.00;	data_table[34].edges[7] = 181.00;	data_table[34].edges[8] = 0.00;	data_table[34].edges[9] = 0.00;	data_table[34].edges[10] = 0.00;	data_table[34].edges[11] = 0.00;
+				data_table[35].edges[0] = 1727.00;	data_table[35].edges[1] = 1675.00;	data_table[35].edges[2] = 89.00;	data_table[35].edges[3] = 11.00;	data_table[35].edges[4] = 0.00;	data_table[35].edges[5] = 1921.00;	data_table[35].edges[6] = 289.00;	data_table[35].edges[7] = 214.00;	data_table[35].edges[8] = 24.00;	data_table[35].edges[9] = 0.00;	data_table[35].edges[10] = 0.00;	data_table[35].edges[11] = 0.00;
+				data_table[36].edges[0] = 1864.00;	data_table[36].edges[1] = 1804.00;	data_table[36].edges[2] = 110.00;	data_table[36].edges[3] = 14.00;	data_table[36].edges[4] = 0.00;	data_table[36].edges[5] = 2065.00;	data_table[36].edges[6] = 322.00;	data_table[36].edges[7] = 247.00;	data_table[36].edges[8] = 238.00;	data_table[36].edges[9] = 29.00;	data_table[36].edges[10] = 0.00;	data_table[36].edges[11] = 0.00;
+				data_table[37].edges[0] = 2007.00;	data_table[37].edges[1] = 1940.00;	data_table[37].edges[2] = 133.00;	data_table[37].edges[3] = 20.00;	data_table[37].edges[4] = 0.00;	data_table[37].edges[5] = 2216.00;	data_table[37].edges[6] = 357.00;	data_table[37].edges[7] = 280.00;	data_table[37].edges[8] = 269.00;	data_table[37].edges[9] = 38.00;	data_table[37].edges[10] = 0.00;	data_table[37].edges[11] = 0.00;
+				data_table[38].edges[0] = 2155.00;	data_table[38].edges[1] = 2080.00;	data_table[38].edges[2] = 157.00;	data_table[38].edges[3] = 26.00;	data_table[38].edges[4] = 0.00;	data_table[38].edges[5] = 2372.00;	data_table[38].edges[6] = 394.00;	data_table[38].edges[7] = 312.00;	data_table[38].edges[8] = 300.00;	data_table[38].edges[9] = 45.00;	data_table[38].edges[10] = 0.00;	data_table[38].edges[11] = 0.00;
+				data_table[39].edges[0] = 2307.00;	data_table[39].edges[1] = 2222.00;	data_table[39].edges[2] = 180.00;	data_table[39].edges[3] = 29.00;	data_table[39].edges[4] = 0.00;	data_table[39].edges[5] = 2532.00;	data_table[39].edges[6] = 430.00;	data_table[39].edges[7] = 344.00;	data_table[39].edges[8] = 330.00;	data_table[39].edges[9] = 51.00;	data_table[39].edges[10] = 0.00;	data_table[39].edges[11] = 0.00;
+				data_table[40].edges[0] = 2465.00;	data_table[40].edges[1] = 2371.00;	data_table[40].edges[2] = 205.00;	data_table[40].edges[3] = 34.00;	data_table[40].edges[4] = 0.00;	data_table[40].edges[5] = 2698.00;	data_table[40].edges[6] = 468.00;	data_table[40].edges[7] = 378.00;	data_table[40].edges[8] = 363.00;	data_table[40].edges[9] = 58.00;	data_table[40].edges[10] = 0.00;	data_table[40].edges[11] = 0.00;
+				data_table[41].edges[0] = 2625.00;	data_table[41].edges[1] = 2520.00;	data_table[41].edges[2] = 227.00;	data_table[41].edges[3] = 35.00;	data_table[41].edges[4] = 0.00;	data_table[41].edges[5] = 2865.00;	data_table[41].edges[6] = 505.00;	data_table[41].edges[7] = 410.00;	data_table[41].edges[8] = 392.00;	data_table[41].edges[9] = 62.00;	data_table[41].edges[10] = 0.00;	data_table[41].edges[11] = 0.00;
+				data_table[42].edges[0] = 2793.00;	data_table[42].edges[1] = 2677.00;	data_table[42].edges[2] = 253.00;	data_table[42].edges[3] = 39.00;	data_table[42].edges[4] = 0.00;	data_table[42].edges[5] = 3042.00;	data_table[42].edges[6] = 544.00;	data_table[42].edges[7] = 445.00;	data_table[42].edges[8] = 425.00;	data_table[42].edges[9] = 68.00;	data_table[42].edges[10] = 0.00;	data_table[42].edges[11] = 0.00;
+				data_table[43].edges[0] = 2967.00;	data_table[43].edges[1] = 2838.00;	data_table[43].edges[2] = 279.00;	data_table[43].edges[3] = 43.00;	data_table[43].edges[4] = 0.00;	data_table[43].edges[5] = 3224.00;	data_table[43].edges[6] = 585.00;	data_table[43].edges[7] = 483.00;	data_table[43].edges[8] = 461.00;	data_table[43].edges[9] = 75.00;	data_table[43].edges[10] = 0.00;	data_table[43].edges[11] = 0.00;
+				data_table[44].edges[0] = 3146.00;	data_table[44].edges[1] = 3004.00;	data_table[44].edges[2] = 307.00;	data_table[44].edges[3] = 48.00;	data_table[44].edges[4] = 0.00;	data_table[44].edges[5] = 3412.00;	data_table[44].edges[6] = 627.00;	data_table[44].edges[7] = 521.00;	data_table[44].edges[8] = 496.00;	data_table[44].edges[9] = 81.00;	data_table[44].edges[10] = 0.00;	data_table[44].edges[11] = 0.00;
+				data_table[45].edges[0] = 3330.00;	data_table[45].edges[1] = 3173.00;	data_table[45].edges[2] = 335.00;	data_table[45].edges[3] = 51.00;	data_table[45].edges[4] = 0.00;	data_table[45].edges[5] = 3604.00;	data_table[45].edges[6] = 670.00;	data_table[45].edges[7] = 559.00;	data_table[45].edges[8] = 531.00;	data_table[45].edges[9] = 86.00;	data_table[45].edges[10] = 0.00;	data_table[45].edges[11] = 0.00;
+				data_table[46].edges[0] = 3524.00;	data_table[46].edges[1] = 3351.00;	data_table[46].edges[2] = 367.00;	data_table[46].edges[3] = 0.00;	data_table[46].edges[4] = 0.00;	data_table[46].edges[5] = 3806.00;	data_table[46].edges[6] = 717.00;	data_table[46].edges[7] = 602.00;	data_table[46].edges[8] = 571.00;	data_table[46].edges[9] = 95.00;	data_table[46].edges[10] = 56.00;	data_table[46].edges[11] = 0.00;
+				data_table[47].edges[0] = 3727.00;	data_table[47].edges[1] = 3538.00;	data_table[47].edges[2] = 404.00;	data_table[47].edges[3] = 0.00;	data_table[47].edges[4] = 0.00;	data_table[47].edges[5] = 4018.00;	data_table[47].edges[6] = 770.00;	data_table[47].edges[7] = 651.00;	data_table[47].edges[8] = 616.00;	data_table[47].edges[9] = 108.00;	data_table[47].edges[10] = 67.00;	data_table[47].edges[11] = 0.00;
+				data_table[48].edges[0] = 3938.00;	data_table[48].edges[1] = 3730.00;	data_table[48].edges[2] = 443.00;	data_table[48].edges[3] = 0.00;	data_table[48].edges[4] = 0.00;	data_table[48].edges[5] = 4237.00;	data_table[48].edges[6] = 826.00;	data_table[48].edges[7] = 702.00;	data_table[48].edges[8] = 664.00;	data_table[48].edges[9] = 122.00;	data_table[48].edges[10] = 77.00;	data_table[48].edges[11] = 0.00;
+				data_table[49].edges[0] = 4156.00;	data_table[49].edges[1] = 3929.00;	data_table[49].edges[2] = 485.00;	data_table[49].edges[3] = 24.00;	data_table[49].edges[4] = 0.00;	data_table[49].edges[5] = 4465.00;	data_table[49].edges[6] = 884.00;	data_table[49].edges[7] = 756.00;	data_table[49].edges[8] = 714.00;	data_table[49].edges[9] = 136.00;	data_table[49].edges[10] = 89.00;	data_table[49].edges[11] = 0.00;
+				data_table[50].edges[0] = 4380.00;	data_table[50].edges[1] = 4132.00;	data_table[50].edges[2] = 528.00;	data_table[50].edges[3] = 31.00;	data_table[50].edges[4] = 0.00;	data_table[50].edges[5] = 944.00;	data_table[50].edges[6] = 812.00;	data_table[50].edges[7] = 766.00;	data_table[50].edges[8] = 152.00;	data_table[50].edges[9] = 98.00;	data_table[50].edges[10] = 0.00;	data_table[50].edges[11] = 0.00;
+				data_table[51].edges[0] = 4612.00;	data_table[51].edges[1] = 4341.00;	data_table[51].edges[2] = 40.00;	data_table[51].edges[3] = 572.00;	data_table[51].edges[4] = 0.00;	data_table[51].edges[5] = 1006.00;	data_table[51].edges[6] = 870.00;	data_table[51].edges[7] = 819.00;	data_table[51].edges[8] = 168.00;	data_table[51].edges[9] = 110.00;	data_table[51].edges[10] = 0.00;	data_table[51].edges[11] = 0.00;
+				data_table[52].edges[0] = 4852.00;	data_table[52].edges[1] = 4557.00;	data_table[52].edges[2] = 619.00;	data_table[52].edges[3] = 50.00;	data_table[52].edges[4] = 0.00;	data_table[52].edges[5] = 1072.00;	data_table[52].edges[6] = 930.00;	data_table[52].edges[7] = 875.00;	data_table[52].edges[8] = 186.00;	data_table[52].edges[9] = 123.00;	data_table[52].edges[10] = 0.00;	data_table[52].edges[11] = 0.00;
+				data_table[53].edges[0] = 4782.00;	data_table[53].edges[1] = 672.00;	data_table[53].edges[2] = 63.00;	data_table[53].edges[3] = 0.00;	data_table[53].edges[4] = 0.00;	data_table[53].edges[5] = 1145.00;	data_table[53].edges[6] = 999.00;	data_table[53].edges[7] = 937.00;	data_table[53].edges[8] = 208.00;	data_table[53].edges[9] = 147.00;	data_table[53].edges[10] = 0.00;	data_table[53].edges[11] = 0.00;
+				data_table[54].edges[0] = 740.00;	data_table[54].edges[1] = 726.00;	data_table[54].edges[2] = 76.00;	data_table[54].edges[3] = 0.00;	data_table[54].edges[4] = 0.00;	data_table[54].edges[5] = 1217.00;	data_table[54].edges[6] = 1065.00;	data_table[54].edges[7] = 998.00;	data_table[54].edges[8] = 231.00;	data_table[54].edges[9] = 162.00;	data_table[54].edges[10] = 0.00;	data_table[54].edges[11] = 0.00;
+				data_table[55].edges[0] = 796.00;	data_table[55].edges[1] = 781.00;	data_table[55].edges[2] = 90.00;	data_table[55].edges[3] = 15.00;	data_table[55].edges[4] = 0.00;	data_table[55].edges[5] = 1293.00;	data_table[55].edges[6] = 1137.00;	data_table[55].edges[7] = 1062.00;	data_table[55].edges[8] = 253.00;	data_table[55].edges[9] = 180.00;	data_table[55].edges[10] = 0.00;	data_table[55].edges[11] = 0.00;
+				data_table[56].edges[0] = 849.00;	data_table[56].edges[1] = 832.00;	data_table[56].edges[2] = 99.00;	data_table[56].edges[3] = 14.00;	data_table[56].edges[4] = 0.00;	data_table[56].edges[5] = 1361.00;	data_table[56].edges[6] = 1204.00;	data_table[56].edges[7] = 1123.00;	data_table[56].edges[8] = 270.00;	data_table[56].edges[9] = 191.00;	data_table[56].edges[10] = 0.00;	data_table[56].edges[11] = 0.00;
+				data_table[57].edges[0] = 901.00;	data_table[57].edges[1] = 883.00;	data_table[57].edges[2] = 110.00;	data_table[57].edges[3] = 20.00;	data_table[57].edges[4] = 0.00;	data_table[57].edges[5] = 1435.00;	data_table[57].edges[6] = 1273.00;	data_table[57].edges[7] = 1185.00;	data_table[57].edges[8] = 290.00;	data_table[57].edges[9] = 207.00;	data_table[57].edges[10] = 0.00;	data_table[57].edges[11] = 0.00;
+				data_table[58].edges[0] = 951.00;	data_table[58].edges[1] = 931.00;	data_table[58].edges[2] = 113.00;	data_table[58].edges[3] = 22.00;	data_table[58].edges[4] = 0.00;	data_table[58].edges[5] = 1511.00;	data_table[58].edges[6] = 1337.00;	data_table[58].edges[7] = 1242.00;	data_table[58].edges[8] = 305.00;	data_table[58].edges[9] = 218.00;	data_table[58].edges[10] = 0.00;	data_table[58].edges[11] = 0.00;
+				data_table[59].edges[0] = 1000.00;	data_table[59].edges[1] = 978.00;	data_table[59].edges[2] = 118.00;	data_table[59].edges[3] = 21.00;	data_table[59].edges[4] = 0.00;	data_table[59].edges[5] = 1575.00;	data_table[59].edges[6] = 1403.00;	data_table[59].edges[7] = 1297.00;	data_table[59].edges[8] = 315.00;	data_table[59].edges[9] = 225.00;	data_table[59].edges[10] = 0.00;	data_table[59].edges[11] = 0.00;
+				data_table[60].edges[0] = 1052.00;	data_table[60].edges[1] = 1027.00;	data_table[60].edges[2] = 120.00;	data_table[60].edges[3] = 24.00;	data_table[60].edges[4] = 0.00;	data_table[60].edges[5] = 1649.00;	data_table[60].edges[6] = 1471.00;	data_table[60].edges[7] = 1357.00;	data_table[60].edges[8] = 331.00;	data_table[60].edges[9] = 236.00;	data_table[60].edges[10] = 0.00;	data_table[60].edges[11] = 0.00;
+				data_table[61].edges[0] = 1106.00;	data_table[61].edges[1] = 1080.00;	data_table[61].edges[2] = 129.00;	data_table[61].edges[3] = 21.00;	data_table[61].edges[4] = 0.00;	data_table[61].edges[5] = 1723.00;	data_table[61].edges[6] = 1541.00;	data_table[61].edges[7] = 1420.00;	data_table[61].edges[8] = 346.00;	data_table[61].edges[9] = 247.00;	data_table[61].edges[10] = 0.00;	data_table[61].edges[11] = 0.00;
+				data_table[62].edges[0] = 1161.00;	data_table[62].edges[1] = 1131.00;	data_table[62].edges[2] = 133.00;	data_table[62].edges[3] = 22.00;	data_table[62].edges[4] = 0.00;	data_table[62].edges[5] = 1800.00;	data_table[62].edges[6] = 1614.00;	data_table[62].edges[7] = 1481.00;	data_table[62].edges[8] = 360.00;	data_table[62].edges[9] = 257.00;	data_table[62].edges[10] = 0.00;	data_table[62].edges[11] = 0.00;
+				data_table[63].edges[0] = 1217.00;	data_table[63].edges[1] = 1185.00;	data_table[63].edges[2] = 140.00;	data_table[63].edges[3] = 20.00;	data_table[63].edges[4] = 0.00;	data_table[63].edges[5] = 1881.00;	data_table[63].edges[6] = 1688.00;	data_table[63].edges[7] = 1544.00;	data_table[63].edges[8] = 376.00;	data_table[63].edges[9] = 271.00;	data_table[63].edges[10] = 0.00;	data_table[63].edges[11] = 0.00;
+				data_table[64].edges[0] = 1275.00;	data_table[64].edges[1] = 1241.00;	data_table[64].edges[2] = 147.00;	data_table[64].edges[3] = 25.00;	data_table[64].edges[4] = 0.00;	data_table[64].edges[5] = 1967.00;	data_table[64].edges[6] = 1768.00;	data_table[64].edges[7] = 1611.00;	data_table[64].edges[8] = 398.00;	data_table[64].edges[9] = 285.00;	data_table[64].edges[10] = 0.00;	data_table[64].edges[11] = 0.00;
+				data_table[65].edges[0] = 1332.00;	data_table[65].edges[1] = 1295.00;	data_table[65].edges[2] = 154.00;	data_table[65].edges[3] = 26.00;	data_table[65].edges[4] = 0.00;	data_table[65].edges[5] = 2047.00;	data_table[65].edges[6] = 1842.00;	data_table[65].edges[7] = 1676.00;	data_table[65].edges[8] = 416.00;	data_table[65].edges[9] = 293.00;	data_table[65].edges[10] = 0.00;	data_table[65].edges[11] = 0.00;
+				data_table[66].edges[0] = 1391.00;	data_table[66].edges[1] = 1351.00;	data_table[66].edges[2] = 161.00;	data_table[66].edges[3] = 20.00;	data_table[66].edges[4] = 0.00;	data_table[66].edges[5] = 2128.00;	data_table[66].edges[6] = 1923.00;	data_table[66].edges[7] = 1741.00;	data_table[66].edges[8] = 436.00;	data_table[66].edges[9] = 307.00;	data_table[66].edges[10] = 51.00;	data_table[66].edges[11] = 0.00;
+				data_table[67].edges[0] = 1453.00;	data_table[67].edges[1] = 1409.00;	data_table[67].edges[2] = 168.00;	data_table[67].edges[3] = 29.00;	data_table[67].edges[4] = 0.00;	data_table[67].edges[5] = 2206.00;	data_table[67].edges[6] = 2006.00;	data_table[67].edges[7] = 1812.00;	data_table[67].edges[8] = 449.00;	data_table[67].edges[9] = 320.00;	data_table[67].edges[10] = 60.00;	data_table[67].edges[11] = 0.00;
+				data_table[68].edges[0] = 1515.00;	data_table[68].edges[1] = 1468.00;	data_table[68].edges[2] = 180.00;	data_table[68].edges[3] = 32.00;	data_table[68].edges[4] = 0.00;	data_table[68].edges[5] = 2307.00;	data_table[68].edges[6] = 2090.00;	data_table[68].edges[7] = 1884.00;	data_table[68].edges[8] = 472.00;	data_table[68].edges[9] = 337.00;	data_table[68].edges[10] = 53.00;	data_table[68].edges[11] = 0.00;
+				data_table[69].edges[0] = 1576.00;	data_table[69].edges[1] = 1528.00;	data_table[69].edges[2] = 185.00;	data_table[69].edges[3] = 24.00;	data_table[69].edges[4] = 0.00;	data_table[69].edges[5] = 2398.00;	data_table[69].edges[6] = 2173.00;	data_table[69].edges[7] = 1950.00;	data_table[69].edges[8] = 487.00;	data_table[69].edges[9] = 343.00;	data_table[69].edges[10] = 54.00;	data_table[69].edges[11] = 0.00;
+				data_table[70].edges[0] = 1639.00;	data_table[70].edges[1] = 1588.00;	data_table[70].edges[2] = 195.00;	data_table[70].edges[3] = 28.00;	data_table[70].edges[4] = 0.00;	data_table[70].edges[5] = 2491.00;	data_table[70].edges[6] = 2263.00;	data_table[70].edges[7] = 2024.00;	data_table[70].edges[8] = 506.00;	data_table[70].edges[9] = 359.00;	data_table[70].edges[10] = 57.00;	data_table[70].edges[11] = 0.00;
+				data_table[71].edges[0] = 1716.00;	data_table[71].edges[1] = 1662.00;	data_table[71].edges[2] = 31.00;	data_table[71].edges[3] = 0.00;	data_table[71].edges[4] = 0.00;	data_table[71].edges[5] = 2601.00;	data_table[71].edges[6] = 2365.00;	data_table[71].edges[7] = 2108.00;	data_table[71].edges[8] = 538.00;	data_table[71].edges[9] = 380.00;	data_table[71].edges[10] = 214.00;	data_table[71].edges[11] = 65.00;
+				data_table[72].edges[0] = 1793.00;	data_table[72].edges[1] = 1735.00;	data_table[72].edges[2] = 36.00;	data_table[72].edges[3] = 0.00;	data_table[72].edges[4] = 0.00;	data_table[72].edges[5] = 2708.00;	data_table[72].edges[6] = 2469.00;	data_table[72].edges[7] = 2194.00;	data_table[72].edges[8] = 565.00;	data_table[72].edges[9] = 404.00;	data_table[72].edges[10] = 229.00;	data_table[72].edges[11] = 71.00;
+				data_table[73].edges[0] = 1872.00;	data_table[73].edges[1] = 1809.00;	data_table[73].edges[2] = 36.00;	data_table[73].edges[3] = 0.00;	data_table[73].edges[4] = 0.00;	data_table[73].edges[5] = 2820.00;	data_table[73].edges[6] = 2575.00;	data_table[73].edges[7] = 2281.00;	data_table[73].edges[8] = 595.00;	data_table[73].edges[9] = 425.00;	data_table[73].edges[10] = 245.00;	data_table[73].edges[11] = 77.00;
+				data_table[74].edges[0] = 1949.00;	data_table[74].edges[1] = 1883.00;	data_table[74].edges[2] = 35.00;	data_table[74].edges[3] = 0.00;	data_table[74].edges[4] = 0.00;	data_table[74].edges[5] = 2932.00;	data_table[74].edges[6] = 2682.00;	data_table[74].edges[7] = 2367.00;	data_table[74].edges[8] = 625.00;	data_table[74].edges[9] = 444.00;	data_table[74].edges[10] = 260.00;	data_table[74].edges[11] = 83.00;
+				data_table[75].edges[0] = 2031.00;	data_table[75].edges[1] = 1960.00;	data_table[75].edges[2] = 45.00;	data_table[75].edges[3] = 0.00;	data_table[75].edges[4] = 0.00;	data_table[75].edges[5] = 2792.00;	data_table[75].edges[6] = 2457.00;	data_table[75].edges[7] = 654.00;	data_table[75].edges[8] = 468.00;	data_table[75].edges[9] = 273.00;	data_table[75].edges[10] = 46.00;	data_table[75].edges[11] = 84.00;
+				data_table[76].edges[0] = 2116.00;	data_table[76].edges[1] = 2040.00;	data_table[76].edges[2] = 50.00;	data_table[76].edges[3] = 0.00;	data_table[76].edges[4] = 0.00;	data_table[76].edges[5] = 2909.00;	data_table[76].edges[6] = 2551.00;	data_table[76].edges[7] = 690.00;	data_table[76].edges[8] = 494.00;	data_table[76].edges[9] = 295.00;	data_table[76].edges[10] = 60.00;	data_table[76].edges[11] = 95.00;
+				data_table[77].edges[0] = 2202.00;	data_table[77].edges[1] = 2122.00;	data_table[77].edges[2] = 52.00;	data_table[77].edges[3] = 0.00;	data_table[77].edges[4] = 0.00;	data_table[77].edges[5] = 3026.00;	data_table[77].edges[6] = 2645.00;	data_table[77].edges[7] = 722.00;	data_table[77].edges[8] = 519.00;	data_table[77].edges[9] = 313.00;	data_table[77].edges[10] = 102.00;	data_table[77].edges[11] = 71.00;
+				data_table[78].edges[0] = 2291.00;	data_table[78].edges[1] = 2206.00;	data_table[78].edges[2] = 54.00;	data_table[78].edges[3] = 0.00;	data_table[78].edges[4] = 0.00;	data_table[78].edges[5] = 3148.00;	data_table[78].edges[6] = 2743.00;	data_table[78].edges[7] = 759.00;	data_table[78].edges[8] = 545.00;	data_table[78].edges[9] = 334.00;	data_table[78].edges[10] = 108.00;	data_table[78].edges[11] = 83.00;
+				data_table[79].edges[0] = 2385.00;	data_table[79].edges[1] = 2295.00;	data_table[79].edges[2] = 58.00;	data_table[79].edges[3] = 0.00;	data_table[79].edges[4] = 0.00;	data_table[79].edges[5] = 3278.00;	data_table[79].edges[6] = 2847.00;	data_table[79].edges[7] = 800.00;	data_table[79].edges[8] = 571.00;	data_table[79].edges[9] = 360.00;	data_table[79].edges[10] = 120.00;	data_table[79].edges[11] = 98.00;
+				data_table[80].edges[0] = 2485.00;	data_table[80].edges[1] = 2389.00;	data_table[80].edges[2] = 75.00;	data_table[80].edges[3] = 0.00;	data_table[80].edges[4] = 0.00;	data_table[80].edges[5] = 3416.00;	data_table[80].edges[6] = 2957.00;	data_table[80].edges[7] = 845.00;	data_table[80].edges[8] = 609.00;	data_table[80].edges[9] = 386.00;	data_table[80].edges[10] = 136.00;	data_table[80].edges[11] = 118.00;
+				data_table[81].edges[0] = 2586.00;	data_table[81].edges[1] = 2484.00;	data_table[81].edges[2] = 86.00;	data_table[81].edges[3] = 19.00;	data_table[81].edges[4] = 0.00;	data_table[81].edges[5] = 3554.00;	data_table[81].edges[6] = 3066.00;	data_table[81].edges[7] = 894.00;	data_table[81].edges[8] = 644.00;	data_table[81].edges[9] = 413.00;	data_table[81].edges[10] = 147.00;	data_table[81].edges[11] = 138.00;
+				data_table[82].edges[0] = 2688.00;	data_table[82].edges[1] = 2580.00;	data_table[82].edges[2] = 93.00;	data_table[82].edges[3] = 24.00;	data_table[82].edges[4] = 0.00;	data_table[82].edges[5] = 3696.00;	data_table[82].edges[6] = 3177.00;	data_table[82].edges[7] = 938.00;	data_table[82].edges[8] = 679.00;	data_table[82].edges[9] = 440.00;	data_table[82].edges[10] = 159.00;	data_table[82].edges[11] = 157.00;
+				data_table[83].edges[0] = 3491.00;	data_table[83].edges[1] = 3332.00;	data_table[83].edges[2] = 0.00;	data_table[83].edges[3] = 0.00;	data_table[83].edges[4] = 0.00;	data_table[83].edges[5] = 4046.00;	data_table[83].edges[6] = 0.00;	data_table[83].edges[7] = 0.00;	data_table[83].edges[8] = 0.00;	data_table[83].edges[9] = 0.00;	data_table[83].edges[10] = 0.00;	data_table[83].edges[11] = 0.00;
+				data_table[84].edges[0] = 0.00;	data_table[84].edges[1] = 0.00;	data_table[84].edges[2] = 0.00;	data_table[84].edges[3] = 0.00;	data_table[84].edges[4] = 0.00;	data_table[84].edges[5] = 0.00;	data_table[84].edges[6] = 0.00;	data_table[84].edges[7] = 0.00;	data_table[84].edges[8] = 0.00;	data_table[84].edges[9] = 0.00;	data_table[84].edges[10] = 0.00;	data_table[84].edges[11] = 0.00;
+				data_table[85].edges[0] = 0.00;	data_table[85].edges[1] = 0.00;	data_table[85].edges[2] = 0.00;	data_table[85].edges[3] = 0.00;	data_table[85].edges[4] = 0.00;	data_table[85].edges[5] = 0.00;	data_table[85].edges[6] = 0.00;	data_table[85].edges[7] = 0.00;	data_table[85].edges[8] = 0.00;	data_table[85].edges[9] = 0.00;	data_table[85].edges[10] = 0.00;	data_table[85].edges[11] = 0.00;
+				data_table[86].edges[0] = 0.00;	data_table[86].edges[1] = 0.00;	data_table[86].edges[2] = 0.00;	data_table[86].edges[3] = 0.00;	data_table[86].edges[4] = 0.00;	data_table[86].edges[5] = 0.00;	data_table[86].edges[6] = 0.00;	data_table[86].edges[7] = 0.00;	data_table[86].edges[8] = 0.00;	data_table[86].edges[9] = 0.00;	data_table[86].edges[10] = 0.00;	data_table[86].edges[11] = 0.00;
+				data_table[87].edges[0] = 0.00;	data_table[87].edges[1] = 0.00;	data_table[87].edges[2] = 0.00;	data_table[87].edges[3] = 0.00;	data_table[87].edges[4] = 0.00;	data_table[87].edges[5] = 0.00;	data_table[87].edges[6] = 0.00;	data_table[87].edges[7] = 0.00;	data_table[87].edges[8] = 0.00;	data_table[87].edges[9] = 0.00;	data_table[87].edges[10] = 0.00;	data_table[87].edges[11] = 0.00;
+				data_table[88].edges[0] = 0.00;	data_table[88].edges[1] = 0.00;	data_table[88].edges[2] = 0.00;	data_table[88].edges[3] = 0.00;	data_table[88].edges[4] = 0.00;	data_table[88].edges[5] = 0.00;	data_table[88].edges[6] = 0.00;	data_table[88].edges[7] = 0.00;	data_table[88].edges[8] = 0.00;	data_table[88].edges[9] = 0.00;	data_table[88].edges[10] = 0.00;	data_table[88].edges[11] = 0.00;
+				data_table[89].edges[0] = 3491.00;	data_table[89].edges[1] = 3332.00;	data_table[89].edges[2] = 344.00;	data_table[89].edges[3] = 335.00;	data_table[89].edges[4] = 88.00;	data_table[89].edges[5] = 4046.00;	data_table[89].edges[6] = 1329.00;	data_table[89].edges[7] = 967.00;	data_table[89].edges[8] = 714.00;	data_table[89].edges[9] = 676.00;	data_table[89].edges[10] = 290.00;	data_table[89].edges[11] = 182.00;
+				data_table[90].edges[0] = 0.00;	data_table[90].edges[1] = 0.00;	data_table[90].edges[2] = 0.00;	data_table[90].edges[3] = 0.00;	data_table[90].edges[4] = 0.00;	data_table[90].edges[5] = 0.00;	data_table[90].edges[6] = 0.00;	data_table[90].edges[7] = 0.00;	data_table[90].edges[8] = 0.00;	data_table[90].edges[9] = 0.00;	data_table[90].edges[10] = 0.00;	data_table[90].edges[11] = 0.00;
+				data_table[91].edges[0] = 3728.00;	data_table[91].edges[1] = 3552.00;	data_table[91].edges[2] = 391.00;	data_table[91].edges[3] = 381.00;	data_table[91].edges[4] = 96.00;	data_table[91].edges[5] = 4303.00;	data_table[91].edges[6] = 1441.00;	data_table[91].edges[7] = 1045.00;	data_table[91].edges[8] = 780.00;	data_table[91].edges[9] = 738.00;	data_table[91].edges[10] = 324.00;	data_table[91].edges[11] = 195.00;
+				data_table[92].edges[0] = 0.00;	data_table[92].edges[1] = 0.00;	data_table[92].edges[2] = 0.00;	data_table[92].edges[3] = 0.00;	data_table[92].edges[4] = 0.00;	data_table[92].edges[5] = 0.00;	data_table[92].edges[6] = 0.00;	data_table[92].edges[7] = 0.00;	data_table[92].edges[8] = 0.00;	data_table[92].edges[9] = 0.00;	data_table[92].edges[10] = 0.00;	data_table[92].edges[11] = 0.00;
+				data_table[93].edges[0] = 0.00;	data_table[93].edges[1] = 0.00;	data_table[93].edges[2] = 0.00;	data_table[93].edges[3] = 0.00;	data_table[93].edges[4] = 0.00;	data_table[93].edges[5] = 0.00;	data_table[93].edges[6] = 0.00;	data_table[93].edges[7] = 0.00;	data_table[93].edges[8] = 0.00;	data_table[93].edges[9] = 0.00;	data_table[93].edges[10] = 0.00;	data_table[93].edges[11] = 0.00;
+				data_table[94].edges[0] = 0.00;	data_table[94].edges[1] = 0.00;	data_table[94].edges[2] = 0.00;	data_table[94].edges[3] = 0.00;	data_table[94].edges[4] = 0.00;	data_table[94].edges[5] = 0.00;	data_table[94].edges[6] = 0.00;	data_table[94].edges[7] = 0.00;	data_table[94].edges[8] = 0.00;	data_table[94].edges[9] = 0.00;	data_table[94].edges[10] = 0.00;	data_table[94].edges[11] = 0.00;
+				data_table[95].edges[0] = 0.00;	data_table[95].edges[1] = 0.00;	data_table[95].edges[2] = 0.00;	data_table[95].edges[3] = 0.00;	data_table[95].edges[4] = 0.00;	data_table[95].edges[5] = 0.00;	data_table[95].edges[6] = 0.00;	data_table[95].edges[7] = 0.00;	data_table[95].edges[8] = 0.00;	data_table[95].edges[9] = 0.00;	data_table[95].edges[10] = 0.00;	data_table[95].edges[11] = 0.00;
+				data_table[96].edges[0] = 0.00;	data_table[96].edges[1] = 0.00;	data_table[96].edges[2] = 0.00;	data_table[96].edges[3] = 0.00;	data_table[96].edges[4] = 0.00;	data_table[96].edges[5] = 0.00;	data_table[96].edges[6] = 0.00;	data_table[96].edges[7] = 0.00;	data_table[96].edges[8] = 0.00;	data_table[96].edges[9] = 0.00;	data_table[96].edges[10] = 0.00;	data_table[96].edges[11] = 0.00;
+				data_table[97].edges[0] = 0.00;	data_table[97].edges[1] = 0.00;	data_table[97].edges[2] = 0.00;	data_table[97].edges[3] = 0.00;	data_table[97].edges[4] = 0.00;	data_table[97].edges[5] = 0.00;	data_table[97].edges[6] = 0.00;	data_table[97].edges[7] = 0.00;	data_table[97].edges[8] = 0.00;	data_table[97].edges[9] = 0.00;	data_table[97].edges[10] = 0.00;	data_table[97].edges[11] = 0.00;
+				data_table[98].edges[0] = 0.00;	data_table[98].edges[1] = 0.00;	data_table[98].edges[2] = 0.00;	data_table[98].edges[3] = 0.00;	data_table[98].edges[4] = 0.00;	data_table[98].edges[5] = 0.00;	data_table[98].edges[6] = 0.00;	data_table[98].edges[7] = 0.00;	data_table[98].edges[8] = 0.00;	data_table[98].edges[9] = 0.00;	data_table[98].edges[10] = 0.00;	data_table[98].edges[11] = 0.00;
+				data_table[99].edges[0] = 0.00;	data_table[99].edges[1] = 0.00;	data_table[99].edges[2] = 0.00;	data_table[99].edges[3] = 0.00;	data_table[99].edges[4] = 0.00;	data_table[99].edges[5] = 0.00;	data_table[99].edges[6] = 0.00;	data_table[99].edges[7] = 0.00;	data_table[99].edges[8] = 0.00;	data_table[99].edges[9] = 0.00;	data_table[99].edges[10] = 0.00;	data_table[99].edges[11] = 0.00;
+				data_table[100].edges[0] = 0.00;	data_table[100].edges[1] = 0.00;	data_table[100].edges[2] = 0.00;	data_table[100].edges[3] = 0.00;	data_table[100].edges[4] = 0.00;	data_table[100].edges[5] = 0.00;	data_table[100].edges[6] = 0.00;	data_table[100].edges[7] = 0.00;	data_table[100].edges[8] = 0.00;	data_table[100].edges[9] = 0.00;	data_table[100].edges[10] = 0.00;	data_table[100].edges[11] = 0.00;
+				data_table[101].edges[0] = 0.00;	data_table[101].edges[1] = 0.00;	data_table[101].edges[2] = 0.00;	data_table[101].edges[3] = 0.00;	data_table[101].edges[4] = 0.00;	data_table[101].edges[5] = 0.00;	data_table[101].edges[6] = 0.00;	data_table[101].edges[7] = 0.00;	data_table[101].edges[8] = 0.00;	data_table[101].edges[9] = 0.00;	data_table[101].edges[10] = 0.00;	data_table[101].edges[11] = 0.00;
+data_table[102].edges[0] = 0.00;	data_table[102].edges[1] = 0.00;	data_table[102].edges[2] = 0.00;	data_table[102].edges[3] = 0.00;	data_table[102].edges[4] = 0.00;	data_table[102].edges[5] = 0.00;	data_table[102].edges[6] = 0.00;	data_table[102].edges[7] = 0.00;	data_table[102].edges[8] = 0.00;	data_table[102].edges[9] = 0.00;	data_table[102].edges[10] = 0.00;	data_table[102].edges[11] = 0.00;
 			}
 
 			// 1: Doyle and Turner parameterization - 4 Gaussians - [0, 4]
@@ -1009,7 +1299,7 @@ namespace mt
 			// 1: Doyle and Turner parameterization - 4 Gaussians - [0, 4]
 			// 2: Peng et al. parameterization - 5 Gaussians - [0, 4]
 			// 3: Peng et al. parameterization - 5 Gaussians - [0, 12]
-			template<class TPP_Coef>
+			template <class TPP_Coef>
 			void set_Doyle_Peng_neutral_coef(const int &Z, TPP_Coef &feg, TPP_Coef &fxg, TPP_Coef &Pr, TPP_Coef &Vr, TPP_Coef &VR)		
 			{
 				int iZ = Z-1;
@@ -1040,7 +1330,7 @@ namespace mt
 			}
 
 			// 4: Kirkland parameterization - 3 Yukawa + 3 Gaussians - [0, 12]			
-			template<class TPP_Coef>
+			template <class TPP_Coef>
 			void set_Kirkland_neutral_coef(const int &Z, TPP_Coef &feg, TPP_Coef &fxg, TPP_Coef &Pr, TPP_Coef &Vr, TPP_Coef &VR)		
 			{
 				int iZ = Z-1;
@@ -1095,7 +1385,7 @@ namespace mt
 			}
 			
 			// 5: Weickenmeier and H.Kohl - a*(1-exp(-bg^2)/g^2 - [0, 12]
-			template<class TPP_Coef>
+			template <class TPP_Coef>
 			void set_Weickenmeier_neutral_coef(const int &Z, TPP_Coef &feg, TPP_Coef &fxg, TPP_Coef &Pr, TPP_Coef &Vr, TPP_Coef &VR)		
 			{
 				int iZ = Z-1;
@@ -1130,7 +1420,7 @@ namespace mt
 			}
 			
 			// 6: Lobato parameterization - Hydrogen functions - [0, 12]
-			template<class TPP_Coef>
+			template <class TPP_Coef>
 			void set_Lobato_neutral_coef(const int &Z, TPP_Coef &feg, TPP_Coef &fxg, TPP_Coef &Pr, TPP_Coef &Vr, TPP_Coef &VR)		
 			{
 				int iZ = Z-1;
@@ -1161,7 +1451,7 @@ namespace mt
 			}
 
 			// Peng et al. parameterization for ions - 5 Gaussians - [0, 4]
-			template<class TPP_Coef>
+			template <class TPP_Coef>
 			void set_Peng_ions_coef(const int &Z, const int &charge, TPP_Coef &feg, TPP_Coef &fxg, TPP_Coef &Pr, TPP_Coef &Vr, TPP_Coef &VR)		
 			{
 				using T = Value_type<TPP_Coef>;
@@ -1219,7 +1509,7 @@ namespace mt
 			}
 
 			// get Coefficients
-			template<class TAtom_Type>
+			template <class TAtom_Type>
 			void get_atom_coef(int Z, double Vrl, int nR, double R_min, TAtom_Type &atom_type)		
 			{
 				using T = Value_type<TAtom_Type>;
@@ -1256,7 +1546,7 @@ namespace mt
 					set_Lobato_neutral_coef(Z, c_feg[0], c_fxg[0], c_Pr[0], c_Vr[0], c_VR[0]);
 				}
 
-				auto from_idx_to_charge = [](const int &i)->int{return ((i%2== 0)?1:-1)*((i+1)/2); };
+				auto from_idx_to_charge = [](const int &i)->int{return ((i%2 == 0)?1:-1)*((i+1)/2); };
 
 				// Peng et al. parameterizationfor ions - 5 Gaussians - [0, 4]
 				int ncoef = 1;
@@ -1272,7 +1562,7 @@ namespace mt
 				int icoef = 0;
 				for(auto i = 0; i < c_feg.size(); i++)
 				{
-					if((i== 0) || nonZero(c_feg[i].cl[0]))
+					if((i == 0) || nonZero(c_feg[i].cl[0]))
 					{
 						auto &coef = atom_type.coef[icoef++];
 						coef.charge = from_idx_to_charge(i); 
@@ -1285,7 +1575,7 @@ namespace mt
 
 						coef.R_min = R_min;
 						c_atom_cal.Set_Atom_Type(potential_type, coef.charge, &atom_type);
-						coef.R_max = (coef.charge== 0)?c_atom_cal.AtomicRadius_Cutoff(3, Vrl):atom_type.coef[0].R_max;
+						coef.R_max = (coef.charge == 0)?c_atom_cal.AtomicRadius_Cutoff(3, Vrl):atom_type.coef[0].R_max;
 						if(isZero(coef.R_max))
 						{
 							coef.R_max = 1.75*atom_type.ra_e;

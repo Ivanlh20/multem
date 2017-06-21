@@ -1,6 +1,6 @@
 /**
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,21 +13,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #include "types.cuh"
 #include "matlab_types.cuh"
 #include "traits.cuh"
 #include "stream.cuh"
-#include "fft2.cuh"
+#include "fft.cuh"
+#include "atom_data.hpp"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
-#include "atom_data.hpp"
+
 #include "microscope_effects.cuh"
-#include "host_functions.hpp"
-#include "device_functions.cuh"
-#include "host_device_functions.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -35,79 +33,114 @@
 using mt::rmatrix_r;
 using mt::rmatrix_c;
 
-template<class TInput_Multislice>
-void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full =true)
+template <class TInput_Multislice>
+void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full = true)
 {
-	using value_type_r = mt::Value_type<TInput_Multislice>;
-
-	input_multislice.precision = mx_get_scalar_field<mt::ePrecision>(mx_input_multislice, "precision");
-	input_multislice.device = mx_get_scalar_field<mt::eDevice>(mx_input_multislice, "device"); 
-	input_multislice.cpu_ncores = mx_get_scalar_field<int>(mx_input_multislice, "cpu_ncores"); 
-	input_multislice.cpu_nthread = mx_get_scalar_field<int>(mx_input_multislice, "cpu_nthread"); 
-	input_multislice.gpu_device = mx_get_scalar_field<int>(mx_input_multislice, "gpu_device"); 
-	input_multislice.gpu_nstream = mx_get_scalar_field<int>(mx_input_multislice, "gpu_nstream"); 
+	using T_r = mt::Value_type<TInput_Multislice>;
 
 	input_multislice.simulation_type = mt::eTEMST_HRTEM;
 
-	input_multislice.illumination_model = mx_get_scalar_field<mt::eIllumination_Model>(mx_input_multislice, "illumination_model");
-	input_multislice.temporal_spatial_incoh = mx_get_scalar_field<mt::eTemporal_Spatial_Incoh>(mx_input_multislice, "temporal_spatial_incoh");
+	/**************************** Specimen *****************************/
+	auto lx = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_lx");
+	auto ly = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_ly");
+	T_r lz = 0;
+	T_r dz = 0.25;
+	bool pbc_xy = true; 
 
-	input_multislice.E_0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "E_0");
-	input_multislice.theta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "theta")*mt::c_deg_2_rad;
-	input_multislice.phi = mx_get_scalar_field<value_type_r>(mx_input_multislice, "phi")*mt::c_deg_2_rad;
-
-	bool bwl = true;
-	bool pbc_xy = true;
-
+	/************************** xy sampling ****************************/
 	auto nx = mx_get_scalar_field<int>(mx_input_multislice, "nx");
 	auto ny = mx_get_scalar_field<int>(mx_input_multislice, "ny");
-	auto lx = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lx");
-	auto ly = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ly");
-	value_type_r dz = 0.25;
+	bool bwl = false;
 
-	input_multislice.grid.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
+	input_multislice.grid_2d.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
 
-	/****************************** Incident wave ********************************/
+	/************************ Incident wave ****************************/
 	auto iw_type = mx_get_scalar_field<mt::eIncident_Wave_Type>(mx_input_multislice, "iw_type");
 	input_multislice.set_incident_wave_type(iw_type);
 
 	if(input_multislice.is_user_define_wave() && full)
 	{
 		auto iw_psi = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "iw_psi");
-		mt::Stream<mt::e_host> stream(input_multislice.cpu_nthread);
-		mt::assign(stream, iw_psi, input_multislice.iw_psi);
+		mt::assign(iw_psi, input_multislice.iw_psi);
 	}
 
-	/****************************** Objective lens ********************************/
-	input_multislice.obj_lens.m = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_m"); 												// momentum of the vortex
-	input_multislice.obj_lens.f = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_f"); 									// defocus(Angstrom)
-	input_multislice.obj_lens.Cs3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_Cs3")*mt::c_mm_2_Ags; 				// third order spherical aberration(mm-->Angstrom)
-	input_multislice.obj_lens.Cs5 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_Cs5")*mt::c_mm_2_Ags; 				// fifth order aberration(mm-->Angstrom)
-	input_multislice.obj_lens.mfa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_mfa2"); 								// magnitude 2-fold astigmatism(Angstrom)
-	input_multislice.obj_lens.afa2 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_afa2")*mt::c_deg_2_rad; 			// angle 2-fold astigmatism(degrees-->rad)
-	input_multislice.obj_lens.mfa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_mfa3"); 								// magnitude 3-fold astigmatism(Angstrom)
-	input_multislice.obj_lens.afa3 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_afa3")*mt::c_deg_2_rad; 			// angle 3-fold astigmatism(degrees-->rad)
-	input_multislice.obj_lens.inner_aper_ang = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_inner_aper_ang")*mt::c_mrad_2_rad; 		// inner aperture(mrad-->rad)
-	input_multislice.obj_lens.outer_aper_ang = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_outer_aper_ang")*mt::c_mrad_2_rad; 		// outer aperture(mrad-->rad)
-	input_multislice.obj_lens.sf = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_sf"); 									// defocus spread(Angstrom)
-	input_multislice.obj_lens.nsf = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_nsf"); 											// Number of integration steps for the defocus Spread
-	input_multislice.obj_lens.beta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_beta")*mt::c_mrad_2_rad; 			// divergence semi-angle(mrad-->rad)
-	input_multislice.obj_lens.nbeta = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_nbeta"); 										// Number of integration steps for the divergence semi-angle
+	// read iw_x and iw_y
+	auto iw_x = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "iw_x");
+	auto iw_y = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "iw_y");
+	
+	int n_iw_xy = min(iw_x.size(), iw_y.size()); 
+	input_multislice.iw_x.assign(iw_x.begin(), iw_x.begin()+n_iw_xy);
+	input_multislice.iw_y.assign(iw_y.begin(), iw_y.begin()+n_iw_xy);
+
+	/********************* Microscope parameter ***********************/
+	input_multislice.E_0 = mx_get_scalar_field<T_r>(mx_input_multislice, "E_0");
+	input_multislice.theta = mx_get_scalar_field<T_r>(mx_input_multislice, "theta")*mt::c_deg_2_rad;
+	input_multislice.phi = mx_get_scalar_field<T_r>(mx_input_multislice, "phi")*mt::c_deg_2_rad;
+
+	/********************* Illumination model *************************/
+	input_multislice.illumination_model = mx_get_scalar_field<mt::eIllumination_Model>(mx_input_multislice, "illumination_model");
+	input_multislice.temporal_spatial_incoh = mx_get_scalar_field<mt::eTemporal_Spatial_Incoh>(mx_input_multislice, "temporal_spatial_incoh");
+
+	/****************************** Condenser lens ********************************/
+	input_multislice.cond_lens.beta = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_beta")*mt::c_mrad_2_rad; 						// divergence semi-angle(mrad-->rad)
+	input_multislice.cond_lens.nbeta = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_nbeta");										// Number of integration steps for the divergence semi-angle
+	
+	input_multislice.cond_lens.set_input_data(input_multislice.E_0, input_multislice.grid_2d);
+
+	/************************ Objective lens **************************/
+	input_multislice.obj_lens.m = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_m");													// momentum of the vortex
+	input_multislice.obj_lens.c_10 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_10"); 											// defocus (Angstrom)
+	input_multislice.obj_lens.c_12 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_12"); 											// 2-fold astigmatism (Angstrom)
+	input_multislice.obj_lens.phi_12 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_12")*mt::c_deg_2_rad; 						// Azimuthal angle of 2-fold astigmatism (degrees-->rad)
+
+	input_multislice.obj_lens.c_21 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_21"); 											// Axial coma (Angstrom)
+	input_multislice.obj_lens.phi_21 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_21")*mt::c_deg_2_rad; 						// Azimuthal angle of axial coma (degrees-->rad)
+	input_multislice.obj_lens.c_23 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_23"); 											// 3-fold astigmatism (Angstrom)
+	input_multislice.obj_lens.phi_23 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_23")*mt::c_deg_2_rad; 						// Azimuthal angle of 3-fold astigmatism (degrees-->rad)
+
+	input_multislice.obj_lens.c_30 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_30")*mt::c_mm_2_Angs; 							// 3rd order spherical aberration (mm-->Angstrom)
+	input_multislice.obj_lens.c_32 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_32"); 											// Axial star aberration (Angstrom)
+	input_multislice.obj_lens.phi_32 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_32")*mt::c_deg_2_rad; 						// Azimuthal angle of axial star aberration (degrees-->rad)
+	input_multislice.obj_lens.c_34 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_34"); 											// 4-fold astigmatism (Angstrom)
+	input_multislice.obj_lens.phi_34 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_34")*mt::c_deg_2_rad; 						// Azimuthal angle of 4-fold astigmatism (degrees-->rad)
+
+	input_multislice.obj_lens.c_41 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_41"); 											// 4th order axial coma (Angstrom)
+	input_multislice.obj_lens.phi_41 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_41")*mt::c_deg_2_rad; 						// Azimuthal angle of 4th order axial coma (degrees-->rad)
+	input_multislice.obj_lens.c_43 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_43"); 											// 3-lobe aberration (Angstrom)
+	input_multislice.obj_lens.phi_43 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_43")*mt::c_deg_2_rad; 						// Azimuthal angle of 3-lobe aberration (degrees-->rad)
+	input_multislice.obj_lens.c_45 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_45"); 											// 5-fold astigmatism (Angstrom)
+	input_multislice.obj_lens.phi_45 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_45")*mt::c_deg_2_rad; 						// Azimuthal angle of 5-fold astigmatism (degrees-->rad)
+
+	input_multislice.obj_lens.c_50 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_50")*mt::c_mm_2_Angs; 							// 5th order spherical aberration (mm-->Angstrom)
+	input_multislice.obj_lens.c_52 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_52"); 											// 5th order axial star aberration (Angstrom)
+	input_multislice.obj_lens.phi_52 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_52")*mt::c_deg_2_rad; 						// Azimuthal angle of 5th order axial star aberration (degrees-->rad)
+	input_multislice.obj_lens.c_54 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_54"); 											// 5th order rosette aberration (Angstrom)
+	input_multislice.obj_lens.phi_54 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_54")*mt::c_deg_2_rad; 						// Azimuthal angle of 5th order rosette aberration(degrees-->rad)
+	input_multislice.obj_lens.c_56 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_56"); 											// 6-fold astigmatism (Angstrom)
+	input_multislice.obj_lens.phi_56 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_56")*mt::c_deg_2_rad; 						// Azimuthal angle of 6-fold astigmatism (degrees-->rad)
+	
+	input_multislice.obj_lens.inner_aper_ang = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_inner_aper_ang")*mt::c_mrad_2_rad; 		// inner aperture (mrad-->rad)
+	input_multislice.obj_lens.outer_aper_ang = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_outer_aper_ang")*mt::c_mrad_2_rad; 		// outer aperture (mrad-->rad)
+	
+	input_multislice.obj_lens.sf = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_sf"); 												// defocus spread (Angstrom)
+	input_multislice.obj_lens.nsf = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_nsf"); 												// Number of integration steps for the defocus Spread
+	
+	input_multislice.obj_lens.beta = input_multislice.cond_lens.beta; 																			// divergence semi-angle (mrad-->rad)
+	input_multislice.obj_lens.nbeta = input_multislice.cond_lens.nbeta;																			// Number of integration steps for the divergence semi-angle
+	
+	
 	input_multislice.obj_lens.zero_defocus_type = mt::eZDT_Last;
 	input_multislice.obj_lens.zero_defocus_plane = 0.0;	
-	input_multislice.obj_lens.set_input_data(input_multislice.E_0, input_multislice.grid);
-
+	
+	input_multislice.obj_lens.set_input_data(input_multislice.E_0, input_multislice.grid_2d);
 
 	input_multislice.validate_parameters();
  }
 
-void set_output_multislice(const mxArray *mx_input_multislice, mxArray *&mx_output_multislice, mt::Output_Multislice_Matlab &output_multislice)
+template<class TOutput_Multislice>
+void set_struct_microscope_aberrations(TOutput_Multislice &output_multislice, mxArray *&mx_output_multislice)
 {
-	mt::Input_Multislice<double> input_multislice;
-	read_input_multislice(mx_input_multislice, input_multislice, false);
-	output_multislice.set_input_data(&input_multislice);
-
-	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thickness", "m2psi"};
+	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thick", "m2psi"};
 	int number_of_fields_output_multislice = 6;
 	mwSize dims_output_multislice[2] = {1, 1};
 
@@ -115,50 +148,54 @@ void set_output_multislice(const mxArray *mx_input_multislice, mxArray *&mx_outp
 
 	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx);
 	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x.data());
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y.data());
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thickness", 1, output_multislice.thickness.size(), output_multislice.thickness.data());
-	output_multislice.m2psi_tot[0] = mx_create_matrix_field<rmatrix_r>(mx_output_multislice, "m2psi", output_multislice.ny, output_multislice.nx);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thick", 1, output_multislice.thick.size(), output_multislice.thick);
+	mx_create_set_matrix_field<rmatrix_c>(mx_output_multislice, "m2psi", output_multislice.ny, output_multislice.nx, output_multislice.m2psi_tot[0]);
 }
 
-template<class T, mt::eDevice dev>
-void il_microscope_aberrations(const mxArray *mxB, mt::Output_Multislice_Matlab &output_multislice)
+template <class T, mt::eDevice dev>
+void run_microscope_aberrations(mt::System_Configuration &system_conf, const mxArray *mx_input_multislice, mxArray *&mx_output_multislice)
 {
 	mt::Input_Multislice<T> input_multislice;
-	read_input_multislice(mxB, input_multislice);
+	read_input_multislice(mx_input_multislice, input_multislice);
 
-	mt::Stream<dev> stream;
-	mt::FFT2<T, dev> fft2;
+    mt::Output_Multislice<T> output_multislice;
+    output_multislice.set_input_data(&input_multislice);
+
+	mt::Stream<dev> stream(system_conf.nstream);
+	mt::FFT<T, dev> fft_2d;
+	fft_2d.create_plan_2d(input_multislice.grid_2d.ny, input_multislice.grid_2d.nx, system_conf.nstream);
+
 	mt::Microscope_Effects<T, dev> microscope_effects;
+	microscope_effects.set_input_data(&input_multislice, &stream, &fft_2d);
+	microscope_effects(output_multislice);
 
-	stream.resize(input_multislice.nstream);
-	fft2.create_plan_2d(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
-	microscope_effects.set_input_data(&input_multislice, &stream, &fft2);
+	stream.synchronize();
+	fft_2d.cleanup();
 
-	microscope_effects.apply(output_multislice);
-
-	fft2.cleanup();
+	set_struct_microscope_aberrations(output_multislice, mx_output_multislice);
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	mt::Output_Multislice_Matlab output_multislice;
-	set_output_multislice(prhs[0], plhs[0], output_multislice);
+	auto system_conf = mt::read_system_conf(prhs[0]);
+	int idx_0 = (system_conf.active)?1:0;
 
-	if(output_multislice.is_float_host())
+	if(system_conf.is_float_host())
 	{
-		il_microscope_aberrations<float, mt::e_host>(prhs[0], output_multislice);
+		run_microscope_aberrations<float, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	else if(output_multislice.is_double_host())
+	else if(system_conf.is_double_host())
 	{
-		il_microscope_aberrations<double, mt::e_host>(prhs[0], output_multislice);
+		run_microscope_aberrations<double, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	if(output_multislice.is_float_device())
+	else if(system_conf.is_float_device())
 	{
-		il_microscope_aberrations<float, mt::e_device>(prhs[0], output_multislice);
+		run_microscope_aberrations<float, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	else if(output_multislice.is_double_device())
+	else if(system_conf.is_double_device())
 	{
-		il_microscope_aberrations<double, mt::e_device>(prhs[0], output_multislice);
+		run_microscope_aberrations<double, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
 }

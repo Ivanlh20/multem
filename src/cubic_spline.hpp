@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,11 +13,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef SPLINE_H
 #define SPLINE_H
+
+#ifdef _MSC_VER
+#pragma once
+#endif// _MSC_VER
 
 #include <vector>
 #include <cstdlib>
@@ -29,7 +33,7 @@
 namespace mt
 {
 	// Cubic_Spline interpolation
-	template<class T>
+	template <class T>
 	class Cubic_Spline
 	{
 	private:
@@ -37,7 +41,7 @@ namespace mt
 		// f(x) = c3*(x-x_i)^3 + c2*(x-x_i)^2 + c1*(x-x_i) + c0
 		Vector<T, e_host> m_x, m_c3, m_c2, m_c1, m_c0;
 	public:
-		template<class TVector>
+		template <class TVector>
 		void set_points(const TVector &x, const TVector &y)
 		{
 			assert(x.size() == y.size());
@@ -98,7 +102,7 @@ namespace mt
 			return ((m_c3[idx]*h + m_c2[idx])*h + m_c1[idx])*h + m_c0[idx];
 		}
 
-		template<class TCI_Coef>
+		template <class TCI_Coef>
 		void get_coeff(TCI_Coef &ci_coef)
 		{
 			ci_coef.c0.assign(m_c0.begin(), m_c0.end());
@@ -107,7 +111,7 @@ namespace mt
 			ci_coef.c3.assign(m_c3.begin(), m_c3.end());
 		}
 
-		template<class TVector_1, class TVector_2> 
+		template <class TVector_1, class TVector_2> 
 		void eval_function(TVector_1 &x, TVector_2 &y)
 		{	
 			for(auto i = 0; i<x.size(); i++)
@@ -116,18 +120,19 @@ namespace mt
 			}
 		}
 
-		template<class TGrid, class TVector> 
-		void eval_radial_function(const TGrid &grid, Value_type<TGrid> x, Value_type<TGrid> y, TVector &V)
+		template <class TGrid, class TVector> 
+		void eval_radial_function(const TGrid &grid_2d, Value_type<TGrid> x, Value_type<TGrid> y, TVector &V)
 		{	
-			using T = Value_type<TGrid>;
-			T r_max = x_max();
-			T fr_max = (*this)(r_max);
-			for(auto ix = 0; ix < grid.nx; ix++)
+			using X = Value_type<TGrid>;
+
+			X r_max = x_max();
+			X fr_max = (*this)(r_max);
+			for(auto ix = 0; ix < grid_2d.nx; ix++)
 			{
-				for(auto iy = 0; iy < grid.ny; iy++)
+				for(auto iy = 0; iy < grid_2d.ny; iy++)
 				{
-					T r = grid.R2(ix, iy, x, y);
-					int ixy = grid.ind_col(ix, iy);
+					X r = grid_2d.R2(ix, iy, x, y);
+					int ixy = grid_2d.ind_col(ix, iy);
 					V[ixy] = (r < r_max)?(*this)(r):fr_max;
 				}
 			}

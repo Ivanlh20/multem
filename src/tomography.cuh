@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef TOMOGRAPHY_H
@@ -35,7 +35,7 @@
 
 namespace mt
 {
-	template<class T, eDevice dev>
+	template <class T, eDevice dev>
 	class Tomography
 	{
 		public:
@@ -51,7 +51,7 @@ namespace mt
 			{	
 				input_tomography = input_tomography_i;
 				atoms.assign(input_tomography->atoms);
-				box.set_input_data(input_tomography->r0_min, input_tomography->grid.lx, input_tomography->grid.ly, input_tomography->grid.lx);
+				box.set_input_data(input_tomography->r0_min, input_tomography->grid_2d.lx, input_tomography->grid_2d.ly, input_tomography->grid_2d.lx);
 
 				image.resize(input_tomography->image.size());
 				assign_input_image();
@@ -60,10 +60,10 @@ namespace mt
 				T IA_exp = 0;
 				for(auto irot = 0; irot< image.size(); irot++)
 				{
-					chi2_0 += mt::sum_square(input_tomography->grid, image[irot]);
-					IA_exp += mt::sum(input_tomography->grid, image[irot]);
+					chi2_0 += mt::sum_square(input_tomography->grid_2d, image[irot]);
+					IA_exp += mt::sum(input_tomography->grid_2d, image[irot]);
 				}
-				IA_exp = IA_exp*input_tomography->grid.dRx*input_tomography->grid.dRy/(atoms.size()*image.size());
+				IA_exp = IA_exp*input_tomography->grid_2d.dRx*input_tomography->grid_2d.dRy/(atoms.size()*image.size());
 
 				T IA_sim = 0;
 				for(auto ir = 0; ir<input_tomography->r.size(); ir++)
@@ -92,7 +92,7 @@ namespace mt
 				for(auto i = 0; i<c_nAtomsTypes; i++)
 				{
 					auto Z = i+1;
-					atomic_data.To_atom_type_CPU(Z, c_Vrl, c_nR, input_tomography->grid.dR_min(), atom_type_host[i]);
+					atomic_data.To_atom_type_CPU(Z, c_Vrl, c_nR, input_tomography->grid_2d.dR_min(), atom_type_host[i]);
 					if(input_tomography->Z == Z)
 					{
 						mt::assign(input_tomography->r, atom_type_host[i].R);
@@ -110,7 +110,7 @@ namespace mt
 				/***************************************************************************/
 				stream.resize(input_tomography->nstream);
 
-				int nv = max(input_tomography->grid.nx_dRx(2*input_tomography->grid.lx), input_tomography->grid.ny_dRy(2*input_tomography->grid.ly));
+				int nv = max(input_tomography->grid_2d.nx_dRx(2*input_tomography->grid_2d.lx), input_tomography->grid_2d.ny_dRy(2*input_tomography->grid_2d.ly));
 				stream_data.resize(stream.size());
 				for(auto i = 0; i<stream_data.size(); i++)
 				{
@@ -147,7 +147,7 @@ namespace mt
 				Temp_min = 1e-06*chi2_opt;
 			}
 
-			template<class Output_Tomography>
+			template <class Output_Tomography>
 			void run(Output_Tomography &output_tomography)
 			{
 				init_point();
@@ -212,7 +212,7 @@ namespace mt
 				using value_type = T;
 				using size_type = std::size_t;
 
-				static const eDevice device = dev;
+				static const eDevice device = e_host;
 
 				size_type size() const
 				{
@@ -238,8 +238,8 @@ namespace mt
 					atom_Ip[istream].y = r_i.y;
 					atom_Ip[istream].R2_max = atom_type[iZ].R2_max;
 					atom_Ip[istream].R2 = raw_pointer_cast(atom_type[iZ].R2.data());
-					atom_Ip[istream].set_ix0_ixn(input_tomography->grid, atom_type[iZ].R_max);
-					atom_Ip[istream].set_iy0_iyn(input_tomography->grid, atom_type[iZ].R_max);
+					atom_Ip[istream].set_ix0_ixn(input_tomography->grid_2d, atom_type[iZ].R_max);
+					atom_Ip[istream].set_iy0_iyn(input_tomography->grid_2d, atom_type[iZ].R_max);
 					atom_Ip[istream].c0 = raw_pointer_cast(atom_type[iZ].ciVR.c0.data());
 					atom_Ip[istream].c1 = raw_pointer_cast(atom_type[iZ].ciVR.c1.data());
 					atom_Ip[istream].c2 = raw_pointer_cast(atom_type[iZ].ciVR.c2.data());
@@ -276,10 +276,10 @@ namespace mt
 				T chi2 = 0;
 				for(auto irot = 0; irot<input_tomography->angle.size(); irot++)
 				{
-					auto Rm = get_rotation_matrix(input_tomography->angle[irot], input_tomography->tm_u0);
-					auto r = r_i.rotate(Rm, input_tomography->tm_p0);
+					auto Rm = get_rotation_matrix(input_tomography->angle[irot], input_tomography->spec_rot_u0);
+					auto r = r_i.rotate(Rm, input_tomography->spec_rot_center_p);
 					set_atom_Ip(input_tomography->Z, r, stream, atom_Ip);
-					chi2 += mt::atom_cost_function(input_tomography->grid, atom_Ip[0], image[irot]);
+					chi2 += mt::atom_cost_function(input_tomography->grid_2d, atom_Ip[0], image[irot]);
 				}
 				return chi2;
 			}
@@ -289,10 +289,10 @@ namespace mt
 				stream.set_n_act_stream(1);
 				for(auto irot = 0; irot<input_tomography->angle.size(); irot++)
 				{
-					auto Rm = get_rotation_matrix(input_tomography->angle[irot], input_tomography->tm_u0);
-					auto r = r_i.rotate(Rm, input_tomography->tm_p0);
+					auto Rm = get_rotation_matrix(input_tomography->angle[irot], input_tomography->spec_rot_u0);
+					auto r = r_i.rotate(Rm, input_tomography->spec_rot_center_p);
 					set_atom_Ip(input_tomography->Z, r, stream, atom_Ip);
-					mt::subtract_atom(stream, input_tomography->grid, atom_Ip, image[irot]);
+					mt::subtract_atom(stream, input_tomography->grid_2d, atom_Ip, image[irot]);
 				}
 			}
 
@@ -322,15 +322,15 @@ namespace mt
 				T chi2 = 0;
 				for(auto irot = 0; irot<input_tomography->angle.size(); irot++)
 				{
-					auto Rm = get_rotation_matrix(input_tomography->angle[irot], input_tomography->tm_u0);
+					auto Rm = get_rotation_matrix(input_tomography->angle[irot], input_tomography->spec_rot_u0);
 					for(int iatoms = 0; iatoms<atoms.size(); iatoms++)
 					{
-						auto r = atoms.r_n[iatoms].rotate(Rm, input_tomography->tm_p0);
-						// r = r.rotate(Rm, input_tomography->tm_p0);
+						auto r = atoms.r_n[iatoms].rotate(Rm, input_tomography->spec_rot_center_p);
+						// r = r.rotate(Rm, input_tomography->spec_rot_center_p);
 						set_atom_Ip(input_tomography->Z, r, stream, atom_Ip);
-						mt::subtract_atom(stream, input_tomography->grid, atom_Ip, image[irot]);
+						mt::subtract_atom(stream, input_tomography->grid_2d, atom_Ip, image[irot]);
 					}
-					chi2 += mt::sum_square(input_tomography->grid, image[irot]);
+					chi2 += mt::sum_square(input_tomography->grid_2d, image[irot]);
 				}
 				return chi2;
 			}
@@ -367,7 +367,7 @@ namespace mt
 
 			Stream<dev> stream;
 
-			Box_Occ box;
+			Box_Occ<T> box;
 			Rand_r3d<T> rand;
 			int rand_trial;
 			T chi2_0;

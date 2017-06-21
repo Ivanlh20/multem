@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef INPUT_TOMOGRAPHY_H
@@ -36,7 +36,7 @@ namespace mt
 {
 	bool is_gpu_available();
 
-	template<class T>
+	template <class T>
 	class Input_Tomography
 	{
 		public:
@@ -48,11 +48,11 @@ namespace mt
 			int gpu_device; 									// GPU device
 			int gpu_nstream; 									// Number of streams
 
-			r3d<T> tm_u0; 										// unitary vector			
-			r3d<T> tm_p0; 										// rotation point
+			r3d<T> spec_rot_u0; 										// unitary vector			
+			r3d<T> spec_rot_center_p; 										// rotation point
 
 			int nstream;
-			Grid<T> grid; 										// gridBT information
+			Grid_2d<T> grid_2d; 										// grid_bt information
 
 			T r0_min;
 			T rTemp;
@@ -68,7 +68,7 @@ namespace mt
 			Vector<Vector<T, e_host>, e_host> image;
 
 			Input_Tomography(): precision(eP_double), device(e_host), cpu_nthread(4), 
-				gpu_device(0), gpu_nstream(8), tm_u0(1, 0, 0), tm_p0(1, 0, 0), 
+				gpu_device(0), gpu_nstream(8), spec_rot_u0(1, 0, 0), spec_rot_center_p(1, 0, 0), 
 				nstream(0), r0_min(0.75), rTemp(0.8), input_atoms(eIA_no), Z(0){};
 
 			void validate_parameters()
@@ -85,11 +85,11 @@ namespace mt
 
 				set_device();
 
-				tm_u0.normalized();
+				spec_rot_u0.normalized();
 
 				if(!is_input_atoms())
 				{
-					T lxyz = ::fmax(grid.lx, grid.ly);
+					T lxyz = ::fmax(grid_2d.lx, grid_2d.ly);
 					r3d<T> r_min(0, 0, 0);
 					r3d<T> r_max(lxyz, lxyz, lxyz);
 					atoms.set_range(Z, r_min, r_max);

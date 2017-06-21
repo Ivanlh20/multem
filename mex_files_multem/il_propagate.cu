@@ -1,6 +1,6 @@
 /**
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,19 +13,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #include "types.cuh"
 #include "matlab_types.cuh"
 #include "traits.cuh"
 #include "stream.cuh"
-#include "fft2.cuh"
+#include "fft.cuh"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
-#include "host_functions.hpp"
-#include "device_functions.cuh"
-#include "host_device_functions.cuh"
+
 #include "propagator.cuh"
 
 #include <mex.h>
@@ -34,59 +32,61 @@
 using mt::rmatrix_r;
 using mt::rmatrix_c;
 
-template<class TInput_Multislice>
-void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full =true)
+template <class TInput_Multislice>
+void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full = true)
 {
-	using value_type_r = mt::Value_type<TInput_Multislice>;
-
-	input_multislice.precision = mx_get_scalar_field<mt::ePrecision>(mx_input_multislice, "precision");
-	input_multislice.device = mx_get_scalar_field<mt::eDevice>(mx_input_multislice, "device"); 
-	input_multislice.cpu_ncores = mx_get_scalar_field<int>(mx_input_multislice, "cpu_ncores"); 
-	input_multislice.cpu_nthread = mx_get_scalar_field<int>(mx_input_multislice, "cpu_nthread"); 
-	input_multislice.gpu_device = mx_get_scalar_field<int>(mx_input_multislice, "gpu_device"); 
-	input_multislice.gpu_nstream = mx_get_scalar_field<int>(mx_input_multislice, "gpu_nstream"); 
+	using T_r = mt::Value_type<TInput_Multislice>;
 
 	input_multislice.simulation_type = mt::eTEMST_PropRS;
 
-	input_multislice.E_0 = mx_get_scalar_field<value_type_r>(mx_input_multislice, "E_0");
-	input_multislice.theta = mx_get_scalar_field<value_type_r>(mx_input_multislice, "theta")*mt::c_deg_2_rad;
-	input_multislice.phi = mx_get_scalar_field<value_type_r>(mx_input_multislice, "phi")*mt::c_deg_2_rad;
+	/**************************** Specimen *****************************/
+	auto lx = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_lx");
+	auto ly = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_ly");
+	T_r lz = 0;
+	T_r dz = 0.25;
+	bool pbc_xy = true; 
 
-	bool bwl = true;
-	bool pbc_xy = true;
-
+	/************************** xy sampling ****************************/
 	auto nx = mx_get_scalar_field<int>(mx_input_multislice, "nx");
 	auto ny = mx_get_scalar_field<int>(mx_input_multislice, "ny");
-	auto lx = mx_get_scalar_field<value_type_r>(mx_input_multislice, "lx");
-	auto ly = mx_get_scalar_field<value_type_r>(mx_input_multislice, "ly");
-	value_type_r dz = 0.25;
+	bool bwl = false;
 
-	input_multislice.grid.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
+	input_multislice.grid_2d.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
 
-	/****************************** Incident wave ********************************/
+	/************************ Incident wave ****************************/
 	auto iw_type = mx_get_scalar_field<mt::eIncident_Wave_Type>(mx_input_multislice, "iw_type");
 	input_multislice.set_incident_wave_type(iw_type);
 
 	if(input_multislice.is_user_define_wave() && full)
 	{
 		auto iw_psi = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "iw_psi");
-		mt::Stream<mt::e_host> stream(input_multislice.cpu_nthread);
-		mt::assign(stream, iw_psi, input_multislice.iw_psi);
+		mt::assign(iw_psi, input_multislice.iw_psi);
 	}
 
-	input_multislice.obj_lens.f = mx_get_scalar_field<value_type_r>(mx_input_multislice, "obj_lens_f"); 									// defocus(Angstrom)
-	input_multislice.obj_lens.set_input_data(input_multislice.E_0, input_multislice.grid);
+	// read iw_x and iw_y
+	auto iw_x = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "iw_x");
+	auto iw_y = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "iw_y");
+	
+	int n_iw_xy = min(iw_x.size(), iw_y.size()); 
+	input_multislice.iw_x.assign(iw_x.begin(), iw_x.begin()+n_iw_xy);
+	input_multislice.iw_y.assign(iw_y.begin(), iw_y.begin()+n_iw_xy);
+
+	/********************* Microscope parameter ***********************/
+	input_multislice.E_0 = mx_get_scalar_field<T_r>(mx_input_multislice, "E_0");
+	input_multislice.theta = mx_get_scalar_field<T_r>(mx_input_multislice, "theta")*mt::c_deg_2_rad;
+	input_multislice.phi = mx_get_scalar_field<T_r>(mx_input_multislice, "phi")*mt::c_deg_2_rad;
+
+	/************************ Objective lens **************************/
+	input_multislice.obj_lens.c_10 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_f"); 									// defocus(Angstrom)
+	input_multislice.obj_lens.set_input_data(input_multislice.E_0, input_multislice.grid_2d);
 
 	input_multislice.validate_parameters();
  }
 
-void set_output_multislice(const mxArray *mx_input_multislice, mxArray *&mx_output_multislice, mt::Output_Multislice_Matlab &output_multislice)
+template<class TOutput_Multislice>
+void set_struct_propagate(TOutput_Multislice &output_multislice, mxArray *&mx_output_multislice)
 {
-	mt::Input_Multislice<double> input_multislice;
-	read_input_multislice(mx_input_multislice, input_multislice, false);
-	output_multislice.set_input_data(&input_multislice);
-
-	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thickness", "psi"};
+	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thick", "psi"};
 	int number_of_fields_output_multislice = 6;
 	mwSize dims_output_multislice[2] = {1, 1};
 
@@ -94,53 +94,54 @@ void set_output_multislice(const mxArray *mx_input_multislice, mxArray *&mx_outp
 
 	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx);
 	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x.data());
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y.data());
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thickness", 1, output_multislice.thickness.size(), output_multislice.thickness.data());
-	output_multislice.psi_coh[0] = mx_create_matrix_field<rmatrix_c>(mx_output_multislice, "psi", output_multislice.ny, output_multislice.nx);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thick", 1, output_multislice.thick.size(), output_multislice.thick);
+	mx_create_set_matrix_field<rmatrix_c>(mx_output_multislice, "psi", output_multislice.ny, output_multislice.nx, output_multislice.psi_coh[0]);
 }
 
-template<class T, mt::eDevice dev>
-void il_propagate(const mxArray *mxB, mt::Output_Multislice_Matlab &output_multislice)
+template <class T, mt::eDevice dev>
+void run_propagate(mt::System_Configuration &system_conf, const mxArray *mx_input_multislice, mxArray *&mx_output_multislice)
 {
 	mt::Input_Multislice<T> input_multislice;
-	read_input_multislice(mxB, input_multislice);
+	read_input_multislice(mx_input_multislice, input_multislice);
 
-	mt::Stream<dev> stream;
-	mt::FFT2<T, dev> fft2;
+    mt::Output_Multislice<T> output_multislice;
+    output_multislice.set_input_data(&input_multislice);
+
+	mt::Stream<dev> stream(system_conf.nstream);
+	mt::FFT<T, dev> fft_2d;
+	fft_2d.create_plan_2d(input_multislice.grid_2d.ny, input_multislice.grid_2d.nx, system_conf.nstream);
+
 	mt::Propagator<T, dev> propagator;
+	propagator.set_input_data(&input_multislice, &stream, &fft_2d);
+	propagator(mt::eS_Real, input_multislice.gx_0(), input_multislice.gy_0(), input_multislice.obj_lens.c_10 , output_multislice);
 
-	stream.resize(input_multislice.nstream);
-	fft2.create_plan_2d(input_multislice.grid.ny, input_multislice.grid.nx, input_multislice.nstream);
-	propagator.set_input_data(&input_multislice, &stream, &fft2);
+	stream.synchronize();
+	fft_2d.cleanup();
 
-	T gx_0 = input_multislice.gx_0();
-	T gy_0 = input_multislice.gy_0();
-
-	propagator.propagate(mt::eS_Real, gx_0, gy_0, input_multislice.obj_lens.f, output_multislice);
-
-	fft2.cleanup();
+	set_struct_propagate(output_multislice, mx_output_multislice);
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-{
-	mt::Output_Multislice_Matlab output_multislice;
-	set_output_multislice(prhs[0], plhs[0], output_multislice);
+{	
+	auto system_conf = mt::read_system_conf(prhs[0]);
+	int idx_0 = (system_conf.active)?1:0;
 
-	if(output_multislice.is_float_host())
+	if(system_conf.is_float_host())
 	{
-		il_propagate<float, mt::e_host>(prhs[0], output_multislice);
+		run_propagate<float, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	else if(output_multislice.is_double_host())
+	else if(system_conf.is_double_host())
 	{
-		il_propagate<double, mt::e_host>(prhs[0], output_multislice);
+		run_propagate<double, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	if(output_multislice.is_float_device())
+	else if(system_conf.is_float_device())
 	{
-		il_propagate<float, mt::e_device>(prhs[0], output_multislice);
+		run_propagate<float, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	else if(output_multislice.is_double_device())
+	else if(system_conf.is_double_device())
 	{
-		il_propagate<double, mt::e_device>(prhs[0], output_multislice);
+		run_propagate<double, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
 }

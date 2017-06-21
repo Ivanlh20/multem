@@ -1,53 +1,54 @@
-function [] = MEX(option, mfile, path, varargin)
+function [] = MEX(option, m_file, src, varargin)
 nVarargs = length(varargin);
 for k = 1:nVarargs
-	varargin{k} = strcat(path, filesep, char(varargin{k}));
-end;
+	varargin{k} = strcat(src, filesep, char(varargin{k}));
+end
 
 CUDA_PATH = getenv('CUDA_PATH');
-
 if(isempty(CUDA_PATH))
     if(ispc)
-        setenv('CUDA_PATH', 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.5');
+        setenv('CUDA_PATH', 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0');
     elseif(ismac)
-        setenv('CUDA_PATH', '/Developer/NVIDIA/CUDA-7.5');
+        setenv('CUDA_PATH', '/Developer/NVIDIA/CUDA-8.0');
     else
-        % scientific linux
-        setenv('CUDA_PATH', '/usr/local/cuda-7.5');
-%         % ubuntu
-%         setenv('CUDA_PATH', '/usr/local/cuda-7.5');        
-    end;    
-end;
+        setenv('CUDA_PATH', '/usr/local/cuda-8.0');    
+    end    
+end
+CUDA_INC_BIN = [CUDA_PATH, filesep, 'bin'];
+CUDA_INC_PATH = [CUDA_PATH, filesep, 'include'];
 
 % NVCC compiler location
-setenv('MW_NVCC_PATH', strcat(CUDA_PATH, filesep, 'bin'));
-% Cuda libraries
-CUDA_INCLUDE = strcat('-I"', CUDA_PATH, filesep, 'include"');
+setenv('MW_NVCC_PATH', CUDA_INC_BIN);
 
 if(ispc)
-    FFTW_LIB = ['-L' path ' -lfftw3f -lfftw3'];
-    LAPACK_LIB = ['-L' path ' -lblas -llapack'];
+    FFTW_LIB = ['-L"',src,'" -lfftw3f-3 -lfftw3-3'];
+    LAPACK_LIB = ['-lblas -llapack'];
+    CUDA_LIB_PATH  = [CUDA_PATH, filesep, 'lib', filesep, 'x64'];      
 elseif(ismac)
     FFTW_LIB = ' -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';
     LAPACK_LIB = ' -lblas -llapack';
+    CUDA_LIB_PATH  = [CUDA_PATH, filesep, 'lib64'];
 else
     % scientific linux
-    FFTW_LIB = '-L/opt/local/lib -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';  
-    LAPACK_LIB = '-L/opt/local/lib -lblas -llapack';
-%     % ubuntu
-%     FFTW_LIB = '-L/usr/lib/x86_64-linux-gnu -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';  
-%     LAPACK_LIB = '-L/usr/lib/x86_64-linux-gnu -lblas -llapack';
-end;
+%     FFTW_LIB = '-L"/opt/local/lib" -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';  
+%     LAPACK_LIB = '-L"/opt/local/lib" -lblas -llapack';
+    % ubuntu
+    FFTW_LIB = '-L"/usr/lib/x86_64-linux-gnu" -lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';  
+    LAPACK_LIB = '-L"/usr/lib" -lblas -llapack';
+    CUDA_LIB_PATH  = [CUDA_PATH, filesep, 'lib64'];
+end
 
-ADD_INC = strcat('-I', path);
-OUTDIR = strcat('..', filesep, 'mex_executables');
+INCLUDE = ['-I"',CUDA_INC_PATH,'" -I"', src, '"'];
+LIBRARY = ['-L"',CUDA_LIB_PATH,'" -lcudart -lcufft -lcublas ', FFTW_LIB, ' ', LAPACK_LIB];
 
-if (strcmpi(option, 'debug'))
-    mex_comand = 'mex -g -largeArrayDims -outdir';
+if (strcmpi(option, 'release'))
+    mex_comand = 'mex -v -largeArrayDims';
 else
-    mex_comand = 'mex -largeArrayDims -outdir';   
-end;
+    mex_comand = 'mex -v -g -largeArrayDims'; 
+end
 
-textcommands = strjoin({mex_comand, OUTDIR, ADD_INC, CUDA_INCLUDE, mfile, strjoin(varargin), LAPACK_LIB, FFTW_LIB});  
+OUTDIR = ['-outdir ..', filesep, 'mex_bin'];
+
+textcommands = strjoin({mex_comand, OUTDIR, INCLUDE, LIBRARY, m_file, strjoin(varargin)});
 disp(textcommands);
 eval(textcommands);

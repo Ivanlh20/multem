@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2016 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http://www.gnu.org/licenses/>.
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef LIN_ALG_DEF_H
@@ -25,13 +25,13 @@
 
 namespace mt
 {
-	template<class T>
+	template <class T>
 	struct r3d;
 
-	// template<class T, eDevice dev>
+	// template <class T, eDevice dev>
 	// class Vector;
 
-	template<class T>
+	template <class T>
 	struct Rand_r3d
 	{
 		public:
@@ -59,7 +59,7 @@ namespace mt
 	};
 
 	// /*******************************mxn matrix*********************************/
-	// template<class T>
+	// template <class T>
 	// struct Mmxn
 	// {		
 	// 	using value_type = T;
@@ -138,21 +138,21 @@ namespace mt
 
 	// };
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> operator+(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
 	// {
 	// 	return Mmxn<X>(lhs.x+rhs.x, lhs.y+rhs.y, lhs.z+rhs.z);
 	// }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> operator+(const Mmxn<X> &lhs, const X &rhs)
 	// {
 	// 	return Mmxn<X>(lhs.x+rhs, lhs.y+rhs, lhs.z+rhs);
 	// }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> operator+(const X &lhs, const Mmxn<X> &rhs)
 	// {
@@ -160,63 +160,63 @@ namespace mt
 	// }
 
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> operator-(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
 	// {
 	// 	return Mmxn<X>(lhs.x-rhs.x, lhs.y-rhs.y, lhs.z-rhs.z);
 	// }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> operator-(const Mmxn<X> &lhs, const X &rhs)
 	// {
 	// 	return Mmxn<X>(lhs.x-rhs, lhs.y-rhs, lhs.z-rhs);
 	// }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> operator-(const X &lhs, const Mmxn<X> &rhs)
 	// {
 	// 	return Mmxn<X>(lhs-rhs.x, lhs-rhs.y, lhs-rhs.z);
 	// }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> operator*(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
 	// {
 	// 	return Mmxn<X>(lhs.x*rhs.x, lhs.y*rhs.y, lhs.z*rhs.z);
 	// }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> operator*(const Mmxn<X> &lhs, const X &rhs)
 	// {
 	// 	return Mmxn<X>(lhs.x*rhs, lhs.y*rhs, lhs.z*rhs);
 	// }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> operator*(const X &lhs, const Mmxn<X> &rhs)
 	// {
 	// 	return Mmxn<X>(lhs*rhs.x, lhs*rhs.y, lhs*rhs.z);
 	// }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> operator/(const Mmxn<X> &lhs, const X &rhs)
 	// {
 	// 	return Mmxn<X>(lhs.x/rhs, lhs.y/rhs, lhs.z/rhs);
 	// }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> fmin(const Mmxn<X> lhs, const Mmxn<X> rhs)
 	// {
 	// 	return Mmxn<X>(::fmin(lhs.x, rhs.x), ::fmin(lhs.y, rhs.y), ::fmin(lhs.z, rhs.z));
 	// }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline Mmxn<X> fmax(const Mmxn<X> lhs, const Mmxn<X> rhs)
 	// {
@@ -245,7 +245,7 @@ namespace mt
 	// }
 
 
-	// // template<class TVector>
+	// // template <class TVector>
 	// // DEVICE_CALLABLE
 	// // inline Mmxn<T> matrix_prod(const TVector &Rm)
 	// // {
@@ -256,14 +256,14 @@ namespace mt
 	// // 	return r_o;
 	// // }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline X dot(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
 	// {
 	// 	return lhs.x*rhs.x + lhs.y*rhs.y + lhs.z*rhs.z;
 	// }
 
-	// template<class X>
+	// template <class X>
 	// DEVICE_CALLABLE
 	// inline X angle(const Mmxn<X> &lhs, const Mmxn<X> &rhs)
 	// {
@@ -271,7 +271,7 @@ namespace mt
 	// }
 
 	/******************************2d vector*********************************/
-	template<class T>
+	template <class T>
 	struct r2d
 	{		
 		using value_type = T;
@@ -331,13 +331,13 @@ namespace mt
 		}
 
 		DEVICE_CALLABLE
-		inline T norm()
+		inline T norm() const
 		{
 			return x*x + y*y;
 		}
 
 		DEVICE_CALLABLE
-		inline T module()
+		inline T module() const
 		{
 			return sqrt(norm());
 		}
@@ -348,7 +348,7 @@ namespace mt
 			*this /= module();
 		}
 
-		template<class TVector>
+		template <class TVector>
 		DEVICE_CALLABLE
 		inline r2d<T> apply_matrix(const TVector &Rm)
 		{
@@ -358,7 +358,7 @@ namespace mt
 			return r_o;
 		}
 
-		template<class TVector>
+		template <class TVector>
 		DEVICE_CALLABLE
 		inline r2d<T> rotate(const TVector &Rm, const r2d<T> &p0)
 		{
@@ -369,91 +369,91 @@ namespace mt
 
 	};
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> operator-(const r2d<X> r)
 	{
 		return r2d<X>(-r.x, -r.y);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> operator+(const r2d<X> &lhs, const r2d<X> &rhs)
 	{
 		return r2d<X>(lhs.x+rhs.x, lhs.y+rhs.y);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> operator+(const r2d<X> &lhs, const X &rhs)
 	{
 		return r2d<X>(lhs.x+rhs, lhs.y+rhs);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> operator+(const X &lhs, const r2d<X> &rhs)
 	{
 		return r2d<X>(lhs+rhs.x, lhs+rhs.y);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> operator-(const r2d<X> &lhs, const r2d<X> &rhs)
 	{
 		return r2d<X>(lhs.x-rhs.x, lhs.y-rhs.y);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> operator-(const r2d<X> &lhs, const X &rhs)
 	{
 		return r2d<X>(lhs.x-rhs, lhs.y-rhs);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> operator-(const X &lhs, const r2d<X> &rhs)
 	{
 		return r2d<X>(lhs-rhs.x, lhs-rhs.y);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> operator*(const r2d<X> &lhs, const r2d<X> &rhs)
 	{
 		return r2d<X>(lhs.x*rhs.x, lhs.y*rhs.y);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> operator*(const r2d<X> &lhs, const X &rhs)
 	{
 		return r2d<X>(lhs.x*rhs, lhs.y*rhs);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> operator*(const X &lhs, const r2d<X> &rhs)
 	{
 		return r2d<X>(lhs*rhs.x, lhs*rhs.y);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> operator/(const r2d<X> &lhs, const X &rhs)
 	{
 		return r2d<X>(lhs.x/rhs, lhs.y/rhs);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> fmin(const r2d<X> lhs, const r2d<X> rhs)
 	{
 		return r2d<X>(::fmin(lhs.x, rhs.x), ::fmin(lhs.y, rhs.y));
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r2d<X> fmax(const r2d<X> lhs, const r2d<X> rhs)
 	{
@@ -481,7 +481,7 @@ namespace mt
 		return r/module(r);
 	}
 
-	// template<class TVector>
+	// template <class TVector>
 	// DEVICE_CALLABLE
 	// inline r2d<T> matrix_prod(const TVector &Rm)
 	// {
@@ -492,14 +492,14 @@ namespace mt
 	// 	return r_o;
 	// }
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline X dot(const r2d<X> &lhs, const r2d<X> &rhs)
 	{
 		return lhs.x*rhs.x + lhs.y*rhs.y;
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline X angle(const r2d<X> &lhs, const r2d<X> &rhs)
 	{
@@ -507,7 +507,7 @@ namespace mt
 	}
 
 	/******************************3d vector*********************************/
-	template<class T>
+	template <class T>
 	struct r3d
 	{		
 		using value_type = T;
@@ -517,7 +517,7 @@ namespace mt
 		T z;
 
 		DEVICE_CALLABLE
-		inline r3d(const T &x_i = T(), const T &y_i = T(), const T &z_i = T())
+		r3d(const T &x_i = T(), const T &y_i = T(), const T &z_i = T())
 		{
 			x = x_i;
 			y = y_i;
@@ -526,7 +526,7 @@ namespace mt
 
 		template <typename X> 
 		DEVICE_CALLABLE
-		inline r3d(const r3d<X> &r)
+		r3d(const r3d<X> &r)
 		{
 			x = r.x;
 			y = r.y;
@@ -572,7 +572,7 @@ namespace mt
 		DEVICE_CALLABLE
 		inline T norm()
 		{
-			return x*x + y*y + z*z;
+			return pow(x, 2)+pow(y, 2)+pow(z, 2);
 		}
 
 		DEVICE_CALLABLE
@@ -587,7 +587,7 @@ namespace mt
 			*this /= module();
 		}
 
-		template<class TVector>
+		template <class TVector>
 		DEVICE_CALLABLE
 		inline r3d<T> apply_matrix(const TVector &Rm)
 		{
@@ -598,9 +598,9 @@ namespace mt
 			return r_o;
 		}
 
-		template<class TVector>
+		template <class TVector>
 		DEVICE_CALLABLE
-		inline r3d<T> rotate(const TVector &Rm, const r3d<T> &p0)
+		inline r3d<T> rotate(const TVector &Rm, const r3d<T> &p0) const
 		{
 			r3d<T> r(x, y, z); 
 			r -= p0;
@@ -609,84 +609,84 @@ namespace mt
 
 	};
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> operator+(const r3d<X> &lhs, const r3d<X> &rhs)
 	{
 		return r3d<X>(lhs.x+rhs.x, lhs.y+rhs.y, lhs.z+rhs.z);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> operator+(const r3d<X> &lhs, const X &rhs)
 	{
 		return r3d<X>(lhs.x+rhs, lhs.y+rhs, lhs.z+rhs);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> operator+(const X &lhs, const r3d<X> &rhs)
 	{
 		return r3d<X>(lhs+rhs.x, lhs+rhs.y, lhs+rhs.z);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> operator-(const r3d<X> &lhs, const r3d<X> &rhs)
 	{
 		return r3d<X>(lhs.x-rhs.x, lhs.y-rhs.y, lhs.z-rhs.z);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> operator-(const r3d<X> &lhs, const X &rhs)
 	{
 		return r3d<X>(lhs.x-rhs, lhs.y-rhs, lhs.z-rhs);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> operator-(const X &lhs, const r3d<X> &rhs)
 	{
 		return r3d<X>(lhs-rhs.x, lhs-rhs.y, lhs-rhs.z);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> operator*(const r3d<X> &lhs, const r3d<X> &rhs)
 	{
 		return r3d<X>(lhs.x*rhs.x, lhs.y*rhs.y, lhs.z*rhs.z);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> operator*(const r3d<X> &lhs, const X &rhs)
 	{
 		return r3d<X>(lhs.x*rhs, lhs.y*rhs, lhs.z*rhs);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> operator*(const X &lhs, const r3d<X> &rhs)
 	{
 		return r3d<X>(lhs*rhs.x, lhs*rhs.y, lhs*rhs.z);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> operator/(const r3d<X> &lhs, const X &rhs)
 	{
 		return r3d<X>(lhs.x/rhs, lhs.y/rhs, lhs.z/rhs);
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> fmin(const r3d<X> lhs, const r3d<X> rhs)
 	{
 		return r3d<X>(::fmin(lhs.x, rhs.x), ::fmin(lhs.y, rhs.y), ::fmin(lhs.z, rhs.z));
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline r3d<X> fmax(const r3d<X> lhs, const r3d<X> rhs)
 	{
@@ -715,7 +715,7 @@ namespace mt
 	}
 
 
-	// template<class TVector>
+	// template <class TVector>
 	// DEVICE_CALLABLE
 	// inline r3d<T> matrix_prod(const TVector &Rm)
 	// {
@@ -726,14 +726,14 @@ namespace mt
 	// 	return r_o;
 	// }
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline X dot(const r3d<X> &lhs, const r3d<X> &rhs)
 	{
 		return lhs.x*rhs.x + lhs.y*rhs.y + lhs.z*rhs.z;
 	}
 
-	template<class X>
+	template <class X>
 	DEVICE_CALLABLE
 	inline X angle(const r3d<X> &lhs, const r3d<X> &rhs)
 	{

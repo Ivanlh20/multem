@@ -4,14 +4,14 @@ function[atoms]=extract_atomic_pos(path, ncols, iconf_0)
     fileID = fopen(path,'r');
     for i1 = 1:3
         fgetl(fileID);
-    end;
+    end
     natoms = str2double(deblank(fgetl(fileID)));
     fclose(fileID);
 
     function[atoms_t]= read_pos(fileID, sextract, natoms)
         for i2 =1:9
             fgetl(fileID);
-        end;
+        end
         t = textscan(fileID, sextract,'Delimiter','\t', 'MultipleDelimsAsOne', natoms);
         atoms_t = [t{1}, t{2}, t{3}];
     end
@@ -24,8 +24,8 @@ function[atoms]=extract_atomic_pos(path, ncols, iconf_0)
         if(ic==iconf_0)
             atoms = atoms_conf;
             break;
-        end;
+        end
         ic = ic + 1;
-    end;
+    end
     fclose(fileID);
 end
