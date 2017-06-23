@@ -7,12 +7,13 @@
 *.asv
 *.deps
 *.wisdom
-*.dll
 *.exe
+*.dll
 *.7z
 *Copy*.cuh
 *Copy*.hpp
 *Copy*.cpp
+MULTEM_binary.rar
 compile_mex_general.m
 mex_examples_general
 mex_files_general
@@ -21,3 +22,4 @@ src_temporal
 design
 build-multem-Desktop_Qt_5_9_0_MSVC2015_64bit-Debug
 build-multem-Desktop_Qt_5_9_0_MSVC2015_64bit-Release
+gui_bin

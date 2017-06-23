@@ -27,15 +27,15 @@ input_multislice.iw_y = 0.0;    % y position
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.cond_lens_m = 0;                  % Vortex momentum
-input_multislice.cond_lens_c_10 = -15.836;             % Defocus (Å)
-input_multislice.cond_lens_c_30 = 1e-03;            % Third order spherical aberration (mm)
-input_multislice.cond_lens_c_50 = 0.00;             % Fifth order spherical aberration (mm)
+input_multislice.cond_lens_c_10 = -15.836;         % Defocus (Å)
+input_multislice.cond_lens_c_30 = 1e-03;           % Third order spherical aberration (mm)
+input_multislice.cond_lens_c_50 = 0.00;            % Fifth order spherical aberration (mm)
 input_multislice.cond_lens_c_12 = 0.0;             % Twofold astigmatism (Å)
-input_multislice.cond_lens_phi_12 = 0.0;             % Azimuthal angle of the twofold astigmatism (º)
+input_multislice.cond_lens_phi_12 = 0.0;           % Azimuthal angle of the twofold astigmatism (º)
 input_multislice.cond_lens_c_23 = 0.0;             % Threefold astigmatism (Å)
-input_multislice.cond_lens_phi_23 = 0.0;             % Azimuthal angle of the threefold astigmatism (º)
-input_multislice.cond_lens_inner_aper_ang = 0.0;       % Inner aperture (mrad) 
-input_multislice.cond_lens_outer_aper_ang = 21.0;      % Outer aperture (mrad)
+input_multislice.cond_lens_phi_23 = 0.0;           % Azimuthal angle of the threefold astigmatism (º)
+input_multislice.cond_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad) 
+input_multislice.cond_lens_outer_aper_ang = 21.0;  % Outer aperture (mrad)
 input_multislice.cond_lens_sf = 32;                % Defocus Spread (Å)
 input_multislice.cond_lens_nsf = 10;               % Number of integration steps for the defocus Spread
 input_multislice.cond_lens_beta = 0.2;             % Divergence semi-angle (mrad)
@@ -52,7 +52,7 @@ for x = (0.4:0.025:0.6)*input_multislice.spec_lx
         psi_0 = flipud(output_incident_wave.psi_0);
         figure(2);
         subplot(1, 2, 1);
-        imagesc(abs(input_multislice.iw_psi).^2);
+        imagesc(abs(psi_0).^2);
         title('intensity');
         axis image;
         colormap gray;

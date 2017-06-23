@@ -12,6 +12,7 @@ input_multislice = multem_default_values();         % Load default values;
 
 system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
 system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+
 system_conf.cpu_ncores = 1;
 system_conf.cpu_nthread = 1; 
 system_conf.gpu_device = 0;
