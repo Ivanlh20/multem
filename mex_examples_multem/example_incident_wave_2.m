@@ -46,6 +46,9 @@ for x = (0.4:0.025:0.6)*input_multislice.spec_lx
         
         input_multislice.iw_x = x;
         input_multislice.iw_y = y;
+%         input_multislice.iw_x = input_multislice.spec_lx/2;
+%         input_multislice.iw_y = input_multislice.spec_ly/2;
+        
         tic;
         output_incident_wave = il_incident_wave(system_conf, input_multislice); 
         toc;

@@ -44,8 +44,8 @@ na = 8; nb = 8; nc = 40; ncu = 2; rms3d = 0.085;
 , input_multislice.spec_ly, input_multislice.spec_lz...
 , a, b, c, input_multislice.spec_dz] = Si001Crystal(na, nb, nc, ncu, rms3d);
 
-input_multislice.nx = 1024; 
-input_multislice.ny = 1024;
+input_multislice.nx = 4096; 
+input_multislice.ny = 4096;
 
 %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.illumination_model = 4;           % 1: coherente mode, 4: Numerical integration

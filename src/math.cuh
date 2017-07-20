@@ -431,17 +431,19 @@
 	using std::min;
 	using std::max;
 
-	DEVICE_CALLABLE FORCE_INLINE
-	double norm(const double &x)
-	{
-		return x*x;
-	}
+    //#ifndef __APPLE__
+	    DEVICE_CALLABLE FORCE_INLINE
+	    double norm(const double &x)
+	    {
+		    return x*x;
+	    }
 
-	DEVICE_CALLABLE FORCE_INLINE
-	float norm(const float &x)
-	{
-		return x*x;
-	}
+	    DEVICE_CALLABLE FORCE_INLINE
+	    float norm(const float &x)
+	    {
+		    return x*x;
+	    }
+   // #endif
 
 	template <class T>
 	DEVICE_CALLABLE FORCE_INLINE

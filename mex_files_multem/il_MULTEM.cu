@@ -484,18 +484,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	if(system_conf.is_float_host())
 	{
+        mexPrintf("cpu float");
 		run_multislice<float, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
 	else if(system_conf.is_double_host())
 	{
+        mexPrintf("cpu double");
 		run_multislice<double, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
 	if(system_conf.is_float_device())
 	{
+        mexPrintf("gpu float");
 		run_multislice<float, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
 	else if(system_conf.is_double_device())
 	{
+        mexPrintf("gpu double");
 		run_multislice<double, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
 

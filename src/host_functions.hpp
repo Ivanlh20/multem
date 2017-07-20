@@ -3566,7 +3566,7 @@ namespace mt
 	{
 		using T = Value_type<TVector>;
 
-		dv = ::fmax(dv, 0.1);
+		dv = ::max(dv, 0.1);
 
 		TVector vr(vr_first, vr_last);
 
@@ -3690,65 +3690,65 @@ namespace mt
     enable_if_real_host_vector<TVector, void>
     write_mat_matrix(std::ofstream &bin_file, TVector &matrix)
     {
-        using T = Value_type<TVector>;
+        //using T = Value_type<TVector>;
 
-        bin_file.write(reinterpret_cast<char*>(matrix.data()), matrix.size()*sizeof(T));
+        //bin_file.write(reinterpret_cast<char*>(matrix.data()), matrix.size()*sizeof(T));
     }
 
     template<class TVector>
     enable_if_complex_host_vector<TVector, void>
     write_mat_matrix(std::ofstream &bin_file, TVector &matrix)
     {
-        using T = Value_type_r<TVector>;
+        //using T = Value_type_r<TVector>;
 
-        vector<T> vect_r(nxy);
-        vector<T> vect_i(nxy);
-        for (auto ik = 0; ik<nxy; ik++)
-        {
-            vect_r[ik] = matrix[ik].real();
-            vect_i[ik] = matrix[ik].imag();
-        }
+        //vector<T> vect_r(nxy);
+        //vector<T> vect_i(nxy);
+        //for (auto ik = 0; ik<nxy; ik++)
+        //{
+        //    vect_r[ik] = matrix[ik].real();
+        //    vect_i[ik] = matrix[ik].imag();
+        //}
 
-        bin_file.write(reinterpret_cast<char*>(vect_r.data()), matrix.size()*sizeof(T));
-        bin_file.write(reinterpret_cast<char*>(vect_i.data()), matrix.size()*sizeof(T));
+        //bin_file.write(reinterpret_cast<char*>(vect_r.data()), matrix.size()*sizeof(T));
+        //bin_file.write(reinterpret_cast<char*>(vect_i.data()), matrix.size()*sizeof(T));
     }
 
     template<class TVector>
     void write_mat_binary_matrix(const char *filename, Grid_2d<Value_type_r<TVector>> &grid_2d, TVector &matrix)
     {
-        int type = matrix_type<TVector>;
+        //int type = matrix_type<TVector>;
 
-        std::ofstream bin_file(filename, std::ofstream::binary);
-        bin_file.write(reinterpret_cast<char*>(&(grid_2d.nx)), sizeof(int));
-        bin_file.write(reinterpret_cast<char*>(&(grid_2d.ny)), sizeof(int));
-        bin_file.write(reinterpret_cast<char*>(&(grid_2d.dRx)), sizeof(double));
-        bin_file.write(reinterpret_cast<char*>(&(grid_2d.dRy)), sizeof(double));
-        bin_file.write(reinterpret_cast<char*>(&type), sizeof(int));
+        //std::ofstream bin_file(filename, std::ofstream::binary);
+        //bin_file.write(reinterpret_cast<char*>(&(grid_2d.nx)), sizeof(int));
+        //bin_file.write(reinterpret_cast<char*>(&(grid_2d.ny)), sizeof(int));
+        //bin_file.write(reinterpret_cast<char*>(&(grid_2d.dRx)), sizeof(double));
+        //bin_file.write(reinterpret_cast<char*>(&(grid_2d.dRy)), sizeof(double));
+        //bin_file.write(reinterpret_cast<char*>(&type), sizeof(int));
 
-        switch (type)
-        {
-        case 1:
-        {
-            write_mat_matrix<float>(bin_file, matrix);
-        }
-        break;
-        case 2:
-        {
-            write_mat_matrix<double>(bin_file, matrix);
-        }
-        break;
-        case 3:
-        {
-            write_mat_matrix<complex<float>>(bin_file, matrix);
-        }
-        break;
-        case 4:
-        {
-            write_mat_matrix<complex<double>>(bin_file, matrix);
-        }
-        break;
-        }
-        bin_file.close();
+        //switch (type)
+        //{
+        //case 1:
+        //{
+        //    write_mat_matrix<float>(bin_file, matrix);
+        //}
+        //break;
+        //case 2:
+        //{
+        //    write_mat_matrix<double>(bin_file, matrix);
+        //}
+        //break;
+        //case 3:
+        //{
+        //    write_mat_matrix<complex<float>>(bin_file, matrix);
+        //}
+        //break;
+        //case 4:
+        //{
+        //    write_mat_matrix<complex<double>>(bin_file, matrix);
+        //}
+        //break;
+        //}
+        //bin_file.close();
     }
 
  /************************ extract real vector form complex vector**********************/

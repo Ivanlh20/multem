@@ -45,7 +45,6 @@ input_multislice.cond_lens_zero_defocus_plane = 0;
 
 for x = (0.4:0.025:0.6)*input_multislice.spec_lx
     for y = (0.4:0.025:0.6)*input_multislice.spec_ly
-        
         input_multislice.iw_x = x;
         input_multislice.iw_y = y;
 

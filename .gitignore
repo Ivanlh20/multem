@@ -13,6 +13,7 @@
 *Copy*.cuh
 *Copy*.hpp
 *Copy*.cpp
+MULTEM_binary
 MULTEM_binary.rar
 compile_mex_general.m
 mex_examples_general

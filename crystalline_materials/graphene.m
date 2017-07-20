@@ -17,4 +17,4 @@ CrysPar.uLayer(1).atoms = [6, 0.0, 0.0, 0.0, rms, occ, region, charge;...
 Crys3D = il_crystal_by_lays(CrysPar);
 lx = CrysPar.a*CrysPar.na;
 ly = CrysPar.b*CrysPar.nb;
-lz = 0.5*(lx+ly);
+lz = 0.0;

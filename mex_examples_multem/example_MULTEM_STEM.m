@@ -36,14 +36,14 @@ input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
 input_multislice.theta = 0.0;                       % Till ilumination (º)
 input_multislice.phi = 0.0;                         % Till ilumination (º)
 
-na = 8; nb = 8; nc = 5; ncu = 2; rms3d = 0.0942; % 0.085;
+na = 8; nb = 8; nc = 25; ncu = 2; rms3d = 0.0942; % 0.085;
 
 [input_multislice.spec_atoms, input_multislice.spec_lx...
 , input_multislice.spec_ly, input_multislice.spec_lz...
 , a, b, c, input_multislice.spec_dz] = Au001Crystal(na, nb, nc, ncu, rms3d);
 
-input_multislice.nx = 1024; 
-input_multislice.ny = 1024;
+input_multislice.nx = 4096; 
+input_multislice.ny = 4096;
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.cond_lens_m = 0;                  % Vortex momentum

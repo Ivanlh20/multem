@@ -38,13 +38,13 @@
 		  MATLABMEX="/DMATLAB_MEX_FILE"           
           INCLUDE="-I&quot;$MATLABROOT\extern\include&quot; -I&quot;$MATLABROOT\simulink\include&quot;"   
      
-          SINGLE_CARD="-gencode=arch=compute_60,code=&#92;&quot;sm_60,compute_60&#92;&quot;"
-		  MULTI_CARD="-gencode=arch=compute_20,code=sm_20 -gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot; -gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot;"		
+          SINGLE_CARD="-gencode=arch=compute_61,code=&#92;&quot;sm_61,compute_61&#92;&quot;"
+		  MULTI_CARD="-gencode=arch=compute_20,code=sm_20 -gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot; -gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot; -gencode=arch=compute_60,code=&#92;&quot;sm_60,compute_60&#92;&quot;"		
 
           COMPILER="nvcc"
           COMPDEFINES="--compiler-options=/D_CRT_SECURE_NO_DEPRECATE,/D_SCL_SECURE_NO_DEPRECATE,/D_SECURE_SCL=0,$MATLABMEX"	  		  
           COMPFLAGS="--compiler-options=/Zp8,/GR,/bigobj,/W3,/EHs,/nologo,/MD $NVCCFLAGS"  		        
-		  NVCCFLAGS="$SINGLE_CARD --default-stream per-thread --std=c++11"
+		  NVCCFLAGS="$MULTI_CARD --default-stream per-thread --std=c++11"
     
 		  OPTIMFLAGS="--compiler-options=/O2,/Oy-,/DNDEBUG"          
           DEBUGFLAGS="--compiler-options=/Zi -g"
