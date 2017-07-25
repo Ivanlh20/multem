@@ -32,7 +32,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     int idx_theta = (nrhs==3)?2:3;
 	auto theta = mx_get_scalar<double>(prhs[idx_theta])*mt::c_mrad_2_rad;
 
-
     auto g_req = mt::rad_2_rAngs(E0, theta);
     auto nx = static_cast<int>(round(2*lx*g_req));
     auto ny = static_cast<int>(round(2*ly*g_req));

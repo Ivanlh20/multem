@@ -65,7 +65,7 @@ namespace mt
 		for(int iatoms = 0; iatoms<atoms.size(); iatoms++)
 		{
 
-			r3d<T> r = atoms.to_r3d(iatoms).rotate(Rm, p0);
+			auto r = atoms.to_r3d(iatoms).rotate(Rm, p0);
 
 			atoms.x[iatoms] = r.x;
 			atoms.y[iatoms] = r.y;

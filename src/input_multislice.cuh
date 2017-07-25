@@ -696,16 +696,18 @@ namespace mt
 				if(is_spec_rot_active())
 				{
 					thick_type = eTT_Whole_Spec;
-					spec_rot_u0.normalized();
+                    spec_rot_u0.normalized();
 					// get geometric center
 					if(spec_rot_center_type == eRPT_geometric_center)
 					{
 						spec_rot_center_p = r3d<T>(atoms.x_mean, atoms.y_mean, atoms.z_mean);
 					}
-					//rotate atoms
+					// rotate atoms
 					rotate_atoms(atoms, spec_rot_theta, spec_rot_u0, spec_rot_center_p);
 					// get statistic
 					atoms.get_statistic();
+                    // reset theta
+                    spec_rot_theta = 0;
 				}
 
 				// match slicing with the require thickness

@@ -143,13 +143,17 @@ namespace mt
 	{
 		Vector<T, e_host> Rm(9);
 		T alpha = 1-cos(theta);
+        alpha = (isZero(alpha)?0:alpha);
 		T beta = sin(theta);
+        beta = (isZero(beta)?0:beta);
 		Rm[0] = 1.0 + alpha*(u0.x*u0.x-1);
 		Rm[1] = u0.y*u0.x*alpha + u0.z*beta;
 		Rm[2] = u0.z*u0.x*alpha - u0.y*beta;
+
 		Rm[3] = u0.x*u0.y*alpha - u0.z*beta;
 		Rm[4] = 1.0 + alpha*(u0.y*u0.y-1);
 		Rm[5] = u0.z*u0.y*alpha + u0.x*beta;
+
 		Rm[6] = u0.x*u0.z*alpha + u0.y*beta;
 		Rm[7] = u0.y*u0.z*alpha - u0.x*beta;
 		Rm[8] = 1.0 + alpha*(u0.z*u0.z-1);

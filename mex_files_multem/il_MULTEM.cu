@@ -96,6 +96,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 		/************************ Specimen rotation *************************/
 		input_multislice.spec_rot_theta = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_rot_theta")*mt::c_deg_2_rad;
 		input_multislice.spec_rot_u0 = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_u0");
+        input_multislice.spec_rot_u0.normalized();
 		input_multislice.spec_rot_center_type = mx_get_scalar_field<mt::eRot_Point_Type>(mx_input_multislice, "spec_rot_center_type");
 		input_multislice.spec_rot_center_p = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_center_p");
 

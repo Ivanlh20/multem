@@ -1193,11 +1193,39 @@ namespace mt
 				TVector_I v_hist(nbins, 0);
 				for(auto iv = 0; iv< v.size(); iv++)
 				{
-					auto ih = static_cast<int>(floor((double(v[iv])-v_min)/dv));
-					if(ih<nbins)
-					{
-						v_hist[ih]++;
-					}
+                    auto v_id = double(v[iv]);
+					auto ih = static_cast<int>(floor((v_id-v_min)/dv));
+                    auto v_imin = v_min + (ih-1)*dv;
+                    auto v_imax = v_imin + dv;
+
+                    if(v_id<v_imin)
+                    {
+                        for (auto ik = ih; ik >= 0; ik--)
+                        {
+                            v_imin = v_min + (ik-1)*dv;
+                            v_imax = v_imin + dv;
+                            if((v_imin<=v_id)&&(v_id<v_imax))
+                            {
+                                ih = ik-1;
+                                break;
+                            }
+                        }
+                    }
+                    else if(v_id>v_imax)
+                    {
+                        for (auto ik = ih; ik < nbins; ik++)
+                        {
+                            v_imin = v_min + ik*dv;
+                            v_imax = v_imin + dv;
+                            if((v_imin<=v_id)&&(v_id<v_imax))
+                            {
+                                ih = ik;
+                                break;
+                            }
+                        }
+                    }
+                    ih = max(0, min(nbins-1, ih));
+					v_hist[ih]++;
 				}
 
 				while(v_hist.back()==0)

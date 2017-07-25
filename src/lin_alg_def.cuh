@@ -584,7 +584,8 @@ namespace mt
 		DEVICE_CALLABLE
 		inline void normalized()
 		{
-			*this /= module();
+            auto rm = module();
+			*this /= (isZero(rm))?1.0:rm;
 		}
 
 		template <class TVector>
