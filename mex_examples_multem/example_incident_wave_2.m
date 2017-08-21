@@ -27,16 +27,16 @@ input_multislice.iw_y = 0.0;    % y position
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.cond_lens_m = 0;                  % Vortex momentum
-input_multislice.cond_lens_c_10 = -15.836;         % Defocus (Å)
+input_multislice.cond_lens_c_10 = -15.836;         % Defocus (Ã…)
 input_multislice.cond_lens_c_30 = 1e-03;           % Third order spherical aberration (mm)
 input_multislice.cond_lens_c_50 = 0.00;            % Fifth order spherical aberration (mm)
-input_multislice.cond_lens_c_12 = 0.0;             % Twofold astigmatism (Å)
-input_multislice.cond_lens_phi_12 = 0.0;           % Azimuthal angle of the twofold astigmatism (º)
-input_multislice.cond_lens_c_23 = 0.0;             % Threefold astigmatism (Å)
-input_multislice.cond_lens_phi_23 = 0.0;           % Azimuthal angle of the threefold astigmatism (º)
+input_multislice.cond_lens_c_12 = 0.0;             % Twofold astigmatism (Ã…)
+input_multislice.cond_lens_phi_12 = 0.0;           % Azimuthal angle of the twofold astigmatism (Â°)
+input_multislice.cond_lens_c_23 = 0.0;             % Threefold astigmatism (Ã…)
+input_multislice.cond_lens_phi_23 = 0.0;           % Azimuthal angle of the threefold astigmatism (Â°)
 input_multislice.cond_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad) 
 input_multislice.cond_lens_outer_aper_ang = 21.0;  % Outer aperture (mrad)
-input_multislice.cond_lens_sf = 32;                % Defocus Spread (Å)
+input_multislice.cond_lens_sf = 32;                % Defocus Spread (Ã…)
 input_multislice.cond_lens_nsf = 10;               % Number of integration steps for the defocus Spread
 input_multislice.cond_lens_beta = 0.2;             % Divergence semi-angle (mrad)
 input_multislice.cond_lens_nbeta = 10;             % Number of integration steps for the divergence semi-angle
