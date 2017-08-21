@@ -35,8 +35,8 @@ input_multislice.pn_seed = 300183;                  % Random seed(frozen phonon)
 input_multislice.bwl = 0;                           % Band-width limit, 1: true, 0:false
 
 input_multislice.E_0 = 100;                         % Acceleration Voltage (keV)
-input_multislice.theta = 0.0;                       % Tilt illumination (�)
-input_multislice.phi = 0.0;                         % Tilt illumination (�)
+input_multislice.theta = 0.0;                       % Tilt illumination (°)
+input_multislice.phi = 0.0;                         % Tilt illumination (°)
 
 na = 8; nb = 8; nc = 40; ncu = 2; rms3d = 0.085;
 
@@ -59,16 +59,16 @@ input_multislice.iw_y = input_multislice.spec_ly/2;  % y position
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.cond_lens_m = 0;                  % Vortex momentum
-input_multislice.cond_lens_c_10 = 1110;            % Defocus (�)
+input_multislice.cond_lens_c_10 = 1110;            % Defocus (Å)
 input_multislice.cond_lens_c_30 = 3.3;             % Third order spherical aberration (mm)
 input_multislice.cond_lens_c_50 = 0.00;            % Fifth order spherical aberration (mm)
-input_multislice.cond_lens_c_12 = 0.0;             % Twofold astigmatism (�)
-input_multislice.cond_lens_phi_12 = 0.0;           % Azimuthal angle of the twofold astigmatism (�)
-input_multislice.cond_lens_c_23 = 0.0;             % Threefold astigmatism (�)
-input_multislice.cond_lens_phi_23 = 0.0;           % Azimuthal angle of the threefold astigmatism (�)
+input_multislice.cond_lens_c_12 = 0.0;             % Twofold astigmatism (Å)
+input_multislice.cond_lens_phi_12 = 0.0;           % Azimuthal angle of the twofold astigmatism (°)
+input_multislice.cond_lens_c_23 = 0.0;             % Threefold astigmatism (Å)
+input_multislice.cond_lens_phi_23 = 0.0;           %Azimuthal angle of the threefold astigmatism (°)
 input_multislice.cond_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad) 
 input_multislice.cond_lens_outer_aper_ang = 7.50;  % Outer aperture (mrad)
-input_multislice.cond_lens_sf = 32;                % Defocus Spread (�)
+input_multislice.cond_lens_sf = 32;                % Defocus Spread (Å)
 input_multislice.cond_lens_nsf = 8;                % Number of integration steps for the defocus Spread
 input_multislice.cond_lens_beta = 0.2;             % Divergence semi-angle (mrad)
 input_multislice.cond_lens_nbeta = 10;             % Number of integration steps for the divergence semi-angle
@@ -76,7 +76,7 @@ input_multislice.cond_lens_zero_defocus_type = 1;  % eZDT_First = 1, eZDT_User_D
 input_multislice.cond_lens_zero_defocus_plane = 0;
 
 input_multislice.thick_type = 1;                    % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
-input_multislice.thick = [10, 20, 30, 50, 70, 90];  % Array of thickes (�)
+input_multislice.thick = [10, 20, 30, 50, 70, 90];  % Array of thickness (Å)
 
 clear il_MULTEM;
 tic;

@@ -28,8 +28,8 @@ input_multislice.temporal_spatial_incoh = 1;        % 1: Spatial and temporal, 2
 input_multislice.bwl = 0;
 
 input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
-input_multislice.theta = 0.0;                       % Tilt illumination (�)
-input_multislice.phi = 0.0;                         % Tilt illumination (�)
+input_multislice.theta = 0.0;                       % Tilt illumination (°)
+input_multislice.phi = 0.0;                         % Tilt illumination (°)
 
 na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
 
@@ -51,16 +51,16 @@ input_multislice.cond_lens_beta = 0.2;              % Divergence semi-angle (mra
 
 %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.obj_lens_m = 0;                    % Vortex momentum
-input_multislice.obj_lens_c_10 = 15.836;               % Defocus (�)
+input_multislice.obj_lens_c_10 = 15.836;               % Defocus (Å)
 input_multislice.obj_lens_c_30 = 1e-03;              % Third order spherical aberration (mm)
 input_multislice.obj_lens_c_50 = 0.00;               % Fifth order spherical aberration (mm)
-input_multislice.obj_lens_c_12 = 0.0;               % Twofold astigmatism (�)
-input_multislice.obj_lens_phi_12 = 0.0;               % Azimuthal angle of the twofold astigmatism (�)
-input_multislice.obj_lens_c_23 = 0.0;               % Threefold astigmatism (�)
-input_multislice.obj_lens_phi_23 = 0.0;               % Azimuthal angle of the threefold astigmatism (�)
+input_multislice.obj_lens_c_12 = 0.0;               % Twofold astigmatism (Å)
+input_multislice.obj_lens_phi_12 = 0.0;               % Azimuthal angle of the twofold astigmatism (°)
+input_multislice.obj_lens_c_23 = 0.0;               % Threefold astigmatism (Å)
+input_multislice.obj_lens_phi_23 = 0.0;               %Azimuthal angle of the threefold astigmatism (°)
 input_multislice.obj_lens_inner_aper_ang = 0.0;     % Inner aperture (mrad) 
 input_multislice.obj_lens_outer_aper_ang = 24.0;    % Outer aperture (mrad)
-input_multislice.obj_lens_sf = 32;                  % Defocus Spread (�)
+input_multislice.obj_lens_sf = 32;                  % Defocus Spread (Å)
 input_multislice.obj_lens_nsf = 10;                 % # integration steps for the defocus Spread. It will be only used if illumination_model=4
 input_multislice.obj_lens_zero_defocus_type = 3;    % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 input_multislice.obj_lens_zero_defocus_plane = 0;   % It will be only used if obj_lens_zero_defocus_type = eZDT_User_Define
