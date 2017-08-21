@@ -48,7 +48,7 @@ input_multislice.nx = 4096;
 input_multislice.ny = 4096;
 
 %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.illumination_model = 4;           % 1: coherent mode, 4: Numerical integration
+input_multislice.illumination_model = 4;           % 1: Coherent mode, 4: Numerical integration
 input_multislice.temporal_spatial_incoh = 2;       % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -65,7 +65,7 @@ input_multislice.cond_lens_c_50 = 0.00;            % Fifth order spherical aberr
 input_multislice.cond_lens_c_12 = 0.0;             % Twofold astigmatism (Å)
 input_multislice.cond_lens_phi_12 = 0.0;           % Azimuthal angle of the twofold astigmatism (°)
 input_multislice.cond_lens_c_23 = 0.0;             % Threefold astigmatism (Å)
-input_multislice.cond_lens_phi_23 = 0.0;           %Azimuthal angle of the threefold astigmatism (°)
+input_multislice.cond_lens_phi_23 = 0.0;           % Azimuthal angle of the threefold astigmatism (°)
 input_multislice.cond_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad) 
 input_multislice.cond_lens_outer_aper_ang = 7.50;  % Outer aperture (mrad)
 input_multislice.cond_lens_sf = 32;                % Defocus Spread (Å)

@@ -22,7 +22,7 @@ input_multislice.pn_seed = 300183;
 input_multislice.pn_single_conf = 0;                % 1: true, 0:false
 input_multislice.pn_nconf = 5;
 
-input_multislice.illumination_model = 2;            % 1: coherent mode, 2: Partial coherent mode, 3: transmission cross coefficient, 4: Numerical integration
+input_multislice.illumination_model = 2;            % 1: Coherent mode, 2: Partial coherent mode, 3: Transmission cross coefficient, 4: Numerical integration
 input_multislice.temporal_spatial_incoh = 1;        % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
 input_multislice.bwl = 0;
@@ -57,7 +57,7 @@ input_multislice.obj_lens_c_50 = 0.00;               % Fifth order spherical abe
 input_multislice.obj_lens_c_12 = 0.0;               % Twofold astigmatism (Å)
 input_multislice.obj_lens_phi_12 = 0.0;               % Azimuthal angle of the twofold astigmatism (°)
 input_multislice.obj_lens_c_23 = 0.0;               % Threefold astigmatism (Å)
-input_multislice.obj_lens_phi_23 = 0.0;               %Azimuthal angle of the threefold astigmatism (°)
+input_multislice.obj_lens_phi_23 = 0.0;               % Azimuthal angle of the threefold astigmatism (°)
 input_multislice.obj_lens_inner_aper_ang = 0.0;     % Inner aperture (mrad) 
 input_multislice.obj_lens_outer_aper_ang = 24.0;    % Outer aperture (mrad)
 input_multislice.obj_lens_sf = 32;                  % Defocus Spread (Å)

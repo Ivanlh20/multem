@@ -76,7 +76,7 @@ input_multislice.theta = 0.0;                                   % Polar angle (Â
 input_multislice.phi = 0.0;                                     % Azimuthal angle (Â°)
 
 %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.illumination_model = 2;                        % 1: coherent mode, 2: Partial coherent mode, 3: transmission cross coefficient, 4: Numerical integration
+input_multislice.illumination_model = 2;                        % 1: Coherent mode, 2: Partial coherent mode, 3: Transmission cross coefficient, 4: Numerical integration
 input_multislice.temporal_spatial_incoh = 1;                    % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
