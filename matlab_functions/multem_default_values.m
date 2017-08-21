@@ -18,35 +18,35 @@ input_multislice.pn_dim = 110;                                  % phonon dimensi
 input_multislice.pn_seed = 300183;                              % Random seed(frozen phonon)
 
 %%%%%%%%%%%%%%%%%%%%%%% Specimen information %%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.spec_atoms = [];                               % simulation box length in x direction (Å)
-input_multislice.spec_dz = 0.25;                                % slice thick (Å)
+input_multislice.spec_atoms = [];                               % simulation box length in x direction (ï¿½)
+input_multislice.spec_dz = 0.25;                                % slice thick (ï¿½)
 
-input_multislice.spec_lx = 10;                                  % simulation box length in x direction (Å)
-input_multislice.spec_ly = 10;                                  % simulation box length in y direction (Å)
-input_multislice.spec_lz = 10;                                  % simulation box length gpuDEin z direction (Å)
+input_multislice.spec_lx = 10;                                  % simulation box length in x direction (ï¿½)
+input_multislice.spec_ly = 10;                                  % simulation box length in y direction (ï¿½)
+input_multislice.spec_lz = 10;                                  % simulation box length gpuDEin z direction (ï¿½)
 
 input_multislice.spec_cryst_na = 1;                             % number of unit cell along a
 input_multislice.spec_cryst_nb = 1;                             % number of unit cell along b
 input_multislice.spec_cryst_nc = 1;                             % number of unit cell along c
-input_multislice.spec_cryst_a = 0;                              % length along a (Å)
-input_multislice.spec_cryst_b = 0;                              % length along b (Å)
-input_multislice.spec_cryst_c = 0;                              % length along c (Å)
-input_multislice.spec_cryst_x0 = 0;                             % reference position along x direction (Å)
-input_multislice.spec_cryst_y0 = 0;                             % reference position along y direction (Å)
+input_multislice.spec_cryst_a = 0;                              % length along a (ï¿½)
+input_multislice.spec_cryst_b = 0;                              % length along b (ï¿½)
+input_multislice.spec_cryst_c = 0;                              % length along c (ï¿½)
+input_multislice.spec_cryst_x0 = 0;                             % reference position along x direction (ï¿½)
+input_multislice.spec_cryst_y0 = 0;                             % reference position along y direction (ï¿½)
 
-input_multislice.spec_amorp(1).z_0 = 0;                         % Starting z position of the amorphous layer (Å)
-input_multislice.spec_amorp(1).z_e = 0;                         % Ending z position of the amorphous layer (Å)
-input_multislice.spec_amorp(1).dz = 2.0;                        % slice thick of the amorphous layer (Å)
+input_multislice.spec_amorp(1).z_0 = 0;                         % Starting z position of the amorphous layer (ï¿½)
+input_multislice.spec_amorp(1).z_e = 0;                         % Ending z position of the amorphous layer (ï¿½)
+input_multislice.spec_amorp(1).dz = 2.0;                        % slice thick of the amorphous layer (ï¿½)
 
 %%%%%%%%%%%%%%%%%%%%%%%%% Specimen Rotation %%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.spec_rot_theta = 0;                            % angle (º)
+input_multislice.spec_rot_theta = 0;                            % angle (ï¿½)
 input_multislice.spec_rot_u0 = [0 0 1];                          % unitary vector			
 input_multislice.spec_rot_center_type = 1;                       % 1: geometric center, 2: User define		
 input_multislice.spec_rot_center_p = [0 0 0];                    % rotation point
 
 %%%%%%%%%%%%%%%%%%%%%% Specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.thick_type = 1;                                % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
-input_multislice.thick = 0;                                     % Array of thickness (Å)
+input_multislice.thick = 0;                                     % Array of thickness (ï¿½)
 
 %%%%%%%%%%%%%%%%%%%%%%% Potential slicing %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.potential_slicing = 1;                         % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
@@ -72,11 +72,11 @@ input_multislice.iw_y = 0.0;                                    % y position
 
 %%%%%%%%%%%%%%%%%%%% Microscope paramters %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.E_0 = 300;                                     % Acceleration Voltage (keV)
-input_multislice.theta = 0.0;                                   % Polar angle (º)
-input_multislice.phi = 0.0;                                     % Azimuthal angle (º)
+input_multislice.theta = 0.0;                                   % Polar angle (ï¿½)
+input_multislice.phi = 0.0;                                     % Azimuthal angle (ï¿½)
 
 %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.illumination_model = 2;                        % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
+input_multislice.illumination_model = 2;                        % 1: coherent mode, 2: Partial coherent mode, 3: transmission cross coefficient, 4: Numerical integration
 input_multislice.temporal_spatial_incoh = 1;                    % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -88,35 +88,35 @@ input_multislice.temporal_spatial_incoh = 1;                    % 1: Spatial and
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.cond_lens_m = 0;                               % Vortex momentum
 
-input_multislice.cond_lens_c_10 = 14.0312;                      % [C1]      Defocus (Å)
-input_multislice.cond_lens_c_12 = 0.00;                         % [A1]      2-fold astigmatism (Å)
-input_multislice.cond_lens_phi_12 = 0.00;                       % [phi_A1]	Azimuthal angle of 2-fold astigmatism (º)
+input_multislice.cond_lens_c_10 = 14.0312;                      % [C1]      Defocus (ï¿½)
+input_multislice.cond_lens_c_12 = 0.00;                         % [A1]      2-fold astigmatism (ï¿½)
+input_multislice.cond_lens_phi_12 = 0.00;                       % [phi_A1]	Azimuthal angle of 2-fold astigmatism (ï¿½)
 
-input_multislice.cond_lens_c_21 = 0.00;                         % [B2]      Axial coma (Å)
-input_multislice.cond_lens_phi_21 = 0.00;                       % [phi_B2]	Azimuthal angle of axial coma (º)
-input_multislice.cond_lens_c_23 = 0.00;                         % [A2]      3-fold astigmatism (Å)
-input_multislice.cond_lens_phi_23 = 0.00;                       % [phi_A2]	Azimuthal angle of 3-fold astigmatism (º)
+input_multislice.cond_lens_c_21 = 0.00;                         % [B2]      Axial coma (ï¿½)
+input_multislice.cond_lens_phi_21 = 0.00;                       % [phi_B2]	Azimuthal angle of axial coma (ï¿½)
+input_multislice.cond_lens_c_23 = 0.00;                         % [A2]      3-fold astigmatism (ï¿½)
+input_multislice.cond_lens_phi_23 = 0.00;                       % [phi_A2]	Azimuthal angle of 3-fold astigmatism (ï¿½)
 
 input_multislice.cond_lens_c_30 = 1e-03;                        % [C3] 		3rd order spherical aberration (mm)
-input_multislice.cond_lens_c_32 = 0.00;                         % [S3]      Axial star aberration (Å)
-input_multislice.cond_lens_phi_32 = 0.00;                       % [phi_S3]	Azimuthal angle of axial star aberration (º)
-input_multislice.cond_lens_c_34 = 0.00;                         % [A3]      4-fold astigmatism (Å)
-input_multislice.cond_lens_phi_34 = 0.0;                        % [phi_A3]	Azimuthal angle of 4-fold astigmatism (º)
+input_multislice.cond_lens_c_32 = 0.00;                         % [S3]      Axial star aberration (ï¿½)
+input_multislice.cond_lens_phi_32 = 0.00;                       % [phi_S3]	Azimuthal angle of axial star aberration (ï¿½)
+input_multislice.cond_lens_c_34 = 0.00;                         % [A3]      4-fold astigmatism (ï¿½)
+input_multislice.cond_lens_phi_34 = 0.0;                        % [phi_A3]	Azimuthal angle of 4-fold astigmatism (ï¿½)
 
-input_multislice.cond_lens_c_41 = 0.00;                         % [B4]      4th order axial coma (Å)
-input_multislice.cond_lens_phi_41 = 0.00;                       % [phi_B4]	Azimuthal angle of 4th order axial coma (º)
-input_multislice.cond_lens_c_43 = 0.00;                         % [D4]      3-lobe aberration (Å)
-input_multislice.cond_lens_phi_43 = 0.00;                       % [phi_D4]	Azimuthal angle of 3-lobe aberration (º)
-input_multislice.cond_lens_c_45 = 0.00;                         % [A4]      5-fold astigmatism (Å)
-input_multislice.cond_lens_phi_45 = 0.00;                       % [phi_A4]	Azimuthal angle of 5-fold astigmatism (º)
+input_multislice.cond_lens_c_41 = 0.00;                         % [B4]      4th order axial coma (ï¿½)
+input_multislice.cond_lens_phi_41 = 0.00;                       % [phi_B4]	Azimuthal angle of 4th order axial coma (ï¿½)
+input_multislice.cond_lens_c_43 = 0.00;                         % [D4]      3-lobe aberration (ï¿½)
+input_multislice.cond_lens_phi_43 = 0.00;                       % [phi_D4]	Azimuthal angle of 3-lobe aberration (ï¿½)
+input_multislice.cond_lens_c_45 = 0.00;                         % [A4]      5-fold astigmatism (ï¿½)
+input_multislice.cond_lens_phi_45 = 0.00;                       % [phi_A4]	Azimuthal angle of 5-fold astigmatism (ï¿½)
 
 input_multislice.cond_lens_c_50 = 0.00;                         % [C5]      5th order spherical aberration (mm)
-input_multislice.cond_lens_c_52 = 0.00;                         % [S5]      5th order axial star aberration (Å)
-input_multislice.cond_lens_phi_52 = 0.00;                       % [phi_S5]	Azimuthal angle of 5th order axial star aberration (º)
-input_multislice.cond_lens_c_54 = 0.00;                         % [R5]      5th order rosette aberration (Å)
-input_multislice.cond_lens_phi_54 = 0.00;                       % [phi_R5]	Azimuthal angle of 5th order rosette aberration (º)
-input_multislice.cond_lens_c_56 = 0.00;                         % [A5]      6-fold astigmatism (Å)
-input_multislice.cond_lens_phi_56 = 0.00;                       % [phi_A5]	Azimuthal angle of 6-fold astigmatism (º)
+input_multislice.cond_lens_c_52 = 0.00;                         % [S5]      5th order axial star aberration (ï¿½)
+input_multislice.cond_lens_phi_52 = 0.00;                       % [phi_S5]	Azimuthal angle of 5th order axial star aberration (ï¿½)
+input_multislice.cond_lens_c_54 = 0.00;                         % [R5]      5th order rosette aberration (ï¿½)
+input_multislice.cond_lens_phi_54 = 0.00;                       % [phi_R5]	Azimuthal angle of 5th order rosette aberration (ï¿½)
+input_multislice.cond_lens_c_56 = 0.00;                         % [A5]      6-fold astigmatism (ï¿½)
+input_multislice.cond_lens_phi_56 = 0.00;                       % [phi_A5]	Azimuthal angle of 6-fold astigmatism (ï¿½)
 
 input_multislice.cond_lens_inner_aper_ang = 0.0;                % Inner aperture (mrad) 
 input_multislice.cond_lens_outer_aper_ang = 21.0;   			% Outer aperture (mrad)
@@ -124,7 +124,7 @@ input_multislice.cond_lens_outer_aper_ang = 21.0;   			% Outer aperture (mrad)
 input_multislice.cond_lens_beta = 0.2;              			% Divergence semi-angle (mrad)
 input_multislice.cond_lens_nbeta = 10;              			% # integration steps for the divergence semi-angle. It will be only used if illumination_model=4
 
-input_multislice.cond_lens_sf = 32;                 			% Defocus Spread (Å)
+input_multislice.cond_lens_sf = 32;                 			% Defocus Spread (ï¿½)
 input_multislice.cond_lens_nsf = 10;                			% # integration steps for the defocus Spread. It will be only used if illumination_model=4
 
 input_multislice.cond_lens_zero_defocus_type = 1;   			% eZDT_First = 1, eZDT_User_Define = 2
@@ -132,51 +132,51 @@ input_multislice.cond_lens_zero_defocus_plane = 0;  			% It will be only used if
 
 %%%%%%%%%%%%%%%%%%% condenser lens variable %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%% it will be active in the future %%%%%%%%%%%%%%%%%
-% 1: Vortex momentum, 2: Defocus (Å), 2: Third order spherical aberration (mm)
+% 1: Vortex momentum, 2: Defocus (ï¿½), 2: Third order spherical aberration (mm)
 % 3: Third order spherical aberration (mm),  4: Fifth order spherical aberration (mm)
-% 5: Twofold astigmatism (Å), 2: Defocus (Å), 6: Azimuthal angle of the twofold astigmatism (º)
-% 7: Threefold astigmatism (Å),  8: Azimuthal angle of the threefold astigmatism (º)
-% 9: Inner aperture (mrad), 2: Defocus (Å), 10: Outer aperture (mrad)
+% 5: Twofold astigmatism (ï¿½), 2: Defocus (ï¿½), 6: Azimuthal angle of the twofold astigmatism (ï¿½)
+% 7: Threefold astigmatism (ï¿½),  8: Azimuthal angle of the threefold astigmatism (ï¿½)
+% 9: Inner aperture (mrad), 2: Defocus (ï¿½), 10: Outer aperture (mrad)
 % input_multislice.cdl_var_type = 0;                  			% 0:off 1: m, 2: f, 3 Cs3, 4:Cs5, 5:mfa2, 6:afa2, 7:mfa3, 8:afa3, 9:inner_aper_ang , 10:outer_aper_ang
 % input_multislice.cdl_var = [-2 -1 0 1 2];           			% variable array
 
 %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.obj_lens_m = 0;                                % Vortex momentum
 
-input_multislice.obj_lens_c_10 = 14.0312;                       % [C1]      Defocus (Å)
-input_multislice.obj_lens_c_12 = 0.00;                          % [A1]      2-fold astigmatism (Å)
-input_multislice.obj_lens_phi_12 = 0.00;                        % [phi_A1]	Azimuthal angle of 2-fold astigmatism (º)
+input_multislice.obj_lens_c_10 = 14.0312;                       % [C1]      Defocus (ï¿½)
+input_multislice.obj_lens_c_12 = 0.00;                          % [A1]      2-fold astigmatism (ï¿½)
+input_multislice.obj_lens_phi_12 = 0.00;                        % [phi_A1]	Azimuthal angle of 2-fold astigmatism (ï¿½)
 
-input_multislice.obj_lens_c_21 = 0.00;                          % [B2]      Axial coma (Å)
-input_multislice.obj_lens_phi_21 = 0.00;                        % [phi_B2]	Azimuthal angle of axial coma (º)
-input_multislice.obj_lens_c_23 = 0.00;                          % [A2]      3-fold astigmatism (Å)
-input_multislice.obj_lens_phi_23 = 0.00;                        % [phi_A2]	Azimuthal angle of 3-fold astigmatism (º)
+input_multislice.obj_lens_c_21 = 0.00;                          % [B2]      Axial coma (ï¿½)
+input_multislice.obj_lens_phi_21 = 0.00;                        % [phi_B2]	Azimuthal angle of axial coma (ï¿½)
+input_multislice.obj_lens_c_23 = 0.00;                          % [A2]      3-fold astigmatism (ï¿½)
+input_multislice.obj_lens_phi_23 = 0.00;                        % [phi_A2]	Azimuthal angle of 3-fold astigmatism (ï¿½)
 
 input_multislice.obj_lens_c_30 = 1e-03;                         % [C3] 		3rd order spherical aberration (mm)
-input_multislice.obj_lens_c_32 = 0.00;                          % [S3]      Axial star aberration (Å)
-input_multislice.obj_lens_phi_32 = 0.00;                        % [phi_S3]	Azimuthal angle of axial star aberration (º)
-input_multislice.obj_lens_c_34 = 0.00;                          % [A3]      4-fold astigmatism (Å)
-input_multislice.obj_lens_phi_34 = 0.0;                         % [phi_A3]	Azimuthal angle of 4-fold astigmatism (º)
+input_multislice.obj_lens_c_32 = 0.00;                          % [S3]      Axial star aberration (ï¿½)
+input_multislice.obj_lens_phi_32 = 0.00;                        % [phi_S3]	Azimuthal angle of axial star aberration (ï¿½)
+input_multislice.obj_lens_c_34 = 0.00;                          % [A3]      4-fold astigmatism (ï¿½)
+input_multislice.obj_lens_phi_34 = 0.0;                         % [phi_A3]	Azimuthal angle of 4-fold astigmatism (ï¿½)
 
-input_multislice.obj_lens_c_41 = 0.00;                          % [B4]      4th order axial coma (Å)
-input_multislice.obj_lens_phi_41 = 0.00;                        % [phi_B4]	Azimuthal angle of 4th order axial coma (º)
-input_multislice.obj_lens_c_43 = 0.00;                          % [D4]      3-lobe aberration (Å)
-input_multislice.obj_lens_phi_43 = 0.00;                        % [phi_D4]	Azimuthal angle of 3-lobe aberration (º)
-input_multislice.obj_lens_c_45 = 0.00;                          % [A4]      5-fold astigmatism (Å)
-input_multislice.obj_lens_phi_45 = 0.00;                        % [phi_A4]	Azimuthal angle of 5-fold astigmatism (º)
+input_multislice.obj_lens_c_41 = 0.00;                          % [B4]      4th order axial coma (ï¿½)
+input_multislice.obj_lens_phi_41 = 0.00;                        % [phi_B4]	Azimuthal angle of 4th order axial coma (ï¿½)
+input_multislice.obj_lens_c_43 = 0.00;                          % [D4]      3-lobe aberration (ï¿½)
+input_multislice.obj_lens_phi_43 = 0.00;                        % [phi_D4]	Azimuthal angle of 3-lobe aberration (ï¿½)
+input_multislice.obj_lens_c_45 = 0.00;                          % [A4]      5-fold astigmatism (ï¿½)
+input_multislice.obj_lens_phi_45 = 0.00;                        % [phi_A4]	Azimuthal angle of 5-fold astigmatism (ï¿½)
 
 input_multislice.obj_lens_c_50 = 0.00;                          % [C5]      5th order spherical aberration (mm)
-input_multislice.obj_lens_c_52 = 0.00;                          % [S5]      5th order axial star aberration (Å)
-input_multislice.obj_lens_phi_52 = 0.00;                        % [phi_S5]	Azimuthal angle of 5th order axial star aberration (º)
-input_multislice.obj_lens_c_54 = 0.00;                          % [R5]      5th order rosette aberration (Å)
-input_multislice.obj_lens_phi_54 = 0.00;                        % [phi_R5]	Azimuthal angle of 5th order rosette aberration (º)
-input_multislice.obj_lens_c_56 = 0.00;                          % [A5]      6-fold astigmatism (Å)
-input_multislice.obj_lens_phi_56 = 0.00;                        % [phi_A5]	Azimuthal angle of 6-fold astigmatism (º)
+input_multislice.obj_lens_c_52 = 0.00;                          % [S5]      5th order axial star aberration (ï¿½)
+input_multislice.obj_lens_phi_52 = 0.00;                        % [phi_S5]	Azimuthal angle of 5th order axial star aberration (ï¿½)
+input_multislice.obj_lens_c_54 = 0.00;                          % [R5]      5th order rosette aberration (ï¿½)
+input_multislice.obj_lens_phi_54 = 0.00;                        % [phi_R5]	Azimuthal angle of 5th order rosette aberration (ï¿½)
+input_multislice.obj_lens_c_56 = 0.00;                          % [A5]      6-fold astigmatism (ï¿½)
+input_multislice.obj_lens_phi_56 = 0.00;                        % [phi_A5]	Azimuthal angle of 6-fold astigmatism (ï¿½)
 
 input_multislice.obj_lens_inner_aper_ang = 0.0;     			% Inner aperture (mrad) 
 input_multislice.obj_lens_outer_aper_ang = 24.0;    			% Outer aperture (mrad)
 
-input_multislice.obj_lens_sf = 32;                  			% Defocus Spread (Å)
+input_multislice.obj_lens_sf = 32;                  			% Defocus Spread (ï¿½)
 input_multislice.obj_lens_nsf = 10;                 			% # integration steps for the defocus Spread. It will be only used if illumination_model=4
 
 input_multislice.obj_lens_zero_defocus_type = 3;    			% eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
@@ -186,10 +186,10 @@ input_multislice.obj_lens_zero_defocus_plane = 0;   			% It will be only used if
 input_multislice.scanning_type = 1;                 			% eST_Line = 1, eST_Area = 2
 input_multislice.scanning_periodic = 1;             			% 1: true, 0:false (periodic boundary conditions)
 input_multislice.scanning_ns = 10;                  			% number of sampling points
-input_multislice.scanning_x0 = 0.0;                 			% x-starting point (Å)
-input_multislice.scanning_y0 = 0.0;                 			% y-starting point (Å)
-input_multislice.scanning_xe = 4.078;               			% x-final point (Å)
-input_multislice.scanning_ye = 4.078;               			% y-final point (Å)
+input_multislice.scanning_x0 = 0.0;                 			% x-starting point (ï¿½)
+input_multislice.scanning_y0 = 0.0;                 			% y-starting point (ï¿½)
+input_multislice.scanning_xe = 4.078;               			% x-final point (ï¿½)
+input_multislice.scanning_ye = 4.078;               			% y-final point (ï¿½)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% STEM Detector %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.detector.type = 1;  % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3

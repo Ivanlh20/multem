@@ -22,14 +22,14 @@ input_multislice.pn_seed = 300183;
 input_multislice.pn_single_conf = 0;                % 1: true, 0:false
 input_multislice.pn_nconf = 5;
 
-input_multislice.illumination_model = 2;            % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
+input_multislice.illumination_model = 2;            % 1: coherent mode, 2: Partial coherent mode, 3: transmission cross coefficient, 4: Numerical integration
 input_multislice.temporal_spatial_incoh = 1;        % 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
 input_multislice.bwl = 0;
 
 input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
-input_multislice.theta = 0.0;                       % Till ilumination (º)
-input_multislice.phi = 0.0;                         % Till ilumination (º)
+input_multislice.theta = 0.0;                       % Tilt illumination (º)
+input_multislice.phi = 0.0;                         % Tilt illumination (º)
 
 na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
 

@@ -485,7 +485,7 @@ namespace mt
 			T theta; 											// incident tilt (in spherical coordinates) (rad)
 			T phi; 												// incident tilt (in spherical coordinates) (rad)
 
-			eIllumination_Model illumination_model; 			// 1: Partial coherente mode, 2: transmission cross coefficient
+			eIllumination_Model illumination_model; 			// 1: Partial coherent mode, 2: transmission cross coefficient
 			eTemporal_Spatial_Incoh temporal_spatial_incoh; 	// 1: Spatial and temporal, 2: Temporal, 3: Spatial
 
 			Lens<T> cond_lens; 									// Condenser lens

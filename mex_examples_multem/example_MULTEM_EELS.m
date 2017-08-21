@@ -25,8 +25,8 @@ input_multislice.pn_nconf = 5;                      % true: phonon configuration
 input_multislice.bwl = 0;                           % Band-width limit, 1: true, 0:false
 
 input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
-input_multislice.theta = 0.0;                       % Till ilumination (º)
-input_multislice.phi = 0.0;                         % Till ilumination (º)
+input_multislice.theta = 0.0;                       % Tilt illumination (ï¿½)
+input_multislice.phi = 0.0;                         % Tilt illumination (ï¿½)
 
 na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
 
@@ -45,16 +45,16 @@ input_multislice.iw_y = input_multislice.spec_ly/2;     % y position
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.cond_lens_m = 0;                  % Vortex momentum
-input_multislice.cond_lens_c_10 = 88.7414;            % Defocus (Å)
+input_multislice.cond_lens_c_10 = 88.7414;            % Defocus (ï¿½)
 input_multislice.cond_lens_c_30 = 0.04;             % Third order spherical aberration (mm)
 input_multislice.cond_lens_c_50 = 0.00;             % Fifth order spherical aberration (mm)
-input_multislice.cond_lens_c_12 = 0.0;             % Twofold astigmatism (Å)
-input_multislice.cond_lens_phi_12 = 0.0;             % Azimuthal angle of the twofold astigmatism (º)
-input_multislice.cond_lens_c_23 = 0.0;             % Threefold astigmatism (Å)
-input_multislice.cond_lens_phi_23 = 0.0;             % Azimuthal angle of the threefold astigmatism (º)
+input_multislice.cond_lens_c_12 = 0.0;             % Twofold astigmatism (ï¿½)
+input_multislice.cond_lens_phi_12 = 0.0;             % Azimuthal angle of the twofold astigmatism (ï¿½)
+input_multislice.cond_lens_c_23 = 0.0;             % Threefold astigmatism (ï¿½)
+input_multislice.cond_lens_phi_23 = 0.0;             % Azimuthal angle of the threefold astigmatism (ï¿½)
 input_multislice.cond_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad) 
 input_multislice.cond_lens_outer_aper_ang = 21.0;  % Outer aperture (mrad)
-input_multislice.cond_lens_sf = 32;                % Defocus Spread (Å)
+input_multislice.cond_lens_sf = 32;                % Defocus Spread (ï¿½)
 input_multislice.cond_lens_nsf = 10;               % Number of integration steps for the defocus Spread
 input_multislice.cond_lens_beta = 0.2;             % Divergence semi-angle (mrad)
 input_multislice.cond_lens_nbeta = 10;             % Number of integration steps for the divergence semi-angle
@@ -63,10 +63,10 @@ input_multislice.cond_lens_nbeta = 10;             % Number of integration steps
 input_multislice.scanning_type = 1;             % eST_Line = 1, eST_Area = 2
 input_multislice.scanning_periodic = 1;         % 1: true, 0:false (periodic boundary conditions)
 input_multislice.scanning_ns = 10;              % number of sampling points
-input_multislice.scanning_x0 = 2*a;             % x-starting point (Å) 
-input_multislice.scanning_y0 = 2.5*b;           % y-starting point (Å)
-input_multislice.scanning_xe = 3*a;             % x-final point (Å)
-input_multislice.scanning_ye = 2.5*b;           % y-final point (Å)
+input_multislice.scanning_x0 = 2*a;             % x-starting point (ï¿½) 
+input_multislice.scanning_y0 = 2.5*b;           % y-starting point (ï¿½)
+input_multislice.scanning_xe = 3*a;             % x-final point (ï¿½)
+input_multislice.scanning_ye = 2.5*b;           % y-final point (ï¿½)
 
 input_multislice.eels_E_loss = 532;             % Energy loss (eV)
 input_multislice.eels_m_selection = 3;          % selection rule

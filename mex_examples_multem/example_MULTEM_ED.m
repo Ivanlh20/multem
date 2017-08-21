@@ -33,8 +33,8 @@ input_multislice.pn_nconf = 10;
 input_multislice.bwl = 0;
 
 input_multislice.E_0 = 300;                         % Acceleration Voltage (keV)
-input_multislice.theta = 0.0;                       % Till ilumination (º)
-input_multislice.phi = 0.0;                         % Till ilumination (º)
+input_multislice.theta = 0.0;                       % Tilt illumination (º)
+input_multislice.phi = 0.0;                         % Tilt illumination (º)
 
 na = 8; nb = 8; nc = 40; ncu = 2; rms3d = 0.085;
 
