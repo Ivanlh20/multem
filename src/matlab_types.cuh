@@ -77,7 +77,7 @@ namespace mt
 
 	template <class T>
 	std::ostream& operator<<(std::ostream& out, const complex_s<T>& z){
-		return out << "("<< z.real() << ", " << z.imag() << ")";
+		return out << "("<< z.real() << ", " << z.imag() <<")";
 	}
 
 	/*********************pointer to double matrix*****************/
@@ -523,10 +523,10 @@ namespace mt
 
 	template <class TVector_i, class TVector_o>
 	enable_if_host_vector_and_rmatrix<TVector_i, TVector_o, void>
-	add_square_scale_to_host(Stream<e_host> &stream, Value_type<TVector_o> w_i, 
+	add_scale_square_to_host(Stream<e_host> &stream, Value_type<TVector_o> w_i, 
 	TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h = nullptr)
 	{
-		auto thr_add_square_scale_to_host = [&](const Range_2d &range)
+		auto thr_add_scale_square_to_host = [&](const Range_2d &range)
 		{
 			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
 			{
@@ -537,7 +537,7 @@ namespace mt
 
 		stream.set_n_act_stream(M_o.size());
 		stream.set_grid(1, M_o.size());
-		stream.exec(thr_add_square_scale_to_host);
+		stream.exec(thr_add_scale_square_to_host);
 	}
 
 	template <class TVector_c_i, class TVector_r_o, class TVector_c_o>

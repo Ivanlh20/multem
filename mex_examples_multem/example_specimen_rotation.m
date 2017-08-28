@@ -20,13 +20,9 @@ atoms = center_spec(atoms, lx, ly, lz);
 
 theta = 45;                                 % angle (º)
 u0 = [1 1 0];                               % unitary vector			
-rot_point_type = 0;                         % 1: geometric center, 2: User define		
+rot_point_type = 1;                         % 1: geometric center, 2: User define		
 p0 = [0 0 0];                               % rotation point
 
-% p0 = mean(atoms(:,2:4));
-% [~, ii] = sort(sqrt(sum((atoms(:,2:4)-p0).^2, 2)));
-% p0 = atoms(ii(1), 2:4);
-        
 % rotate specimen
 atoms_r = il_spec_rot(atoms, theta, u0, rot_point_type, p0);
 figure(1); clf;

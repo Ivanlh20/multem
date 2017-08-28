@@ -7,7 +7,7 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * MULTEM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
@@ -27,11 +27,11 @@ using mt::rmatrix_r;
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	auto lx = mx_get_scalar<double>(prhs[0]);
-    auto nx = mx_get_scalar<int>(prhs[1]);
-	auto ly = (nrhs > 2)?mx_get_scalar<double>(prhs[2]):lx;
-    auto ny = (nrhs > 3)?mx_get_scalar<int>(prhs[3]):nx;
+	auto nx = mx_get_scalar<int>(prhs[1]);
+	auto ly = (nrhs > 2) ? mx_get_scalar<double>(prhs[2]) : lx;
+	auto ny = (nrhs > 3) ? mx_get_scalar<int>(prhs[3]) : nx;
 
-    auto g_max = 0.5*min(nx/lx, ny/ly);
+	auto g_max = 0.5*min(nx / lx, ny / ly);
 
 	/******************************************************************/
 	auto rg_max = mx_create_scalar<rmatrix_r>(plhs[0]);

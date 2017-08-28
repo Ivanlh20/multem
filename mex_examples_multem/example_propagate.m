@@ -4,12 +4,10 @@ input_multislice = multem_default_values();         % Load default values;
 
 system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
 system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_ncores = 1; 
 system_conf.cpu_nthread = 4; 
 system_conf.gpu_device = 0;
-system_conf.gpu_nstream = 1;
 
-% eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCI=42, eTEMST_EWFS=51, eTEMST_EWRS=52, 
+% eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, eTEMST_EWFS=51, eTEMST_EWRS=52, 
 % eTEMST_EELS=61, eTEMST_EFTEM=62, eTEMST_ProbeFS=71, eTEMST_ProbeRS=72, eTEMST_PPFS=81, eTEMST_PPRS=82,eTEMST_TFFS=91, eTEMST_TFRS=92
 input_multislice.simulation_type = 52;
 input_multislice.pn_model = 1;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
@@ -23,7 +21,7 @@ input_multislice.pn_single_conf = 0;                % 1: true, 0:false
 input_multislice.pn_nconf = 5;
 
 input_multislice.illumination_model = 2;            % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
-input_multislice.temporal_spatial_incoh = 1;        % 1: Spatial and temporal, 2: Temporal, 3: Spatial
+input_multislice.temporal_spatial_incoh = 1;        % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 
 input_multislice.bwl = 0;
 
@@ -46,7 +44,7 @@ input_multislice.iw_psi = 0;                            % user define incident w
 input_multislice.iw_x = input_multislice.spec_lx/2;     % x position 
 input_multislice.iw_y = input_multislice.spec_ly/2;     % y position
 
-input_multislice.simulation_type = 52;                  % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCI=42, eTEMST_EWFS=51, eTEMST_EWRS=52, eTEMST_EELS=61, eTEMST_EFTEM=62
+input_multislice.simulation_type = 52;                  % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, eTEMST_EWFS=51, eTEMST_EWRS=52, eTEMST_EELS=61, eTEMST_EFTEM=62
 clear il_MULTEM;
 tic;
 output_multislice = il_MULTEM(system_conf, input_multislice); 

@@ -71,7 +71,7 @@ namespace mt
 					break;
 					case eIWT_Convergent_Wave:
 					{
-						auto f_0 = input_multislice->cond_lens.c_10 ;
+						auto f_0 = input_multislice->cond_lens.c_10;
 						auto f_s = f_0 - (input_multislice->cond_lens.zero_defocus_plane-z_init);
 						input_multislice->cond_lens.set_defocus(f_s);
 
@@ -128,8 +128,6 @@ namespace mt
 				}
 
 				mt::copy_to_host(output_multislice.stream, psi, output_multislice.psi_0[0]);
-				output_multislice.shift();
-				output_multislice.clear_temporal_data();
 			}
 
 		private:

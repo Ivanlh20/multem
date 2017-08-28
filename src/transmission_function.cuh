@@ -29,7 +29,6 @@
 #include "output_multislice.hpp"
 #include "projected_potential.cuh"
 
-
 namespace mt
 {
 	template <class T, eDevice dev>
@@ -98,6 +97,7 @@ namespace mt
 				else
 				{
 					Projected_Potential<T, dev>::operator()(islice, this->V_0);
+					//this->operator()(islice, this->V_0);
 					trans(this->input_multislice->Vr_factor(), this->V_0, trans_0);
 				}
 			}
@@ -105,6 +105,7 @@ namespace mt
 			void trans(const int &islice_0, const int &islice_e, Vector<T_c, dev> &trans_0)
 			{
 				Projected_Potential<T, dev>::operator()(islice_0, islice_e, this->V_0);
+				//this->operator()(islice_0, islice_e, this->V_0);
 				trans(this->input_multislice->Vr_factor(), this->V_0, trans_0);
 			}
 
@@ -113,8 +114,6 @@ namespace mt
 			{
 				trans(islice, trans_0);
 				mt::copy_to_host(output_multislice.stream, trans_0, output_multislice.trans[0]);
-				output_multislice.shift();
-				output_multislice.clear_temporal_data();
 			}
 
 			void move_atoms(const int &fp_iconf)

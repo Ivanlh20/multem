@@ -89,7 +89,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.spec_rot_theta = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_rot_theta")*mt::c_deg_2_rad;
 	input_multislice.spec_rot_u0 = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_u0");
 	input_multislice.spec_rot_u0.normalized();
-    input_multislice.spec_rot_center_type = mx_get_scalar_field<mt::eRot_Point_Type>(mx_input_multislice, "spec_rot_center_type");
+	input_multislice.spec_rot_center_type = mx_get_scalar_field<mt::eRot_Point_Type>(mx_input_multislice, "spec_rot_center_type");
 	input_multislice.spec_rot_center_p = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_center_p");
 
 	/************************ Potential slicing ************************/
@@ -105,6 +105,13 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	/************************ simulation type **************************/
 	input_multislice.islice = mx_get_scalar_field<int>(mx_input_multislice, "islice")-1;
 
+	/********************* select output region *************************/
+	input_multislice.output_area.ix_0 = mx_get_scalar_field<int>(mx_input_multislice, "output_area_ix_0")-1;
+	input_multislice.output_area.iy_0 = mx_get_scalar_field<int>(mx_input_multislice, "output_area_iy_0")-1;
+	input_multislice.output_area.ix_e = mx_get_scalar_field<int>(mx_input_multislice, "output_area_ix_e")-1;
+	input_multislice.output_area.iy_e = mx_get_scalar_field<int>(mx_input_multislice, "output_area_iy_e")-1;
+
+	/********************* validate parameters *************************/
 	input_multislice.validate_parameters();
  }
 
@@ -130,34 +137,22 @@ void run_projected_potential(mt::System_Configuration &system_conf, const mxArra
 {
 	mt::Input_Multislice<T> input_multislice;
 	read_input_multislice(mx_input_multislice, input_multislice);
-
-    mt::Output_Multislice<T> output_multislice;
-    output_multislice.set_input_data(&input_multislice);
+	input_multislice.system_conf = system_conf;
 
 	mt::Stream<dev> stream(system_conf.nstream);
 	mt::Projected_Potential<T, dev> projected_potential;
 	projected_potential.set_input_data(&input_multislice, &stream);
+
+	mt::Output_Multislice<T> output_multislice;
+	output_multislice.set_input_data(&input_multislice);
+
 	projected_potential.move_atoms(input_multislice.pn_nconf);
-
-	//cudaEvent_t start, stop;
-	//cudaEventCreate(&start);
-	//cudaEventCreate(&stop);
-
-	//cudaEventRecord(start, 0);
-
 	projected_potential(input_multislice.islice, output_multislice);
 
-	//cudaEventRecord(stop, 0);
-	//cudaEventSynchronize(stop);
-
-	//float elapsedTime = 0;
-	//cudaEventElapsedTime(&elapsedTime, start, stop);
-	//mexPrintf("Elapsed time = %8.3f ms\n", elapsedTime);
-
-	//cudaEventDestroy(start);
-	//cudaEventDestroy(stop);
-
 	stream.synchronize();
+
+	output_multislice.gather();
+	output_multislice.clean_temporal();
 
 	set_struct_projected_potential(output_multislice, mx_output_multislice);
 }

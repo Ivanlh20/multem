@@ -38,7 +38,59 @@
 //	#pragma message("nonCuda MATH_H")
 //#endif
 
-#ifndef __CUDACC__
+#ifdef __CUDACC__
+	#include <cuda.h>
+	#include <math.h>
+	#include <thrust/complex.h>
+	using thrust::complex;
+	using thrust::norm;
+	using thrust::polar;
+	using thrust::arg;
+	using thrust::abs;
+
+	template <class T> 
+	DEVICE_CALLABLE FORCE_INLINE
+	T bessel_j0(const T &x)
+	{
+		return j0(x);
+	}
+
+	template <class T> 
+	DEVICE_CALLABLE FORCE_INLINE
+	T bessel_j1(const T &x)
+	{
+		return j1(x);
+	}
+
+	template <class T> 
+	DEVICE_CALLABLE FORCE_INLINE
+	T bessel_jn(const int &n, const T &x)
+	{
+		return jn(n, x);
+	}
+
+	template <class T> 
+	DEVICE_CALLABLE FORCE_INLINE
+	T bessel_y0(const T &x)
+	{
+		return y0(x);
+	}
+
+	template <class T> 
+	DEVICE_CALLABLE FORCE_INLINE
+	T bessel_y1(const T &x)
+	{
+		return y1(x);
+	}
+
+	template <class T> 
+	DEVICE_CALLABLE FORCE_INLINE
+	T bessel_yn(const int &n, const T &x)
+	{
+		return yn(n, x);
+	}
+
+#else
 	#include <cmath>
 	#include <complex>
 	using std::complex;
@@ -374,76 +426,30 @@
 		}
 		return by;
 	}
-
-#else
-	#include <cuda.h>
-	#include <math.h>
-	#include <thrust/complex.h>
-	using thrust::complex;
-	using thrust::norm;
-	using thrust::polar;
-	using thrust::arg;
-	using thrust::abs;
-
-	template <class T> 
-	DEVICE_CALLABLE FORCE_INLINE
-	T bessel_j0(const T &x)
-	{
-		return j0(x);
-	}
-
-	template <class T> 
-	DEVICE_CALLABLE FORCE_INLINE
-	T bessel_j1(const T &x)
-	{
-		return j1(x);
-	}
-
-	template <class T> 
-	DEVICE_CALLABLE FORCE_INLINE
-	T bessel_jn(const int &n, const T &x)
-	{
-		return jn(n, x);
-	}
-
-	template <class T> 
-	DEVICE_CALLABLE FORCE_INLINE
-	T bessel_y0(const T &x)
-	{
-		return y0(x);
-	}
-
-	template <class T> 
-	DEVICE_CALLABLE FORCE_INLINE
-	T bessel_y1(const T &x)
-	{
-		return y1(x);
-	}
-
-	template <class T> 
-	DEVICE_CALLABLE FORCE_INLINE
-	T bessel_yn(const int &n, const T &x)
-	{
-		return yn(n, x);
-	}
-
 #endif
 	using std::min;
 	using std::max;
 
-    //#ifndef __APPLE__
-	    DEVICE_CALLABLE FORCE_INLINE
-	    double norm(const double &x)
-	    {
-		    return x*x;
-	    }
+	template <class T> 
+	DEVICE_CALLABLE FORCE_INLINE
+	T square(T x)
+	{
+		return x*x;
+	}
 
-	    DEVICE_CALLABLE FORCE_INLINE
-	    float norm(const float &x)
-	    {
-		    return x*x;
-	    }
-   // #endif
+ //#ifndef __APPLE__
+	 DEVICE_CALLABLE FORCE_INLINE
+	 double norm(const double &x)
+	 {
+		 return x*x;
+	 }
+
+	 DEVICE_CALLABLE FORCE_INLINE
+	 float norm(const float &x)
+	 {
+		 return x*x;
+	 }
+ // #endif
 
 	template <class T>
 	DEVICE_CALLABLE FORCE_INLINE

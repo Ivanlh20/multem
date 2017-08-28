@@ -96,11 +96,13 @@ namespace mt
 	const double c_5i2 = 2.236067977499789696409; 			// 5^(1/2)
 	const double c_7i2 = 2.645751311064590590502; 			// 7^(1/2)	
 
-	const double c_fwhm2sigma = 0.42466090014400953; 		// fwhm to sigma 
+	const double c_hwhm_2_sigma = 0.84932180028801907; 		// hwhm to sigma 1/(sqrt(2*log(2)))
+	const double c_fwhm_2_sigma = 0.42466090014400953; 		// fwhm to sigma 1/(2*sqrt(2*log(2)))
+	const double c_iehwgd_2_sigma = 0.70710678118654746; 	// iehwgd to sigma 1/sqrt(2)
 
 	const double c_mrad_2_rad = 1.0e-03; 					// mrad-->rad
 	const double c_deg_2_rad = 0.01745329251994329576924;	// degrees-->rad
-	const double c_mm_2_Angs = 1.0e+07; 						// mm-->Angstrom
+	const double c_mm_2_Angs = 1.0e+07; 					// mm-->Angstrom
 	const double c_eV_2_keV = 1e-03; 						// ev-->keV
 
 	const int c_cSynCPU = 5;
@@ -113,9 +115,6 @@ namespace mt
 	const int c_thrnxny = 16;
 	const int c_thrnxy = 256;
 	const double c_Vrl = 0.015;
-
-	#define IsFS(i, nh)	((i < nh)?i:i-2*nh)
-	#define IsRS(i, nh)	((i < nh)?i+nh:i-nh)
 
 	const int cSizeofI = sizeof(int);
 	const int cSizeofRD = sizeof(double);
@@ -505,20 +504,35 @@ namespace mt
 			return m_size;
 		}
 
-		template <class X>
-		rVector(rVector<X> &vector)
+		rVector(const rVector<T> &vector)
 		{
 			m_size = vector.m_size;
 			V = vector.V;
 		}
 
-		template <class TVector>
-		rVector(TVector &vector)
+		rVector(Vector<T, e_host> &vector)
 		{
 			m_size = vector.size();
 			V = raw_pointer_cast(vector.data());
 		}
 
+		rVector(Vector<T, e_device> &vector)
+		{
+			m_size = vector.size();
+			V = raw_pointer_cast(vector.data());
+		}
+
+		//rVector(host_vector<T> &vector)
+		//{
+		//	m_size = vector.size();
+		//	V = raw_pointer_cast(vector.data());
+		//}
+
+		//rVector(device_vector<T> &vector)
+		//{
+		//	m_size = vector.size();
+		//	V = raw_pointer_cast(vector.data());
+		//}
 		DEVICE_CALLABLE FORCE_INLINE
 		T& operator[](const int i){ return V[i]; }
 
@@ -650,8 +664,38 @@ namespace mt
 		int ixy_e; 	// final index
 		Range_1d(): ix_0(0), ix_e(0), ixy_0(0), ixy_e(0){}
 
+		Range_1d(int ix_0i, int ix_ei): ix_0(ix_0i), ix_e(ix_ei)
+		{
+			ixy_0 = 0;
+			ixy_e = nx();
+		}
+
 		template <class TGrid>
 		Range_1d(const TGrid &grid_1d){ set_grid(grid_1d); }
+
+		void clear()
+		{
+			ix_0 = 0;
+			ix_e = 0;
+			ixy_0 = 0;
+			ixy_e = 0;
+		}
+
+		int nx() const { return (ix_e-ix_0);}
+
+		void clip_ix(int ix_0i, int ix_ei)
+		{
+			ix_0 = min(ix_ei, max(ix_0i, ix_0));
+			ix_e = min(ix_ei, max(ix_0i, ix_e));
+		}
+
+		void set_ascending_index()
+		{ 
+			if(ix_0>ix_e)
+			{
+				std::swap(ix_0, ix_e);
+			}
+		}
 
 		template <class TGrid>
 		void set_grid(const TGrid &grid_1d)
@@ -674,8 +718,25 @@ namespace mt
 		Range_2d(): ix_0(0), ix_e(0), 
 		iy_0(0), iy_e(0), ixy_0(0), ixy_e(0){}
 
+		Range_2d(int ix_0i, int ix_ei, int iy_0i, int iy_ei): ix_0(ix_0i), ix_e(ix_ei), 
+		iy_0(iy_0i), iy_e(iy_ei)
+		{
+			ixy_0 = 0;
+			ixy_e = nxy();
+		}
+
 		template <class TGrid>
 		Range_2d(const TGrid &grid_2d){ set_grid(grid_2d); }
+
+		void clear()
+		{
+			ix_0 = 0;
+			ix_e = 0; 
+			iy_0 = 0;
+			iy_e = 0;
+			ixy_0 = 0;
+			ixy_e = 0;
+		}
 
 		template <class TGrid>
 		void set_grid(const TGrid &grid_2d)
@@ -686,6 +747,67 @@ namespace mt
 			iy_e = grid_2d.ny;
 			ixy_0 = 0;
 			ixy_e = grid_2d.nxy();
+		}
+
+		DEVICE_CALLABLE FORCE_INLINE
+		int nx() const { return (ix_e-ix_0);}
+
+		DEVICE_CALLABLE FORCE_INLINE
+		int ny() const { return (iy_e-iy_0);}
+
+		DEVICE_CALLABLE FORCE_INLINE
+		int nxy() const { return (nx()*ny());}
+
+		DEVICE_CALLABLE FORCE_INLINE
+		void clip_ix(int ix_0i, int ix_ei)
+		{
+			ix_0 = min(ix_ei, max(ix_0i, ix_0));
+			ix_e = min(ix_ei, max(ix_0i, ix_e));
+		}
+
+		DEVICE_CALLABLE FORCE_INLINE
+		void clip_iy(int iy_0i, int iy_ei)
+		{
+			iy_0 = min(iy_ei, max(iy_0i, iy_0));
+			iy_e = min(iy_ei, max(iy_0i, iy_e));
+		}
+
+		DEVICE_CALLABLE FORCE_INLINE
+		void set_ascending_index()
+		{ 
+			if(ix_0>ix_e)
+			{
+				std::swap(ix_0, ix_e);
+			}
+
+			if(iy_0>iy_e)
+			{
+				std::swap(iy_0, iy_e);
+			}
+		}
+
+		DEVICE_CALLABLE FORCE_INLINE
+ 		bool chk_ix_bound(const int &ix) const
+		{
+			return (ix_0<=ix)&&(ix<ix_e);
+		}
+
+		DEVICE_CALLABLE FORCE_INLINE
+ 		bool chk_iy_bound(const int &iy) const
+		{
+			return (iy_0<=iy)&&(iy<iy_e);
+		}
+
+		DEVICE_CALLABLE FORCE_INLINE
+		bool chk_bound(const int &ix, const int &iy) const
+		{
+			return chk_ix_bound(ix)&&chk_iy_bound(iy);
+		}
+
+ 		DEVICE_CALLABLE FORCE_INLINE
+		int ind_col_o(const int &ix, const int &iy) const 
+		{ 
+			return ((ix-ix_0)*ny()+(iy-iy_0)); 
 		}
 	};
 
@@ -1193,38 +1315,38 @@ namespace mt
 				TVector_I v_hist(nbins, 0);
 				for(auto iv = 0; iv< v.size(); iv++)
 				{
-                    auto v_id = double(v[iv]);
+	 auto v_id = double(v[iv]);
 					auto ih = static_cast<int>(floor((v_id-v_min)/dv));
-                    auto v_imin = v_min + (ih-1)*dv;
-                    auto v_imax = v_imin + dv;
+	 auto v_imin = v_min + (ih-1)*dv;
+	 auto v_imax = v_imin + dv;
 
-                    if(v_id<v_imin)
-                    {
-                        for (auto ik = ih; ik >= 0; ik--)
-                        {
-                            v_imin = v_min + (ik-1)*dv;
-                            v_imax = v_imin + dv;
-                            if((v_imin<=v_id)&&(v_id<v_imax))
-                            {
-                                ih = ik-1;
-                                break;
-                            }
-                        }
-                    }
-                    else if(v_id>v_imax)
-                    {
-                        for (auto ik = ih; ik < nbins; ik++)
-                        {
-                            v_imin = v_min + ik*dv;
-                            v_imax = v_imin + dv;
-                            if((v_imin<=v_id)&&(v_id<v_imax))
-                            {
-                                ih = ik;
-                                break;
-                            }
-                        }
-                    }
-                    ih = max(0, min(nbins-1, ih));
+	 if(v_id<v_imin)
+	 {
+	 for (auto ik = ih; ik >= 0; ik--)
+	 {
+	  v_imin = v_min + (ik-1)*dv;
+	  v_imax = v_imin + dv;
+	  if((v_imin<=v_id)&&(v_id<v_imax))
+	  {
+		ih = ik-1;
+		break;
+	  }
+	 }
+	 }
+	 else if(v_id>v_imax)
+	 {
+	 for (auto ik = ih; ik < nbins; ik++)
+	 {
+	  v_imin = v_min + ik*dv;
+	  v_imax = v_imin + dv;
+	  if((v_imin<=v_id)&&(v_id<v_imax))
+	  {
+		ih = ik;
+		break;
+	  }
+	 }
+	 }
+	 ih = max(0, min(nbins-1, ih));
 					v_hist[ih]++;
 				}
 
@@ -1759,11 +1881,11 @@ namespace mt
 			Rx_0 = Rx_0_i;
 			dRx = mt::Div(lx, nx);
 			dgx = mt::Div(1.0, lx);
-			gl2_max = pow(gl_max(), 2);
+			gl2_max = ::square(gl_max());
 
 			// y = 1/(1+exp(alpha*(x^2-x_c^2)))
 			T dg0 = 0.25, fg0 = 1e-02;
-			alpha = log(1.0/fg0-1.0)/(pow(gl_max()+dg0, 2)-gl2_max);
+			alpha = log(1.0/fg0-1.0)/(::square(gl_max()+dg0)-gl2_max);
 		}
 
 		inline
@@ -1880,7 +2002,7 @@ namespace mt
 		T gx(const int &ix, T gx_0=T()) const { return (igx(ix)*dgx-gx_0); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T g2(const int &ix, T gx_0=T()) const { return pow(gx(ix, gx_0), 2); }
+		T g2(const int &ix, T gx_0=T()) const { return ::square(gx(ix, gx_0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
 		T g(const int &ix, T gx_0=T()) const { return fabs(gx(ix, gx_0)); }
@@ -1900,7 +2022,7 @@ namespace mt
 		T Rx(const int &ix, T x0=T()) const { return (iRx(ix)*dRx+Rx_0-x0); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T R2(const int &ix, T x0=T()) const { return pow(Rx(ix, x0), 2); }
+		T R2(const int &ix, T x0=T()) const { return ::square(Rx(ix, x0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
 		T R(const int &ix, T x0=T()) const { return fabs(Rx(ix, x0)); }
@@ -1920,7 +2042,7 @@ namespace mt
 		T gx_shift(const int &ix, T gx_0=T()) const { return (igx_shift(ix)*dgx-gx_0); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T g2_shift(const int &ix, T gx_0=T()) const { return pow(gx_shift(ix, gx_0), 2); }
+		T g2_shift(const int &ix, T gx_0=T()) const { return ::square(gx_shift(ix, gx_0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
 		T g_shift(const int &ix, T gx_0=T()) const { return fabs(gx_shift(ix, gx_0)); }
@@ -1933,7 +2055,7 @@ namespace mt
 		T Rx_shift(const int &ix, T x0=T()) const { return (iRx_shift(ix)*dRx+Rx_0-x0); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T R2_shift(const int &ix, T x0=T()) const { return pow(Rx_shift(ix, x0), 2); }
+		T R2_shift(const int &ix, T x0=T()) const { return ::square(Rx_shift(ix, x0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
 		T R_shift(const int &ix, T x0=T()) const { return fabs(Rx_shift(ix, x0)); }
@@ -2013,7 +2135,7 @@ namespace mt
 
 		inline
 		Grid_2d(): nx(0), ny(0), nxh(0), nyh(0), 
-			lx(0), ly(0), dz(0), pbc_xy(true), bwl(true), 
+			lx(0), ly(0), dz(0), pbc_xy(true), bwl(false), 
 			Rx_0(0), Ry_0(0), dRx(0), dRy(0), dgx(0), dgy(0), gl2_max(0){}
 
 		Grid_2d(int nx_i, int ny_i)
@@ -2048,11 +2170,11 @@ namespace mt
 			dRy = mt::Div(ly, ny);
 			dgx = mt::Div(T(1.0), lx);
 			dgy = mt::Div(T(1.0), ly);
-			gl2_max = pow(gl_max(), 2);
+			gl2_max = ::square(gl_max());
 
 			// y = 1/(1+exp(alpha*(x^2-x_c^2)))
 			T dg0 = 0.25, fg0 = 1e-02;
-			alpha = log(1.0/fg0-1.0)/(pow(gl_max()+dg0, 2)-gl2_max);
+			alpha = log(1.0/fg0-1.0)/(::square(gl_max()+dg0)-gl2_max);
 		}
 
 		inline
@@ -2110,6 +2232,7 @@ namespace mt
 			iRx_iRy_shift(ix, iy);
 			return ix*ny+iy; 
 		}
+
 		/*********************************************************/
 		// Maximun limited frequency
 		DEVICE_CALLABLE FORCE_INLINE
@@ -2311,7 +2434,7 @@ namespace mt
 
 		// Squared of the maximun frequency
 		DEVICE_CALLABLE FORCE_INLINE
-		T g2_max() const { return pow(g_max(), 2); }
+		T g2_max() const { return ::square(g_max()); }
 
 		DEVICE_CALLABLE FORCE_INLINE
 		T R_0_min() const { return ::fmin(Rx_0, Ry_0); }
@@ -2342,10 +2465,10 @@ namespace mt
 		T gy(const int &iy, T gy_0=T()) const { return (igy(iy)*dgy-gy_0); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T gx2(const int &ix, T gx_0=T()) const { return pow(gx(ix, gx_0), 2); }
+		T gx2(const int &ix, T gx_0=T()) const { return ::square(gx(ix, gx_0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T gy2(const int &iy, T gy_0=T()) const { return pow(gy(iy, gy_0), 2); }
+		T gy2(const int &iy, T gy_0=T()) const { return ::square(gy(iy, gy_0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
 		T g2(const int &ix, const int &iy, T gx_0=T(), T gy_0=T())const { return (gx2(ix, gx_0)+gy2(iy, gy_0)); }
@@ -2380,10 +2503,10 @@ namespace mt
 		T Ry(const int &iy, T y0=T()) const { return (iRy(iy)*dRy+Ry_0-y0); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T Rx2(const int &ix, T x0=T()) const { return pow(Rx(ix, x0), 2); }
+		T Rx2(const int &ix, T x0=T()) const { return ::square(Rx(ix, x0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T Ry2(const int &iy, T y0=T()) const { return pow(Ry(iy, y0), 2); }
+		T Ry2(const int &iy, T y0=T()) const { return ::square(Ry(iy, y0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
 		T R2(const int &ix, const int &iy, T x0=T(), T y0=T()) const { return (Rx2(ix, x0)+Ry2(iy, y0)); }
@@ -2417,10 +2540,10 @@ namespace mt
 		T gy_shift(const int &iy, T gy_0=T()) const { return (igy_shift(iy)*dgy-gy_0); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T gx2_shift(const int &ix, T gx_0=T()) const { return pow(gx_shift(ix, gx_0), 2); }
+		T gx2_shift(const int &ix, T gx_0=T()) const { return ::square(gx_shift(ix, gx_0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T gy2_shift(const int &iy, T gy_0=T()) const { return pow(gy_shift(iy, gy_0), 2); }
+		T gy2_shift(const int &iy, T gy_0=T()) const { return ::square(gy_shift(iy, gy_0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
 		T g2_shift(const int &ix, const int &iy, T gx_0=T(), T gy_0=T()) const { return (gx2_shift(ix, gx_0)+gy2_shift(iy, gy_0)); }
@@ -2449,10 +2572,10 @@ namespace mt
 		T Ry_shift(const int &iy, T y0=T()) const { return (iRy_shift(iy)*dRy+Ry_0-y0); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T Rx2_shift(const int &ix, T x0=T()) const { return pow(Rx_shift(ix, x0), 2); }
+		T Rx2_shift(const int &ix, T x0=T()) const { return ::square(Rx_shift(ix, x0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
-		T Ry2_shift(const int &iy, T y0=T()) const { return pow(Ry_shift(iy, y0), 2); }
+		T Ry2_shift(const int &iy, T y0=T()) const { return ::square(Ry_shift(iy, y0)); }
 
 		DEVICE_CALLABLE FORCE_INLINE
 		T R2_shift(const int &ix, const int &iy, T x0=T(), T y0=T()) const { return (Rx2_shift(ix, x0)+Ry2_shift(iy, y0)); }
@@ -2470,7 +2593,7 @@ namespace mt
 		DEVICE_CALLABLE FORCE_INLINE
 		T bwl_factor_shift(const int &ix, const int &iy) const 
 		{ 
-			return (bwl)?1.0/(1.0+exp(alpha*(g2_shift(ix, iy)-gl2_max))):1;
+			return (bwl)?1.0/(1.0+exp(alpha*(g2_shift(ix, iy)-gl2_max))):1.0;
 		}
 
 		DEVICE_CALLABLE FORCE_INLINE
@@ -2634,16 +2757,16 @@ namespace mt
 			for(auto i= 0; i<detector.fx.size(); i++)
 			{
 				fx[i].assign(detector.fx[i].begin(), detector.fx[i].end());
-				fn[i] = detector.fn[i] ;
-				grid_1d[i] = detector.grid_1d[i] ;
+				fn[i] = detector.fn[i];
+				grid_1d[i] = detector.grid_1d[i];
 			}
 
 			fR.resize(detector.fR.size());
 			for(auto i= 0; i<detector.fR.size(); i++)
 			{
 				fR[i].assign(detector.fR[i].begin(), detector.fR[i].end());
-				fn[i] = detector.fn[i] ;
-				grid_2d[i] = detector.grid_2d[i] ;
+				fn[i] = detector.fn[i];
+				grid_2d[i] = detector.grid_2d[i];
 			}
 		}
 
@@ -2696,85 +2819,6 @@ namespace mt
 		Vector<TVector, e_host> image;
 	};
 
-	/**************************** Spatial Incoherence ***************************/
-	template <class T>
-	struct Spatial_Incoherence
-	{
-		using value_type = T;
-
-		T beta; 				// Divergence semi-angle (rad)
-		int nbeta; 				// Number of integration steps for the divergence semi-angle
-
-		T lambda; 				// wavelength(Angstrom)
-
-		T sggs; 				// standard deviation
-		int ngxs; 				// Number of source sampling points x
-		int ngys; 				// Number of source sampling points y
-		T dgxs; 				// source sampling m_size;
-		T dgys; 				// source sampling m_size;
-		T g2_maxs; 				// q maximum square;
-
-		Spatial_Incoherence(): beta(0), nbeta(0), lambda(0), 
-			sggs(0), ngxs(0), ngys(0), dgxs(0), dgys(0), g2_maxs(0) {}
-
-		void set_input_data(T E_0, Grid_2d<T> &grid_2d)
-		{
-			lambda = get_lambda(E_0);
-
-			T g0s = sin(beta)/lambda;
-			sggs = g0s/c_2i2;
-			T gmaxs = 3.5*sggs;
-			g2_maxs = gmaxs*gmaxs;
-			T dgs = gmaxs/static_cast<T>(nbeta);
-
-			int n;
-			n = (dgs<grid_2d.dgx)?static_cast<int>(floor(grid_2d.dgx/dgs)+1):1;
-			ngxs = static_cast<int>(floor(n*gmaxs/grid_2d.dgx)) + 1;
-			dgxs = gmaxs/ngxs;
-
-			n = (dgs<grid_2d.dgy)?static_cast<int>(floor(grid_2d.dgy/dgs)+1):1;
-			ngys = static_cast<int>(floor(n*gmaxs/grid_2d.dgy)) + 1;
-			dgys = gmaxs/ngys;
-		}
-
-		template <class TSpatial_Incoherence> 
-		void assign(TSpatial_Incoherence &spt_incoh)
-		{
-			beta = spt_incoh.beta;
-			nbeta = spt_incoh.nbeta;
-
-			lambda = spt_incoh.lambda;
-
-			sggs = spt_incoh.sggs;
-			ngxs = spt_incoh.ngxs;
-			ngys = spt_incoh.ngys;
-			dgxs = spt_incoh.dgxs;
-			dgys = spt_incoh.dgys;
-			g2_maxs = spt_incoh.g2_maxs;
-		}
-
-		template <class TSpatial_Incoherence> 
-		Spatial_Incoherence<T>& operator=(TSpatial_Incoherence &spt_incoh)
-		{
-			assign(spt_incoh);
-			return *this; 
-		}
-
-		inline
-		T gxs(const int &ix) const { return static_cast<T>(ix)*dgxs; }
-
-		inline
-		T gys(const int &iy) const { return static_cast<T>(iy)*dgys; }
-
-		inline
-		T g2s(const int &ix, const int &iy) const 
-		{ 
-			T gxi = gxs(ix);
-			T gyi = gys(iy);
-			return gxi*gxi + gyi*gyi;
-		}
-	};
-
 	/****************************lens***************************/
 	template <class T>
 	struct Lens
@@ -2816,11 +2860,14 @@ namespace mt
 		T inner_aper_ang; 		// Inner aperture (rad);
 		T outer_aper_ang; 		// Outer aperture (rad);
 
-		T sf; 					// Defocus Spread (Å)
-		int nsf; 				// Number of integration steps for the defocus Spread
+		T dsf_sigma; 			// Standard deviation of the defocus spread function(Å)
+		int dsf_npoints; 		// Number of integration points of the efocus spread function
+		T dsf_iehwgd; 			// e^-1 half-width value of the Gaussian distribution
 
-		T beta; 				// Divergence semi-angle (rad)
-		int nbeta; 				// Number of integration steps for the divergence semi-angle
+		T ssf_sigma; 			// Standard deviation of the source spread function: For parallel ilumination(Å^-1); otherwise (Å)
+		int ssf_npoints; 		// Number of integration points of the source spread function
+		T ssf_iehwgd; 			// e^-1 half-width value of the Gaussian distribution
+		T ssf_beta; 			// divergence semi-angle (rad)
 
 		eZero_Defocus_Type zero_defocus_type; 	// Defocus type: eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 		T zero_defocus_plane; 	// plane
@@ -2850,8 +2897,6 @@ namespace mt
 
 		T g2_min; 				// inner_aper_ang/lambda
 		T g2_max; 				// outer_aper_ang/lambda
-
-		T sggs; 				// standard deviation
 		int ngxs; 				// Number of source sampling points x
 		int ngys; 				// Number of source sampling points y
 		T dgxs; 				// source sampling m_size;
@@ -2862,9 +2907,9 @@ namespace mt
 			c_30(0), c_32(0), phi_32(0), c_34(0), phi_34(0), 
 			c_41(0), phi_41(0), c_43(0), phi_43(0), c_45(0), phi_45(0), 
 			c_50(0), c_52(0), phi_52(0), c_54(0), phi_54(0), c_56(0), phi_56(0), 
-			inner_aper_ang(0), outer_aper_ang(0), sf(0), nsf(0), beta(0), 
-			nbeta(0), zero_defocus_plane(0), gamma(0), lambda(0), lambda2(0), 
-			g2_min(0), g2_max(0), sggs(0), ngxs(0), ngys(0), dgxs(0), dgys(0), g2_maxs(0),
+			inner_aper_ang(0), outer_aper_ang(0), dsf_sigma(0), dsf_npoints(0), dsf_iehwgd(0), 
+			ssf_sigma(0), ssf_npoints(0), ssf_iehwgd(0), ssf_beta(0), zero_defocus_plane(0), gamma(0), lambda(0), 
+			lambda2(0), g2_min(0), g2_max(0), ngxs(0), ngys(0), dgxs(0), dgys(0), g2_maxs(0),
 			c_c_10(0), c_c_12(0), c_c_21(0), c_c_23(0), c_c_30(0), c_c_32(0), c_c_34(0), c_c_41(0), 
 			c_c_43(0), c_c_45(0), c_c_50(0), c_c_52(0), c_c_54(0), c_c_56(0) {}
 
@@ -2897,11 +2942,12 @@ namespace mt
 			g2_min = (isZero(inner_aper_ang)||(inner_aper_ang<0))?0:pow(sin(inner_aper_ang)/lambda, 2);
 			g2_max = (isZero(outer_aper_ang)||(outer_aper_ang<0))?grid_2d.g2_max(): pow(sin(outer_aper_ang)/lambda, 2);
 
-			T g0s = sin(beta)/lambda;
-			sggs = g0s/c_2i2;
-			T gmaxs = 3.5*sggs;
+			set_dsf_sigma(dsf_sigma);
+			set_ssf_sigma(ssf_sigma);
+
+			T gmaxs = 3.5*ssf_sigma;
 			g2_maxs = gmaxs*gmaxs;
-			T dgs = gmaxs/static_cast<T>(nbeta);
+			T dgs = gmaxs/static_cast<T>(ssf_npoints);
 
 			int n;
 			n = (dgs<grid_2d.dgx)?static_cast<int>(floor(grid_2d.dgx/dgs)+1):1;
@@ -2911,6 +2957,19 @@ namespace mt
 			n = (dgs<grid_2d.dgy)?static_cast<int>(floor(grid_2d.dgy/dgs)+1):1;
 			ngys = static_cast<int>(floor(n*gmaxs/grid_2d.dgy)) + 1;
 			dgys = gmaxs/ngys;
+		}
+
+		void set_dsf_sigma(T dsf_sigma_i)
+		{
+			dsf_sigma = dsf_sigma_i;
+			dsf_iehwgd = c_2i2*dsf_sigma;
+		}
+
+		void set_ssf_sigma(T ssf_sigma_i)
+		{
+			ssf_sigma = ssf_sigma_i;
+			ssf_iehwgd = c_2i2*ssf_sigma;
+			ssf_beta = asin(ssf_iehwgd*lambda);
 		}
 
 		void set_defocus(T f_i)
@@ -3004,11 +3063,14 @@ namespace mt
 			inner_aper_ang = lens.inner_aper_ang;
 			outer_aper_ang = lens.outer_aper_ang;
 
-			sf = lens.sf;
-			nsf = lens.nsf;
+			dsf_sigma = lens.dsf_sigma;
+			dsf_npoints = lens.dsf_npoints;
+			dsf_iehwgd = lens.dsf_iehwgd;
 
-			beta = lens.beta;
-			nbeta = lens.nbeta;
+			ssf_sigma = lens.ssf_sigma;
+			ssf_npoints = lens.ssf_npoints;
+			ssf_iehwgd = lens.ssf_iehwgd;
+			ssf_beta = lens.ssf_beta;
 
 			gamma = lens.gamma;
 			lambda = lens.lambda;
@@ -3036,7 +3098,6 @@ namespace mt
 			g2_min = lens.g2_min;
 			g2_max = lens.g2_max;
 
-			sggs = lens.sggs;
 			ngxs = lens.ngxs;
 			ngys = lens.ngys;
 			dgxs = lens.dgxs;
@@ -4356,7 +4417,21 @@ namespace mt
 				{
 					device = e_host; 
 				}
-				set_device();
+				if(is_device())
+				{
+					#ifdef __CUDACC__
+						if(!is_gpu_available())
+						{
+							device = mt::e_host;
+							n_gpu = 0;
+						} 
+						else
+						{
+							n_gpu = number_of_gpu_available();
+							gpu_device = min(max(0, gpu_device), n_gpu-1);
+						}
+					#endif
+				}
 
 				cpu_nthread = max(1, cpu_nthread);
 				gpu_nstream = max(1, gpu_nstream);
@@ -4368,16 +4443,7 @@ namespace mt
 				if(is_device())
 				{
 					#ifdef __CUDACC__
-						if(!is_gpu_available())
-						{
-							device = mt::e_host;
-						} 
-						else
-						{
-							auto ngpu = number_of_gpu_available();
-							gpu_device = min(max(0, gpu_device), ngpu-1);
-							cudaSetDevice(gpu_device);
-						}
+						cudaSetDevice(gpu_device);
 					#endif
 				}
 				else
@@ -4385,6 +4451,19 @@ namespace mt
 					
 					device = mt::e_host;
 				}
+			}
+
+ 			int get_device()
+			{
+				int idx_dev = -1;
+				if(is_device())
+				{
+					#ifdef __CUDACC__
+						cudaGetDevice(&idx_dev);
+					#endif
+				}
+
+				return idx_dev;
 			}
 
 			bool is_host() const
@@ -4426,6 +4505,9 @@ namespace mt
 			{
 				return is_double() && is_device();
 			}
+
+		private:
+			int n_gpu;
 	};
 
 	/************************regions*************************/
@@ -4757,7 +4839,7 @@ namespace mt
 			DEVICE_CALLABLE FORCE_INLINE
 			T operator()(const T &Rx) const
 			{ 
-				return pow(cos(cx*Rx), 2);
+				return ::square(cos(cx*Rx));
 			}
 	};
 
@@ -4824,7 +4906,7 @@ namespace mt
 			DEVICE_CALLABLE FORCE_INLINE
 			T operator()(const T &R) const
 			{ 
-				return pow(cos(cxy*R), 2);
+				return ::square(cos(cxy*R));
 			}
 	};
 
@@ -4860,7 +4942,7 @@ namespace mt
 			{
 				n = n_i;
 				radius = radius_i;
-				R02 = pow(radius, 2);
+				R02 = ::square(radius);
 				Rx2_l = 1e+6*radius;
 				x_c = x_c_i;
 				k = 0;

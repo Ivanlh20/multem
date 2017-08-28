@@ -368,7 +368,7 @@ namespace mt
 			Stream<dev> stream;
 
 			Box_Occ<T> box;
-			Rand_r3d<T> rand;
+			Rand_3d<T, e_host> rand;
 			int rand_trial;
 			T chi2_0;
 

@@ -40,7 +40,7 @@ namespace mt
 
 			static const eDevice device = dev;
 
-			Projected_Potential(): stream(nullptr), n_atoms_p(512){}
+			Projected_Potential(): stream(nullptr), n_atoms_s(512){}
 
 			void set_input_data(Input_Multislice<T> *input_multislice_i, Stream<dev> *stream_i)
 			{	
@@ -56,11 +56,11 @@ namespace mt
 					atom_type[iatom_type].assign(Spec<T>::atom_type[iatom_type]);
 				}
 
-				n_atoms_p = (device==e_host)?(stream->size()):512;
+				n_atoms_s = (device==e_host)?(stream->size()):512;
 
 				int nv = max(this->input_multislice->grid_2d.nx_dRx(this->atoms.l_x_int), this->input_multislice->grid_2d.ny_dRy(this->atoms.l_y_int));
 
-				stream_data.resize(n_atoms_p);
+				stream_data.resize(n_atoms_s);
 
 				for(auto i = 0; i<stream_data.size(); i++)
 				{
@@ -79,8 +79,8 @@ namespace mt
 					}
 				}
 
-				atom_Vp_h.resize(n_atoms_p);
-				atom_Vp.resize(n_atoms_p);
+				atom_Vp_h.resize(n_atoms_s);
+				atom_Vp.resize(n_atoms_s);
 
 				V_0.resize(this->input_multislice->grid_2d.nxy());
 			}
@@ -143,7 +143,7 @@ namespace mt
 				int iatoms = iatom_0;
 				while (iatoms <= iatom_e)
 				{
-					int n_atoms = min(n_atoms_p, iatom_e-iatoms+1);
+					int n_atoms = min(n_atoms_s, iatom_e-iatoms+1);
 					set_atom_Vp(z_0, z_e, iatoms, n_atoms, atom_Vp);
 					//get_cubic_poly_coef_Vz(*stream, atom_Vp_h);
 
@@ -186,14 +186,12 @@ namespace mt
 			{
 				this->operator()(islice, islice, V_0);
 				mt::copy_to_host(output_multislice.stream, V_0, output_multislice.V[0]);
-				output_multislice.shift();
-				output_multislice.clear_temporal_data();
 			}
 
 			Vector<T, dev> V_0;
 			Stream<dev> *stream;
 		private:
-			int n_atoms_p;
+			int n_atoms_s;
 
 			struct Stream_Data
 			{
@@ -225,9 +223,9 @@ namespace mt
 				Vector<Vector<T, dev>, e_host> c3; 		// third coefficient
 			};
 
-			void set_atom_Vp(const T &z_0, const T &z_e, int iatoms, int n_atoms_p, Vector<Atom_Vp<T>, dev> &atom_Vp)
+			void set_atom_Vp(const T &z_0, const T &z_e, int iatoms, int n_atoms, Vector<Atom_Vp<T>, dev> &atom_Vp)
 			{
-				for(auto istream = 0; istream < n_atoms_p; istream++)
+				for(auto istream = 0; istream < n_atoms; istream++)
 				{
 					auto iZ = this->atoms.Z[iatoms]-1;
 					auto charge = this->atoms.charge[iatoms];
@@ -245,6 +243,7 @@ namespace mt
 					atom_Vp_h[istream].set_iy0_iyn(this->input_multislice->grid_2d, coef.R_max);
 					atom_Vp_h[istream].R2_tap = coef.R2_tap();
 					atom_Vp_h[istream].tap_cf = coef.tap_cf;
+
 					if(device==e_host)
 					{
 						atom_Vp_h[istream].iv = raw_pointer_cast(stream_data.iv[istream].data());
@@ -272,7 +271,7 @@ namespace mt
 					}
 					iatoms++;
 				}
-				thrust::copy(atom_Vp_h.begin(), atom_Vp_h.end(), atom_Vp.begin());
+				thrust::copy(atom_Vp_h.begin(), atom_Vp_h.begin()+n_atoms, atom_Vp.begin());
 			}
 			
 			void get_cubic_poly_coef_Vz(Stream<dev> &stream, Vector<Atom_Vp<T>, e_host> &atom_Vp)

@@ -268,18 +268,21 @@ namespace mt
 		{
 			system_conf.device = mx_get_scalar_field<mt::eDevice>(mx_input, "device"); 
 			system_conf.precision = mx_get_scalar_field<mt::ePrecision>(mx_input, "precision");
-			system_conf.cpu_ncores = mx_get_scalar_field<int>(mx_input, "cpu_ncores"); 
+			system_conf.cpu_ncores = 1; 
+			//system_conf.cpu_ncores = mx_get_scalar_field<int>(mx_input, "cpu_ncores"); 
 			system_conf.cpu_nthread = mx_get_scalar_field<int>(mx_input, "cpu_nthread"); 
-			system_conf.gpu_device = mx_get_scalar_field<int>(mx_input, "gpu_device"); 
-			system_conf.gpu_nstream = mx_get_scalar_field<int>(mx_input, "gpu_nstream"); 
+			system_conf.gpu_device = mx_get_scalar_field<int>(mx_input, "gpu_device");
+			system_conf.gpu_nstream = 0; 
+			//system_conf.gpu_nstream = mx_get_scalar_field<int>(mx_input, "gpu_nstream"); 
 			system_conf.active = true;
 		}
 		else
 		{
 			system_conf.cpu_nthread = 4; 
 			system_conf.active = false;
-		};
+		}
 		system_conf.validate_parameters();
+		system_conf.set_device();
 
 		return system_conf;
 	}

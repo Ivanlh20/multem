@@ -29,12 +29,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	auto E0 = mx_get_scalar<double>(prhs[0]);
 	auto lx = mx_get_scalar<double>(prhs[1]);
 	auto ly = (nrhs > 3)?mx_get_scalar<double>(prhs[2]):lx;
-    int idx_theta = (nrhs==3)?2:3;
+ int idx_theta = (nrhs==3)?2:3;
 	auto theta = mx_get_scalar<double>(prhs[idx_theta])*mt::c_mrad_2_rad;
 
-    auto g_req = mt::rad_2_rAngs(E0, theta);
-    auto nx = static_cast<int>(round(2*lx*g_req));
-    auto ny = static_cast<int>(round(2*ly*g_req));
+ auto g_req = mt::rad_2_rAngs(E0, theta);
+ auto nx = static_cast<int>(round(2*lx*g_req));
+ auto ny = static_cast<int>(round(2*ly*g_req));
 
 	mt::Prime_Num pm;
 	nx = pm(nx, mt::eDST_Closest);
@@ -42,10 +42,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	/******************************************************************/
 	auto rnx = mx_create_scalar<rmatrix_r>(plhs[0]);
-    rnx[0] = nx;
-    if(nlhs>1)
-    {
-	    auto rny = mx_create_scalar<rmatrix_r>(plhs[1]);
-        rny[0] = ny;
-    }
+ rnx[0] = nx;
+ if(nlhs>1)
+ {
+	 auto rny = mx_create_scalar<rmatrix_r>(plhs[1]);
+ rny[0] = ny;
+ }
 }

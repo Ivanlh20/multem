@@ -51,7 +51,7 @@ namespace mt
 				}
 
 				// Load quadratures
-				temporal_spatial_quadratures(input_multislice->obj_lens, qt, qs);
+				obj_lens_temporal_spatial_quadratures(input_multislice->obj_lens, qt, qs);
 			}
 
 			void operator()(Vector<T_c, dev> &fpsi, Vector<T_r, dev> &m2psi_tot)
@@ -92,8 +92,6 @@ namespace mt
 				Vector<T_r, dev> m2psi_tot(input_multislice->grid_2d.nxy());
 				this->operator()(psi, m2psi_tot);
 				mt::copy_to_host(output_multislice.stream, m2psi_tot, output_multislice.m2psi_tot[0]);
-				output_multislice.shift();
-				output_multislice.clear_temporal_data();
 			}
 
 		private:
@@ -106,19 +104,19 @@ namespace mt
 
 			void PCTF_LI_WPO_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<T_c, dev> &fpsi, Vector<T_r, dev> &m2psi_tot)
 			{
-				T_r sf = input_multislice->obj_lens.sf;
-				T_r beta = input_multislice->obj_lens.beta;
+				T_r dsf_sigma = input_multislice->obj_lens.dsf_sigma;
+				T_r ssf_sigma = input_multislice->obj_lens.ssf_sigma;
 
 				switch(temporal_spatial_incoh)
 				{
 					case eTSI_Temporal:	// Temporal
 					{
-						input_multislice->obj_lens.beta = 0;
+						input_multislice->obj_lens.set_ssf_sigma(0);
 					}
 					break;
 					case eTSI_Spatial:	// Spatial
 					{
-						input_multislice->obj_lens.sf = 0;
+						input_multislice->obj_lens.set_dsf_sigma(0);
 					}
 					break;
 				}
@@ -127,8 +125,8 @@ namespace mt
 				fft_2d->inverse(psi);
 				mt::square(*stream, psi, m2psi_tot);
 
-				input_multislice->obj_lens.sf = sf;
-				input_multislice->obj_lens.beta = beta;
+				input_multislice->obj_lens.set_dsf_sigma(dsf_sigma);
+				input_multislice->obj_lens.set_ssf_sigma(ssf_sigma);
 			}
 
 			void num_int_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<T_c, dev> &fpsi, Vector<T_r, dev> &m2psi_tot)
@@ -144,12 +142,12 @@ namespace mt
 						{
 							for(auto j = 0; j<qt.size(); j++)
 							{
-								auto c_10 = input_multislice->obj_lens.sf*qt.x[j]+c_10_0;
+								auto c_10 = input_multislice->obj_lens.dsf_iehwgd*qt.x[j]+c_10_0;
 								input_multislice->obj_lens.set_defocus(c_10); 
 								
 								mt::apply_CTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, qs.x[i], qs.y[i], fpsi, psi);
 								fft_2d->inverse(psi);
-								mt::add_square_scale(*stream, qs.w[i]*qt.w[j], psi, m2psi_tot);
+								mt::add_scale_square(*stream, qs.w[i]*qt.w[j], psi, m2psi_tot);
 							}
 						}
 					}
@@ -158,12 +156,12 @@ namespace mt
 					{
 						for(auto j = 0; j<qt.size(); j++)
 						{
-							auto c_10 = input_multislice->obj_lens.sf*qt.x[j]+c_10_0;
+							auto c_10 = input_multislice->obj_lens.dsf_iehwgd*qt.x[j]+c_10_0;
 							input_multislice->obj_lens.set_defocus(c_10); 
 
 							mt::apply_CTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, 0.0, 0.0, fpsi, psi);
 							fft_2d->inverse(psi);
-							mt::add_square_scale(*stream, qt.w[j], psi, m2psi_tot);
+							mt::add_scale_square(*stream, qt.w[j], psi, m2psi_tot);
 						}
 					}
 					break;
@@ -173,7 +171,7 @@ namespace mt
 						{
 							mt::apply_CTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, qs.x[i], qs.y[i], fpsi, psi);
 							fft_2d->inverse(psi);
-							mt::add_square_scale(*stream, qs.w[i], psi, m2psi_tot);
+							mt::add_scale_square(*stream, qs.w[i], psi, m2psi_tot);
 						}
 					}
 				}

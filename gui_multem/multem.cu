@@ -28,15 +28,15 @@ template <class T, mt::eDevice dev>
 void mt_run_multislice(mt::System_Configuration &system_conf,
  mt::Input_Multislice<T> &input_multislice, mt::Output_Multislice<T> &output_multislice)
 {
-    mt::Stream<dev> stream(system_conf.nstream);
-    mt::FFT<T, dev> fft_2d;
-    fft_2d.create_plan_2d(input_multislice.grid_2d.ny, input_multislice.grid_2d.nx, system_conf.nstream);
+	mt::Stream<dev> stream(system_conf.nstream);
+	mt::FFT<T, dev> fft_2d;
+	fft_2d.create_plan_2d(input_multislice.grid_2d.ny, input_multislice.grid_2d.nx, system_conf.nstream);
 
 	if(input_multislice.is_IWFS_IWRS())
 	{
 		mt::Incident_Wave<T, dev> incident_wave;
 		incident_wave.set_input_data(&input_multislice, &stream, &fft_2d);
-        auto space = (input_multislice.is_IWRS())?mt::eS_Real:mt::eS_Reciprocal;
+	auto space = (input_multislice.is_IWRS())?mt::eS_Real:mt::eS_Reciprocal;
 		incident_wave(space, output_multislice);
 	}
 	else
@@ -48,8 +48,8 @@ void mt_run_multislice(mt::System_Configuration &system_conf,
 		multislice(output_multislice);
 	}
 
-    stream.synchronize();
-    fft_2d.cleanup();
+	 stream.synchronize();
+	 fft_2d.cleanup();
 }
 
 inline
@@ -139,6 +139,6 @@ int mt_iter(mt::System_Configuration &system_conf)
 inline
 void mt_init()
 {
-    mt::Stream<mt::e_device> stream;
-    mt::FFT<float, mt::e_device> fft_2d;
+	mt::Stream<mt::e_device> stream;
+	mt::FFT<float, mt::e_device> fft_2d;
 }

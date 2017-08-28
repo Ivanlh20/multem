@@ -20,6 +20,7 @@
 #define MULTISLICE_H
 
 #include <fftw3.h>
+#include "math.cuh"
 #include "types.cuh"
 #include "traits.cuh"
 #include "input_multislice.cuh"
@@ -29,6 +30,7 @@
 #include "host_device_functions.cuh"
 #include "energy_loss.cuh"
 #include "wave_function.cuh"
+#include "timing.cuh"
 
 namespace mt
 {
@@ -101,7 +103,7 @@ namespace mt
 				ext_iter = 0;
 				/*****************************************************************/
 
-				T_r w = input_multislice->get_weight();
+				T_r w = input_multislice->get_phonon_rot_weight();
 
 				output_multislice.init();
 
@@ -151,57 +153,65 @@ namespace mt
 
 					wave_function.set_m2psi_coh(output_multislice);
 				}
-
-				output_multislice.shift();
-				output_multislice.clear_temporal_data();
 			}
 
 			template <class TOutput_multislice>
 			void CBED_CBEI(TOutput_multislice &output_multislice)
 			{
-				Q1<T_r, e_host> qt;
-				Q2<T_r, e_host> qs;
-
-				// Load quadratures
-				temporal_spatial_quadratures(input_multislice->cond_lens, qt, qs);
-
-                /*****************************************************************/
-
-				T_r w = input_multislice->get_weight();
-				T_r f_0 = input_multislice->cond_lens.c_10 ;
-				// T_r theta_0 = input_multislice->theta;
-				// T_r phi_0 = input_multislice->phi;
-
 				output_multislice.init();
 
 				if(input_multislice->is_illu_mod_full_integration())
 				{
-					ext_niter = qt.size()*input_multislice->number_conf();
+					Q1<double, e_host> qt;
+					Q2<double, e_host> qs;
+
+					// Load quadratures
+					cond_lens_temporal_spatial_quadratures(input_multislice->cond_lens, qt, qs);
+
+					/*****************************************************************/
+					double w_pr_0 = input_multislice->get_phonon_rot_weight();
+					double c_10_0 = input_multislice->cond_lens.c_10;
+					double dsf_iehwgd = input_multislice->cond_lens.dsf_iehwgd;
+					double ssf_iehwgd = input_multislice->cond_lens.ssf_iehwgd;
+					const int nbeams = input_multislice->number_of_beams();
+					Vector<T_r, e_host> beam_x(nbeams);
+					Vector<T_r, e_host> beam_y(nbeams);
+
+					ext_niter = qs.size()*qt.size()*input_multislice->number_conf();
 					ext_iter = 0;
 
 					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
 					{
 						wave_function.move_atoms(iconf);		
 
-						for(auto j = 0; j<qt.size(); j++)
+						// spatial incoherence
+						for(auto ispat = 0; ispat<qs.size(); ispat++)
 						{
-							auto f = input_multislice->cond_lens.sf*qt.x[j]+f_0;
-							input_multislice->cond_lens.set_defocus(f); 
-							wave_function.set_incident_wave(wave_function.psi_z);
-							wave_function.psi(w*qt.w[j], wave_function.psi_z, output_multislice);
+							for(auto ibeam = 0; ibeam<nbeams; ibeam++)
+							{
+								beam_x[ibeam] = ssf_iehwgd*qs.x[ispat] + input_multislice->iw_x[ibeam];
+								beam_y[ibeam] = ssf_iehwgd*qs.y[ispat] + input_multislice->iw_y[ibeam];
+							}
 
-							ext_iter++;
-							if(ext_stop_sim) break;
+							// temporal incoherence
+							for(auto itemp = 0; itemp<qt.size(); itemp++)
+							{
+								double c_10 = dsf_iehwgd*qt.x[itemp] + c_10_0;
+								input_multislice->cond_lens.set_defocus(c_10); 
+								wave_function.set_incident_wave(wave_function.psi_z, beam_x, beam_y);
+								wave_function.psi(w_pr_0*qs.w[ispat]*qt.w[itemp], wave_function.psi_z, output_multislice);
+
+								ext_iter++;
+								if(ext_stop_sim) break;
+							}
 						}
 
 						if(ext_stop_sim) break;
 					}
 					wave_function.set_m2psi_coh(output_multislice);
 
-					output_multislice.shift();
-					output_multislice.clear_temporal_data();
-
-					input_multislice->obj_lens.set_defocus(f_0);
+					input_multislice->obj_lens.set_defocus(c_10_0);
+					input_multislice->set_beam_position(input_multislice->iw_x, input_multislice->iw_y);
 				}
 				else
 				{
@@ -222,7 +232,7 @@ namespace mt
 				ext_iter = 0;
 				/*****************************************************************/
 
-				T_r w = input_multislice->get_weight();
+				T_r w = input_multislice->get_phonon_rot_weight();
 
 				output_multislice.init();
 
@@ -242,9 +252,6 @@ namespace mt
 				}
 
 				wave_function.set_m2psi_coh(output_multislice);
-
-				output_multislice.shift();
-				output_multislice.clear_temporal_data();
 			}
 
 			template <class TOutput_multislice>
@@ -254,14 +261,16 @@ namespace mt
 				ext_iter = 0;
 				/*****************************************************************/
 
-				T_r w = input_multislice->get_weight();
+				T_r w = input_multislice->get_phonon_rot_weight();
 
 				output_multislice.init();
 
 				for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
 				{
-					wave_function.move_atoms(iconf);		
+					wave_function.move_atoms(iconf);
+
 					wave_function.set_incident_wave(wave_function.psi_z);
+
 					wave_function.psi(w, wave_function.psi_z, output_multislice);
 
 					ext_iter++;
@@ -269,9 +278,6 @@ namespace mt
 				}
 
 				wave_function.set_m2psi_coh(output_multislice);
-
-				output_multislice.shift();
-				output_multislice.clear_temporal_data();
 			}
 
 			template <class TOutput_multislice>
@@ -286,7 +292,7 @@ namespace mt
 				}
 				/*****************************************************************/
 
-				T_r w = input_multislice->get_weight();
+				T_r w = input_multislice->get_phonon_rot_weight();
 
 				auto psi = [&](T_r w, Vector<T_c, dev> &psi_z, TOutput_multislice &output_multislice)
 				{
@@ -325,6 +331,10 @@ namespace mt
 
 				output_multislice.init();
 
+				input_multislice->iscan.resize(1);
+				input_multislice->beam_x.resize(1);
+				input_multislice->beam_y.resize(1);
+
 				if(input_multislice->is_EELS())
 				{
 					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
@@ -354,9 +364,6 @@ namespace mt
 						if(ext_stop_sim) break;
 					}
 				}
-
-				output_multislice.shift();
-				output_multislice.clear_temporal_data();
 			}
 
 			Input_Multislice<T_r> *input_multislice;
@@ -378,7 +385,6 @@ namespace mt
 
 	template <class T, eDevice dev>
 	int Multislice<T, dev>::ext_iter = 0;
-
 } // namespace mt
 
 #endif

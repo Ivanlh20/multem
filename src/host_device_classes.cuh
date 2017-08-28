@@ -24,6 +24,7 @@
 #include "traits.cuh"
 #include "stream.cuh"
 #include "fft.cuh"
+#include "random.cuh"
 
 #ifdef __CUDACC__
 	#include <cuda.h>
@@ -153,7 +154,7 @@ namespace mt
 
 			void set_fft_plan()
 			{
-				fft_2d->create_plan_1d_bc(grid_2d.ny, grid_2d.nx, stream->size());
+				fft_2d->create_plan_1d_batch(grid_2d.ny, grid_2d.nx, stream->size());
 			}
 
 			void operator()(T sigma_r, TVector_c &Im)
@@ -428,7 +429,7 @@ namespace mt
 
 			void set_fft_plan()
 			{
-				fft_2d->create_plan_1d_bc(grid_2d.ny, grid_2d.nx, stream->size());
+				fft_2d->create_plan_1d_batch(grid_2d.ny, grid_2d.nx, stream->size());
 			}
 
 			void operator()(T sigma_r, T PSNR, TVector_c &Im)
@@ -921,42 +922,37 @@ namespace mt
 			/************************Host************************/
 			template<eDevice devn = dev>
 			enable_if_dev_host<devn, void>
-			operator()(TVector &M_i, T theta, r2d<T> p0, T sxy, r2d<T> ps, TVector &M_o)
+			operator()(TVector &M_i, T theta, r2d<T> p0, T sx, T sy, r2d<T> ps, TVector &M_o)
 			{
 				// calculate background
 				T bg = mean(*stream, M_i);
 
-				int nx_o = get_new_size(grid_2d.nx, sxy);
-				int ny_o = get_new_size(grid_2d.ny, sxy);
+				int nx_o = get_new_size(grid_2d.nx, sx);
+				int ny_o = get_new_size(grid_2d.ny, sy);
 
 				Grid_2d<T> grid_2d_o(nx_o, ny_o, nx_o*grid_2d.dRx, ny_o*grid_2d.dRy);
 
 				stream->set_n_act_stream(grid_2d_o.nx);
 				stream->set_grid(grid_2d_o.nx, grid_2d_o.ny);
-				stream->exec_matrix(host_device_detail::rot_sca_sft_2d<Grid_2d<T>, TVector>, grid_2d, M_i, theta, p0, sxy, ps, bg, grid_2d_o, M_o);
+				stream->exec_matrix(host_device_detail::rot_sca_sft_2d<Grid_2d<T>, TVector>, grid_2d, M_i, theta, p0, sx, sy, ps, bg, grid_2d_o, M_o);
 			}
 
 			/**********************Device**********************/
 		#ifdef __CUDACC__
 			template<eDevice devn = dev>
 			enable_if_dev_device<devn, void>
-			operator()(TVector &M_i, T theta, r2d<T> p0, T sxy, r2d<T> ps, TVector &M_o)
+			operator()(TVector &M_i, T theta, r2d<T> p0, T sx, T sy, r2d<T> ps, TVector &M_o)
 			{
-				if(isEqual<T>(sxy, T(1)))
-				{
-					M_o = M_i;
-				}
-
 				// calculate background
 				T bg = mean(*stream, M_i);
 
-				int nx_o = max(int(floor(grid_2d.nx*sxy)), 1);
-				int ny_o = max(int(floor(grid_2d.ny*sxy)), 1);
+				int nx_o = max(int(floor(grid_2d.nx*sx)), 1);
+				int ny_o = max(int(floor(grid_2d.ny*sy)), 1);
 
 				Grid_2d<T> grid_2d_o(nx_o, ny_o, nx_o*grid_2d.dRx, ny_o*grid_2d.dRy);
 
 				auto grid_bt = grid_2d_o.cuda_grid();
-				device_detail::rot_sca_sft_2d<Grid_2d<T>, typename TVector::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, M_i, theta, p0, sxy, ps, bg, grid_2d_o, M_o);
+				device_detail::rot_sca_sft_2d<Grid_2d<T>, typename TVector::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, M_i, theta, p0, sx, sy, ps, bg, grid_2d_o, M_o);
 			}
 		#endif
 
@@ -991,7 +987,7 @@ namespace mt
 			/************************Host************************/
 			template<eDevice devn = dev>
 			enable_if_dev_host<devn, void>
-			operator()(TVector &M_i, T theta, r2d<T> p0, T sxy, r2d<T> ps, T sim, 
+			operator()(TVector &M_i, T theta, r2d<T> p0, T sx, T sy, r2d<T> ps, T sim, 
 			int nx_o, int ny_o, TVector &M_o)
 			{
 				// calculate maximum
@@ -1004,15 +1000,15 @@ namespace mt
 
 				T bg = 0.6*mean(*stream, M_i);
 
-				T Rx_0 = p0.x*sxy-(nx_o/2)*grid_2d.dRx;
-				T Ry_0 = p0.y*sxy-(ny_o/2)*grid_2d.dRy;
+				T Rx_0 = p0.x*sx-(nx_o/2)*grid_2d.dRx;
+				T Ry_0 = p0.y*sy-(ny_o/2)*grid_2d.dRy;
 
 				Grid_2d<T> grid_2d_o(nx_o, ny_o, nx_o*grid_2d.dRx, ny_o*grid_2d.dRy);
 				grid_2d_o.set_R_0(Rx_0, Ry_0);
 
 				stream->set_n_act_stream(grid_2d_o.nx);
 				stream->set_grid(grid_2d_o.nx, grid_2d_o.ny);
-				stream->exec_matrix(host_device_detail::rot_sca_sft_2d<Grid_2d<T>, TVector>, grid_2d, M_i, theta, p0, sxy, ps, bg, grid_2d_o, M_o);
+				stream->exec_matrix(host_device_detail::rot_sca_sft_2d<Grid_2d<T>, TVector>, grid_2d, M_i, theta, p0, sx, sy, ps, bg, grid_2d_o, M_o);
 
 				normalized_data(M_o, M_max);
 
@@ -1216,7 +1212,7 @@ namespace mt
 
 			void set_fft_plan()
 			{
-				fft_2d->create_plan_1d_bc(grid_2d.ny, grid_2d.nx, stream->size());
+				fft_2d->create_plan_1d_batch(grid_2d.ny, grid_2d.nx, stream->size());
 			}
 
 			void operator()(T alpha, TVector_r ys, TVector_c &Im)
@@ -1503,8 +1499,8 @@ namespace mt
 
 			void set_fft_plan()
 			{
-				fft_2d->create_plan_1d_bc(grid_2d.ny, grid_2d.nx, stream->size());
-				fft_2d_e.create_plan_1d_bc(grid_2d_e.ny, grid_2d_e.nx, stream->size());
+				fft_2d->create_plan_1d_batch(grid_2d.ny, grid_2d.nx, stream->size());
+				fft_2d_e.create_plan_1d_batch(grid_2d_e.ny, grid_2d_e.nx, stream->size());
 			}
 
 			void operator()(TVector_r &M_r, TVector_r &M_s, T p, T sigma_g, 
@@ -2242,7 +2238,7 @@ namespace mt
 							{
 								T ee_f = pow(yr[ix]-ys[ix], 2);
 								T ee_df = pow(yr_n[ix]+yr_b[ix]-2*ys[ix], 2);
-								T chi2_p = alpha*ee_f + beta*ee_df;;
+								T chi2_p = alpha*ee_f + beta*ee_df;
 								host_device_detail::kh_sum(chi2, chi2_p, chi2_ee);
 							}
 							chi2_pk[ix_pk] = chi2;

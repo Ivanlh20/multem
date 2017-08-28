@@ -113,6 +113,13 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	
 	input_multislice.cond_lens.set_input_data(input_multislice.E_0, input_multislice.grid_2d);
 
+	/********************* select output region *************************/
+	input_multislice.output_area.ix_0 = mx_get_scalar_field<int>(mx_input_multislice, "output_area_ix_0")-1;
+	input_multislice.output_area.iy_0 = mx_get_scalar_field<int>(mx_input_multislice, "output_area_iy_0")-1;
+	input_multislice.output_area.ix_e = mx_get_scalar_field<int>(mx_input_multislice, "output_area_ix_e")-1;
+	input_multislice.output_area.iy_e = mx_get_scalar_field<int>(mx_input_multislice, "output_area_iy_e")-1;
+
+	/********************* validate parameters *************************/
 	input_multislice.validate_parameters();
 }
 
@@ -138,9 +145,7 @@ void run_incident_wave(mt::System_Configuration &system_conf, const mxArray *mx_
 {
 	mt::Input_Multislice<T> input_multislice;
 	read_input_multislice(mx_input_multislice, input_multislice);
-
-    mt::Output_Multislice<T> output_multislice;
-    output_multislice.set_input_data(&input_multislice);
+	input_multislice.system_conf = system_conf;
 
 	mt::Stream<dev> stream(system_conf.nstream);
 	mt::FFT<T, dev> fft_2d;
@@ -148,9 +153,16 @@ void run_incident_wave(mt::System_Configuration &system_conf, const mxArray *mx_
 	
 	mt::Incident_Wave<T, dev> incident_wave;
 	incident_wave.set_input_data(&input_multislice, &stream, &fft_2d);
+
+	mt::Output_Multislice<T> output_multislice;
+	output_multislice.set_input_data(&input_multislice);
+
 	incident_wave(mt::eS_Real, output_multislice);
 
 	stream.synchronize();
+
+	output_multislice.gather();
+	output_multislice.clean_temporal();
 	fft_2d.cleanup();
 
 	set_struct_incident_wave(output_multislice, mx_output_multislice);

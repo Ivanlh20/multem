@@ -19,6 +19,7 @@
 #ifndef WAVE_FUNCTION_H
 #define WAVE_FUNCTION_H
 
+#include "math.cuh"
 #include "types.cuh"
 #include "fft.cuh"
 #include "input_multislice.cuh"
@@ -48,12 +49,6 @@ namespace mt
 			{
 				psi_z.resize(input_multislice_i->grid_2d.nxy());
 				m2psi_z.resize(input_multislice_i->grid_2d.nxy());
-
-				if(this->device == e_device)
-				{
-					psi_zh.resize(input_multislice_i->grid_2d.nxy());
-					m2psi_zh.resize(input_multislice_i->grid_2d.nxy());
-				}
 
 				if(input_multislice_i->is_STEM())
 				{
@@ -155,33 +150,35 @@ namespace mt
 
 						if(this->input_multislice->pn_coh_contrib)
 						{
-							mt::add_scale_to_host(output_multislice.stream, w_i, *psi_z_o, output_multislice.psi_coh[ithk], &psi_zh);
+							output_multislice.add_scale_psi_coh(ithk, w_i, *psi_z_o);
 						}
 					}
 					else if(this->input_multislice->is_EWFS_EWRS_SC())
 					{
-						mt::copy_to_host(output_multislice.stream, *psi_z_o, output_multislice.psi_coh[ithk], &psi_zh);
+						output_multislice.set_crop_shift_psi_coh(ithk, *psi_z_o);
+					}
+					else if(this->input_multislice->is_EWFS_EWRS())
+					{
+						output_multislice.add_scale_crop_shift_m2psi_tot_from_psi(ithk, w_i, *psi_z_o);
+						output_multislice.add_scale_crop_shift_psi_coh(ithk, w_i, *psi_z_o);
 					}
 					else if(this->input_multislice->is_ISTEM_CBEI_HRTEM_HCTEM_EFTEM())
 					{
 						microscope_effects(*psi_z_o, m2psi_z);
-						mt::add_scale_to_host(output_multislice.stream, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
+						output_multislice.add_scale_crop_shift_m2psi_tot_from_m2psi(ithk, w_i, m2psi_z);
 
 						if(this->input_multislice->pn_coh_contrib)
 						{
-							mt::add_scale_to_host(output_multislice.stream, w_i, *psi_z_o, output_multislice.psi_coh[ithk], &psi_zh);
+							output_multislice.add_scale_psi_coh(ithk, w_i, *psi_z_o);
 						}
 					}
 					else
 					{
+						output_multislice.add_scale_crop_shift_m2psi_tot_from_psi(ithk, w_i, *psi_z_o);
+
 						if(this->input_multislice->pn_coh_contrib)
 						{
-							mt::add_scale_m2psi_psi_to_host(output_multislice.stream, w_i, *psi_z_o, output_multislice.m2psi_tot[ithk], output_multislice.psi_coh[ithk], &psi_zh);
-						}
-						else
-						{
-							mt::square(*(this->stream), *psi_z_o, m2psi_z);
-							mt::add_scale_to_host(output_multislice.stream, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
+							output_multislice.add_scale_psi_coh(ithk, w_i, *psi_z_o);
 						}
 					}
 				}
@@ -195,11 +192,13 @@ namespace mt
 					return;
 				}
 
+				int n_thk = this->input_multislice->thick.size();
+
 				if(this->input_multislice->is_STEM())
 				{
-					for(auto ithk = 0; ithk < this->slicing.thick.size(); ithk++)
+					for(auto ithk = 0; ithk < n_thk; ithk++)
 					{
-						mt::assign(output_multislice.psi_coh[ithk], psi_z, &psi_zh);
+						output_multislice.from_psi_coh_2_phi(ithk, psi_z);
 						for(auto iDet = 0; iDet<detector.size(); iDet++)
 						{
 							int iscan = this->input_multislice->iscan[0];
@@ -209,18 +208,19 @@ namespace mt
 				}
 				else if(this->input_multislice->is_ISTEM_CBEI_HRTEM_HCTEM_EFTEM())
 				{
-					for(auto ithk = 0; ithk < this->slicing.thick.size(); ithk++)
+					for(auto ithk = 0; ithk < n_thk; ithk++)
 					{
-						mt::assign(output_multislice.psi_coh[ithk], psi_z, &psi_zh);
+						output_multislice.from_psi_coh_2_phi(ithk, psi_z);
 						microscope_effects(psi_z, m2psi_z);
-						mt::copy_to_host(output_multislice.stream, m2psi_z, output_multislice.m2psi_coh[ithk], &m2psi_zh);
+						output_multislice.set_crop_shift_m2psi_coh(ithk, m2psi_z);
 					}
 				}
 				else
 				{
-					for(auto ithk = 0; ithk < this->slicing.thick.size(); ithk++)
+					for(auto ithk = 0; ithk < n_thk; ithk++)
 					{
-						mt::square(output_multislice.stream, output_multislice.psi_coh[ithk], output_multislice.m2psi_coh[ithk]);
+						output_multislice.from_psi_coh_2_phi(ithk, psi_z);
+						output_multislice.add_scale_crop_shift_m2psi_coh_from_psi(ithk, 1.0, psi_z);
 					}
 				}
 			}
@@ -229,6 +229,7 @@ namespace mt
 			void psi_slice(const T_r &gxu, const T_r &gyu, const int &islice, TVector_c &psi_z)
 			{
 				this->transmit(islice, psi_z);
+
 				if(this->input_multislice->is_multislice())
 				{
 					propagator(eS_Real, gxu, gyu, this->dz(islice), psi_z);
@@ -244,6 +245,7 @@ namespace mt
 				for(auto islice = 0; islice<this->slicing.slice.size(); islice++)
 				{
 					psi_slice(gx_0, gy_0, islice, psi_z);
+
 					set_m2psi_tot_psi_coh(psi_z, gx_0, gy_0, islice, w_i, output_multislice);
 				}
 			}
@@ -289,20 +291,26 @@ namespace mt
 					{
 						mt::hard_aperture(*(this->stream), this->input_multislice->grid_2d, this->input_multislice->eels_fr.g_collection, 1.0, psi_z);
 						microscope_effects(psi_z, m2psi_z);
-						mt::add_scale_to_host(output_multislice.stream, w_i, m2psi_z, output_multislice.m2psi_tot[ithk], &m2psi_zh);
+						output_multislice.add_scale_crop_shift_m2psi_tot_from_m2psi(ithk, w_i, m2psi_z);
 					}
 				}
 			}
 
-			void set_incident_wave(TVector_c &psi)
+			void set_incident_wave(TVector_c &psi, Vector<T_r, e_host> &beam_x, Vector<T_r, e_host> &beam_y)
 			{
 				T_r gxu = 0;
 				T_r gyu = 0;
-				auto &beam_x = this->input_multislice->beam_x;
-				auto &beam_y = this->input_multislice->beam_y;
 				auto z_init = this->slicing.z_m(0);
 
 				incident_wave(psi, gxu, gyu, beam_x, beam_y, z_init);
+			}
+
+			void set_incident_wave(TVector_c &psi)
+			{
+				auto &beam_x = this->input_multislice->beam_x;
+				auto &beam_y = this->input_multislice->beam_y;
+
+				set_incident_wave(psi, beam_x, beam_y);
 			}
 
 			Propagator<T_r, dev> propagator;
@@ -310,12 +318,11 @@ namespace mt
 			TVector_c psi_z;
 			TVector_r m2psi_z;
 
-			Vector<T_c, e_host> psi_zh;
-			Vector<T_r, e_host> m2psi_zh;
-
 			Detector<T_r, dev> detector; 	
 			Microscope_Effects<T_r, dev> microscope_effects;
 			Incident_Wave<T_r, dev> incident_wave;		
+
+			//mt::Timing<mt::e_device> time;
 	};
 
 } // namespace mt

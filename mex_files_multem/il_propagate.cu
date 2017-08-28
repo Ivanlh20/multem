@@ -77,9 +77,16 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.phi = mx_get_scalar_field<T_r>(mx_input_multislice, "phi")*mt::c_deg_2_rad;
 
 	/************************ Objective lens **************************/
-	input_multislice.obj_lens.c_10 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_f"); 									// defocus(Angstrom)
+	input_multislice.obj_lens.c_10 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_f"); 	// defocus(Angstrom)
 	input_multislice.obj_lens.set_input_data(input_multislice.E_0, input_multislice.grid_2d);
+	
+	/********************* select output region *************************/
+	input_multislice.output_area.ix_0 = mx_get_scalar_field<int>(mx_input_multislice, "output_area_ix_0")-1;
+	input_multislice.output_area.iy_0 = mx_get_scalar_field<int>(mx_input_multislice, "output_area_iy_0")-1;
+	input_multislice.output_area.ix_e = mx_get_scalar_field<int>(mx_input_multislice, "output_area_ix_e")-1;
+	input_multislice.output_area.iy_e = mx_get_scalar_field<int>(mx_input_multislice, "output_area_iy_e")-1;
 
+	/********************* validate parameters *************************/
 	input_multislice.validate_parameters();
  }
 
@@ -105,9 +112,7 @@ void run_propagate(mt::System_Configuration &system_conf, const mxArray *mx_inpu
 {
 	mt::Input_Multislice<T> input_multislice;
 	read_input_multislice(mx_input_multislice, input_multislice);
-
-    mt::Output_Multislice<T> output_multislice;
-    output_multislice.set_input_data(&input_multislice);
+	input_multislice.system_conf = system_conf;
 
 	mt::Stream<dev> stream(system_conf.nstream);
 	mt::FFT<T, dev> fft_2d;
@@ -115,9 +120,16 @@ void run_propagate(mt::System_Configuration &system_conf, const mxArray *mx_inpu
 
 	mt::Propagator<T, dev> propagator;
 	propagator.set_input_data(&input_multislice, &stream, &fft_2d);
+
+	mt::Output_Multislice<T> output_multislice;
+	output_multislice.set_input_data(&input_multislice);
+
 	propagator(mt::eS_Real, input_multislice.gx_0(), input_multislice.gy_0(), input_multislice.obj_lens.c_10 , output_multislice);
 
 	stream.synchronize();
+
+	output_multislice.gather();
+	output_multislice.clean_temporal();
 	fft_2d.cleanup();
 
 	set_struct_propagate(output_multislice, mx_output_multislice);

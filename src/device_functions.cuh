@@ -382,6 +382,99 @@ namespace mt
 			}
 		}
 
+		/***************************************************************************/
+ 		// Shift matrix respect to (nxh, nyh)
+		template <class TGrid, class T>
+		__global__ void assign_shift_2d(TGrid grid_2d, rVector<T> M_i, rVector<T> M_o)
+		{
+			int iy = threadIdx.x + blockIdx.x*blockDim.x;
+			int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			{
+				host_device_detail::fft2_shift(ix, iy, grid_2d, M_i, M_o);
+			}
+		}
+
+  		// add, scale, crop and shift
+		template <class TGrid, class T>
+		__global__ void add_scale_shift_2d(TGrid grid_2d, T w, rVector<T> M_i, Range_2d range, rVector<T> M_o)
+		{
+			int iy = threadIdx.x + blockIdx.x*blockDim.x;
+			int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			{
+				host_device_detail::add_scale_shift_2d(ix, iy, grid_2d, w, M_i, range, M_o);
+			}
+		}
+
+  		// add, scale, square, crop and shift
+		template <class TGrid, class T1, class T2>
+		__global__ void add_scale_square_shift_2d(TGrid grid_2d, T2 w, rVector<T1> M_i, Range_2d range, rVector<T2> M_o)
+		{
+			int iy = threadIdx.x + blockIdx.x*blockDim.x;
+			int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			{
+				host_device_detail::add_scale_square_shift_2d(ix, iy, grid_2d, w, M_i, range, M_o);
+			}
+		}
+
+ 		// Assign and crop
+		template <class TGrid, class T>
+		__global__ void assign_crop(TGrid grid_2d, rVector<T> M_i, rVector<T> M_o)
+		{
+			int iy = threadIdx.x + blockIdx.x*blockDim.x;
+			int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			{
+				host_device_detail::assign_crop(ix, iy, grid_2d, M_i, M_o);
+			}
+		}
+
+ 		// crop and shift
+		template <class TGrid, class T>
+		__global__ void assign_crop_shift_2d(TGrid grid_2d, rVector<T> M_i, Range_2d range, rVector<T> M_o)
+		{
+			int iy = threadIdx.x + blockIdx.x*blockDim.x;
+			int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			{
+				host_device_detail::assign_crop_shift_2d(ix, iy, grid_2d, M_i, range, M_o);
+			}
+		}
+ 
+ 		// add, scale, crop and shift
+		template <class TGrid, class T>
+		__global__ void add_scale_crop_shift_2d(TGrid grid_2d, T w, rVector<T> M_i, Range_2d range, rVector<T> M_o)
+		{
+			int iy = threadIdx.x + blockIdx.x*blockDim.x;
+			int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			{
+				host_device_detail::add_scale_crop_shift_2d(ix, iy, grid_2d, w, M_i, range, M_o);
+			}
+		}
+
+  		// add, scale, square, crop and shift
+		template <class TGrid, class T1, class T2>
+		__global__ void add_scale_square_crop_shift_2d(TGrid grid_2d, T2 w, rVector<T1> M_i, Range_2d range, rVector<T2> M_o)
+		{
+			int iy = threadIdx.x + blockIdx.x*blockDim.x;
+			int ix = threadIdx.y + blockIdx.y*blockDim.y;
+
+			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			{
+				host_device_detail::add_scale_square_crop_shift_2d(ix, iy, grid_2d, w, M_i, range, M_o);
+			}
+		}
+
+		/***************************************************************************/
 		// sum over the detector
 		template <class TGrid, class T>
 		__global__ void sum_over_Det(TGrid grid_2d, Value_type<TGrid> g2_min, Value_type<TGrid> g2_max, rVector<T> M_i, rVector<T> Mp_o)
@@ -1011,14 +1104,14 @@ namespace mt
 		// rotate, scale and shift xy
 		template <class TGrid, class T>
 		__global__ void rot_sca_sft_2d(TGrid grid_2d_i, rVector<T> M_i, T theta, r2d<T> p0, 
-		T fxy, r2d<T> ps, T bg, TGrid grid_2d_o, rVector<T> M_o)
+		T fx, T fy, r2d<T> ps, T bg, TGrid grid_2d_o, rVector<T> M_o)
 		{
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid_2d_o.nx)&&(iy < grid_2d_o.ny))
 			{
-				host_device_detail::rot_sca_sft_2d(ix, iy, grid_2d_i, M_i, theta, p0, fxy, ps, bg, grid_2d_o, M_o);
+				host_device_detail::rot_sca_sft_2d(ix, iy, grid_2d_i, M_i, theta, p0, fx, fy, ps, bg, grid_2d_o, M_o);
 			}
 		}
 
@@ -1048,7 +1141,7 @@ namespace mt
 	enable_if_device_vector<TVector, void>
 	fill(Stream<e_device> &stream, TVector &M_io, Value_type<TVector> value_i)
 	{
-		thrust::fill(thrust::device, M_io.begin(), M_io.end(), value_i);
+		thrust::fill(M_io.begin(), M_io.end(), value_i);
 	}
 
 	template <class TVector_1, class TVector_2>
@@ -1132,18 +1225,18 @@ namespace mt
 
 	template <class TVector_1, class TVector_2>
 	enable_if_device_vector_and_device_vector<TVector_1, TVector_2, void>
-	add_square_scale(Stream<e_device> &stream, Value_type<TVector_2> w1_i, TVector_1 &M1_i, Value_type<TVector_2> w2_i, TVector_1 &M2_i, TVector_2 &M_o)
+	add_scale_square(Stream<e_device> &stream, Value_type<TVector_2> w1_i, TVector_1 &M1_i, Value_type<TVector_2> w2_i, TVector_1 &M2_i, TVector_2 &M_o)
 	{
 		using value_type = Value_type<TVector_2>;
-		thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), functor::add_square_scale_i<value_type>(w1_i, w2_i));
+		thrust::transform(M1_i.begin(), M1_i.end(), M2_i.begin(), M_o.begin(), functor::add_scale_square_i<value_type>(w1_i, w2_i));
 	}
 
 	template <class TVector_1, class TVector_2>
 	enable_if_device_vector_and_device_vector<TVector_1, TVector_2, void>
-	add_square_scale(Stream<e_device> &stream, Value_type<TVector_2> w_i, TVector_1 &M_i, TVector_2 &M_io)
+	add_scale_square(Stream<e_device> &stream, Value_type<TVector_2> w_i, TVector_1 &M_i, TVector_2 &M_io)
 	{
 		using value_type = Value_type<TVector_2>;
-		thrust::transform(M_i.begin(), M_i.end(), M_io.begin(), M_io.begin(), functor::add_square_scale<value_type>(w_i));
+		thrust::transform(M_i.begin(), M_i.end(), M_io.begin(), M_io.begin(), functor::add_scale_square<value_type>(w_i));
 	}
 
 	template <class TVector_1, class TVector_2>
@@ -1441,6 +1534,7 @@ namespace mt
 		device_detail::fft2_shift<TGrid, typename TVector::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, M_io); 	
 	}
 
+
 	template <class TGrid, class TVector>
 	enable_if_device_vector<TVector, Value_type<TVector>>
 	sum_over_Det(Stream<e_device> &stream, TGrid &grid_2d, Value_type<TGrid> g_min, Value_type<TGrid> g_max, TVector &M_i)
@@ -1501,7 +1595,6 @@ namespace mt
 	Value_type<TGrid> gxu, Value_type<TGrid> gyu, TVector_c &psi_i, TVector_c &psi_o)
 	{
 		auto grid_bt = grid_2d.cuda_grid();
-
 		device_detail::propagate<TGrid, typename TVector_c::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, w, gxu, gyu, psi_i, psi_o);
 	}
 
@@ -1670,7 +1763,7 @@ namespace mt
 
 	template <class TVector_i, class TVector_o>
 	enable_if_device_vector_and_host_vector<TVector_i, TVector_o, void>
-	add_square_scale_to_host(Stream<e_host> &stream, Value_type<TVector_o> w_i, 
+	add_scale_square_to_host(Stream<e_host> &stream, Value_type<TVector_o> w_i, 
 	TVector_i &M_i, TVector_o &M_o, Vector<Value_type<TVector_i>, e_host> *M_i_h = nullptr)
 	{
 		Vector<Value_type<TVector_i>, e_host> M_h;
@@ -1679,7 +1772,7 @@ namespace mt
 		// data transfer from GPU to CPU
 		M_i_h->assign(M_i.begin(), M_i.end());
 
-		mt::add_square_scale_to_host(stream, w_i, *M_i_h, M_o);
+		mt::add_scale_square_to_host(stream, w_i, *M_i_h, M_o);
 	}
 
 	template <class TVector_c_i, class TVector_r_o, class TVector_c_o>
@@ -1696,9 +1789,283 @@ namespace mt
 		mt::add_scale_m2psi_psi_to_host(stream, w_i, *psi_i_h, m2psi_o, psi_o);
 	}
 
+ 	/***************************************************************************/
+	/*************************** Device to Device ******************************/
 	/***************************************************************************/
-	/***************************************************************************/
+ 	template <class TGrid, class TVector>
+	enable_if_device_vector<TVector, void>
+	assign_shift_2d(TGrid &grid_2d, TVector &M_i, TVector &M_o, 
+	Vector<Value_type<TVector>, e_host> *M_i_h = nullptr)
+	{
+		auto grid_bt = grid_2d.cuda_grid_h();
 
+		device_detail::assign_shift_2d<TGrid, typename TVector::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, M_i, M_o); 	
+	}
+
+  	template <class TGrid, class TVector>
+	enable_if_device_vector<TVector, void>
+	add_scale_shift_2d(TGrid &grid_2d, Value_type<TVector> w, 
+	TVector &M_i, TVector &M_o, Vector<Value_type<TVector>, e_host> *M_i_h = nullptr)
+	{
+		auto grid_bt = grid_2d.cuda_grid_h();
+
+		device_detail::add_scale_shift_2d<TGrid, typename TVector::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, w, M_i, M_o); 	
+	}
+ 
+  	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_device_vector_and_device_vector<TVector_1, TVector_2, void>
+	add_scale_square_shift_2d(TGrid &grid_2d, Value_type<TGrid> w, 
+	TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		auto grid_bt = grid_2d.cuda_grid_h();
+
+		device_detail::add_scale_square_shift_2d<TGrid, typename TVector_1::value_type, typename TVector_2::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, w, M_i, M_o); 	
+	}
+
+  	template <class TGrid, class TVector>
+	enable_if_device_vector<TVector, void>
+	assign_crop(TGrid &grid_2d, TVector &M_i, Range_2d &range, 
+	TVector &M_o, Vector<Value_type<TVector>, e_host> *M_i_h = nullptr)
+	{
+		auto grid_bt = grid_2d.cuda_grid();
+
+		device_detail::assign_crop_shift_2d<TGrid, typename TVector::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, M_i, range, M_o); 	
+	}
+
+ 	template <class TGrid, class TVector>
+	enable_if_device_vector<TVector, void>
+	assign_crop_shift_2d(TGrid &grid_2d, TVector &M_i, Range_2d &range, 
+	TVector &M_o, Vector<Value_type<TVector>, e_host> *M_i_h = nullptr)
+	{
+		auto grid_bt = grid_2d.cuda_grid_h();
+
+		device_detail::assign_crop_shift_2d<TGrid, typename TVector::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, M_i, range, M_o); 	
+	}
+
+  	template <class TGrid, class TVector>
+	enable_if_device_vector<TVector, void>
+	add_scale_crop_shift_2d(TGrid &grid_2d, Value_type<TVector> w, 
+	TVector &M_i, Range_2d &range, TVector &M_o, Vector<Value_type<TVector>, e_host> *M_i_h = nullptr)
+	{
+		auto grid_bt = grid_2d.cuda_grid_h();
+
+		device_detail::add_scale_crop_shift_2d<TGrid, typename TVector::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, w, M_i, range, M_o); 	
+	}
+ 
+  	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_device_vector_and_device_vector<TVector_1, TVector_2, void>
+	add_scale_square_crop_shift_2d(TGrid &grid_2d, Value_type<TGrid> w, 
+	TVector_1 &M_i, Range_2d &range, TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		auto grid_bt = grid_2d.cuda_grid_h();
+
+		device_detail::add_scale_square_crop_shift_2d<TGrid, typename TVector_1::value_type, typename TVector_2::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, w, M_i, range, M_o); 	
+	}
+
+ 	/***************************************************************************/
+	/***************************** Device to Host ******************************/
+	/***************************************************************************/
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_device_vector_and_host_vector<TVector_1, TVector_2, void>
+	assign_shift_2d(TGrid &grid_2d, TVector_1 &M_i, TVector_2 &M_o, 
+	Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		Vector<Value_type<TVector_1>, e_host> M_h;
+		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		// data transfer from GPU to CPU
+		M_i_h->assign(M_i.begin(), M_i.end());
+
+		mt::assign_shift_2d(grid_2d, *M_i_h, M_o);
+	}
+ 	
+	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_device_vector_and_host_vector<TVector_1, TVector_2, void>
+	add_scale_shift_2d(TGrid &grid_2d, Value_type<TVector_2> w, 
+	TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		Vector<Value_type<TVector_1>, e_host> M_h;
+		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		// data transfer from GPU to CPU
+		M_i_h->assign(M_i.begin(), M_i.end());
+
+		mt::add_scale_shift_2d(grid_2d, w, *M_i_h, M_o);
+	}
+
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_device_vector_and_host_vector<TVector_1, TVector_2, void>
+	add_scale_square_shift_2d(TGrid &grid_2d, Value_type<TGrid> w, 
+	TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		Vector<Value_type<TVector_1>, e_host> M_h;
+		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		// data transfer from GPU to CPU
+		M_i_h->assign(M_i.begin(), M_i.end());
+
+		mt::add_scale_square_shift_2d(grid_2d, w, *M_i_h, M_o);
+	}
+
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_device_vector_and_host_vector<TVector_1, TVector_2, void>
+	assign_crop(TGrid &grid_2d, TVector_1 &M_i, Range_2d &range, 
+	TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		Vector<Value_type<TVector_1>, e_host> M_h;
+		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		// data transfer from GPU to CPU
+		M_i_h->assign(M_i.begin(), M_i.end());
+
+		mt::assign_crop(grid_2d, *M_i_h, range, M_o);
+	}
+
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_device_vector_and_host_vector<TVector_1, TVector_2, void>
+	assign_crop_shift_2d(TGrid &grid_2d, TVector_1 &M_i, Range_2d &range, 
+	TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		Vector<Value_type<TVector_1>, e_host> M_h;
+		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		// data transfer from GPU to CPU
+		M_i_h->assign(M_i.begin(), M_i.end());
+
+		mt::assign_crop_shift_2d(grid_2d, *M_i_h, range, M_o);
+	}
+
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_device_vector_and_host_vector<TVector_1, TVector_2, void>
+	add_scale_crop_shift_2d(TGrid &grid_2d, Value_type<TVector_2> w, 
+	TVector_1 &M_i, Range_2d &range, TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		Vector<Value_type<TVector_1>, e_host> M_h;
+		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		// data transfer from GPU to CPU
+		M_i_h->assign(M_i.begin(), M_i.end());
+
+		mt::add_scale_crop_shift_2d(grid_2d, w, *M_i_h, range, M_o);
+	}
+
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_device_vector_and_host_vector<TVector_1, TVector_2, void>
+	add_scale_square_crop_shift_2d(TGrid &grid_2d, Value_type<TGrid> w, 
+	TVector_1 &M_i, Range_2d &range, TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		Vector<Value_type<TVector_1>, e_host> M_h;
+		M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		// data transfer from GPU to CPU
+		M_i_h->assign(M_i.begin(), M_i.end());
+
+		mt::add_scale_square_crop_shift_2d(grid_2d, w, *M_i_h, range, M_o);
+	}
+
+  	/***************************************************************************/
+	/***************************** Host to Device ******************************/
+	/***************************************************************************/
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_host_vector_and_device_vector<TVector_1, TVector_2, void>
+	assign_shift_2d(TGrid &grid_2d, TVector_1 &M_i, TVector_2 &M_o, 
+	Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		//Vector<Value_type<TVector_1>, e_host> M_h;
+		//M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		//// data transfer from GPU to CPU
+		//M_i_h->assign(M_i.begin(), M_i.end());
+
+		//mt::assign_shift_2d(grid_2d, *M_i_h, M_o);
+	}
+ 	
+	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_host_vector_and_device_vector<TVector_1, TVector_2, void>
+	add_scale_shift_2d(TGrid &grid_2d, Value_type<TVector_2> w, 
+	TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		//Vector<Value_type<TVector_1>, e_host> M_h;
+		//M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		//// data transfer from GPU to CPU
+		//M_i_h->assign(M_i.begin(), M_i.end());
+
+		//mt::add_scale_shift_2d(grid_2d, w, *M_i_h, M_o);
+	}
+
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_host_vector_and_device_vector<TVector_1, TVector_2, void>
+	add_scale_square_shift_2d(TGrid &grid_2d, Value_type<TGrid> w, 
+	TVector_1 &M_i, TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		//Vector<Value_type<TVector_1>, e_host> M_h;
+		//M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		//// data transfer from GPU to CPU
+		//M_i_h->assign(M_i.begin(), M_i.end());
+
+		//mt::add_scale_square_shift_2d(grid_2d, w, *M_i_h, M_o);
+	}
+
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_host_vector_and_device_vector<TVector_1, TVector_2, void>
+	assign_crop(TGrid &grid_2d, TVector_1 &M_i, Range_2d &range, 
+	TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		//Vector<Value_type<TVector_1>, e_host> M_h;
+		//M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		//// data transfer from GPU to CPU
+		//M_i_h->assign(M_i.begin(), M_i.end());
+
+		//mt::assign_crop(grid_2d, *M_i_h, range, M_o);
+	}
+
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_host_vector_and_device_vector<TVector_1, TVector_2, void>
+	assign_crop_shift_2d(TGrid &grid_2d, TVector_1 &M_i, Range_2d &range, 
+	TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		//Vector<Value_type<TVector_1>, e_host> M_h;
+		//M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		//// data transfer from GPU to CPU
+		//M_i_h->assign(M_i.begin(), M_i.end());
+
+		//mt::assign_crop_shift_2d(grid_2d, *M_i_h, range, M_o);
+	}
+
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_host_vector_and_device_vector<TVector_1, TVector_2, void>
+	add_scale_crop_shift_2d(TGrid &grid_2d, Value_type<TVector_2> w, 
+	TVector_1 &M_i, Range_2d &range, TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		//Vector<Value_type<TVector_1>, e_host> M_h;
+		//M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		//// data transfer from GPU to CPU
+		//M_i_h->assign(M_i.begin(), M_i.end());
+
+		//mt::add_scale_crop_shift_2d(grid_2d, w, *M_i_h, range, M_o);
+	}
+
+ 	template <class TGrid, class TVector_1, class TVector_2>
+	enable_if_host_vector_and_device_vector<TVector_1, TVector_2, void>
+	add_scale_square_crop_shift_2d(TGrid &grid_2d, Value_type<TGrid> w, 
+	TVector_1 &M_i, Range_2d &range, TVector_2 &M_o, Vector<Value_type<TVector_1>, e_host> *M_i_h = nullptr)
+	{
+		//Vector<Value_type<TVector_1>, e_host> M_h;
+		//M_i_h = (M_i_h == nullptr)?&M_h:M_i_h;
+
+		//// data transfer from GPU to CPU
+		//M_i_h->assign(M_i.begin(), M_i.end());
+
+		//mt::add_scale_square_crop_shift_2d(grid_2d, w, *M_i_h, range, M_o);
+	}
+
+	/***************************************************************************/
+	/***************************************************************************/
 	template <class TVector>
 	enable_if_device_vector<TVector, void>
 	trs(Stream<e_device> &stream, const int &nrows, const int &ncols, TVector &M)

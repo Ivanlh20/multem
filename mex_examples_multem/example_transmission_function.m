@@ -7,7 +7,6 @@ system_conf.device = 2;                             % eD_CPU = 1, eD_GPU = 2
 system_conf.cpu_ncores = 1;                         % Number of Cores CPU (It will be used in the future)
 system_conf.cpu_nthread = 4;                   % Number of CPU threads 
 system_conf.gpu_device = 0;                    % GPU device (i.e. 0, 1, 2, ... )
-system_conf.gpu_nstream = 1;                   % Number of streams
 
 input_multislice.pn_model = 1;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multislice.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3

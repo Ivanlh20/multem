@@ -1,6 +1,6 @@
 clear all;
 clc;
-Z = 6;
+Z = 78;
 occ = 1;
 region = 0;
 charge = 0;

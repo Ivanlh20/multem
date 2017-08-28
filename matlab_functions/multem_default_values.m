@@ -58,7 +58,7 @@ input_multislice.bwl = 0;                                       % Band-width lim
 
 %%%%%%%%%%%%%%%%%%%%%%%% Simulation type %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, 
-% eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCI=42, 
+% eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, 
 % eTEMST_EWFS=51, eTEMST_EWRS=52, eTEMST_EELS=61, eTEMST_EFTEM=62, 
 % eTEMST_ProbeFS=71, eTEMST_ProbeRS=72, eTEMST_PPFS=81, eTEMST_PPRS=82, 
 % eTEMST_TFFS=91, eTEMST_TFRS=92
@@ -70,14 +70,14 @@ input_multislice.iw_psi = 0;                                    % User define in
 input_multislice.iw_x = 0.0;                                    % x position 
 input_multislice.iw_y = 0.0;                                    % y position
 
-%%%%%%%%%%%%%%%%%%%% Microscope paramters %%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% Microscope parameters %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.E_0 = 300;                                     % Acceleration Voltage (keV)
 input_multislice.theta = 0.0;                                   % Polar angle (º)
 input_multislice.phi = 0.0;                                     % Azimuthal angle (º)
 
 %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.illumination_model = 2;                        % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
-input_multislice.temporal_spatial_incoh = 1;                    % 1: Spatial and temporal, 2: Temporal, 3: Spatial
+input_multislice.temporal_spatial_incoh = 1;                    % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % On the optimun probe in aberration corrected ADF-STEM
@@ -121,12 +121,15 @@ input_multislice.cond_lens_phi_56 = 0.00;                       % [phi_A5]	Azimu
 input_multislice.cond_lens_inner_aper_ang = 0.0;                % Inner aperture (mrad) 
 input_multislice.cond_lens_outer_aper_ang = 21.0;   			% Outer aperture (mrad)
 
-input_multislice.cond_lens_beta = 0.2;              			% Divergence semi-angle (mrad)
-input_multislice.cond_lens_nbeta = 10;              			% # integration steps for the divergence semi-angle. It will be only used if illumination_model=4
+%%%%%%%%%% source spread function %%%%%%%%%%%%
+input_multislice.cond_lens_ssf_sigma = 0.0072;                  % standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
+input_multislice.cond_lens_ssf_npoints = 8;              		% # of integration points. It will be only used if illumination_model=4
 
-input_multislice.cond_lens_sf = 32;                 			% Defocus Spread (Å)
-input_multislice.cond_lens_nsf = 10;                			% # integration steps for the defocus Spread. It will be only used if illumination_model=4
+%%%%%%%%% defocus spread function %%%%%%%%%%%%
+input_multislice.cond_lens_dsf_sigma = 32;                 		% standard deviation (Å)
+input_multislice.cond_lens_dsf_npoints  = 10;                	% # of integration points. It will be only used if illumination_model=4
 
+%%%%%%%%% zero defocus reference %%%%%%%%%%%%
 input_multislice.cond_lens_zero_defocus_type = 1;   			% eZDT_First = 1, eZDT_User_Define = 2
 input_multislice.cond_lens_zero_defocus_plane = 0;  			% It will be only used if cond_lens_zero_defocus_type = eZDT_User_Define
 
@@ -176,20 +179,13 @@ input_multislice.obj_lens_phi_56 = 0.00;                        % [phi_A5]	Azimu
 input_multislice.obj_lens_inner_aper_ang = 0.0;     			% Inner aperture (mrad) 
 input_multislice.obj_lens_outer_aper_ang = 24.0;    			% Outer aperture (mrad)
 
-input_multislice.obj_lens_sf = 32;                  			% Defocus Spread (Å)
-input_multislice.obj_lens_nsf = 10;                 			% # integration steps for the defocus Spread. It will be only used if illumination_model=4
+%%%%%%%%% defocus spread function %%%%%%%%%%%%
+input_multislice.obj_lens_dsf_sigma = 32;                 		% standard deviation (Å)
+input_multislice.obj_lens_dsf_npoints  = 10;                	% # of integration points. It will be only used if illumination_model=4
 
+%%%%%%%%% zero defocus reference %%%%%%%%%%%%
 input_multislice.obj_lens_zero_defocus_type = 3;    			% eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 input_multislice.obj_lens_zero_defocus_plane = 0;   			% It will be only used if obj_lens_zero_defocus_type = eZDT_User_Define
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ISTEM/STEM %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.scanning_type = 1;                 			% eST_Line = 1, eST_Area = 2
-input_multislice.scanning_periodic = 1;             			% 1: true, 0:false (periodic boundary conditions)
-input_multislice.scanning_ns = 10;                  			% number of sampling points
-input_multislice.scanning_x0 = 0.0;                 			% x-starting point (Å)
-input_multislice.scanning_y0 = 0.0;                 			% y-starting point (Å)
-input_multislice.scanning_xe = 4.078;               			% x-final point (Å)
-input_multislice.scanning_ye = 4.078;               			% y-final point (Å)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% STEM Detector %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.detector.type = 1;  % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
@@ -203,21 +199,43 @@ input_multislice.detector.radial(1).fx = 0;         			% radial sensitivity valu
 input_multislice.detector.matrix(1).R = 0;          			% 2D detector angle(mrad)
 input_multislice.detector.matrix(1).fR = 0;         			% 2D sensitivity value
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%% Scanning area for ISTEM/STEM/EELS %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+input_multislice.scanning_type = 1;                 			% eST_Line = 1, eST_Area = 2
+input_multislice.scanning_periodic = 1;             			% 1: true, 0:false (periodic boundary conditions)
+input_multislice.scanning_ns = 10;                  			% number of sampling points
+input_multislice.scanning_x0 = 0.0;                 			% x-starting point (Å)
+input_multislice.scanning_y0 = 0.0;                 			% y-starting point (Å)
+input_multislice.scanning_xe = 4.078;               			% x-final point (Å)
+input_multislice.scanning_ye = 4.078;               			% y-final point (Å)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%PED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.ped_nrot = 360;                    			% Number of orientations
 input_multislice.ped_theta = 3.0;                   			% Precession angle (degrees)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% HCI %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%HCI %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.hci_nrot = 360;                    			% number of orientations
 input_multislice.hci_theta = 3.0;                   			% Precession angle (degrees)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EELS %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%EELS %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.eels_Z = 79;                       			% atomic type
 input_multislice.eels_E_loss = 80;                  			% Energy loss (eV)
 input_multislice.eels_collection_angle = 100;       			% Collection half angle (mrad)
 input_multislice.eels_m_selection = 3;              			% selection rule
 input_multislice.eels_channelling_type = 1;         			% eCT_Single_Channelling = 1, eCT_Mixed_Channelling = 2, eCT_Double_Channelling = 3 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EFTEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%EFTEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.eftem_Z = 79;                      			% atomic type
 input_multislice.eftem_E_loss = 80;                 			% Energy loss (eV)
 input_multislice.eftem_collection_angle = 100;      			% Collection half angle (mrad)
 input_multislice.eftem_m_selection = 3;             			% selection rule
 input_multislice.eftem_channelling_type = 1;        			% eCT_Single_Channelling = 1, eCT_Mixed_Channelling = 2, eCT_Double_Channelling = 3 
+
+%%%%%%%%%%%%%%%%%%%%%%% OUTPUT REGION %%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% This option is not use for eTEMST_STEM and eTEMST_EELS %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+input_multislice.output_area_ix_0 = 1;                             % x-starting in pixel
+input_multislice.output_area_iy_0 = 1;                             % y-starting in pixel
+input_multislice.output_area_ix_e = 1;                             % x-final in pixel
+input_multislice.output_area_iy_e = 1;                             % y-final in pixel

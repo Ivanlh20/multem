@@ -76,11 +76,12 @@ namespace mt
 				else
 				{
 					fft_2d->forward(psi_i, psi_o); 
+
 					mt::propagate(*stream, input_multislice->grid_2d, input_multislice->get_propagator_factor(z), gxu, gyu, psi_o, psi_o);
 
 					if(space_out == eS_Real)
 					{
-						fft_2d->inverse(psi_o);
+						fft_2d->inverse(psi_o, psi_o);
 					}
 				}
 			}
@@ -99,8 +100,6 @@ namespace mt
 				mt::fft2_shift(*stream, input_multislice->grid_2d, psi);
 				this->operator()(space_out, gxu, gyu, z, psi);
 				mt::copy_to_host(output_multislice.stream, psi, output_multislice.psi_coh[0]);
-				output_multislice.shift();
-				output_multislice.clear_temporal_data();
 			}
 
 		private:

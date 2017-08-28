@@ -7,7 +7,7 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * MULTEM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
@@ -26,6 +26,7 @@
 #include "output_multislice.hpp"
 #include "atom_data.hpp"
 #include "multislice.cuh"
+#include "timing.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -39,8 +40,8 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	using T_r = mt::Value_type<TInput_Multislice>;
 
 	/************************ simulation type **************************/
-	input_multislice.simulation_type = mx_get_scalar_field<mt::eTEM_Sim_Type>(mx_input_multislice, "simulation_type"); 
-	
+	input_multislice.simulation_type = mx_get_scalar_field<mt::eTEM_Sim_Type>(mx_input_multislice, "simulation_type");
+
 	/*******************************************************************/
 	input_multislice.interaction_model = mx_get_scalar_field<mt::eElec_Spec_Int_Model>(mx_input_multislice, "interaction_model");
 	input_multislice.potential_type = mx_get_scalar_field<mt::ePotential_Type>(mx_input_multislice, "potential_type");
@@ -50,7 +51,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.reverse_multislice = mx_get_scalar_field<bool>(mx_input_multislice, "reverse_multislice");
 
 	/************** Electron-Phonon interaction model ******************/
-	input_multislice.pn_model = mx_get_scalar_field<mt::ePhonon_Model>(mx_input_multislice, "pn_model"); 
+	input_multislice.pn_model = mx_get_scalar_field<mt::ePhonon_Model>(mx_input_multislice, "pn_model");
 	input_multislice.pn_coh_contrib = mx_get_scalar_field<bool>(mx_input_multislice, "pn_coh_contrib");
 	input_multislice.pn_single_conf = mx_get_scalar_field<bool>(mx_input_multislice, "pn_single_conf");
 	input_multislice.pn_nconf = mx_get_scalar_field<int>(mx_input_multislice, "pn_nconf");
@@ -62,9 +63,9 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	auto ly = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_ly");
 	auto lz = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_lz");
 	auto dz = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_dz");
-	bool pbc_xy = true; 
+	bool pbc_xy = true;
 
-	if(input_multislice.is_specimen_required())
+	if (input_multislice.is_specimen_required())
 	{
 		auto atoms = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "spec_atoms");
 
@@ -79,14 +80,14 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 
 		auto mx_spec_amorp = mxGetField(mx_input_multislice, 0, "spec_amorp");
 		mt::Vector<mt::Amorp_Lay_Info<T_r>, mt::e_host> amorp_lay_info(mxGetN(mx_spec_amorp));
-		for(auto i = 0; i<amorp_lay_info.size(); i++)
+		for (auto i = 0; i < amorp_lay_info.size(); i++)
 		{
 			amorp_lay_info[i].z_0 = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_0");
 			amorp_lay_info[i].z_e = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_e");
 			amorp_lay_info[i].dz = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "dz");
 		}
 
-		if(full)
+		if (full)
 		{
 			input_multislice.atoms.set_crystal_parameters(ct_na, ct_nb, ct_nc, ct_a, ct_b, ct_c, ct_x0, ct_y0);
 			input_multislice.atoms.set_amorphous_parameters(amorp_lay_info);
@@ -96,17 +97,17 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 		/************************ Specimen rotation *************************/
 		input_multislice.spec_rot_theta = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_rot_theta")*mt::c_deg_2_rad;
 		input_multislice.spec_rot_u0 = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_u0");
-        input_multislice.spec_rot_u0.normalized();
+		input_multislice.spec_rot_u0.normalized();
 		input_multislice.spec_rot_center_type = mx_get_scalar_field<mt::eRot_Point_Type>(mx_input_multislice, "spec_rot_center_type");
 		input_multislice.spec_rot_center_p = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_center_p");
 
 		/************************ Specimen thickness ***********************/
 		input_multislice.thick_type = mx_get_scalar_field<mt::eThick_Type>(mx_input_multislice, "thick_type");
-		if(!input_multislice.is_whole_spec() && full)
+		if (!input_multislice.is_whole_spec() && full)
 		{
 			auto thick = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "thick");
 			mt::assign(thick, input_multislice.thick);
-		}	
+		}
 
 		/************************ Potential slicing ************************/
 		input_multislice.potential_slicing = mx_get_scalar_field<mt::ePotential_Slicing>(mx_input_multislice, "potential_slicing");
@@ -123,7 +124,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	auto iw_type = mx_get_scalar_field<mt::eIncident_Wave_Type>(mx_input_multislice, "iw_type");
 	input_multislice.set_incident_wave_type(iw_type);
 
-	if(input_multislice.is_user_define_wave() && full)
+	if (input_multislice.is_user_define_wave() && full)
 	{
 		auto iw_psi = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "iw_psi");
 		mt::assign(iw_psi, input_multislice.iw_psi);
@@ -132,10 +133,10 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	// read iw_x and iw_y
 	auto iw_x = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "iw_x");
 	auto iw_y = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "iw_y");
-	
-	int n_iw_xy = min(iw_x.size(), iw_y.size()); 
-	input_multislice.iw_x.assign(iw_x.begin(), iw_x.begin()+n_iw_xy);
-	input_multislice.iw_y.assign(iw_y.begin(), iw_y.begin()+n_iw_xy);
+
+	int n_iw_xy = min(iw_x.size(), iw_y.size());
+	input_multislice.iw_x.assign(iw_x.begin(), iw_x.begin() + n_iw_xy);
+	input_multislice.iw_y.assign(iw_y.begin(), iw_y.begin() + n_iw_xy);
 
 	/********************* Microscope parameter ***********************/
 	input_multislice.E_0 = mx_get_scalar_field<T_r>(mx_input_multislice, "E_0");
@@ -181,15 +182,18 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.cond_lens.inner_aper_ang = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_inner_aper_ang")*mt::c_mrad_2_rad;		// inner aperture (mrad-->rad)
 	input_multislice.cond_lens.outer_aper_ang = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_outer_aper_ang")*mt::c_mrad_2_rad;		// outer aperture (mrad-->rad)
 
-	input_multislice.cond_lens.sf = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_sf"); 												// Defocus spread (Angstrom)
-	input_multislice.cond_lens.nsf = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_nsf"); 											// Number of integration steps for the defocus Spread
-	
-	input_multislice.cond_lens.beta = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_beta")*mt::c_mrad_2_rad; 						// divergence semi-angle (mrad-->rad)
-	input_multislice.cond_lens.nbeta = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_nbeta");										// Number of integration steps for the divergence semi-angle
-	
+	/********************* defocus spread function ********************/
+	input_multislice.cond_lens.dsf_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_dsf_sigma"); 								// standard deviation (Angstrom)
+	input_multislice.cond_lens.dsf_npoints = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_dsf_npoints"); 							// # of integration points
+
+	/********************* source spread function *********************/
+	input_multislice.cond_lens.ssf_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_ssf_sigma"); 								// standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.cond_lens.ssf_npoints = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_ssf_npoints");							// # of integration points
+
+	/********************* zero defocus reference ********************/																																				/********************* zero defocus reference ********************/
 	input_multislice.cond_lens.zero_defocus_type = mx_get_scalar_field<mt::eZero_Defocus_Type>(mx_input_multislice, "cond_lens_zero_defocus_type");	// Zero defocus type
 	input_multislice.cond_lens.zero_defocus_plane = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_zero_defocus_plane");					// Zero defocus position
-	
+
 	input_multislice.cond_lens.set_input_data(input_multislice.E_0, input_multislice.grid_2d);
 
 	/*********************** Objective lens ***************************/
@@ -223,23 +227,26 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.obj_lens.phi_54 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_54")*mt::c_deg_2_rad; 						// Azimuthal angle of 5th order rosette aberration(degrees-->rad)
 	input_multislice.obj_lens.c_56 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_56"); 											// 6-fold astigmatism (Angstrom)
 	input_multislice.obj_lens.phi_56 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_phi_56")*mt::c_deg_2_rad; 						// Azimuthal angle of 6-fold astigmatism (degrees-->rad)
-	
+
 	input_multislice.obj_lens.inner_aper_ang = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_inner_aper_ang")*mt::c_mrad_2_rad; 		// inner aperture (mrad-->rad)
 	input_multislice.obj_lens.outer_aper_ang = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_outer_aper_ang")*mt::c_mrad_2_rad; 		// outer aperture (mrad-->rad)
-	
-	input_multislice.obj_lens.sf = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_sf"); 												// defocus spread (Angstrom)
-	input_multislice.obj_lens.nsf = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_nsf"); 												// Number of integration steps for the defocus Spread
-	
-	input_multislice.obj_lens.beta = input_multislice.cond_lens.beta; 																			// divergence semi-angle (mrad-->rad)
-	input_multislice.obj_lens.nbeta = input_multislice.cond_lens.nbeta;																			// Number of integration steps for the divergence semi-angle
-	
+
+	/********************* defocus spread function ********************/
+	input_multislice.obj_lens.dsf_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_dsf_sigma"); 									// standard deviation (Angstrom)
+	input_multislice.obj_lens.dsf_npoints = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_dsf_npoints");								// # of integration points
+
+	/********************* source spread function *********************/
+	input_multislice.obj_lens.ssf_sigma = input_multislice.cond_lens.ssf_sigma; 																// standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.obj_lens.ssf_npoints = input_multislice.cond_lens.ssf_npoints;																// # of integration points
+
+	/********************* zero defocus reference ********************/
 	input_multislice.obj_lens.zero_defocus_type = mx_get_scalar_field<mt::eZero_Defocus_Type>(mx_input_multislice, "obj_lens_zero_defocus_type");	// Zero defocus type
 	input_multislice.obj_lens.zero_defocus_plane = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_zero_defocus_plane");					// Zero defocus position
-	
+
 	input_multislice.obj_lens.set_input_data(input_multislice.E_0, input_multislice.grid_2d);
 
-	/************************* ISTEM/STEM *****************************/
-	if(input_multislice.is_scanning())
+	/************************** ISTEM/STEM ***************************/
+	if (input_multislice.is_scanning())
 	{
 		input_multislice.scanning.type = mx_get_scalar_field<mt::eScanning_Type>(mx_input_multislice, "scanning_type");
 		input_multislice.scanning.pbc = mx_get_scalar_field<bool>(mx_input_multislice, "scanning_periodic");
@@ -251,7 +258,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 		input_multislice.scanning.set_grid();
 	}
 
-	if(input_multislice.is_STEM())
+	if (input_multislice.is_STEM())
 	{
 		T_r lambda = mt::get_lambda(input_multislice.E_0);
 		mxArray *mx_detector = mxGetField(mx_input_multislice, 0, "detector");
@@ -259,62 +266,62 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 
 		switch (input_multislice.detector.type)
 		{
-			case mt::eDT_Circular:
+		case mt::eDT_Circular:
+		{
+			mx_detector = mxGetField(mx_detector, 0, "cir");
+			int ndetector = mxGetN(mx_detector);
+			if (ndetector > 0)
 			{
-				mx_detector = mxGetField(mx_detector, 0, "cir");
-				int ndetector = mxGetN(mx_detector);
-				if(ndetector>0)
+				input_multislice.detector.resize(ndetector);
+				for (auto i = 0; i < input_multislice.detector.size(); i++)
 				{
-					input_multislice.detector.resize(ndetector);
-					for(auto i = 0; i<input_multislice.detector.size(); i++)
-					{
-						auto inner_ang = mx_get_scalar_field<T_r>(mx_detector, i, "inner_ang")*mt::c_mrad_2_rad;
-						input_multislice.detector.g_inner[i] = sin(inner_ang)/lambda;
-						auto outer_ang = mx_get_scalar_field<T_r>(mx_detector, i, "outer_ang")*mt::c_mrad_2_rad;
-						input_multislice.detector.g_outer[i] = sin(outer_ang)/lambda;
-					}
+					auto inner_ang = mx_get_scalar_field<T_r>(mx_detector, i, "inner_ang")*mt::c_mrad_2_rad;
+					input_multislice.detector.g_inner[i] = sin(inner_ang) / lambda;
+					auto outer_ang = mx_get_scalar_field<T_r>(mx_detector, i, "outer_ang")*mt::c_mrad_2_rad;
+					input_multislice.detector.g_outer[i] = sin(outer_ang) / lambda;
 				}
 			}
-			break;
-			case mt::eDT_Radial:
+		}
+		break;
+		case mt::eDT_Radial:
+		{
+			mx_detector = mxGetField(mx_detector, 0, "radial");
+			int ndetector = mxGetN(mx_detector);
+			if (ndetector > 0)
 			{
-				mx_detector = mxGetField(mx_detector, 0, "radial");
-				int ndetector = mxGetN(mx_detector);
-				if(ndetector>0)
+				input_multislice.detector.resize(ndetector);
+				for (auto i = 0; i < input_multislice.detector.size(); i++)
 				{
-					input_multislice.detector.resize(ndetector);
-					for(auto i = 0; i<input_multislice.detector.size(); i++)
-					{
-						// auto x = mx_get_matrix_field<rmatrix_r>(mx_detector, i, "x");
-						// mt::assign(x, input_multislice.detector.x[i]);
-						// mt::scale(input_multislice.detector.x[i], 1.0/lambda);
+					// auto x = mx_get_matrix_field<rmatrix_r>(mx_detector, i, "x");
+					// mt::assign(x, input_multislice.detector.x[i]);
+					// mt::scale(input_multislice.detector.x[i], 1.0/lambda);
 
-						auto fx = mx_get_matrix_field<rmatrix_r>(mx_detector, i, "fx");
-						mt::assign(fx, input_multislice.detector.fx[i]);
-					}
+					auto fx = mx_get_matrix_field<rmatrix_r>(mx_detector, i, "fx");
+					mt::assign(fx, input_multislice.detector.fx[i]);
 				}
 			}
-			break;
-			case mt::eDT_Matrix:
+		}
+		break;
+		case mt::eDT_Matrix:
+		{
+			mx_detector = mxGetField(mx_detector, 0, "matrix");
+			int ndetector = mxGetN(mx_detector);
+			if (ndetector > 0)
 			{
-				mx_detector = mxGetField(mx_detector, 0, "matrix");
-				int ndetector = mxGetN(mx_detector);
-				if(ndetector>0)
+				input_multislice.detector.resize(ndetector);
+				for (auto i = 0; i < input_multislice.detector.size(); i++)
 				{
-					input_multislice.detector.resize(ndetector);
-					for(auto i = 0; i<input_multislice.detector.size(); i++)
-					{
-						// auto R = mx_get_matrix_field<rmatrix_r>(mx_detector, i, "x");
-						// mt::assign(R, input_multislice.detector.R[i]);
-						// mt::scale(input_multislice.detector.R[i], 1.0/lambda);
-						// mt::fft2_shift(input_multislice.grid_2d, input_multislice.detector.R[i]);
+					// auto R = mx_get_matrix_field<rmatrix_r>(mx_detector, i, "x");
+					// mt::assign(R, input_multislice.detector.R[i]);
+					// mt::scale(input_multislice.detector.R[i], 1.0/lambda);
+					// mt::fft2_shift(input_multislice.grid_2d, input_multislice.detector.R[i]);
 
-						auto fR = mx_get_matrix_field<rmatrix_r>(mx_detector, i, "fR");
-						mt::assign(fR, input_multislice.detector.fR[i]);
-					}
+					auto fR = mx_get_matrix_field<rmatrix_r>(mx_detector, i, "fR");
+					mt::assign(fR, input_multislice.detector.fR[i]);
 				}
 			}
-			break;
+		}
+		break;
 		}
 	}
 	else if (input_multislice.is_PED())
@@ -350,8 +357,15 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 		input_multislice.eels_fr.set_input_data(space, input_multislice.E_0, E_loss, m_selection, collection_angle, channelling_type, Z);
 	}
 
+	/********************* select output region *************************/
+	input_multislice.output_area.ix_0 = mx_get_scalar_field<int>(mx_input_multislice, "output_area_ix_0")-1;
+	input_multislice.output_area.iy_0 = mx_get_scalar_field<int>(mx_input_multislice, "output_area_iy_0")-1;
+	input_multislice.output_area.ix_e = mx_get_scalar_field<int>(mx_input_multislice, "output_area_ix_e")-1;
+	input_multislice.output_area.iy_e = mx_get_scalar_field<int>(mx_input_multislice, "output_area_iy_e")-1;
+
+	/********************* validate parameters *************************/
 	input_multislice.validate_parameters();
- }
+}
 
 template<class TOutput_Multislice>
 void set_struct_multislice(TOutput_Multislice &output_multislice, mxArray *&mx_output_multislice)
@@ -368,64 +382,64 @@ void set_struct_multislice(TOutput_Multislice &output_multislice, mxArray *&mx_o
 	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y);
 	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thick", 1, output_multislice.thick.size(), output_multislice.thick);
 
-	if(output_multislice.is_STEM() || output_multislice.is_EELS())
+	if (output_multislice.is_STEM() || output_multislice.is_EELS())
 	{
 		mxArray *mx_field_data;
-		const char *field_names_data_full[] = {"image_tot", "image_coh"};
-		const char *field_names_data_partial[] = {"image_tot"};
-		const char **field_names_data = (output_multislice.pn_coh_contrib)?field_names_data_full:field_names_data_partial;
-		int number_of_fields_data = (output_multislice.pn_coh_contrib)?2:1;
-		mwSize dims_data[2] = {1, output_multislice.thick.size()};
+		const char *field_names_data_full[] = { "image_tot", "image_coh" };
+		const char *field_names_data_partial[] = { "image_tot" };
+		const char **field_names_data = (output_multislice.pn_coh_contrib) ? field_names_data_full : field_names_data_partial;
+		int number_of_fields_data = (output_multislice.pn_coh_contrib) ? 2 : 1;
+		mwSize dims_data[2] = { 1, output_multislice.thick.size() };
 
 		mx_field_data = mxCreateStructArray(2, dims_data, number_of_fields_data, field_names_data);
 		mxSetField(mx_output_multislice, 0, "data", mx_field_data);
 
 		mxArray *mx_field_detector_tot;
 		mxArray *mx_field_detector_coh;
-		const char *field_names_detector[] = {"image"};
+		const char *field_names_detector[] = { "image" };
 		int number_of_fields_detector = 1;
 		// mwSize dims_detector[2] = {1, output_multislice.ndetector};
 		mwSize dims_detector[2];
 		dims_detector[0] = 1;
 		dims_detector[1] = output_multislice.ndetector;
 
-		int nx = (output_multislice.scanning.is_line())?1:output_multislice.nx;
+		int nx = (output_multislice.scanning.is_line()) ? 1 : output_multislice.nx;
 		int ny = output_multislice.ny;
-		for(auto ithk = 0; ithk<output_multislice.thick.size(); ithk++)
+		for (auto ithk = 0; ithk < output_multislice.thick.size(); ithk++)
 		{
 			mx_field_detector_tot = mxCreateStructArray(2, dims_detector, number_of_fields_detector, field_names_detector);
 			mxSetField(mx_field_data, ithk, "image_tot", mx_field_detector_tot);
-			if(output_multislice.pn_coh_contrib)
+			if (output_multislice.pn_coh_contrib)
 			{
 				mx_field_detector_coh = mxCreateStructArray(2, dims_detector, number_of_fields_detector, field_names_detector);
 				mxSetField(mx_field_data, ithk, "image_coh", mx_field_detector_coh);
 			}
 
-			for(auto iDet = 0; iDet<output_multislice.ndetector; iDet++)
+			for (auto iDet = 0; iDet < output_multislice.ndetector; iDet++)
 			{
 				mx_create_set_matrix_field<rmatrix_r>(mx_field_detector_tot, iDet, "image", ny, nx, output_multislice.image_tot[ithk].image[iDet]);
-				if(output_multislice.pn_coh_contrib)
+				if (output_multislice.pn_coh_contrib)
 				{
 					mx_create_set_matrix_field<rmatrix_r>(mx_field_detector_coh, iDet, "image", ny, nx, output_multislice.image_coh[ithk].image[iDet]);
 				}
 			}
 		}
 	}
-	else if(output_multislice.is_EWFS_EWRS())
+	else if (output_multislice.is_EWFS_EWRS())
 	{
 		mxArray *mx_field_data;
-		const char *field_names_data_full[] = {"m2psi_tot", "psi_coh"};
-		const char *field_names_data_partial[] = {"psi_coh"};
-		const char **field_names_data = (!output_multislice.is_EWFS_EWRS_SC())?field_names_data_full:field_names_data_partial;
-		int number_of_fields_data = (!output_multislice.is_EWFS_EWRS_SC())?2:1;
-		mwSize dims_data[2] = {1, output_multislice.thick.size()};
+		const char *field_names_data_full[] = { "m2psi_tot", "psi_coh" };
+		const char *field_names_data_partial[] = { "psi_coh" };
+		const char **field_names_data = (!output_multislice.is_EWFS_EWRS_SC()) ? field_names_data_full : field_names_data_partial;
+		int number_of_fields_data = (!output_multislice.is_EWFS_EWRS_SC()) ? 2 : 1;
+		mwSize dims_data[2] = { 1, output_multislice.thick.size() };
 
 		mx_field_data = mxCreateStructArray(2, dims_data, number_of_fields_data, field_names_data);
 		mxSetField(mx_output_multislice, 0, "data", mx_field_data);
 
-		for(auto ithk = 0; ithk<output_multislice.thick.size(); ithk++)
+		for (auto ithk = 0; ithk < output_multislice.thick.size(); ithk++)
 		{
-			if(!output_multislice.is_EWFS_EWRS_SC())
+			if (!output_multislice.is_EWFS_EWRS_SC())
 			{
 				mx_create_set_matrix_field<rmatrix_r>(mx_field_data, ithk, "m2psi_tot", output_multislice.ny, output_multislice.nx, output_multislice.m2psi_tot[ithk]);
 			}
@@ -435,19 +449,19 @@ void set_struct_multislice(TOutput_Multislice &output_multislice, mxArray *&mx_o
 	else
 	{
 		mxArray *mx_field_data;
-		const char *field_names_data_full[] = {"m2psi_tot", "m2psi_coh"};
-		const char *field_names_data_partial[] = {"m2psi_tot"};
-		const char **field_names_data = (output_multislice.pn_coh_contrib)?field_names_data_full:field_names_data_partial;
-		int number_of_fields_data = (output_multislice.pn_coh_contrib)?2:1;
-		mwSize dims_data[2] = {1, output_multislice.thick.size()};
+		const char *field_names_data_full[] = { "m2psi_tot", "m2psi_coh" };
+		const char *field_names_data_partial[] = { "m2psi_tot" };
+		const char **field_names_data = (output_multislice.pn_coh_contrib) ? field_names_data_full : field_names_data_partial;
+		int number_of_fields_data = (output_multislice.pn_coh_contrib) ? 2 : 1;
+		mwSize dims_data[2] = { 1, output_multislice.thick.size() };
 
 		mx_field_data = mxCreateStructArray(2, dims_data, number_of_fields_data, field_names_data);
 		mxSetField(mx_output_multislice, 0, "data", mx_field_data);
 
-		for(auto ithk = 0; ithk<output_multislice.thick.size(); ithk++)
+		for (auto ithk = 0; ithk < output_multislice.thick.size(); ithk++)
 		{
 			mx_create_set_matrix_field<rmatrix_r>(mx_field_data, ithk, "m2psi_tot", output_multislice.ny, output_multislice.nx, output_multislice.m2psi_tot[ithk]);
-			if(output_multislice.pn_coh_contrib)
+			if (output_multislice.pn_coh_contrib)
 			{
 				mx_create_set_matrix_field<rmatrix_r>(mx_field_data, ithk, "m2psi_coh", output_multislice.ny, output_multislice.nx, output_multislice.m2psi_coh[ithk]);
 			}
@@ -456,26 +470,40 @@ void set_struct_multislice(TOutput_Multislice &output_multislice, mxArray *&mx_o
 }
 
 template <class T, mt::eDevice dev>
-void run_multislice(mt::System_Configuration &system_conf, const mxArray *mx_input_multislice, mxArray *&mx_output_multislice)
+void run_multislice(mt::System_Configuration &system_conf, const mxArray *mx_input_multislice, 
+mxArray *&mx_output_multislice)
 {
 	mt::Input_Multislice<T> input_multislice;
 	read_input_multislice(mx_input_multislice, input_multislice);
-
-    mt::Output_Multislice<T> output_multislice;
-    output_multislice.set_input_data(&input_multislice);
+	input_multislice.system_conf = system_conf;
 
 	mt::Stream<dev> stream(system_conf.nstream);
+
 	mt::FFT<T, dev> fft_2d;
 	fft_2d.create_plan_2d(input_multislice.grid_2d.ny, input_multislice.grid_2d.nx, system_conf.nstream);
-	
+
 	mt::Multislice<T, dev> multislice;
 	multislice.set_input_data(&input_multislice, &stream, &fft_2d);
-	multislice(output_multislice);
 
+	mt::Output_Multislice<T> output_multislice;
+	output_multislice.set_input_data(&input_multislice);
+
+	multislice(output_multislice);
 	stream.synchronize();
+
+	output_multislice.gather();
+	output_multislice.clean_temporal();
 	fft_2d.cleanup();
 
 	set_struct_multislice(output_multislice, mx_output_multislice);
+
+	auto err = cudaGetLastError();
+	if (err != cudaSuccess) {
+		mexPrintf("CUDA error: %s\n", cudaGetErrorString(err));
+	}
+	//auto t3 = time.elapsed_ms();
+	//mexPrintf("creation, execution, phase grating, deleting time = %7.5f, %7.5f, %7.5f, %7.5f\n", t1, t2, tx, t3);
+	//mexPrintf("send device = %d, get device = %d\n", system_conf.gpu_device, system_conf.get_device());
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
@@ -483,26 +511,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	auto system_conf = mt::read_system_conf(prhs[0]);
 	int idx_0 = (system_conf.active)?1:0;
 
-	if(system_conf.is_float_host())
+	if (system_conf.is_float_host())
 	{
-        mexPrintf("cpu float");
+		//mexPrintf("cpu - float precision calculation\n");
 		run_multislice<float, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	else if(system_conf.is_double_host())
+	else if (system_conf.is_double_host())
 	{
-        mexPrintf("cpu double");
+		//mexPrintf("cpu - double precision calculation\n");
 		run_multislice<double, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	if(system_conf.is_float_device())
+	if (system_conf.is_float_device())
 	{
-        mexPrintf("gpu float");
+		//mexPrintf("gpu - float precision calculation\n");
 		run_multislice<float, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	else if(system_conf.is_double_device())
+	else if (system_conf.is_double_device())
 	{
-        mexPrintf("gpu double");
+		//mexPrintf("gpu - double precision calculation\n");
 		run_multislice<double, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
-
 	//cudaDeviceReset();
 }

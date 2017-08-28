@@ -35,6 +35,14 @@ namespace mt
 			{
 				using value_type = Value_type<TQ1>;
 
+				if (nQuad <= 1)
+				{
+					Q.resize(1);
+					Q.x[0] = 0;
+					Q.w[0] = 1;
+					return;
+				}
+
 				value_type xmin, xmax, rmax = 225;
 				cQ.resize(nQuad);
 

@@ -400,6 +400,182 @@ namespace mt
 			std::normal_distribution<T> randn_z;
 	};
 
+	/***************************************************************/
+
+	// add Gaussian noise
+	template <class TVector>
+	void add_gauss_nois(Stream<e_host> &stream, TVector &M_i, 
+	Value_type<TVector> sigma, TVector &M_o)
+	{	
+		using T = Value_type<TVector>;
+
+		auto thr_gauss_nois = [&](const Range_2d &range)
+		{
+			std::random_device rd;
+			std::mt19937_64 gen(rd());
+			std::normal_distribution<T> randn;
+
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				 M_o[ixy] = M_i[ixy] + sigma*randn(gen);
+			}
+		};
+
+		stream.set_n_act_stream(M_i.size());
+		stream.set_grid(M_i.size(), 1);
+		stream.exec(thr_gauss_nois);
+	};
+
+	// add Gaussian noise
+	template <class TVector>
+	TVector add_gauss_nois(Stream<e_host> &stream, TVector &M_i, 
+	Value_type<TVector> sigma)
+	{	
+		using T = Value_type<TVector>;
+
+		TVector M(M_i.size());
+		auto thr_gauss_nois = [&](const Range_2d &range)
+		{
+			std::random_device rd;
+			std::mt19937_64 gen(rd());
+			std::normal_distribution<T> randn;
+
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				 M[ixy] = M_i[ixy] + sigma*randn(gen);
+			}
+		};
+
+		stream.set_n_act_stream(M_i.size());
+		stream.set_grid(M_i.size(), 1);
+		stream.exec(thr_gauss_nois);
+
+		return M;
+	};
+	/***************************************************************/
+	// add Poisson noise
+	template <class TVector>
+	TVector add_poiss_nois(Stream<e_host> &stream, TVector &M_i, 
+	Value_type<TVector> scf)
+	{	
+		using T = Value_type<TVector>;
+
+		TVector M(M_i.size());
+		auto thr_poiss_nois = [&](const Range_2d &range)
+		{
+			std::random_device rd;
+			std::mt19937_64 gen(rd());
+			std::poisson_distribution<int> randp;
+
+			for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+			{
+				auto x0 = scf*M_i[ixy];
+				randp.param(std::poisson_distribution<int>::param_type(x0));
+				M[ixy] = randp(gen);
+			}
+		};
+
+		stream.set_n_act_stream(M_i.size());
+		stream.set_grid(M_i.size(), 1);
+		stream.exec(thr_poiss_nois);
+
+		return M;
+	};
+
+	// add Poisson noise
+	template <class TVector>
+	TVector add_poiss_nois_by_SNR(Stream<e_host> &stream, TVector &Im_i, 
+		Value_type<TVector> SNR_i, Value_type<TVector> &scl_o)
+	{	
+		using T = Value_type<TVector>;
+
+		auto get_SNR = [](Stream<e_host> &stream, TVector &Im, T Im_std, T scf)->T
+		{
+			T x_mean = 0;
+			T x_var = 0;
+			auto thr_SNR = [&](const Range_2d &range)
+			{
+				std::mt19937_64 gen;
+				std::poisson_distribution<int> rand;
+
+				T x_mean_partial = 0;
+				T x_var_partial = 0;
+				for(auto ixy = range.ixy_0; ixy < range.ixy_e; ixy++)
+				{
+					auto x0 = scf*Im[ixy];
+					rand.param(std::poisson_distribution<int>::param_type(x0));
+					auto xn = rand(gen)-x0;
+					x_mean_partial += xn;
+					x_var_partial += xn*xn;
+				}
+
+				stream.stream_mutex.lock();
+				x_mean += x_mean_partial;
+				x_var += x_var_partial;
+				stream.stream_mutex.unlock();
+			};
+
+			stream.set_n_act_stream(Im.size());
+			stream.set_grid(1, Im.size());
+			stream.exec(thr_SNR);
+
+			x_mean /= Im.size();
+			x_var = x_var/Im.size()-x_mean*x_mean;
+
+			return scf*Im_std/sqrt(x_var);
+		};
+
+		auto Im_i_std = sqrt(variance(stream, Im_i));
+
+		T SNR_k = get_SNR(stream, Im_i, Im_i_std, 1);
+	
+		T k_0 = 1;
+		T k_e = 1;
+
+		if(SNR_k<SNR_i)
+		{
+			do
+			{
+				k_e *= 2;
+				SNR_k = get_SNR(stream, Im_i, Im_i_std, k_e);
+			}
+			while (SNR_k < SNR_i);
+			k_0 = k_e/2;	
+		}
+		else
+		{
+			do
+			{
+				k_0 /= 2;
+				SNR_k = get_SNR(stream, Im_i, Im_i_std, k_0);
+			}
+			while (SNR_k >= SNR_i);
+			k_e = 2*k_0;
+		}
+
+
+		// bisection method
+		int ic = 0;
+		do
+		{
+			scl_o = 0.5*(k_0 + k_e);
+			auto SNR_k = get_SNR(stream, Im_i, Im_i_std, scl_o);
+
+			if(SNR_k < SNR_i)
+			{
+				k_0 = scl_o;
+			}
+			else
+			{
+				k_e = scl_o;
+			}
+			ic++;
+		} while ((fabs(SNR_i-SNR_k)>0.1) && (ic<10));
+
+		// add Poisson noise
+		return add_poiss_nois(stream, Im_i, scl_o);
+	}
+
 } // namespace mt
 
 #endif

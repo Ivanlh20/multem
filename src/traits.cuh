@@ -241,7 +241,7 @@ namespace mt
 	using enable_if_double = typename std::enable_if<is_double<T>::value, U>::type;
 
 	template <class T, class U>
-    using enable_if_real = typename std::enable_if<is_real<T>::value, U>::type;
+ using enable_if_real = typename std::enable_if<is_real<T>::value, U>::type;
 
 	template <class T, class U>
 	using enable_if_cfloat = typename std::enable_if<is_cfloat<T>::value, U>::type;
@@ -311,20 +311,20 @@ namespace mt
 
 
 	/*********************************type***********************************/
-    template<class TVector>
-    enable_if_float<Value_type<TVector>, int>
+ template<class TVector>
+ enable_if_float<Value_type<TVector>, int>
 	matrix_type(TVector &vector){ return 1; }
 
-    template<class TVector>
-    enable_if_double<Value_type<TVector>, int>
+ template<class TVector>
+ enable_if_double<Value_type<TVector>, int>
 	matrix_type(TVector &vector){ return 2; }
 
-    template<class TVector>
-    enable_if_cfloat<Value_type<TVector>, int>
+ template<class TVector>
+ enable_if_cfloat<Value_type<TVector>, int>
 	matrix_type(TVector &vector){ return 3; }
 
-    template<class TVector>
-    enable_if_cdouble<Value_type<TVector>, int>
+ template<class TVector>
+ enable_if_cdouble<Value_type<TVector>, int>
 	matrix_type(TVector &vector){ return 4; }
 
 } // namespace mt

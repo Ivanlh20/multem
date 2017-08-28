@@ -138,7 +138,6 @@ namespace mt
 		device_properties.resize(device_count);
 		for (auto idev = 0; idev < device_count; idev++)
 		{
-			cudaSetDevice(idev);
 			cudaDeviceProp cuda_device_prop;
 			cudaGetDeviceProperties(&cuda_device_prop, idev);
 
@@ -148,8 +147,11 @@ namespace mt
 			memory_info<e_device>(device_properties[idev].total_memory_size, device_properties[idev].free_memory_size);
 		}
 
-		auto compare_fn = [](const Device_Properties &a, const Device_Properties &b)->bool{ return a.compute_capability > b.compute_capability; };
-		std::sort(device_properties.begin(), device_properties.end(), compare_fn);
+		//auto compare_fn = [](const Device_Properties &a, const Device_Properties &b)->bool
+		//{ 
+		//	return a.compute_capability > b.compute_capability; 
+		//};
+		//std::sort(device_properties.begin(), device_properties.end(), compare_fn);
 	}
 
 	inline

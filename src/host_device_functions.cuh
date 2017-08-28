@@ -89,6 +89,49 @@ namespace mt
 		return sin(theta)/get_lambda(E_0);
 	}
 
+	// Marc De Graef - Introduction to Conventional Transmission Electron Microscopy page: 608
+	// hwhm: Half width at half maximum
+	// sigma: Standard deviation
+	template <class T>
+	DEVICE_CALLABLE FORCE_INLINE 
+	T hwhm_2_sigma(const T &v)
+	{
+		T c_hwhm_2_sigma = 0.84932180028801907; // hwhm to sigma 1/(sqrt(2*log(2)))
+		return v*c_hwhm_2_sigma;
+	}
+
+	// Marc De Graef - Introduction to Conventional Transmission Electron Microscopy page: 608
+	// fwhm: Full width at half maximum
+	// sigma: Standard deviation
+	template <class T>
+	DEVICE_CALLABLE FORCE_INLINE 
+	T fwhm_2_sigma(const T &v)
+	{
+		T c_fwhm_2_sigma = 0.42466090014400953; // fwhm to sigma 1/(2*sqrt(2*log(2)))
+		return v*c_fwhm_2_sigma;
+	}
+
+	// Marc De Graef - Introduction to Conventional Transmission Electron Microscopy page: 608
+	// iehwgd: e^-1 half-width value of the Gaussian distribution
+	// sigma: Standard deviation
+	template <class T>
+	DEVICE_CALLABLE FORCE_INLINE 
+	T iehwgd_2_sigma(const T &v)
+	{
+		T c_iehwgd_2_sigma = 0.70710678118654746; // iehwgd to sigma 1/sqrt(2)
+		return v*c_iehwgd_2_sigma;
+	}
+
+	// Marc De Graef - Introduction to Conventional Transmission Electron Microscopy page: 608
+	// sigma: Standard deviation
+	template <class T>
+	DEVICE_CALLABLE FORCE_INLINE 
+	T rad_2_sigma(const T &E_0, const T &theta)
+	{
+		T q0 = sin(theta)/get_lambda(E_0);
+		return iehwgd_2_sigma(q0);
+	}
+
 	// E. J. Kirkland - Advanced computing in electron microscopy page: 10-13
 	// Input: E_0(keV), Output: gamma*lambda/c_Potf
 	template <class T>
@@ -143,9 +186,9 @@ namespace mt
 	{
 		Vector<T, e_host> Rm(9);
 		T alpha = 1-cos(theta);
-        alpha = (isZero(alpha)?0:alpha);
+		alpha = (isZero(alpha)?0:alpha);
 		T beta = sin(theta);
-        beta = (isZero(beta)?0:beta);
+		beta = (isZero(beta)?0:beta);
 		Rm[0] = 1.0 + alpha*(u0.x*u0.x-1);
 		Rm[1] = u0.y*u0.x*alpha + u0.z*beta;
 		Rm[2] = u0.z*u0.x*alpha - u0.y*beta;
@@ -1539,7 +1582,6 @@ namespace mt
 			thrust::swap(M_io[ixy], M_io[ixy_shift]);
 		}
 
-
 		template <class TGrid, class TVector>
 		DEVICE_CALLABLE FORCE_INLINE 
 		void fft2_shift(const int &ix, const int &iy, const TGrid &grid_2d, TVector &M_io)
@@ -1552,7 +1594,190 @@ namespace mt
 			ixy_shift = grid_2d.ind_col(grid_2d.nxh+ix, iy);
 			thrust::swap(M_io[ixy], M_io[ixy_shift]);
 		}
+ 
+ 		/***************************************************************************/
+  		template <class TGrid, class TVector>
+		DEVICE_CALLABLE FORCE_INLINE 
+		void assign_shift_2d(const int &ix, const int &iy, const TGrid &grid_2d, 
+		TVector &M_i, TVector &M_o)
+		{
+			int ixy = grid_2d.ind_col(ix, iy); 
+			int ixy_shift = grid_2d.ind_col(grid_2d.nxh+ix, grid_2d.nyh+iy);
+			M_o[ixy] = M_i[ixy_shift];
+			M_o[ixy_shift] = M_i[ixy];
 
+			ixy = grid_2d.ind_col(ix, grid_2d.nyh+iy); 
+			ixy_shift = grid_2d.ind_col(grid_2d.nxh+ix, iy);
+			M_o[ixy] = M_i[ixy_shift];
+			M_o[ixy_shift] = M_i[ixy];
+		}
+ 
+ 		template <class TGrid, class TVector>
+		DEVICE_CALLABLE FORCE_INLINE 
+		void add_scale_shift_2d(const int &ix, const int &iy, const TGrid &grid_2d, 
+		const Value_type<TVector> &w, TVector &M_i, TVector &M_o)
+		{
+			int ixy = grid_2d.ind_col(ix, iy); 
+			int ixy_shift = grid_2d.ind_col(grid_2d.nxh+ix, grid_2d.nyh+iy);
+
+			M_o[ixy] += w*M_i[ixy_shift];
+ 			M_o[ixy_shift] += w*M_i[ixy];
+
+			/***************************************************************************/
+			ixy = grid_2d.ind_col(ix, grid_2d.nyh+iy); 
+			ixy_shift = grid_2d.ind_col(grid_2d.nxh+ix, iy);
+
+			M_o[ixy] += w*M_i[ixy_shift];
+ 			M_o[ixy_shift] += w*M_i[ixy];
+		}
+
+		template <class TGrid, class TVector_1, class TVector_2>
+		DEVICE_CALLABLE FORCE_INLINE 
+		void add_scale_square_shift_2d(const int &ix, const int &iy, const TGrid &grid_2d, 
+		const Value_type<TVector_2> &w, TVector_1 &M_i, TVector_2 &M_o)
+		{
+			int ixy = grid_2d.ind_col(ix, iy); 
+			int ixy_shift = grid_2d.ind_col(grid_2d.nxh+ix, grid_2d.nyh+iy);
+
+			M_o[ixy] += w*::norm(M_i[ixy_shift]);
+ 			M_o[ixy_shift] += w*::norm(M_i[ixy]);
+
+			/***************************************************************************/
+			ixy = grid_2d.ind_col(ix, grid_2d.nyh+iy); 
+			ixy_shift = grid_2d.ind_col(grid_2d.nxh+ix, iy);
+
+			M_o[ixy] += w*::norm(M_i[ixy_shift]);
+ 			M_o[ixy_shift] += w*::norm(M_i[ixy]);
+		}
+
+		/***************************************************************************/
+ 		template <class TGrid, class TVector>
+		DEVICE_CALLABLE FORCE_INLINE 
+		void assign_crop(const int &ix, const int &iy, const TGrid &grid_2d, TVector &M_i, Range_2d &range, TVector &M_o)
+		{
+			if(range.chk_bound(ix, iy))
+			{
+				 M_o[range.ind_col_o(ix, iy)] = M_i[grid_2d.ind_col(ix, iy)];
+			}
+		}
+
+ 		template <class TGrid, class TVector>
+		DEVICE_CALLABLE FORCE_INLINE 
+		void assign_crop_shift_2d(const int &ix, const int &iy, const TGrid &grid_2d, TVector &M_i, Range_2d &range, TVector &M_o)
+		{
+ 			int ix_i = ix;
+			int iy_i = iy;
+
+			int ix_s = grid_2d.nxh+ix;
+			int iy_s = grid_2d.nyh+iy;
+
+			if(range.chk_bound(ix_i, iy_i))
+			{
+				 M_o[range.ind_col_o(ix_i, iy_i)] = M_i[grid_2d.ind_col(ix_s, iy_s)];
+			}
+
+ 			if(range.chk_bound(ix_s, iy_s))
+			{
+				 M_o[range.ind_col_o(ix_s, iy_s)] = M_i[grid_2d.ind_col(ix_i, iy_i)];
+			}
+
+			/***************************************************************************/
+ 			ix_i = ix;
+			iy_i = grid_2d.nyh+iy;
+
+			ix_s = grid_2d.nxh+ix;
+			iy_s = iy;
+
+			if(range.chk_bound(ix_i, iy_i))
+			{
+				 M_o[range.ind_col_o(ix_i, iy_i)] = M_i[grid_2d.ind_col(ix_s, iy_s)];
+			}
+
+ 			if(range.chk_bound(ix_s, iy_s))
+			{
+				 M_o[range.ind_col_o(ix_s, iy_s)] = M_i[grid_2d.ind_col(ix_i, iy_i)];
+			}
+		}
+
+ 		template <class TGrid, class TVector>
+		DEVICE_CALLABLE FORCE_INLINE 
+		void add_scale_crop_shift_2d(const int &ix, const int &iy, const TGrid &grid_2d, 
+		const Value_type<TVector> &w, TVector &M_i, Range_2d &range, TVector &M_o)
+		{
+ 			int ix_i = ix;
+			int iy_i = iy;
+
+			int ix_s = grid_2d.nxh+ix;
+			int iy_s = grid_2d.nyh+iy;
+
+			if(range.chk_bound(ix_i, iy_i))
+			{
+				 M_o[range.ind_col_o(ix_i, iy_i)] += w*M_i[grid_2d.ind_col(ix_s, iy_s)];
+			}
+
+ 			if(range.chk_bound(ix_s, iy_s))
+			{
+				 M_o[range.ind_col_o(ix_s, iy_s)] += w*M_i[grid_2d.ind_col(ix_i, iy_i)];
+			}
+
+			/***************************************************************************/
+ 			ix_i = ix;
+			iy_i = grid_2d.nyh+iy;
+
+			ix_s = grid_2d.nxh+ix;
+			iy_s = iy;
+
+			if(range.chk_bound(ix_i, iy_i))
+			{
+				 M_o[range.ind_col_o(ix_i, iy_i)] += w*M_i[grid_2d.ind_col(ix_s, iy_s)];
+			}
+
+ 			if(range.chk_bound(ix_s, iy_s))
+			{
+				 M_o[range.ind_col_o(ix_s, iy_s)] += w*M_i[grid_2d.ind_col(ix_i, iy_i)];
+			}
+		}
+
+		template <class TGrid, class TVector_1, class TVector_2>
+		DEVICE_CALLABLE FORCE_INLINE 
+		void add_scale_square_crop_shift_2d(const int &ix, const int &iy, const TGrid &grid_2d, 
+		const Value_type<TVector_2> &w, TVector_1 &M_i, Range_2d &range, TVector_2 &M_o)
+		{
+ 			int ix_i = ix;
+			int iy_i = iy;
+
+			int ix_s = grid_2d.nxh+ix;
+			int iy_s = grid_2d.nyh+iy;
+
+			if(range.chk_bound(ix_i, iy_i))
+			{
+				 M_o[range.ind_col_o(ix_i, iy_i)] += w*::norm(M_i[grid_2d.ind_col(ix_s, iy_s)]);
+			}
+
+ 			if(range.chk_bound(ix_s, iy_s))
+			{
+				 M_o[range.ind_col_o(ix_s, iy_s)] += w*::norm(M_i[grid_2d.ind_col(ix_i, iy_i)]);
+			}
+
+			/***************************************************************************/
+ 			ix_i = ix;
+			iy_i = grid_2d.nyh+iy;
+
+			ix_s = grid_2d.nxh+ix;
+			iy_s = iy;
+
+			if(range.chk_bound(ix_i, iy_i))
+			{
+				 M_o[range.ind_col_o(ix_i, iy_i)] += w*::norm(M_i[grid_2d.ind_col(ix_s, iy_s)]);
+			}
+
+ 			if(range.chk_bound(ix_s, iy_s))
+			{
+				 M_o[range.ind_col_o(ix_s, iy_s)] += w*::norm(M_i[grid_2d.ind_col(ix_i, iy_i)]);
+			}
+		}
+
+		/***************************************************************************/
 		template <class TGrid, class TVector>
 		DEVICE_CALLABLE FORCE_INLINE 
 		void sum_over_Det(const int &ix, const int &iy, const TGrid &grid_2d, 
@@ -1575,7 +1800,7 @@ namespace mt
 			if((g2_min <= g2)&&(g2 <= g2_max))
 			{
 				int ixy = grid_2d.ind_col(ix, iy);
-                                sum += norm(M_i[ixy]);
+				sum += norm(M_i[ixy]);
 			}
 		}
 
@@ -1585,7 +1810,7 @@ namespace mt
 		const TVector_1 &S_i, const TVector_2 &M_i, Value_type<TGrid> &sum)
 		{
 			const int ixy = grid_2d.ind_col(ix, iy);
-                        sum += S_i[ixy]*norm(M_i[ixy]);
+			sum += S_i[ixy] * norm(M_i[ixy]);
 		}
 
 		template <class TGrid, class TVector_c>
@@ -1616,7 +1841,7 @@ namespace mt
 			const auto m = grid_2d.bwl_factor_shift(ix, iy)/grid_2d.nxy_r();
 			const auto theta = w*grid_2d.g2_shift(ix, iy, gx_0, gy_0);
 
-                        psi_o[ixy] = polar(m, theta)*psi_i[ixy];
+			psi_o[ixy] = polar(m, theta)*psi_i[ixy];
 		}
 
 		/********************* phase shifts real space **********************/
@@ -1793,18 +2018,18 @@ namespace mt
 			if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
 			{			
 				T_r chi = g2*(lens.c_c_30*g2+lens.c_c_10);
-				T_r c = c_Pi*lens.beta*lens.sf;
+				T_r c = c_Pi*lens.ssf_beta*lens.dsf_iehwgd;
 				T_r u = 1.0 + 2*c*c*g2;
 
-				c = c_Pi*lens.sf*lens.lambda*g2;
+				c = c_Pi*lens.dsf_iehwgd*lens.lambda*g2;
 				T_r temp_inc = 0.5*c*c;
 
-				c = c_Pi*lens.beta*(lens.c_30*lens.lambda2*g2-lens.c_10);
+				c = c_Pi*lens.ssf_beta*(lens.c_30*lens.lambda2*g2-lens.c_10);
 				T_r spa_inc = c*c*g2;
 
 				T_r st_inc = exp(-(spa_inc+temp_inc)/u)/sqrt(u);
 
-                                fPsi_o[ixy] = fPsi_i[ixy]*polar(st_inc, chi);
+				fPsi_o[ixy] = fPsi_i[ixy]*polar(st_inc, chi);
 			}
 			else
 			{
@@ -2153,11 +2378,12 @@ namespace mt
 
 		template <class T>
 		DEVICE_CALLABLE FORCE_INLINE 
-		r2d<T> af_irot_sca_sft(const T &theta, const r2d<T> &p0, const T &fxy, const r2d<T> &ps, r2d<T> p)
+		r2d<T> af_irot_sca_sft(const T &theta, const r2d<T> &p0, const T &fx, const T &fy, const r2d<T> &ps, r2d<T> p)
 		{
 			T sin_t, cos_t;
 			sincos(theta, &sin_t, &cos_t);
-			p = (p-ps)/fxy;
+			p.x = (p.x-ps.x)/fx;
+ p.y = (p.y-ps.y)/fy;
 			p -= p0;
 			p = r2d<T>(cos_t*p.x+sin_t*p.y, -sin_t*p.x+cos_t*p.y);
 			p += p0;
@@ -2229,13 +2455,13 @@ namespace mt
 		template <class TGrid, class TVector>
 		DEVICE_CALLABLE FORCE_INLINE 
 		void rot_sca_sft_2d(const int &ix, const int &iy, const TGrid &grid_2d_i, TVector &M_i, 
-		const Value_type<TGrid> &theta, const r2d<Value_type<TGrid>> &p0, const Value_type<TGrid> &fxy, 
+		const Value_type<TGrid> &theta, const r2d<Value_type<TGrid>> &p0, const Value_type<TGrid> &fx, const Value_type<TGrid> &fy, 
 		const r2d<Value_type<TGrid>> &ps, const Value_type<TGrid> &bg, const TGrid &grid_2d_o, TVector &M_o)
 		{
 			using T = Value_type<TGrid>;
 
 			r2d<T> p(grid_2d_o.Rx(ix), grid_2d_o.Ry(iy));
-			p = af_irot_sca_sft(theta, p0, fxy, ps, p);
+			p = af_irot_sca_sft(theta, p0, fx, fy, ps, p);
 
 			M_o[grid_2d_o.ind_col(ix, iy)] = (grid_2d_i.ckb_bound(p))?interp_bl_2d(p, grid_2d_i, M_i):bg;
 		};
@@ -2980,10 +3206,10 @@ namespace mt
 		};
 
 		template <class T>
-		struct add_square_scale
+		struct add_scale_square
 		{
 			const T w;
-			add_square_scale(T w_i = T()): w(w_i){}
+			add_scale_square(T w_i = T()): w(w_i){}
 
 			template <class U, class V>
 			DEVICE_CALLABLE
@@ -2991,11 +3217,11 @@ namespace mt
 		};
 
 		template <class T>
-		struct add_square_scale_i
+		struct add_scale_square_i
 		{
 			const T w1;
 			const T w2;
-			add_square_scale_i(T w1_i = T(), T w2_i = T()): w1(w1_i), w2(w2_i){}
+			add_scale_square_i(T w1_i = T(), T w2_i = T()): w1(w1_i), w2(w2_i){}
 
 			template <class U, class V>
 			DEVICE_CALLABLE
