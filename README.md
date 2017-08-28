@@ -69,7 +69,7 @@ Troubleshooting
     - Verify the installation of blas and lapack libraries. In Ubuntu, it can be installed by executing the following command: 
     	* `sudo apt-get install libblas-dev liblapack-dev`
     
-- Verify the intallation path of cuda 8.0, fftw3, blas and lapack. Their installation path should be specified in the `MEX.m` file located at `matlab_functions`.
+- Verify the installation path of cuda 8.0, fftw3, blas and lapack. Their installation paths should be specified in the `MEX.m` file located at `matlab_functions`.
 
 **Please cite MULTEM in your publications if it helps your research:**
 
