@@ -49,7 +49,6 @@
           LDDEBUGFLAGS="-g"
           
           LINKEXPORT="-Wl,--version-script,&quot;$MATLABROOT/extern/lib/$ARCH/mexFunction.map&quot;"
-          LINKEXPORTVER="-Wl,--version-script,&quot;$MATLABROOT/extern/lib/$ARCH/c_exportsmexfileversion.map&quot;"
           LINKLIBS="-Wl,-rpath-link,$MATLABROOT/bin/$ARCH -L&quot;$MATLABROOT/bin/$ARCH&quot; -lmx -lmex -lmat -lm -lstdc++"
   
           OBJEXT=".o"
