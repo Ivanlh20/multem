@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 #include "types.cuh"
 #include "matlab_types.cuh"
-#include "host_device_functions.cuh"
+#include "cgpu_fcns.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"

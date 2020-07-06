@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,12 +22,12 @@
 #include "math.cuh"
 #include "types.cuh"
 #include "lin_alg_def.cuh"
-#include "random.cuh"
+#include "cgpu_rand.cuh"
 #include "atomic_data.hpp"
-#include "atom_data.hpp"
+#include "atomic_data_mt.hpp"
 #include "input_multislice.cuh"
-#include "host_device_functions.cuh"
-#include "host_functions.hpp"
+#include "cgpu_fcns.cuh"
+#include "cpu_fcns.hpp"
 #include "slicing.hpp"
 
 namespace mt
@@ -81,7 +81,7 @@ namespace mt
 				slicing.calculate();
 			}
 
-			/* Move atoms (random distribution will be included in the future) */
+			/* Move atoms (cgpu_rand distribution will be included in the future) */
 			void move_atoms(const int &fp_iconf)
 			{
 				// set phonon configuration

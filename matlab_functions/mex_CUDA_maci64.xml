@@ -4,7 +4,7 @@
     ShortName="nvcc"
     HostCompiler="Clang++"
     Manufacturer="NVIDIA"
-    Version="8.0"
+    Version="XXX_CUDA_VERSION"
     Language="CUDA"
     Priority="A"
     Location="$NVCC" >
@@ -55,7 +55,7 @@
     <client>
     </client>
     <locationFinder>
-        <NVCC diagnostic="Version 8.0 of the CUDA toolkit could not be found. If installed, set MW_NVCC_PATH environment variable to location of nvcc compiler." >
+        <NVCC diagnostic="Version XXX_CUDA_VERSION of the CUDA toolkit could not be found. If installed, set MW_NVCC_PATH environment variable to location of nvcc compiler." >
             <and>
                 <or>
                     <and> <!-- Search for nvcc in standard locations, favoring user variable MW_NVCC_PATH, but reject if it isn't the supported version -->
@@ -75,11 +75,11 @@
                             <cmdReturns name="which nvcc" />
                             <fileExists name="/usr/local/cuda/bin/nvcc" />
                         </or>
-                        <cmdReturns name="$$/nvcc --version | egrep -E 'release 8.0' > /dev/null && echo $$/nvcc" />
+                        <cmdReturns name="$$/nvcc --version | egrep -E 'release XXX_CUDA_VERSION' > /dev/null && echo $$/nvcc" />
                     </and>
-                    <fileExists name="/Developer/NVIDIA/CUDA-8.0/bin/nvcc" /> <!-- Search the default install location -->
+                    <fileExists name="/Developer/NVIDIA/CUDA-XXX_CUDA_VERSION/bin/nvcc" /> <!-- Search the default install location -->
                 </or>
-                <cmdReturns name="$$/nvcc --version | egrep -E 'release 8.0' > /dev/null && echo $$/nvcc" />
+                <cmdReturns name="$$/nvcc --version | egrep -E 'release XXX_CUDA_VERSION' > /dev/null && echo $$/nvcc" />
             </and>
         </NVCC>
     <!--Check for faulty DEVELOPER_DIR environment variable -->

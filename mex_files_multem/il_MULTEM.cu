@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,11 @@
 #include "types.cuh"
 #include "matlab_types.cuh"
 #include "traits.cuh"
-#include "host_device_functions.cuh"
+#include "cgpu_fcns.cuh"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
-#include "atom_data.hpp"
-#include "multislice.cuh"
+#include "atomic_data_mt.hpp"
+#include "tem_simulation.cuh"
 #include "timing.cuh"
 
 #include <mex.h>
@@ -130,7 +130,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 		mt::assign(iw_psi, input_multislice.iw_psi);
 	}
 
-	// read iw_x and iw_y
+	// read beam_x and beam_y
 	auto iw_x = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "iw_x");
 	auto iw_y = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "iw_y");
 
@@ -183,14 +183,19 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.cond_lens.outer_aper_ang = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_outer_aper_ang")*mt::c_mrad_2_rad;		// outer aperture (mrad-->rad)
 
 	/********************* defocus spread function ********************/
-	input_multislice.cond_lens.dsf_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_dsf_sigma"); 								// standard deviation (Angstrom)
-	input_multislice.cond_lens.dsf_npoints = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_dsf_npoints"); 							// # of integration points
+	input_multislice.cond_lens.ti_a = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_ti_a"); 											// Height proportion of a normalized Gaussian [0, 1] 
+	input_multislice.cond_lens.ti_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_ti_sigma");   								// Standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.cond_lens.ti_beta = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_ti_beta"); 									// Standard deviation of the source spread function for the Exponential component: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.cond_lens.ti_npts = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_ti_npts");									// Number of integration points
 
 	/********************* source spread function *********************/
-	input_multislice.cond_lens.ssf_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_ssf_sigma"); 								// standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
-	input_multislice.cond_lens.ssf_npoints = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_ssf_npoints");							// # of integration points
+	input_multislice.cond_lens.si_a = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_si_a"); 											// Height proportion of a normalized Gaussian [0, 1] 
+	input_multislice.cond_lens.si_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_si_sigma");   								// Standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.cond_lens.si_beta = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_si_beta"); 									// Standard deviation of the source spread function for the Exponential component: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.cond_lens.si_rad_npts = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_si_rad_npts"); 	 						// Number of radial integration points
+	input_multislice.cond_lens.si_azm_npts = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_si_azm_npts"); 
 
-	/********************* zero defocus reference ********************/																																				/********************* zero defocus reference ********************/
+	/********************* zero defocus reference ********************/																			/********************* zero defocus reference ********************/
 	input_multislice.cond_lens.zero_defocus_type = mx_get_scalar_field<mt::eZero_Defocus_Type>(mx_input_multislice, "cond_lens_zero_defocus_type");	// Zero defocus type
 	input_multislice.cond_lens.zero_defocus_plane = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_zero_defocus_plane");					// Zero defocus position
 
@@ -232,12 +237,17 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.obj_lens.outer_aper_ang = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_outer_aper_ang")*mt::c_mrad_2_rad; 		// outer aperture (mrad-->rad)
 
 	/********************* defocus spread function ********************/
-	input_multislice.obj_lens.dsf_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_dsf_sigma"); 									// standard deviation (Angstrom)
-	input_multislice.obj_lens.dsf_npoints = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_dsf_npoints");								// # of integration points
+	input_multislice.obj_lens.ti_a = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_ti_a"); 											// Height proportion of a normalized Gaussian [0, 1]
+	input_multislice.obj_lens.ti_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_ti_sigma");   									// Standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.obj_lens.ti_beta = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_ti_beta"); 										// Standard deviation of the source spread function for the Exponential component: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.obj_lens.ti_npts = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_ti_npts");										// Number of integration points
 
 	/********************* source spread function *********************/
-	input_multislice.obj_lens.ssf_sigma = input_multislice.cond_lens.ssf_sigma; 																// standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
-	input_multislice.obj_lens.ssf_npoints = input_multislice.cond_lens.ssf_npoints;																// # of integration points
+	input_multislice.obj_lens.si_a = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_si_a"); 											// Height proportion of a normalized Gaussian [0, 1]
+	input_multislice.obj_lens.si_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_si_sigma");   								// Standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.obj_lens.si_beta = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_si_beta"); 									// Standard deviation of the source spread function for the Exponential component: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.obj_lens.si_rad_npts = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_si_rad_npts"); 	 						// Number of radial integration points
+	input_multislice.obj_lens.si_azm_npts = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_si_azm_npts");    							// Number of azimuth integration points
 
 	/********************* zero defocus reference ********************/
 	input_multislice.obj_lens.zero_defocus_type = mx_get_scalar_field<mt::eZero_Defocus_Type>(mx_input_multislice, "obj_lens_zero_defocus_type");	// Zero defocus type
@@ -482,13 +492,13 @@ mxArray *&mx_output_multislice)
 	mt::FFT<T, dev> fft_2d;
 	fft_2d.create_plan_2d(input_multislice.grid_2d.ny, input_multislice.grid_2d.nx, system_conf.nstream);
 
-	mt::Multislice<T, dev> multislice;
-	multislice.set_input_data(&input_multislice, &stream, &fft_2d);
+	mt::Multislice<T, dev> tem_simulation;
+	tem_simulation.set_input_data(&input_multislice, &stream, &fft_2d);
 
 	mt::Output_Multislice<T> output_multislice;
 	output_multislice.set_input_data(&input_multislice);
 
-	multislice(output_multislice);
+	tem_simulation(output_multislice);
 	stream.synchronize();
 
 	output_multislice.gather();

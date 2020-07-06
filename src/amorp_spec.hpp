@@ -22,9 +22,9 @@
 #include "math.cuh"
 #include "types.cuh"
 #include "lin_alg_def.cuh"
-#include "atom_data.hpp"
+#include "atomic_data_mt.hpp"
 #include "atomic_data.hpp"
-#include "random.cuh"
+#include "cgpu_rand.cuh"
 #include "box_occ.hpp"
 
 namespace mt
@@ -107,7 +107,7 @@ namespace mt
 			m_al_type = atoms.amorp_lay_info[0].type;
 			m_rho = convert_density(Z, rho);
 
-			// set random set
+			// set cgpu_rand set
 			rand_3d.seed(seed);
 
 			// calculate number of atoms for the amorphous spec
@@ -123,7 +123,7 @@ namespace mt
 				// set amorphous box size
 				box.set_input_data(d_min, m_l_x, m_l_y, m_l_z);
 				
-				// set random box size
+				// set cgpu_rand box size
 				rand_3d.set_box_size(m_l_x, m_l_y, m_l_z);
 
 				return 0;
@@ -162,7 +162,7 @@ namespace mt
 			// set amorphous box size
 			box.set_input_data(d_min, m_l_x, m_l_y, m_l_z+depth_ct);
 
-			// set random box size
+			// set cgpu_rand box size
 			rand_3d.set_box_size(m_l_x, m_l_y, m_l_z+depth_ct);
 
 			// set number of atoms

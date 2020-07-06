@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@
 #include "fft.cuh"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
-#include "host_functions.hpp"
-#include "device_functions.cuh"
-#include "host_device_functions.cuh"
+#include "cpu_fcns.hpp"
+#include "gpu_fcns.cuh"
+#include "cgpu_fcns.cuh"
 
 namespace mt
 {

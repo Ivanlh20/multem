@@ -4,7 +4,7 @@
     ShortName="nvcc"
     HostCompiler="g++"    
     Manufacturer="NVIDIA"
-    Version="8.0"
+    Version="XXX_CUDA_VERSION"
     Language="CUDA"
     Priority="A"
     Location="$NVCC" >
@@ -33,7 +33,7 @@
           MATLABMEX="-DMATLAB_MEX_FILE"
           INCLUDE="-I&quot;$MATLABROOT/extern/include&quot; -I&quot;$MATLABROOT/simulink/include&quot;" 
        
-          ARCH_FLAGS="XXX_ARCH_FLAGS"
+          ARCH_FLAGS="-gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot; -gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot; -gencode=arch=compute_60,code=&#92;&quot;sm_60,compute_60&#92;&quot; -gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot;"
 		  NVCC_FLAGS="--std=c++11 --default-stream per-thread --expt-extended-lambda $ARCH_FLAGS"
           
           CXX="$NVCC"
@@ -69,7 +69,7 @@
                 
     </vars>
     <locationFinder>
-        <NVCC diagnostic="Version 8.0 of the CUDA toolkit could not be found. If installed, set MW_NVCC_PATH environment variable to location of nvcc compiler." >
+        <NVCC diagnostic="Version XXX_CUDA_VERSION of the CUDA toolkit could not be found. If installed, set MW_NVCC_PATH environment variable to location of nvcc compiler." >
             <and>
                 <or>
                     <and> <!-- Search for nvcc in standard locations, favoring user variable MW_NVCC_PATH, but reject if it isn't the supported version -->
@@ -89,11 +89,11 @@
                             <cmdReturns name="which nvcc" />
                             <fileExists name="/usr/local/cuda/bin/nvcc" />
                         </or>
-                        <cmdReturns name="$$/nvcc --version | egrep -E 'release 8.0' > /dev/null && echo $$/nvcc" />
+                        <cmdReturns name="$$/nvcc --version | egrep -E 'release XXX_CUDA_VERSION' > /dev/null && echo $$/nvcc" />
                     </and>
                     <fileExists name="/usr/local/cuda-8.0/bin/nvcc" /> <!-- Search the default install location -->
                 </or>
-                <cmdReturns name="$$/nvcc --version | egrep -E 'release 8.0' > /dev/null && echo $$/nvcc" />
+                <cmdReturns name="$$/nvcc --version | egrep -E 'release XXX_CUDA_VERSION' > /dev/null && echo $$/nvcc" />
             </and>
         </NVCC>
         <GCC>

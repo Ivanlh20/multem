@@ -2,10 +2,10 @@
 #include "memory_info.cuh"
 #include "lin_alg_def.cuh"
 #include "atomic_data.hpp"
-#include "atom_data.hpp"
+#include "atomic_data_mt.hpp"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
-#include "multislice.cuh"
+#include "tem_simulation.cuh"
 #include "multem.cu"
 
 #include <QtWidgets>
@@ -24,7 +24,7 @@ MainWindow::MainWindow(): central_widget(new QLabel)
 
 	pb_timer = new PB_Timer(this);
 
-	// set seed to generate random numbers
+	// set seed to generate cgpu_rand numbers
 	qsrand(QTime::currentTime().msec());
 
 	setWindowTitle(tr("MULTEM"));
@@ -2980,7 +2980,7 @@ void MainWindow::create_general_dock_widget()
 
 	/*******************************************************/
 	ckb_pn_auto_seed = new QCheckBox(tr("auto"));
-	ckb_pn_auto_seed->setStatusTip(tr("Automatic random seed"));
+	ckb_pn_auto_seed->setStatusTip(tr("Automatic cgpu_rand seed"));
 
 	/*******************************************************/
 	auto lyg_frozen_phonon = new QGridLayout;

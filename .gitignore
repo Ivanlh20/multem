@@ -9,6 +9,7 @@
 *.wisdom
 *.exe
 *.dll
+*.asv
 *.7z
 *Copy*.cuh
 *Copy*.hpp

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  */
 
 #include "types.cuh"
-#include "atom_data.hpp"
-#include "crystal_spec.hpp"
+#include "atomic_data_mt.hpp"
+#include "xtl_build.hpp"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -55,11 +55,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double a, b, c;
 	mt::Vector<mt::Atom_Data<double>, mt::e_host> uLayer;
 	mt::Atom_Data<double> atoms;
-	mt::Crystal_Spec<double> crystal_spec;
+	mt::Crystal_Spec<double> xtl_build;
 
 	read_input_data(prhs[0], na, nb, nc, a, b, c, uLayer);
 
-	crystal_spec(na, nb, nc, a, b, c, uLayer, atoms);
+	xtl_build(na, nb, nc, a, b, c, uLayer, atoms);
 
 	auto atomsM = mx_create_matrix<rmatrix_r>(atoms.size(), 8, plhs[0]);
 

@@ -1,7 +1,14 @@
-clear all;
-clc;
+% Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+
+clear; clc;
+addpath([fileparts(pwd) filesep 'mex_bin'])
+addpath([fileparts(pwd) filesep 'crystalline_materials'])
+addpath([fileparts(pwd) filesep 'matlab_functions'])
+
 Z = 79;
-occ = 1;region = 0;charge = 0;
+occ = 1;
+region = 0;
+charge = 0;
 
 gmin = 0; gmax = 20; ng = 512;
 dg = (gmax-gmin)/(ng-1); 

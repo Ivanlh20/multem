@@ -1,12 +1,17 @@
-clear all;
-clc;
+% Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+
+clear; clc;
+addpath([fileparts(pwd) filesep 'mex_bin'])
+addpath([fileparts(pwd) filesep 'crystalline_materials'])
+addpath([fileparts(pwd) filesep 'matlab_functions'])
+
 Z = 78;
 occ = 1;
 region = 0;
 charge = 0;
 
 gmin = 0; gmax = 12; ng = 512;
-dg = (gmax-gmin)/(ng-1); 
+dg = (gmax-gmin)/(ng-1);
 g = gmin:dg:gmax;
 
 [f1, df1] = il_feg(1, Z, charge, g);

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "math.cuh"
 #include "types.cuh"
 #include "lin_alg_def.cuh"
-#include "atom_data.hpp"
+#include "atomic_data_mt.hpp"
 #include "slicing.hpp"
 #include "memory_info.cuh"
 
@@ -516,7 +516,7 @@ namespace mt
 		eOperation_Mode operation_mode;						// eOM_Normal = 1, eOM_Advanced = 2
 		bool slice_storage;									// true, false
 		bool reverse_multislice;							// true, false
-		int mul_sign;										// multislice sign
+		int mul_sign;										// tem_simulation sign
 
 		T Vrl; 												// Atomic potential cut-off
 		int nR; 											// Number of grid_bt points
@@ -527,7 +527,7 @@ namespace mt
 		host_vector<T> cdl_var; 							// Array of thickes
 
 		host_vector<int> iscan;
-		host_vector<T> beam_x;								// temporal variables for
+		host_vector<T> beam_x;								// temporal variables
 		host_vector<T> beam_y;
 
 		int islice;
@@ -649,7 +649,7 @@ namespace mt
 
 			lambda = get_lambda(E_0);
 
-			// multislice sign
+			// tem_simulation sign
 			mul_sign = (reverse_multislice) ? -1 : 1;
 
 			theta = set_incident_angle(theta);
@@ -739,29 +739,34 @@ namespace mt
 
 			/************* verify lenses parameters **************/
 
-			if (isZero(cond_lens.ssf_sigma))
+			if (isZero(cond_lens.si_sigma))
 			{
 				temporal_spatial_incoh = eTSI_Temporal;
 			}
 
 			if (!is_illu_mod_full_integration())
 			{
-				cond_lens.ssf_npoints = 1;
-				cond_lens.dsf_npoints = 1;
+				cond_lens.si_rad_npts = 1;
+				cond_lens.si_azm_npts = 1;
+				cond_lens.ti_npts = 1;
 
-				obj_lens.ssf_npoints = 1;
-				obj_lens.dsf_npoints = 1;
+				obj_lens.si_rad_npts = 1;
+				obj_lens.si_azm_npts = 1;
+				obj_lens.ti_npts = 1;
 			}
 
 			if (is_incoh_temporal())
 			{
-				cond_lens.ssf_npoints = 1;
-				obj_lens.ssf_npoints = 1;
+				cond_lens.si_rad_npts = 1;
+				cond_lens.si_azm_npts = 1;
+
+				obj_lens.si_rad_npts = 1;
+				obj_lens.si_azm_npts = 1;
 			}
 			else if (is_incoh_spatial())
 			{
-				cond_lens.dsf_npoints = 1;
-				obj_lens.dsf_npoints = 1;
+				cond_lens.ti_npts = 1;
+				obj_lens.ti_npts = 1;
 			}
 
 			// set condenser lens parameters

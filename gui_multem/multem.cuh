@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include "stream.cuh"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
-#include "multislice.cuh"
+#include "tem_simulation.cuh"
 
 template <class T, mt::eDevice dev>
 void run_multislice(mt::System_Configuration &system_conf,
@@ -39,9 +39,9 @@ void run_multislice(mt::System_Configuration &system_conf,
 	mt::FFT<T, dev> fft_2d;
 	fft_2d.create_plan_2d(input_multislice.grid_2d.ny, input_multislice.grid_2d.nx, system_conf.nstream);
 
-	mt::Multislice<T, dev> multislice;
-	multislice.set_input_data(&input_multislice, &stream, &fft_2d);
-	multislice(output_multislice);
+	mt::Multislice<T, dev> tem_simulation;
+	tem_simulation.set_input_data(&input_multislice, &stream, &fft_2d);
+	tem_simulation(output_multislice);
 
 	stream.synchronize();
 	fft_2d.cleanup();

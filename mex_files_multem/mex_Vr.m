@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'il_Vr.cpp', '../src');
+ilm_mex('release', 'il_vr.cpp', '../src');

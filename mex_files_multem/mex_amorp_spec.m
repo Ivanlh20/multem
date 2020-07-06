@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'il_amorp_spec.cpp', '../src');
+ilm_mex('release', 'il_amorp_spec.cpp', '../src');

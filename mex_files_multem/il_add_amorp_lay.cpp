@@ -18,7 +18,7 @@
 
 #include "types.cuh"
 #include "matlab_types.cuh"
-#include "atom_data.hpp"
+#include "atomic_data_mt.hpp"
 #include "amorp_spec.hpp"
 
 #include <mex.h>

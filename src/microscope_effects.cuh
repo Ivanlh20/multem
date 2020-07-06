@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@
 
 #include "math.cuh"
 #include "types.cuh"
-#include "host_functions.hpp"
-#include "device_functions.cuh"
-#include "host_device_functions.cuh"
+#include "cpu_fcns.hpp"
+#include "gpu_fcns.cuh"
+#include "cgpu_fcns.cuh"
 #include "quadrature.hpp"
 
 namespace mt
@@ -104,19 +104,19 @@ namespace mt
 
 			void PCTF_LI_WPO_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<T_c, dev> &fpsi, Vector<T_r, dev> &m2psi_tot)
 			{
-				T_r dsf_sigma = input_multislice->obj_lens.dsf_sigma;
-				T_r ssf_sigma = input_multislice->obj_lens.ssf_sigma;
+				T_r ti_sigma = input_multislice->obj_lens.ti_sigma;
+				T_r si_sigma = input_multislice->obj_lens.si_sigma;
 
 				switch(temporal_spatial_incoh)
 				{
 					case eTSI_Temporal:	// Temporal
 					{
-						input_multislice->obj_lens.set_ssf_sigma(0);
+						input_multislice->obj_lens.set_si_sigma(0);
 					}
 					break;
 					case eTSI_Spatial:	// Spatial
 					{
-						input_multislice->obj_lens.set_dsf_sigma(0);
+						input_multislice->obj_lens.set_ti_sigma(0);
 					}
 					break;
 				}
@@ -125,8 +125,8 @@ namespace mt
 				fft_2d->inverse(psi);
 				mt::square(*stream, psi, m2psi_tot);
 
-				input_multislice->obj_lens.set_dsf_sigma(dsf_sigma);
-				input_multislice->obj_lens.set_ssf_sigma(ssf_sigma);
+				input_multislice->obj_lens.set_ti_sigma(ti_sigma);
+				input_multislice->obj_lens.set_si_sigma(si_sigma);
 			}
 
 			void num_int_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<T_c, dev> &fpsi, Vector<T_r, dev> &m2psi_tot)
@@ -142,7 +142,7 @@ namespace mt
 						{
 							for(auto j = 0; j<qt.size(); j++)
 							{
-								auto c_10 = input_multislice->obj_lens.dsf_iehwgd*qt.x[j]+c_10_0;
+								auto c_10 = input_multislice->obj_lens.ti_iehwgd*qt.x[j]+c_10_0;
 								input_multislice->obj_lens.set_defocus(c_10); 
 								
 								mt::apply_CTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, qs.x[i], qs.y[i], fpsi, psi);
@@ -156,7 +156,7 @@ namespace mt
 					{
 						for(auto j = 0; j<qt.size(); j++)
 						{
-							auto c_10 = input_multislice->obj_lens.dsf_iehwgd*qt.x[j]+c_10_0;
+							auto c_10 = input_multislice->obj_lens.ti_iehwgd*qt.x[j]+c_10_0;
 							input_multislice->obj_lens.set_defocus(c_10); 
 
 							mt::apply_CTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, 0.0, 0.0, fpsi, psi);

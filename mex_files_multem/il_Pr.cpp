@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  */
 
 #include "types.cuh"
-#include "atom_cal.hpp"
+#include "atomic_fcns_mt.hpp"
 #include "atomic_data.hpp"
 
 #include <mex.h>
@@ -39,7 +39,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mt::Atomic_Data atomic_data(potential_type);
 	atomic_data.To_atom_type_CPU(Z, mt::c_Vrl, mt::c_nR, 0.0, atom_type);
 
-	mt::Atom_Cal<double> atom_cal;
-	atom_cal.Set_Atom_Type(potential_type, charge, &atom_type);
-	atom_cal.Pr_dPr(r.m_size, r.real, Pr.real, dPr.real);
+	mt::Atom_Cal<double> atomic_fcns_mt;
+	atomic_fcns_mt.Set_Atom_Type(potential_type, charge, &atom_type);
+	atomic_fcns_mt.Pr_dPr(r.m_size, r.real, Pr.real, dPr.real);
 }

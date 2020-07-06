@@ -1,3 +1,3 @@
 clc; clear all;
 
-MEX('release', 'il_hwhm_2_sigma.cpp', '../src');
+ilm_mex('release', 'il_hwhm_2_sigma.cpp', '../src');

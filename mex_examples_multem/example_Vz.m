@@ -1,4 +1,9 @@
-clear all; clc;
+% Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+
+clear; clc;
+addpath([fileparts(pwd) filesep 'mex_bin'])
+addpath([fileparts(pwd) filesep 'crystalline_materials'])
+addpath([fileparts(pwd) filesep 'matlab_functions'])
 
 Z = 79;
 charge = 1;
@@ -8,12 +13,12 @@ dlnr = log(rmax/rmin)/(nr-1); r = rmin*exp((0:1:(nr-1))*dlnr);
 z0 = -8.0; ze = 8.0;
 
 tic;
-[f1, df1] = il_Vz(1, Z, charge, z0, ze, r);
-[f2, df2] = il_Vz(2, Z, charge, z0, ze, r);
-[f3, df3] = il_Vz(3, Z, charge, z0, ze, r);
-[f4, df4] = il_Vz(4, Z, charge, z0, ze, r);
-[f5, df5] = il_Vz(5, Z, charge, z0, ze, r);
-[f6, df6] = il_Vz(6, Z, charge, z0, ze, r);
+[f1, df1] = il_vz(1, Z, charge, z0, ze, r);
+[f2, df2] = il_vz(2, Z, charge, z0, ze, r);
+[f3, df3] = il_vz(3, Z, charge, z0, ze, r);
+[f4, df4] = il_vz(4, Z, charge, z0, ze, r);
+[f5, df5] = il_vz(5, Z, charge, z0, ze, r);
+[f6, df6] = il_vz(6, Z, charge, z0, ze, r);
 toc;
 
 figure(1); clf;

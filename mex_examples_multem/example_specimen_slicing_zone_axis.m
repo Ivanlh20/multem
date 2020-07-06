@@ -1,33 +1,38 @@
-clear all; clc;
+% Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
 
-input_multislice = multem_default_values();         % Load default values;
+clear; clc;
+addpath([fileparts(pwd) filesep 'mex_bin'])
+addpath([fileparts(pwd) filesep 'crystalline_materials'])
+addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-input_multislice.pn_model = 3;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
-input_multislice.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
-input_multislice.potential_slicing = 1;             % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
-input_multislice.pn_dim = 111; 
-input_multislice.pn_seed = 300183; 
-input_multislice.pn_nconf = 3;
+input_multem = ilm_dflt_input_multem();         % Load default values;
 
-input_multislice.spec_rot_theta = 0; 					% final angle
-input_multislice.spec_rot_u0 = [1 0 0]; 					% unitary vector			
-input_multislice.spec_rot_center_type = 1; 			% 1: geometric center, 2: User define		
-input_multislice.spec_rot_center_p = [0 0 0];					% rotation point
+input_multem.pn_model = 3;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+input_multem.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
+input_multem.potential_slicing = 1;             % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
+input_multem.pn_dim = 111; 
+input_multem.pn_seed = 300183; 
+input_multem.pn_nconf = 3;
+
+input_multem.spec_rot_theta = 0; 					% final angle
+input_multem.spec_rot_u0 = [1 0 0]; 					% unitary vector			
+input_multem.spec_rot_center_type = 1; 			% 1: geometric center, 2: User define		
+input_multem.spec_rot_center_p = [0 0 0];					% rotation point
 
 na = 4; nb = 4; nc = 20; ncu = 2; rms3d = 0.085;
 
-[input_multislice.spec_atoms, input_multislice.spec_lx...
-, input_multislice.spec_ly, input_multislice.spec_lz...
-, a, b, c, input_multislice.spec_dz] = Au001Crystal(na, nb, nc, ncu, rms3d);
+[input_multem.spec_atoms, input_multem.spec_lx...
+, input_multem.spec_ly, input_multem.spec_lz...
+, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rms3d);
 
-% show_crystal(1, input_multislice.spec_atoms);
+% ilm_show_crystal(1, input_multem.spec_atoms);
 
-input_multislice.spec_dz = 5.0;
+input_multem.spec_dz = 5.0;
 
 view
 % get spec slicing
 tic;
-[atoms, Slice] = il_spec_slicing(input_multislice);
+[atoms, Slice] = il_spec_slicing(input_multem);
 toc;
 [natoms,~] = size(atoms); [nslice, ~] = size(Slice);
 
@@ -45,5 +50,5 @@ for i = 1:nslice
     pause(0.1);
 end
 
-[size(input_multislice.spec_atoms, 1), natoms, nslice]
-[input_multislice.spec_lx, input_multislice.spec_ly, input_multislice.spec_lz]
+[size(input_multem.spec_atoms, 1), natoms, nslice]
+[input_multem.spec_lx, input_multem.spec_ly, input_multem.spec_lz]

@@ -1,3 +1,3 @@
 clc; clear all;
   
-MEX('release', 'il_lambda.cpp', '../src');
+ilm_mex('release', 'il_lambda.cpp', '../src');

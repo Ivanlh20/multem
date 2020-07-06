@@ -1,3 +1,3 @@
 clc; clear all;
   
-MEX('release', 'il_MULTEM.cu', '../src');
+ilm_mex('release', 'il_multem.cu', '../src');

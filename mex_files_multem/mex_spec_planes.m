@@ -1,3 +1,3 @@
 clc; clear all;
   
-MEX('release', 'il_spec_planes.cpp', '../src');
+ilm_mex('release', 'il_spec_planes.cpp', '../src');

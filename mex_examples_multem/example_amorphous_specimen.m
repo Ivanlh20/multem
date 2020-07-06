@@ -1,4 +1,10 @@
-clear all; clc;
+% Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+
+clear; clc;
+addpath([fileparts(pwd) filesep 'mex_bin'])
+addpath([fileparts(pwd) filesep 'crystalline_materials'])
+addpath([fileparts(pwd) filesep 'matlab_functions'])
+
 
 lx = 50;
 ly = 50;

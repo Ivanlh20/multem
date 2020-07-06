@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,13 @@
 #include "traits.cuh"
 #include "stream.cuh"
 #include "fft.cuh"
-#include "atom_data.hpp"
+#include "atomic_data_mt.hpp"
 #include "slicing.hpp"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
-#include "host_functions.hpp"
-#include "device_functions.cuh"
-#include "host_device_functions.cuh"
+#include "cpu_fcns.hpp"
+#include "gpu_fcns.cuh"
+#include "cgpu_fcns.cuh"
 #include "wave_function.cuh"
 
 #include <mex.h>
@@ -178,12 +178,12 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.cond_lens.outer_aper_ang = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_outer_aper_ang")*mt::c_mrad_2_rad;		// outer aperture (mrad-->rad)
 
 	/********************* defocus spread function ********************/
-	input_multislice.cond_lens.dsf_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_dsf_sigma"); 								// standard deviation (Angstrom)
-	input_multislice.cond_lens.dsf_npoints = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_dsf_npoints"); 							// # of integration points
+	input_multislice.cond_lens.ti_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_ti_sigma"); 								// standard deviation (Angstrom)
+	input_multislice.cond_lens.ti_npts = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_ti_npts"); 							// # of integration points
 
 	/********************* source spread function *********************/
-	input_multislice.cond_lens.ssf_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_ssf_sigma"); 								// standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
-	input_multislice.cond_lens.ssf_npoints = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_ssf_npoints");							// # of integration points
+	input_multislice.cond_lens.si_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_si_sigma"); 								// standard deviation: For parallel ilumination(ï¿½^-1); otherwise (ï¿½)
+	input_multislice.cond_lens.si_rad_npts = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_si_rad_npts");							// # of integration points
 
 	/********************* zero defocus reference ********************/
 	input_multislice.cond_lens.zero_defocus_type = mx_get_scalar_field<mt::eZero_Defocus_Type>(mx_input_multislice, "cond_lens_zero_defocus_type");	// Zero defocus type
@@ -274,11 +274,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	if (system_conf.is_float_host())
 	{
-		//run_wave_function<float, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
+		run_wave_function<float, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
 	else if (system_conf.is_double_host())
 	{
-		//run_wave_function<double, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
+		run_wave_function<double, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
 	}
 	else if (system_conf.is_float_device())
 	{
@@ -286,6 +286,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 	else if (system_conf.is_double_device())
 	{
-		//run_wave_function<double, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
+		run_wave_function<double, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
 }

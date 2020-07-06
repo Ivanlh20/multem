@@ -1,6 +1,6 @@
 /**
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include "traits.cuh"
 #include "stream.cuh"
 #include "fft.cuh"
-#include "atom_data.hpp"
+#include "atomic_data_mt.hpp"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
 
@@ -82,8 +82,8 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.temporal_spatial_incoh = mx_get_scalar_field<mt::eTemporal_Spatial_Incoh>(mx_input_multislice, "temporal_spatial_incoh");
 
 	/********************* source spread function *********************/
-	input_multislice.cond_lens.ssf_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_ssf_sigma"); 								// standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
-	input_multislice.cond_lens.ssf_npoints = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_ssf_npoints");							// # of integration points
+	input_multislice.cond_lens.si_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "cond_lens_si_sigma"); 								// standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.cond_lens.si_rad_npts = mx_get_scalar_field<int>(mx_input_multislice, "cond_lens_si_rad_npts");							// # of integration points
 
 	input_multislice.cond_lens.set_input_data(input_multislice.E_0, input_multislice.grid_2d);
 
@@ -123,12 +123,12 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.obj_lens.outer_aper_ang = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_outer_aper_ang")*mt::c_mrad_2_rad; 		// outer aperture (mrad-->rad)
 
 	/********************* defocus spread function ********************/
-	input_multislice.obj_lens.dsf_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_dsf_sigma"); 									// standard deviation (Angstrom)
-	input_multislice.obj_lens.dsf_npoints = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_dsf_npoints");								// # of integration points
+	input_multislice.obj_lens.ti_sigma = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_ti_sigma"); 									// standard deviation (Angstrom)
+	input_multislice.obj_lens.ti_npts = mx_get_scalar_field<int>(mx_input_multislice, "obj_lens_ti_npts");								// # of integration points
 
 	/********************* source spread function *********************/
-	input_multislice.obj_lens.ssf_sigma = input_multislice.cond_lens.ssf_sigma; 																// standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
-	input_multislice.obj_lens.ssf_npoints = input_multislice.cond_lens.ssf_npoints;																// # of integration points																		// # of integration points
+	input_multislice.obj_lens.si_sigma = input_multislice.cond_lens.si_sigma; 																// standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
+	input_multislice.obj_lens.si_rad_npts = input_multislice.cond_lens.si_rad_npts;																// # of integration points																		// # of integration points
 
 	/********************* zero defocus reference ********************/
 	input_multislice.obj_lens.zero_defocus_type = mt::eZDT_Last;

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 
 #include "math.cuh"
 #include "types.cuh"
-#include "atom_data.hpp"
-#include "host_functions.hpp"
+#include "atomic_data_mt.hpp"
+#include "cpu_fcns.hpp"
 
 namespace mt
 {

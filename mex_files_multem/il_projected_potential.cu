@@ -20,7 +20,7 @@
 #include "matlab_types.cuh"
 #include "traits.cuh"
 #include "stream.cuh"
-#include "atom_data.hpp"
+#include "atomic_data_mt.hpp"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
 

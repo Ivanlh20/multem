@@ -18,8 +18,8 @@
 
 #include "types.cuh"
 #include "matlab_types.cuh"
-#include "atom_data.hpp"
-#include "host_functions.hpp"
+#include "atomic_data_mt.hpp"
+#include "cpu_fcns.hpp"
 
 #include <mex.h>
 #include "matlab_mex.cuh"

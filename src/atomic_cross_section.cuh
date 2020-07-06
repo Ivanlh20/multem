@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@
 #include "fft.cuh"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
-#include "multislice.cuh"
+#include "tem_simulation.cuh"
 #include "cubic_spline.hpp"
-#include "host_device_classes.cuh"
+#include "cgpu_classes.cuh"
 #include <thrust/transform.h>
 
 namespace mt
@@ -48,16 +48,16 @@ namespace mt
 			template <class TVector>
 			void get(TVector &r_o, TVector &fr_o)
 			{
-				/**************************multislice calculation*******************************/
+				/**************************tem_simulation calculation*******************************/
 				mt::Output_Multislice_Vector<T> output_multislice;
 				output_multislice.set_input_data(input_multislice);
 
-				mt::Multislice<T, dev> multislice;
-				multislice.set_input_data(input_multislice);
+				mt::Multislice<T, dev> tem_simulation;
+				tem_simulation.set_input_data(input_multislice);
 
-				multislice.run(output_multislice);
+				tem_simulation.run(output_multislice);
 
-				multislice.cleanup();
+				tem_simulation.cleanup();
 
 				/******************************* Cross section ********************************/
 				mt::Grid_2d<double> grid_2d;

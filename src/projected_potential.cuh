@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@
 #include "quadrature.hpp"
 #include "input_multislice.cuh"
 #include "output_multislice.hpp"
-#include "host_functions.hpp"
-#include "device_functions.cuh"
-#include "host_device_functions.cuh"
+#include "cpu_fcns.hpp"
+#include "gpu_fcns.cuh"
+#include "cgpu_fcns.cuh"
 #include "spec.hpp"
 
 namespace mt
@@ -48,7 +48,7 @@ namespace mt
 				stream = stream_i;
 
 				Quadrature quadrature;
-				quadrature.get(0, c_nqz, qz); // 0: int_-1^1 y(x) dx - TanhSinh quadrature
+				quadrature(0, c_nqz, qz); // 0: int_-1^1 y(x) dx - TanhSinh quadrature
 
 				atom_type.resize(c_nAtomsTypes);
 				for(auto iatom_type = 0; iatom_type<atom_type.size(); iatom_type++)
@@ -227,7 +227,7 @@ namespace mt
 			{
 				for(auto istream = 0; istream < n_atoms; istream++)
 				{
-					auto iZ = this->atoms.Z[iatoms]-1;
+					auto iZ = (this->atoms.Z[iatoms] % 1000)-1;
 					auto charge = this->atoms.charge[iatoms];
 					int icharge = atom_type[iZ].charge_to_idx(charge);
 					auto &coef = atom_type[iZ].coef[icharge];
