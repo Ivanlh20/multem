@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<config
+    Name="nvcc"
+    ShortName="nvcc"
+    HostCompiler="g++"    
+    Manufacturer="NVIDIA"
+    Version="10.0"
+    Language="CUDA"
+    Priority="A"
+    Location="$NVCC" >
+    <Details
+          CompilerExecutable="$CXX"
+          CompilerDefines="$DEFINES"
+          CompilerFlags="$CXXFLAGS"
+          OptimizationFlags="$CXXOPTIMFLAGS"
+          DebugFlags="$CXXDEBUGFLAGS"
+          IncludeFlags="$INCLUDE"
+          LinkerExecutable="$LDXX"
+          LinkerFlags="$LDFLAGS $LDTYPE"
+          LinkerLibraries="$LINKLIBS"
+          LinkerOptimizationFlags="$LDOPTIMFLAGS"
+          LinkerDebugFlags="$LDDEBUGFLAGS"
+
+          CompilerDefineFormatter="-D%s"
+          LinkerLibrarySwitchFormatter="-l%s"
+          LinkerPathFormatter="-L%s"
+    />
+    <vars
+          CMDLINE1="$CXX -c $CXXFLAGS $OPTIM $DEFINES $INCLUDE $SRC -o $OBJ"
+          CMDLINE2="$LDXX $LDFLAGS $LDTYPE $LINKOPTIM $LINKEXPORTVER $OBJS $CXXLIBS $LINKLIBS -o $EXE"
+          CMDLINE3="rm -f $OBJ"
+          
+          MATLABMEX="-DMATLAB_MEX_FILE"
+          INCLUDE="-I&quot;$MATLABROOT/extern/include&quot; -I&quot;$MATLABROOT/simulink/include&quot;" 
+       
+          ARCH_FLAGS="-gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot; -gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot; -gencode=arch=compute_60,code=&#92;&quot;sm_60,compute_60&#92;&quot; -gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot;"
+		  NVCC_FLAGS="--std=c++11 --default-stream per-thread --expt-extended-lambda $ARCH_FLAGS"
+          
+          CXX="$NVCC"
+          CXXFLAGS="--compiler-options=-fexceptions,-fPIC,-fno-omit-frame-pointer,-pthread $NVCC_FLAGS"          
+          DEFINES="--compiler-options=-D_GNU_SOURCE,$MATLABMEX"
+          CXXOPTIMFLAGS="-O2 -DNDEBUG"
+          CXXDEBUGFLAGS="-g"
+                    
+          LDXX="$GCC"
+          LDFLAGS="-pthread -Wl,--no-undefined"
+          LDTYPE="-shared"
+          LDOPTIMFLAGS="-O2"
+          LDDEBUGFLAGS="-g"
+          
+          LINKEXPORT="-Wl,--version-script,&quot;$MATLABROOT/extern/lib/$ARCH/mexFunction.map&quot;"
+          LINKLIBS="-Wl,-rpath-link,$MATLABROOT/bin/$ARCH -L&quot;$MATLABROOT/bin/$ARCH&quot; -lmx -lmex -lmat -lm -lstdc++"
+  
+          OBJEXT=".o"
+          LDEXT=".mexa64"
+
+          SETENV="CC=&quot;gcc&quot;
+                CXX=&quot;$CXX&quot;
+                CFLAGS=&quot;$CFLAGS $DEFINES&quot;
+                CXXFLAGS=&quot;$CXXFLAGS $DEFINES&quot;
+                COPTIMFLAGS=&quot;$COPTIMFLAGS&quot;                
+                CXXOPTIMFLAGS=&quot;$CXXOPTIMFLAGS&quot;
+                CDEBUGFLAGS=&quot;$CDEBUGFLAGS&quot;                
+                CXXDEBUGFLAGS=&quot;$CXXDEBUGFLAGS&quot;                
+                LD=&quot;$LD&quot;
+                LDXX=&quot;$LDXX&quot;
+                LDFLAGS=&quot;$LDFLAGS $LDTYPE $LINKLIBS $LINKEXPORT&quot;
+                LDDEBUGFLAGS=&quot;$LDDEBUGFLAGS&quot;">
+                
+    </vars>
+    <locationFinder>
+        <NVCC diagnostic="Version 10.0 of the CUDA toolkit could not be found. If installed, set MW_NVCC_PATH environment variable to location of nvcc compiler." >
+            <and>
+                <or>
+                    <and> <!-- Search for nvcc in standard locations, favoring user variable MW_NVCC_PATH, but reject if it isn't the supported version -->
+                        <or>
+                            <and>
+                                <envVarExists name="MW_NVCC_PATH" />
+                                <fileExists name="$$/nvcc" />
+                            </and>
+                            <and>
+                                <envVarExists name="CUDA_BIN_PATH" />
+                                <fileExists name="$$/nvcc" />
+                            </and>
+                            <and>
+                                <envVarExists name="CUDA_PATH" />
+                                <fileExists name="$$/bin/nvcc" />
+                            </and>
+                            <cmdReturns name="which nvcc" />
+                            <fileExists name="/usr/local/cuda/bin/nvcc" />
+                        </or>
+                        <cmdReturns name="$$/nvcc --version | egrep -E 'release 10.0' > /dev/null && echo $$/nvcc" />
+                    </and>
+                    <fileExists name="/usr/local/cuda-8.0/bin/nvcc" /> <!-- Search the default install location -->
+                </or>
+                <cmdReturns name="$$/nvcc --version | egrep -E 'release 10.0' > /dev/null && echo $$/nvcc" />
+            </and>
+        </NVCC>
+        <GCC>
+            <cmdReturns name="which g++" />
+        </GCC>
+        <CPPLIB_DIR>
+            <cmdReturns name="g++ -print-file-name=libstdc++.so"
+                        diagnostic="GCC appears to be installed, but supporting C++ libraries were not found.  You must first install the gcc-c++ package, or similiar, to complete this action."/>
+        </CPPLIB_DIR>
+    </locationFinder>
+</config>
