@@ -51,7 +51,7 @@ The following steps work using Matlab R2018a and CUDA 10.0. It assumes that Visu
   
   	- Verify the installation of Visual studio 2017 community.
   	- Verify the installation of Cuda 10.0 (https://developer.nvidia.com/cuda-downloads).
-	  - Replace the Thrust library folder in location: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include\thrust
+    - Replace the Thrust library folder in location: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include\thrust
   	
   **for Linux:**
   

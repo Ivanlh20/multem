@@ -142,10 +142,10 @@ function [] = ilm_mex(option, m_file, src, varargin)
         FFTW_LIB_PATH = '/usr/lib/x86_64-linux-gnu';  
         FFTW_LIBS = '-lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';
 		
-        BLAS_LIB_PATH = '/usr/lib/libblas';
+        BLAS_LIB_PATH = '/usr/lib/x86_64-linux-gnu/blas';
         BLAS_LIBS = '-lblas';
 		
-        LAPACK_LIB_PATH = '/usr/lib/lapack';
+        LAPACK_LIB_PATH = '/usr/lib/x86_64-linux-gnu/lapack';
         LAPACK_LIBS = '-llapack';
     end
     
