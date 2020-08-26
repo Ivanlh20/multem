@@ -34,14 +34,14 @@ input_multem.spec_dz = 0.5;
 % get spec slicing
 tic;
 input_multem.pn_model = 1;
-[atoms0, Slice0] = il_spec_slicing(input_multem);
+[atoms0, Slice0] = ilc_spec_slicing(input_multem);
 toc;
 
 [nslice0, ~] = size(Slice0);
 
 tic;
 input_multem.pn_model = 3;
-[atoms, Slice] = il_spec_slicing(input_multem);
+[atoms, Slice] = ilc_spec_slicing(input_multem);
 toc;
 
 [nslice, ~] = size(Slice);

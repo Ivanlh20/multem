@@ -31,8 +31,8 @@ na = 4; nb = 4; nc = 4; ncu = 2; rms3d = 0.085;
 input_multem.nx = 2048; 
 input_multem.ny = 2048;
 
-clear il_spec_slicing;
-[atoms, Slice] = il_spec_slicing(input_multem);
+clear ilc_spec_slicing;
+[atoms, Slice] = ilc_spec_slicing(input_multem);
 
 [natoms,~] = size(atoms); [nslice, ~] = size(Slice);
 for islice = 1:nslice
@@ -41,15 +41,15 @@ for islice = 1:nslice
     system_conf.device = 1;                        % eD_CPU = 1, eD_GPU = 2
     system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
     tic;
-    clear il_projected_potential;
-    ouput_multislice_1 = il_projected_potential(system_conf, input_multem);
+    clear ilc_projected_potential;
+    ouput_multislice_1 = ilc_projected_potential(system_conf, input_multem);
     toc;
     
     system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
     system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
     tic;
-    clear il_projected_potential;
-    ouput_multislice_2 = il_projected_potential(system_conf, input_multem);
+    clear ilc_projected_potential;
+    ouput_multislice_2 = ilc_projected_potential(system_conf, input_multem);
     toc;
     mean(abs(ouput_multislice_1.V(:)-ouput_multislice_2.V(:)))
     

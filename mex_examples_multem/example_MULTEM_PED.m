@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % 
 % Precession electron diffraction (PED) simulation
 % 
@@ -67,7 +67,7 @@ input_multem.temporal_spatial_incoh = 1;         % 1: Temporal and Spatial, 2: T
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%% source spread function %%%%%%%%%%%%
-ssf_sigma = il_mrad_2_sigma(input_multem.E_0, 0.02);  % mrad to standard deviation
+ssf_sigma = ilc_mrad_2_sigma(input_multem.E_0, 0.02);  % mrad to standard deviation
 input_multem.obj_lens_ssf_sigma = ssf_sigma;          % standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
 input_multem.obj_lens_ssf_npoints = 4;                % # of integration points. It will be only used if illumination_model=4
 
@@ -80,9 +80,9 @@ input_multem.obj_lens_outer_aper_ang = 0.0;   % Outer aperture (mrad)
 input_multem.ped_nrot = 30;       % number of orientations
 input_multem.ped_theta = 3.0;      % Precession angle (degrees)
 
-clear il_multem;
+clear ilc_multem;
 tic;
-output_multislice = il_multem(system_conf, input_multem); 
+output_multislice = ilc_multem(system_conf, input_multem); 
 toc;
 
 c = 1e7;

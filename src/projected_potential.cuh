@@ -254,7 +254,7 @@ namespace mt
 					{
 						atom_Vp_h[istream].z0h = 0.5*(z_0 - this->atoms.z[iatoms]); 
 						atom_Vp_h[istream].zeh = 0.5*(z_e - this->atoms.z[iatoms]);
-						atom_Vp_h[istream].split = (atom_Vp_h[istream].z0h<0)&&(0<atom_Vp_h[istream].zeh);
+						atom_Vp_h[istream].split = (atom_Vp_h[istream].z0h<0) && (0<atom_Vp_h[istream].zeh);
 						atom_Vp_h[istream].cl = raw_pointer_cast(coef.Vr.cl.data());
 						atom_Vp_h[istream].cnl = raw_pointer_cast(coef.Vr.cnl.data());
 						atom_Vp_h[istream].c0 = raw_pointer_cast(stream_data.c0[istream].data());

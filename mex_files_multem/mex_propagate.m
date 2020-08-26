@@ -1,3 +1,4 @@
 clc; clear all;
+addpath( '../matlab_functions')
 
-ilm_mex('release', 'il_propagate.cu', '../src');
+ilm_mex('release', 'ilc_propagate.cu', '../src');

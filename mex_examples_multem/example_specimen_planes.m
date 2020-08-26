@@ -46,7 +46,7 @@ lay_pos = 2; %1: top, 2: bottom
 z_min = min(input_multem.spec_atoms(:, 4));
 z_max = max(input_multem.spec_atoms(:, 4));
 tic;
-input_multem.spec_atoms = il_add_amorp_lay(input_multem.spec_atoms, input_multem.spec_lx, input_multem.spec_ly, lz, d_min, Z, rms_3d, rho, lay_pos, seed);
+input_multem.spec_atoms = ilc_add_amorp_lay(input_multem.spec_atoms, input_multem.spec_lx, input_multem.spec_ly, lz, d_min, Z, rms_3d, rho, lay_pos, seed);
 toc;
 
 if(lay_pos==1)
@@ -70,7 +70,7 @@ z_min = min(input_multem.spec_atoms(:, 4));
 z_max = max(input_multem.spec_atoms(:, 4));
 
 tic;
-input_multem.spec_atoms = il_add_amorp_lay(input_multem.spec_atoms, input_multem.spec_lx, input_multem.spec_ly, lz, d_min, Z, rms_3d, rho, lay_pos, seed);
+input_multem.spec_atoms = ilc_add_amorp_lay(input_multem.spec_atoms, input_multem.spec_lx, input_multem.spec_ly, lz, d_min, Z, rms_3d, rho, lay_pos, seed);
 toc;
 
 if(lay_pos==1)
@@ -88,7 +88,7 @@ ilm_show_crystal(1, input_multem.spec_atoms)
 
 clc;
 tic;
-[z_planes] = il_spec_planes(input_multem);
+[z_planes] = ilc_spec_planes(input_multem);
 toc;
 diff(z_planes)
 [nplanes, ~] = size(z_planes);
@@ -112,7 +112,7 @@ axis([-2, 18, min(input_multem.spec_atoms(:, 4))-5, max(input_multem.spec_atoms(
 
 % nbins = floor((max(input_multem.spec_atoms(:, 4))-min(input_multem.spec_atoms(:, 4)))/0.10001);
 % tic;
-% [x, y] = il_hist(input_multem.spec_atoms(:, 4), nbins-1);
+% [x, y] = ilc_hist(input_multem.spec_atoms(:, 4), nbins-1);
 % toc;
 % 
 % figure(2); clf;

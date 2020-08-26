@@ -22,7 +22,7 @@ xtl_parm.uLayer(1).atoms = [79, 0.0, 0.0, 0.0, rmsd_3d, occ, region, charge; 79,
 xtl_parm.uLayer(2).atoms = [79, 0.0, 0.5, 0.5, rmsd_3d, occ, region, charge; 79, 0.5, 0.0, 0.5, rmsd_3d, occ, region, charge];
 
 tic;
-Crys3D = il_crystal_by_lays(xtl_parm);
+Crys3D = ilc_crystal_by_lays(xtl_parm);
 toc;
 
 na = 1;

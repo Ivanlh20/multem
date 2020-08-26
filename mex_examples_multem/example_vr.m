@@ -14,12 +14,12 @@ rmin = 1e-02; rmax = 5.0; nr = 512;
 dlnr = log(rmax/rmin)/(nr-1); r = rmin*exp((0:1:(nr-1))*dlnr);
 
 tic;
-[f1, df1] = il_vr(1, Z, charge, r);
-[f2, df2] = il_vr(2, Z, charge, r);
-[f3, df3] = il_vr(3, Z, charge, r);
-[f4, df4] = il_vr(4, Z, charge, r);
-[f5, df5] = il_vr(5, Z, charge, r);
-[f6, df6] = il_vr(6, Z, charge, r);
+[f1, df1] = ilc_vr(1, Z, charge, r);
+[f2, df2] = ilc_vr(2, Z, charge, r);
+[f3, df3] = ilc_vr(3, Z, charge, r);
+[f4, df4] = ilc_vr(4, Z, charge, r);
+[f5, df5] = ilc_vr(5, Z, charge, r);
+[f6, df6] = ilc_vr(6, Z, charge, r);
 toc;
 
 figure(1); clf;

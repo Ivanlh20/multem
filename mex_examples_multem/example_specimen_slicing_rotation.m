@@ -43,7 +43,7 @@ input_multem.spec_lz = 100;
 [input_multem.spec_atoms] = ilm_center_spec(input_multem.spec_atoms, input_multem.spec_lx, input_multem.spec_ly, input_multem.spec_lz);
 
 % get spec slicing
-[atoms, Slice] = il_spec_slicing(input_multem);
+[atoms, Slice] = ilc_spec_slicing(input_multem);
 
 ilm_show_crystal(1, atoms);
 

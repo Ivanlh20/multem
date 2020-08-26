@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % 
 % Exit wave real space (EWRS) simulation
 % 
@@ -27,7 +27,7 @@ rot_point_type = 1;                         % 1: geometric center, 2: User defin
 p0 = [0 0 0];                               % rotation point
 
 % rotate specimen
-atoms_r = il_spec_rot(atoms, theta, u0, rot_point_type, p0);
+atoms_r = ilc_spec_rot(atoms, theta, u0, rot_point_type, p0);
 figure(1); clf;
 
 subplot(1, 2, 1);

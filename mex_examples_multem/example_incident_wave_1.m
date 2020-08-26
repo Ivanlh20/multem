@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % Incident wave simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
@@ -55,7 +55,7 @@ for x = (0.4:0.025:0.6)*input_multem.spec_lx
         input_multem.iw_y = y;
 
         tic;
-        output_incident_wave = il_incident_wave(system_conf, input_multem); 
+        output_incident_wave = ilc_incident_wave(system_conf, input_multem); 
         toc;
         psi_0 = output_incident_wave.psi_0;
         sum(abs(output_incident_wave.psi_0(:)).^2)

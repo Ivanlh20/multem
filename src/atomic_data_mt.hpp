@@ -80,7 +80,7 @@ namespace mt
 		for(int iatoms = 0; iatoms<atoms.size(); iatoms++)
 		{
 			const auto z = atoms.z[iatoms];
-			if((z_0<z)&&(z<z_e))
+			if((z_0<z) && (z<z_e))
 			{
 				atoms.Z[iatoms_z] = atoms.Z[iatoms];
 				atoms.x[iatoms_z] = atoms.x[iatoms];
@@ -383,7 +383,7 @@ namespace mt
 				size_type iatoms_c = 0;
 				for(auto iatoms = 0; iatoms < atoms.size(); iatoms++)
 				{
-					if((!pbc_xy_i)||((atoms.x[iatoms]<lx_b)&&(atoms.y[iatoms]<ly_b)))
+					if((!pbc_xy_i)||((atoms.x[iatoms]<lx_b) && (atoms.y[iatoms]<ly_b)))
 					{
 						Z[iatoms_c] = atoms.Z[iatoms];
 						x[iatoms_c] = atoms.x[iatoms];
@@ -766,7 +766,7 @@ namespace mt
 				bool is_xy_positive() const
 				{
 					const T ee = 1e-4;
-					return (-ee<x)&&(-ee<y);
+					return (-ee<x) && (-ee<y);
 				}
 			};
 

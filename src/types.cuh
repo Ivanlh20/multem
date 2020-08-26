@@ -644,14 +644,14 @@ namespace mt
 	DEVICE_CALLABLE FORCE_INLINE
 	bool Check_Bound(const T &x, const T &x_min, const T &x_max)
 	{
-		return (x_min <= x)&&(x <= x_max);
+		return (x_min <= x) && (x <= x_max);
 	}
 
 	template <class T, class U>
 	DEVICE_CALLABLE FORCE_INLINE
 	bool Check_Bound(const T &x, const T &x_min, const T &x_max, const U &y, const U &y_min, const U &y_max)
 	{
-		return (x_min <= x)&&(x <= x_max)&&(y_min <= y)&&(y <= y_max);
+		return (x_min <= x) && (x <= x_max) && (y_min <= y) && (y <= y_max);
 	}
 
 
@@ -789,13 +789,13 @@ namespace mt
 		DEVICE_CALLABLE FORCE_INLINE
  		bool chk_ix_bound(const int &ix) const
 		{
-			return (ix_0<=ix)&&(ix<ix_e);
+			return (ix_0<=ix) && (ix<ix_e);
 		}
 
 		DEVICE_CALLABLE FORCE_INLINE
  		bool chk_iy_bound(const int &iy) const
 		{
-			return (iy_0<=iy)&&(iy<iy_e);
+			return (iy_0<=iy) && (iy<iy_e);
 		}
 
 		DEVICE_CALLABLE FORCE_INLINE
@@ -896,7 +896,7 @@ namespace mt
 
 		bool chk_bound(const T &x) const
 		{
-			return (x_0()<=x)&&(x<=x_e());
+			return (x_0()<=x) && (x<=x_e());
 		}
 
 		void shift(T dx)
@@ -1046,12 +1046,12 @@ namespace mt
 
 		bool chk_x_bound(const T &x) const
 		{
-			return (x_0()<=x)&&(x<=x_e());
+			return (x_0()<=x) && (x<=x_e());
 		}
 
 		bool chk_y_bound(const T &y) const
 		{
-			return (y_0()<=y)&&(y<=y_e());
+			return (y_0()<=y) && (y<=y_e());
 		}
 
 		bool chk_bound(const T &x, const T &y) const
@@ -1115,7 +1115,7 @@ namespace mt
 			for(auto iatoms = 0; iatoms < atoms.size(); iatoms++)
 			{
 				auto z = atoms.z[iatoms];
-				if((z_0<z)&&(z<z_e))
+				if((z_0<z) && (z<z_e))
 				{
 					f_region += atoms.region[iatoms];
 					c_region++;
@@ -1200,7 +1200,7 @@ namespace mt
 
 				for(auto iz = 0; iz < v_hist.size()-1; iz++)
 				{
-					if((v_hist[iz]>0)&&(v_hist[iz+1]==0))
+					if((v_hist[iz]>0) && (v_hist[iz+1]==0))
 					{
 						v_lim.push_back(v.front()+(iz+1)*dv);
 					}
@@ -1326,7 +1326,7 @@ namespace mt
 	 {
 	  v_imin = v_min + (ik-1)*dv;
 	  v_imax = v_imin + dv;
-	  if((v_imin<=v_id)&&(v_id<v_imax))
+	  if((v_imin<=v_id) && (v_id<v_imax))
 	  {
 		ih = ik-1;
 		break;
@@ -1339,7 +1339,7 @@ namespace mt
 	 {
 	  v_imin = v_min + ik*dv;
 	  v_imax = v_imin + dv;
-	  if((v_imin<=v_id)&&(v_id<v_imax))
+	  if((v_imin<=v_id) && (v_id<v_imax))
 	  {
 		ih = ik;
 		break;
@@ -1358,7 +1358,7 @@ namespace mt
 				for(auto ih = 1; ih < v_hist.size()-1; ih++)
 				{
 					bool bn = (ih<v_hist.size()-2)?(0<v_hist[ih+2]):false;
-					bn = (0<v_hist[ih-1])&&((0<v_hist[ih+1])||bn);
+					bn = (0<v_hist[ih-1]) && ((0<v_hist[ih+1])||bn);
 					if((v_hist[ih]==0) && bn)
 					{
 						v_hist[ih] = 1;
@@ -1814,7 +1814,7 @@ namespace mt
 
 								auto p = p7*p5*p3*p2;
 
-								if((prime_0<p)&&(p<=prime_e))
+								if((prime_0<p) && (p<=prime_e))
 								{
 									number.push_back(p);
 								}
@@ -3464,7 +3464,7 @@ namespace mt
 				for(auto i = 0; i < size(); i++)
 				{
 					auto atom = read_atom(nr_atoms_i, nc_atoms_i, atoms_i, i);
-					if((!pbc_xy_i)||((atom.x<lx_b)&&(atom.y<ly_b)))
+					if((!pbc_xy_i)||((atom.x<lx_b) && (atom.y<ly_b)))
 					{
 						x[j] = atom.x; 				// x-position
 						y[j] = atom.y; 				// y-position
@@ -3494,7 +3494,7 @@ namespace mt
 				size_type j = 0;
 				for(auto i = 0; i < size(); i++)
 				{
-					if((!pbc_xy_i)||((atoms.x[i]<lx_b)&&(atoms.y[i]<ly_b)))
+					if((!pbc_xy_i)||((atoms.x[i]<lx_b) && (atoms.y[i]<ly_b)))
 					{
 						x[j] = atoms.x[i]; 				// x-position
 						y[j] = atoms.y[i]; 				// y-position
@@ -4188,6 +4188,7 @@ namespace mt
 			eScanning_Type type;			// 1: Line, 2: Area,
 			eGrid_Type grid_type;			// 1: regular, 2: quadratic
 			bool pbc;						// periodic boundary conditions
+			bool spxs;						// square pixel size
 			int ns; 						// Number of sampling points
 			int nx;
 			int ny;
@@ -4207,7 +4208,7 @@ namespace mt
 				return x.size();
 			}
 
-			Scanning(): type(eST_Line), grid_type(eGT_Regular), pbc(false), ns(1),
+			Scanning(): type(eST_Line), grid_type(eGT_Regular), pbc(false), spxs(true), ns(1),
 				nx(0), dRx(0), dRy(0), ny(0), x0(0), y0(0), xe(0), ye(0) {};
 
 			template <class TScanning>
@@ -4216,6 +4217,7 @@ namespace mt
 				type = scanning.type;
 				grid_type = scanning.grid_type;
 				pbc = scanning.pbc;
+				spxs = scanning.spxs;
 				ns = scanning.ns;
 				nx = scanning.nx;
 				ny = scanning.ny;
@@ -4243,6 +4245,7 @@ namespace mt
 				type = eST_Line;
 				grid_type = eGT_Regular;
 				pbc = false;
+				spxs = true;
 				ns = 1;
 				x0 = y0 = 0;
 				xe = ye = 0;
@@ -4348,8 +4351,10 @@ namespace mt
 						dRy = std::copysign(dRx, yu);
 						ny = int(floor(yu/dRy+Epsilon<T>::rel+0.5));
 						ny += (pbc)?0:1;
+						ny += (pbc)?0:1;
 
-						// dRy = yu/((pbc)?ny:(ny-1)); // temporal fix
+						if(!spxs)
+							dRy = yu/((pbc)?ny:(ny-1));
 					}
 					else
 					{
@@ -4358,7 +4363,8 @@ namespace mt
 						nx = int(floor(xu/dRx+Epsilon<T>::rel+0.5));
 						nx += (pbc)?0:1;
 
-						// dRx = xu/((pbc)?nx:(nx-1)); // temporal fix
+						if(!spxs)
+							dRx = xu/((pbc)?nx:(nx-1));
 					}
 
 					x.resize(nxy());

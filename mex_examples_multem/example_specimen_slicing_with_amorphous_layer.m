@@ -40,7 +40,7 @@ lay_pos = 2; %1: top, 2: bottom
 z_min = min(input_multem.spec_atoms(:, 4));
 z_max = max(input_multem.spec_atoms(:, 4));
 tic;
-input_multem.spec_atoms = il_add_amorp_lay(input_multem.spec_atoms, input_multem.spec_lx, input_multem.spec_ly, lz, d_min, Z, rms_3d, rho, lay_pos, seed);
+input_multem.spec_atoms = ilc_add_amorp_lay(input_multem.spec_atoms, input_multem.spec_lx, input_multem.spec_ly, lz, d_min, Z, rms_3d, rho, lay_pos, seed);
 toc;
 
 if(lay_pos==1)
@@ -64,7 +64,7 @@ input_multem.spec_amorp(1).dz = 2.0;                    % slice thick of the amo
 % z_max = max(input_multem.spec_atoms(:, 4));
 % 
 % tic;
-% input_multem.spec_atoms = il_add_amorp_lay(input_multem.spec_atoms, input_multem.spec_lx, input_multem.spec_ly, lz, d_min, Z, rms_3d, rho, lay_pos, seed);
+% input_multem.spec_atoms = ilc_add_amorp_lay(input_multem.spec_atoms, input_multem.spec_lx, input_multem.spec_ly, lz, d_min, Z, rms_3d, rho, lay_pos, seed);
 % toc;
 % 
 % if(lay_pos==1)
@@ -81,7 +81,7 @@ input_multem.spec_amorp(1).dz = 2.0;                    % slice thick of the amo
 
 clc;
 tic;
-[atoms, Slice] = il_spec_slicing(input_multem);
+[atoms, Slice] = ilc_spec_slicing(input_multem);
 toc;
 disp([min(atoms(:, 4)), max(atoms(:,4))])
 
@@ -106,7 +106,7 @@ end
 axis([-2, 18, min(input_multem.spec_atoms(:, 4))-5, max(input_multem.spec_atoms(:, 4))+5]);
 
 tic;
-[z_planes] = il_spec_planes(input_multem);
+[z_planes] = ilc_spec_planes(input_multem);
 toc;
 nplanes = length(z_planes);
 for i = 1:nplanes

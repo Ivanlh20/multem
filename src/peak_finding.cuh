@@ -552,7 +552,7 @@ namespace mt
 					T y = v1*y1 + v2*y2 + v3*y3 + v4*y1 + v*y2 + v6*y3 + v7*y1 + v8*y2 + v9*y3;
 					peak = r2d<T>(x, y)/v_s;
 
-					return (v1<=v)&&(v2<=v)&&(v3<=v)&&(v4<=v)&&(v6<=v)&&(v7<=v)&&(v8<=v)&&(v9<=v);
+					return (v1<=v) && (v2<=v) && (v3<=v) && (v4<=v) && (v6<=v) && (v7<=v) && (v8<=v) && (v9<=v);
 				};
 
 				auto npeaks_m = static_cast<int>(ceil(grid_2d.lx*grid_2d.ly/(c_Pi*sigma*sigma)));

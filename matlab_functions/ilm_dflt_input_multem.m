@@ -203,6 +203,7 @@ function [input_multem] = ilm_dflt_input_multem()
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.scanning_type = 1;                 			% eST_Line = 1, eST_Area = 2
     input_multem.scanning_periodic = 1;             			% 1: true, 0:false (periodic boundary conditions)
+    input_multem.scanning_square_pxs = 1;             			% 0: false, 1: true
     input_multem.scanning_ns = 10;                  			% number of sampling points
     input_multem.scanning_x0 = 0.0;                 			% x-starting point (Å)
     input_multem.scanning_y0 = 0.0;                 			% y-starting point (Å)

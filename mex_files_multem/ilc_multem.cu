@@ -260,6 +260,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	{
 		input_multislice.scanning.type = mx_get_scalar_field<mt::eScanning_Type>(mx_input_multislice, "scanning_type");
 		input_multislice.scanning.pbc = mx_get_scalar_field<bool>(mx_input_multislice, "scanning_periodic");
+		input_multislice.scanning.spxs = mx_get_scalar_field<bool>(mx_input_multislice, "scanning_square_pxs");
 		input_multislice.scanning.ns = mx_get_scalar_field<int>(mx_input_multislice, "scanning_ns");
 		input_multislice.scanning.x0 = mx_get_scalar_field<T_r>(mx_input_multislice, "scanning_x0");
 		input_multislice.scanning.y0 = mx_get_scalar_field<T_r>(mx_input_multislice, "scanning_y0");

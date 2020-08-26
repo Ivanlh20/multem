@@ -2031,7 +2031,7 @@ namespace mt
 							T y_thr = 0.61*y_pk[ix_max];
 							for(auto ix=0; ix<x_pk.size(); ix++)
 							{
-								if((ix!=ix_max)&&(y_thr<y_pk[ix]))
+								if((ix!=ix_max) && (y_thr<y_pk[ix]))
 								{
 									return fd_shift(icol, M_r, M_s);
 								}
@@ -2115,7 +2115,7 @@ namespace mt
 						{
 							if(y[ix]>y_thr)
 							{
-								if((y[ix-1]<y[ix])&&(y[ix+1]<y[ix]))
+								if((y[ix-1]<y[ix]) && (y[ix+1]<y[ix]))
 								{
 									ix_pk[ic] = ix;
 									x_pk[ic] = grid_1d.Rx(ix);
@@ -2135,7 +2135,7 @@ namespace mt
 						int ic = 0;
 						for(auto ix=0; ix<size(); ix++)
 						{
-							if((x_min<=x_pk[ix])&&(x_pk[ix]<=x_max))
+							if((x_min<=x_pk[ix]) && (x_pk[ix]<=x_max))
 							{
 								ix_pk[ic] = ix_pk[ix];
 								x_pk[ic] = x_pk[ix];

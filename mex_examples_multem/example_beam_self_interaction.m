@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
 
@@ -53,7 +53,7 @@ input_multem.iw_y = 0.5*input_multem.spec_ly;
 ax = 0:input_multem.spec_lx/input_multem.nx:input_multem.spec_lx;
 ay = 0:input_multem.spec_ly/input_multem.ny:input_multem.spec_ly;
 
-df0 = il_scherzer_defocus(input_multem.E_0, input_multem.cond_lens_c_30);
+df0 = ilc_scherzer_defocus(input_multem.E_0, input_multem.cond_lens_c_30);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%% simulation box size %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,7 +67,7 @@ input_multem.iw_y = 0.5*input_multem.spec_ly;
 %%%%%%%%%%%%%The incoming beam at Scherzer defocus at z=0 %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.cond_lens_c_10 = df0;
-output_incident_wave = il_incident_wave(system_conf, input_multem); 
+output_incident_wave = ilc_incident_wave(system_conf, input_multem); 
 psi_i = output_incident_wave.psi_0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -75,7 +75,7 @@ psi_i = output_incident_wave.psi_0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 thk = 250;
 input_multem.cond_lens_c_10 = (df0+thk);
-output_incident_wave = il_incident_wave(system_conf, input_multem); 
+output_incident_wave = ilc_incident_wave(system_conf, input_multem); 
 psi_o = output_incident_wave.psi_0;
 
 
@@ -103,7 +103,7 @@ input_multem.iw_y = 0.5*input_multem.spec_ly;
 %%%%%%%%%%%%%The incoming beam at Scherzer defocus at z=0 %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.cond_lens_c_10 = df0;
-output_incident_wave = il_incident_wave(system_conf, input_multem); 
+output_incident_wave = ilc_incident_wave(system_conf, input_multem); 
 psi_i = output_incident_wave.psi_0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -111,7 +111,7 @@ psi_i = output_incident_wave.psi_0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 thk = 250;
 input_multem.cond_lens_c_10 = (df0+thk);
-output_incident_wave = il_incident_wave(system_conf, input_multem); 
+output_incident_wave = ilc_incident_wave(system_conf, input_multem); 
 psi_o = output_incident_wave.psi_0;
 
 

@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % Incident wave simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
@@ -52,12 +52,12 @@ input_multem.cond_lens_si_sigma = 0.2;             % standard deviation: For par
 input_multem.cond_lens_si_rad_npts = 8;             % # of integration points. It will be only used if illumination_model=4
 input_multem.cond_lens_zero_defocus_type = 1;  % eZDT_First = 1, eZDT_User_Define = 4
 input_multem.cond_lens_zero_defocus_plane = 0;
-input_multem.cond_lens_c_10 = il_scherzer_defocus(input_multem.E_0, input_multem.cond_lens_c_30);  
+input_multem.cond_lens_c_10 = ilc_scherzer_defocus(input_multem.E_0, input_multem.cond_lens_c_30);  
 
 input_multem.cond_lens_c_10 = input_multem.cond_lens_c_10;
 
 tic;
-output_incident_wave = il_incident_wave(system_conf, input_multem); 
+output_incident_wave = ilc_incident_wave(system_conf, input_multem); 
 toc;
 
 psi_0 = flipud(output_incident_wave.psi_0);

@@ -195,7 +195,7 @@ namespace mt
 			{
 				TVector_r z_slice;
 
-				if((pot_sli!=ePS_dz_Sub)&&(z_plane.size() == 1))
+				if((pot_sli!=ePS_dz_Sub) && (z_plane.size() == 1))
 				{
 					z_slice.resize(2);
 					z_slice[0] = atoms.z_int_min;
@@ -270,7 +270,7 @@ namespace mt
 					{
 						for(auto i = 0; i<z_slice.size()-1; i++)
 						{
-							if((z_slice[i] < z)&&(z <= z_slice[i+1]))
+							if((z_slice[i] < z) && (z <= z_slice[i+1]))
 							{
 								return i;
 							}
