@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % Electron diffraction (ED) simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
@@ -58,9 +58,9 @@ input_multem.E_0 = 300;                          % Acceleration Voltage (keV)
 input_multem.theta = 0.0;                        % Till ilumination (º)
 input_multem.phi = 0.0;                          % Till ilumination (º)
 
-clear il_multem;
+clear ilc_multem;
 tic;
-output_multislice = il_multem(system_conf, input_multem); 
+output_multislice = ilc_multem(system_conf, input_multem); 
 toc;
 
 c = 1e6;

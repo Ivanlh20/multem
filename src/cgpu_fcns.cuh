@@ -280,7 +280,7 @@ namespace mt
 					fxe = fx;
 				}
 				it++;
-			}while((fabs(fx)>Tol)&&(it < itMax));
+			}while((fabs(fx)>Tol) && (it < itMax));
  
 			return x;
 		}
@@ -358,7 +358,7 @@ namespace mt
 		void int_Vz_z0_ze(TFn fn, const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y)
 		{
 			using T = Value_type<TrPP_Coef>;
-			bool split = (z0<0)&&(0<ze);
+			bool split = (z0<0) && (0<ze);
 			T a = (split)?-0.5*z0:0.5*(ze-z0); 
 			T b = (split)?0.5*z0:0.5*(ze+z0);
 			T zi, ri, yi, R2 = R*R;
@@ -390,7 +390,7 @@ namespace mt
 		void int_Vz_dVz_z0_ze(TFn fn, const Value_type<TrPP_Coef> &z0, const Value_type<TrPP_Coef> &ze, const Value_type<TrPP_Coef> &R, const TrPP_Coef &rcoef, const TrQ1 &rq1, Value_type<TrPP_Coef> &y, Value_type<TrPP_Coef> &dy)
 		{
 			using T = Value_type<TrPP_Coef>;
-			bool split = (z0<0)&&(0<ze);
+			bool split = (z0<0) && (0<ze);
 			T a = (split)?-0.5*z0:0.5*(ze-z0); 
 			T b = (split)?0.5*z0:0.5*(ze+z0);
 			T zi, ri, yi, dyi, R2 = R*R;
@@ -1784,7 +1784,7 @@ namespace mt
 		const Value_type<TGrid> &g2_min, const Value_type<TGrid> &g2_max, const TVector &M_i, Value_type<TGrid> &sum)
 		{
 			auto g2 = grid_2d.g2_shift(ix, iy);
-			if((g2_min <= g2)&&(g2 <= g2_max))
+			if((g2_min <= g2) && (g2 < g2_max))
 			{
 				int ixy = grid_2d.ind_col(ix, iy); 
 				sum += M_i[ixy];
@@ -1797,7 +1797,7 @@ namespace mt
 		const Value_type<TGrid> &g2_min, const Value_type<TGrid> &g2_max, const TVector &M_i, Value_type<TGrid> &sum)
 		{
 			auto g2 = grid_2d.g2_shift(ix, iy);
-			if((g2_min < g2)&&(g2 <= g2_max))
+			if((g2_min <= g2) && (g2 < g2_max))
 			{
 				int ixy = grid_2d.ind_col(ix, iy);
 				sum += norm(M_i[ixy]);
@@ -1829,7 +1829,7 @@ namespace mt
 			const int ixy = grid_2d.ind_col(ix, iy); 
 			const auto g2 = grid_2d.g2_shift(ix, iy);
 
-			M_io[ixy] = ((g2 <= g2_max))?(T(w)*M_io[ixy]):0;
+			M_io[ixy] = ((g2 < g2_max))?(T(w)*M_io[ixy]):0;
 		}
 
 		template <class TGrid, class TVector_c>
@@ -1955,7 +1955,7 @@ namespace mt
 
 			complex<T> v = 0;
 
-			if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
+			if((lens.g2_min <= g2) && (g2 < lens.g2_max))
 			{
 				auto g4 = g2*g2;
 				auto g6 = g4*g2;
@@ -2015,7 +2015,7 @@ namespace mt
 			int ixy = grid_2d.ind_col(ix, iy);
 			T_r g2 = grid_2d.g2_shift(ix, iy);
 
-			if((lens.g2_min <= g2)&&(g2 < lens.g2_max))
+			if((lens.g2_min <= g2) && (g2 < lens.g2_max))
 			{			
 				T_r chi = g2*(lens.c_c_30*g2+lens.c_c_10);
 				T_r c = c_Pi*lens.si_theta_c*lens.ti_iehwgd;

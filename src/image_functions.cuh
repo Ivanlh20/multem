@@ -183,7 +183,7 @@ namespace mt
 
 			auto wedge_push = [ny](const int &ix, const int &iy, TVector &Im_i, std::deque<int> &wd)
 			{
-				while((!wd.empty())&&(Im_i[ix*ny+wd.back()]<= Im_i[ix*ny+iy]))
+				while((!wd.empty()) && (Im_i[ix*ny+wd.back()]<= Im_i[ix*ny+iy]))
 				{
 					wd.pop_back();
 				}
@@ -262,7 +262,7 @@ namespace mt
 
 			auto wedge_push = [ny](const int &ix, const int &iy, TVector &Im_i, std::deque<int> &wd)
 			{
-				while((!wd.empty())&&(Im_i[ix*ny+wd.back()]>= Im_i[ix*ny+iy]))
+				while((!wd.empty()) && (Im_i[ix*ny+wd.back()]>= Im_i[ix*ny+iy]))
 				{
 					wd.pop_back();
 				}
@@ -923,7 +923,7 @@ namespace mt
 	template <class TVector>
 	TVector ftr_poiss_dnois_1d(Stream<e_host> &stream, TVector &Im_i, int nkr_w, int nkr_m)
 	{
-		if((nkr_w == 0)&&(nkr_m == 0))
+		if((nkr_w == 0) && (nkr_m == 0))
 		{
 		 return Im_i;
 		}
@@ -946,7 +946,7 @@ namespace mt
 	template <class TGrid, class TVector>
 	TVector ftr_poiss_dnois_2d_br(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im_i, int nkr_w, int nkr_m)
 	{
-		if((nkr_w == 0)&&(nkr_m == 0))
+		if((nkr_w == 0) && (nkr_m == 0))
 		{
 			return Im_i;
 		}
@@ -969,7 +969,7 @@ namespace mt
 	template <class TGrid, class TVector>
 	TVector ftr_poiss_dnois_2d(Stream<e_host> &stream, TGrid &grid_2d, TVector &Im_i, int nkr_w, int nkr_m)
 	{
-		if((nkr_w == 0)&&(nkr_m == 0))
+		if((nkr_w == 0) && (nkr_m == 0))
 		{
 			return Im_i;
 		}
@@ -1032,7 +1032,7 @@ namespace mt
 		nx_o = max(int(floor(nx_i*shrink_factor)), 1);
 		ny_o = max(int(floor(ny_i*shrink_factor)), 1);
 
-		if((nx_i == nx_o)&&(ny_i == ny_o))
+		if((nx_i == nx_o) && (ny_i == ny_o))
 		{
 			Im_o.assign(Im_i.begin(), Im_i.end());
 			return Im_o;

@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % Scanning transmission electron microscopy (STEM) simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
@@ -14,7 +14,7 @@ input_multem = ilm_dflt_input_multem();          % Load default values;
 %%%%%%%%%%%%%%%%%%%%% Set system configuration %%%%%%%%%%%%%%%%%%%%%
 system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
 system_conf.device = 2;                              % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_nthread = 6;
+system_conf.cpu_nthread = 1;
 system_conf.gpu_device = 0;
 
 %%%%%%%%%%%%%%%%%%%% Set simulation experiment %%%%%%%%%%%%%%%%%%%%%
@@ -42,7 +42,7 @@ na = 8; nb = 8; nc = 5; ncu = 2; rms3d = 0.085;
 
 [input_multem.spec_atoms, input_multem.spec_lx...
 , input_multem.spec_ly, input_multem.spec_lz...
-, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rms3d);
+, a, b, c, input_multem.spec_dz] = Au110_xtl(na, nb, nc, ncu, rms3d);
 
 %%%%%%%%%%%%%%%%%%%%%% Specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.thick_type = 2;                     % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
@@ -75,12 +75,12 @@ input_multem.cond_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad)
 input_multem.cond_lens_outer_aper_ang = 21.0;  % Outer aperture (mrad)
 
 %%%%%%%%% defocus spread function %%%%%%%%%%%%
-dsf_sigma = il_iehwgd_2_sigma(32); % from defocus spread to standard deviation
+dsf_sigma = ilc_iehwgd_2_sigma(32); % from defocus spread to standard deviation
 input_multem.cond_lens_ti_sigma = dsf_sigma;   % standard deviation (�)
 input_multem.cond_lens_ti_npts = 5;         % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%%% source spread function %%%%%%%%%%%%
-ssf_sigma = il_hwhm_2_sigma(0.45); % half width at half maximum to standard deviation
+ssf_sigma = ilc_hwhm_2_sigma(0.45); % half width at half maximum to standard deviation
 input_multem.cond_lens_si_sigma = ssf_sigma;  	% standard deviation: For parallel ilumination(�^-1); otherwise (�)
 input_multem.cond_lens_si_rad_npts = 4;         % # of integration points. It will be only used if illumination_model=4
 
@@ -91,6 +91,7 @@ input_multem.cond_lens_zero_defocus_plane = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.scanning_type = 2; % eST_Line = 1, eST_Area = 2
 input_multem.scanning_periodic = 1;     % 1: true, 0:false (periodic boundary conditions)
+input_multem.scanning_square_pxs = 0;   % 0: false, 1: true
 input_multem.scanning_ns = 20;
 input_multem.scanning_x0 = 3*a;
 input_multem.scanning_y0 = 3*b;
@@ -105,10 +106,11 @@ input_multem.detector.cir(2).inner_ang = 80;  % Inner angle(mrad)
 input_multem.detector.cir(2).outer_ang = 160; % Outer angle(mrad)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% run multem %%%%%%%%%%%%%%%%%%%%%%%%%%
-clear il_multem;
+clear ilc_multem;
 tic;
-output_multislice = il_multem(system_conf, input_multem);
+output_multislice = ilc_multem(system_conf, input_multem);
 toc;
+output_multislice
 
 figure(1);
 for i=1:length(output_multislice.data)

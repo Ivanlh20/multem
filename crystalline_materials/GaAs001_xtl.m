@@ -13,13 +13,13 @@ function [atoms, lx, ly, lz, a, b, c, dz] = GaAs001_xtl(na, nb, nc, ncu, rms3d)
     region = 0;
     charge = 0;
     % Ga = 31, As = 33;
-    % Z charge x y z rms3d occupancy region charge
+    % Z x y z rms3d occupancy region charge
     xtl_parm.uLayer(1).atoms = [31, 0.00, 0.00, 0.00, rms3d, occ, region, charge; 31, 0.50, 0.50, 0.00, rms3d, occ, region, charge]; %Ga
     xtl_parm.uLayer(2).atoms = [33, 0.25, 0.25, 0.25, rms3d, occ, region, charge; 33, 0.75, 0.75, 0.25, rms3d, occ, region, charge]; %As
     xtl_parm.uLayer(3).atoms = [31, 0.00, 0.50, 0.50, rms3d, occ, region, charge; 31, 0.50, 0.00, 0.50, rms3d, occ, region, charge]; %Ga
     xtl_parm.uLayer(4).atoms = [33, 0.75, 0.25, 0.75, rms3d, occ, region, charge; 33, 0.25, 0.75, 0.75, rms3d, occ, region, charge]; %As
 
-    atoms = il_crystal_by_lays(xtl_parm);
+    atoms = ilc_crystal_by_lays(xtl_parm);
 
     dz = xtl_parm.c/ncu;
     lx = na*xtl_parm.a; ly = nb*xtl_parm.b; lz = nc*xtl_parm.c;

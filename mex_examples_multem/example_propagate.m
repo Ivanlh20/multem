@@ -50,9 +50,9 @@ input_multem.iw_x = input_multem.spec_lx/2;     % x position
 input_multem.iw_y = input_multem.spec_ly/2;     % y position
 
 input_multem.simulation_type = 52;                  % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, eTEMST_EWFS=51, eTEMST_EWRS=52, eTEMST_EELS=61, eTEMST_EFTEM=62
-clear il_multem;
+clear ilc_multem;
 tic;
-output_multislice = il_multem(system_conf, input_multem); 
+output_multislice = ilc_multem(system_conf, input_multem); 
 toc;
 
 input_multem.obj_lens_c_10 = 10;                      %Angs
@@ -66,7 +66,7 @@ system_conf.device = 1;                        % eD_CPU = 1, eD_GPU = 2
 system_conf.cpu_nthread = 2; 
 system_conf.gpu_device = 0;
 tic;
-output_propagate = il_propagate(system_conf, input_multem); 
+output_propagate = ilc_propagate(system_conf, input_multem); 
 toc;
 
 figure(1);

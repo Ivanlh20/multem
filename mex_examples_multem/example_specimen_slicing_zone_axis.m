@@ -32,7 +32,7 @@ input_multem.spec_dz = 5.0;
 view
 % get spec slicing
 tic;
-[atoms, Slice] = il_spec_slicing(input_multem);
+[atoms, Slice] = ilc_spec_slicing(input_multem);
 toc;
 [natoms,~] = size(atoms); [nslice, ~] = size(Slice);
 

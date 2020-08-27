@@ -12,12 +12,12 @@ Rmin = 1e-02; Rmax = 5.0; nR = 512;
 dlnR = log(Rmax/Rmin)/(nR-1); R = Rmin*exp((0:1:(nR-1))*dlnR);
 
 tic;
-[f1, df1] = il_vp(1, Z, charge, R);
-[f2, df2] = il_vp(2, Z, charge, R);
-[f3, df3] = il_vp(3, Z, charge, R); 
-[f4, df4] = il_vp(4, Z, charge, R);
-[f5, df5] = il_vp(5, Z, charge, R);
-[f6, df6] = il_vp(6, Z, charge, R);
+[f1, df1] = ilc_vp(1, Z, charge, R);
+[f2, df2] = ilc_vp(2, Z, charge, R);
+[f3, df3] = ilc_vp(3, Z, charge, R); 
+[f4, df4] = ilc_vp(4, Z, charge, R);
+[f5, df5] = ilc_vp(5, Z, charge, R);
+[f6, df6] = ilc_vp(6, Z, charge, R);
 toc;
 
 figure(1); clf;

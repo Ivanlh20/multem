@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>clear; clc;
 
@@ -92,9 +92,9 @@ input_multem.output_area_iy_0 = 1;                             % y-starting pixe
 input_multem.output_area_ix_e = 1;                             % x-final pixel
 input_multem.output_area_iy_e = 1;                             % y-final pixel
 
-clear il_wave_function;
+clear ilc_wave_function;
 tic;
-ouput_multislice = il_wave_function(system_conf, input_multem);
+ouput_multislice = ilc_wave_function(system_conf, input_multem);
 toc;
 
 figure(1);

@@ -363,7 +363,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.nyh))
+			if((ix < grid_2d.nx) && (iy < grid_2d.nyh))
 			{
 				host_device_detail::fft2_sft_bc(ix, iy, grid_2d, M_io);
 			}
@@ -376,7 +376,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			if((ix < grid_2d.nxh) && (iy < grid_2d.nyh))
 			{
 				host_device_detail::fft2_shift(ix, iy, grid_2d, M_io);
 			}
@@ -390,7 +390,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			if((ix < grid_2d.nxh) && (iy < grid_2d.nyh))
 			{
 				host_device_detail::fft2_shift(ix, iy, grid_2d, M_i, M_o);
 			}
@@ -403,7 +403,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			if((ix < grid_2d.nxh) && (iy < grid_2d.nyh))
 			{
 				host_device_detail::add_scale_shift_2d(ix, iy, grid_2d, w, M_i, range, M_o);
 			}
@@ -416,7 +416,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			if((ix < grid_2d.nxh) && (iy < grid_2d.nyh))
 			{
 				host_device_detail::add_scale_square_shift_2d(ix, iy, grid_2d, w, M_i, range, M_o);
 			}
@@ -429,7 +429,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::assign_crop(ix, iy, grid_2d, M_i, M_o);
 			}
@@ -442,7 +442,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			if((ix < grid_2d.nxh) && (iy < grid_2d.nyh))
 			{
 				host_device_detail::assign_crop_shift_2d(ix, iy, grid_2d, M_i, range, M_o);
 			}
@@ -455,7 +455,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			if((ix < grid_2d.nxh) && (iy < grid_2d.nyh))
 			{
 				host_device_detail::add_scale_crop_shift_2d(ix, iy, grid_2d, w, M_i, range, M_o);
 			}
@@ -468,7 +468,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nxh)&&(iy < grid_2d.nyh))
+			if((ix < grid_2d.nxh) && (iy < grid_2d.nyh))
 			{
 				host_device_detail::add_scale_square_crop_shift_2d(ix, iy, grid_2d, w, M_i, range, M_o);
 			}
@@ -587,7 +587,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::bandwidth_limit(ix, iy, grid_2d, M_io);
 			}
@@ -599,7 +599,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::hard_aperture(ix, iy, grid_2d, g2_max, w, M_io);
 			}
@@ -613,7 +613,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::propagate(ix, iy, grid_2d, w, gxu, gyu, psi_i, psi_o);
 			}
@@ -640,7 +640,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::exp_r_factor_2d_bc(ix, iy, grid_2d, alpha, gy, psi_i, psi_o);
 			}
@@ -654,7 +654,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::exp_r_factor_2d(ix, iy, grid_2d, gx, gy, psi_i, psi_o);
 			}
@@ -670,7 +670,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::mul_exp_r_factor_2d(ix, iy, grid_2d, gx, gy, psi_i, psi_o);
 			}
@@ -697,7 +697,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::exp_g_factor_2d_bc(ix, iy, grid_2d, alpha, Ry, psi_i, psi_o);
 			}
@@ -711,7 +711,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::exp_g_factor_2d(ix, iy, grid_2d, Rx, Ry, psi_i, psi_o);
 			}
@@ -727,7 +727,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::mul_exp_g_factor_2d(ix, iy, grid_2d, Rx, Ry, psi_i, psi_o);
 			}
@@ -742,7 +742,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{	
 				host_device_detail::probe(ix, iy, grid_2d, lens, x, y, gxu, gyu, fPsi_o);
 			}
@@ -756,7 +756,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{	
 				host_device_detail::apply_CTF(ix, iy, grid_2d, lens, gxu, gyu, fPsi_i, fPsi_o);
 			}
@@ -769,7 +769,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::apply_PCTF(ix, iy, grid_2d, lens, fPsi_i, fPsi_o);
 			}
@@ -828,7 +828,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::kernel_xyz(ix, iy, grid_2d, eels, k_x, k_y, k_z);
 			}
@@ -840,7 +840,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::kernel_x(ix, iy, grid_2d, eels, k_x);
 			}
@@ -852,7 +852,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::kernel_y(ix, iy, grid_2d, eels, k_y);
 			}
@@ -864,7 +864,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::kernel_z(ix, iy, grid_2d, eels, k_z);
 			}
@@ -876,7 +876,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::kernel_mn1(ix, iy, grid_2d, eels, k_mn1);
 			}
@@ -888,7 +888,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::kernel_mp1(ix, iy, grid_2d, eels, k_mp1);
 			}
@@ -901,7 +901,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < ncols)&&(iy < nrows))
+			if((ix < ncols) && (iy < nrows))
 			{
 				host_device_detail::trs(ix, iy, ncols, nrows, M_i, M_o);
 			}
@@ -915,7 +915,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::vector_col_x_matrix(ix, iy, grid_2d, fg, M_io);
 			}
@@ -942,7 +942,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::gauss_cv_2d(ix, iy, grid_2d, alpha, M_io);
 			}
@@ -969,7 +969,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::gauss_dcv_2d(ix, iy, grid_2d, alpha, PSNR, M_io);
 			}
@@ -1009,7 +1009,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d_i.nx)&&(iy < grid_2d_i.ny))
+			if((ix < grid_2d_i.nx) && (iy < grid_2d_i.ny))
 			{
 				host_device_detail::pcf_2d_bc_pp(ix, iy, iy_s, grid_2d_i, grid_2d_o, M_i, fh, M_o);
 			}
@@ -1023,7 +1023,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::pcf_2d_bc_gaussian(ix, iy, grid_2d, M_1, M_2, fg, pcf);
 			}
@@ -1037,7 +1037,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d_i.nx)&&(iy < grid_2d_i.ny))
+			if((ix < grid_2d_i.nx) && (iy < grid_2d_i.ny))
 			{
 				int ixy_i = grid_2d_o.ind_col(ix, iy+iy_s);
 				int ixy_o = grid_2d_i.ind_col(ix, iy);
@@ -1054,7 +1054,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::pcf_2d_pp(ix, iy, grid_2d, bw_2d, M_i, M_o);
 			}
@@ -1068,7 +1068,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d.nx)&&(iy < grid_2d.ny))
+			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
 				host_device_detail::pcf_2d_gaussian(ix, iy, grid_2d, gs_2d, M_1, M_2, pcf);
 			}
@@ -1081,7 +1081,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d_o.nx)&&(iy < grid_2d_o.ny))
+			if((ix < grid_2d_o.nx) && (iy < grid_2d_o.ny))
 			{
 				host_device_detail::sc_2d(ix, iy, grid_2d_i, M_i, fxy, grid_2d_o, M_o);
 			}
@@ -1095,7 +1095,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d_o.nx)&&(iy < grid_2d_o.ny))
+			if((ix < grid_2d_o.nx) && (iy < grid_2d_o.ny))
 			{
 				host_device_detail::rot_2d(ix, iy, grid_2d_i, M_i, theta, p0, bg, grid_2d_o, M_o);
 			}
@@ -1109,7 +1109,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d_o.nx)&&(iy < grid_2d_o.ny))
+			if((ix < grid_2d_o.nx) && (iy < grid_2d_o.ny))
 			{
 				host_device_detail::rot_sca_sft_2d(ix, iy, grid_2d_i, M_i, theta, p0, fx, fy, ps, bg, grid_2d_o, M_o);
 			}
@@ -1122,7 +1122,7 @@ namespace mt
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
-			if((ix < grid_2d_o.nx)&&(iy < grid_2d_o.ny))
+			if((ix < grid_2d_o.nx) && (iy < grid_2d_o.ny))
 			{
 				host_device_detail::shx_scy(ix, iy, grid_2d_i, M_i, fx, fy, bg, grid_2d_o, M_o);
 			}

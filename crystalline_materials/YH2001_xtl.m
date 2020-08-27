@@ -19,7 +19,7 @@ function [atoms, lx, ly, lz, a, b, c, dz] = YH2001_xtl(na, nb, nc, ncu, rms3d_Y,
     xtl_parm.uLayer(3).atoms = [39, 0.0, 0.5, 0.5, rms3d_Y, occ, region, charge; 39, 0.5, 0.0, 0.5, rms3d_Y, occ, region, charge];
     xtl_parm.uLayer(4).atoms = [1, 0.25, 0.25, 0.75, rms3d_H, occ, region, charge; 1, 0.75, 0.25, 0.75, rms3d_H, occ, region, charge; 1, 0.25, 0.75, 0.75, rms3d_H, occ, region, charge; 1, 0.75, 0.75, 0.75, rms3d_H, occ, region, charge];
 
-    atoms = il_crystal_by_lays(xtl_parm);
+    atoms = ilc_crystal_by_lays(xtl_parm);
 
     dz = xtl_parm.c/ncu;
     lx = na*xtl_parm.a; ly = nb*xtl_parm.b; lz = nc*xtl_parm.c;

@@ -16,7 +16,7 @@ seed = 1983;
 rho = 2.2;
 
 tic;
-atoms = il_amorp_spec(lx, ly, lz, d_min, Z, rms_3d, rho, seed);
+atoms = ilc_amorp_spec(lx, ly, lz, d_min, Z, rms_3d, rho, seed);
 toc;
 
 % path = strcat('input_spec\Si_',num2str(lx), 'x', num2str(ly), 'x', num2str(lz), '_', num2str(seed), '.mat');
@@ -37,7 +37,7 @@ ii = find((0.5*d<=atoms(:,2))&(atoms(:,2)<=lx-0.5*d)&(0.5*d<=atoms(:,3))&(atoms(
 density = length(atoms)*12.011/(lx0*ly0*lz0*NA*(1e-8)^3)
 
 tic;
-[r, rdf] = il_rdf_3d(atoms, 8, 200);
+[r, rdf] = ilc_rdf_3d(atoms, 8, 200);
 toc;
 
 figure(2); clf;

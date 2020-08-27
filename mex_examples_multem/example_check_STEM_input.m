@@ -113,9 +113,9 @@ tfm_check_stem_setup(input_multem, 1)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Run %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% clear il_multem;
+% clear ilc_multem;
 % tic;
-% output_multislice = il_multem(system_conf, input_multem); 
+% output_multislice = ilc_multem(system_conf, input_multem); 
 % toc;
 
 
