@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % Scanning transmission electron microscopy (STEM) simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
@@ -75,12 +75,12 @@ input_multem.cond_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad)
 input_multem.cond_lens_outer_aper_ang = 21.0;  % Outer aperture (mrad)
 
 %%%%%%%%% defocus spread function %%%%%%%%%%%%
-dsf_sigma = il_iehwgd_2_sigma(32); % from defocus spread to standard deviation
+dsf_sigma = ilc_iehwgd_2_sigma(32); % from defocus spread to standard deviation
 input_multem.cond_lens_ti_sigma = dsf_sigma;   % standard deviation (�)
 input_multem.cond_lens_ti_npts = 5;         % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%%% source spread function %%%%%%%%%%%%
-ssf_sigma = il_hwhm_2_sigma(0.45); % half width at half maximum to standard deviation
+ssf_sigma = ilc_hwhm_2_sigma(0.45); % half width at half maximum to standard deviation
 input_multem.cond_lens_si_sigma = ssf_sigma;  	% standard deviation: For parallel ilumination(�^-1); otherwise (�)
 input_multem.cond_lens_si_rad_npts = 4;         % # of integration points. It will be only used if illumination_model=4
 
@@ -102,9 +102,9 @@ input_multem.detector.type = 1;  % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix 
 input_multem.detector.cir(1).inner_ang = 40;  % Inner angle(mrad)
 input_multem.detector.cir(1).outer_ang = 160; % Outer angle(mrad)
 
-clear il_multem;
+clear ilc_multem;
 tic;
-output_radial_detector = il_multem(system_conf, input_multem);
+output_radial_detector = ilc_multem(system_conf, input_multem);
 toc;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Matrix Detector %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -135,9 +135,9 @@ axis image;
 colormap gray;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% run multem %%%%%%%%%%%%%%%%%%%%%%%%%%
-clear il_multem;
+clear ilc_multem;
 tic;
-output_matrix_detector = il_multem(system_conf, input_multem);
+output_matrix_detector = ilc_multem(system_conf, input_multem);
 toc;
 
 figure(2); clf;

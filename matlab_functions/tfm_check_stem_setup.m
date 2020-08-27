@@ -14,7 +14,7 @@ function tfm_check_stem_setup(input_multem, n_detector)
         input_multem.iw_x = 0.5*input_multem.spec_lx;
         input_multem.iw_y = 0.5*input_multem.spec_ly;
 
-        output_incident_wave = il_incident_wave(system_conf, input_multem); 
+        output_incident_wave = ilc_incident_wave(system_conf, input_multem); 
 
         psi_0 = output_incident_wave.psi_0;
         figure(1); clf
@@ -40,7 +40,7 @@ function tfm_check_stem_setup(input_multem, n_detector)
     function fcn_check_slicing(input_multem)
 
         % Slicing
-        [atoms, Slice] = il_spec_slicing(input_multem);   
+        [atoms, Slice] = ilc_spec_slicing(input_multem);   
         [nslice, ~] = size(Slice);
 
         figure(2); clf;

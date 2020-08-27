@@ -13,10 +13,10 @@ function [atoms, lx, ly, lz, a, b, c, dz] = Au110_xtl(na, nb, nc, ncu, rms3d)
     region = 0;
     charge = 0;
     % Au = 79
-    % Z charge x y z rms3d occupancy region charge
+    % Z x y z rms3d occupancy region charge
     xtl_parm.uLayer(1).atoms = [79, 0.00, 0.00, 0.00, rms3d, 1.0];
     xtl_parm.uLayer(2).atoms = [79, 0.50, 0.50, 0.50, rms3d, 1.0];
-    atoms = il_crystal_by_lays(xtl_parm);
+    atoms = ilc_crystal_by_lays(xtl_parm);
 
     dz = xtl_parm.c/ncu;
     lx = na*xtl_parm.a; ly = nb*xtl_parm.b; lz = nc*xtl_parm.c;

@@ -4,7 +4,7 @@
     ShortName="nvcc"
     HostCompiler="g++"    
     Manufacturer="NVIDIA"
-    Version="XXX_CUDA_VERSION"
+    Version="XXX_CUDA_VER"
     Language="CUDA"
     Priority="A"
     Location="$NVCC" >
@@ -26,18 +26,19 @@
           LinkerPathFormatter="-L%s"
     />
     <vars
-          CMDLINE1="$CXX -c $CXXFLAGS $OPTIM $DEFINES $INCLUDE $SRC -o $OBJ"
+          CMDLINE1="$CXX -c $NVCC_FLAGS $CXXFLAGS $OPTIM $DEFINES $INCLUDE $SRC -o $OBJ"
           CMDLINE2="$LDXX $LDFLAGS $LDTYPE $LINKOPTIM $LINKEXPORTVER $OBJS $CXXLIBS $LINKLIBS -o $EXE"
           CMDLINE3="rm -f $OBJ"
           
           MATLABMEX="-DMATLAB_MEX_FILE"
-          INCLUDE="-I&quot;$MATLABROOT/extern/include&quot; -I&quot;$MATLABROOT/simulink/include&quot;" 
+          INCLUDE="-I&quot;$MATLABROOT/extern/include&quot;" 
        
-          ARCH_FLAGS="-gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot; -gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot; -gencode=arch=compute_60,code=&#92;&quot;sm_60,compute_60&#92;&quot; -gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot;"
-		  NVCC_FLAGS="--std=c++11 --default-stream per-thread --expt-extended-lambda $ARCH_FLAGS"
+          ARCH_FLAGS="XXX_ARCH_FLAGS"
+          NVCC_FLAGS="--std=c++14 --default-stream per-thread --expt-extended-lambda --expt-relaxed-constexpr $ARCH_FLAGS"
           
           CXX="$NVCC"
-          CXXFLAGS="--compiler-options=-fexceptions,-fPIC,-fno-omit-frame-pointer,-pthread $NVCC_FLAGS"          
+          CFLAGS="--compiler-options=-fexceptions,-fPIC,-fno-omit-frame-pointer,-pthread,-fwrapv,-march=native"
+          CXXFLAGS="$CFLAGS"
           DEFINES="--compiler-options=-D_GNU_SOURCE,$MATLABMEX"
           CXXOPTIMFLAGS="-O2 -DNDEBUG"
           CXXDEBUGFLAGS="-g"
@@ -49,7 +50,8 @@
           LDDEBUGFLAGS="-g"
           
           LINKEXPORT="-Wl,--version-script,&quot;$MATLABROOT/extern/lib/$ARCH/mexFunction.map&quot;"
-          LINKLIBS="-Wl,-rpath-link,$MATLABROOT/bin/$ARCH -L&quot;$MATLABROOT/bin/$ARCH&quot; -lmx -lmex -lmat -lm -lstdc++"
+          LINKEXPORTVER="-Wl,--version-script,&quot;$MATLABROOT/extern/lib/$ARCH/c_exportsmexfileversion.map&quot;"
+          LINKLIBS="-Wl,-rpath-link,$MATLABROOT/bin/$ARCH -L&quot;$MATLABROOT/bin/$ARCH&quot; -lmx -lmex -lmat -lm -lstdc++ "
   
           OBJEXT=".o"
           LDEXT=".mexa64"
@@ -69,32 +71,35 @@
                 
     </vars>
     <locationFinder>
-        <NVCC diagnostic="Version XXX_CUDA_VERSION of the CUDA toolkit could not be found. If installed, set MW_NVCC_PATH environment variable to location of nvcc compiler." >
-            <and>
-                <or>
-                    <and> <!-- Search for nvcc in standard locations, favoring user variable MW_NVCC_PATH, but reject if it isn't the supported version -->
-                        <or>
-                            <and>
-                                <envVarExists name="MW_NVCC_PATH" />
-                                <fileExists name="$$/nvcc" />
-                            </and>
-                            <and>
-                                <envVarExists name="CUDA_BIN_PATH" />
-                                <fileExists name="$$/nvcc" />
-                            </and>
-                            <and>
-                                <envVarExists name="CUDA_PATH" />
-                                <fileExists name="$$/bin/nvcc" />
-                            </and>
-                            <cmdReturns name="which nvcc" />
-                            <fileExists name="/usr/local/cuda/bin/nvcc" />
-                        </or>
-                        <cmdReturns name="$$/nvcc --version | egrep -E 'release XXX_CUDA_VERSION' > /dev/null && echo $$/nvcc" />
-                    </and>
-                    <fileExists name="/usr/local/cuda-8.0/bin/nvcc" /> <!-- Search the default install location -->
-                </or>
-                <cmdReturns name="$$/nvcc --version | egrep -E 'release XXX_CUDA_VERSION' > /dev/null && echo $$/nvcc" />
-            </and>
+        <NVCC>
+            <or> <!-- Look for user-installed nvcc, otherwise use the shipped one -->
+                <and>
+                    <or>
+                        <and> <!-- Search for nvcc in standard locations, favoring user variable MW_NVCC_PATH, but reject if it isn't the supported version -->
+                            <or>
+                                <and>
+                                    <envVarExists name="MW_NVCC_PATH" />
+                                    <fileExists name="$$/nvcc" />
+                                </and>
+                                <and>
+                                    <envVarExists name="CUDA_BIN_PATH" />
+                                    <fileExists name="$$/nvcc" />
+                                </and>
+                                <and>
+                                    <envVarExists name="CUDA_PATH" />
+                                    <fileExists name="$$/bin/nvcc" />
+                                </and>
+                                <cmdReturns name="which nvcc" />
+                                <fileExists name="/usr/local/cuda/bin/nvcc" />
+                            </or>
+                            <cmdReturns name="$$/nvcc --version | egrep -E 'release XXX_CUDA_VER' > /dev/null && echo $$/nvcc" />
+                        </and>
+                        <fileExists name="/usr/local/cuda-XXX_CUDA_VER/bin/nvcc" /> <!-- Search the default install location -->
+                    </or>
+                    <cmdReturns name="$$/nvcc --version | egrep -E 'release XXX_CUDA_VER' > /dev/null && echo $$/nvcc" />
+                </and>
+                <fileExists name="$MATLABROOT/sys/cuda/glnxa64/cuda/bin/nvcc"/> <!-- No user-installed nvcc was found. Use the shipped -->
+            </or>
         </NVCC>
         <GCC>
             <cmdReturns name="which g++" />
@@ -103,5 +108,15 @@
             <cmdReturns name="g++ -print-file-name=libstdc++.so"
                         diagnostic="GCC appears to be installed, but supporting C++ libraries were not found.  You must first install the gcc-c++ package, or similiar, to complete this action."/>
         </CPPLIB_DIR>
+        <VER>
+            <cmdReturns name="g++ -dumpversion"/>
+        </VER>
+        <GCCDIR>
+            <cmdReturns name="which g++" />
+            <dirExists name="$$/../" />
+        </GCCDIR>
+        <GCC_TARGET>
+            <cmdReturns name="g++ -dumpmachine" />
+        </GCC_TARGET>
     </locationFinder>
 </config>

@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % Convergent beam electron Imaging (CBEI) simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
@@ -81,12 +81,12 @@ input_multem.cond_lens_inner_aper_ang = 0.0;    % Inner aperture (mrad)
 input_multem.cond_lens_outer_aper_ang = 21.0;   % Outer aperture (mrad)
 
 %%%%%%%%% defocus spread function %%%%%%%%%%%%
-dsf_sigma = il_iehwgd_2_sigma(32); % from defocus spread to standard deviation
+dsf_sigma = ilc_iehwgd_2_sigma(32); % from defocus spread to standard deviation
 input_multem.cond_lens_ti_sigma = dsf_sigma;   % standard deviation (Å)
 input_multem.cond_lens_ti_npts = 5;         % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%%% source spread function %%%%%%%%%%%%
-ssf_sigma = il_hwhm_2_sigma(0.45); % half width at half maximum to standard deviation
+ssf_sigma = ilc_hwhm_2_sigma(0.45); % half width at half maximum to standard deviation
 input_multem.cond_lens_si_sigma = ssf_sigma;  	% standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
 input_multem.cond_lens_si_rad_npts = 4;         % # of integration points. It will be only used if illumination_model=4
 
@@ -112,9 +112,9 @@ input_multem.obj_lens_ti_npts = 10;         % # of integration points. It will b
 input_multem.obj_lens_zero_defocus_type = 3;    % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 input_multem.obj_lens_zero_defocus_plane = 0;
 
-clear il_multem;
+clear ilc_multem;
 tic;
-output_multislice = il_multem(system_conf, input_multem); 
+output_multislice = ilc_multem(system_conf, input_multem); 
 toc;
 
 figure(1);

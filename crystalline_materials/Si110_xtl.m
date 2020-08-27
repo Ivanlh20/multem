@@ -16,7 +16,7 @@ function [atoms, lx, ly, lz, a, b, c, dz] = Si110_xtl(na, nb, nc, ncu, rms3d)
     % Z x y z rms3d occupancy charge 
     xtl_parm.uLayer(1).atoms = [14, 0.00, 0.00, 0.00, rms3d, occ, region, charge; 14, 0.50, 0.75, 0.00, rms3d, occ, region, charge];
     xtl_parm.uLayer(2).atoms = [14, 0.00, 0.25, 0.50, rms3d, occ, region, charge; 14, 0.50, 0.50, 0.50, rms3d, occ, region, charge];
-    atoms = il_crystal_by_lays(xtl_parm);
+    atoms = ilc_crystal_by_lays(xtl_parm);
 
     dz = xtl_parm.c/ncu;
     lx = na*xtl_parm.a; ly = nb*xtl_parm.b; lz = nc*xtl_parm.c;

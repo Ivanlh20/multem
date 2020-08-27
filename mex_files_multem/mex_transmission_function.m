@@ -1,3 +1,4 @@
 clc; clear all;
-  
-ilm_mex('release', 'il_transmission_function.cu', '../src');
+addpath( '../matlab_functions')
+
+ilm_mex('release', 'ilc_transmission_function.cu', '../src');

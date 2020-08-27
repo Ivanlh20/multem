@@ -14,12 +14,12 @@ gmin = 0; gmax = 20; ng = 512;
 dg = (gmax-gmin)/(ng-1); 
 g = gmin:dg:gmax;
 
-[f1, df1] = il_fxg(1, Z, charge, g);
-[f2, df2] = il_fxg(2, Z, charge, g);
-[f3, df3] = il_fxg(3, Z, charge, g);
-[f4, df4] = il_fxg(4, Z, charge, g);
-[f5, df5] = il_fxg(5, Z, charge, g);
-[f6, df6] = il_fxg(6, Z, charge, g);
+[f1, df1] = ilc_fxg(1, Z, charge, g);
+[f2, df2] = ilc_fxg(2, Z, charge, g);
+[f3, df3] = ilc_fxg(3, Z, charge, g);
+[f4, df4] = ilc_fxg(4, Z, charge, g);
+[f5, df5] = ilc_fxg(5, Z, charge, g);
+[f6, df6] = ilc_fxg(6, Z, charge, g);
 
 figure(1); clf;
 

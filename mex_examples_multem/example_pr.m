@@ -13,12 +13,12 @@ charge = 0;
 rmin = 1e-05; rmax = 0.1; nr = 512;
 dlnr = log(rmax/rmin)/(nr-1); r = rmin*exp((0:1:(nr-1))*dlnr);
 
-[f1, df1] = il_pr(1, Z, charge, r); 
-[f2, df2] = il_pr(2, Z, charge, r);
-[f3, df3] = il_pr(3, Z, charge, r);
-[f4, df4] = il_pr(4, Z, charge, r);
-[f5, df5] = il_pr(5, Z, charge, r);
-[f6, df6] = il_pr(6, Z, charge, r);
+[f1, df1] = ilc_pr(1, Z, charge, r); 
+[f2, df2] = ilc_pr(2, Z, charge, r);
+[f3, df3] = ilc_pr(3, Z, charge, r);
+[f4, df4] = ilc_pr(4, Z, charge, r);
+[f5, df5] = ilc_pr(5, Z, charge, r);
+[f6, df6] = ilc_pr(6, Z, charge, r);
 
 figure(1); clf;
 

@@ -1,4 +1,5 @@
-addpath([ pwd '/matlab_functions'])
+clc; clear all;
+addpath('matlab_functions')
 
 files = {'mex_lambda',...
         'mex_sigma',...

@@ -13,12 +13,12 @@ function [atoms, lx, ly, lz, a, b, c, dz] = PdH001_xtl(na, nb, nc, ncu, rms3d)
     region = 0;
     charge = 0;
     % Pd = 46, H = 1
-    % Z charge x y z rms3d occupancy region charge
+    % Z x y z rms3d occupancy region charge
     xtl_parm.uLayer(1).atoms = [46, 0.0, 0.0, 0.0, rms3d, occ, region, charge; 46, 0.5, 0.5, 0.0, rms3d, occ, region, charge;...
                                1, 0.5, 0.0, 0.0, rms3d, occ, region, charge; 1, 0.0, 0.5, 0.0, rms3d, occ, region, charge];
     xtl_parm.uLayer(2).atoms = [46, 0.0, 0.5, 0.5, rms3d, occ, region, charge; 46, 0.5, 0.0, 0.5, rms3d, occ, region, charge;...
                                1, 0.0, 0.0, 0.5, rms3d, occ, region, charge; 1, 0.5, 0.5, 0.5, rms3d, occ, region, charge];
-    atoms = il_crystal_by_lays(xtl_parm);
+    atoms = ilc_crystal_by_lays(xtl_parm);
 
     dz = xtl_parm.c/ncu;
     lx = na*xtl_parm.a; ly = nb*xtl_parm.b; lz = nc*xtl_parm.c;

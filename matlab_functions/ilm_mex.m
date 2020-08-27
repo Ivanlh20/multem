@@ -3,10 +3,10 @@ function [] = ilm_mex(option, m_file, src, varargin)
     %%%%%%%%%%%%%%%%%%%%% Format input data %%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if(strcmp('../', src(1:3)))
-        [pathstr,~,~] = fileparts(pwd);
+        [pathstr, ~, ~] = fileparts(pwd);
         src = [pathstr, filesep, src(4:end)];
     else
-        [pathstr,~,~] = fileparts(src);
+        [pathstr, ~, ~] = fileparts(src);
     end
     
     nVarargs = length(varargin);
@@ -18,6 +18,9 @@ function [] = ilm_mex(option, m_file, src, varargin)
     %%%%%%%%%%%%%%%%%%%%%%% set cuda path %%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     CUDA_PATH = getenv('CUDA_PATH');
+    
+    CUDA_PATH = '';
+    
     if(isempty(CUDA_PATH))
         if(ispc)
             CUDA_PATH = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0';
@@ -25,15 +28,26 @@ function [] = ilm_mex(option, m_file, src, varargin)
             CUDA_PATH = '/Developer/NVIDIA/CUDA-10.0';
         else
             CUDA_PATH = '/usr/local/cuda-10.0';
-        end    
+        end
     end
-%     CUDA_PATH = ilm_replace_filesep(CUDA_PATH);
+
+    CUDA_PATH = ilm_replace_filesep(CUDA_PATH);
     
     %%%%%%%%%%%%%%%%%%%% get cuda version  %%%%%%%%%%%%%%%%%%%%%%%
     idx = strfind(CUDA_PATH, filesep);
     CUDA_VERSION = CUDA_PATH((idx(end)+1):end);
     CUDA_VERSION = CUDA_VERSION(~isletter(CUDA_VERSION));
     CUDA_VERSION = erase(CUDA_VERSION, {'-', '_'});
+    
+    if isempty(CUDA_VERSION)
+        CUDA_VERSION_PATH = [CUDA_PATH, filesep,'version.txt'];
+        FID = fopen(CUDA_VERSION_PATH);
+        data = textscan(FID,'%s');
+        fclose(FID);
+        stringData = string(data{:});
+        stringData = strsplit(stringData{3}, '.');
+        CUDA_VERSION = [stringData{1}, '.', stringData{2}];
+    end
     
     if(~exist(CUDA_PATH, 'dir'))
         disp('Error - Cuda path not found')
@@ -46,16 +60,17 @@ function [] = ilm_mex(option, m_file, src, varargin)
     elseif(ismac)
         CUDA_LIB_PATH = [CUDA_PATH, filesep, 'lib64'];
     else
-        CUDA_LIB_PATH = [CUDA_PATH, filesep, 'lib64'];  
-    end     
-    CUDA_LIBS = '-lcudart -lcufft -lcublas';  
+        CUDA_LIB_PATH = [CUDA_PATH, filesep, 'lib64'];
+    end 
+    CUDA_LIBS = '-lcudart -lcufft -lcublas';
     
     %%%%%%%%%%%%%%% set NVCC compiler location %%%%%%%%%%%%%%%%%%
-    setenv('CUDA_PATH', CUDA_PATH);    
+    setenv('CUDA_PATH', CUDA_PATH);
     setenv('CUDA_BIN_PATH', CUDA_BIN_PATH);
     setenv('CUDA_LIB_PATH', CUDA_LIB_PATH);
+    setenv('CUDA_NVVM_PATH', [CUDA_PATH, filesep, 'nvvm']);
     setenv('MW_NVCC_PATH', CUDA_BIN_PATH);
-
+    
     %%%%%%%%%%%%%%%%%%% set card architecture %%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%% https://developer.nvidia.com/cuda-gpus %%%%%%%%%%
@@ -67,23 +82,24 @@ function [] = ilm_mex(option, m_file, src, varargin)
     CARD_70="-gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot;";
     CARD_MULT = join([CARD_30, CARD_35, CARD_50, CARD_60, CARD_70], ' ');
 
-%     ARCH_FLAGS = CARD_60;
+    if 0
+        gpu = gpuDevice();
+        gpu_card = round(str2double(gpu.ComputeCapability));
 
-    gpu = gpuDevice();
-    gpu_card  = round(str2double(gpu.ComputeCapability));
-    
-    switch gpu_card
-        case 3
-            ARCH_FLAGS = CARD_30;
-        case 5
-            ARCH_FLAGS = CARD_50;
-        case 6
-            ARCH_FLAGS = CARD_60;
-        case 7
-            ARCH_FLAGS = CARD_70;
-        otherwise
-            ARCH_FLAGS = CARD_30;
+        switch gpu_card
+            case 3
+                ARCH_FLAGS = CARD_30;
+            case 5
+                ARCH_FLAGS = CARD_50;
+            case 6
+                ARCH_FLAGS = CARD_60;
+            case 7
+                ARCH_FLAGS = CARD_70;
+            otherwise
+                ARCH_FLAGS = CARD_30;
+        end
     end
+    
     ARCH_FLAGS = CARD_MULT;
     
     %%%%%%%%%%%%%%% read template mex_cuda file %%%%%%%%%%%%%%%%%
@@ -92,7 +108,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
     elseif(ismac)
         mex_cuda_filename = 'mex_CUDA_maci64.xml';
     else
-        mex_cuda_filename = 'mex_CUDA_glnxa64.xml';  
+        mex_cuda_filename = 'mex_CUDA_glnxa64.xml';
     end 
     
     %%%%%%%%%%%%%%%%%% read mex_cuda template %%%%%%%%%%%%%%%%%%%%
@@ -100,7 +116,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
     mex_cuda = fileread(mex_cuda_file_in);
     
     %%%%%%%%%%%%% replace string in mex_cuda file %%%%%%%%%%%%%%%%
-    mex_cuda = strrep(mex_cuda, 'XXX_CUDA_VERSION', CUDA_VERSION);
+    mex_cuda = strrep(mex_cuda, 'XXX_CUDA_VER', CUDA_VERSION);
     mex_cuda = strrep(mex_cuda, 'XXX_ARCH_FLAGS', ARCH_FLAGS);
     
     %%%%%%%%%%%%%%%%%%% save mex_cuda file %%%%%%%%%%%%%%%%%%%%%%
@@ -111,35 +127,36 @@ function [] = ilm_mex(option, m_file, src, varargin)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%% set library path %%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if(ispc)
         % OS = Windows 10
         FFTW_LIB_PATH = src;
         FFTW_LIBS = '-lfftw3f-3 -lfftw3-3';
         
         BLAS_LIB_PATH = src;
-        BLAS_LIBS = '-lblas';    
+        BLAS_LIBS = '-lblas';
         
         LAPACK_LIB_PATH = src;
-        LAPACK_LIBS = '-llapack';  
+        LAPACK_LIBS = '-llapack';
+        
     elseif(ismac)
-        % OS = Windows 10/usr/bin/ld: 
+        % OS = /usr/bin/ld: 
         FFTW_LIB_PATH = [];
         FFTW_LIBS = '-lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';
         BLAS_LIB_PATH = [];
-        BLAS_LIBS = '-lblas';    
+        BLAS_LIBS = '-lblas';
         
         LAPACK_LIB_PATH = [];
         LAPACK_LIBS = '-llapack';
     else
         % OS = scientific linux
-%         FFTW_LIB = '-/opt/local/lib';  
-%         FFTW_LIBS = '-lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';
-%         LAPACK_LIB = '/opt/local/lib';
-%         BLAS_LAPACK_LIBS = '-lblas -llapack';
+        %FFTW_LIB = '-/opt/local/lib';
+        %FFTW_LIBS = '-lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';
+        %LAPACK_LIB = '/opt/local/lib';
+        %BLAS_LAPACK_LIBS = '-lblas -llapack';
 
         % OS = ubuntu
-        FFTW_LIB_PATH = '/usr/lib/x86_64-linux-gnu';  
+        FFTW_LIB_PATH = '/usr/lib/x86_64-linux-gnu';
         FFTW_LIBS = '-lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';
 		
         BLAS_LIB_PATH = '/usr/lib/x86_64-linux-gnu/blas';
@@ -152,35 +169,38 @@ function [] = ilm_mex(option, m_file, src, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     BLAS_LIBS = '-lmwblas';
     LAPACK_LIBS = '-lmwlapack ';
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     if(~exist(FFTW_LIB_PATH, 'dir'))
-        disp(['FFTW path not found'])
+        disp('FFTW path not found')
     end
     
     if(~exist(BLAS_LIB_PATH, 'dir'))
-        disp(['Blas path not found'])
+        disp('Blas path not found')
     end
     
     if(~exist(LAPACK_LIB_PATH, 'dir'))
-        disp(['Lapack path not found'])
+        disp('Lapack path not found')
     end
-	
-    INCLUDE = ['-I"',CUDA_INC_PATH, '" -I"', src, '"'];
-    LIBRARY = ['-L"',CUDA_LIB_PATH, '" ',CUDA_LIBS, ' -L"', FFTW_LIB_PATH, '" ',FFTW_LIBS, ' -L"',BLAS_LIB_PATH, '" ',BLAS_LIBS, ' -L"',LAPACK_LIB_PATH, '" ', LAPACK_LIBS];
-
-    if (strcmpi(option, 'release'))
-        mex_comand = 'mex -v -R2017b';
-    else
-        mex_comand = 'mex -v -g -R2017b'; 
+    
+%     if(~ispc && ~ismac)
+%         mex_cuda_filename = 'nvcc_g++.xml';
+%     end 
+    
+    INCLUDE = ['-I"', CUDA_INC_PATH, '" -I"', src, '"'];
+    LIBRARY = ['-L"', CUDA_LIB_PATH, '" ', CUDA_LIBS, ' -L"', FFTW_LIB_PATH, '" ', FFTW_LIBS, ' -L"', BLAS_LIB_PATH, '" ', BLAS_LIBS, ' -L"', LAPACK_LIB_PATH, '" ', LAPACK_LIBS];    
+    mex_comand = ['mex -R2017b -f ', mex_cuda_filename, ' -v'];
+    
+    if (strcmpi(option, 'debug'))
+        mex_comand = [mex_comand, ' -g'];
     end
 
     OUTDIR = ['-outdir ..', filesep, 'mex_bin'];
 
     textcommands = strjoin({mex_comand, OUTDIR, INCLUDE, LIBRARY, m_file, strjoin(varargin)});
-
     disp(textcommands);
     eval(textcommands);
-    
+
     delete(mex_cuda_file_out);
 end

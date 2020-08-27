@@ -18,7 +18,7 @@ rho = 2.2;
 lay_pos = 1; %1: top, 2: bottom
 
 tic;
-atoms = il_add_amorp_lay(atoms, lx, ly, lz, d_min, Z, rms_3d, rho, lay_pos, seed);
+atoms = ilc_add_amorp_lay(atoms, lx, ly, lz, d_min, Z, rms_3d, rho, lay_pos, seed);
 toc;
 
 ilm_show_crystal(1, atoms)
@@ -35,6 +35,6 @@ disp([min(atoms(:, 4)), max(atoms(:,4))])
 
 figure(2); clf;
 tic;
-[r, rdf] = il_rdf_3d(atoms, 8, 200);
+[r, rdf] = ilc_rdf_3d(atoms, 8, 200);
 toc;
 plot(r, rdf,'-+r');

@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % STEM electron energy loss spectroscopy (EELS) simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
@@ -92,11 +92,11 @@ input_multem.eels_channelling_type = 1;     % eCT_Single_Channelling = 1, eCT_Mi
 input_multem.eels_collection_angle = 100;   % Collection half angle (mrad)
 input_multem.eels_Z = 38;                   % atomic type
 
-clear il_multem;
+clear ilc_multem;
 tic;
-output_multislice = il_multem(system_conf, input_multem); 
+output_multislice = ilc_multem(system_conf, input_multem); 
 toc;
-clear il_multem;
+clear ilc_multem;
 
 figure(1);
 for i=1:length(output_multislice.data)
@@ -110,9 +110,9 @@ end
 % cc = [1 0 1; 1 0 0; 0 0 1; 0 0 0];
 % for i=1:4
 %     input_multem.eels_channelling_type = i;
-%     clear il_multem;
+%     clear ilc_multem;
 %     tic;
-%     [eels] = il_multem(system_conf, input_multem); 
+%     [eels] = ilc_multem(system_conf, input_multem); 
 %     toc;
 %     figure(1);
 %     hold on;

@@ -1,4 +1,4 @@
-% output_multislice = il_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
 % Convergent beam electron diffraction (CBED) simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
@@ -81,14 +81,14 @@ input_multem.cond_lens_inner_aper_ang = 0.0;    % Inner aperture (mrad)
 input_multem.cond_lens_outer_aper_ang = 7.50;   % Outer aperture (mrad)
 
 %%%%%%%%% defocus spread function %%%%%%%%%%%%
-dsf_sigma = il_iehwgd_2_sigma(32); % from defocus spread to standard deviation
+dsf_sigma = ilc_iehwgd_2_sigma(32); % from defocus spread to standard deviation
 input_multem.cond_lens_ti_a = 1.0;                          % Height proportion of a normalized Gaussian [0, 1]
 input_multem.cond_lens_ti_sigma = dsf_sigma;                % Standard deviation of the defocus spread for the Gaussian component (�)
 input_multem.cond_lens_ti_beta = 0.0;                 		% Standard deviation of the defocus spread for the Exponential component (�)
 input_multem.cond_lens_ti_npts = 4;                         % Number of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%%% source spread function %%%%%%%%%%%%
-ssf_sigma = il_hwhm_2_sigma(0.45); % half width at half maximum to standard deviation
+ssf_sigma = ilc_hwhm_2_sigma(0.45); % half width at half maximum to standard deviation
 input_multem.cond_lens_si_a = 1.0;                          % Height proportion of a normalized Gaussian [0, 1]
 input_multem.cond_lens_si_sigma = ssf_sigma;                % Standard deviation of the source spread function for the Gaussian component: For parallel ilumination(�^-1); otherwise (�)
 input_multem.cond_lens_si_beta = 0.0;                 		% Standard deviation of the source spread function for the Exponential component: For parallel ilumination(�^-1); otherwise (�)
@@ -99,9 +99,9 @@ input_multem.cond_lens_si_azm_npts = 4;                     % Number of radial i
 input_multem.cond_lens_zero_defocus_type = 4;   % eZDT_First = 1, eZDT_User_Define = 4
 input_multem.cond_lens_zero_defocus_plane = 0;
 
-clear il_multem;
+clear ilc_multem;
 tic;
-output_multislice = il_multem(system_conf, input_multem);
+output_multislice = ilc_multem(system_conf, input_multem);
 toc;
 
 c = 1e5;
