@@ -1,4 +1,4 @@
-% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = input_multem.ilc_multem perform TEM simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>clear; clc;
 
@@ -6,12 +6,12 @@ addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-input_multem = ilm_dflt_input_multem();         % Load default values;
+input_multem = multem_input.parameters;         % Load default values;
 
-system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
-system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_nthread = 4;
-system_conf.gpu_device = 0;
+input_multem.system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
+input_multem.system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+input_multem.system_conf.cpu_nthread = 4;
+input_multem.system_conf.gpu_device = 0;
 
 % eTEMST_EWFS=51, eTEMST_EWRS=52
 input_multem.simulation_type = 52;
@@ -94,7 +94,7 @@ input_multem.output_area_iy_e = 1;                             % y-final pixel
 
 clear ilc_wave_function;
 tic;
-ouput_multislice = ilc_wave_function(system_conf, input_multem);
+ouput_multislice = input_multem.ilc_wave_function;
 toc;
 
 figure(1);

@@ -1,4 +1,4 @@
-% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = input_multem.ilc_multem perform TEM simulation
 % 
 % Precession electron diffraction (PED) simulation
 % 
@@ -12,13 +12,13 @@ addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
 %%%%%%%%%%%%%%%%%% Load multem default parameter %%%%%%%%$$%%%%%%%%%
-input_multem = ilm_dflt_input_multem();          % Load default values;
+input_multem = multem_input.parameters;          % Load default values;
 
 %%%%%%%%%%%%%%%%%%%%% Set system configuration %%%%%%%%%%%%%%%%%%%%%
-system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
-system_conf.device = 2;                              % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_nthread = 1; 
-system_conf.gpu_device = 0;
+input_multem.system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
+input_multem.system_conf.device = 2;                              % eD_CPU = 1, eD_GPU = 2
+input_multem.system_conf.cpu_nthread = 1; 
+input_multem.system_conf.gpu_device = 0;
 
 %%%%%%%%%%%%%%%%%%%% Set simulation experiment %%%%%%%%%%%%%%%%%%%%%
 % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, eTEMST_EWFS=51, eTEMST_EWRS=52, 
@@ -49,7 +49,7 @@ na = 16; nb = 16; nc = 30; ncu = 2; rms3d = 0.085;
 
 %%%%%%%%%%%%%%%%%%%%%% Specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.thick_type = 1;                     % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
-input_multem.thick = c:c:1000;                   % Array of thickes (Å)
+input_multem.thick = c:c:1000;                   % Array of thickes (ï¿½)
 
 %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.nx = 1024;
@@ -58,8 +58,8 @@ input_multem.bwl = 0;                            % Band-width limit, 1: true, 0:
 
 %%%%%%%%%%%%%%%%%%%% Microscope parameters %%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.E_0 = 300;                          % Acceleration Voltage (keV)
-input_multem.theta = 0.0;                        % Till ilumination (º)
-input_multem.phi = 0.0;                          % Till ilumination (º)
+input_multem.theta = 0.0;                        % Till ilumination (ï¿½)
+input_multem.phi = 0.0;                          % Till ilumination (ï¿½)
 
 %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.illumination_model = 1;             % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
@@ -68,7 +68,7 @@ input_multem.temporal_spatial_incoh = 1;         % 1: Temporal and Spatial, 2: T
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%% source spread function %%%%%%%%%%%%
 ssf_sigma = ilc_mrad_2_sigma(input_multem.E_0, 0.02);  % mrad to standard deviation
-input_multem.obj_lens_ssf_sigma = ssf_sigma;          % standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
+input_multem.obj_lens_ssf_sigma = ssf_sigma;          % standard deviation: For parallel ilumination(ï¿½^-1); otherwise (ï¿½)
 input_multem.obj_lens_ssf_npoints = 4;                % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,7 +82,7 @@ input_multem.ped_theta = 3.0;      % Precession angle (degrees)
 
 clear ilc_multem;
 tic;
-output_multislice = ilc_multem(system_conf, input_multem); 
+output_multislice = input_multem.ilc_multem; 
 toc;
 
 c = 1e7;

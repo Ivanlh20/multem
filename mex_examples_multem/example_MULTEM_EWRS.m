@@ -1,4 +1,4 @@
-% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = input_multem.ilc_multem perform TEM simulation
 % Exit wave real space (EWRS) simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
@@ -9,13 +9,13 @@ addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
 %%%%%%%%%%%%%%%%%% Load multem default parameter %%%%%%%%$$%%%%%%%%%
-input_multem = ilm_dflt_input_multem();          % Load default values;
+input_multem = multem_input.parameters;          % Load default values;
 
 %%%%%%%%%%%%%%%%%%%%% Set system configuration %%%%%%%%%%%%%%%%%%%%%
-system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
-system_conf.device = 2;                              % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_nthread = 1; 
-system_conf.gpu_device = 0;
+input_multem.system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
+input_multem.system_conf.device = 2;                              % eD_CPU = 1, eD_GPU = 2
+input_multem.system_conf.cpu_nthread = 1; 
+input_multem.system_conf.gpu_device = 0;
 
 %%%%%%%%%%%%%%%%%%%% Set simulation experiment %%%%%%%%%%%%%%%%%%%%%
 % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, eTEMST_EWFS=51, eTEMST_EWRS=52, 
@@ -101,7 +101,7 @@ input_multem.obj_lens_zero_defocus_plane = 0;   % It will be only used if obj_le
 
 clear ilc_multem;
 tic;
-output_multislice = ilc_multem(system_conf, input_multem); 
+output_multislice = input_multem.ilc_multem; 
 toc;
 
 figure(1);

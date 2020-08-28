@@ -1,4 +1,4 @@
-% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = input_multem.ilc_multem perform TEM simulation
 % 
 % Exit wave real space (EWRS) simulation
 % 
@@ -21,7 +21,7 @@ na = 8; nb = 8; nc = 8; ncu = 2; rms3d = 0.085;
 [atoms, ~] = Au001_xtl(na, nb, nc, ncu, rms3d);
 atoms = ilm_center_spec(atoms, lx, ly, lz);
 
-theta = 45;                                 % angle (º)
+theta = 45;                                 % angle (ï¿½)
 u0 = [1 1 0];                               % unitary vector			
 rot_point_type = 1;                         % 1: geometric center, 2: User define		
 p0 = [0 0 0];                               % rotation point
