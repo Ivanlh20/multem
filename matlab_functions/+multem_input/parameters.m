@@ -25,15 +25,15 @@ classdef parameters
       %%%%%%%%%%%%%%%%%%%%%%% Specimen information %%%%%%%%%%%%%%%%%%%%%%%
       
       spec_atoms = [];                                                                                         % Specimen atoms
-      spec_dz(1,1) double {mustBePositive} = 0.25;                                                             % slice thick (Angstrom)
+      spec_dz(1,1) double {mustBeNonnegative} = 0.25;                                                             % slice thick (Angstrom)
 
-      spec_lx(1,1) double {mustBePositive} = 10;                                                               % simulation box length in x direction (Angstrom)
-      spec_ly(1,1) double {mustBePositive} = 10;                                                               % simulation box length in y direction (Angstrom)
-      spec_lz(1,1) double {mustBePositive} = 10;                                                               % simulation box length gpuDEin z direction (Angstrom)
+      spec_lx(1,1) double {mustBeNonnegative} = 10;                                                               % simulation box length in x direction (Angstrom)
+      spec_ly(1,1) double {mustBeNonnegative} = 10;                                                               % simulation box length in y direction (Angstrom)
+      spec_lz(1,1) double {mustBeNonnegative} = 10;                                                               % simulation box length gpuDEin z direction (Angstrom)
 
-      spec_cryst_na(1,1) uint64 {mustBePositive} = 1;                                                          % number of unit cell along a
-      spec_cryst_nb(1,1) uint64 {mustBePositive} = 1;                                                          % number of unit cell along b
-      spec_cryst_nc(1,1) uint64 {mustBePositive} = 1;                                                          % number of unit cell along c
+      spec_cryst_na(1,1) uint64 {mustBeNonnegative} = 1;                                                          % number of unit cell along a
+      spec_cryst_nb(1,1) uint64 {mustBeNonnegative} = 1;                                                          % number of unit cell along b
+      spec_cryst_nc(1,1) uint64 {mustBeNonnegative} = 1;                                                          % number of unit cell along c
       spec_cryst_a(1,1) double {mustBeNonnegative} = 0;                                                        % length along a (Angstrom)
       spec_cryst_b(1,1) double {mustBeNonnegative} = 0;                                                        % length along b (Angstrom)
       spec_cryst_c(1,1) double {mustBeNonnegative} = 0;                                                        % length along c (Angstrom)
