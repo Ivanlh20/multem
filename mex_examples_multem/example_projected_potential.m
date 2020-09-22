@@ -5,12 +5,12 @@ addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-input_multem = ilm_dflt_input_multem();         % Load default values;
+input_multem = multem_input.parameters;         % Load default values;
 
-system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
-system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_nthread = 4; 
-system_conf.gpu_device = 0;
+input_multem.system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
+input_multem.system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+input_multem.system_conf.cpu_nthread = 4; 
+input_multem.system_conf.gpu_device = 0;
 
 input_multem.pn_model = 3;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multem.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
@@ -32,24 +32,24 @@ input_multem.nx = 2048;
 input_multem.ny = 2048;
 
 clear ilc_spec_slicing;
-[atoms, Slice] = ilc_spec_slicing(input_multem);
+[atoms, Slice] = ilc_spec_slicing(input_multem.toStruct);
 
 [natoms,~] = size(atoms); [nslice, ~] = size(Slice);
 for islice = 1:nslice
     input_multem.islice = islice;
     
-    system_conf.device = 1;                        % eD_CPU = 1, eD_GPU = 2
-    system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
+    input_multem.system_conf.device = 1;                        % eD_CPU = 1, eD_GPU = 2
+    input_multem.system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
     tic;
     clear ilc_projected_potential;
-    ouput_multislice_1 = ilc_projected_potential(system_conf, input_multem);
+    ouput_multislice_1 = input_multem.ilc_projected_potential;
     toc;
     
-    system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
-    system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
+    input_multem.system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+    input_multem.system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
     tic;
     clear ilc_projected_potential;
-    ouput_multislice_2 = ilc_projected_potential(system_conf, input_multem);
+    ouput_multislice_2 = input_multem.ilc_projected_potential;
     toc;
     mean(abs(ouput_multislice_1.V(:)-ouput_multislice_2.V(:)))
     

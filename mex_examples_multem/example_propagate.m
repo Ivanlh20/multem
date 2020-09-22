@@ -5,12 +5,12 @@ addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-input_multem = ilm_dflt_input_multem();         % Load default values;
+input_multem = multem_input.parameters;         % Load default values;
 
-system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
-system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_nthread = 4; 
-system_conf.gpu_device = 0;
+input_multem.system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
+input_multem.system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+input_multem.system_conf.cpu_nthread = 4; 
+input_multem.system_conf.gpu_device = 0;
 
 % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, eTEMST_EWFS=51, eTEMST_EWRS=52, 
 % eTEMST_EELS=61, eTEMST_EFTEM=62, eTEMST_ProbeFS=71, eTEMST_ProbeRS=72, eTEMST_PPFS=81, eTEMST_PPRS=82,eTEMST_TFFS=91, eTEMST_TFRS=92
@@ -52,7 +52,7 @@ input_multem.iw_y = input_multem.spec_ly/2;     % y position
 input_multem.simulation_type = 52;                  % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, eTEMST_EWFS=51, eTEMST_EWRS=52, eTEMST_EELS=61, eTEMST_EFTEM=62
 clear ilc_multem;
 tic;
-output_multislice = ilc_multem(system_conf, input_multem); 
+output_multislice = input_multem.ilc_multem; 
 toc;
 
 input_multem.obj_lens_c_10 = 10;                      %Angs
@@ -61,12 +61,12 @@ input_multem.obj_lens_c_10 = 10;                      %Angs
 input_multem.iw_type = 3;                      % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
 input_multem.iw_psi = output_multislice.data.psi_coh;  % user define incident wave
 
-system_conf.precision = 2;                     % eP_Float = 1, eP_double = 2
-system_conf.device = 1;                        % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_nthread = 2; 
-system_conf.gpu_device = 0;
+input_multem.system_conf.precision = 2;                     % eP_Float = 1, eP_double = 2
+input_multem.system_conf.device = 1;                        % eD_CPU = 1, eD_GPU = 2
+input_multem.system_conf.cpu_nthread = 2; 
+input_multem.system_conf.gpu_device = 0;
 tic;
-output_propagate = ilc_propagate(system_conf, input_multem); 
+output_propagate = input_multem.ilc_propagate; 
 toc;
 
 figure(1);
