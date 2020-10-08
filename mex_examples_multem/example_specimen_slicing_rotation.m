@@ -5,12 +5,12 @@ addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-input_multem = ilm_dflt_input_multem();         % Load default values;
+input_multem = multem_input.parameters;         % Load default values;
 
-system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
-system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_nthread = 4; 
-system_conf.gpu_device = 0;
+input_multem.system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
+input_multem.system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+input_multem.system_conf.cpu_nthread = 4; 
+input_multem.system_conf.gpu_device = 0;
 
 % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, eTEMST_EWFS=51, eTEMST_EWRS=52, 
 % eTEMST_EELS=61, eTEMST_EFTEM=62, eTEMST_ProbeFS=71, eTEMST_ProbeRS=72, eTEMST_PPFS=81, eTEMST_PPRS=82,eTEMST_TFFS=91, eTEMST_TFRS=92
@@ -25,7 +25,7 @@ input_multem.pn_seed = 300183;                  % Random seed(frozen phonon)
 input_multem.pn_single_conf = 0;                % 1: true, 0:false (extract single configuration)
 input_multem.pn_nconf = 100;                      % true: phonon configuration, false: number of frozen phonon configurations
 
-input_multem.spec_rot_theta = 45;                                 % angle (º)
+input_multem.spec_rot_theta = 45;                                 % angle (ï¿½)
 input_multem.spec_rot_u0 = [1 0 0];                               % unitary vector			
 input_multem.spec_rot_center_type = 1;                         % 1: geometric center, 2: User define		
 input_multem.spec_rot_center_p = [0 0 0];                               % rotation point
@@ -43,7 +43,7 @@ input_multem.spec_lz = 100;
 [input_multem.spec_atoms] = ilm_center_spec(input_multem.spec_atoms, input_multem.spec_lx, input_multem.spec_ly, input_multem.spec_lz);
 
 % get spec slicing
-[atoms, Slice] = ilc_spec_slicing(input_multem);
+[atoms, Slice] = ilc_spec_slicing(input_multem.toStruct);
 
 ilm_show_crystal(1, atoms);
 

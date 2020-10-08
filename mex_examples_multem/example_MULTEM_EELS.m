@@ -1,4 +1,4 @@
-% output_multislice = ilc_multem(system_conf, input_multem) perform TEM simulation
+% output_multislice = input_multem.ilc_multem perform TEM simulation
 % STEM electron energy loss spectroscopy (EELS) simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
@@ -8,12 +8,12 @@ addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-input_multem = ilm_dflt_input_multem();         % Load default values;
+input_multem = multem_input.parameters;         % Load default values;
 
-system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
-system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_nthread = 4; 
-system_conf.gpu_device = 0;
+input_multem.system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
+input_multem.system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
+input_multem.system_conf.cpu_nthread = 4; 
+input_multem.system_conf.gpu_device = 0;
 
 % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, 
 % eST_EELS=61, eST_EFTEM=62, eST_ProbeFS=71, eST_ProbeRS=72, eST_PPFS=81, eST_PPRS=82,eST_TFFS=91, eST_TFRS=92
@@ -31,8 +31,8 @@ input_multem.pn_nconf = 5;                      % true: phonon configuration, fa
 input_multem.bwl = 0;                           % Band-width limit, 1: true, 0:false
 
 input_multem.E_0 = 300;                         % Acceleration Voltage (keV)
-input_multem.theta = 0.0;                       % Till ilumination (º)
-input_multem.phi = 0.0;                         % Till ilumination (º)
+input_multem.theta = 0.0;                       % Till ilumination (ï¿½)
+input_multem.phi = 0.0;                         % Till ilumination (ï¿½)
 
 na = 4; nb = 4; nc = 10; ncu = 2; rms3d = 0.085;
 
@@ -51,28 +51,28 @@ input_multem.iw_y = input_multem.spec_ly/2;     % y position
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.cond_lens_m = 0;                  % Vortex momentum
-input_multem.cond_lens_c_10 = 88.7414;            % Defocus (Å)
+input_multem.cond_lens_c_10 = 88.7414;            % Defocus (ï¿½)
 input_multem.cond_lens_c_30 = 0.04;             % Third order spherical aberration (mm)
 input_multem.cond_lens_c_50 = 0.00;             % Fifth order spherical aberration (mm)
-input_multem.cond_lens_c_12 = 0.0;             % Twofold astigmatism (Å)
-input_multem.cond_lens_phi_12 = 0.0;             % Azimuthal angle of the twofold astigmatism (º)
-input_multem.cond_lens_c_23 = 0.0;             % Threefold astigmatism (Å)
-input_multem.cond_lens_phi_23 = 0.0;             % Azimuthal angle of the threefold astigmatism (º)
+input_multem.cond_lens_c_12 = 0.0;             % Twofold astigmatism (ï¿½)
+input_multem.cond_lens_phi_12 = 0.0;             % Azimuthal angle of the twofold astigmatism (ï¿½)
+input_multem.cond_lens_c_23 = 0.0;             % Threefold astigmatism (ï¿½)
+input_multem.cond_lens_phi_23 = 0.0;             % Azimuthal angle of the threefold astigmatism (ï¿½)
 input_multem.cond_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad) 
 input_multem.cond_lens_outer_aper_ang = 21.0;  % Outer aperture (mrad)
-input_multem.cond_lens_ti_sigma = 32;                % standard deviation (Å)
+input_multem.cond_lens_ti_sigma = 32;                % standard deviation (ï¿½)
 input_multem.cond_lens_ti_npts = 10;               % # of integration points. It will be only used if illumination_model=4
-input_multem.cond_lens_si_sigma = 0.2;             % standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
+input_multem.cond_lens_si_sigma = 0.2;             % standard deviation: For parallel ilumination(ï¿½^-1); otherwise (ï¿½)
 input_multem.cond_lens_si_rad_npts = 8;             % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.scanning_type = 1;             % eST_Line = 1, eST_Area = 2
 input_multem.scanning_periodic = 1;         % 1: true, 0:false (periodic boundary conditions)
 input_multem.scanning_ns = 10;              % number of sampling points
-input_multem.scanning_x0 = 2*a;             % x-starting point (Å) 
-input_multem.scanning_y0 = 2.5*b;           % y-starting point (Å)
-input_multem.scanning_xe = 3*a;             % x-final point (Å)
-input_multem.scanning_ye = 2.5*b;           % y-final point (Å)
+input_multem.scanning_x0 = 2*a;             % x-starting point (ï¿½) 
+input_multem.scanning_y0 = 2.5*b;           % y-starting point (ï¿½)
+input_multem.scanning_xe = 3*a;             % x-final point (ï¿½)
+input_multem.scanning_ye = 2.5*b;           % y-final point (ï¿½)
 
 input_multem.eels_E_loss = 532;             % Energy loss (eV)
 input_multem.eels_m_selection = 3;          % selection rule
@@ -94,7 +94,7 @@ input_multem.eels_Z = 38;                   % atomic type
 
 clear ilc_multem;
 tic;
-output_multislice = ilc_multem(system_conf, input_multem); 
+output_multislice = input_multem.ilc_multem; 
 toc;
 clear ilc_multem;
 
@@ -112,7 +112,7 @@ end
 %     input_multem.eels_channelling_type = i;
 %     clear ilc_multem;
 %     tic;
-%     [eels] = ilc_multem(system_conf, input_multem); 
+%     [eels] = input_multem.ilc_multem; 
 %     toc;
 %     figure(1);
 %     hold on;

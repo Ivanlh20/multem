@@ -1,20 +1,20 @@
 function tfm_check_stem_setup(input_multem, n_detector)
-    
+
     fcn_check_probe(input_multem);
     fcn_check_slicing(input_multem);
     fcn_check_detector_coverage(input_multem, n_detector);
 
     function fcn_check_probe(input_multem)
-        system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
-        system_conf.device = 1;                              % eD_CPU = 1, eD_GPU = 2
-        system_conf.cpu_nthread = 1; 
-        system_conf.gpu_device = 0;
+        input_multem.system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
+        input_multem.system_conf.device = 1;                              % eD_CPU = 1, eD_GPU = 2
+        input_multem.system_conf.cpu_nthread = 1; 
+        input_multem.system_conf.gpu_device = 0;
         
         input_multem.iw_type = 2;                       % 2 = convergent beam
         input_multem.iw_x = 0.5*input_multem.spec_lx;
         input_multem.iw_y = 0.5*input_multem.spec_ly;
 
-        output_incident_wave = ilc_incident_wave(system_conf, input_multem); 
+        output_incident_wave = input_multem.ilc_incident_wave; 
 
         psi_0 = output_incident_wave.psi_0;
         figure(1); clf
@@ -40,7 +40,7 @@ function tfm_check_stem_setup(input_multem, n_detector)
     function fcn_check_slicing(input_multem)
 
         % Slicing
-        [atoms, Slice] = ilc_spec_slicing(input_multem);   
+        [atoms, Slice] = ilc_spec_slicing(input_multem.toStruct);   
         [nslice, ~] = size(Slice);
 
         figure(2); clf;

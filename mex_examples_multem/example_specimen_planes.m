@@ -5,7 +5,7 @@ addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-input_multem = ilm_dflt_input_multem();         % Load default values;
+input_multem = multem_input.parameters;         % Load default values;
 
 input_multem.pn_model = 3;                  % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multem.interaction_model = 1;             % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
@@ -93,7 +93,7 @@ ilm_show_crystal(1, input_multem.spec_atoms)
 
 clc;
 tic;
-[z_planes] = ilc_spec_planes(input_multem);
+[z_planes] = ilc_spec_planes(input_multem.toStruct);
 toc;
 diff(z_planes)
 [nplanes, ~] = size(z_planes);
