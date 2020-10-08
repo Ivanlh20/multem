@@ -35,11 +35,11 @@ input_multem.E_0 = 100;
 input_multem.theta = 0.01;
 input_multem.phi = 0.0;
 
-na = 8; nb = 8; nc = 3; ncu = 2; rms3d = 0.085;
+na = 8; nb = 8; nc = 3; ncu = 2; rmsd_3d = 0.085;
 
 [input_multem.spec_atoms, input_multem.spec_lx...
 , input_multem.spec_ly, input_multem.spec_lz...
-, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rms3d);
+, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
 
 input_multem.thick_type = 1;             % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
 input_multem.thick = 0:2*c:1000;         % Array of thickes

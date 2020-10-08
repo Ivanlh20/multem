@@ -122,12 +122,16 @@ function [input_multem] = ilm_dflt_input_multem()
 
     %%%%%%%%% defocus spread function %%%%%%%%%%%%
     dsf_sigma = ilc_iehwgd_2_sigma(32);                         % from defocus spread to standard deviation
+    input_multem.cond_lens_ti_a = 1.0;
     input_multem.cond_lens_ti_sigma = dsf_sigma;                % standard deviation
+    input_multem.cond_lens_ti_beta = 1;
     input_multem.cond_lens_ti_npts = 5;                         % # of integration points. It will be only used if illumination_model=4
 
     %%%%%%%%%% source spread function %%%%%%%%%%%%
     ssf_sigma = ilc_hwhm_2_sigma(0.45);                         % half width at half maximum to standard deviation
+    input_multem.cond_lens_si_a = 1.0;
     input_multem.cond_lens_si_sigma = ssf_sigma;                % standard deviation: For parallel ilumination(Å^-1); otherwise
+    input_multem.cond_lens_si_beta = 1.0;
     input_multem.cond_lens_si_rad_npts = 8;                     % # of integration points. It will be only used if illumination_model=4
     input_multem.cond_lens_si_azm_npts = 12;                    % # of integration points. It will be only used if illumination_model=4
 

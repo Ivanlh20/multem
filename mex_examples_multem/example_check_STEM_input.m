@@ -37,8 +37,8 @@ input_multem.pn_dim = 110;                       % phonon dimensions (xyz)
 input_multem.pn_seed = 100183;                   % Random seed(frozen phonon)
 
 %%%%%%%%%%%%%%%%%%%%%%% Specimen information %%%%%%%%%%%%%%%%%%%%%%%
-rms3d = 0.0697;
-[atoms, lx, ly, lz] = ilm_read_ap_xyz('Pt_twin.xyz', rms3d);
+rmsd_3d = 0.0697;
+[atoms, lx, ly, lz] = ilm_read_ap_xyz('Pt_twin.xyz', rmsd_3d);
 
 
 atoms = ilm_center_spec(atoms, lx, ly, lz);

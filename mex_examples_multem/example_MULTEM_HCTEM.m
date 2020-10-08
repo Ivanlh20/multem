@@ -38,11 +38,11 @@ input_multem.pn_dim = 110;                       % phonon dimensions (xyz)
 input_multem.pn_seed = 300183;                   % Random seed(frozen phonon)
 
 %%%%%%%%%%%%%%%%%%%%%%% Specimen information %%%%%%%%%%%%%%%%%%%%%%%
-na = 16; nb = 16; nc = 20; ncu = 2; rms3d = 0.085;
+na = 16; nb = 16; nc = 20; ncu = 2; rmsd_3d = 0.085;
 
 [input_multem.spec_atoms, input_multem.spec_lx...
 , input_multem.spec_ly, input_multem.spec_lz...
-, a, b, c, input_multem.spec_dz] = Cu001_xtl(na, nb, nc, ncu, rms3d);
+, a, b, c, input_multem.spec_dz] = Cu001_xtl(na, nb, nc, ncu, rmsd_3d);
 
 %%%%%%%%%%%%%%%%%%%%%% Specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.thick_type = 1;                     % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
