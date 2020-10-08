@@ -50,7 +50,8 @@ else
     input_multem.spec_amorp(1).z_0 = z_max;             % Starting z position of the amorphous layer (Å)
     input_multem.spec_amorp(1).z_e = z_max+lz;          % Ending z position of the amorphous layer (Å)
 end
-input_multem.spec_amorp(1).dz = 2.0;                    % slice thick of the amorphous layer (Å)
+input_multem.spec_amorp(1).dz = 4.0;                    % slice thick of the amorphous layer (Å)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % lz = 10;
 % Z = 6;

@@ -16,7 +16,7 @@ function [atoms, lx, ly, lz, a, b, c, dz] = Au001_xtl(na, nb, nc, ncu, rms3d)
     region = 0;
     charge = 0;
     % Au = 79
-    % Z x y z rms3d occupancy charge
+    % Z x y z rms3d occupancy region charge
     xtl_parm.uLayer(1).atoms = [79, 0.0, 0.0, 0.0, rms3d, occ, region, charge; 79, 0.5, 0.5, 0.0, rms3d, occ, region, charge];
     xtl_parm.uLayer(2).atoms = [79, 0.0, 0.5, 0.5, rms3d, occ, region, charge; 79, 0.5, 0.0, 0.5, rms3d, occ, region, charge];
     atoms = ilc_crystal_by_lays(xtl_parm);
