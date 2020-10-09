@@ -5,7 +5,7 @@ addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-Z = 78;
+Z = 49;
 charge = 0;
 
 Rmin = 1e-02; Rmax = 5.0; nR = 512;

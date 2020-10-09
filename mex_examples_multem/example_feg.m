@@ -5,7 +5,7 @@ addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-Z = 78;
+Z = 50;
 occ = 1;
 region = 0;
 charge = 0;
@@ -20,7 +20,6 @@ g = gmin:dg:gmax;
 [f4, df4] = ilc_feg(4, Z, charge, g);
 [f5, df5] = ilc_feg(5, Z, charge, g);
 [f6, df6] = ilc_feg(6, Z, charge, g);
-
 figure(1); clf;
 
 subplot(1, 2, 1);
