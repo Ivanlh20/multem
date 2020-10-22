@@ -19,7 +19,7 @@ input_multem.spec_rot_u0 = [1 0 0]; 					% unitary vector
 input_multem.spec_rot_center_type = 1; 			% 1: geometric center, 2: User define		
 input_multem.spec_rot_center_p = [0 0 0];					% rotation point
 
-na = 6; nb = 6; nc = 10; ncu = 4; rmsd_3d = 0.15;
+na = 6; nb = 6; nc = 10; ncu = 4; rmsd_3d = 0.085;
 
 [input_multem.spec_atoms, input_multem.spec_lx...
 , input_multem.spec_ly, input_multem.spec_lz...
