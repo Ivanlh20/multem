@@ -4351,10 +4351,11 @@ namespace mt
 						dRy = std::copysign(dRx, yu);
 						ny = int(floor(yu/dRy+Epsilon<T>::rel+0.5));
 						ny += (pbc)?0:1;
-						ny += (pbc)?0:1;
 
-						if(!spxs)
+						if (!spxs)
+						{
 							dRy = yu/((pbc)?ny:(ny-1));
+						}
 					}
 					else
 					{
@@ -4363,8 +4364,10 @@ namespace mt
 						nx = int(floor(xu/dRx+Epsilon<T>::rel+0.5));
 						nx += (pbc)?0:1;
 
-						if(!spxs)
+						if (!spxs)
+						{
 							dRx = xu/((pbc)?nx:(nx-1));
+						}
 					}
 
 					x.resize(nxy());

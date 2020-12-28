@@ -82,7 +82,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
     CARD_70="-gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot;";
     CARD_MULT = join([CARD_30, CARD_35, CARD_50, CARD_60, CARD_70], ' ');
 
-    if 0
+    if 1
         gpu = gpuDevice();
         gpu_card = round(str2double(gpu.ComputeCapability));
 
@@ -98,9 +98,9 @@ function [] = ilm_mex(option, m_file, src, varargin)
             otherwise
                 ARCH_FLAGS = CARD_30;
         end
+    else
+        ARCH_FLAGS = CARD_MULT;
     end
-    
-    ARCH_FLAGS = CARD_MULT;
     
     %%%%%%%%%%%%%%% read template mex_cuda file %%%%%%%%%%%%%%%%%
     if(ispc)
