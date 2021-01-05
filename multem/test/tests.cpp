@@ -3,8 +3,8 @@
 
 int main() {
   
-  mt::Input input;
-  mt::test(input);
+  mt::SystemConfiguration a;
+  mt::test(a);
 
   return 0;
 }
