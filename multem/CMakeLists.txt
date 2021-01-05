@@ -1,3 +1,7 @@
+##############################################################################
+# Build file for multem project
+##############################################################################
+
 cmake_minimum_required(VERSION 3.11.0)
 
 # Set the project name
@@ -23,7 +27,11 @@ set(COVERAGE_LINK_FLAGS    -coverage)
 # clusters which may not allow export of LD_LIBRARY_PATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH True)
 
-# Add a C/C++ extension
+##############################################################################
+# Build the multem library
+##############################################################################
+
+# Add a C/C++ library
 add_library(multem SHARED src/multem.cpp)
 
 # Ensure we are using C++11
@@ -38,6 +46,7 @@ set_property(TARGET multem PROPERTY LIBRARY_OUTPUT_DIRECTORY lib)
 
 # Set the include directory
 target_include_directories(multem PUBLIC src)
+target_include_directories(multem PUBLIC include)
 
 # Link to the CUDA libraries
 target_link_libraries(multem PUBLIC
@@ -54,3 +63,28 @@ target_link_libraries(multem PUBLIC
 # Install the python extension
 install(TARGETS multem LIBRARY DESTINATION lib)
 install(FILES include/multem.h DESTINATION include)
+
+##############################################################################
+# Build the test executable
+##############################################################################
+
+# Enable testing so we can just call "ctest" if we want
+enable_testing()
+
+# Add an executable
+add_executable(multem-test test/tests.cpp)
+
+# Ensure we are using C++11
+target_compile_features(multem-test PUBLIC cxx_std_11)
+
+# Build the test into the bin directory
+set_property(TARGET multem-test PROPERTY RUNTIME_OUTPUT_DIRECTORY bin)
+
+# Set the include directory
+target_include_directories(multem-test PUBLIC include)
+
+# Link to the multem shared library
+target_link_libraries(multem-test multem)
+
+# Add the test to ctest runner
+add_test(NAME test COMMAND multem-test)
