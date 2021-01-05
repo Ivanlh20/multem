@@ -502,12 +502,12 @@ namespace mt
 		{
 			if(ix_0>ix_e)
 			{
-				std::swap(ix_0, ix_e);
+				int t = ix_0; ix_0 = ix_e; ix_e = t;
 			}
 
 			if(iy_0>iy_e)
 			{
-				std::swap(iy_0, iy_e);
+				int t = iy_0; iy_0 = iy_e; iy_e = t;
 			}
 		}
 
