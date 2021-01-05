@@ -33,6 +33,9 @@ target_compile_features(multem PUBLIC cxx_std_11)
 # Setting this option does not pass arch flag to compiler
 set_property(TARGET multem PROPERTY CUDA_ARCHITECTURES OFF)
 
+# Build the library into the lib directory
+set_property(TARGET multem PROPERTY LIBRARY_OUTPUT_DIRECTORY lib)
+
 # Set the include directory
 target_include_directories(multem PUBLIC src)
 
