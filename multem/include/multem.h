@@ -493,17 +493,28 @@ namespace mt {
   /*    output_area_iy_e(1) {}*/
   /*};*/
 
+
+  /****************************************************************************
+   * The SystemConfiguration interface
+   ***************************************************************************/
+
   /**
    * A proxy for the System_Configuration class
    */
   class SystemConfiguration {
   public:
+
+    struct Data;
+
     SystemConfiguration();
     SystemConfiguration(const SystemConfiguration&);
     SystemConfiguration(SystemConfiguration&&);
+    SystemConfiguration(const Data&);
     SystemConfiguration& operator=(const SystemConfiguration&);
     SystemConfiguration& operator=(SystemConfiguration&&);
     ~SystemConfiguration();
+
+    const SystemConfiguration::Data& internal() const;
 
     void set_precision(ePrecision precision);
     ePrecision get_precision() const;
@@ -539,11 +550,202 @@ namespace mt {
     bool is_double_device() const;
 
   private:
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
+    std::unique_ptr<Data> impl_;
   };
 
-  void test(const SystemConfiguration& config);
+  /****************************************************************************
+   * The Input interface
+   ***************************************************************************/
+
+  /**
+   * A proxy for the Input_Multislice class
+   */
+  template <typename T>
+  class Input {
+  public:
+
+    struct Data;
+
+    Input();
+    Input(const Input&);
+    Input(Input&&);
+    Input(const Data&);
+    Input& operator=(const Input&);
+    Input& operator=(Input&&);
+    ~Input();
+    
+    const Data& internal() const;
+
+		SystemConfiguration get_system_conf() const;
+		void set_system_conf(const SystemConfiguration &system_conf);
+
+		eElec_Spec_Int_Model get_interaction_model() const;
+		void set_interaction_model(eElec_Spec_Int_Model interaction_model);
+
+		ePotential_Type get_potential_type() const;
+		void set_potential_type(ePotential_Type potential_type);
+
+		ePhonon_Model get_pn_model() const;
+		void set_pn_model(ePhonon_Model pn_model);
+
+		bool get_pn_coh_contrib() const;
+		void set_pn_coh_contrib(bool pn_coh_contrib);
+
+		bool get_pn_single_conf() const;
+		void set_pn_single_conf(bool pn_single_conf);
+
+		/* const FP_Dim& get_pn_dim() const; */
+    /* void set_pn_dim(const FP_Dim &pn_dim); */
+
+		int get_fp_dist() const;
+    void set_fp_dist(int fp_dist);
+
+		int get_pn_seed() const;
+    void set_pn_seed(int pn_seed);
+
+		int get_pn_nconf() const;
+    void set_pn_nconf(int pn_nconf);
+
+		int get_fp_iconf_0() const;
+    void set_fp_iconf_0(int fp_iconf_0);
+
+		/* const Atom_Data<T>& get_atoms() const; */
+    /* void set_atoms(const Atom_Data<T>& atoms); */
+
+		bool get_is_crystal() const;
+    void set_is_crystal(bool is_crystal);
+
+		double get_spec_rot_theta() const;
+    void set_spec_rot_theta(double spec_rot_theta);
+
+		/* const r3d<T>& get_spec_rot_u0() const; */
+    /* void set_spec_rot_u0(const r3d<T>& spec_rot_u0); */
+
+		eRot_Point_Type get_spec_rot_center_type() const;
+    void set_spec_rot_center_type(eRot_Point_Type spec_rot_center_type);
+
+		/* const r3d<T>& get_spec_rot_center_p() const; */
+    /* void set_spec_rot_center_p(const r3d<T>& spec_rot_center_p); */
+
+		eThick_Type get_thick_type() const;
+    void set_thick_type(eThick_Type thick_type);
+
+		/* const host_vector<T>& get_thick() const; */
+    /* void set_thick(const host_vector<T>& thick); */
+
+		ePotential_Slicing get_potential_slicing() const;
+    void set_potential_slicing(ePotential_Slicing potential_slicing);
+
+		/* const Grid_2d<T>& get_grid_2d() const; */
+    /* void set_grid_2d(const Grid_2d<T>& grid_2d); */
+
+		/* const Range_2d& get_output_area() const; */
+    /* void set_output_area(const Range_2d& output_area); */
+
+		eTEM_Sim_Type get_simulation_type() const;
+    void set_simulation_type(eTEM_Sim_Type simulation_type);
+
+		eIncident_Wave_Type get_iw_type() const;
+    void set_iw_type(eIncident_Wave_Type iw_type);
+
+		/* const host_vector<complex<T>>& get_iw_psi() const; */
+    /* void set_iw_psi(const host_vector<complex<T>>& iw_psi); */
+
+		/* const host_vector<T>& get_iw_x() const; */
+    /* void set_iw_x(const host_vector<T>& iw_x); */
+
+		/* const host_vector<T>& get_iw_y() const; */
+    /* void set_iw_y(const host_vector<T>& iw_y); */
+
+		double get_E_0() const;
+    void set_E_0(double E_0);
+
+		double get_lambda() const;
+    void set_lambda(double lambda);
+
+		double get_theta() const;
+    void set_theta(double theta);
+
+		double get_phi() const;
+    void set_phi(double phi);
+
+		eIllumination_Model get_illumination_model() const;
+    void set_illumination_model(eIllumination_Model illumination_model);
+
+		eTemporal_Spatial_Incoh get_temporal_spatial_incoh() const;
+    void set_temporal_spatial_incoh(eTemporal_Spatial_Incoh temporal_spatial_incoh);
+
+		/* const Lens<T>& get_cond_lens() const; */
+    /* void set_cond_lens(const Lens<T>& cond_lens); */
+
+		/* const Lens<T>& get_obj_lens() const; */
+    /* void set_obj_lens(const Lens<T>& obj_lens); */
+
+		/* const Scanning<T>& get_scanning() const; */
+    /* void set_scanning(const Scanning<T>& scanning); */
+
+		/* const Detector<T, e_host>& get_detector() const; */
+    /* void set_detector(const Detector<T, e_host>& detector); */
+
+		/* const EELS<T>& get_eels_fr() const; */
+    /* void set_eels_fr(const EELS<T>& eels_fr); */
+
+		eOperation_Mode get_operation_mode() const;
+    void set_operation_mode(eOperation_Mode operation_mode);
+
+		bool get_slice_storage() const;
+    void set_slice_storage(bool slice_storage);
+
+		bool get_reverse_multislice() const;
+    void set_reverse_multislice(bool reverse_multislice);
+
+		int get_mul_sign() const;
+    void set_mul_sign(int mul_sign);
+
+		double get_Vrl() const;
+    void set_Vrl(double Vrl);
+
+		int get_nR() const;
+    void set_nR(int nR);
+
+		int get_nrot() const;
+    void set_nrot(int nrot);
+
+		eLens_Var_Type get_cdl_var_type() const;
+    void set_cdl_var_type(eLens_Var_Type cdl_var_type);
+
+		/* const host_vector<T>& get_cdl_var() const; */
+    /* void set_cdl_var(const host_vector<T>& cdl_var); */
+
+		/* const host_vector<int>& get_iscan() const; */
+    /* void set_iscan(const host_vector<int>& iscan); */
+
+		/* const host_vector<T>& get_beam_x() const; */
+    /* void set_beam_x(const host_vector<T>& beam_x); */
+
+		/* const host_vector<T>& get_beam_y() const; */
+    /* void set_beam_y(const host_vector<T>& beam_y); */
+
+		int get_islice() const;
+    void set_islice(int islice);
+
+		bool get_dp_Shift() const;
+    void set_dp_Shift(bool dp_Shift);
+
+  private:
+    std::unique_ptr<Data> impl_;
+  };
+
+  /**
+   * Explict instantiation of template classes
+   */
+  template class Input<float>;
+  template class Input<double>;
+  typedef Input<float> InputFloat; 
+  typedef Input<double> InputDouble; 
+
+  template <typename T>
+  void test(const Input<T>&);
 
 }  // namespace mt
 
