@@ -18,10 +18,6 @@ find_package(FFTW REQUIRED)
 set(HAS_FLTO False)
 set(HAS_FLTO_THIN False)
 
-# Set the coverage compile and link flags for gcc or clang
-set(COVERAGE_COMPILE_FLAGS -coverage)
-set(COVERAGE_LINK_FLAGS    -coverage)
-
 # Add the automatically determined parts of the RPATH which point to directories
 # outside the build tree to the install RPATH. Required for submission to
 # clusters which may not allow export of LD_LIBRARY_PATH
@@ -32,7 +28,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH True)
 ##############################################################################
 
 # Add a C/C++ library
-add_library(multem SHARED src/multem.cpp)
+add_library(multem SHARED src/multem.cu)
 
 # Ensure we are using C++11
 target_compile_features(multem PUBLIC cxx_std_11)
@@ -40,9 +36,6 @@ target_compile_features(multem PUBLIC cxx_std_11)
 # Not specifying CUDA architecture throws and error.
 # Setting this option does not pass arch flag to compiler
 set_property(TARGET multem PROPERTY CUDA_ARCHITECTURES OFF)
-
-# Build the library into the lib directory
-set_property(TARGET multem PROPERTY LIBRARY_OUTPUT_DIRECTORY lib)
 
 # Set the include directory
 target_include_directories(multem PUBLIC src)
@@ -53,12 +46,6 @@ target_link_libraries(multem PUBLIC
   ${CUDA_LIBRARIES} 
   ${CUDA_CUFFT_LIBRARIES}
   ${FFTW_LIBRARIES})
-
-# Set the coverage compile and link flags in the debug build
-#target_compile_options(multem 
-#  PUBLIC "$<$<CONFIG:DEBUG>:${COVERAGE_COMPILE_FLAGS}>")
-#target_link_options(multem 
-#  PUBLIC "$<$<CONFIG:DEBUG>:${COVERAGE_LINK_FLAGS}>")
 
 # Install the python extension
 install(TARGETS multem LIBRARY DESTINATION lib)
@@ -76,9 +63,6 @@ add_executable(multem-test test/tests.cpp)
 
 # Ensure we are using C++11
 target_compile_features(multem-test PUBLIC cxx_std_11)
-
-# Build the test into the bin directory
-set_property(TARGET multem-test PROPERTY RUNTIME_OUTPUT_DIRECTORY bin)
 
 # Set the include directory
 target_include_directories(multem-test PUBLIC include)
