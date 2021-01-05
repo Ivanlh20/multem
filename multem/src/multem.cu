@@ -26,7 +26,7 @@
 #include <input_multislice.cuh>
 
 namespace mt {
-  
+
   /****************************************************************************
    * The SystemConfiguration interface
    ***************************************************************************/
@@ -34,25 +34,25 @@ namespace mt {
   struct SystemConfiguration::Data {
     System_Configuration data;
     Data() {}
-    Data(const System_Configuration &d)
-      : data(d) {}
+    Data(const System_Configuration& d)
+        : data(d) {}
   };
 
-  SystemConfiguration::SystemConfiguration() 
-    : impl_(std::make_unique<Data>()) {}
-  
+  SystemConfiguration::SystemConfiguration()
+      : impl_(std::make_unique<Data>()) {}
+
   SystemConfiguration::SystemConfiguration(const SystemConfiguration& other)
-    : impl_(std::make_unique<Data>(*other.impl_)) {}
+      : impl_(std::make_unique<Data>(*other.impl_)) {}
 
   SystemConfiguration::SystemConfiguration(SystemConfiguration&& other) = default;
 
-  SystemConfiguration& SystemConfiguration::operator=(const SystemConfiguration &other) {
+  SystemConfiguration& SystemConfiguration::operator=(const SystemConfiguration& other) {
     *impl_ = *other.impl_;
     return *this;
   }
-  
-  SystemConfiguration::SystemConfiguration(const Data &other)
-    : impl_(std::make_unique<Data>(other)) {}
+
+  SystemConfiguration::SystemConfiguration(const Data& other)
+      : impl_(std::make_unique<Data>(other)) {}
 
   SystemConfiguration& SystemConfiguration::operator=(SystemConfiguration&&) = default;
 
@@ -69,7 +69,7 @@ namespace mt {
   ePrecision SystemConfiguration::get_precision() const {
     return impl_->data.precision;
   }
-  
+
   void SystemConfiguration::set_device(eDevice device) {
     impl_->data.device = device;
   }
@@ -85,7 +85,7 @@ namespace mt {
   int SystemConfiguration::get_cpu_ncores() const {
     return impl_->data.cpu_ncores;
   }
-  
+
   void SystemConfiguration::set_cpu_nthread(int cpu_nthread) {
     impl_->data.cpu_nthread = cpu_nthread;
   }
@@ -93,7 +93,7 @@ namespace mt {
   int SystemConfiguration::get_cpu_nthread() const {
     return impl_->data.cpu_nthread;
   }
-  
+
   void SystemConfiguration::set_gpu_device(int gpu_device) {
     impl_->data.gpu_device = gpu_device;
   }
@@ -101,7 +101,7 @@ namespace mt {
   int SystemConfiguration::get_gpu_device() const {
     return impl_->data.gpu_device;
   }
-  
+
   void SystemConfiguration::set_gpu_nstream(int gpu_nstream) {
     impl_->data.gpu_nstream = gpu_nstream;
   }
@@ -109,7 +109,7 @@ namespace mt {
   int SystemConfiguration::get_gpu_nstream() const {
     return impl_->data.gpu_nstream;
   }
-  
+
   void SystemConfiguration::set_nstream(int nstream) {
     impl_->data.nstream = nstream;
   }
@@ -117,7 +117,7 @@ namespace mt {
   int SystemConfiguration::get_nstream() const {
     return impl_->data.nstream;
   }
-  
+
   void SystemConfiguration::set_active(bool active) {
     impl_->data.active = active;
   }
@@ -157,33 +157,33 @@ namespace mt {
   bool SystemConfiguration::is_double_device() const {
     return impl_->data.is_double_device();
   }
-  
+
   /****************************************************************************
    * The Input interface
    ***************************************************************************/
- 
+
   template <typename T>
   struct Input<T>::Data {
     Input_Multislice<T> data;
   };
 
   template <typename T>
-  Input<T>::Input() 
-    : impl_(std::make_unique<Data>()) {}
-  
+  Input<T>::Input()
+      : impl_(std::make_unique<Data>()) {}
+
   template <typename T>
   Input<T>::Input(const Input& other)
-    : impl_(std::make_unique<Data>(*other.impl_)) {}
+      : impl_(std::make_unique<Data>(*other.impl_)) {}
 
   template <typename T>
   Input<T>::Input(Input&& other) = default;
-  
-  template <typename T>
-  Input<T>::Input(const Input<T>::Data &other)
-    : impl_(std::make_unique<Data>(other)) {}
 
   template <typename T>
-  Input<T>& Input<T>::operator=(const Input<T> &other) {
+  Input<T>::Input(const Input<T>::Data& other)
+      : impl_(std::make_unique<Data>(other)) {}
+
+  template <typename T>
+  Input<T>& Input<T>::operator=(const Input<T>& other) {
     *impl_ = *other.impl_;
     return *this;
   }
@@ -193,7 +193,7 @@ namespace mt {
 
   template <typename T>
   Input<T>::~Input<T>() = default;
-  
+
   template <typename T>
   const Input<T>::Data& Input<T>::internal() const {
     return *impl_;
@@ -205,7 +205,7 @@ namespace mt {
   }
 
   template <typename T>
-  void Input<T>::set_system_conf(const SystemConfiguration &system_conf) {
+  void Input<T>::set_system_conf(const SystemConfiguration& system_conf) {
     impl_->data.system_conf = system_conf.internal().data;
   }
 
@@ -590,13 +590,13 @@ namespace mt {
   void Input<T>::set_dp_Shift(bool dp_Shift) {
     impl_->data.dp_Shift = dp_Shift;
   }
-  
+
   /****************************************************************************
    * Misc function calls
    ***************************************************************************/
 
   template <typename T>
-  void test(const Input<T> &a) {
+  void test(const Input<T>& a) {
     std::cout << a.get_system_conf().get_precision() << std::endl;
   }
 
@@ -605,4 +605,4 @@ namespace mt {
    */
   template void test<float>(const Input<float>&);
   template void test<double>(const Input<double>&);
-}
+}  // namespace mt
