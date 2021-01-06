@@ -915,18 +915,8 @@ namespace mt {
   }
 
   template <typename T>
-  void Output<T>::set_output_type(eTEM_Output_Type output_type) {
-    impl_->data.output_type = output_type;
-  }
-
-  template <typename T>
   int Output<T>::get_ndetector() const {
     return impl_->data.ndetector;
-  }
-
-  template <typename T>
-  void Output<T>::set_ndetector(int ndetector) {
-    impl_->data.ndetector = ndetector;
   }
 
   template <typename T>
@@ -935,18 +925,8 @@ namespace mt {
   }
 
   template <typename T>
-  void Output<T>::set_nx(int nx) {
-    impl_->data.nx = nx;
-  }
-
-  template <typename T>
   int Output<T>::get_ny() const {
     return impl_->data.ny;
-  }
-
-  template <typename T>
-  void Output<T>::set_ny(int ny) {
-    impl_->data.ny = ny;
   }
 
   template <typename T>
@@ -955,18 +935,8 @@ namespace mt {
   }
 
   template <typename T>
-  void Output<T>::set_dx(T dx) {
-    impl_->data.dx = dx;
-  }
-
-  template <typename T>
   T Output<T>::get_dy() const {
     return impl_->data.dy;
-  }
-
-  template <typename T>
-  void Output<T>::set_dy(T dy) {
-    impl_->data.dy = dy;
   }
 
   template <typename T>
@@ -975,18 +945,8 @@ namespace mt {
   }
 
   template <typename T>
-  void Output<T>::set_dr(T dr) {
-    impl_->data.dr = dr;
-  }
-
-  template <typename T>
   std::vector<T> Output<T>::get_x() const {
     return std::vector<T>(impl_->data.x.begin(), impl_->data.x.end());
-  }
-
-  template <typename T>
-  void Output<T>::set_x(const std::vector<T>& x) {
-    impl_->data.x.assign(x.begin(), x.end());
   }
 
   template <typename T>
@@ -995,18 +955,93 @@ namespace mt {
   }
 
   template <typename T>
-  void Output<T>::set_y(const std::vector<T>& y) {
-    impl_->data.y.assign(y.begin(), y.end());
-  }
-
-  template <typename T>
   std::vector<T> Output<T>::get_r() const {
     return std::vector<T>(impl_->data.r.begin(), impl_->data.r.end());
   }
+    
+  template <typename T>
+  std::vector<DetInt<typename Output<T>::vector_type>> Output<T>::get_image_tot() const {
+    std::vector<DetInt<vector_type>> result;
+    for (auto &x : impl_->data.image_tot) {
+      DetInt<vector_type> d;
+      for (auto &y : x.image) {
+        d.image.push_back(vector_type(y.begin(), y.end()));
+      }
+      result.push_back(d);
+    }
+    return result;
+  }
 
   template <typename T>
-  void Output<T>::set_r(const std::vector<T>& r) {
-    impl_->data.r.assign(r.begin(), r.end());
+  std::vector<DetInt<typename Output<T>::vector_type>> Output<T>::get_image_coh() const {
+    std::vector<DetInt<vector_type>> result;
+    for (auto &x : impl_->data.image_coh) {
+      DetInt<vector_type> d;
+      for (auto &y : x.image) {
+        d.image.push_back(vector_type(y.begin(), y.end()));
+      }
+      result.push_back(d);
+    }
+    return result;
+  }
+
+  template <typename T>
+  std::vector<typename Output<T>::vector_type> Output<T>::get_m2psi_tot() const {
+    std::vector<vector_type> result;
+    for (auto &x : impl_->data.m2psi_tot) {
+      result.push_back(vector_type(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  std::vector<typename Output<T>::vector_type> Output<T>::get_m2psi_coh() const {
+    std::vector<vector_type> result;
+    for (auto &x : impl_->data.m2psi_coh) {
+      result.push_back(vector_type(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  std::vector<typename Output<T>::complex_vector_type> Output<T>::get_psi_coh() const {
+    std::vector<complex_vector_type> result;
+    for (auto &x : impl_->data.psi_coh) {
+      result.push_back(complex_vector_type(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  std::vector<typename Output<T>::vector_type> Output<T>::get_V() const {
+    std::vector<vector_type> result;
+    for (auto &x : impl_->data.V) {
+      result.push_back(vector_type(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  std::vector<typename Output<T>::complex_vector_type> Output<T>::get_trans() const {
+    std::vector<complex_vector_type> result;
+    for (auto &x : impl_->data.trans) {
+      result.push_back(complex_vector_type(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  std::vector<typename Output<T>::complex_vector_type> Output<T>::get_psi_0() const {
+    std::vector<complex_vector_type> result;
+    for (auto &x : impl_->data.psi_0) {
+      result.push_back(complex_vector_type(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  std::vector<bool> Output<T>::get_thk_gpu() const {
+    return std::vector<bool>(impl_->data.thk_gpu.begin(), impl_->data.thk_gpu.end());
   }
 
   /****************************************************************************

@@ -630,6 +630,27 @@ namespace mt {
   private:
     std::unique_ptr<Data> impl_;
   };
+  
+  /****************************************************************************
+   * The Detector interface
+   ***************************************************************************/
+
+  /**
+   * Interface for Det_Int. This can be removed simply by using std::vector in
+   * the Det_Int class rather than thrust::vector
+   */
+  template <typename T>
+  class DetInt {
+  public:
+		using value_type = typename T::value_type;
+		using size_type = std::size_t;
+
+		size_type size() const {
+			return image.size();
+		}
+
+    std::vector<T> image;
+  };
 
   /****************************************************************************
    * The Input interface
@@ -827,6 +848,9 @@ namespace mt {
   public:
     struct Data;
 
+    typedef std::vector<T> vector_type;
+    typedef std::vector<complex<T>> complex_vector_type;
+
     Output();
     Output(Output&);
     Output(Output&&);
@@ -838,74 +862,24 @@ namespace mt {
     const Data& internal() const;
 		
     eTEM_Output_Type get_output_type() const;
-    void set_output_type(eTEM_Output_Type output_type);
-
 		int get_ndetector() const;
-		void set_ndetector(int ndetector);
-		
     int get_nx() const;
-		void set_nx(int nx);
-		
     int get_ny() const;
-		void set_ny(int ny);
-		
     T get_dx() const;
-		void set_dx(T dx);
-		
     T get_dy() const;
-    void set_dy(T dy);
-
 		T get_dr() const;
-		void set_dr(T dr);
-
     std::vector<T> get_x() const;
-		void set_x(const std::vector<T>& x);
-
     std::vector<T> get_y() const;
-		void set_y(const std::vector<T>& y);
-
     std::vector<T> get_r() const;
-		void set_r(const std::vector<T>& r);
-
-    /* std::vector<Det_Int<TVector_hr>> get_image_tot() const; */
-		/* void set_image_tot(std::vector<Det_Int<TVector_hr>> image_tot); */
-
-    /* std::vector<Det_Int<TVector_hr>> get_image_coh() const; */
-		/* void set_image_coh(std::vector<Det_Int<TVector_hr>> image_coh); */
-
-    /* std::vector<TVector_hr> get_m2psi_tot() const; */
-		/* void set_m2psi_tot(std::vector<TVector_hr> m2psi_tot); */
-
-    /* std::vector<TVector_hr> get_m2psi_coh() const; */
-		/* void set_m2psi_coh(std::vector<TVector_hr> m2psi_coh); */
-
-    /* std::vector<TVector_hc> get_psi_coh() const; */
-		/* void set_psi_coh(std::vector<TVector_hc> psi_coh); */
-
-    /* std::vector<TVector_hr> get_V() const; */
-		/* void set_V(std::vector<TVector_hr> V); */
-
-    /* std::vector<TVector_hc> get_trans() const; */
-		/* void set_trans(std::vector<TVector_hc> trans); */
-
-    /* std::vector<TVector_hc> get_psi_0() const; */
-		/* void set_psi_0(std::vector<TVector_hc> psi_0); */
-
-		/* std::vector<bool> get_thk_gpu() const; */
-		/* void set_thk_gpu(std::vector<bool> thk_gpu); */
-
-    /* std::vector<TVector_dr> get_m2psi_tot_d() const; */
-		/* void set_m2psi_tot_d(std::vector<TVector_dr> m2psi_tot_d); */
-
-    /* std::vector<TVector_dr> get_m2psi_coh_d() const; */
-		/* void set_m2psi_coh_d(std::vector<TVector_dr> m2psi_coh_d); */
-
-    /* std::vector<TVector_dc> get_psi_coh_d() const; */
-		/* void set_psi_coh_d(std::vector<TVector_dc> psi_coh_d); */
-
-		/* Stream<e_host> get_stream() const; */
-		/* void set_stream(Stream<e_host> stream); */
-
+    std::vector<DetInt<vector_type>> get_image_tot() const;
+    std::vector<DetInt<vector_type>> get_image_coh() const;
+    std::vector<vector_type> get_m2psi_tot() const;
+    std::vector<vector_type> get_m2psi_coh() const;
+    std::vector<complex_vector_type> get_psi_coh() const;
+    std::vector<vector_type> get_V() const;
+    std::vector<complex_vector_type> get_trans() const;
+    std::vector<complex_vector_type> get_psi_0() const;
+		std::vector<bool> get_thk_gpu() const;
   
   private:
     std::unique_ptr<Data> impl_;
