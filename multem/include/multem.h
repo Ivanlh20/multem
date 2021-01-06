@@ -30,6 +30,8 @@
 #include <vector>
 #include <memory>
 #include <multem/constants.h>
+#include <lin_alg_def.cuh>
+#include <safe_types.cuh>
 
 namespace mt {
 
@@ -550,6 +552,84 @@ namespace mt {
   private:
     std::unique_ptr<Data> impl_;
   };
+  
+  /****************************************************************************
+   * The Atom_Data interface
+   ***************************************************************************/
+
+  /**
+   * A proxy for the Atom_Data class
+   */
+  template <typename T>
+  class AtomData {
+  public:
+    struct Data;
+
+    AtomData();
+    AtomData(const AtomData&);
+    AtomData(AtomData&&);
+    AtomData(const Data&);
+    AtomData& operator=(const AtomData&);
+    AtomData& operator=(AtomData&&);
+    ~AtomData();
+
+    const Data& internal() const;
+
+  private:
+    std::unique_ptr<Data> impl_;
+  };
+  
+  /****************************************************************************
+   * The Scanning interface
+   ***************************************************************************/
+
+  /**
+   * A proxy for the Scanning class
+   */
+  template <typename T>
+  class ScanningData {
+  public:
+    struct Data;
+
+    ScanningData();
+    ScanningData(const ScanningData&);
+    ScanningData(ScanningData&&);
+    ScanningData(const Data&);
+    ScanningData& operator=(const ScanningData&);
+    ScanningData& operator=(ScanningData&&);
+    ~ScanningData();
+
+    const Data& internal() const;
+
+  private:
+    std::unique_ptr<Data> impl_;
+  };
+  
+  /****************************************************************************
+   * The Detector interface
+   ***************************************************************************/
+
+  /**
+   * A proxy for the Scanning class
+   */
+  template <typename T>
+  class DetectorData {
+  public:
+    struct Data;
+
+    DetectorData();
+    DetectorData(const DetectorData&);
+    DetectorData(DetectorData&&);
+    DetectorData(const Data&);
+    DetectorData& operator=(const DetectorData&);
+    DetectorData& operator=(DetectorData&&);
+    ~DetectorData();
+
+    const Data& internal() const;
+
+  private:
+    std::unique_ptr<Data> impl_;
+  };
 
   /****************************************************************************
    * The Input interface
@@ -591,8 +671,8 @@ namespace mt {
     bool get_pn_single_conf() const;
     void set_pn_single_conf(bool pn_single_conf);
 
-    /* const FP_Dim& get_pn_dim() const; */
-    /* void set_pn_dim(const FP_Dim &pn_dim); */
+    const FP_Dim& get_pn_dim() const;
+    void set_pn_dim(const FP_Dim &pn_dim);
 
     int get_fp_dist() const;
     void set_fp_dist(int fp_dist);
@@ -606,8 +686,8 @@ namespace mt {
     int get_fp_iconf_0() const;
     void set_fp_iconf_0(int fp_iconf_0);
 
-    /* const Atom_Data<T>& get_atoms() const; */
-    /* void set_atoms(const Atom_Data<T>& atoms); */
+    AtomData<T> get_atoms() const;
+    void set_atoms(const AtomData<T>& atoms);
 
     bool get_is_crystal() const;
     void set_is_crystal(bool is_crystal);
@@ -615,29 +695,29 @@ namespace mt {
     double get_spec_rot_theta() const;
     void set_spec_rot_theta(double spec_rot_theta);
 
-    /* const r3d<T>& get_spec_rot_u0() const; */
-    /* void set_spec_rot_u0(const r3d<T>& spec_rot_u0); */
+    const r3d<T>& get_spec_rot_u0() const;
+    void set_spec_rot_u0(const r3d<T>& spec_rot_u0);
 
     eRot_Point_Type get_spec_rot_center_type() const;
     void set_spec_rot_center_type(eRot_Point_Type spec_rot_center_type);
 
-    /* const r3d<T>& get_spec_rot_center_p() const; */
-    /* void set_spec_rot_center_p(const r3d<T>& spec_rot_center_p); */
+    const r3d<T>& get_spec_rot_center_p() const;
+    void set_spec_rot_center_p(const r3d<T>& spec_rot_center_p);
 
     eThick_Type get_thick_type() const;
     void set_thick_type(eThick_Type thick_type);
 
-    /* const host_vector<T>& get_thick() const; */
-    /* void set_thick(const host_vector<T>& thick); */
+    std::vector<T> get_thick() const;
+    void set_thick(const std::vector<T>& thick);
 
     ePotential_Slicing get_potential_slicing() const;
     void set_potential_slicing(ePotential_Slicing potential_slicing);
 
-    /* const Grid_2d<T>& get_grid_2d() const; */
-    /* void set_grid_2d(const Grid_2d<T>& grid_2d); */
+    const Grid_2d<T>& get_grid_2d() const;
+    void set_grid_2d(const Grid_2d<T>& grid_2d);
 
-    /* const Range_2d& get_output_area() const; */
-    /* void set_output_area(const Range_2d& output_area); */
+    const Range_2d& get_output_area() const;
+    void set_output_area(const Range_2d& output_area);
 
     eTEM_Sim_Type get_simulation_type() const;
     void set_simulation_type(eTEM_Sim_Type simulation_type);
@@ -645,14 +725,14 @@ namespace mt {
     eIncident_Wave_Type get_iw_type() const;
     void set_iw_type(eIncident_Wave_Type iw_type);
 
-    /* const host_vector<complex<T>>& get_iw_psi() const; */
-    /* void set_iw_psi(const host_vector<complex<T>>& iw_psi); */
+    std::vector<complex<T>> get_iw_psi() const;
+    void set_iw_psi(const std::vector<complex<T>>& iw_psi);
 
-    /* const host_vector<T>& get_iw_x() const; */
-    /* void set_iw_x(const host_vector<T>& iw_x); */
+    std::vector<T> get_iw_x() const;
+    void set_iw_x(const std::vector<T>& iw_x);
 
-    /* const host_vector<T>& get_iw_y() const; */
-    /* void set_iw_y(const host_vector<T>& iw_y); */
+    std::vector<T> get_iw_y() const;
+    void set_iw_y(const std::vector<T>& iw_y);
 
     double get_E_0() const;
     void set_E_0(double E_0);
@@ -672,20 +752,20 @@ namespace mt {
     eTemporal_Spatial_Incoh get_temporal_spatial_incoh() const;
     void set_temporal_spatial_incoh(eTemporal_Spatial_Incoh temporal_spatial_incoh);
 
-    /* const Lens<T>& get_cond_lens() const; */
-    /* void set_cond_lens(const Lens<T>& cond_lens); */
+    const Lens<T>& get_cond_lens() const;
+    void set_cond_lens(const Lens<T>& cond_lens);
 
-    /* const Lens<T>& get_obj_lens() const; */
-    /* void set_obj_lens(const Lens<T>& obj_lens); */
+    const Lens<T>& get_obj_lens() const;
+    void set_obj_lens(const Lens<T>& obj_lens);
 
-    /* const Scanning<T>& get_scanning() const; */
-    /* void set_scanning(const Scanning<T>& scanning); */
+    ScanningData<T> get_scanning() const;
+    void set_scanning(const ScanningData<T>& scanning);
 
-    /* const Detector<T, e_host>& get_detector() const; */
-    /* void set_detector(const Detector<T, e_host>& detector); */
+    DetectorData<T> get_detector() const;
+    void set_detector(const DetectorData<T>& detector);
 
-    /* const EELS<T>& get_eels_fr() const; */
-    /* void set_eels_fr(const EELS<T>& eels_fr); */
+    const EELS<T>& get_eels_fr() const;
+    void set_eels_fr(const EELS<T>& eels_fr);
 
     eOperation_Mode get_operation_mode() const;
     void set_operation_mode(eOperation_Mode operation_mode);
@@ -711,17 +791,17 @@ namespace mt {
     eLens_Var_Type get_cdl_var_type() const;
     void set_cdl_var_type(eLens_Var_Type cdl_var_type);
 
-    /* const host_vector<T>& get_cdl_var() const; */
-    /* void set_cdl_var(const host_vector<T>& cdl_var); */
+    std::vector<T> get_cdl_var() const;
+    void set_cdl_var(const std::vector<T>& cdl_var);
 
-    /* const host_vector<int>& get_iscan() const; */
-    /* void set_iscan(const host_vector<int>& iscan); */
+    std::vector<int> get_iscan() const;
+    void set_iscan(const std::vector<int>& iscan);
 
-    /* const host_vector<T>& get_beam_x() const; */
-    /* void set_beam_x(const host_vector<T>& beam_x); */
+    std::vector<T> get_beam_x() const;
+    void set_beam_x(const std::vector<T>& beam_x);
 
-    /* const host_vector<T>& get_beam_y() const; */
-    /* void set_beam_y(const host_vector<T>& beam_y); */
+    std::vector<T> get_beam_y() const;
+    void set_beam_y(const std::vector<T>& beam_y);
 
     int get_islice() const;
     void set_islice(int islice);
@@ -729,17 +809,109 @@ namespace mt {
     bool get_dp_Shift() const;
     void set_dp_Shift(bool dp_Shift);
 
+    void validate_parameters();
+
   private:
     std::unique_ptr<Data> impl_;
   };
+  
+  /****************************************************************************
+   * The Output interface
+   ***************************************************************************/
 
   /**
-   * Explict instantiation of template classes
+   * A proxy for the Output_Multislice class
    */
-  template class Input<float>;
-  template class Input<double>;
-  typedef Input<float> InputFloat;
-  typedef Input<double> InputDouble;
+  template <typename T>
+  class Output : public Input<T> {
+  public:
+    struct Data;
+
+    Output();
+    Output(Output&);
+    Output(Output&&);
+    Output(Data&);
+    Output& operator=(Output&);
+    Output& operator=(Output&&);
+    ~Output();
+
+    const Data& internal() const;
+		
+    eTEM_Output_Type get_output_type() const;
+    void set_output_type(eTEM_Output_Type output_type);
+
+		int get_ndetector() const;
+		void set_ndetector(int ndetector);
+		
+    int get_nx() const;
+		void set_nx(int nx);
+		
+    int get_ny() const;
+		void set_ny(int ny);
+		
+    T get_dx() const;
+		void set_dx(T dx);
+		
+    T get_dy() const;
+    void set_dy(T dy);
+
+		T get_dr() const;
+		void set_dr(T dr);
+
+    std::vector<T> get_x() const;
+		void set_x(const std::vector<T>& x);
+
+    std::vector<T> get_y() const;
+		void set_y(const std::vector<T>& y);
+
+    std::vector<T> get_r() const;
+		void set_r(const std::vector<T>& r);
+
+    /* std::vector<Det_Int<TVector_hr>> get_image_tot() const; */
+		/* void set_image_tot(std::vector<Det_Int<TVector_hr>> image_tot); */
+
+    /* std::vector<Det_Int<TVector_hr>> get_image_coh() const; */
+		/* void set_image_coh(std::vector<Det_Int<TVector_hr>> image_coh); */
+
+    /* std::vector<TVector_hr> get_m2psi_tot() const; */
+		/* void set_m2psi_tot(std::vector<TVector_hr> m2psi_tot); */
+
+    /* std::vector<TVector_hr> get_m2psi_coh() const; */
+		/* void set_m2psi_coh(std::vector<TVector_hr> m2psi_coh); */
+
+    /* std::vector<TVector_hc> get_psi_coh() const; */
+		/* void set_psi_coh(std::vector<TVector_hc> psi_coh); */
+
+    /* std::vector<TVector_hr> get_V() const; */
+		/* void set_V(std::vector<TVector_hr> V); */
+
+    /* std::vector<TVector_hc> get_trans() const; */
+		/* void set_trans(std::vector<TVector_hc> trans); */
+
+    /* std::vector<TVector_hc> get_psi_0() const; */
+		/* void set_psi_0(std::vector<TVector_hc> psi_0); */
+
+		/* std::vector<bool> get_thk_gpu() const; */
+		/* void set_thk_gpu(std::vector<bool> thk_gpu); */
+
+    /* std::vector<TVector_dr> get_m2psi_tot_d() const; */
+		/* void set_m2psi_tot_d(std::vector<TVector_dr> m2psi_tot_d); */
+
+    /* std::vector<TVector_dr> get_m2psi_coh_d() const; */
+		/* void set_m2psi_coh_d(std::vector<TVector_dr> m2psi_coh_d); */
+
+    /* std::vector<TVector_dc> get_psi_coh_d() const; */
+		/* void set_psi_coh_d(std::vector<TVector_dc> psi_coh_d); */
+
+		/* Stream<e_host> get_stream() const; */
+		/* void set_stream(Stream<e_host> stream); */
+
+  
+  private:
+    std::unique_ptr<Data> impl_;
+
+  };
+
 
   template <typename T>
   void test(const Input<T>&);

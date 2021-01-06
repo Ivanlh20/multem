@@ -38,7 +38,7 @@ target_compile_features(multem PUBLIC cxx_std_11)
 set_property(TARGET multem PROPERTY CUDA_ARCHITECTURES OFF)
 
 # Set the include directory
-target_include_directories(multem PUBLIC src)
+target_include_directories(multem PRIVATE src)
 target_include_directories(multem PUBLIC include)
 
 # Link to the CUDA libraries
