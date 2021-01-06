@@ -783,6 +783,11 @@ namespace mt
 		using value_type = typename TVector::value_type;
 		using size_type = std::size_t;
 
+    // Need this to stop compiler warnings about calling __host__ function from
+    // __host__ __device__ function
+    __host__
+    ~Det_Int() {}
+
 		static const eDevice device = e_host;
 
 		size_type size() const
