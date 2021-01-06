@@ -105,6 +105,20 @@ namespace mt
 		Output_Multislice() : Input_Multislice<T_r>(), output_type(eTEMOT_m2psi_tot), 
 		ndetector(0), nx(0), ny(0), dx(0), dy(0), dr(0), n_thk(0), n_thk_d(0) {}
 
+    Output_Multislice(Output_Multislice &other)
+      : Input_Multislice<T_r>(), 
+        output_type(eTEMOT_m2psi_tot), 
+		    ndetector(0), 
+        nx(0), 
+        ny(0), 
+        dx(0), 
+        dy(0), 
+        dr(0), 
+        n_thk(0), 
+        n_thk_d(0) {
+      assign(other);
+    }
+
 		template <class TOutput_Multislice>
 		void assign(TOutput_Multislice &output_multislice)
 		{
