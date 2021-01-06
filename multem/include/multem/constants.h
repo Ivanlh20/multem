@@ -352,6 +352,72 @@ namespace mt {
     eET_Matrix = 1,
     eET_Vector = 2
   };
+	
+  /******************************Dim 3************************************/
+	struct FP_Dim
+	{
+		bool x;
+		bool y;
+		bool z;
+
+		FP_Dim(): x(true), y(true), z(false){}
+
+		void set(const int &Dim)
+		{
+			switch(Dim)
+			{
+				case 111:
+				{
+					x = true;
+					y = true;
+					z = true;
+				}
+				break;
+				case 110:
+				{
+					x = true;
+					y = true;
+					z = false;
+				}
+				break;
+				case 101:
+				{
+					x = true;
+					y = false;
+					z = true;
+				}
+				break;
+				case 11:
+				{
+					x = false;
+					y = true;
+					z = true;
+				}
+				break;
+				case 100:
+				{
+					x = true;
+					y = false;
+					z = false;
+				}
+				break;
+				case 10:
+				{
+					x = false;
+					y = true;
+					z = false;
+				}
+				break;
+				case 1:
+				{
+					x = false;
+					y = false;
+					z = true;
+				}
+				break;
+			}
+		}
+	};
 
 }  // namespace mt
 

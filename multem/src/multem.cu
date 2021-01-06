@@ -24,6 +24,7 @@
 #include <multem.h>
 #include <types.cuh>
 #include <input_multislice.cuh>
+#include <output_multislice.hpp>
 
 namespace mt {
 
@@ -157,6 +158,139 @@ namespace mt {
   bool SystemConfiguration::is_double_device() const {
     return impl_->data.is_double_device();
   }
+  
+  /****************************************************************************
+   * The AtomData interface
+   ***************************************************************************/
+
+  template <typename T>
+  struct AtomData<T>::Data {
+    Atom_Data<T> data;
+    Data() {}
+    Data(const Atom_Data<T>& d)
+        : data(d) {}
+  };
+
+  template <typename T>
+  AtomData<T>::AtomData()
+      : impl_(std::make_unique<Data>()) {}
+
+  template <typename T>
+  AtomData<T>::AtomData(const AtomData& other)
+      : impl_(std::make_unique<Data>(*other.impl_)) {}
+
+  template <typename T>
+  AtomData<T>::AtomData(AtomData&& other) = default;
+
+  template <typename T>
+  AtomData<T>::AtomData(const AtomData<T>::Data& other)
+      : impl_(std::make_unique<Data>(other)) {}
+
+  template <typename T>
+  AtomData<T>& AtomData<T>::operator=(const AtomData<T>& other) {
+    *impl_ = *other.impl_;
+    return *this;
+  }
+
+  template <typename T>
+  AtomData<T>& AtomData<T>::operator=(AtomData<T>&&) = default;
+
+  template <typename T>
+  AtomData<T>::~AtomData<T>() = default;
+
+  template <typename T>
+  const AtomData<T>::Data& AtomData<T>::internal() const {
+    return *impl_;
+  }
+  
+  /****************************************************************************
+   * The Scanning interface
+   ***************************************************************************/
+
+  template <typename T>
+  struct ScanningData<T>::Data {
+    Scanning<T> data;
+    Data() {}
+    Data(const Scanning<T>& d)
+        : data(d) {}
+  };
+
+  template <typename T>
+  ScanningData<T>::ScanningData()
+      : impl_(std::make_unique<Data>()) {}
+
+  template <typename T>
+  ScanningData<T>::ScanningData(const ScanningData& other)
+      : impl_(std::make_unique<Data>(*other.impl_)) {}
+
+  template <typename T>
+  ScanningData<T>::ScanningData(ScanningData&& other) = default;
+
+  template <typename T>
+  ScanningData<T>::ScanningData(const ScanningData<T>::Data& other)
+      : impl_(std::make_unique<Data>(other)) {}
+
+  template <typename T>
+  ScanningData<T>& ScanningData<T>::operator=(const ScanningData<T>& other) {
+    *impl_ = *other.impl_;
+    return *this;
+  }
+
+  template <typename T>
+  ScanningData<T>& ScanningData<T>::operator=(ScanningData<T>&&) = default;
+
+  template <typename T>
+  ScanningData<T>::~ScanningData<T>() = default;
+
+  template <typename T>
+  const ScanningData<T>::Data& ScanningData<T>::internal() const {
+    return *impl_;
+  }
+  
+  /****************************************************************************
+   * The Detector interface
+   ***************************************************************************/
+
+  template <typename T>
+  struct DetectorData<T>::Data {
+    Detector<T, e_host> data;
+    Data() {}
+    Data(const Detector<T, e_host>& d)
+        : data(d) {}
+  };
+
+  template <typename T>
+  DetectorData<T>::DetectorData()
+      : impl_(std::make_unique<Data>()) {}
+
+  template <typename T>
+  DetectorData<T>::DetectorData(const DetectorData& other)
+      : impl_(std::make_unique<Data>(*other.impl_)) {}
+
+  template <typename T>
+  DetectorData<T>::DetectorData(DetectorData&& other) = default;
+
+  template <typename T>
+  DetectorData<T>::DetectorData(const DetectorData<T>::Data& other)
+      : impl_(std::make_unique<Data>(other)) {}
+
+  template <typename T>
+  DetectorData<T>& DetectorData<T>::operator=(const DetectorData<T>& other) {
+    *impl_ = *other.impl_;
+    return *this;
+  }
+
+  template <typename T>
+  DetectorData<T>& DetectorData<T>::operator=(DetectorData<T>&&) = default;
+
+  template <typename T>
+  DetectorData<T>::~DetectorData<T>() = default;
+
+  template <typename T>
+  const DetectorData<T>::Data& DetectorData<T>::internal() const {
+    return *impl_;
+  }
+  
 
   /****************************************************************************
    * The Input interface
@@ -259,13 +393,15 @@ namespace mt {
     impl_->data.pn_single_conf = pn_single_conf;
   }
 
-  /* const Input<T>::FP_Dim& get_pn_dim() const { */
-  /*   return impl_->data.pn_dim; */
-  /* } */
+  template <typename T>
+  const FP_Dim& Input<T>::get_pn_dim() const {
+    return impl_->data.pn_dim;
+  }
 
-  /* void Input<T>::set_pn_dim(const FP_Dim &pn_dim) { */
-  /*   impl_->data.pn_dim = pn_dim; */
-  /* } */
+  template <typename T>
+  void Input<T>::set_pn_dim(const FP_Dim &pn_dim) {
+    impl_->data.pn_dim = pn_dim;
+  }
 
   template <typename T>
   int Input<T>::get_fp_dist() const {
@@ -307,8 +443,15 @@ namespace mt {
     impl_->data.fp_iconf_0 = fp_iconf_0;
   }
 
-  /* const Atom_Data<T>& get_atoms() const; */
-  /* void set_atoms(const Atom_Data<T>& atoms); */
+  template <typename T>
+  AtomData<T> Input<T>::get_atoms() const {
+    return AtomData<T>(typename AtomData<T>::Data(impl_->data.atoms));
+  }
+
+  template <typename T>
+  void Input<T>::set_atoms(const AtomData<T>& atoms) {
+    impl_->data.atoms = atoms.internal().data;
+  }
 
   template <typename T>
   bool Input<T>::get_is_crystal() const {
@@ -330,8 +473,15 @@ namespace mt {
     impl_->data.spec_rot_theta = spec_rot_theta;
   }
 
-  /* const r3d<T>& get_spec_rot_u0() const; */
-  /* void set_spec_rot_u0(const r3d<T>& spec_rot_u0); */
+  template <typename T>
+  const r3d<T>& Input<T>::get_spec_rot_u0() const {
+    return impl_->data.spec_rot_u0;
+  }
+
+  template <typename T>
+  void Input<T>::set_spec_rot_u0(const r3d<T>& spec_rot_u0) {
+    impl_->data.spec_rot_u0 = spec_rot_u0;
+  }
 
   template <typename T>
   eRot_Point_Type Input<T>::get_spec_rot_center_type() const {
@@ -343,8 +493,15 @@ namespace mt {
     impl_->data.spec_rot_center_type = spec_rot_center_type;
   }
 
-  /* const r3d<T>& get_spec_rot_center_p() const; */
-  /* void set_spec_rot_center_p(const r3d<T>& spec_rot_center_p); */
+  template <typename T>
+  const r3d<T>& Input<T>::get_spec_rot_center_p() const {
+    return impl_->data.spec_rot_center_p;
+  }
+
+  template <typename T>
+  void Input<T>::set_spec_rot_center_p(const r3d<T>& spec_rot_center_p) {
+    impl_->data.spec_rot_center_p = spec_rot_center_p;
+  }
 
   template <typename T>
   eThick_Type Input<T>::get_thick_type() const {
@@ -356,8 +513,15 @@ namespace mt {
     impl_->data.thick_type = thick_type;
   }
 
-  /* const host_vector<T>& get_thick() const; */
-  /* void set_thick(const host_vector<T>& thick); */
+  template <typename T>
+  std::vector<T> Input<T>::get_thick() const {
+    return std::vector<T>(impl_->data.thick.begin(), impl_->data.thick.end());
+  }
+
+  template <typename T>
+  void Input<T>::set_thick(const std::vector<T>& thick) {
+    impl_->data.thick.assign(thick.begin(), thick.end());
+  }
 
   template <typename T>
   ePotential_Slicing Input<T>::get_potential_slicing() const {
@@ -369,11 +533,25 @@ namespace mt {
     impl_->data.potential_slicing = potential_slicing;
   }
 
-  /* const Grid_2d<T>& get_grid_2d() const; */
-  /* void set_grid_2d(const Grid_2d<T>& grid_2d); */
+  template <typename T>
+  const Grid_2d<T>& Input<T>::get_grid_2d() const {
+    return impl_->data.grid_2d;
+  }
 
-  /* const Range_2d& get_output_area() const; */
-  /* void set_output_area(const Range_2d& output_area); */
+  template <typename T>
+  void Input<T>::set_grid_2d(const Grid_2d<T>& grid_2d) {
+    impl_->data.grid_2d = grid_2d;
+  }
+
+  template <typename T>
+  const Range_2d& Input<T>::get_output_area() const {
+    return impl_->data.output_area;
+  }
+
+  template <typename T>
+  void Input<T>::set_output_area(const Range_2d& output_area) {
+    impl_->data.output_area = output_area;
+  }
 
   template <typename T>
   eTEM_Sim_Type Input<T>::get_simulation_type() const {
@@ -395,14 +573,35 @@ namespace mt {
     impl_->data.iw_type = iw_type;
   }
 
-  /* const host_vector<complex<T>>& get_iw_psi() const; */
-  /* void set_iw_psi(const host_vector<complex<T>>& iw_psi); */
+  template <typename T>
+  std::vector<complex<T>> Input<T>::get_iw_psi() const {
+    return std::vector<complex<T>>(impl_->data.iw_psi.begin(), impl_->data.iw_psi.end());
+  }
 
-  /* const host_vector<T>& get_iw_x() const; */
-  /* void set_iw_x(const host_vector<T>& iw_x); */
+  template <typename T>
+  void Input<T>::set_iw_psi(const std::vector<complex<T>>& iw_psi) {
+    impl_->data.iw_psi.assign(iw_psi.begin(), iw_psi.end());
+  }
 
-  /* const host_vector<T>& get_iw_y() const; */
-  /* void set_iw_y(const host_vector<T>& iw_y); */
+  template <typename T>
+  std::vector<T> Input<T>::get_iw_x() const {
+    return std::vector<T>(impl_->data.iw_x.begin(), impl_->data.iw_x.end());
+  }
+
+  template <typename T>
+  void Input<T>::set_iw_x(const std::vector<T>& iw_x) {
+    impl_->data.iw_x.assign(iw_x.begin(), iw_x.end());
+  }
+
+  template <typename T>
+  std::vector<T> Input<T>::get_iw_y() const {
+    return std::vector<T>(impl_->data.iw_y.begin(), impl_->data.iw_y.end());
+  }
+
+  template <typename T>
+  void Input<T>::set_iw_y(const std::vector<T>& iw_y) {
+    impl_->data.iw_y.assign(iw_y.begin(), iw_y.end());
+  }
 
   template <typename T>
   double Input<T>::get_E_0() const {
@@ -464,20 +663,55 @@ namespace mt {
     impl_->data.temporal_spatial_incoh = temporal_spatial_incoh;
   }
 
-  /* const Lens<T>& get_cond_lens() const; */
-  /* void set_cond_lens(const Lens<T>& cond_lens); */
+  template <typename T>
+  const Lens<T>& Input<T>::get_cond_lens() const {
+    return impl_->data.cond_lens;
+  }
+  
+  template <typename T>
+  void Input<T>::set_cond_lens(const Lens<T>& cond_lens) {
+    impl_->data.cond_lens = cond_lens;
+  }
 
-  /* const Lens<T>& get_obj_lens() const; */
-  /* void set_obj_lens(const Lens<T>& obj_lens); */
+  template <typename T>
+  const Lens<T>& Input<T>::get_obj_lens() const {
+    return impl_->data.obj_lens;
+  }
 
-  /* const Scanning<T>& get_scanning() const; */
-  /* void set_scanning(const Scanning<T>& scanning); */
+  template <typename T>
+  void Input<T>::set_obj_lens(const Lens<T>& obj_lens) {
+    impl_->data.obj_lens = obj_lens;
+  }
 
-  /* const Detector<T, e_host>& get_detector() const; */
-  /* void set_detector(const Detector<T, e_host>& detector); */
+  template <typename T>
+  ScanningData<T> Input<T>::get_scanning() const {
+    return ScanningData<T>(typename ScanningData<T>::Data(impl_->data.scanning));
+  }
+  
+  template <typename T>
+  void Input<T>::set_scanning(const ScanningData<T>& scanning) {
+    impl_->data.scanning = scanning.internal().data;
+  }
 
-  /* const EELS<T>& get_eels_fr() const; */
-  /* void set_eels_fr(const EELS<T>& eels_fr); */
+  template <typename T>
+  DetectorData<T> Input<T>::get_detector() const {
+    return DetectorData<T>(typename DetectorData<T>::Data(impl_->data.detector));
+  }
+  
+  template <typename T>
+  void Input<T>::set_detector(const DetectorData<T>& detector) {
+    impl_->data.detector = detector.internal().data;
+  }
+
+  template <typename T>
+  const EELS<T>& Input<T>::get_eels_fr() const {
+    return impl_->data.eels_fr;
+  }
+  
+  template <typename T>
+  void Input<T>::set_eels_fr(const EELS<T>& eels_fr) {
+    impl_->data.eels_fr = eels_fr;
+  }
 
   template <typename T>
   eOperation_Mode Input<T>::get_operation_mode() const {
@@ -559,17 +793,45 @@ namespace mt {
     impl_->data.cdl_var_type = cdl_var_type;
   }
 
-  /* const host_vector<T>& get_cdl_var() const; */
-  /* void set_cdl_var(const host_vector<T>& cdl_var); */
+  template <typename T>
+  std::vector<T> Input<T>::get_cdl_var() const {
+    return std::vector<T>(impl_->data.cdl_var.begin(), impl_->data.cdl_var.end());
+  }
 
-  /* const host_vector<int>& get_iscan() const; */
-  /* void set_iscan(const host_vector<int>& iscan); */
+  template <typename T>
+  void Input<T>::set_cdl_var(const std::vector<T>& cdl_var) {
+    impl_->data.cdl_var.assign(cdl_var.begin(), cdl_var.end());
+  }
 
-  /* const host_vector<T>& get_beam_x() const; */
-  /* void set_beam_x(const host_vector<T>& beam_x); */
+  template <typename T>
+  std::vector<int> Input<T>::get_iscan() const {
+    return std::vector<int>(impl_->data.iscan.begin(), impl_->data.iscan.end());
+  }
 
-  /* const host_vector<T>& get_beam_y() const; */
-  /* void set_beam_y(const host_vector<T>& beam_y); */
+  template <typename T>
+  void Input<T>::set_iscan(const std::vector<int>& iscan) {
+    impl_->data.iscan.assign(iscan.begin(), iscan.end());
+  }
+
+  template <typename T>
+  std::vector<T> Input<T>::get_beam_x() const {
+    return std::vector<T>(impl_->data.beam_x.begin(), impl_->data.beam_x.end());
+  }
+
+  template <typename T>
+  void Input<T>::set_beam_x(const std::vector<T>& beam_x) {
+    impl_->data.beam_x.assign(beam_x.begin(), beam_x.end());
+  }
+
+  template <typename T>
+  std::vector<T> Input<T>::get_beam_y() const {
+    return std::vector<T>(impl_->data.beam_y.begin(), impl_->data.beam_y.end());
+  }
+
+  template <typename T>
+  void Input<T>::set_beam_y(const std::vector<T>& beam_y) {
+    impl_->data.beam_y.assign(beam_y.begin(), beam_y.end());
+  }
 
   template <typename T>
   int Input<T>::get_islice() const {
@@ -591,6 +853,162 @@ namespace mt {
     impl_->data.dp_Shift = dp_Shift;
   }
 
+  template <typename T>
+  void Input<T>::validate_parameters() {
+    impl_->data.validate_parameters();
+  }
+
+  /****************************************************************************
+   * The Output interface
+   ***************************************************************************/
+
+  template <typename T>
+  struct Output<T>::Data {
+    Output_Multislice<T> data;
+
+    // Constructors required due to behaviour of Output_Multislice. Would
+    // probably be better if we could fix Output_Multislice so that the normal
+    // copy constructors work.
+    Data() = default;
+    Data(Data&) = default;
+    Data& operator=(Data& other) {
+      data = other.data;
+      return *this;
+    }
+  };
+
+  template <typename T>
+  Output<T>::Output()
+      : impl_(std::make_unique<Data>()) {}
+
+  template <typename T>
+  Output<T>::Output(Output& other)
+      : impl_(std::make_unique<Data>(*other.impl_)) {}
+
+  template <typename T>
+  Output<T>::Output(Output&& other) = default;
+
+  template <typename T>
+  Output<T>::Output(Output<T>::Data& other)
+      : impl_(std::make_unique<Data>(other)) {}
+
+  template <typename T>
+  Output<T>& Output<T>::operator=(Output<T>& other) {
+    *impl_ = *other.impl_;
+    return *this;
+  }
+
+  template <typename T>
+  Output<T>& Output<T>::operator=(Output<T>&&) = default;
+
+  template <typename T>
+  Output<T>::~Output<T>() = default;
+
+  template <typename T>
+  const Output<T>::Data& Output<T>::internal() const {
+    return *impl_;
+  }
+
+  template <typename T>
+  eTEM_Output_Type Output<T>::get_output_type() const {
+    return impl_->data.output_type;
+  }
+
+  template <typename T>
+  void Output<T>::set_output_type(eTEM_Output_Type output_type) {
+    impl_->data.output_type = output_type;
+  }
+
+  template <typename T>
+  int Output<T>::get_ndetector() const {
+    return impl_->data.ndetector;
+  }
+
+  template <typename T>
+  void Output<T>::set_ndetector(int ndetector) {
+    impl_->data.ndetector = ndetector;
+  }
+
+  template <typename T>
+  int Output<T>::get_nx() const {
+    return impl_->data.nx;
+  }
+
+  template <typename T>
+  void Output<T>::set_nx(int nx) {
+    impl_->data.nx = nx;
+  }
+
+  template <typename T>
+  int Output<T>::get_ny() const {
+    return impl_->data.ny;
+  }
+
+  template <typename T>
+  void Output<T>::set_ny(int ny) {
+    impl_->data.ny = ny;
+  }
+
+  template <typename T>
+  T Output<T>::get_dx() const {
+    return impl_->data.dx;
+  }
+
+  template <typename T>
+  void Output<T>::set_dx(T dx) {
+    impl_->data.dx = dx;
+  }
+
+  template <typename T>
+  T Output<T>::get_dy() const {
+    return impl_->data.dy;
+  }
+
+  template <typename T>
+  void Output<T>::set_dy(T dy) {
+    impl_->data.dy = dy;
+  }
+
+  template <typename T>
+  T Output<T>::get_dr() const {
+    return impl_->data.dr;
+  }
+
+  template <typename T>
+  void Output<T>::set_dr(T dr) {
+    impl_->data.dr = dr;
+  }
+
+  template <typename T>
+  std::vector<T> Output<T>::get_x() const {
+    return std::vector<T>(impl_->data.x.begin(), impl_->data.x.end());
+  }
+
+  template <typename T>
+  void Output<T>::set_x(const std::vector<T>& x) {
+    impl_->data.x.assign(x.begin(), x.end());
+  }
+
+  template <typename T>
+  std::vector<T> Output<T>::get_y() const {
+    return std::vector<T>(impl_->data.y.begin(), impl_->data.y.end());
+  }
+
+  template <typename T>
+  void Output<T>::set_y(const std::vector<T>& y) {
+    impl_->data.y.assign(y.begin(), y.end());
+  }
+
+  template <typename T>
+  std::vector<T> Output<T>::get_r() const {
+    return std::vector<T>(impl_->data.r.begin(), impl_->data.r.end());
+  }
+
+  template <typename T>
+  void Output<T>::set_r(const std::vector<T>& r) {
+    impl_->data.r.assign(r.begin(), r.end());
+  }
+
   /****************************************************************************
    * Misc function calls
    ***************************************************************************/
@@ -599,10 +1017,23 @@ namespace mt {
   void test(const Input<T>& a) {
     std::cout << a.get_system_conf().get_precision() << std::endl;
   }
+  
+  /****************************************************************************
+   * Explict instantiation of template classes and functions
+   ***************************************************************************/
+  
+  /**
+   * Explict instantiation of template classes
+   */
+  template class Input<float>;
+  template class Input<double>;
+  template class Output<float>;
+  template class Output<double>;
 
   /**
    * Explict instantiation of template functions
    */
   template void test<float>(const Input<float>&);
   template void test<double>(const Input<double>&);
+
 }  // namespace mt
