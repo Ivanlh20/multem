@@ -32,7 +32,6 @@
 
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <device_functions.h>
 #include <cufft.h>
 
 #include "cgpu_fcns.cuh"
