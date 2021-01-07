@@ -92,7 +92,7 @@ namespace mt
 					case eIWT_User_Define_Wave:
 					{
 						// we need to include defocus
-						auto f_s = -(input_multislice->cond_lens.zero_defocus_plane-z_init);
+						// auto f_s = -(input_multislice->cond_lens.zero_defocus_plane-z_init);
 
 						Vector<T_r, e_host> x(x_b.size());
 						Vector<T_r, e_host> y(y_b.size());
