@@ -31,7 +31,6 @@
 #include "energy_loss.cuh"
 #include "wave_function.cuh"
 #include "timing.cuh"
-#include "matlab_mex.cuh"
 
 namespace mt
 {
