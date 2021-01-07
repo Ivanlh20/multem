@@ -50,6 +50,10 @@ target_link_libraries(multem PUBLIC
 # Install the python extension
 install(TARGETS multem LIBRARY DESTINATION lib)
 install(FILES include/multem.h DESTINATION include)
+install(FILES include/lin_alg_def.cuh DESTINATION include)
+install(FILES include/math.cuh DESTINATION include)
+install(FILES include/safe_types.cuh DESTINATION include)
+install(FILES include/multem/constants.h DESTINATION include/multem)
 
 ##############################################################################
 # Build the test executable
