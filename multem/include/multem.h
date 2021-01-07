@@ -494,6 +494,64 @@ namespace mt {
   /*    output_area_ix_e(1),*/
   /*    output_area_iy_e(1) {}*/
   /*};*/
+  
+  /****************************************************************************
+   * The FFT interface
+   ***************************************************************************/
+
+  template <typename T, eDevice dev>
+  class FFTData {
+  public:
+    struct Data;
+
+    FFTData();
+    FFTData(const FFTData&);
+    FFTData(FFTData&&);
+    FFTData(const Data&);
+    FFTData& operator=(const FFTData&);
+    FFTData& operator=(FFTData&&);
+    ~FFTData();
+    
+    const FFTData::Data& internal() const;
+    FFTData::Data& internal();
+
+    void cleanup();
+    void destroy_plan();
+		void create_plan_1d(const int &nx, int nThread=1);
+		void create_plan_1d_batch(const int &ny, const int &nx, int nThread=1);
+		void create_plan_2d(const int &ny, const int &nx, int nThread);
+		void create_plan_2d_batch(const int &ny, const int &nx, const int &nz, int nThread);
+  
+  private:
+    std::unique_ptr<Data> impl_;
+  };
+  
+  /****************************************************************************
+   * The Stream interface
+   ***************************************************************************/
+  
+  template <eDevice dev>
+  class StreamIface {
+  public:
+    struct Data;
+    
+    StreamIface();
+    ~StreamIface();
+    
+    const StreamIface::Data& internal() const;
+    StreamIface::Data& internal();
+
+    StreamIface(int new_stream);
+    int size() const;
+		void resize(int new_nstream);
+		void synchronize();
+		void set_n_act_stream(const int &new_n_act_stream);
+		void set_grid(const int &nx_i, const int &ny_i);
+		Range_2d get_range(const int &istream);
+
+  private:
+    std::unique_ptr<Data> impl_;
+  };
 
   /****************************************************************************
    * The SystemConfiguration interface
@@ -673,6 +731,7 @@ namespace mt {
     ~Input();
 
     const Data& internal() const;
+    Data& internal();
 
     SystemConfiguration get_system_conf() const;
     void set_system_conf(const SystemConfiguration& system_conf);
@@ -860,6 +919,7 @@ namespace mt {
     ~Output();
 
     const Data& internal() const;
+    Data& internal();
 		
     eTEM_Output_Type get_output_type() const;
 		int get_ndetector() const;
@@ -880,12 +940,42 @@ namespace mt {
     std::vector<complex_vector_type> get_trans() const;
     std::vector<complex_vector_type> get_psi_0() const;
 		std::vector<bool> get_thk_gpu() const;
+
+    void gather();
+    void clean_temporal();
   
   private:
     std::unique_ptr<Data> impl_;
 
   };
+  
+  /****************************************************************************
+   * The Multislice interface
+   ***************************************************************************/
 
+  /**
+   * A proxy for the Output_Multislice class
+   */
+  template <typename T, eDevice dev>
+  class MultisliceData {
+  public:
+    struct Data;
+
+    typedef std::vector<T> vector_type;
+    typedef std::vector<complex<T>> complex_vector_type;
+
+    MultisliceData();
+    ~MultisliceData();
+
+    const Data& internal() const;
+
+		void set_input_data(Input<T> &input, StreamIface<dev> &stream_i, FFTData<T, dev> &fft2_i);
+		void operator()(Output<T> &output_multislice);
+    
+  private:
+    std::unique_ptr<Data> impl_;
+
+  };
 
   template <typename T>
   void test(const Input<T>&);

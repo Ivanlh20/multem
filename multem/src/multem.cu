@@ -25,8 +25,148 @@
 #include <types.cuh>
 #include <input_multislice.cuh>
 #include <output_multislice.hpp>
+#include <tem_simulation.cuh>
 
 namespace mt {
+  
+  /****************************************************************************
+   * The FFT interface
+   ***************************************************************************/
+  
+  template <typename T, eDevice dev>
+  struct FFTData<T, dev>::Data {
+    FFT<T, dev> data;
+  };
+
+  template <typename T, eDevice dev>
+  FFTData<T, dev>::FFTData()
+      : impl_(std::make_unique<Data>()) {}
+
+  template <typename T, eDevice dev>
+  FFTData<T, dev>::FFTData(const FFTData& other)
+      : impl_(std::make_unique<Data>(*other.impl_)) {}
+
+  template <typename T, eDevice dev>
+  FFTData<T, dev>::FFTData(FFTData&& other) = default;
+
+  template <typename T, eDevice dev>
+  FFTData<T, dev>& FFTData<T, dev>::operator=(const FFTData& other) {
+    *impl_ = *other.impl_;
+    return *this;
+  }
+
+  template <typename T, eDevice dev>
+  FFTData<T, dev>::FFTData(const Data& other)
+      : impl_(std::make_unique<Data>(other)) {}
+
+  template <typename T, eDevice dev>
+  FFTData<T, dev>& FFTData<T, dev>::operator=(FFTData&&) = default;
+
+  template <typename T, eDevice dev>
+  FFTData<T, dev>::~FFTData() = default;
+
+  template <typename T, eDevice dev>
+  const FFTData<T, dev>::Data& FFTData<T, dev>::internal() const {
+    return *impl_;
+  }
+  
+  template <typename T, eDevice dev>
+  FFTData<T, dev>::Data& FFTData<T, dev>::internal() {
+    return *impl_;
+  }
+
+  template <typename T, eDevice dev>
+  void FFTData<T, dev>::cleanup() {
+    impl_->data.cleanup();
+  }
+  
+  template <typename T, eDevice dev>
+  void FFTData<T, dev>::destroy_plan() {
+    impl_->data.destroy_plan();
+  }
+  
+  template <typename T, eDevice dev>
+  void FFTData<T, dev>::create_plan_1d(const int &nx, int nThread) {
+    impl_->data.create_plan_1d(nx, nThread);
+  }
+  
+  template <typename T, eDevice dev>
+  void FFTData<T, dev>::create_plan_1d_batch(const int &ny, const int &nx, int nThread) {
+    impl_->data.create_plan_1d_batch(ny, nx, nThread);
+  }
+  
+  template <typename T, eDevice dev>
+  void FFTData<T, dev>::create_plan_2d(const int &ny, const int &nx, int nThread) {
+    impl_->data.create_plan_2d(ny, nx, nThread);
+  }
+  
+  template <typename T, eDevice dev>
+  void FFTData<T, dev>::create_plan_2d_batch(const int &ny, const int &nx, const int &nz, int nThread) {
+    impl_->data.create_plan_2d_batch(ny, nx, nz, nThread);
+  }
+  
+  /****************************************************************************
+   * The Stream interface
+   ***************************************************************************/
+  
+  template <eDevice dev>
+  struct StreamIface<dev>::Data {
+    Stream<dev> data;
+    Data() = default;
+    Data(int new_stream)
+      : data(new_stream) {}
+  };
+
+  template <eDevice dev>
+  StreamIface<dev>::StreamIface()
+      : impl_(std::make_unique<Data>()) {}
+
+  template <eDevice dev>
+  StreamIface<dev>::~StreamIface() = default;
+
+  template <eDevice dev>
+  const StreamIface<dev>::Data& StreamIface<dev>::internal() const {
+    return *impl_;
+  }
+  
+  template <eDevice dev>
+  StreamIface<dev>::Data& StreamIface<dev>::internal() {
+    return *impl_;
+  }
+
+  template <eDevice dev>
+  StreamIface<dev>::StreamIface(int new_stream)
+    : impl_(std::make_unique<Data>(new_stream)) {}
+
+  template <eDevice dev>
+  int StreamIface<dev>::size() const {
+    return impl_->data.size();
+  }
+
+  template <eDevice dev>
+  void StreamIface<dev>::resize(int new_nstream) {
+    impl_->data.resize(new_nstream);
+  }
+
+  template <eDevice dev>
+  void StreamIface<dev>::synchronize() {
+    impl_->data.synchronize();
+  }
+
+  template <eDevice dev>
+  void StreamIface<dev>::set_n_act_stream(const int &new_n_act_stream) {
+    impl_->data.set_n_act_stream(new_n_act_stream);
+  }
+
+  template <eDevice dev>
+  void StreamIface<dev>::set_grid(const int &nx_i, const int &ny_i) {
+    impl_->data.set_grid(nx_i, ny_i);
+  }
+
+  template <eDevice dev>
+  Range_2d StreamIface<dev>::get_range(const int &istream) {
+    return impl_->data.get_range(istream);
+  }
 
   /****************************************************************************
    * The SystemConfiguration interface
@@ -330,6 +470,11 @@ namespace mt {
 
   template <typename T>
   const Input<T>::Data& Input<T>::internal() const {
+    return *impl_;
+  }
+  
+  template <typename T>
+  Input<T>::Data& Input<T>::internal() {
     return *impl_;
   }
 
@@ -908,6 +1053,11 @@ namespace mt {
   const Output<T>::Data& Output<T>::internal() const {
     return *impl_;
   }
+  
+  template <typename T>
+  Output<T>::Data& Output<T>::internal() {
+    return *impl_;
+  }
 
   template <typename T>
   eTEM_Output_Type Output<T>::get_output_type() const {
@@ -1044,6 +1194,47 @@ namespace mt {
     return std::vector<bool>(impl_->data.thk_gpu.begin(), impl_->data.thk_gpu.end());
   }
 
+  template <typename T>
+  void Output<T>::gather() {
+    impl_->data.gather();
+  }
+  
+  template <typename T>
+  void Output<T>::clean_temporal() {
+    impl_->data.clean_temporal();
+  }
+  
+  /****************************************************************************
+   * The Multislice interface
+   ***************************************************************************/
+
+  template <typename T, eDevice dev>
+  struct MultisliceData<T, dev>::Data {
+    Multislice<T, dev> data;
+  };
+
+  template <typename T, eDevice dev>
+  MultisliceData<T, dev>::MultisliceData()
+      : impl_(std::make_unique<Data>()) {}
+
+  template <typename T, eDevice dev>
+  const MultisliceData<T, dev>::Data& MultisliceData<T, dev>::internal() const {
+    return *impl_;
+  }
+		
+  template <typename T, eDevice dev>
+  void MultisliceData<T, dev>::set_input_data(Input<T> &input, StreamIface<dev> &stream_i, FFTData<T, dev> &fft2_i) {
+    impl_->data.set_input_data(
+        &input.internal().data,
+        &stream_i.internal().data,
+        &fft2_i.internal().data);
+  }
+		
+  template <typename T, eDevice dev>
+  void MultisliceData<T, dev>::operator()(Output<T> &output) {
+    impl_->data(output.internal().data);
+  }
+
   /****************************************************************************
    * Misc function calls
    ***************************************************************************/
@@ -1060,10 +1251,24 @@ namespace mt {
   /**
    * Explict instantiation of template classes
    */
+  template class FFTData<float, e_host>;
+  template class FFTData<float, e_device>;
+  template class FFTData<double, e_host>;
+  template class FFTData<double, e_device>;
+
+  template class StreamIface<e_host>;
+  template class StreamIface<e_device>;
+
   template class Input<float>;
   template class Input<double>;
+
   template class Output<float>;
   template class Output<double>;
+  
+  template class MultisliceData<float, e_host>;
+  template class MultisliceData<float, e_device>;
+  template class MultisliceData<double, e_host>;
+  template class MultisliceData<double, e_device>;
 
   /**
    * Explict instantiation of template functions
