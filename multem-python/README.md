@@ -9,6 +9,10 @@
 To install from source, clone this repository and then do the following:
 
 ```sh
+git submodule update --init --recursive
+```
+
+```sh
 pip install -r requirements.txt
 python setup.py install -DMULTEM_ROOT=${MULTEM_INSTALL_PATH}
 ```
