@@ -342,6 +342,177 @@ namespace mt {
   const AtomData<T>::Data& AtomData<T>::internal() const {
     return *impl_;
   }
+
+  template <typename T>
+  T AtomData<T>::get_dz() const {
+    return impl_->data.dz;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_dz(T dz) {
+    impl_->data.dz = dz;
+  }
+  
+  template <typename T>
+  T AtomData<T>::get_l_x() const {
+    return impl_->data.l_x;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_l_x(T l_x) {
+    impl_->data.l_x = l_x;
+  }
+  
+  template <typename T>
+  T AtomData<T>::get_l_y() const {
+    return impl_->data.l_y;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_l_y(T l_y) {
+    impl_->data.l_y = l_y;
+  }
+  
+  template <typename T>
+  T AtomData<T>::get_l_z() const {
+    return impl_->data.l_z;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_l_z(T l_z) {
+    impl_->data.l_z = l_z;
+  }
+  
+  template <typename T>
+  int AtomData<T>::get_ct_na() const {
+    return impl_->data.ct_na;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_ct_na(int ct_na) {
+    impl_->data.ct_na = ct_na;
+  }
+  
+  template <typename T>
+  int AtomData<T>::get_ct_nb() const {
+    return impl_->data.ct_nb;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_ct_nb(int ct_nb) {
+    impl_->data.ct_nb = ct_nb;
+  }
+  
+  template <typename T>
+  int AtomData<T>::get_ct_nc() const {
+    return impl_->data.ct_nc;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_ct_nc(int ct_nc) {
+    impl_->data.ct_nc = ct_nc;
+  }
+  
+  template <typename T>
+  T AtomData<T>::get_ct_a() const {
+    return impl_->data.ct_a;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_ct_a(T ct_a) {
+    impl_->data.ct_a = ct_a;
+  }
+  
+  template <typename T>
+  T AtomData<T>::get_ct_b() const {
+    return impl_->data.ct_b;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_ct_b(T ct_b) {
+    impl_->data.ct_b = ct_b;
+  }
+  
+  template <typename T>
+  T AtomData<T>::get_ct_c() const {
+    return impl_->data.ct_c;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_ct_c(T ct_c) {
+    impl_->data.ct_c = ct_c;
+  }
+  
+  template <typename T>
+  T AtomData<T>::get_ct_x0() const {
+    return impl_->data.ct_x0;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_ct_x0(T ct_x0) {
+    impl_->data.ct_x0 = ct_x0;
+  }
+  
+  template <typename T>
+  T AtomData<T>::get_ct_y0() const {
+    return impl_->data.ct_y0;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_ct_y0(T ct_y0) {
+    impl_->data.ct_y0 = ct_y0;
+  }
+
+  template <typename T>
+  std::vector<Amorp_Lay_Info<T>> AtomData<T>::get_amorphous_parameters() const {
+    return std::vector<Amorp_Lay_Info<T>>(
+        impl_->data.amorp_lay_info.begin(),
+        impl_->data.amorp_lay_info.end());
+  }
+
+  template <typename T>
+  void AtomData<T>::set_amorphous_parameters(const std::vector<Amorp_Lay_Info<T>> &amorp_lay_info) {
+    impl_->data.amorp_lay_info.assign(amorp_lay_info.begin(), amorp_lay_info.end());
+  }
+  
+  template <typename T>
+  std::vector<Atom<T>> AtomData<T>::get_spec_atoms() const {
+    Atom_Data<T>& atoms = impl_->data;
+    std::vector<Atom<T>> result(atoms.size());
+    for (auto i = 0; i < result.size(); ++i) {
+      result[i] = Atom<T>(
+          atoms.Z[i],
+          atoms.x[i],
+          atoms.y[i],
+          atoms.z[i],
+          atoms.sigma[i],
+          atoms.occ[i],
+          atoms.region[i],
+          atoms.charge[i]);
+    }
+    return result;
+  }
+
+  template <typename T>
+  void AtomData<T>::set_spec_atoms(const std::vector<Atom<T>>& spec_atoms) {
+    Atom_Data<T>& atoms = impl_->data;
+    atoms.resize(spec_atoms.size());
+    for (auto i = 0; i < spec_atoms.size(); ++i) {
+      atoms.Z[i] = spec_atoms[i].Z;
+      atoms.x[i] = spec_atoms[i].x;
+      atoms.y[i] = spec_atoms[i].y;
+      atoms.z[i] = spec_atoms[i].z;
+      atoms.sigma[i] = spec_atoms[i].sigma;
+      atoms.occ[i] = spec_atoms[i].occ;
+      atoms.region[i] = spec_atoms[i].region;
+      atoms.charge[i] = spec_atoms[i].charge;
+    }
+  }
+
+  template <typename T>
+  void AtomData<T>::get_statistic() {
+    impl_->data.get_statistic();
+  }
   
   /****************************************************************************
    * The Scanning interface
@@ -385,6 +556,94 @@ namespace mt {
   template <typename T>
   const ScanningData<T>::Data& ScanningData<T>::internal() const {
     return *impl_;
+  }
+    
+
+  template <typename T>
+  eScanning_Type ScanningData<T>::get_type() const {
+    return impl_->data.type;
+  }
+
+  template <typename T>
+  void ScanningData<T>::set_type(eScanning_Type type) {
+    impl_->data.type = type;
+  }
+  
+
+  template <typename T>
+  bool ScanningData<T>::get_pbc() const {
+    return impl_->data.pbc;
+  }
+
+  template <typename T>
+  void ScanningData<T>::set_pbc(bool pbc) {
+    impl_->data.pbc = pbc;
+  }
+  
+
+  template <typename T>
+  bool ScanningData<T>::get_spxs() const {
+    return impl_->data.spxs;
+  }
+
+  template <typename T>
+  void ScanningData<T>::set_spxs(bool spxs) {
+    impl_->data.spxs = spxs;
+  }
+  
+
+  template <typename T>
+  int ScanningData<T>::get_ns() const {
+    return impl_->data.ns;
+  }
+
+  template <typename T>
+  void ScanningData<T>::set_ns(int ns) {
+    impl_->data.ns = ns;
+  }
+
+
+  template <typename T>
+  T ScanningData<T>::get_x0() const {
+    return impl_->data.x0;
+  }
+
+  template <typename T>
+  void ScanningData<T>::set_x0(T x0) {
+    impl_->data.x0 = x0;
+  }
+  
+
+  template <typename T>
+  T ScanningData<T>::get_y0() const {
+    return impl_->data.y0;
+  }
+
+  template <typename T>
+  void ScanningData<T>::set_y0(T y0) {
+    impl_->data.y0 = y0;
+  }
+  
+
+  template <typename T>
+  T ScanningData<T>::get_xe() const {
+    return impl_->data.xe;
+  }
+
+  template <typename T>
+  void ScanningData<T>::set_xe(T xe) {
+    impl_->data.xe = xe;
+  }
+  
+
+  template <typename T>
+  T ScanningData<T>::get_ye() const {
+    return impl_->data.ye;
+  }
+
+  template <typename T>
+  void ScanningData<T>::set_ye(T ye) {
+    impl_->data.ye = ye;
   }
   
   /****************************************************************************
@@ -539,7 +798,7 @@ namespace mt {
   }
 
   template <typename T>
-  const FP_Dim& Input<T>::get_pn_dim() const {
+  FP_Dim& Input<T>::get_pn_dim() const {
     return impl_->data.pn_dim;
   }
 
@@ -619,7 +878,7 @@ namespace mt {
   }
 
   template <typename T>
-  const r3d<T>& Input<T>::get_spec_rot_u0() const {
+  r3d<T>& Input<T>::get_spec_rot_u0() const {
     return impl_->data.spec_rot_u0;
   }
 
@@ -639,7 +898,7 @@ namespace mt {
   }
 
   template <typename T>
-  const r3d<T>& Input<T>::get_spec_rot_center_p() const {
+  r3d<T>& Input<T>::get_spec_rot_center_p() const {
     return impl_->data.spec_rot_center_p;
   }
 
@@ -679,7 +938,7 @@ namespace mt {
   }
 
   template <typename T>
-  const Grid_2d<T>& Input<T>::get_grid_2d() const {
+  Grid_2d<T>& Input<T>::get_grid_2d() const {
     return impl_->data.grid_2d;
   }
 
@@ -689,7 +948,7 @@ namespace mt {
   }
 
   template <typename T>
-  const Range_2d& Input<T>::get_output_area() const {
+  Range_2d& Input<T>::get_output_area() const {
     return impl_->data.output_area;
   }
 
@@ -809,7 +1068,7 @@ namespace mt {
   }
 
   template <typename T>
-  const Lens<T>& Input<T>::get_cond_lens() const {
+  Lens<T>& Input<T>::get_cond_lens() const {
     return impl_->data.cond_lens;
   }
   
@@ -819,10 +1078,10 @@ namespace mt {
   }
 
   template <typename T>
-  const Lens<T>& Input<T>::get_obj_lens() const {
+  Lens<T>& Input<T>::get_obj_lens() const {
     return impl_->data.obj_lens;
   }
-
+  
   template <typename T>
   void Input<T>::set_obj_lens(const Lens<T>& obj_lens) {
     impl_->data.obj_lens = obj_lens;
@@ -849,7 +1108,7 @@ namespace mt {
   }
 
   template <typename T>
-  const EELS<T>& Input<T>::get_eels_fr() const {
+  EELS<T>& Input<T>::get_eels_fr() const {
     return impl_->data.eels_fr;
   }
   
@@ -996,6 +1255,11 @@ namespace mt {
   template <typename T>
   void Input<T>::set_dp_Shift(bool dp_Shift) {
     impl_->data.dp_Shift = dp_Shift;
+  }
+  
+  template <typename T>
+  void Input<T>::set_incident_wave_type(eIncident_Wave_Type iw_type) {
+    impl_->data.set_incident_wave_type(iw_type);
   }
 
   template <typename T>
@@ -1258,6 +1522,9 @@ namespace mt {
 
   template class StreamIface<e_host>;
   template class StreamIface<e_device>;
+
+  template class AtomData<float>;
+  template class AtomData<double>;
 
   template class Input<float>;
   template class Input<double>;

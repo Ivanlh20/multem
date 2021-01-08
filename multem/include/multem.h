@@ -615,6 +615,46 @@ namespace mt {
    * The Atom_Data interface
    ***************************************************************************/
 
+  template <typename T>
+  class Atom {
+  public:
+    int Z;
+    T x;
+    T y;
+    T z;
+    T sigma;
+    T occ;
+    int region;
+    int charge;
+
+    Atom()
+      : Z(0),
+        x(0),
+        y(0),
+        z(0),
+        sigma(0),
+        occ(0),
+        region(0),
+        charge(0) {}
+
+    Atom(int Z_in,
+         T x_in,
+         T y_in,
+         T z_in,
+         T sigma_in,
+         T occ_in,
+         T region_in,
+         T charge_in)
+      : Z(Z_in),
+        x(x_in),
+        y(y_in),
+        z(z_in),
+        sigma(sigma_in),
+        occ(occ_in),
+        region(region_in),
+        charge(charge_in) {}
+  };
+
   /**
    * A proxy for the Atom_Data class
    */
@@ -633,6 +673,50 @@ namespace mt {
 
     const Data& internal() const;
 
+    T get_dz() const;
+    void set_dz(T dz);
+    
+    T get_l_x() const;
+    void set_l_x(T l_x);
+    
+    T get_l_y() const;
+    void set_l_y(T l_y);
+    
+    T get_l_z() const;
+    void set_l_z(T l_z);
+    
+    int get_ct_na() const;
+    void set_ct_na(int ct_na);
+    
+    int get_ct_nb() const;
+    void set_ct_nb(int ct_nb);
+    
+    int get_ct_nc() const;
+    void set_ct_nc(int ct_nc);
+    
+    T get_ct_a() const;
+    void set_ct_a(T ct_a);
+    
+    T get_ct_b() const;
+    void set_ct_b(T ct_b);
+    
+    T get_ct_c() const;
+    void set_ct_c(T ct_c);
+    
+    T get_ct_x0() const;
+    void set_ct_x0(T ct_x0);
+    
+    T get_ct_y0() const;
+    void set_ct_y0(T ct_y0);
+
+    std::vector<Amorp_Lay_Info<T>> get_amorphous_parameters() const;
+    void set_amorphous_parameters(const std::vector<Amorp_Lay_Info<T>> &amorp_lay_info);
+    
+    std::vector<Atom<T>> get_spec_atoms() const;
+    void set_spec_atoms(const std::vector<Atom<T>>& spec_atoms);
+  
+    void get_statistic();
+  
   private:
     std::unique_ptr<Data> impl_;
   };
@@ -658,6 +742,30 @@ namespace mt {
     ~ScanningData();
 
     const Data& internal() const;
+
+    eScanning_Type get_type() const;
+    void set_type(eScanning_Type type);
+    
+    bool get_pbc() const;
+    void set_pbc(bool pbc);
+    
+    bool get_spxs() const;
+    void set_spxs(bool spxs);
+    
+    int get_ns() const;
+    void set_ns(int ns);
+
+    T get_x0() const;
+    void set_x0(T x0);
+    
+    T get_y0() const;
+    void set_y0(T y0);
+    
+    T get_xe() const;
+    void set_xe(T xe);
+    
+    T get_ye() const;
+    void set_ye(T ye);
 
   private:
     std::unique_ptr<Data> impl_;
@@ -751,7 +859,7 @@ namespace mt {
     bool get_pn_single_conf() const;
     void set_pn_single_conf(bool pn_single_conf);
 
-    const FP_Dim& get_pn_dim() const;
+    FP_Dim& get_pn_dim() const;
     void set_pn_dim(const FP_Dim &pn_dim);
 
     int get_fp_dist() const;
@@ -775,13 +883,13 @@ namespace mt {
     double get_spec_rot_theta() const;
     void set_spec_rot_theta(double spec_rot_theta);
 
-    const r3d<T>& get_spec_rot_u0() const;
+    r3d<T>& get_spec_rot_u0() const;
     void set_spec_rot_u0(const r3d<T>& spec_rot_u0);
 
     eRot_Point_Type get_spec_rot_center_type() const;
     void set_spec_rot_center_type(eRot_Point_Type spec_rot_center_type);
 
-    const r3d<T>& get_spec_rot_center_p() const;
+    r3d<T>& get_spec_rot_center_p() const;
     void set_spec_rot_center_p(const r3d<T>& spec_rot_center_p);
 
     eThick_Type get_thick_type() const;
@@ -793,10 +901,10 @@ namespace mt {
     ePotential_Slicing get_potential_slicing() const;
     void set_potential_slicing(ePotential_Slicing potential_slicing);
 
-    const Grid_2d<T>& get_grid_2d() const;
+    Grid_2d<T>& get_grid_2d() const;
     void set_grid_2d(const Grid_2d<T>& grid_2d);
 
-    const Range_2d& get_output_area() const;
+    Range_2d& get_output_area() const;
     void set_output_area(const Range_2d& output_area);
 
     eTEM_Sim_Type get_simulation_type() const;
@@ -832,10 +940,10 @@ namespace mt {
     eTemporal_Spatial_Incoh get_temporal_spatial_incoh() const;
     void set_temporal_spatial_incoh(eTemporal_Spatial_Incoh temporal_spatial_incoh);
 
-    const Lens<T>& get_cond_lens() const;
+    Lens<T>& get_cond_lens() const;
     void set_cond_lens(const Lens<T>& cond_lens);
 
-    const Lens<T>& get_obj_lens() const;
+    Lens<T>& get_obj_lens() const;
     void set_obj_lens(const Lens<T>& obj_lens);
 
     ScanningData<T> get_scanning() const;
@@ -844,7 +952,7 @@ namespace mt {
     DetectorData<T> get_detector() const;
     void set_detector(const DetectorData<T>& detector);
 
-    const EELS<T>& get_eels_fr() const;
+    EELS<T>& get_eels_fr() const;
     void set_eels_fr(const EELS<T>& eels_fr);
 
     eOperation_Mode get_operation_mode() const;
@@ -889,6 +997,7 @@ namespace mt {
     bool get_dp_Shift() const;
     void set_dp_Shift(bool dp_Shift);
 
+    void set_incident_wave_type(eIncident_Wave_Type iw_type);
     void validate_parameters();
 
   private:
