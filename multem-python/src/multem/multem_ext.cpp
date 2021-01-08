@@ -6,6 +6,7 @@
 #include <pybind11/functional.h>
 #include <multem.h>
 #include <multem/system_configuration.h>
+#include <multem/detector.h>
 #include <multem/input_multislice.h>
 
 namespace py = pybind11;
@@ -13,6 +14,7 @@ namespace py = pybind11;
 PYBIND11_MODULE(multem_ext, m)
 {
   export_system_configuration(m);
+  export_detector(m);
   export_input_multislice(m);
 }
 
