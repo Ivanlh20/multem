@@ -54,13 +54,13 @@ namespace pybind11 { namespace detail {
       self.set_type(obj[0].cast<mt::eDetector_Type>());
       self.set_fx(obj[1].cast<std::vector<std::vector<T>>>());
       self.set_fR(obj[2].cast<std::vector<std::vector<T>>>());
-      self.set_grid_1d(obj[3].cast<std::vector<mt::Grid_1d<T>>>());
+      self.set_grid_1d(obj[3].cast<std::vector<mt::Grid_2d<T>>>());
       self.set_grid_2d(obj[4].cast<std::vector<mt::Grid_2d<T>>>());
       self.set_fn(obj[5].cast<std::vector<std::string>>());
       self.set_g_inner(obj[6].cast<std::vector<T>>());
       self.set_g_outer(obj[7].cast<std::vector<T>>());
-      self.set_inner_ang(obj[8].cast<std::vector<T>>());
-      self.set_outer_ang(obj[9].cast<std::vector<T>>());
+      self.inner_ang = obj[8].cast<std::vector<T>>();
+      self.outer_ang = obj[9].cast<std::vector<T>>();
       return self;
     }
 
@@ -69,47 +69,56 @@ namespace pybind11 { namespace detail {
 }}
 
 
-template <typename Module>
-void export_detector(Module m)
+template <typename Module, typename T>
+void wrap_detector(Module m)
 {
-  typedef double T;
+  typedef py::detail::DetectorWrapper<T> Type;
 
   // Wrap the mt::Input class
-  py::class_<py::detail::DetectorWrapper<T>>(m, "Detector")
+  py::class_<Type>(m, "Detector")
     .def(py::init<>())
-    .def("size", &py::detail::DetectorWrapper<T>::size)
-    .def("clear", &py::detail::DetectorWrapper<T>::clear)
-    .def("resize", &py::detail::DetectorWrapper<T>::resize)
-    .def("is_detector_circular", &py::detail::DetectorWrapper<T>::is_detector_circular)
-    .def("is_detector_radial", &py::detail::DetectorWrapper<T>::is_detector_radial)
-    .def("is_detector_matrix", &py::detail::DetectorWrapper<T>::is_detector_matrix)
+    .def("size", &Type::size)
+    .def("clear", &Type::clear)
+    .def("resize", &Type::resize)
+    .def("is_detector_circular", &Type::is_detector_circular)
+    .def("is_detector_radial", &Type::is_detector_radial)
+    .def("is_detector_matrix", &Type::is_detector_matrix)
     .def_property(
         "type",
-        &py::detail::DetectorWrapper<T>::get_type,
-        &py::detail::DetectorWrapper<T>::set_type)
+        &Type::get_type,
+        &Type::set_type)
     .def_property(
         "fx",
-        &py::detail::DetectorWrapper<T>::get_fx,
-        &py::detail::DetectorWrapper<T>::set_fx)
+        &Type::get_fx,
+        &Type::set_fx)
     .def_property(
         "fR",
-        &py::detail::DetectorWrapper<T>::get_fR,
-        &py::detail::DetectorWrapper<T>::set_fR)
+        &Type::get_fR,
+        &Type::set_fR)
     .def_property(
         "grid_1d",
-        &py::detail::DetectorWrapper<T>::get_grid_1d,
-        &py::detail::DetectorWrapper<T>::set_grid_1d)
+        &Type::get_grid_1d,
+        &Type::set_grid_1d)
     .def_property(
         "grid_2d",
-        &py::detail::DetectorWrapper<T>::get_grid_2d,
-        &py::detail::DetectorWrapper<T>::set_grid_2d)
+        &Type::get_grid_2d,
+        &Type::set_grid_2d)
     .def_property(
         "fn",
-        &py::detail::DetectorWrapper<T>::get_fn,
-        &py::detail::DetectorWrapper<T>::set_fn)
-    .def_readwrite("inner_ang", &py::detail::DetectorWrapper<T>::inner_ang)
-    .def_readwrite("outer_ang", &py::detail::DetectorWrapper<T>::outer_ang)
+        &Type::get_fn,
+        &Type::set_fn)
+    .def_readwrite("inner_ang", &Type::inner_ang)
+    .def_readwrite("outer_ang", &Type::outer_ang)
+    .def(py::pickle(
+        &Type::getstate,
+        &Type::setstate))
     ;
+}
+
+template <typename Module>
+void export_detector(Module m) {
+  wrap_detector<Module, float>(m);
+  wrap_detector<Module, double>(m);
 }
 
 #endif
