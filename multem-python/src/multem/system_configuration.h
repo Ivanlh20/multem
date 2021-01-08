@@ -8,6 +8,10 @@
  *  This code is distributed under the GPLv3 license, a copy of 
  *  which is included in the root directory of this package.
  */
+
+#ifndef MULTEM_PYTHON_SYSTEM_CONFIGURATION_H
+#define MULTEM_PYTHON_SYSTEM_CONFIGURATION_H
+
 #include <pybind11/pybind11.h>
 #include <multem.h>
 #include <multem/serialization.h>
@@ -82,4 +86,4 @@ void export_system_configuration(Module m)
     ;
 }
 
-
+#endif

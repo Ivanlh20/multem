@@ -689,7 +689,133 @@ namespace mt {
   const DetectorData<T>::Data& DetectorData<T>::internal() const {
     return *impl_;
   }
+		
+  template <typename T>
+  DetectorData<T>::size_type DetectorData<T>::size() const {
+    return impl_->data.size();
+  }
+
+  template <typename T>
+  void DetectorData<T>::clear() {
+    impl_->data.clear();
+  }
+
+  template <typename T>
+  void DetectorData<T>::resize(const typename DetectorData<T>::size_type &new_size) {
+    impl_->data.resize(new_size);
+  }
   
+  template <typename T>
+  bool DetectorData<T>::is_detector_circular() const {
+    return impl_->data.is_detector_circular();
+  }
+
+  template <typename T>
+  bool DetectorData<T>::is_detector_radial() const {
+    return impl_->data.is_detector_radial();
+  }
+
+  template <typename T>
+  bool DetectorData<T>::is_detector_matrix() const {
+    return impl_->data.is_detector_matrix();
+  }
+
+  
+  template <typename T>
+  eDetector_Type DetectorData<T>::get_type() const {
+    return impl_->data.type;
+  }
+
+  template <typename T>
+  void DetectorData<T>::set_type(eDetector_Type type) {
+    impl_->data.type = type;
+  }
+
+  template <typename T>
+  std::vector<T> DetectorData<T>::get_g_inner() const {
+    return std::vector<T>(impl_->data.g_inner.begin(), impl_->data.g_inner.end());
+  }
+
+  template <typename T>
+  void DetectorData<T>::set_g_inner(const std::vector<T>& g_inner) {
+    impl_->data.g_inner.assign(g_inner.begin(), g_inner.end());
+  }
+
+  template <typename T>
+  std::vector<T> DetectorData<T>::get_g_outer() const {
+    return std::vector<T>(impl_->data.g_outer.begin(), impl_->data.g_outer.end());
+  }
+
+  template <typename T>
+  void DetectorData<T>::set_g_outer(const std::vector<T>& g_outer) {
+    impl_->data.g_outer.assign(g_outer.begin(), g_outer.end());
+  }
+
+  template <typename T>
+  std::vector<std::vector<T>> DetectorData<T>::get_fx() const {
+    std::vector<std::vector<T>> result;
+    for (auto x : impl_->data.fx) {
+      result.push_back(std::vector<T>(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  void DetectorData<T>::set_fx(const std::vector<std::vector<T>>& fx) {
+    Vector<Vector<T, e_host>, e_host> result;
+    for (auto x : fx) {
+      result.push_back(Vector<T, e_host>(x.begin(), x.end()));
+    }
+    impl_->data.fx = result;
+  }
+  
+  template <typename T>
+  std::vector<std::vector<T>> DetectorData<T>::get_fR() const {
+    std::vector<std::vector<T>> result;
+    for (auto x : impl_->data.fR) {
+      result.push_back(std::vector<T>(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  void DetectorData<T>::set_fR(const std::vector<std::vector<T>>& fR) {
+    Vector<Vector<T, e_host>, e_host> result;
+    for (auto x : fR) {
+      result.push_back(Vector<T, e_host>(x.begin(), x.end()));
+    }
+    impl_->data.fR = result;
+  }
+  
+  template <typename T>
+  std::vector<Grid_2d<T>> DetectorData<T>::get_grid_1d() const {
+    return impl_->data.grid_1d;
+  }
+
+  template <typename T>
+  void DetectorData<T>::set_grid_1d(const std::vector<Grid_2d<T>>& grid_1d) {
+    impl_->data.grid_1d = grid_1d;
+  }
+  
+  template <typename T>
+  std::vector<Grid_2d<T>> DetectorData<T>::get_grid_2d() const {
+    return impl_->data.grid_2d;
+  }
+
+  template <typename T>
+  void DetectorData<T>::set_grid_2d(const std::vector<Grid_2d<T>>& grid_2d) {
+    impl_->data.grid_2d = grid_2d;
+  }
+  
+  template <typename T>
+  std::vector<std::string> DetectorData<T>::get_fn() const {
+    return impl_->data.fn;
+  }
+
+  template <typename T>
+  void DetectorData<T>::set_fn(const std::vector<std::string>& fn) {
+    impl_->data.fn = fn;
+  }
 
   /****************************************************************************
    * The Input interface
