@@ -6,6 +6,7 @@
 #include <pybind11/functional.h>
 #include <multem.h>
 #include <multem/system_configuration.h>
+#include <multem/grid_2d.h>
 #include <multem/amorp_lay_info.h>
 #include <multem/atom_data.h>
 #include <multem/scanning.h>
@@ -19,6 +20,7 @@ namespace py = pybind11;
 PYBIND11_MODULE(multem_ext, m)
 {
   export_system_configuration(m);
+  export_grid_2d(m);
   export_amorp_lay_info(m);
   export_atom_data(m);
   export_scanning(m);
