@@ -18,6 +18,10 @@
 
 namespace py = pybind11;
 
+// Make the vector of atoms opaque
+PYBIND11_MAKE_OPAQUE(std::vector<mt::Atom<float>>);
+PYBIND11_MAKE_OPAQUE(std::vector<mt::Atom<double>>);
+
 namespace pybind11 { namespace detail {
   
   /**
@@ -72,8 +76,58 @@ namespace pybind11 { namespace detail {
 
   };
   
+
+  /**
+   * Type cast a mt::Atom object to a tuple
+   */
+  template <> 
+  template <typename T>
+  class type_caster<mt::Atom<T>> {
+  public:
+  
+    PYBIND11_TYPE_CASTER(mt::Atom<T>, _("mt::Atom<T>"));
+
+    bool load(handle src, bool convert) {
+      if (py::isinstance<py::tuple>(src)) {
+        py::tuple t = py::cast<py::tuple>(src);
+        if (py::len(t) == 8) {
+          value.Z = py::cast<int>(t[0]);
+          value.x = py::cast<double>(t[1]);
+          value.y = py::cast<double>(t[2]);
+          value.z = py::cast<double>(t[3]);
+          value.sigma = py::cast<double>(t[4]);
+          value.occ = py::cast<double>(t[5]);
+          value.region = py::cast<int>(t[6]);
+          value.charge = py::cast<int>(t[7]);
+          return true;
+        }
+      }
+      return false;
+    }
+
+    static handle cast(mt::Atom<T> src, return_value_policy policy, handle parent) {
+      return py::make_tuple(
+        src.Z, 
+        src.x, 
+        src.y, 
+        src.z, 
+        src.sigma, 
+        src.occ, 
+        src.region, 
+        src.charge).release();
+    }
+  };
+  
 }}
 
+template <typename Module, typename T>
+void wrap_atom(Module m)
+{
+  typedef mt::Atom<T> Type;
+  
+  // Wrap the vector of atoms
+  py::bind_vector<std::vector<mt::Atom<T>>>(m, "AtomList");
+}
 
 template <typename Module, typename T>
 void wrap_atom_data(Module m)
@@ -148,6 +202,8 @@ void wrap_atom_data(Module m)
 
 template <typename Module>
 void export_atom_data(Module m) {
+  wrap_atom<Module, float>(m);
+  wrap_atom<Module, double>(m);
   wrap_atom_data<Module, float>(m);
   wrap_atom_data<Module, double>(m);
 }
