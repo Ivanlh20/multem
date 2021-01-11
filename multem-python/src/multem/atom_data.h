@@ -202,9 +202,7 @@ void wrap_atom_data(Module m)
 
 template <typename Module>
 void export_atom_data(Module m) {
-  wrap_atom<Module, float>(m);
   wrap_atom<Module, double>(m);
-  wrap_atom_data<Module, float>(m);
   wrap_atom_data<Module, double>(m);
 }
 

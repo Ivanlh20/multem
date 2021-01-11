@@ -487,8 +487,8 @@ namespace mt {
     eIncident_Wave_Type get_iw_type() const;
     void set_iw_type(eIncident_Wave_Type iw_type);
 
-    std::vector<complex<T>> get_iw_psi() const;
-    void set_iw_psi(const std::vector<complex<T>>& iw_psi);
+    std::vector<std::complex<T>> get_iw_psi() const;
+    void set_iw_psi(const std::vector<std::complex<T>>& iw_psi);
 
     std::vector<T> get_iw_x() const;
     void set_iw_x(const std::vector<T>& iw_x);
@@ -591,7 +591,7 @@ namespace mt {
     struct Data;
 
     typedef std::vector<T> vector_type;
-    typedef std::vector<complex<T>> complex_vector_type;
+    typedef std::vector<std::complex<T>> complex_vector_type;
 
     Output();
     Output(Output&);
@@ -639,26 +639,26 @@ namespace mt {
   /**
    * A proxy for the Output_Multislice class
    */
-  template <typename T, eDevice dev>
-  class MultisliceData {
-  public:
-    struct Data;
+  /*template <typename T, eDevice dev>*/
+  /*class MultisliceData {*/
+  /*public:*/
+  /*  struct Data;*/
 
-    typedef std::vector<T> vector_type;
-    typedef std::vector<complex<T>> complex_vector_type;
+  /*  typedef std::vector<T> vector_type;*/
+  /*  typedef std::vector<std::complex<T>> complex_vector_type;*/
 
-    MultisliceData();
-    ~MultisliceData();
+  /*  MultisliceData();*/
+  /*  ~MultisliceData();*/
 
-    const Data& internal() const;
+  /*  const Data& internal() const;*/
 
-		void set_input_data(Input<T> &input, StreamIface<dev> &stream_i, FFTData<T, dev> &fft2_i);
-		void operator()(Output<T> &output_multislice);
+		/*void set_input_data(Input<T> &input, StreamIface<dev> &stream_i, FFTData<T, dev> &fft2_i);*/
+		/*void operator()(Output<T> &output_multislice);*/
     
-  private:
-    std::unique_ptr<Data> impl_;
+  /*private:*/
+  /*  std::unique_ptr<Data> impl_;*/
 
-  };
+  /*};*/
 
   template <typename T>
   void test(const Input<T>&);

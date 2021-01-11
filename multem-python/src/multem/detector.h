@@ -117,7 +117,6 @@ void wrap_detector(Module m)
 
 template <typename Module>
 void export_detector(Module m) {
-  wrap_detector<Module, float>(m);
   wrap_detector<Module, double>(m);
 }
 

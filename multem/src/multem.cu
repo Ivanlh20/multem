@@ -1104,12 +1104,12 @@ namespace mt {
   }
 
   template <typename T>
-  std::vector<complex<T>> Input<T>::get_iw_psi() const {
-    return std::vector<complex<T>>(impl_->data.iw_psi.begin(), impl_->data.iw_psi.end());
+  std::vector<std::complex<T>> Input<T>::get_iw_psi() const {
+    return std::vector<std::complex<T>>(impl_->data.iw_psi.begin(), impl_->data.iw_psi.end());
   }
 
   template <typename T>
-  void Input<T>::set_iw_psi(const std::vector<complex<T>>& iw_psi) {
+  void Input<T>::set_iw_psi(const std::vector<std::complex<T>>& iw_psi) {
     impl_->data.iw_psi.assign(iw_psi.begin(), iw_psi.end());
   }
 
@@ -1598,32 +1598,32 @@ namespace mt {
    * The Multislice interface
    ***************************************************************************/
 
-  template <typename T, eDevice dev>
-  struct MultisliceData<T, dev>::Data {
-    Multislice<T, dev> data;
-  };
+  /* template <typename T, eDevice dev> */
+  /* struct MultisliceData<T, dev>::Data { */
+  /*   Multislice<T, dev> data; */
+  /* }; */
 
-  template <typename T, eDevice dev>
-  MultisliceData<T, dev>::MultisliceData()
-      : impl_(std::make_unique<Data>()) {}
+  /* template <typename T, eDevice dev> */
+  /* MultisliceData<T, dev>::MultisliceData() */
+  /*     : impl_(std::make_unique<Data>()) {} */
 
-  template <typename T, eDevice dev>
-  const MultisliceData<T, dev>::Data& MultisliceData<T, dev>::internal() const {
-    return *impl_;
-  }
+  /* template <typename T, eDevice dev> */
+  /* const MultisliceData<T, dev>::Data& MultisliceData<T, dev>::internal() const { */
+  /*   return *impl_; */
+  /* } */
 		
-  template <typename T, eDevice dev>
-  void MultisliceData<T, dev>::set_input_data(Input<T> &input, StreamIface<dev> &stream_i, FFTData<T, dev> &fft2_i) {
-    impl_->data.set_input_data(
-        &input.internal().data,
-        &stream_i.internal().data,
-        &fft2_i.internal().data);
-  }
+  /* template <typename T, eDevice dev> */
+  /* void MultisliceData<T, dev>::set_input_data(Input<T> &input, StreamIface<dev> &stream_i, FFTData<T, dev> &fft2_i) { */
+  /*   impl_->data.set_input_data( */
+  /*       &input.internal().data, */
+  /*       &stream_i.internal().data, */
+  /*       &fft2_i.internal().data); */
+  /* } */
 		
-  template <typename T, eDevice dev>
-  void MultisliceData<T, dev>::operator()(Output<T> &output) {
-    impl_->data(output.internal().data);
-  }
+  /* template <typename T, eDevice dev> */
+  /* void MultisliceData<T, dev>::operator()(Output<T> &output) { */
+  /*   impl_->data(output.internal().data); */
+  /* } */
 
   /****************************************************************************
    * Misc function calls
@@ -1637,10 +1637,7 @@ namespace mt {
   /****************************************************************************
    * Explict instantiation of template classes and functions
    ***************************************************************************/
-  
-  /**
-   * Explict instantiation of template classes
-   */
+
   template class FFTData<float, e_host>;
   template class FFTData<float, e_device>;
   template class FFTData<double, e_host>;
@@ -1651,6 +1648,12 @@ namespace mt {
 
   template class AtomData<float>;
   template class AtomData<double>;
+  
+  template class DetectorData<float>;
+  template class DetectorData<double>;
+
+  template class ScanningData<float>;
+  template class ScanningData<double>;
 
   template class Input<float>;
   template class Input<double>;
@@ -1658,15 +1661,28 @@ namespace mt {
   template class Output<float>;
   template class Output<double>;
   
-  template class MultisliceData<float, e_host>;
-  template class MultisliceData<float, e_device>;
-  template class MultisliceData<double, e_host>;
-  template class MultisliceData<double, e_device>;
+  /* template class MultisliceData<float, e_host>; */
+  /* template class MultisliceData<float, e_device>; */
+  /* template class MultisliceData<double, e_host>; */
+  /* template class MultisliceData<double, e_device>; */
 
-  /**
-   * Explict instantiation of template functions
-   */
   template void test<float>(const Input<float>&);
   template void test<double>(const Input<double>&);
 
 }  // namespace mt
+
+namespace std {
+  
+  /****************************************************************************
+   * Explict instantiation of template classes and functions from std
+   ***************************************************************************/
+
+  template class complex<float>;
+  template class complex<double>;
+
+  template class vector<float>;
+  template class vector<double>;
+  template class vector<complex<float>>;
+  template class vector<complex<double>>;
+
+}
