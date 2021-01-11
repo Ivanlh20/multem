@@ -184,7 +184,7 @@ void wrap_lens(Module m)
     .def_readwrite("si_theta_c", &Type::si_theta_c)
     .def_readwrite("zero_defocus_type", &Type::zero_defocus_type)
     .def_readwrite("zero_defocus_plane", &Type::zero_defocus_plane)
-    .def_readwrite("lambda", &Type::lambda)
+    .def_readwrite("lambda_", &Type::lambda)
     .def(py::pickle(
         &py::detail::Helpers<Type>::getstate,
         &py::detail::Helpers<Type>::setstate))
