@@ -23,13 +23,14 @@ namespace pybind11 { namespace detail {
   /**
    * Define wrapper function for the mt::ScanningData class
    */
+  template <>
   template <typename T>
-  struct ScanningWrapper : public mt::ScanningData<T> {
+  struct Helpers <mt::ScanningData<T>> {
 
     /**
      * Get the state
      */
-    static py::tuple getstate(const ScanningWrapper &self) {
+    static py::tuple getstate(const mt::ScanningData<T> &self) {
       return py::make_tuple(
           self.get_type(),
           self.get_pbc(),
@@ -44,8 +45,7 @@ namespace pybind11 { namespace detail {
     /**
      * Set the state
      */
-    static ScanningWrapper setstate(py::tuple obj) {
-      ScanningWrapper self;
+    static void setstate(mt::ScanningData<T> &self, py::tuple obj) {
       self.set_type(obj[0].cast<mt::eScanning_Type>());
       self.set_pbc(obj[1].cast<bool>());
       self.set_spxs(obj[2].cast<bool>());
@@ -54,7 +54,6 @@ namespace pybind11 { namespace detail {
       self.set_y0(obj[5].cast<T>());
       self.set_xe(obj[6].cast<T>());
       self.set_ye(obj[7].cast<T>());
-      return self;
     }
 
   };
@@ -65,11 +64,10 @@ namespace pybind11 { namespace detail {
 template <typename Module, typename T>
 void wrap_scanning(Module m)
 {
-  typedef py::detail::ScanningWrapper<T> Type;
+  typedef mt::ScanningData<T> Type;
 
   // Wrap the mt::Input class
   py::class_<Type>(m, "Scanning")
-    .def(py::init<>())
     .def_property(
         "type",
         &Type::get_type,
@@ -102,9 +100,6 @@ void wrap_scanning(Module m)
         "ye",
         &Type::get_ye,
         &Type::set_ye)
-    .def(py::pickle(
-        &Type::getstate,
-        &Type::setstate))
     ;
 }
 

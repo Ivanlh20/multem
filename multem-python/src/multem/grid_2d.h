@@ -9,8 +9,8 @@
  *  which is included in the root directory of this package.
  */
 
-#ifndef MULTEM_PYTHON_grid_2d_H
-#define MULTEM_PYTHON_grid_2d_H
+#ifndef MULTEM_PYTHON_GRID_2D_H
+#define MULTEM_PYTHON_GRID_2D_H
 
 #include <pybind11/pybind11.h>
 #include <multem.h>
@@ -23,13 +23,14 @@ namespace pybind11 { namespace detail {
   /**
    * Define wrapper function for the mt::Grid_2d_ class
    */
+  template <>
   template <typename T>
-  struct Grid_2d_Wrapper : public mt::Grid_2d<T> {
+  struct Helpers <mt::Grid_2d<T>> {
 
     /**
      * Get the state
      */
-    static py::tuple getstate(const Grid_2d_Wrapper &self) {
+    static py::tuple getstate(const mt::Grid_2d<T> &self) {
       return py::make_tuple(
           self.nx,
           self.ny,
@@ -53,8 +54,8 @@ namespace pybind11 { namespace detail {
     /**
      * Set the state
      */
-    static Grid_2d_Wrapper setstate(py::tuple obj) {
-      Grid_2d_Wrapper self;
+    static mt::Grid_2d<T> setstate(py::tuple obj) {
+      mt::Grid_2d<T> self;
       self.nx = obj[0].cast<int>();
       self.ny = obj[1].cast<int>();
       self.nxh = obj[2].cast<int>();
@@ -84,7 +85,7 @@ namespace pybind11 { namespace detail {
 template <typename Module, typename T>
 void wrap_grid_2d(Module m)
 {
-  typedef py::detail::Grid_2d_Wrapper<T> Type;
+  typedef mt::Grid_2d<T> Type;
 
   // Wrap the mt::Input class
   py::class_<Type>(m, "Grid_2d")
@@ -107,8 +108,8 @@ void wrap_grid_2d(Module m)
     .def_readwrite("gl2_max", &Type::gl2_max)
     .def_readwrite("alpha", &Type::alpha)
     .def(py::pickle(
-        &Type::getstate,
-        &Type::setstate))
+        &py::detail::Helpers<Type>::getstate,
+        &py::detail::Helpers<Type>::setstate))
     ;
 }
 
