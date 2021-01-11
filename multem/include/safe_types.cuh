@@ -2586,7 +2586,7 @@ namespace mt
 			bool active;
 
 			System_Configuration(): precision(eP_double), device(e_host), cpu_ncores(1),
-				cpu_nthread(4), gpu_device(0), gpu_nstream(8), nstream(1), active(true){};
+				cpu_nthread(1), gpu_device(0), gpu_nstream(1), nstream(1), active(true){};
 
 			void validate_parameters()
 			{
