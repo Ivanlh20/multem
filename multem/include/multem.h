@@ -203,7 +203,7 @@ namespace mt {
   public:
     struct Data;
 
-    AtomData();
+    /* AtomData(); */
     AtomData(const AtomData&);
     AtomData(AtomData&&);
     AtomData(const Data&);
@@ -273,7 +273,6 @@ namespace mt {
   public:
     struct Data;
 
-    ScanningData();
     ScanningData(const ScanningData&);
     ScanningData(ScanningData&&);
     ScanningData(const Data&);
@@ -326,7 +325,6 @@ namespace mt {
     using value_type = T;
 		using size_type = std::size_t;
 
-    DetectorData();
     DetectorData(const DetectorData&);
     DetectorData(DetectorData&&);
     DetectorData(const Data&);
@@ -366,6 +364,12 @@ namespace mt {
 		
     std::vector<std::string> get_fn() const;
 		void set_fn(const std::vector<std::string>& fn);
+
+    std::vector<T> get_inner_ang() const;
+    void set_inner_ang(const std::vector<T>& inner_ang);
+
+    std::vector<T> get_outer_ang() const;
+    void set_outer_ang(const std::vector<T>& outer_ang);
 
   private:
     std::unique_ptr<Data> impl_;
@@ -448,7 +452,7 @@ namespace mt {
     int get_fp_iconf_0() const;
     void set_fp_iconf_0(int fp_iconf_0);
 
-    AtomData<T> get_atoms() const;
+    AtomData<T>& get_atoms() const;
     void set_atoms(const AtomData<T>& atoms);
 
     bool get_is_crystal() const;
@@ -520,10 +524,10 @@ namespace mt {
     Lens<T>& get_obj_lens() const;
     void set_obj_lens(const Lens<T>& obj_lens);
 
-    ScanningData<T> get_scanning() const;
+    ScanningData<T>& get_scanning() const;
     void set_scanning(const ScanningData<T>& scanning);
 
-    DetectorData<T> get_detector() const;
+    DetectorData<T>& get_detector() const;
     void set_detector(const DetectorData<T>& detector);
 
     EELS<T>& get_eels_fr() const;
@@ -572,6 +576,7 @@ namespace mt {
     void set_dp_Shift(bool dp_Shift);
 
     void set_incident_wave_type(eIncident_Wave_Type iw_type);
+
     void validate_parameters();
 
   private:

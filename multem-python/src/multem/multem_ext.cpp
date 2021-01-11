@@ -8,6 +8,11 @@
 #include <multem/enums.h>
 #include <multem/system_configuration.h>
 #include <multem/grid_2d.h>
+#include <multem/range_2d.h>
+#include <multem/r3d.h>
+#include <multem/fp_dim.h>
+#include <multem/lens.h>
+#include <multem/eels.h>
 #include <multem/amorp_lay_info.h>
 #include <multem/atom_data.h>
 #include <multem/scanning.h>
@@ -23,6 +28,11 @@ PYBIND11_MODULE(multem_ext, m)
   export_enums(m);
   export_system_configuration(m);
   export_grid_2d(m);
+  export_range_2d(m);
+  export_r3d(m);
+  export_fp_dim(m);
+  export_lens(m);
+  export_eels(m);
   export_amorp_lay_info(m);
   export_atom_data(m);
   export_scanning(m);

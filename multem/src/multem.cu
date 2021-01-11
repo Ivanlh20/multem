@@ -305,15 +305,26 @@ namespace mt {
 
   template <typename T>
   struct AtomData<T>::Data {
-    Atom_Data<T> data;
-    Data() {}
-    Data(const Atom_Data<T>& d)
-        : data(d) {}
+    /* Atom_Data<T> d_; */
+    /* std::reference_wrapper<Atom_Data<T>> data; */
+    Atom_Data<T> &data;
+    Data(Atom_Data<T>& d)
+      : data(d) {}
+    Data(const Data &other)
+      : data(other.data) {}
+    Data& operator=(const Data &other) {
+      data = other.data;
+      return *this;
+    }
+    /* Data() */
+    /*   : data(d_) {}; */
+    /* Data(std::reference_wrapper<Atom_Data<T>> d) */
+    /*   : data(d) {}; */
   };
 
-  template <typename T>
-  AtomData<T>::AtomData()
-      : impl_(std::make_unique<Data>()) {}
+  /* template <typename T> */
+  /* AtomData<T>::AtomData() */
+  /*     : impl_(std::make_unique<Data>()) {} */
 
   template <typename T>
   AtomData<T>::AtomData(const AtomData& other)
@@ -477,7 +488,7 @@ namespace mt {
   
   template <typename T>
   std::vector<Atom<T>> AtomData<T>::get_spec_atoms() const {
-    Atom_Data<T>& atoms = impl_->data;
+    const Atom_Data<T>& atoms = impl_->data;
     std::vector<Atom<T>> result(atoms.size());
     for (auto i = 0; i < result.size(); ++i) {
       result[i] = Atom<T>(
@@ -520,15 +531,16 @@ namespace mt {
 
   template <typename T>
   struct ScanningData<T>::Data {
-    Scanning<T> data;
-    Data() {}
-    Data(const Scanning<T>& d)
-        : data(d) {}
+    Scanning<T>& data;
+    Data(Scanning<T>& d)
+      : data(d) {}
+    Data(const Data &other)
+      : data(other.data) {}
+    Data& operator=(const Data &other) {
+      data = other.data;
+      return *this;
+    }
   };
-
-  template <typename T>
-  ScanningData<T>::ScanningData()
-      : impl_(std::make_unique<Data>()) {}
 
   template <typename T>
   ScanningData<T>::ScanningData(const ScanningData& other)
@@ -652,15 +664,18 @@ namespace mt {
 
   template <typename T>
   struct DetectorData<T>::Data {
-    Detector<T, e_host> data;
-    Data() {}
-    Data(const Detector<T, e_host>& d)
-        : data(d) {}
+    Detector<T, e_host>& data;
+    std::vector<T> inner_ang;
+    std::vector<T> outer_ang;
+    Data(Detector<T, e_host>& d)
+      : data(d) {}
+    Data(const Data &other)
+      : data(other.data) {}
+    Data& operator=(const Data &other) {
+      data = other.data;
+      return *this;
+    }
   };
-
-  template <typename T>
-  DetectorData<T>::DetectorData()
-      : impl_(std::make_unique<Data>()) {}
 
   template <typename T>
   DetectorData<T>::DetectorData(const DetectorData& other)
@@ -817,6 +832,26 @@ namespace mt {
     impl_->data.fn = fn;
   }
 
+  template <typename T>
+  std::vector<T> DetectorData<T>::get_inner_ang() const {
+    return std::vector<T>(impl_->inner_ang.begin(), impl_->inner_ang.end());
+  }
+
+  template <typename T>
+  void DetectorData<T>::set_inner_ang(const std::vector<T>& inner_ang) {
+    impl_->inner_ang.assign(inner_ang.begin(), inner_ang.end());
+  }
+
+  template <typename T>
+  std::vector<T> DetectorData<T>::get_outer_ang() const {
+    return std::vector<T>(impl_->outer_ang.begin(), impl_->outer_ang.end());
+  }
+
+  template <typename T>
+  void DetectorData<T>::set_outer_ang(const std::vector<T>& outer_ang) {
+    impl_->outer_ang.assign(outer_ang.begin(), outer_ang.end());
+  }
+
   /****************************************************************************
    * The Input interface
    ***************************************************************************/
@@ -824,6 +859,13 @@ namespace mt {
   template <typename T>
   struct Input<T>::Data {
     Input_Multislice<T> data;
+    AtomData<T> atom_data_proxy;
+    ScanningData<T> scanning_proxy;
+    DetectorData<T> detector_proxy;
+    Data()
+      : atom_data_proxy(typename AtomData<T>::Data(data.atoms)),
+        scanning_proxy(typename ScanningData<T>::Data(data.scanning)),
+        detector_proxy(typename DetectorData<T>::Data(data.detector)){}
   };
 
   template <typename T>
@@ -974,13 +1016,14 @@ namespace mt {
   }
 
   template <typename T>
-  AtomData<T> Input<T>::get_atoms() const {
-    return AtomData<T>(typename AtomData<T>::Data(impl_->data.atoms));
+  AtomData<T>& Input<T>::get_atoms() const {
+    return impl_->atom_data_proxy;
   }
 
   template <typename T>
   void Input<T>::set_atoms(const AtomData<T>& atoms) {
     impl_->data.atoms = atoms.internal().data;
+    impl_->atom_data_proxy = AtomData<T>(typename AtomData<T>::Data(impl_->data.atoms));
   }
 
   template <typename T>
@@ -1214,23 +1257,25 @@ namespace mt {
   }
 
   template <typename T>
-  ScanningData<T> Input<T>::get_scanning() const {
-    return ScanningData<T>(typename ScanningData<T>::Data(impl_->data.scanning));
+  ScanningData<T>& Input<T>::get_scanning() const {
+    return impl_->scanning_proxy;
   }
   
   template <typename T>
   void Input<T>::set_scanning(const ScanningData<T>& scanning) {
     impl_->data.scanning = scanning.internal().data;
+    impl_->scanning_proxy = ScanningData<T>(typename ScanningData<T>::Data(impl_->data.scanning));
   }
 
   template <typename T>
-  DetectorData<T> Input<T>::get_detector() const {
-    return DetectorData<T>(typename DetectorData<T>::Data(impl_->data.detector));
+  DetectorData<T>& Input<T>::get_detector() const {
+    return impl_->detector_proxy;
   }
   
   template <typename T>
   void Input<T>::set_detector(const DetectorData<T>& detector) {
     impl_->data.detector = detector.internal().data;
+    impl_->detector_proxy = DetectorData<T>(typename DetectorData<T>::Data(impl_->data.detector));
   }
 
   template <typename T>

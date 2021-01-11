@@ -13,6 +13,7 @@
 #define MULTEM_PYTHON_AMORP_LAY_INFO_H
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <multem.h>
 #include <multem/serialization.h>
 
@@ -21,62 +22,42 @@ namespace py = pybind11;
 namespace pybind11 { namespace detail {
   
   /**
-   * Define wrapper function for the mt::Amorp_Lay_Info class
+   * Type cast a mt::Amorp_Lay_Info<T> object to a tuple
    */
+  template <> 
   template <typename T>
-  struct Amorp_Lay_Info_Wrapper : public mt::Amorp_Lay_Info<T> {
-
-    /**
-     * Get the state
-     */
-    static py::tuple getstate(const Amorp_Lay_Info_Wrapper &self) {
-      return py::make_tuple(
-          self.z_0,
-          self.z_e,
-          self.dz,
-          self.region,
-          self.type);
-    }
-
-    /**
-     * Set the state
-     */
-    static Amorp_Lay_Info_Wrapper setstate(py::tuple obj) {
-      Amorp_Lay_Info_Wrapper self;
-      self.z_0 = obj[0].cast<T>();
-      self.z_e = obj[1].cast<T>();
-      self.dz = obj[2].cast<T>();
-      self.region = obj[3].cast<int>();
-      self.type = obj[4].cast<mt::eAmorp_Lay_Type>();
-      return self;
-    }
-
-  };
+  class type_caster<mt::Amorp_Lay_Info<T>> {
+  public:
   
+    PYBIND11_TYPE_CASTER(mt::Amorp_Lay_Info<T>, _("mt::Amorp_Lay_Info<T>"));
+
+    bool load(handle src, bool convert) {
+      if (py::isinstance<py::tuple>(src)) {
+        py::tuple t = py::cast<py::tuple>(src);
+        if (py::len(t) == 3) {
+          value.z_0 = py::cast<double>(t[0]);
+          value.z_e = py::cast<double>(t[1]);
+          value.dz = py::cast<double>(t[2]);
+          return true;
+        }
+      }
+      return false;
+    }
+
+    static handle cast(mt::Amorp_Lay_Info<T> src, return_value_policy policy, handle parent) {
+      return py::make_tuple(
+        src.z_0, 
+        src.z_e, 
+        src.dz).release();
+    }
+  };
+ 
 }}
 
 
 template <typename Module, typename T>
 void wrap_amorp_lay_info(Module m)
 {
-  typedef py::detail::Amorp_Lay_Info_Wrapper<T> Type;
-
-  // Wrap the mt::Input class
-  py::class_<Type>(m, "Amorp_Lay_Info")
-    .def(py::init<>())
-    .def_readwrite("z_0", &Type::z_0)
-    .def_readwrite("z_e", &Type::z_e)
-    .def_readwrite("dz", &Type::dz)
-    .def_readwrite("region", &Type::region)
-    .def_readwrite("type", &Type::type)
-    .def_property_readonly("lz", &Type::lz)
-    .def("is_at_top", &Type::is_at_top)
-    .def("is_at_bottom", &Type::is_at_bottom)
-    .def("is_at_middle", &Type::is_at_middle)
-    .def(py::pickle(
-        &Type::getstate,
-        &Type::setstate))
-    ;
 }
 
 template <typename Module>

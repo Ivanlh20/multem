@@ -5,8 +5,8 @@ import pickle
 def test_system_configuration():
 
     system_conf = multem.SystemConfiguration()
-    system_conf.device = multem.eDevice.device
-    system_conf.precision = multem.ePrecision.float
+    system_conf.device = "device"
+    system_conf.precision = "float"
     system_conf.cpu_ncores = 1
     system_conf.cpu_nthread = 2
     system_conf.gpu_device = 3

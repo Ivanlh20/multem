@@ -13,27 +13,60 @@
 #define MULTEM_PYTHON_ATOM_DATA_H
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
 #include <multem.h>
 #include <multem/serialization.h>
 
 namespace py = pybind11;
 
 // Make the vector of atoms opaque
-PYBIND11_MAKE_OPAQUE(std::vector<mt::Atom<float>>);
 PYBIND11_MAKE_OPAQUE(std::vector<mt::Atom<double>>);
 
 namespace pybind11 { namespace detail {
   
   /**
-   * Define wrapper function for the mt::AtomData class
+   * Define wrapper function for the AtomList class
    */
+  template <>
   template <typename T>
-  struct AtomDataWrapper : public mt::AtomData<T> {
+  struct Helpers <std::vector<mt::Atom<T>>> {
 
     /**
      * Get the state
      */
-    static py::tuple getstate(const AtomDataWrapper &self) {
+    static py::list getstate(const std::vector<mt::Atom<T>> &self) {
+      py::list result;
+      for (auto x : self) {
+        result.append(x);
+      }
+      return result;
+    }
+
+    /**
+     * Set the state
+     */
+    static std::vector<mt::Atom<T>> setstate(py::list obj) {
+      std::vector<mt::Atom<T>> self;
+      for (auto x : obj) {
+        self.push_back(x.cast<mt::Atom<T>>());
+      }
+      return self;
+    }
+
+  };
+  
+  /**
+   * Define wrapper function for the mt::AtomData class
+   */
+  template <>
+  template <typename T>
+  struct Helpers <mt::AtomData<T>> {
+
+    /**
+     * Get the state
+     */
+    static py::tuple getstate(const mt::AtomData<T> &self) {
       return py::make_tuple(
           self.get_dz(),
           self.get_l_x(),
@@ -54,8 +87,7 @@ namespace pybind11 { namespace detail {
     /**
      * Set the state
      */
-    static AtomDataWrapper setstate(py::tuple obj) {
-      AtomDataWrapper self;
+    static void setstate(mt::AtomData<T>& self, py::tuple obj) {
       self.set_dz(obj[0].cast<T>());
       self.set_l_x(obj[1].cast<T>());
       self.set_l_y(obj[2].cast<T>());
@@ -71,7 +103,6 @@ namespace pybind11 { namespace detail {
       self.set_amorphous_parameters(obj[12].cast<std::vector<mt::Amorp_Lay_Info<T>>>());
       self.set_spec_atoms(obj[13].cast<std::vector<mt::Atom<T>>>());
       self.get_statistic();
-      return self;
     }
 
   };
@@ -123,20 +154,26 @@ namespace pybind11 { namespace detail {
 template <typename Module, typename T>
 void wrap_atom(Module m)
 {
-  typedef mt::Atom<T> Type;
+  typedef std::vector<mt::Atom<T>> Type;
   
   // Wrap the vector of atoms
-  py::bind_vector<std::vector<mt::Atom<T>>>(m, "AtomList");
+  py::bind_vector<Type>(m, "AtomList")
+    .def(py::pickle(
+        &py::detail::Helpers<Type>::getstate,
+        &py::detail::Helpers<Type>::setstate))
+    ;
+
+  // Allow implicit conversion
+  py::implicitly_convertible<py::list, Type>();
 }
 
 template <typename Module, typename T>
 void wrap_atom_data(Module m)
 {
-  typedef py::detail::AtomDataWrapper<T> Type;
+  typedef mt::AtomData<T> Type;
 
   // Wrap the mt::Input class
   py::class_<Type>(m, "AtomData")
-    .def(py::init<>())
     .def_property(
         "dz",
         &Type::get_dz,
@@ -194,9 +231,6 @@ void wrap_atom_data(Module m)
         &Type::get_spec_atoms,
         &Type::set_spec_atoms)
     .def("get_statistic", &Type::get_statistic)
-    .def(py::pickle(
-        &Type::getstate,
-        &Type::setstate))
     ;
 }
 
