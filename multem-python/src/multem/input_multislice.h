@@ -1460,7 +1460,7 @@ void wrap_input_multislice(Module m)
     .def_property("E_0",
         &Type::get_E_0,
         &Type::set_E_0)
-    .def_property("lambda",
+    .def_property("lambda_",
         &Type::get_lambda,
         &Type::set_lambda)
     .def_property("illumination_model",
@@ -1804,18 +1804,18 @@ void wrap_input_multislice(Module m)
     .def_property("obj_lens_outer_aper_ang", 
         &py::detail::Helpers<Type>::get_obj_lens_outer_aper_ang,
         &py::detail::Helpers<Type>::set_obj_lens_outer_aper_ang)
-    .def_property("cond_lens_ti_a", 
-        &py::detail::Helpers<Type>::get_cond_lens_ti_a,
-        &py::detail::Helpers<Type>::set_cond_lens_ti_a)
-    .def_property("cond_lens_ti_sigma", 
-        &py::detail::Helpers<Type>::get_cond_lens_ti_sigma,
-        &py::detail::Helpers<Type>::set_cond_lens_ti_sigma)
-    .def_property("cond_lens_ti_beta", 
-        &py::detail::Helpers<Type>::get_cond_lens_ti_beta,
-        &py::detail::Helpers<Type>::set_cond_lens_ti_beta)
-    .def_property("cond_lens_ti_npts", 
-        &py::detail::Helpers<Type>::get_cond_lens_ti_npts,
-        &py::detail::Helpers<Type>::set_cond_lens_ti_npts)
+    .def_property("obj_lens_ti_a", 
+        &py::detail::Helpers<Type>::get_obj_lens_ti_a,
+        &py::detail::Helpers<Type>::set_obj_lens_ti_a)
+    .def_property("obj_lens_ti_sigma", 
+        &py::detail::Helpers<Type>::get_obj_lens_ti_sigma,
+        &py::detail::Helpers<Type>::set_obj_lens_ti_sigma)
+    .def_property("obj_lens_ti_beta", 
+        &py::detail::Helpers<Type>::get_obj_lens_ti_beta,
+        &py::detail::Helpers<Type>::set_obj_lens_ti_beta)
+    .def_property("obj_lens_ti_npts", 
+        &py::detail::Helpers<Type>::get_obj_lens_ti_npts,
+        &py::detail::Helpers<Type>::set_obj_lens_ti_npts)
     .def_property("obj_lens_zero_defocus_type", 
         &py::detail::Helpers<Type>::get_obj_lens_zero_defocus_type,
         &py::detail::Helpers<Type>::set_obj_lens_zero_defocus_type)
