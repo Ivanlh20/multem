@@ -79,7 +79,7 @@ void export_system_configuration(Module m)
         &mt::SystemConfiguration::set_gpu_device)
     .def_property("gpu_nstream", 
         &mt::SystemConfiguration::get_gpu_nstream,
-        &mt::SystemConfiguration::set_gpu_device)
+        &mt::SystemConfiguration::set_gpu_nstream)
     .def(py::pickle(
         &py::detail::Helpers<mt::SystemConfiguration>::getstate,
         &py::detail::Helpers<mt::SystemConfiguration>::setstate))
