@@ -3,7 +3,7 @@ import multem
 import pickle
 
 
-def test_grid_2d():
+def test_eels():
 
     eels = multem.EELS()
     eels.space = "Real"
