@@ -81,7 +81,6 @@ void wrap_amorp_lay_info(Module m)
 
 template <typename Module>
 void export_amorp_lay_info(Module m) {
-  wrap_amorp_lay_info<Module, float>(m);
   wrap_amorp_lay_info<Module, double>(m);
 }
 

@@ -202,7 +202,6 @@ void wrap_output_multislice(Module m)
 
 template <typename Module>
 void export_output_multislice(Module m) {
-  wrap_output_multislice<Module, float>(m);
   wrap_output_multislice<Module, double>(m);
 }
 

@@ -110,7 +110,6 @@ void wrap_scanning(Module m)
 
 template <typename Module>
 void export_scanning(Module m) {
-  wrap_scanning<Module, float>(m);
   wrap_scanning<Module, double>(m);
 }
 

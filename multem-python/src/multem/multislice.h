@@ -21,14 +21,14 @@ namespace py = pybind11;
 template <typename Module, typename T, mt::eDevice dev>
 void wrap_multislice(Module m)
 {
-  typedef mt::MultisliceData<T,dev> Type;
+  /* typedef mt::MultisliceData<T,dev> Type; */
 
-  // Wrap the mt::Input class
-  py::class_<Type>(m, "Multislice")
-    .def(py::init<>())
-    .def("set_input_data", &Type::set_input_data)
-    .def("__call__", &Type::operator())
-    ;
+  /* // Wrap the mt::Input class */
+  /* py::class_<Type>(m, "Multislice") */
+  /*   .def(py::init<>()) */
+  /*   .def("set_input_data", &Type::set_input_data) */
+  /*   .def("__call__", &Type::operator()) */
+  /*   ; */
 }
 
 template <typename Module>
