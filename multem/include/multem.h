@@ -151,58 +151,7 @@ namespace mt {
   };
   
   /****************************************************************************
-   * The Scanning interface
-   ***************************************************************************/
-
-  /**
-   * A proxy for the Scanning class
-   */
-  template <typename T>
-  class ScanningData {
-  public:
-    struct Data;
-
-    ScanningData(const ScanningData&);
-    ScanningData(ScanningData&&);
-    ScanningData(const Data&);
-    ScanningData& operator=(const ScanningData&);
-    ScanningData& operator=(ScanningData&&);
-    ~ScanningData();
-
-    const Data& internal() const;
-
-    eScanning_Type get_type() const;
-    void set_type(eScanning_Type type);
-    
-    bool get_pbc() const;
-    void set_pbc(bool pbc);
-    
-    bool get_spxs() const;
-    void set_spxs(bool spxs);
-    
-    int get_ns() const;
-    void set_ns(int ns);
-
-    T get_x0() const;
-    void set_x0(T x0);
-    
-    T get_y0() const;
-    void set_y0(T y0);
-    
-    T get_xe() const;
-    void set_xe(T xe);
-    
-    T get_ye() const;
-    void set_ye(T ye);
-
-    void set_grid();
-
-  private:
-    std::unique_ptr<Data> impl_;
-  };
-  
-  /****************************************************************************
-   * The Scanning interface
+   * The Detector interface
    ***************************************************************************/
 
   /**
@@ -480,8 +429,8 @@ namespace mt {
     Lens<T>& get_obj_lens() const;
     void set_obj_lens(const Lens<T>& obj_lens);
 
-    ScanningData<T>& get_scanning() const;
-    void set_scanning(const ScanningData<T>& scanning);
+    Scanning<T>& get_scanning() const;
+    void set_scanning(const Scanning<T>& scanning);
 
     DetectorData<T>& get_detector() const;
     void set_detector(const DetectorData<T>& detector);

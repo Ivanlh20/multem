@@ -5,8 +5,7 @@ import pickle
 
 def test_grid_2d():
 
-    input = multem.Input()
-    scanning = input.scanning
+    scanning = multem.Scanning()
     scanning.type = "Line"
     scanning.pbc = True
     scanning.spxs = False
@@ -17,18 +16,18 @@ def test_grid_2d():
     scanning.ye = 0.4
 
     def check():
-        assert input.scanning.type.name == "Line"
-        assert input.scanning.pbc == True
-        assert input.scanning.spxs == False
-        assert input.scanning.ns == 10
-        assert input.scanning.x0 == pytest.approx(0.1)
-        assert input.scanning.y0 == pytest.approx(0.2)
-        assert input.scanning.xe == pytest.approx(0.3)
-        assert input.scanning.ye == pytest.approx(0.4)
+        assert scanning.type.name == "Line"
+        assert scanning.pbc == True
+        assert scanning.spxs == False
+        assert scanning.ns == 10
+        assert scanning.x0 == pytest.approx(0.1)
+        assert scanning.y0 == pytest.approx(0.2)
+        assert scanning.xe == pytest.approx(0.3)
+        assert scanning.ye == pytest.approx(0.4)
 
     check()
 
-    input = pickle.loads(pickle.dumps(input))
+    scanning = pickle.loads(pickle.dumps(scanning))
 
     check()
 

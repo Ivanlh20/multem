@@ -2510,6 +2510,231 @@ namespace mt
 			int n_gpu;
 	};
 
+  /********************************Scanning**********************************/
+	template <class T>
+	struct Scanning
+	{
+		public:
+			using value_type = T;
+			using size_type = std::size_t;
+
+			eScanning_Type type;			// 1: Line, 2: Area,
+			eGrid_Type grid_type;			// 1: regular, 2: quadratic
+			bool pbc;						// periodic boundary conditions
+			bool spxs;						// square pixel size
+			int ns; 						// Number of sampling points
+			int nx;
+			int ny;
+			T x0; 							// Initial scanning position in x
+			T y0; 							// Initial scanning in y
+			T xe; 							// final scanning position in x
+			T ye; 							// final scanning position in y
+			T dRx;
+			T dRy;
+
+      std::vector<T> x;
+      std::vector<T> y;
+      std::vector<T> r;
+
+			size_type size() const
+			{
+				return x.size();
+			}
+
+			Scanning(): type(eST_Line), grid_type(eGT_Regular), pbc(false), spxs(true), ns(1),
+				nx(0), dRx(0), dRy(0), ny(0), x0(0), y0(0), xe(0), ye(0) {};
+
+			template <class TScanning>
+			void assign(TScanning &scanning)
+			{
+				type = scanning.type;
+				grid_type = scanning.grid_type;
+				pbc = scanning.pbc;
+				spxs = scanning.spxs;
+				ns = scanning.ns;
+				nx = scanning.nx;
+				ny = scanning.ny;
+				x0 = scanning.x0;
+				y0 = scanning.y0;
+				xe = scanning.xe;
+				ye = scanning.ye;
+				dRx = scanning.dRx;
+				dRy = scanning.dRy;
+
+				x = scanning.x;
+				y = scanning.y;
+				r = scanning.r;
+			}
+
+			template <class TScanning>
+			Scanning<T>& operator=(TScanning &scanning)
+			{
+				assign(scanning);
+				return *this;
+			}
+
+			void set_default()
+			{
+				type = eST_Line;
+				grid_type = eGT_Regular;
+				pbc = false;
+				spxs = true;
+				ns = 1;
+				x0 = y0 = 0;
+				xe = ye = 0;
+			}
+
+			int nxy() const { return nx*ny; }
+
+			T Rx(const int &ix) const
+			{
+				T x = 0;
+				switch (grid_type)
+				{
+					case eGT_Regular:
+					{
+						x = x0 + ix*dRx;
+					}
+					break;
+					case eGT_Quadratic:
+					{
+						x = x0 + pow(ix*dRx, 2);
+					}
+					break;
+				}
+				return x;
+			}
+
+			T Ry(const int &iy) const
+			{
+				T y = 0;
+				switch (grid_type)
+				{
+					case eGT_Regular:
+					{
+						y = y0 + iy*dRy;
+					}
+					break;
+					case eGT_Quadratic:
+					{
+						y = y0 + pow(iy*dRy, 2);
+					}
+					break;
+				}
+				return y;
+			}
+
+			void set_grid()
+			{
+				if(ns <= 0)
+				{
+					ns = nx = ny = 0;
+					x.clear();
+					y.clear();
+					r.clear();
+					return;
+				}
+
+				nx = ny = ns;
+				if(is_line())
+				{
+					T xu = xe-x0;
+					T yu = ye-y0;
+					T ds = sqrt(yu*yu+xu*xu);
+					T theta = atan2(yu, xu);
+					T cos_theta = cos(theta);
+					cos_theta = (isZero(cos_theta))?0:cos_theta;
+					T sin_theta = sin(theta);
+					theta = (isZero(theta))?0:theta;
+
+					switch (grid_type)
+					{
+						case eGT_Regular:
+						{
+							dRx = ds*cos_theta/((pbc)?ns:(ns-1));
+							dRy = ds*sin_theta/((pbc)?ns:(ns-1));
+						}
+						break;
+						case eGT_Quadratic:
+						{
+							dRx = sqrt(ds*cos_theta)/((pbc)?ns:(ns-1));
+							dRy = sqrt(ds*sin_theta)/((pbc)?ns:(ns-1));
+						}
+						break;
+					}
+
+					x.resize(ns);
+					y.resize(ns);
+					r.resize(ns);
+
+					for(auto i = 0; i < ns; i++)
+					{
+						x[i] = Rx(i);
+						y[i] = Ry(i);
+						r[i] = sqrt(pow(x[i]-x0, 2)+pow(y[i]-y0, 2));
+					}
+				}
+				else
+				{
+					T xu = xe-x0;
+					T yu = ye-y0;
+					if(fabs(xu)>fabs(yu))
+					{
+						dRx = xu/((pbc)?ns:(ns-1));
+						dRy = std::copysign(dRx, yu);
+						ny = int(floor(yu/dRy+Epsilon<T>::rel+0.5));
+						ny += (pbc)?0:1;
+
+						if (!spxs)
+						{
+							dRy = yu/((pbc)?ny:(ny-1));
+						}
+					}
+					else
+					{
+						dRy = yu/((pbc)?ns:(ns-1));
+						dRx = std::copysign(dRy, xu);
+						nx = int(floor(xu/dRx+Epsilon<T>::rel+0.5));
+						nx += (pbc)?0:1;
+
+						if (!spxs)
+						{
+							dRx = xu/((pbc)?nx:(nx-1));
+						}
+					}
+
+					x.resize(nxy());
+					y.resize(nxy());
+
+					for(auto ix = 0; ix<nx; ix++)
+					{
+						for(auto iy = 0; iy<ny; iy++)
+						{
+							x[ix*ny+iy] = Rx(ix);
+							y[ix*ny+iy] = Ry(iy);
+						}
+					}
+				}
+
+				x.shrink_to_fit();
+				y.shrink_to_fit();
+				r.shrink_to_fit();
+			}
+
+			bool is_line() const
+			{
+				return type == eST_Line;
+			}
+
+			bool is_area() const
+			{
+				return type == eST_Area;
+			}
+
+		private:
+	};
+
+
 	/************************regions*************************/
 	template <class TVector>
 	struct Region
