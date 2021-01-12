@@ -145,6 +145,8 @@ namespace mt {
   public:
     struct Data;
 
+    typedef std::size_t size_type;
+
     /* AtomData(); */
     AtomData(const AtomData&);
     AtomData(AtomData&&);
@@ -198,6 +200,9 @@ namespace mt {
     void set_spec_atoms(const std::vector<Atom<T>>& spec_atoms);
   
     void get_statistic();
+    void clear();
+    bool empty() const;
+    size_type size() const;
   
   private:
     std::unique_ptr<Data> impl_;
@@ -247,6 +252,8 @@ namespace mt {
     
     T get_ye() const;
     void set_ye(T ye);
+
+    void set_grid();
 
   private:
     std::unique_ptr<Data> impl_;
@@ -585,6 +592,90 @@ namespace mt {
     void set_incident_wave_type(eIncident_Wave_Type iw_type);
 
     void validate_parameters();
+
+		bool is_multislice() const;
+		bool is_phase_object() const;
+		bool is_weak_phase_object() const;
+		bool is_still_atom() const;
+		bool is_absorptive_model() const;
+		bool is_frozen_phonon() const;
+		bool is_frozen_phonon_single_conf() const;
+		bool is_whole_spec() const;
+		bool is_through_slices() const;
+		bool is_through_thick() const;
+		bool is_slicing_by_planes() const;
+		bool is_slicing_by_dz() const;
+		bool is_subslicing() const;
+		bool is_subslicing_whole_spec() const;
+		bool is_plane_wave() const;
+		bool is_convergent_wave() const;
+		bool is_user_define_wave() const;
+		bool is_STEM() const;
+		bool is_ISTEM() const;
+		bool is_CBED() const;
+		bool is_CBEI() const;
+		bool is_ED() const;
+		bool is_HRTEM() const;
+		bool is_PED() const;
+		bool is_HCTEM() const;
+		bool is_EWFS() const;
+		bool is_EWRS() const;
+		bool is_EWFS_SC() const;
+		bool is_EWRS_SC() const;
+		bool is_EELS() const;
+		bool is_EFTEM() const;
+		bool is_IWFS() const;
+		bool is_IWRS() const;
+		bool is_PPFS() const;
+		bool is_PPRS() const;
+		bool is_TFFS() const;
+		bool is_TFRS() const;
+		bool is_PropFS() const;
+		bool is_PropRS() const;
+		bool is_STEM_ISTEM() const;
+		bool is_CBED_CBEI() const;
+		bool is_ED_HRTEM() const;
+		bool is_PED_HCTEM() const;
+		bool is_EWFS_EWRS() const;
+		bool is_EWFS_EWRS_SC() const;
+		bool is_EELS_EFTEM() const;
+		bool is_IWFS_IWRS() const;
+		bool is_PPFS_PPRS() const;
+		bool is_TFFS_TFRS() const;
+		bool is_PropFS_PropRS() const;
+		bool is_grid_FS() const;
+		bool is_grid_RS() const;
+		bool is_simulation_type_FS() const;
+		bool is_simulation_type_RS() const;
+		bool is_specimen_required() const;
+		bool is_ISTEM_CBEI_HRTEM_HCTEM_EFTEM() const;
+		bool is_CBED_ED_EWFS_PED() const;
+		bool is_obj_lens_temp_spat() const;
+		bool is_cond_lens_temp_spat() const;
+		bool is_scanning() const;
+		bool is_illu_mod_coherent() const;
+		bool is_illu_mod_partial_coherent() const;
+		bool is_illu_mod_trans_cross_coef() const;
+		bool is_illu_mod_full_integration() const;
+		bool is_incoh_temporal_spatial() const;
+		bool is_incoh_temporal() const;
+		bool is_incoh_spatial() const;
+		bool is_detector_circular() const;
+		bool is_detector_radial() const;
+		bool is_detector_matrix() const;
+		bool is_slice_storage() const;
+		bool is_operation_mode_normal() const;
+		bool is_operation_mode_advanced() const;
+		bool is_lvt_off() const;
+		bool is_lvt_m() const;
+		bool is_lvt_Cs3() const;
+		bool is_lvt_Cs5() const;
+		bool is_lvt_mfa2() const;
+		bool is_lvt_afa2() const;
+		bool is_lvt_mfa3() const;
+		bool is_lvt_afa3() const;
+		bool is_lvt_inner_aper_ang() const;
+		bool is_lvt_outer_aper_ang() const;
 
   private:
     std::unique_ptr<Data> impl_;

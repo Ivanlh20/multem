@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <multem.h>
+#include <multem/error.h>
 #include <types.cuh>
 #include <input_multislice.cuh>
 #include <output_multislice.hpp>
@@ -386,6 +387,21 @@ namespace mt {
     impl_->data.get_statistic();
   }
   
+  template <typename T>
+  void AtomData<T>::clear() {
+    impl_->data.clear();
+  }
+  
+  template <typename T>
+  bool AtomData<T>::empty() const {
+    return impl_->data.empty();
+  }
+  
+  template <typename T>
+  AtomData<T>::size_type AtomData<T>::size() const {
+    return impl_->data.size();
+  }
+    
   /****************************************************************************
    * The Scanning interface
    ***************************************************************************/
@@ -517,6 +533,11 @@ namespace mt {
   template <typename T>
   void ScanningData<T>::set_ye(T ye) {
     impl_->data.ye = ye;
+  }
+
+  template <typename T>
+  void ScanningData<T>::set_grid() {
+    return impl_->data.set_grid();
   }
   
   /****************************************************************************
@@ -1294,6 +1315,421 @@ namespace mt {
     impl_->data.validate_parameters();
   }
 
+  template <typename T>
+  bool Input<T>::is_multislice() const {
+    return impl_->data.is_multislice();
+  }
+
+  template <typename T>
+  bool Input<T>::is_phase_object() const {
+    return impl_->data.is_phase_object();
+  }
+
+  template <typename T>
+  bool Input<T>::is_weak_phase_object() const {
+    return impl_->data.is_weak_phase_object();
+  }
+
+  template <typename T>
+  bool Input<T>::is_still_atom() const {
+    return impl_->data.is_still_atom();
+  }
+
+  template <typename T>
+  bool Input<T>::is_absorptive_model() const {
+    return impl_->data.is_absorptive_model();
+  }
+
+  template <typename T>
+  bool Input<T>::is_frozen_phonon() const {
+    return impl_->data.is_frozen_phonon();
+  }
+
+  template <typename T>
+  bool Input<T>::is_frozen_phonon_single_conf() const {
+    return impl_->data.is_frozen_phonon_single_conf();
+  }
+
+  template <typename T>
+  bool Input<T>::is_whole_spec() const {
+    return impl_->data.is_whole_spec();
+  }
+
+  template <typename T>
+  bool Input<T>::is_through_slices() const {
+    return impl_->data.is_through_slices();
+  }
+
+  template <typename T>
+  bool Input<T>::is_through_thick() const {
+    return impl_->data.is_through_thick();
+  }
+
+  template <typename T>
+  bool Input<T>::is_slicing_by_planes() const {
+    return impl_->data.is_slicing_by_planes();
+  }
+
+  template <typename T>
+  bool Input<T>::is_slicing_by_dz() const {
+    return impl_->data.is_slicing_by_dz();
+  }
+
+  template <typename T>
+  bool Input<T>::is_subslicing() const {
+    return impl_->data.is_subslicing();
+  }
+
+  template <typename T>
+  bool Input<T>::is_subslicing_whole_spec() const {
+    return impl_->data.is_subslicing_whole_spec();
+  }
+
+  template <typename T>
+  bool Input<T>::is_plane_wave() const {
+    return impl_->data.is_plane_wave();
+  }
+
+  template <typename T>
+  bool Input<T>::is_convergent_wave() const {
+    return impl_->data.is_convergent_wave();
+  }
+
+  template <typename T>
+  bool Input<T>::is_user_define_wave() const {
+    return impl_->data.is_user_define_wave();
+  }
+
+  template <typename T>
+  bool Input<T>::is_STEM() const {
+    return impl_->data.is_STEM();
+  }
+
+  template <typename T>
+  bool Input<T>::is_ISTEM() const {
+    return impl_->data.is_ISTEM();
+  }
+
+  template <typename T>
+  bool Input<T>::is_CBED() const {
+    return impl_->data.is_CBED();
+  }
+
+  template <typename T>
+  bool Input<T>::is_CBEI() const {
+    return impl_->data.is_CBEI();
+  }
+
+  template <typename T>
+  bool Input<T>::is_ED() const {
+    return impl_->data.is_ED();
+  }
+
+  template <typename T>
+  bool Input<T>::is_HRTEM() const {
+    return impl_->data.is_HRTEM();
+  }
+
+  template <typename T>
+  bool Input<T>::is_PED() const {
+    return impl_->data.is_PED();
+  }
+
+  template <typename T>
+  bool Input<T>::is_HCTEM() const {
+    return impl_->data.is_HCTEM();
+  }
+
+  template <typename T>
+  bool Input<T>::is_EWFS() const {
+    return impl_->data.is_EWFS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_EWRS() const {
+    return impl_->data.is_EWRS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_EWFS_SC() const {
+    return impl_->data.is_EWFS_SC();
+  }
+
+  template <typename T>
+  bool Input<T>::is_EWRS_SC() const {
+    return impl_->data.is_EWRS_SC();
+  }
+
+  template <typename T>
+  bool Input<T>::is_EELS() const {
+    return impl_->data.is_EELS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_EFTEM() const {
+    return impl_->data.is_EFTEM();
+  }
+
+  template <typename T>
+  bool Input<T>::is_IWFS() const {
+    return impl_->data.is_IWFS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_IWRS() const {
+    return impl_->data.is_IWRS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_PPFS() const {
+    return impl_->data.is_PPFS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_PPRS() const {
+    return impl_->data.is_PPRS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_TFFS() const {
+    return impl_->data.is_TFFS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_TFRS() const {
+    return impl_->data.is_TFRS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_PropFS() const {
+    return impl_->data.is_PropFS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_PropRS() const {
+    return impl_->data.is_PropRS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_STEM_ISTEM() const {
+    return impl_->data.is_STEM_ISTEM();
+  }
+
+  template <typename T>
+  bool Input<T>::is_CBED_CBEI() const {
+    return impl_->data.is_CBED_CBEI();
+  }
+
+  template <typename T>
+  bool Input<T>::is_ED_HRTEM() const {
+    return impl_->data.is_ED_HRTEM();
+  }
+
+  template <typename T>
+  bool Input<T>::is_PED_HCTEM() const {
+    return impl_->data.is_PED_HCTEM();
+  }
+
+  template <typename T>
+  bool Input<T>::is_EWFS_EWRS() const {
+    return impl_->data.is_EWFS_EWRS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_EWFS_EWRS_SC() const {
+    return impl_->data.is_EWFS_EWRS_SC();
+  }
+
+  template <typename T>
+  bool Input<T>::is_EELS_EFTEM() const {
+    return impl_->data.is_EELS_EFTEM();
+  }
+
+  template <typename T>
+  bool Input<T>::is_IWFS_IWRS() const {
+    return impl_->data.is_IWFS_IWRS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_PPFS_PPRS() const {
+    return impl_->data.is_PPFS_PPRS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_TFFS_TFRS() const {
+    return impl_->data.is_TFFS_TFRS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_PropFS_PropRS() const {
+    return impl_->data.is_PropFS_PropRS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_grid_FS() const {
+    return impl_->data.is_grid_FS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_grid_RS() const {
+    return impl_->data.is_grid_RS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_simulation_type_FS() const {
+    return impl_->data.is_simulation_type_FS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_simulation_type_RS() const {
+    return impl_->data.is_simulation_type_RS();
+  }
+
+  template <typename T>
+  bool Input<T>::is_specimen_required() const {
+    return impl_->data.is_specimen_required();
+  }
+
+  template <typename T>
+  bool Input<T>::is_ISTEM_CBEI_HRTEM_HCTEM_EFTEM() const {
+    return impl_->data.is_ISTEM_CBEI_HRTEM_HCTEM_EFTEM();
+  }
+
+  template <typename T>
+  bool Input<T>::is_CBED_ED_EWFS_PED() const {
+    return impl_->data.is_CBED_ED_EWFS_PED();
+  }
+
+  template <typename T>
+  bool Input<T>::is_obj_lens_temp_spat() const {
+    return impl_->data.is_obj_lens_temp_spat();
+  }
+
+  template <typename T>
+  bool Input<T>::is_cond_lens_temp_spat() const {
+    return impl_->data.is_cond_lens_temp_spat();
+  }
+
+  template <typename T>
+  bool Input<T>::is_scanning() const {
+    return impl_->data.is_scanning();
+  }
+
+  template <typename T>
+  bool Input<T>::is_illu_mod_coherent() const {
+    return impl_->data.is_illu_mod_coherent();
+  }
+
+  template <typename T>
+  bool Input<T>::is_illu_mod_partial_coherent() const {
+    return impl_->data.is_illu_mod_partial_coherent();
+  }
+
+  template <typename T>
+  bool Input<T>::is_illu_mod_trans_cross_coef() const {
+    return impl_->data.is_illu_mod_trans_cross_coef();
+  }
+
+  template <typename T>
+  bool Input<T>::is_illu_mod_full_integration() const {
+    return impl_->data.is_illu_mod_full_integration();
+  }
+
+  template <typename T>
+  bool Input<T>::is_incoh_temporal_spatial() const {
+    return impl_->data.is_incoh_temporal_spatial();
+  }
+
+  template <typename T>
+  bool Input<T>::is_incoh_temporal() const {
+    return impl_->data.is_incoh_temporal();
+  }
+
+  template <typename T>
+  bool Input<T>::is_incoh_spatial() const {
+    return impl_->data.is_incoh_spatial();
+  }
+
+  template <typename T>
+  bool Input<T>::is_detector_circular() const {
+    return impl_->data.is_detector_circular();
+  }
+
+  template <typename T>
+  bool Input<T>::is_detector_radial() const {
+    return impl_->data.is_detector_radial();
+  }
+
+  template <typename T>
+  bool Input<T>::is_detector_matrix() const {
+    return impl_->data.is_detector_matrix();
+  }
+
+  template <typename T>
+  bool Input<T>::is_slice_storage() const {
+    return impl_->data.is_slice_storage();
+  }
+
+  template <typename T>
+  bool Input<T>::is_operation_mode_normal() const {
+    return impl_->data.is_operation_mode_normal();
+  }
+
+  template <typename T>
+  bool Input<T>::is_operation_mode_advanced() const {
+    return impl_->data.is_operation_mode_advanced();
+  }
+
+  template <typename T>
+  bool Input<T>::is_lvt_off() const {
+    return impl_->data.is_lvt_off();
+  }
+
+  template <typename T>
+  bool Input<T>::is_lvt_m() const {
+    return impl_->data.is_lvt_m();
+  }
+
+  template <typename T>
+  bool Input<T>::is_lvt_Cs3() const {
+    return impl_->data.is_lvt_Cs3();
+  }
+
+  template <typename T>
+  bool Input<T>::is_lvt_Cs5() const {
+    return impl_->data.is_lvt_Cs5();
+  }
+
+  template <typename T>
+  bool Input<T>::is_lvt_mfa2() const {
+    return impl_->data.is_lvt_mfa2();
+  }
+
+  template <typename T>
+  bool Input<T>::is_lvt_afa2() const {
+    return impl_->data.is_lvt_afa2();
+  }
+
+  template <typename T>
+  bool Input<T>::is_lvt_mfa3() const {
+    return impl_->data.is_lvt_mfa3();
+  }
+
+  template <typename T>
+  bool Input<T>::is_lvt_afa3() const {
+    return impl_->data.is_lvt_afa3();
+  }
+
+  template <typename T>
+  bool Input<T>::is_lvt_inner_aper_ang() const {
+    return impl_->data.is_lvt_inner_aper_ang();
+  }
+
+  template <typename T>
+  bool Input<T>::is_lvt_outer_aper_ang() const {
+    return impl_->data.is_lvt_outer_aper_ang();
+  }
+
   /****************************************************************************
    * The Output interface
    ***************************************************************************/
@@ -1683,6 +2119,9 @@ namespace mt {
     template <typename T, eDevice dev>
     mt::Output<T> tem_simulation_internal(Input<T>& input_multislice) {
 
+      // Ensure we have the correct function
+      MULTEM_ASSERT(input_multislice.get_system_conf().get_device() == dev);
+
       // Initialise the stream and plan
       mt::Stream<dev> stream(input_multislice.get_system_conf().get_nstream());
       mt::FFT<T, dev> fft_2d;
@@ -1735,6 +2174,11 @@ namespace mt {
   /****************************************************************************
    * Explict instantiation of template classes and functions
    ***************************************************************************/
+  template class Lens<float>;
+  template class Lens<double>;
+  
+  template class EELS<float>;
+  template class EELS<double>;
 
   template class AtomData<float>;
   template class AtomData<double>;

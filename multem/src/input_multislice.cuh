@@ -1321,52 +1321,52 @@ namespace mt
 		/**************************************************************************************/
 		bool is_lvt_off() const
 		{
-			return cdl_var == eLVT_off;
+			return cdl_var_type == eLVT_off;
 		}
 
 		bool is_lvt_m() const
 		{
-			return cdl_var == eLVT_m;
+			return cdl_var_type == eLVT_m;
 		}
 
 		bool is_lvt_Cs3() const
 		{
-			return cdl_var == eLVT_Cs3;
+			return cdl_var_type == eLVT_Cs3;
 		}
 
 		bool is_lvt_Cs5() const
 		{
-			return cdl_var == eLVT_Cs5;
+			return cdl_var_type == eLVT_Cs5;
 		}
 
 		bool is_lvt_mfa2() const
 		{
-			return cdl_var == eLVT_mfa2;
+			return cdl_var_type == eLVT_mfa2;
 		}
 
 		bool is_lvt_afa2() const
 		{
-			return cdl_var == eLVT_afa2;
+			return cdl_var_type == eLVT_afa2;
 		}
 
 		bool is_lvt_mfa3() const
 		{
-			return cdl_var == eLVT_mfa3;
+			return cdl_var_type == eLVT_mfa3;
 		}
 
 		bool is_lvt_afa3() const
 		{
-			return cdl_var == eLVT_afa3;
+			return cdl_var_type == eLVT_afa3;
 		}
 
 		bool is_lvt_inner_aper_ang() const
 		{
-			return cdl_var == eLVT_inner_aper_ang;
+			return cdl_var_type == eLVT_inner_aper_ang;
 		}
 
 		bool is_lvt_outer_aper_ang() const
 		{
-			return cdl_var == eLVT_outer_aper_ang;
+			return cdl_var_type == eLVT_outer_aper_ang;
 		}
 
 	};
