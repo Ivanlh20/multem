@@ -36,64 +36,6 @@
 namespace mt {
 
   /****************************************************************************
-   * The SystemConfiguration interface
-   ***************************************************************************/
-
-  /**
-   * A proxy for the System_Configuration class
-   */
-  class SystemConfiguration {
-  public:
-    struct Data;
-
-    SystemConfiguration();
-    SystemConfiguration(const SystemConfiguration&);
-    SystemConfiguration(SystemConfiguration&&);
-    SystemConfiguration(const Data&);
-    SystemConfiguration& operator=(const SystemConfiguration&);
-    SystemConfiguration& operator=(SystemConfiguration&&);
-    ~SystemConfiguration();
-
-    const SystemConfiguration::Data& internal() const;
-
-    void set_precision(ePrecision precision);
-    ePrecision get_precision() const;
-
-    void set_device(eDevice device);
-    eDevice get_device() const;
-
-    void set_cpu_ncores(int cpu_ncores);
-    int get_cpu_ncores() const;
-
-    void set_cpu_nthread(int cpu_nthread);
-    int get_cpu_nthread() const;
-
-    void set_gpu_device(int gpu_device);
-    int get_gpu_device() const;
-
-    void set_gpu_nstream(int gpu_nstream);
-    int get_gpu_nstream() const;
-
-    void set_nstream(int nstream);
-    int get_nstream() const;
-
-    void set_active(bool active);
-    bool get_active() const;
-
-    bool is_host() const;
-    bool is_device() const;
-    bool is_float() const;
-    bool is_double() const;
-    bool is_float_host() const;
-    bool is_double_host() const;
-    bool is_float_device() const;
-    bool is_double_device() const;
-
-  private:
-    std::unique_ptr<Data> impl_;
-  };
-  
-  /****************************************************************************
    * The Atom_Data interface
    ***************************************************************************/
 
@@ -433,8 +375,8 @@ namespace mt {
 
     Data& internal();
 
-    SystemConfiguration get_system_conf() const;
-    void set_system_conf(const SystemConfiguration& system_conf);
+    System_Configuration& get_system_conf() const;
+    void set_system_conf(const System_Configuration& system_conf);
 
     eElec_Spec_Int_Model get_interaction_model() const;
     void set_interaction_model(eElec_Spec_Int_Model interaction_model);

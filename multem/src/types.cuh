@@ -85,6 +85,121 @@ namespace mt
 	//	}
 	//}
 
+	/************************Host device configuration************************/
+
+
+  System_Configuration::System_Configuration()
+    : precision(eP_double), 
+      device(e_host), 
+      cpu_ncores(1),
+			cpu_nthread(1), 
+      gpu_device(0), 
+      gpu_nstream(1), 
+      nstream(1), 
+      active(true) {};
+
+  void System_Configuration::validate_parameters()
+  {
+    // check precision
+    if(!(is_float() || is_double()))
+    {
+      precision = eP_float;
+    }
+
+    // check cpu or gpu
+    if(!(is_host() || is_device()))
+    {
+      device = e_host;
+    }
+    if(is_device())
+    {
+      #ifdef __CUDACC__
+        if(!is_gpu_available())
+        {
+          device = mt::e_host;
+          n_gpu = 0;
+        }
+        else
+        {
+          n_gpu = number_of_gpu_available();
+          gpu_device = min(max(0, gpu_device), n_gpu-1);
+        }
+      #endif
+    }
+
+    cpu_nthread = max(1, cpu_nthread);
+    gpu_nstream = max(1, gpu_nstream);
+    nstream = (is_host())?cpu_nthread:gpu_nstream;
+  }
+
+  void System_Configuration::set_device()
+  {
+    if(is_device())
+    {
+      #ifdef __CUDACC__
+        cudaSetDevice(gpu_device);
+      #endif
+    }
+    else
+    {
+
+      device = mt::e_host;
+    }
+  }
+
+  int System_Configuration::get_device()
+  {
+    int idx_dev = -1;
+    if(is_device())
+    {
+      #ifdef __CUDACC__
+        cudaGetDevice(&idx_dev);
+      #endif
+    }
+
+    return idx_dev;
+  }
+
+  bool System_Configuration::is_host() const
+  {
+    return device == mt::e_host;
+  }
+
+  bool System_Configuration::is_device() const
+  {
+    return device == mt::e_device;
+  }
+
+  bool System_Configuration::is_float() const
+  {
+    return precision == mt::eP_float;
+  }
+
+  bool System_Configuration::is_double() const
+  {
+    return precision == mt::eP_double;
+  }
+
+  bool System_Configuration::is_float_host() const
+  {
+    return is_float() && is_host();
+  }
+
+  bool System_Configuration::is_double_host() const
+  {
+    return is_double() && is_host();
+  }
+
+  bool System_Configuration::is_float_device() const
+  {
+    return is_float() && is_device();
+  }
+
+  bool System_Configuration::is_double_device() const
+  {
+    return is_double() && is_device();
+  }
+
 	/*******************forward declarations********************/
 	template <class T>
 	struct is_fundamental;

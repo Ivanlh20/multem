@@ -91,7 +91,7 @@ namespace pybind11 { namespace detail {
      */
     static mt::Input<T> setstate(py::tuple obj) {
       mt::Input<T> self;
-      self.set_system_conf(obj[0].cast<mt::SystemConfiguration>());
+      self.set_system_conf(obj[0].cast<mt::System_Configuration>());
       self.set_interaction_model(obj[1].cast<mt::eElec_Spec_Int_Model>());
       self.set_potential_type(obj[2].cast<mt::ePotential_Type>());
       self.set_pn_model(obj[3].cast<mt::ePhonon_Model>());
