@@ -21,39 +21,41 @@ namespace py = pybind11;
 namespace pybind11 { namespace detail {
   
   /**
-   * Define wrapper function for the mt::ScanningData class
+   * Define wrapper function for the mt::Scanning class
    */
   template <>
   template <typename T>
-  struct Helpers <mt::ScanningData<T>> {
+  struct Helpers <mt::Scanning<T>> {
 
     /**
      * Get the state
      */
-    static py::tuple getstate(const mt::ScanningData<T> &self) {
+    static py::tuple getstate(const mt::Scanning<T> &self) {
       return py::make_tuple(
-          self.get_type(),
-          self.get_pbc(),
-          self.get_spxs(),
-          self.get_ns(),
-          self.get_x0(),
-          self.get_y0(),
-          self.get_xe(),
-          self.get_ye());
+          self.type,
+          self.pbc,
+          self.spxs,
+          self.ns,
+          self.x0,
+          self.y0,
+          self.xe,
+          self.ye);
     }
 
     /**
      * Set the state
      */
-    static void setstate(mt::ScanningData<T> &self, py::tuple obj) {
-      self.set_type(obj[0].cast<mt::eScanning_Type>());
-      self.set_pbc(obj[1].cast<bool>());
-      self.set_spxs(obj[2].cast<bool>());
-      self.set_ns(obj[3].cast<int>());
-      self.set_x0(obj[4].cast<T>());
-      self.set_y0(obj[5].cast<T>());
-      self.set_xe(obj[6].cast<T>());
-      self.set_ye(obj[7].cast<T>());
+    static mt::Scanning<T> setstate(py::tuple obj) {
+      mt::Scanning<T> self;
+      self.type = obj[0].cast<mt::eScanning_Type>();
+      self.pbc = obj[1].cast<bool>();
+      self.spxs = obj[2].cast<bool>();
+      self.ns = obj[3].cast<int>();
+      self.x0 = obj[4].cast<T>();
+      self.y0 = obj[5].cast<T>();
+      self.xe = obj[6].cast<T>();
+      self.ye = obj[7].cast<T>();
+      return self;
     }
 
   };
@@ -64,42 +66,22 @@ namespace pybind11 { namespace detail {
 template <typename T>
 void wrap_scanning(py::module_ m)
 {
-  typedef mt::ScanningData<T> Type;
+  typedef mt::Scanning<T> Type;
 
   // Wrap the mt::Input class
   py::class_<Type>(m, "Scanning")
-    .def_property(
-        "type",
-        &Type::get_type,
-        &Type::set_type)
-    .def_property(
-        "pbc",
-        &Type::get_pbc,
-        &Type::set_pbc)
-    .def_property(
-        "spxs",
-        &Type::get_spxs,
-        &Type::set_spxs)
-    .def_property(
-        "ns",
-        &Type::get_ns,
-        &Type::set_ns)
-    .def_property(
-        "x0",
-        &Type::get_x0,
-        &Type::set_x0)
-    .def_property(
-        "y0",
-        &Type::get_y0,
-        &Type::set_y0)
-    .def_property(
-        "xe",
-        &Type::get_xe,
-        &Type::set_xe)
-    .def_property(
-        "ye",
-        &Type::get_ye,
-        &Type::set_ye)
+    .def(py::init<>())
+    .def_readwrite("type", &Type::type)
+    .def_readwrite("pbc", &Type::pbc)
+    .def_readwrite("spxs", &Type::spxs)
+    .def_readwrite("ns", &Type::ns)
+    .def_readwrite("x0", &Type::x0)
+    .def_readwrite("y0", &Type::y0)
+    .def_readwrite("xe", &Type::xe)
+    .def_readwrite("ye", &Type::ye)
+    .def(py::pickle(
+        &py::detail::Helpers<Type>::getstate,
+        &py::detail::Helpers<Type>::setstate))
     ;
 }
 

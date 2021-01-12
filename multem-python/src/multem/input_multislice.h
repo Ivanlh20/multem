@@ -67,7 +67,7 @@ namespace pybind11 { namespace detail {
         self.get_temporal_spatial_incoh(),
         self.get_cond_lens(),
         self.get_obj_lens(),
-        Helpers<mt::ScanningData<T>>::getstate(self.get_scanning()),
+        self.get_scanning(),
         Helpers<mt::DetectorData<T>>::getstate(self.get_detector()),
         self.get_eels_fr(),
         self.get_operation_mode(),
@@ -126,7 +126,7 @@ namespace pybind11 { namespace detail {
       self.set_temporal_spatial_incoh(obj[32].cast<mt::eTemporal_Spatial_Incoh>());
       self.set_cond_lens(obj[33].cast<mt::Lens<T>>());
       self.set_obj_lens(obj[34].cast<mt::Lens<T>>());
-      Helpers<mt::ScanningData<T>>::setstate(self.get_scanning(), obj[35]);
+      self.set_scanning(obj[35].cast<mt::Scanning<T>>());
       Helpers<mt::DetectorData<T>>::setstate(self.get_detector(), obj[36]);
       self.set_eels_fr(obj[37].cast<mt::EELS<T>>());
       self.set_operation_mode(obj[38].cast<mt::eOperation_Mode>());
@@ -1107,82 +1107,82 @@ namespace pybind11 { namespace detail {
 
     static
     mt::eScanning_Type get_scanning_type(const mt::Input<T>& self) {
-      return self.get_scanning().get_type();
+      return self.get_scanning().type;
     }
 
     static
     void set_scanning_type(mt::Input<T>& self, mt::eScanning_Type scanning_type) {
-      self.get_scanning().set_type(scanning_type);
+      self.get_scanning().type = scanning_type;
     }
 
     static
     bool get_scanning_periodic(const mt::Input<T>& self) {
-      return self.get_scanning().get_pbc();
+      return self.get_scanning().pbc;
     }
 
     static
     void set_scanning_periodic(mt::Input<T>& self, bool scanning_periodic) {
-      self.get_scanning().set_pbc(scanning_periodic);
+      self.get_scanning().pbc = scanning_periodic;
     }
 
     static
     bool get_scanning_square(const mt::Input<T>& self) {
-      return self.get_scanning().get_spxs();
+      return self.get_scanning().spxs;
     }
 
     static
     void set_scanning_square(mt::Input<T>& self, bool scanning_square) {
-      self.get_scanning().set_spxs(scanning_square);
+      self.get_scanning().spxs = scanning_square;
     }
 
     static
     int get_scanning_ns(const mt::Input<T>& self) {
-      return self.get_scanning().get_ns();
+      return self.get_scanning().ns;
     }
 
     static
     void set_scanning_ns(mt::Input<T>& self, int scanning_ns) {
-      self.get_scanning().set_ns(scanning_ns);
+      self.get_scanning().ns = scanning_ns;
     }
 
     static
     T get_scanning_x0(const mt::Input<T>& self) {
-      return self.get_scanning().get_x0();
+      return self.get_scanning().x0;
     }
 
     static
     void set_scanning_x0(mt::Input<T>& self, T scanning_x0) {
-      self.get_scanning().set_x0(scanning_x0);
+      self.get_scanning().x0 = scanning_x0;
     }
 
     static
     T get_scanning_y0(const mt::Input<T>& self) {
-      return self.get_scanning().get_y0();
+      return self.get_scanning().y0;
     }
 
     static
     void set_scanning_y0(mt::Input<T>& self, T scanning_y0) {
-      self.get_scanning().set_y0(scanning_y0);
+      self.get_scanning().y0 = scanning_y0;
     }
 
     static
     T get_scanning_xe(const mt::Input<T>& self) {
-      return self.get_scanning().get_xe();
+      return self.get_scanning().xe;
     }
 
     static
     void set_scanning_xe(mt::Input<T>& self, T scanning_xe) {
-      self.get_scanning().set_xe(scanning_xe);
+      self.get_scanning().xe = scanning_xe;
     }
 
     static
     T get_scanning_ye(const mt::Input<T>& self) {
-      return self.get_scanning().get_ye();
+      return self.get_scanning().ye;
     }
 
     static
     void set_scanning_ye(mt::Input<T>& self, T scanning_ye) {
-      self.get_scanning().set_ye(scanning_ye);
+      self.get_scanning().ye = scanning_ye;
     }
 
     static
