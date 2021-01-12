@@ -858,13 +858,13 @@ namespace mt
 		T *c3;
 	};
 
-	template <class T, eDevice dev>
-	struct Detector
-	{
-		using value_type = T;
+  template <typename T>
+  struct Detector<T, e_device> {
+		
+    using value_type = T;
 		using size_type = std::size_t;
 
-		static const eDevice device = dev;
+		static const eDevice device = e_device;
 
 		Detector(): type(eDT_Circular){}
 
@@ -955,7 +955,7 @@ namespace mt
 		}
 
 		template <class TDetector>
-		Detector<T, dev>& operator=(TDetector &detector)
+		Detector<T, e_device>& operator=(TDetector &detector)
 		{
 			assign(detector);
 			return *this;
@@ -975,17 +975,19 @@ namespace mt
 		{
 			return mt::is_detector_matrix(type);
 		}
-
-		eDetector_Type type;					// eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
-		Vector<T, e_host> g_inner;				// Inner aperture Ang^-1
-		Vector<T, e_host> g_outer;				// Outer aperture Ang^-1
-		Vector<Vector<T, dev>, e_host> fx;		// radial sensitivity value
-		Vector<Vector<T, dev>, e_host> fR;		// 2D sensitivity value
+		
+    eDetector_Type type;					// eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
+    std::vector<T> g_inner;				// Inner aperture Ang^-1
+    std::vector<T> g_outer;				// Outer aperture Ang^-1
+    std::vector<Vector<T, e_device>> fx;		// radial sensitivity value
+    std::vector<Vector<T, e_device>> fR;		// 2D sensitivity value
 		std::vector<Grid_2d<T>> grid_1d;		// grid_1d
 		std::vector<Grid_2d<T>> grid_2d;		// grid_2d
 		std::vector<std::string> fn;			// file names
-	};
-	
+    
+  };
+
+
   /********************STEM Intensity***********************/
 	template <class TVector>
 	struct Det_Int

@@ -2509,6 +2509,141 @@ namespace mt
 		private:
 			int n_gpu;
 	};
+	
+  template <class T, eDevice dev>
+	struct Detector
+	{
+	};
+
+  template <typename T>
+  struct Detector<T, e_host> {
+		
+    using value_type = T;
+		using size_type = std::size_t;
+
+		static const eDevice device = e_host;
+
+		Detector(): type(eDT_Circular){}
+
+		size_type size() const
+		{
+			size_type size_out = 0;
+			switch (type)
+			{
+				case eDT_Circular:
+				{
+					size_out = g_inner.size();
+				}
+				break;
+				case eDT_Radial:
+				{
+					size_out = fx.size();
+				}
+					break;
+				case eDT_Matrix:
+				{
+					size_out = fR.size();
+				}
+				break;
+			}
+			return size_out;
+		}
+
+		void clear()
+		{
+			g_inner.clear();
+			g_outer.clear();
+			fx.clear();
+			fR.clear();
+			fn.clear();
+			grid_1d.clear();
+			grid_2d.clear();
+		}
+
+		void resize(const size_type &new_size)
+		{
+			switch (type)
+			{
+				case eDT_Circular:
+				{
+					g_inner.resize(new_size);
+					g_outer.resize(new_size);
+				}
+				break;
+				case eDT_Radial:
+				{
+					fx.resize(new_size);
+					fn.resize(new_size);
+					grid_1d.resize(new_size);
+				}
+					break;
+				case eDT_Matrix:
+				{
+					fR.resize(new_size);
+					fn.resize(new_size);
+					grid_2d.resize(new_size);
+				}
+				break;
+			}
+		}
+
+		template <class TDetector>
+		void assign(TDetector &detector)
+		{
+			type = detector.type;
+			g_inner.assign(detector.g_inner.begin(), detector.g_inner.end());
+			g_outer.assign(detector.g_outer.begin(), detector.g_outer.end());
+
+			fx.resize(detector.fx.size());
+			for(auto i= 0; i<detector.fx.size(); i++)
+			{
+				fx[i].assign(detector.fx[i].begin(), detector.fx[i].end());
+				//fn[i] = detector.fn[i];
+				//grid_1d[i] = detector.grid_1d[i];
+			}
+
+			fR.resize(detector.fR.size());
+			for(auto i= 0; i<detector.fR.size(); i++)
+			{
+				fR[i].assign(detector.fR[i].begin(), detector.fR[i].end());
+				//fn[i] = detector.fn[i];
+				//grid_2d[i] = detector.grid_2d[i];
+			}
+		}
+
+		template <class TDetector>
+		Detector<T, e_host>& operator=(TDetector &detector)
+		{
+			assign(detector);
+			return *this;
+		}
+
+		bool is_detector_circular() const
+		{
+			return mt::is_detector_circular(type);
+		}
+
+		bool is_detector_radial() const
+		{
+			return mt::is_detector_radial(type);
+		}
+
+		bool is_detector_matrix() const
+		{
+			return mt::is_detector_matrix(type);
+		}
+		
+    eDetector_Type type;					// eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
+    std::vector<T> g_inner;				// Inner aperture Ang^-1
+    std::vector<T> g_outer;				// Outer aperture Ang^-1
+    std::vector<std::vector<T>> fx;		// radial sensitivity value
+    std::vector<std::vector<T>> fR;		// 2D sensitivity value
+		std::vector<Grid_2d<T>> grid_1d;		// grid_1d
+		std::vector<Grid_2d<T>> grid_2d;		// grid_2d
+		std::vector<std::string> fn;			// file names
+    std::vector<T> inner_ang;				// Inner aperture 
+    std::vector<T> outer_ang;				// Outer aperture 
+  };
 
   /********************************Scanning**********************************/
 	template <class T>

@@ -68,7 +68,7 @@ namespace pybind11 { namespace detail {
         self.get_cond_lens(),
         self.get_obj_lens(),
         self.get_scanning(),
-        Helpers<mt::DetectorData<T>>::getstate(self.get_detector()),
+        self.get_detector(),
         self.get_eels_fr(),
         self.get_operation_mode(),
         self.get_slice_storage(),
@@ -127,7 +127,7 @@ namespace pybind11 { namespace detail {
       self.set_cond_lens(obj[33].cast<mt::Lens<T>>());
       self.set_obj_lens(obj[34].cast<mt::Lens<T>>());
       self.set_scanning(obj[35].cast<mt::Scanning<T>>());
-      Helpers<mt::DetectorData<T>>::setstate(self.get_detector(), obj[36]);
+      self.set_detector(obj[36].cast<mt::Detector<T, mt::e_host>>());
       self.set_eels_fr(obj[37].cast<mt::EELS<T>>());
       self.set_operation_mode(obj[38].cast<mt::eOperation_Mode>());
       self.set_slice_storage(obj[39].cast<bool>());

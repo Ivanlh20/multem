@@ -6,8 +6,7 @@ import pickle
 
 def test_detector():
 
-    input = multem.Input()
-    detector = input.detector
+    detector = multem.Detector()
     grid_1 = multem.Grid_2d()
     grid_1.nx = 10
     grid_1.ny = 20
@@ -30,7 +29,6 @@ def test_detector():
         grid_2 = multem.Grid_2d()
         grid_2.nx = 11
         grid_2.ny = 21
-        detector = input.detector
         assert detector.type.name == "Matrix"
         assert detector.fx == pytest.approx(numpy.array([ [ 1, 2 ], [ 3, 4 ] ]))
         assert detector.fR == pytest.approx(numpy.array([ [ 2, 3 ], [ 4, 5 ] ]))
@@ -46,7 +44,7 @@ def test_detector():
 
     check()
 
-    input = pickle.loads(pickle.dumps(input))
+    detector = pickle.loads(pickle.dumps(detector))
 
     check()
 

@@ -272,338 +272,6 @@ namespace mt {
   }
     
   /****************************************************************************
-   * The Scanning interface
-   ***************************************************************************/
-
-  template <typename T>
-  struct ScanningData<T>::Data {
-    Scanning<T>& data;
-    Data(Scanning<T>& d)
-      : data(d) {}
-    Data(const Data &other)
-      : data(other.data) {}
-    Data& operator=(const Data &other) {
-      data = other.data;
-      return *this;
-    }
-  };
-
-  template <typename T>
-  ScanningData<T>::ScanningData(const ScanningData& other)
-      : impl_(std::make_unique<Data>(*other.impl_)) {}
-
-  template <typename T>
-  ScanningData<T>::ScanningData(ScanningData&& other) = default;
-
-  template <typename T>
-  ScanningData<T>::ScanningData(const ScanningData<T>::Data& other)
-      : impl_(std::make_unique<Data>(other)) {}
-
-  template <typename T>
-  ScanningData<T>& ScanningData<T>::operator=(const ScanningData<T>& other) {
-    *impl_ = *other.impl_;
-    return *this;
-  }
-
-  template <typename T>
-  ScanningData<T>& ScanningData<T>::operator=(ScanningData<T>&&) = default;
-
-  template <typename T>
-  ScanningData<T>::~ScanningData<T>() = default;
-
-  template <typename T>
-  const ScanningData<T>::Data& ScanningData<T>::internal() const {
-    return *impl_;
-  }
-    
-
-  template <typename T>
-  eScanning_Type ScanningData<T>::get_type() const {
-    return impl_->data.type;
-  }
-
-  template <typename T>
-  void ScanningData<T>::set_type(eScanning_Type type) {
-    impl_->data.type = type;
-  }
-  
-
-  template <typename T>
-  bool ScanningData<T>::get_pbc() const {
-    return impl_->data.pbc;
-  }
-
-  template <typename T>
-  void ScanningData<T>::set_pbc(bool pbc) {
-    impl_->data.pbc = pbc;
-  }
-  
-
-  template <typename T>
-  bool ScanningData<T>::get_spxs() const {
-    return impl_->data.spxs;
-  }
-
-  template <typename T>
-  void ScanningData<T>::set_spxs(bool spxs) {
-    impl_->data.spxs = spxs;
-  }
-  
-
-  template <typename T>
-  int ScanningData<T>::get_ns() const {
-    return impl_->data.ns;
-  }
-
-  template <typename T>
-  void ScanningData<T>::set_ns(int ns) {
-    impl_->data.ns = ns;
-  }
-
-
-  template <typename T>
-  T ScanningData<T>::get_x0() const {
-    return impl_->data.x0;
-  }
-
-  template <typename T>
-  void ScanningData<T>::set_x0(T x0) {
-    impl_->data.x0 = x0;
-  }
-  
-
-  template <typename T>
-  T ScanningData<T>::get_y0() const {
-    return impl_->data.y0;
-  }
-
-  template <typename T>
-  void ScanningData<T>::set_y0(T y0) {
-    impl_->data.y0 = y0;
-  }
-  
-
-  template <typename T>
-  T ScanningData<T>::get_xe() const {
-    return impl_->data.xe;
-  }
-
-  template <typename T>
-  void ScanningData<T>::set_xe(T xe) {
-    impl_->data.xe = xe;
-  }
-  
-
-  template <typename T>
-  T ScanningData<T>::get_ye() const {
-    return impl_->data.ye;
-  }
-
-  template <typename T>
-  void ScanningData<T>::set_ye(T ye) {
-    impl_->data.ye = ye;
-  }
-
-  template <typename T>
-  void ScanningData<T>::set_grid() {
-    return impl_->data.set_grid();
-  }
-  
-  /****************************************************************************
-   * The Detector interface
-   ***************************************************************************/
-
-  template <typename T>
-  struct DetectorData<T>::Data {
-    Detector<T, e_host>& data;
-    std::vector<T> inner_ang;
-    std::vector<T> outer_ang;
-    Data(Detector<T, e_host>& d)
-      : data(d) {}
-    Data(const Data &other)
-      : data(other.data) {}
-    Data& operator=(const Data &other) {
-      data = other.data;
-      return *this;
-    }
-  };
-
-  template <typename T>
-  DetectorData<T>::DetectorData(const DetectorData& other)
-      : impl_(std::make_unique<Data>(*other.impl_)) {}
-
-  template <typename T>
-  DetectorData<T>::DetectorData(DetectorData&& other) = default;
-
-  template <typename T>
-  DetectorData<T>::DetectorData(const DetectorData<T>::Data& other)
-      : impl_(std::make_unique<Data>(other)) {}
-
-  template <typename T>
-  DetectorData<T>& DetectorData<T>::operator=(const DetectorData<T>& other) {
-    *impl_ = *other.impl_;
-    return *this;
-  }
-
-  template <typename T>
-  DetectorData<T>& DetectorData<T>::operator=(DetectorData<T>&&) = default;
-
-  template <typename T>
-  DetectorData<T>::~DetectorData<T>() = default;
-
-  template <typename T>
-  const DetectorData<T>::Data& DetectorData<T>::internal() const {
-    return *impl_;
-  }
-		
-  template <typename T>
-  DetectorData<T>::size_type DetectorData<T>::size() const {
-    return impl_->data.size();
-  }
-
-  template <typename T>
-  void DetectorData<T>::clear() {
-    impl_->data.clear();
-  }
-
-  template <typename T>
-  void DetectorData<T>::resize(const typename DetectorData<T>::size_type &new_size) {
-    impl_->data.resize(new_size);
-  }
-  
-  template <typename T>
-  bool DetectorData<T>::is_detector_circular() const {
-    return impl_->data.is_detector_circular();
-  }
-
-  template <typename T>
-  bool DetectorData<T>::is_detector_radial() const {
-    return impl_->data.is_detector_radial();
-  }
-
-  template <typename T>
-  bool DetectorData<T>::is_detector_matrix() const {
-    return impl_->data.is_detector_matrix();
-  }
-
-  
-  template <typename T>
-  eDetector_Type DetectorData<T>::get_type() const {
-    return impl_->data.type;
-  }
-
-  template <typename T>
-  void DetectorData<T>::set_type(eDetector_Type type) {
-    impl_->data.type = type;
-  }
-
-  template <typename T>
-  std::vector<T> DetectorData<T>::get_g_inner() const {
-    return std::vector<T>(impl_->data.g_inner.begin(), impl_->data.g_inner.end());
-  }
-
-  template <typename T>
-  void DetectorData<T>::set_g_inner(const std::vector<T>& g_inner) {
-    impl_->data.g_inner.assign(g_inner.begin(), g_inner.end());
-  }
-
-  template <typename T>
-  std::vector<T> DetectorData<T>::get_g_outer() const {
-    return std::vector<T>(impl_->data.g_outer.begin(), impl_->data.g_outer.end());
-  }
-
-  template <typename T>
-  void DetectorData<T>::set_g_outer(const std::vector<T>& g_outer) {
-    impl_->data.g_outer.assign(g_outer.begin(), g_outer.end());
-  }
-
-  template <typename T>
-  std::vector<std::vector<T>> DetectorData<T>::get_fx() const {
-    std::vector<std::vector<T>> result;
-    for (auto x : impl_->data.fx) {
-      result.push_back(std::vector<T>(x.begin(), x.end()));
-    }
-    return result;
-  }
-
-  template <typename T>
-  void DetectorData<T>::set_fx(const std::vector<std::vector<T>>& fx) {
-    Vector<Vector<T, e_host>, e_host> result;
-    for (auto x : fx) {
-      result.push_back(Vector<T, e_host>(x.begin(), x.end()));
-    }
-    impl_->data.fx = result;
-  }
-  
-  template <typename T>
-  std::vector<std::vector<T>> DetectorData<T>::get_fR() const {
-    std::vector<std::vector<T>> result;
-    for (auto x : impl_->data.fR) {
-      result.push_back(std::vector<T>(x.begin(), x.end()));
-    }
-    return result;
-  }
-
-  template <typename T>
-  void DetectorData<T>::set_fR(const std::vector<std::vector<T>>& fR) {
-    Vector<Vector<T, e_host>, e_host> result;
-    for (auto x : fR) {
-      result.push_back(Vector<T, e_host>(x.begin(), x.end()));
-    }
-    impl_->data.fR = result;
-  }
-  
-  template <typename T>
-  std::vector<Grid_2d<T>> DetectorData<T>::get_grid_1d() const {
-    return impl_->data.grid_1d;
-  }
-
-  template <typename T>
-  void DetectorData<T>::set_grid_1d(const std::vector<Grid_2d<T>>& grid_1d) {
-    impl_->data.grid_1d = grid_1d;
-  }
-  
-  template <typename T>
-  std::vector<Grid_2d<T>> DetectorData<T>::get_grid_2d() const {
-    return impl_->data.grid_2d;
-  }
-
-  template <typename T>
-  void DetectorData<T>::set_grid_2d(const std::vector<Grid_2d<T>>& grid_2d) {
-    impl_->data.grid_2d = grid_2d;
-  }
-  
-  template <typename T>
-  std::vector<std::string> DetectorData<T>::get_fn() const {
-    return impl_->data.fn;
-  }
-
-  template <typename T>
-  void DetectorData<T>::set_fn(const std::vector<std::string>& fn) {
-    impl_->data.fn = fn;
-  }
-
-  template <typename T>
-  std::vector<T> DetectorData<T>::get_inner_ang() const {
-    return std::vector<T>(impl_->inner_ang.begin(), impl_->inner_ang.end());
-  }
-
-  template <typename T>
-  void DetectorData<T>::set_inner_ang(const std::vector<T>& inner_ang) {
-    impl_->inner_ang.assign(inner_ang.begin(), inner_ang.end());
-  }
-
-  template <typename T>
-  std::vector<T> DetectorData<T>::get_outer_ang() const {
-    return std::vector<T>(impl_->outer_ang.begin(), impl_->outer_ang.end());
-  }
-
-  template <typename T>
-  void DetectorData<T>::set_outer_ang(const std::vector<T>& outer_ang) {
-    impl_->outer_ang.assign(outer_ang.begin(), outer_ang.end());
-  }
-
-  /****************************************************************************
    * The Input interface
    ***************************************************************************/
 
@@ -611,12 +279,8 @@ namespace mt {
   struct Input<T>::Data {
     Input_Multislice<T> data;
     AtomData<T> atom_data_proxy;
-    ScanningData<T> scanning_proxy;
-    DetectorData<T> detector_proxy;
     Data()
-      : atom_data_proxy(typename AtomData<T>::Data(data.atoms)),
-        scanning_proxy(typename ScanningData<T>::Data(data.scanning)),
-        detector_proxy(typename DetectorData<T>::Data(data.detector)){}
+      : atom_data_proxy(typename AtomData<T>::Data(data.atoms)) {}
   };
 
   template <typename T>
@@ -1003,25 +667,23 @@ namespace mt {
   }
 
   template <typename T>
-  ScanningData<T>& Input<T>::get_scanning() const {
-    return impl_->scanning_proxy;
+  Scanning<T>& Input<T>::get_scanning() const {
+    return impl_->data.scanning;
   }
   
   template <typename T>
-  void Input<T>::set_scanning(const ScanningData<T>& scanning) {
-    impl_->data.scanning = scanning.internal().data;
-    impl_->scanning_proxy = ScanningData<T>(typename ScanningData<T>::Data(impl_->data.scanning));
+  void Input<T>::set_scanning(const Scanning<T>& scanning) {
+    impl_->data.scanning = scanning;
   }
 
   template <typename T>
-  DetectorData<T>& Input<T>::get_detector() const {
-    return impl_->detector_proxy;
+  Detector<T, e_host>& Input<T>::get_detector() const {
+    return impl_->data.detector;
   }
   
   template <typename T>
-  void Input<T>::set_detector(const DetectorData<T>& detector) {
-    impl_->data.detector = detector.internal().data;
-    impl_->detector_proxy = DetectorData<T>(typename DetectorData<T>::Data(impl_->data.detector));
+  void Input<T>::set_detector(const Detector<T, e_host>& detector) {
+    impl_->data.detector = detector;
   }
 
   template <typename T>
@@ -2052,12 +1714,6 @@ namespace mt {
   template class AtomData<float>;
   template class AtomData<double>;
   
-  template class DetectorData<float>;
-  template class DetectorData<double>;
-
-  template class ScanningData<float>;
-  template class ScanningData<double>;
-
   template class Input<float>;
   template class Input<double>;
 
