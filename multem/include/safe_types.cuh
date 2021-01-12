@@ -2493,110 +2493,18 @@ namespace mt
 			int nstream;
 			bool active;
 
-			System_Configuration(): precision(eP_double), device(e_host), cpu_ncores(1),
-				cpu_nthread(1), gpu_device(0), gpu_nstream(1), nstream(1), active(true){};
-
-			void validate_parameters()
-			{
-				// check precision
-				if(!(is_float() || is_double()))
-				{
-					precision = eP_float;
-				}
-
-				// check cpu or gpu
-				if(!(is_host() || is_device()))
-				{
-					device = e_host;
-				}
-				if(is_device())
-				{
-					#ifdef __CUDACC__
-						if(!is_gpu_available())
-						{
-							device = mt::e_host;
-							n_gpu = 0;
-						}
-						else
-						{
-							n_gpu = number_of_gpu_available();
-							gpu_device = min(max(0, gpu_device), n_gpu-1);
-						}
-					#endif
-				}
-
-				cpu_nthread = max(1, cpu_nthread);
-				gpu_nstream = max(1, gpu_nstream);
-				nstream = (is_host())?cpu_nthread:gpu_nstream;
-			}
-
-			void set_device()
-			{
-				if(is_device())
-				{
-					#ifdef __CUDACC__
-						cudaSetDevice(gpu_device);
-					#endif
-				}
-				else
-				{
-
-					device = mt::e_host;
-				}
-			}
-
- 			int get_device()
-			{
-				int idx_dev = -1;
-				if(is_device())
-				{
-					#ifdef __CUDACC__
-						cudaGetDevice(&idx_dev);
-					#endif
-				}
-
-				return idx_dev;
-			}
-
-			bool is_host() const
-			{
-				return device == mt::e_host;
-			}
-
-			bool is_device() const
-			{
-				return device == mt::e_device;
-			}
-
-			bool is_float() const
-			{
-				return precision == mt::eP_float;
-			}
-
-			bool is_double() const
-			{
-				return precision == mt::eP_double;
-			}
-
-			bool is_float_host() const
-			{
-				return is_float() && is_host();
-			}
-
-			bool is_double_host() const
-			{
-				return is_double() && is_host();
-			}
-
-			bool is_float_device() const
-			{
-				return is_float() && is_device();
-			}
-
-			bool is_double_device() const
-			{
-				return is_double() && is_device();
-			}
+			System_Configuration();
+			void validate_parameters();
+			void set_device();
+ 			int get_device();
+			bool is_host() const;
+			bool is_device() const;
+			bool is_float() const;
+			bool is_double() const;
+			bool is_float_host() const;
+			bool is_double_host() const;
+			bool is_float_device() const;
+			bool is_double_device() const;
 
 		private:
 			int n_gpu;

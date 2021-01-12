@@ -7,7 +7,7 @@ def test_input_multislice_standard():
     
     input = multem.Input()
 
-    system_conf = multem.SystemConfiguration()
+    system_conf = multem.System_Configuration()
     system_conf.device = "device"
     system_conf.precision = "float"
     system_conf.cpu_ncores = 1

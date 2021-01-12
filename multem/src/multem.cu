@@ -31,137 +31,6 @@
 namespace mt {
   
   /****************************************************************************
-   * The SystemConfiguration interface
-   ***************************************************************************/
-
-  struct SystemConfiguration::Data {
-    System_Configuration data;
-    Data() {}
-    Data(const System_Configuration& d)
-        : data(d) {}
-  };
-
-  SystemConfiguration::SystemConfiguration()
-      : impl_(std::make_unique<Data>()) {}
-
-  SystemConfiguration::SystemConfiguration(const SystemConfiguration& other)
-      : impl_(std::make_unique<Data>(*other.impl_)) {}
-
-  SystemConfiguration::SystemConfiguration(SystemConfiguration&& other) = default;
-
-  SystemConfiguration& SystemConfiguration::operator=(const SystemConfiguration& other) {
-    *impl_ = *other.impl_;
-    return *this;
-  }
-
-  SystemConfiguration::SystemConfiguration(const Data& other)
-      : impl_(std::make_unique<Data>(other)) {}
-
-  SystemConfiguration& SystemConfiguration::operator=(SystemConfiguration&&) = default;
-
-  SystemConfiguration::~SystemConfiguration() = default;
-
-  const SystemConfiguration::Data& SystemConfiguration::internal() const {
-    return *impl_;
-  }
-
-  void SystemConfiguration::set_precision(ePrecision precision) {
-    impl_->data.precision = precision;
-  }
-
-  ePrecision SystemConfiguration::get_precision() const {
-    return impl_->data.precision;
-  }
-
-  void SystemConfiguration::set_device(eDevice device) {
-    impl_->data.device = device;
-  }
-
-  eDevice SystemConfiguration::get_device() const {
-    return impl_->data.device;
-  }
-
-  void SystemConfiguration::set_cpu_ncores(int cpu_ncores) {
-    impl_->data.cpu_ncores = cpu_ncores;
-  }
-
-  int SystemConfiguration::get_cpu_ncores() const {
-    return impl_->data.cpu_ncores;
-  }
-
-  void SystemConfiguration::set_cpu_nthread(int cpu_nthread) {
-    impl_->data.cpu_nthread = cpu_nthread;
-  }
-
-  int SystemConfiguration::get_cpu_nthread() const {
-    return impl_->data.cpu_nthread;
-  }
-
-  void SystemConfiguration::set_gpu_device(int gpu_device) {
-    impl_->data.gpu_device = gpu_device;
-  }
-
-  int SystemConfiguration::get_gpu_device() const {
-    return impl_->data.gpu_device;
-  }
-
-  void SystemConfiguration::set_gpu_nstream(int gpu_nstream) {
-    impl_->data.gpu_nstream = gpu_nstream;
-  }
-
-  int SystemConfiguration::get_gpu_nstream() const {
-    return impl_->data.gpu_nstream;
-  }
-
-  void SystemConfiguration::set_nstream(int nstream) {
-    impl_->data.nstream = nstream;
-  }
-
-  int SystemConfiguration::get_nstream() const {
-    return impl_->data.nstream;
-  }
-
-  void SystemConfiguration::set_active(bool active) {
-    impl_->data.active = active;
-  }
-
-  bool SystemConfiguration::get_active() const {
-    return impl_->data.active;
-  }
-
-  bool SystemConfiguration::is_host() const {
-    return impl_->data.is_host();
-  }
-
-  bool SystemConfiguration::is_device() const {
-    return impl_->data.is_device();
-  }
-
-  bool SystemConfiguration::is_float() const {
-    return impl_->data.is_float();
-  }
-
-  bool SystemConfiguration::is_double() const {
-    return impl_->data.is_double();
-  }
-
-  bool SystemConfiguration::is_float_host() const {
-    return impl_->data.is_float_host();
-  }
-
-  bool SystemConfiguration::is_double_host() const {
-    return impl_->data.is_double_host();
-  }
-
-  bool SystemConfiguration::is_float_device() const {
-    return impl_->data.is_float_device();
-  }
-
-  bool SystemConfiguration::is_double_device() const {
-    return impl_->data.is_double_device();
-  }
-  
-  /****************************************************************************
    * The AtomData interface
    ***************************************************************************/
 
@@ -783,13 +652,13 @@ namespace mt {
   }
 
   template <typename T>
-  SystemConfiguration Input<T>::get_system_conf() const {
-    return SystemConfiguration(SystemConfiguration::Data(impl_->data.system_conf));
+  System_Configuration& Input<T>::get_system_conf() const {
+    return impl_->data.system_conf;
   }
 
   template <typename T>
-  void Input<T>::set_system_conf(const SystemConfiguration& system_conf) {
-    impl_->data.system_conf = system_conf.internal().data;
+  void Input<T>::set_system_conf(const System_Configuration& system_conf) {
+    impl_->data.system_conf = system_conf;
   }
 
   template <typename T>
@@ -2120,15 +1989,15 @@ namespace mt {
     mt::Output<T> tem_simulation_internal(Input<T>& input_multislice) {
 
       // Ensure we have the correct function
-      MULTEM_ASSERT(input_multislice.get_system_conf().get_device() == dev);
+      MULTEM_ASSERT(input_multislice.get_system_conf().device == dev);
 
       // Initialise the stream and plan
-      mt::Stream<dev> stream(input_multislice.get_system_conf().get_nstream());
+      mt::Stream<dev> stream(input_multislice.get_system_conf().nstream);
       mt::FFT<T, dev> fft_2d;
       fft_2d.create_plan_2d(
           input_multislice.get_grid_2d().ny, 
           input_multislice.get_grid_2d().nx, 
-          input_multislice.get_system_conf().get_nstream());
+          input_multislice.get_system_conf().nstream);
 
       // Create the multislice structure
       mt::Multislice<T, dev> simulate;
@@ -2165,7 +2034,7 @@ namespace mt {
 
   template <typename T>
   mt::Output<T> tem_simulation(Input<T>& input_multislice) {
-    eDevice dev = input_multislice.get_system_conf().get_device();
+    eDevice dev = input_multislice.get_system_conf().device;
     return (dev == mt::e_device 
         ? detail::tem_simulation_internal<T, mt::e_device>(input_multislice)
         : detail::tem_simulation_internal<T, mt::e_host>(input_multislice));

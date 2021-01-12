@@ -110,7 +110,8 @@ namespace pybind11 { namespace detail {
 
   object tem_simulation(
       mt::Input<double> &input, 
-      const mt::SystemConfiguration &sys_conf) {
+      const mt::System_Configuration &sys_conf) {
+    input.set_system_conf(sys_conf);
     check_input_multislice(input);
     return py::cast(mt::tem_simulation<double>(input));
   }

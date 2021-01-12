@@ -24,32 +24,32 @@ namespace pybind11 { namespace detail {
    * Define helper function for the multem::SystemConfiguration class
    */
   template <>
-  struct Helpers <mt::SystemConfiguration> {
+  struct Helpers <mt::System_Configuration> {
    
     /**
      * Get the state
      */
-    static py::tuple getstate(const mt::SystemConfiguration &self) {
+    static py::tuple getstate(const mt::System_Configuration &self) {
       return py::make_tuple(
-        self.get_device(),
-        self.get_precision(),
-        self.get_cpu_ncores(),
-        self.get_cpu_nthread(),
-        self.get_gpu_device(),
-        self.get_gpu_nstream());
+        self.device,
+        self.precision,
+        self.cpu_ncores,
+        self.cpu_nthread,
+        self.gpu_device,
+        self.gpu_nstream);
     }
 
     /**
      * Set the state
      */
-    static mt::SystemConfiguration setstate(py::tuple obj) {
-      mt::SystemConfiguration self;
-      self.set_device(obj[0].cast<mt::eDevice>());
-      self.set_precision(obj[1].cast<mt::ePrecision>());
-      self.set_cpu_ncores(obj[2].cast<std::size_t>());
-      self.set_cpu_nthread(obj[3].cast<std::size_t>());
-      self.set_gpu_device(obj[4].cast<std::size_t>());
-      self.set_gpu_nstream(obj[5].cast<std::size_t>());
+    static mt::System_Configuration setstate(py::tuple obj) {
+      mt::System_Configuration self;
+      self.device = obj[0].cast<mt::eDevice>();
+      self.precision = obj[1].cast<mt::ePrecision>();
+      self.cpu_ncores = obj[2].cast<std::size_t>();
+      self.cpu_nthread = obj[3].cast<std::size_t>();
+      self.gpu_device = obj[4].cast<std::size_t>();
+      self.gpu_nstream = obj[5].cast<std::size_t>();
       return self;
     }
   };
@@ -59,29 +59,18 @@ namespace pybind11 { namespace detail {
 
 void export_system_configuration(py::module_ m)
 {
-  py::class_<mt::SystemConfiguration>(m, "SystemConfiguration")
+  typedef mt::System_Configuration Type;
+  py::class_<Type>(m, "System_Configuration")
     .def(py::init<>())
-    .def_property("precision", 
-        &mt::SystemConfiguration::get_precision,
-        &mt::SystemConfiguration::set_precision)
-    .def_property("device", 
-        &mt::SystemConfiguration::get_device,
-        &mt::SystemConfiguration::set_device)
-    .def_property("cpu_ncores", 
-        &mt::SystemConfiguration::get_cpu_ncores,
-        &mt::SystemConfiguration::set_cpu_ncores)
-    .def_property("cpu_nthread", 
-        &mt::SystemConfiguration::get_cpu_nthread,
-        &mt::SystemConfiguration::set_cpu_nthread)
-    .def_property("gpu_device", 
-        &mt::SystemConfiguration::get_gpu_device,
-        &mt::SystemConfiguration::set_gpu_device)
-    .def_property("gpu_nstream", 
-        &mt::SystemConfiguration::get_gpu_nstream,
-        &mt::SystemConfiguration::set_gpu_nstream)
+    .def_readwrite("precision", &Type::precision)
+    .def_readwrite("device", &Type::device)
+    .def_readwrite("cpu_ncores", &Type::cpu_ncores)
+    .def_readwrite("cpu_nthread", &Type::cpu_nthread)
+    .def_readwrite("gpu_device", &Type::gpu_device)
+    .def_readwrite("gpu_nstream", &Type::gpu_nstream)
     .def(py::pickle(
-        &py::detail::Helpers<mt::SystemConfiguration>::getstate,
-        &py::detail::Helpers<mt::SystemConfiguration>::setstate))
+        &py::detail::Helpers<Type>::getstate,
+        &py::detail::Helpers<Type>::setstate))
     ;
 }
 

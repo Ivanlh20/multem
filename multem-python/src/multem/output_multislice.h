@@ -133,7 +133,7 @@ namespace pybind11 { namespace detail {
 
 
   /**
-   * Define helper function for the multem::SystemConfiguration class
+   * Define helper function for the multem::Output class
    */
   template <>
   template <typename T>
@@ -198,7 +198,7 @@ namespace pybind11 { namespace detail {
 }}
 
 template <typename T>
-void wrap_det_int(const py::handle &m, const char *name)
+void wrap_det_int(py::module_ m, const char *name)
 {
   /* return py::class_< mt::DetInt<T> >(m, name, py::buffer_protocol()) */
   /*     .def(py::init<>()) */
@@ -208,7 +208,7 @@ void wrap_det_int(const py::handle &m, const char *name)
 }
 
 template <typename T>
-void wrap_output_multislice(py::module m, const char *name)
+void wrap_output_multislice(py::module_ m, const char *name)
 {
   typedef mt::Input<T> Parent;
   typedef mt::Output<T> Type;
@@ -300,7 +300,7 @@ void wrap_output_multislice(py::module m, const char *name)
     ;
 }
 
-void export_output_multislice(py::module m) {
+void export_output_multislice(py::module_ m) {
   wrap_det_int<double>(m, "DetIntD");
   /* wrap_output_multislice<float>(m, "OutputF"); */
   wrap_output_multislice<double>(m, "OutputD");
