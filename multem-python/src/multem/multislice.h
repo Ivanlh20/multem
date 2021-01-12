@@ -18,25 +18,18 @@
 
 namespace py = pybind11;
 
-template <typename Module, typename T, mt::eDevice dev>
-void wrap_multislice(Module m)
-{
-  /* typedef mt::MultisliceData<T,dev> Type; */
+namespace pybind11 { namespace detail {
 
-  /* // Wrap the mt::Input class */
-  /* py::class_<Type>(m, "Multislice") */
-  /*   .def(py::init<>()) */
-  /*   .def("set_input_data", &Type::set_input_data) */
-  /*   .def("__call__", &Type::operator()) */
-  /*   ; */
-}
+  object tem_simulation(
+      mt::Input<double> &input, 
+      const mt::SystemConfiguration &sys_conf) {
+    return py::cast(mt::tem_simulation<double>(input));
+  }
 
-template <typename Module>
-void export_multislice(Module m) {
-  wrap_multislice<Module, float, mt::e_host>(m);
-  wrap_multislice<Module, float, mt::e_device>(m);
-  wrap_multislice<Module, double, mt::e_host>(m);
-  wrap_multislice<Module, double, mt::e_device>(m);
+}}
+
+void export_multislice(py::module_ &m) {
+  m.def("tem_simulation", &py::detail::tem_simulation);
 }
 
 #endif

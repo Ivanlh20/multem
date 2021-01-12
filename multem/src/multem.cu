@@ -30,145 +30,6 @@
 namespace mt {
   
   /****************************************************************************
-   * The FFT interface
-   ***************************************************************************/
-  
-  template <typename T, eDevice dev>
-  struct FFTData<T, dev>::Data {
-    FFT<T, dev> data;
-  };
-
-  template <typename T, eDevice dev>
-  FFTData<T, dev>::FFTData()
-      : impl_(std::make_unique<Data>()) {}
-
-  template <typename T, eDevice dev>
-  FFTData<T, dev>::FFTData(const FFTData& other)
-      : impl_(std::make_unique<Data>(*other.impl_)) {}
-
-  template <typename T, eDevice dev>
-  FFTData<T, dev>::FFTData(FFTData&& other) = default;
-
-  template <typename T, eDevice dev>
-  FFTData<T, dev>& FFTData<T, dev>::operator=(const FFTData& other) {
-    *impl_ = *other.impl_;
-    return *this;
-  }
-
-  template <typename T, eDevice dev>
-  FFTData<T, dev>::FFTData(const Data& other)
-      : impl_(std::make_unique<Data>(other)) {}
-
-  template <typename T, eDevice dev>
-  FFTData<T, dev>& FFTData<T, dev>::operator=(FFTData&&) = default;
-
-  template <typename T, eDevice dev>
-  FFTData<T, dev>::~FFTData() = default;
-
-  template <typename T, eDevice dev>
-  const FFTData<T, dev>::Data& FFTData<T, dev>::internal() const {
-    return *impl_;
-  }
-  
-  template <typename T, eDevice dev>
-  FFTData<T, dev>::Data& FFTData<T, dev>::internal() {
-    return *impl_;
-  }
-
-  template <typename T, eDevice dev>
-  void FFTData<T, dev>::cleanup() {
-    impl_->data.cleanup();
-  }
-  
-  template <typename T, eDevice dev>
-  void FFTData<T, dev>::destroy_plan() {
-    impl_->data.destroy_plan();
-  }
-  
-  template <typename T, eDevice dev>
-  void FFTData<T, dev>::create_plan_1d(const int &nx, int nThread) {
-    impl_->data.create_plan_1d(nx, nThread);
-  }
-  
-  template <typename T, eDevice dev>
-  void FFTData<T, dev>::create_plan_1d_batch(const int &ny, const int &nx, int nThread) {
-    impl_->data.create_plan_1d_batch(ny, nx, nThread);
-  }
-  
-  template <typename T, eDevice dev>
-  void FFTData<T, dev>::create_plan_2d(const int &ny, const int &nx, int nThread) {
-    impl_->data.create_plan_2d(ny, nx, nThread);
-  }
-  
-  template <typename T, eDevice dev>
-  void FFTData<T, dev>::create_plan_2d_batch(const int &ny, const int &nx, const int &nz, int nThread) {
-    impl_->data.create_plan_2d_batch(ny, nx, nz, nThread);
-  }
-  
-  /****************************************************************************
-   * The Stream interface
-   ***************************************************************************/
-  
-  template <eDevice dev>
-  struct StreamIface<dev>::Data {
-    Stream<dev> data;
-    Data() = default;
-    Data(int new_stream)
-      : data(new_stream) {}
-  };
-
-  template <eDevice dev>
-  StreamIface<dev>::StreamIface()
-      : impl_(std::make_unique<Data>()) {}
-
-  template <eDevice dev>
-  StreamIface<dev>::~StreamIface() = default;
-
-  template <eDevice dev>
-  const StreamIface<dev>::Data& StreamIface<dev>::internal() const {
-    return *impl_;
-  }
-  
-  template <eDevice dev>
-  StreamIface<dev>::Data& StreamIface<dev>::internal() {
-    return *impl_;
-  }
-
-  template <eDevice dev>
-  StreamIface<dev>::StreamIface(int new_stream)
-    : impl_(std::make_unique<Data>(new_stream)) {}
-
-  template <eDevice dev>
-  int StreamIface<dev>::size() const {
-    return impl_->data.size();
-  }
-
-  template <eDevice dev>
-  void StreamIface<dev>::resize(int new_nstream) {
-    impl_->data.resize(new_nstream);
-  }
-
-  template <eDevice dev>
-  void StreamIface<dev>::synchronize() {
-    impl_->data.synchronize();
-  }
-
-  template <eDevice dev>
-  void StreamIface<dev>::set_n_act_stream(const int &new_n_act_stream) {
-    impl_->data.set_n_act_stream(new_n_act_stream);
-  }
-
-  template <eDevice dev>
-  void StreamIface<dev>::set_grid(const int &nx_i, const int &ny_i) {
-    impl_->data.set_grid(nx_i, ny_i);
-  }
-
-  template <eDevice dev>
-  Range_2d StreamIface<dev>::get_range(const int &istream) {
-    return impl_->data.get_range(istream);
-  }
-
-  /****************************************************************************
    * The SystemConfiguration interface
    ***************************************************************************/
 
@@ -896,11 +757,6 @@ namespace mt {
   Input<T>::~Input<T>() = default;
 
   template <typename T>
-  const Input<T>::Data& Input<T>::internal() const {
-    return *impl_;
-  }
-  
-  template <typename T>
   Input<T>::Data& Input<T>::internal() {
     return *impl_;
   }
@@ -1495,13 +1351,28 @@ namespace mt {
   }
 
   template <typename T>
+  void Output<T>::set_input_data(Input<T> &input) {
+    impl_->data.set_input_data(&input.internal().data);
+  }
+
+  template <typename T>
   eTEM_Output_Type Output<T>::get_output_type() const {
     return impl_->data.output_type;
+  }
+  
+  template <typename T>
+  void Output<T>::set_output_type(eTEM_Output_Type output_type) {
+    impl_->data.output_type = output_type;
   }
 
   template <typename T>
   int Output<T>::get_ndetector() const {
     return impl_->data.ndetector;
+  }
+		
+  template <typename T>
+  void Output<T>::set_ndetector(int ndetector) {
+    impl_->data.ndetector = ndetector;
   }
 
   template <typename T>
@@ -1510,8 +1381,18 @@ namespace mt {
   }
 
   template <typename T>
+  void Output<T>::set_nx(int nx) {
+    impl_->data.nx = nx;
+  }
+
+  template <typename T>
   int Output<T>::get_ny() const {
     return impl_->data.ny;
+  }
+
+  template <typename T>
+  void Output<T>::set_ny(int ny) {
+    impl_->data.ny = ny;
   }
 
   template <typename T>
@@ -1520,8 +1401,18 @@ namespace mt {
   }
 
   template <typename T>
+  void Output<T>::set_dx(T dx) {
+    impl_->data.dx = dx;
+  }
+
+  template <typename T>
   T Output<T>::get_dy() const {
     return impl_->data.dy;
+  }
+
+  template <typename T>
+  void Output<T>::set_dy(T dy) {
+    impl_->data.dy = dy;
   }
 
   template <typename T>
@@ -1530,8 +1421,18 @@ namespace mt {
   }
 
   template <typename T>
+  void Output<T>::set_dr(T dr) {
+    impl_->data.dr = dr;
+  }
+
+  template <typename T>
   std::vector<T> Output<T>::get_x() const {
     return std::vector<T>(impl_->data.x.begin(), impl_->data.x.end());
+  }
+
+  template <typename T>
+  void Output<T>::set_x(const std::vector<T>& x) {
+    impl_->data.x.assign(x.begin(), x.end());
   }
 
   template <typename T>
@@ -1540,8 +1441,18 @@ namespace mt {
   }
 
   template <typename T>
+  void Output<T>::set_y(const std::vector<T>& y) {
+    impl_->data.y.assign(y.begin(), y.end());
+  }
+
+  template <typename T>
   std::vector<T> Output<T>::get_r() const {
     return std::vector<T>(impl_->data.r.begin(), impl_->data.r.end());
+  }
+
+  template <typename T>
+  void Output<T>::set_r(const std::vector<T>& r) {
+    impl_->data.r.assign(r.begin(), r.end());
   }
     
   template <typename T>
@@ -1558,6 +1469,20 @@ namespace mt {
   }
 
   template <typename T>
+  void Output<T>::set_image_tot(const std::vector<DetInt<vector_type>>& image_tot) {
+    typedef typename Output_Multislice<T>::TVector_hr TVector_hr;
+    host_vector<Det_Int<TVector_hr>> result;
+    for (auto &x : image_tot) {
+      Det_Int<TVector_hr> d;
+      for (auto &y : x.image) {
+        d.image.push_back(TVector_hr(y.begin(), y.end()));
+      }
+      result.push_back(d);
+    }
+    impl_->data.image_tot = result;
+  }
+
+  template <typename T>
   std::vector<DetInt<typename Output<T>::vector_type>> Output<T>::get_image_coh() const {
     std::vector<DetInt<vector_type>> result;
     for (auto &x : impl_->data.image_coh) {
@@ -1571,12 +1496,36 @@ namespace mt {
   }
 
   template <typename T>
+  void Output<T>::set_image_coh(const std::vector<DetInt<vector_type>>& image_coh) {
+    typedef typename Output_Multislice<T>::TVector_hr vector_type;
+    host_vector<Det_Int<vector_type>> result;
+    for (auto &x : image_coh) {
+      Det_Int<vector_type> d;
+      for (auto &y : x.image) {
+        d.image.push_back(vector_type(y.begin(), y.end()));
+      }
+      result.push_back(d);
+    }
+    impl_->data.image_coh = result;
+  }
+
+  template <typename T>
   std::vector<typename Output<T>::vector_type> Output<T>::get_m2psi_tot() const {
     std::vector<vector_type> result;
     for (auto &x : impl_->data.m2psi_tot) {
       result.push_back(vector_type(x.begin(), x.end()));
     }
     return result;
+  }
+
+  template <typename T>
+  void Output<T>::set_m2psi_tot(const std::vector<vector_type>& m2psi_tot) {
+    typedef typename Output_Multislice<T>::TVector_hr TVector_hr;
+    host_vector<TVector_hr> result;
+    for (auto &x : m2psi_tot) {
+      result.push_back(TVector_hr(x.begin(), x.end()));
+    }
+    impl_->data.m2psi_tot = result;
   }
 
   template <typename T>
@@ -1589,12 +1538,32 @@ namespace mt {
   }
 
   template <typename T>
+  void Output<T>::set_m2psi_coh(const std::vector<vector_type>& m2psi_coh) {
+    typedef typename Output_Multislice<T>::TVector_hr TVector_hr;
+    host_vector<TVector_hr> result;
+    for (auto &x : m2psi_coh) {
+      result.push_back(TVector_hr(x.begin(), x.end()));
+    }
+    impl_->data.m2psi_coh = result;
+  }
+
+  template <typename T>
   std::vector<typename Output<T>::complex_vector_type> Output<T>::get_psi_coh() const {
     std::vector<complex_vector_type> result;
     for (auto &x : impl_->data.psi_coh) {
       result.push_back(complex_vector_type(x.begin(), x.end()));
     }
     return result;
+  }
+
+  template <typename T>
+  void Output<T>::set_psi_coh(const std::vector<complex_vector_type>& psi_coh) {
+    typedef typename Output_Multislice<T>::TVector_hc TVector_hc;
+    host_vector<TVector_hc> result;
+    for (auto &x : psi_coh) {
+      result.push_back(TVector_hc(x.begin(), x.end()));
+    }
+    impl_->data.psi_coh = result;
   }
 
   template <typename T>
@@ -1607,12 +1576,32 @@ namespace mt {
   }
 
   template <typename T>
+  void Output<T>::set_V(const std::vector<vector_type>& V) {
+    typedef typename Output_Multislice<T>::TVector_hr TVector_hr;
+    host_vector<TVector_hr> result;
+    for (auto &x : V) {
+      result.push_back(TVector_hr(x.begin(), x.end()));
+    }
+    impl_->data.V = result;
+  }
+
+  template <typename T>
   std::vector<typename Output<T>::complex_vector_type> Output<T>::get_trans() const {
     std::vector<complex_vector_type> result;
     for (auto &x : impl_->data.trans) {
       result.push_back(complex_vector_type(x.begin(), x.end()));
     }
     return result;
+  }
+
+  template <typename T>
+  void Output<T>::set_trans(const std::vector<complex_vector_type>& trans) {
+    typedef typename Output_Multislice<T>::TVector_hc TVector_hc;
+    host_vector<TVector_hc> result;
+    for (auto &x : trans) {
+      result.push_back(TVector_hc(x.begin(), x.end()));
+    }
+    impl_->data.trans = result;
   }
 
   template <typename T>
@@ -1625,8 +1614,23 @@ namespace mt {
   }
 
   template <typename T>
+  void Output<T>::set_psi_0(const std::vector<complex_vector_type>& psi_0) {
+    typedef typename Output_Multislice<T>::TVector_hc TVector_hc;
+    host_vector<TVector_hc> result;
+    for (auto &x : psi_0) {
+      result.push_back(TVector_hc(x.begin(), x.end()));
+    }
+    impl_->data.psi_0 = result;
+  }
+
+  template <typename T>
   std::vector<bool> Output<T>::get_thk_gpu() const {
     return std::vector<bool>(impl_->data.thk_gpu.begin(), impl_->data.thk_gpu.end());
+  }
+
+  template <typename T>
+  void Output<T>::set_thk_gpu(const std::vector<bool>& thk_gpu) {
+    impl_->data.thk_gpu.assign(thk_gpu.begin(), thk_gpu.end());
   }
 
   template <typename T>
@@ -1674,22 +1678,63 @@ namespace mt {
    * Misc function calls
    ***************************************************************************/
 
+  namespace detail {
+  
+    template <typename T, eDevice dev>
+    mt::Output<T> tem_simulation_internal(Input<T>& input_multislice) {
+
+      // Initialise the stream and plan
+      mt::Stream<dev> stream(input_multislice.get_system_conf().get_nstream());
+      mt::FFT<T, dev> fft_2d;
+      fft_2d.create_plan_2d(
+          input_multislice.get_grid_2d().ny, 
+          input_multislice.get_grid_2d().nx, 
+          input_multislice.get_system_conf().get_nstream());
+
+      // Create the multislice structure
+      mt::Multislice<T, dev> simulate;
+      simulate.set_input_data(
+          &input_multislice.internal().data, 
+          &stream, 
+          &fft_2d);
+
+      // Initialise the output data
+      mt::Output<T> output_multislice;
+      output_multislice.set_input_data(input_multislice);
+      simulate(output_multislice.internal().data);
+      stream.synchronize();
+
+      // Finalise the output data
+      output_multislice.gather();
+      output_multislice.clean_temporal();
+      fft_2d.cleanup();
+
+      // If there is an error then throw
+      auto err = cudaGetLastError();
+      if (err != cudaSuccess) {
+        std::ostringstream msg;
+        msg << "CUDA error: %s\n";
+        msg << cudaGetErrorString(err);
+        throw std::runtime_error(msg.str());
+      }
+
+      // Return the output multislice
+      return output_multislice;
+    }
+
+  }
+
   template <typename T>
-  void test(const Input<T>& a) {
-    std::cout << a.get_system_conf().get_precision() << std::endl;
+  mt::Output<T> tem_simulation(Input<T>& input_multislice) {
+    eDevice dev = input_multislice.get_system_conf().get_device();
+    return (dev == mt::e_device 
+        ? detail::tem_simulation_internal<T, mt::e_device>(input_multislice)
+        : detail::tem_simulation_internal<T, mt::e_host>(input_multislice));
   }
   
   /****************************************************************************
    * Explict instantiation of template classes and functions
    ***************************************************************************/
-
-  template class FFTData<float, e_host>;
-  template class FFTData<float, e_device>;
-  template class FFTData<double, e_host>;
-  template class FFTData<double, e_device>;
-
-  template class StreamIface<e_host>;
-  template class StreamIface<e_device>;
 
   template class AtomData<float>;
   template class AtomData<double>;
@@ -1705,14 +1750,9 @@ namespace mt {
 
   template class Output<float>;
   template class Output<double>;
-  
-  /* template class MultisliceData<float, e_host>; */
-  /* template class MultisliceData<float, e_device>; */
-  /* template class MultisliceData<double, e_host>; */
-  /* template class MultisliceData<double, e_device>; */
 
-  template void test<float>(const Input<float>&);
-  template void test<double>(const Input<double>&);
+  template mt::Output<float> tem_simulation<float>(Input<float>&);
+  template mt::Output<double> tem_simulation<double>(Input<double>&);
 
 }  // namespace mt
 
