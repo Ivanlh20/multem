@@ -36,64 +36,6 @@
 namespace mt {
 
   /****************************************************************************
-   * The FFT interface
-   ***************************************************************************/
-
-  template <typename T, eDevice dev>
-  class FFTData {
-  public:
-    struct Data;
-
-    FFTData();
-    FFTData(const FFTData&);
-    FFTData(FFTData&&);
-    FFTData(const Data&);
-    FFTData& operator=(const FFTData&);
-    FFTData& operator=(FFTData&&);
-    ~FFTData();
-    
-    const FFTData::Data& internal() const;
-    FFTData::Data& internal();
-
-    void cleanup();
-    void destroy_plan();
-		void create_plan_1d(const int &nx, int nThread=1);
-		void create_plan_1d_batch(const int &ny, const int &nx, int nThread=1);
-		void create_plan_2d(const int &ny, const int &nx, int nThread);
-		void create_plan_2d_batch(const int &ny, const int &nx, const int &nz, int nThread);
-  
-  private:
-    std::unique_ptr<Data> impl_;
-  };
-  
-  /****************************************************************************
-   * The Stream interface
-   ***************************************************************************/
-  
-  template <eDevice dev>
-  class StreamIface {
-  public:
-    struct Data;
-    
-    StreamIface();
-    ~StreamIface();
-    
-    const StreamIface::Data& internal() const;
-    StreamIface::Data& internal();
-
-    StreamIface(int new_stream);
-    int size() const;
-		void resize(int new_nstream);
-		void synchronize();
-		void set_n_act_stream(const int &new_n_act_stream);
-		void set_grid(const int &nx_i, const int &ny_i);
-		Range_2d get_range(const int &istream);
-
-  private:
-    std::unique_ptr<Data> impl_;
-  };
-
-  /****************************************************************************
    * The SystemConfiguration interface
    ***************************************************************************/
 
@@ -311,7 +253,7 @@ namespace mt {
   };
   
   /****************************************************************************
-   * The Detector interface
+   * The Scanning interface
    ***************************************************************************/
 
   /**
@@ -376,6 +318,72 @@ namespace mt {
   };
   
   /****************************************************************************
+   * The Scanning interface
+   ***************************************************************************/
+  
+  /**
+   * A class to represent an image
+   */
+  template <typename T>
+  class Image {
+  public:
+
+    typedef T value_type;
+    typedef std::array<std::size_t, 2> shape_type;
+
+    std::vector<value_type> data;
+    shape_type shape;
+
+    Image()
+      : shape({ 0, 0 }) {}
+
+    /**
+     * Construct the image from the pointer
+     * @param data_ The data pointer
+     * @param shape_ The image shape (Y, X)
+     */
+    template <typename U>
+    Image(const U *data_, shape_type shape_)
+      : shape(shape_) {
+      std::size_t size = shape[0]*shape[1];
+      data.assign(data_, data_ + size);
+    }
+  };
+
+  /**
+   * A class to represent a complex image
+   */
+  template <typename T>
+  class Image< std::complex<T> > {
+  public:
+    
+    typedef std::complex<T> value_type;
+    typedef std::array<std::size_t, 2> shape_type;
+
+    std::vector<value_type> data;
+    shape_type shape;
+
+    Image()
+      : shape({ 0, 0 }) {}
+
+    /**
+     * Construct the image from the pointer
+     * @param data_ The data pointer
+     * @param shape_ The image shape (Y, X)
+     */
+    template <typename U>
+    Image(const U *data_, shape_type shape_)
+      : shape(shape_) {
+      std::size_t size = shape[0]*shape[1];
+      data.resize(size);
+      for (auto i = 0; i < size; ++i) {
+        data[i] = value_type(data_[i].real(), data_[i].imag());
+      }
+    }
+    
+  };
+  
+  /****************************************************************************
    * The Detector interface
    ***************************************************************************/
 
@@ -416,7 +424,6 @@ namespace mt {
     Input& operator=(Input&&);
     ~Input();
 
-    const Data& internal() const;
     Data& internal();
 
     SystemConfiguration get_system_conf() const;
@@ -608,26 +615,65 @@ namespace mt {
 
     const Data& internal() const;
     Data& internal();
+
+    void set_input_data(Input<T> &input);
 		
     eTEM_Output_Type get_output_type() const;
-		int get_ndetector() const;
+    void set_output_type(eTEM_Output_Type output_type);
+		
+    int get_ndetector() const;
+		void set_ndetector(int ndetector);
+    
     int get_nx() const;
+    void set_nx(int nx);
+    
     int get_ny() const;
+    void set_ny(int ny);
+    
     T get_dx() const;
+    void set_dx(T dx);
+    
     T get_dy() const;
-		T get_dr() const;
+    void set_dy(T dy);
+		
+    T get_dr() const;
+		void set_dr(T dr);
+
     std::vector<T> get_x() const;
+    void set_x(const std::vector<T>& x);
+    
     std::vector<T> get_y() const;
+    void set_y(const std::vector<T>& y);
+    
     std::vector<T> get_r() const;
+    void set_r(const std::vector<T>& r);
+    
     std::vector<DetInt<vector_type>> get_image_tot() const;
+    void set_image_tot(const std::vector<DetInt<vector_type>>& image_tot);
+    
     std::vector<DetInt<vector_type>> get_image_coh() const;
+    void set_image_coh(const std::vector<DetInt<vector_type>>& image_coh);
+    
     std::vector<vector_type> get_m2psi_tot() const;
+    void set_m2psi_tot(const std::vector<vector_type>& m2psi_tot);
+    
     std::vector<vector_type> get_m2psi_coh() const;
+    void set_m2psi_coh(const std::vector<vector_type>& m2psi_coh);
+    
     std::vector<complex_vector_type> get_psi_coh() const;
+    void set_psi_coh(const std::vector<complex_vector_type>& psi_coh);
+    
     std::vector<vector_type> get_V() const;
+    void set_V(const std::vector<vector_type>& V);
+    
     std::vector<complex_vector_type> get_trans() const;
+    void set_trans(const std::vector<complex_vector_type>& trans);
+    
     std::vector<complex_vector_type> get_psi_0() const;
+    void set_psi_0(const std::vector<complex_vector_type>& psi_0);
+
 		std::vector<bool> get_thk_gpu() const;
+		void set_thk_gpu(const std::vector<bool>& thk_gpu);
 
     void gather();
     void clean_temporal();
@@ -644,29 +690,30 @@ namespace mt {
   /**
    * A proxy for the Output_Multislice class
    */
-  /*template <typename T, eDevice dev>*/
-  /*class MultisliceData {*/
-  /*public:*/
-  /*  struct Data;*/
+  /* template <typename T> */
+  /* class MultisliceData { */
+  /* public: */
+  /*   struct Data; */
 
-  /*  typedef std::vector<T> vector_type;*/
-  /*  typedef std::vector<std::complex<T>> complex_vector_type;*/
+  /*   MultisliceData(); */
+  /*   ~MultisliceData(); */
 
-  /*  MultisliceData();*/
-  /*  ~MultisliceData();*/
+  /*   const Data& internal() const; */
 
-  /*  const Data& internal() const;*/
-
-		/*void set_input_data(Input<T> &input, StreamIface<dev> &stream_i, FFTData<T, dev> &fft2_i);*/
-		/*void operator()(Output<T> &output_multislice);*/
+		/* void set_input_data(Input<T> &input); */
+		/* void operator()(Output<T> &output_multislice); */
     
-  /*private:*/
-  /*  std::unique_ptr<Data> impl_;*/
+  /* private: */
+  /*   std::unique_ptr<Data> impl_; */
 
-  /*};*/
+  /* }; */
+  
+  /****************************************************************************
+   * Simulation functions
+   ***************************************************************************/
 
   template <typename T>
-  void test(const Input<T>&);
+  mt::Output<T> tem_simulation(Input<T>&);
 
 }  // namespace mt
 
