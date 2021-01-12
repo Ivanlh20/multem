@@ -61,8 +61,8 @@ namespace pybind11 { namespace detail {
 }}
 
 
-template <typename Module, typename T>
-void wrap_scanning(Module m)
+template <typename T>
+void wrap_scanning(py::module_ m)
 {
   typedef mt::ScanningData<T> Type;
 
@@ -103,9 +103,8 @@ void wrap_scanning(Module m)
     ;
 }
 
-template <typename Module>
-void export_scanning(Module m) {
-  wrap_scanning<Module, double>(m);
+void export_scanning(py::module_ m) {
+  wrap_scanning<double>(m);
 }
 
 #endif

@@ -52,8 +52,7 @@ namespace pybind11 { namespace detail {
  
 }}
 
-template <typename Module>
-void export_fp_dim(Module m) {
+void export_fp_dim(py::module_ m) {
 }
 
 #endif

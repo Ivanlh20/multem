@@ -57,8 +57,7 @@ namespace pybind11 { namespace detail {
 }}
 
 
-template <typename Module>
-void export_system_configuration(Module m)
+void export_system_configuration(py::module_ m)
 {
   py::class_<mt::SystemConfiguration>(m, "SystemConfiguration")
     .def(py::init<>())

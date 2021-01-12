@@ -82,8 +82,8 @@ namespace pybind11 { namespace detail {
 }}
 
 
-template <typename Module, typename T>
-void wrap_grid_2d(Module m)
+template <typename T>
+void wrap_grid_2d(py::module_ m)
 {
   typedef mt::Grid_2d<T> Type;
 
@@ -113,9 +113,8 @@ void wrap_grid_2d(Module m)
     ;
 }
 
-template <typename Module>
-void export_grid_2d(Module m) {
-  wrap_grid_2d<Module, double>(m);
+void export_grid_2d(py::module_ m) {
+  wrap_grid_2d<double>(m);
 }
 
 #endif

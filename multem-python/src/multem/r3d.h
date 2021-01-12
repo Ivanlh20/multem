@@ -53,8 +53,7 @@ namespace pybind11 { namespace detail {
  
 }}
 
-template <typename Module>
-void export_r3d(Module m) {
+void export_r3d(py::module_ m) {
 }
 
 #endif
