@@ -67,20 +67,20 @@ namespace pybind11 { namespace detail {
     // Check STEM, EELS and EFTEM parameters
     if (input.is_STEM()) {
       T lambda = input.get_cond_lens().lambda;
-      switch (input.get_detector().get_type()) {
+      switch (input.get_detector().type) {
       case mt::eDT_Circular:
         {
           auto& detector = input.get_detector();
-          auto inner_ang = detector.get_inner_ang();
-          auto outer_ang = detector.get_outer_ang();
+          auto inner_ang = detector.inner_ang;
+          auto outer_ang = detector.outer_ang;
           std::vector<T> g_inner(inner_ang.size());
           std::vector<T> g_outer(outer_ang.size());
           for (auto i = 0; i < detector.size(); i++) {
             g_inner[i] = sin(inner_ang[i] * mt::c_mrad_2_rad) / lambda;
             g_outer[i] = sin(outer_ang[i] * mt::c_mrad_2_rad) / lambda;
           }
-          detector.set_g_inner(g_inner);
-          detector.set_g_outer(g_outer);
+          detector.g_inner = g_inner;
+          detector.g_outer = g_outer;
         }
         break;
       };

@@ -151,71 +151,6 @@ namespace mt {
   };
   
   /****************************************************************************
-   * The Detector interface
-   ***************************************************************************/
-
-  /**
-   * A proxy for the Scanning class
-   */
-  template <typename T>
-  class DetectorData {
-  public:
-    struct Data;
-		
-    using value_type = T;
-		using size_type = std::size_t;
-
-    DetectorData(const DetectorData&);
-    DetectorData(DetectorData&&);
-    DetectorData(const Data&);
-    DetectorData& operator=(const DetectorData&);
-    DetectorData& operator=(DetectorData&&);
-    ~DetectorData();
-
-    const Data& internal() const;
-
-		size_type size() const;
-		void clear();
-		void resize(const size_type &new_size);
-		bool is_detector_circular() const;
-		bool is_detector_radial() const;
-		bool is_detector_matrix() const;
-		
-    eDetector_Type get_type() const;
-    void set_type(eDetector_Type type);
-
-    std::vector<T> get_g_inner() const;
-    void set_g_inner(const std::vector<T>& g_inner);
-
-    std::vector<T> get_g_outer() const;
-    void set_g_outer(const std::vector<T>& g_outer);
-
-    std::vector<std::vector<T>> get_fx() const;
-    void set_fx(const std::vector<std::vector<T>>& fx);
-    
-    std::vector<std::vector<T>> get_fR() const;
-    void set_fR(const std::vector<std::vector<T>>& fR);
-		
-    std::vector<Grid_2d<T>> get_grid_1d() const;
-		void set_grid_1d(const std::vector<Grid_2d<T>>& grid_1d);
-		
-    std::vector<Grid_2d<T>> get_grid_2d() const;
-		void set_grid_2d(const std::vector<Grid_2d<T>>& grid_2d);
-		
-    std::vector<std::string> get_fn() const;
-		void set_fn(const std::vector<std::string>& fn);
-
-    std::vector<T> get_inner_ang() const;
-    void set_inner_ang(const std::vector<T>& inner_ang);
-
-    std::vector<T> get_outer_ang() const;
-    void set_outer_ang(const std::vector<T>& outer_ang);
-
-  private:
-    std::unique_ptr<Data> impl_;
-  };
-  
-  /****************************************************************************
    * The Scanning interface
    ***************************************************************************/
   
@@ -432,8 +367,8 @@ namespace mt {
     Scanning<T>& get_scanning() const;
     void set_scanning(const Scanning<T>& scanning);
 
-    DetectorData<T>& get_detector() const;
-    void set_detector(const DetectorData<T>& detector);
+    Detector<T, e_host>& get_detector() const;
+    void set_detector(const Detector<T, e_host>& detector);
 
     EELS<T>& get_eels_fr() const;
     void set_eels_fr(const EELS<T>& eels_fr);
