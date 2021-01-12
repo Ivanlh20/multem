@@ -85,6 +85,22 @@ namespace mt
 	//	}
 	//}
 
+	/*******************forward declarations********************/
+	template <class T>
+	struct is_fundamental;
+
+	template <class T>
+	DEVICE_CALLABLE FORCE_INLINE
+	T get_lambda(const T &E_0);
+
+	template <class T>
+	DEVICE_CALLABLE FORCE_INLINE
+	T get_sigma(const T &E_0);
+
+	template <class T>
+	DEVICE_CALLABLE FORCE_INLINE
+	T get_gamma(const T &E_0);
+
 	/**************************vector**************************/
 	template <class T, eDevice dev>
 	using Vector = typename std::conditional<dev == e_host, typename std::conditional<std::is_fundamental<T>::value ||
@@ -143,6 +159,85 @@ namespace mt
 		const T& operator[](const int i) const { return V[i]; }
 	};
 
+
+  template <typename T>
+  void Lens<T>::set_input_data(T E_0, Grid_2d<T> &grid_2d)
+  {
+    gamma = get_gamma(E_0);
+
+    lambda = get_lambda(E_0);
+    lambda2 = pow(lambda, 2);
+
+    c_c_10 = (isZero(c_10))?0:-c_Pi*c_10*lambda;
+    c_c_12 = (isZero(c_12))?0:-c_Pi*c_12*lambda;
+
+    c_c_21 = (isZero(c_21))?0:-2.0*c_Pi*c_21*pow(lambda, 2)/3.0;
+    c_c_23 = (isZero(c_23))?0:-2.0*c_Pi*c_23*pow(lambda, 2)/3.0;
+
+    c_c_30 = (isZero(c_30))?0:-c_Pi*c_30*pow(lambda, 3)/2.0;
+    c_c_32 = (isZero(c_32))?0:-c_Pi*c_32*pow(lambda, 3)/2.0;
+    c_c_34 = (isZero(c_34))?0:-c_Pi*c_34*pow(lambda, 3)/2.0;
+
+    c_c_41 = (isZero(c_41))?0:-2.0*c_Pi*c_41*pow(lambda, 4)/5.0;
+    c_c_43 = (isZero(c_43))?0:-2.0*c_Pi*c_43*pow(lambda, 4)/5.0;
+    c_c_45 = (isZero(c_45))?0:-2.0*c_Pi*c_45*pow(lambda, 4)/5.0;
+
+    c_c_50 = (isZero(c_50))?0:-c_Pi*c_50*pow(lambda, 5)/3.0;
+    c_c_52 = (isZero(c_52))?0:-c_Pi*c_52*pow(lambda, 5)/3.0;
+    c_c_54 = (isZero(c_54))?0:-c_Pi*c_54*pow(lambda, 5)/3.0;
+    c_c_56 = (isZero(c_56))?0:-c_Pi*c_56*pow(lambda, 5)/3.0;
+
+    g2_min = (isZero(inner_aper_ang)||(inner_aper_ang<0))?0:pow(sin(inner_aper_ang)/lambda, 2);
+    g2_max = (isZero(outer_aper_ang)||(outer_aper_ang<0))?grid_2d.g2_max(): pow(sin(outer_aper_ang)/lambda, 2);
+
+    ti_a = max(T(0), min(T(1), ti_a));
+    set_ti_sigma(ti_sigma);
+    ti_beta = max(T(0), ti_beta);
+    ti_npts = max(1, ti_npts);
+
+    si_a = max(T(0), min(T(1), si_a));
+    set_si_sigma(si_sigma);
+    si_beta = max(T(0), si_beta);
+    si_rad_npts = max(1, si_rad_npts);
+    si_azm_npts = max(1, si_azm_npts);
+
+    T gmaxs = 3.5*si_sigma;
+    g2_maxs = gmaxs*gmaxs;
+    T dgs = gmaxs/static_cast<T>(si_rad_npts);
+
+    int n;
+    n = (dgs<grid_2d.dgx)?static_cast<int>(floor(grid_2d.dgx/dgs)+1):1;
+    ngxs = static_cast<int>(floor(n*gmaxs/grid_2d.dgx)) + 1;
+    dgxs = gmaxs/ngxs;
+
+    n = (dgs<grid_2d.dgy)?static_cast<int>(floor(grid_2d.dgy/dgs)+1):1;
+    ngys = static_cast<int>(floor(n*gmaxs/grid_2d.dgy)) + 1;
+    dgys = gmaxs/ngys;
+  }
+
+  template <typename T>
+	void EELS<T>::set_input_data(eSpace space_i, T E_0_i, T E_loss_i, int m_selection_i, T collection_angle_i, eChannelling_Type channelling_type_i, int Z_i)
+  {
+    space = space_i;
+    E_0 = E_0_i;
+    E_loss = E_loss_i;
+    T gamma = get_gamma(E_0);
+    T lambda = get_lambda(E_0);
+
+    T theta = get_theta(E_loss, E_0);
+
+    ge = theta/(lambda*gamma*gamma);
+    ge2 = pow(gamma*ge, 2);
+    gc = sqrt(2.0*theta)/lambda;
+    gc2 = pow(gc, 2);
+
+    m_selection = m_selection_i;
+    collection_angle = collection_angle_i;
+    g_collection = collection_angle/lambda;
+    channelling_type = channelling_type_i;
+
+    Z = Z_i;
+  }
 
 	
   /**********************Identify planes*********************/
