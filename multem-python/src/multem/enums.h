@@ -47,7 +47,7 @@ namespace pybind11 { namespace detail {
 
 }}
 
-void export_enums(const py::handle &m)
+void export_enums(py::module m)
 {
   py::detail::enum_wrapper<mt::eDevice>(m, "eDevice")
     .value("host", mt::e_host)

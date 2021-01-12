@@ -65,8 +65,8 @@ namespace pybind11 { namespace detail {
 }}
 
 
-template <typename Module, typename T>
-void wrap_detector(Module m)
+template <typename T>
+void wrap_detector(py::module_ m)
 {
   typedef mt::DetectorData<T> Type;
 
@@ -113,9 +113,8 @@ void wrap_detector(Module m)
     ;
 }
 
-template <typename Module>
-void export_detector(Module m) {
-  wrap_detector<Module, double>(m);
+void export_detector(py::module_ m) {
+  wrap_detector<double>(m);
 }
 
 #endif

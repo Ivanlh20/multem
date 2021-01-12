@@ -80,8 +80,8 @@ namespace pybind11 { namespace detail {
 }}
 
 
-template <typename Module, typename T>
-void wrap_eels(Module m)
+template <typename T>
+void wrap_eels(py::module_ m)
 {
   typedef mt::EELS<T> Type;
 
@@ -110,9 +110,8 @@ void wrap_eels(Module m)
     ;
 }
 
-template <typename Module>
-void export_eels(Module m) {
-  wrap_eels<Module, double>(m);
+void export_eels(py::module_ m) {
+  wrap_eels<double>(m);
 }
 
 #endif

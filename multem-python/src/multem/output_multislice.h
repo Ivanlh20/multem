@@ -208,7 +208,7 @@ void wrap_det_int(const py::handle &m, const char *name)
 }
 
 template <typename T>
-void wrap_output_multislice(const py::handle &m, const char *name)
+void wrap_output_multislice(py::module m, const char *name)
 {
   typedef mt::Input<T> Parent;
   typedef mt::Output<T> Type;
@@ -300,7 +300,7 @@ void wrap_output_multislice(const py::handle &m, const char *name)
     ;
 }
 
-void export_output_multislice(const py::handle &m) {
+void export_output_multislice(py::module m) {
   wrap_det_int<double>(m, "DetIntD");
   /* wrap_output_multislice<float>(m, "OutputF"); */
   wrap_output_multislice<double>(m, "OutputD");

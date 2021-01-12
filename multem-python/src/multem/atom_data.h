@@ -151,8 +151,8 @@ namespace pybind11 { namespace detail {
   
 }}
 
-template <typename Module, typename T>
-void wrap_atom(Module m)
+template <typename T>
+void wrap_atom(py::module_ m)
 {
   typedef std::vector<mt::Atom<T>> Type;
   
@@ -167,8 +167,8 @@ void wrap_atom(Module m)
   py::implicitly_convertible<py::list, Type>();
 }
 
-template <typename Module, typename T>
-void wrap_atom_data(Module m)
+template <typename T>
+void wrap_atom_data(py::module_ m)
 {
   typedef mt::AtomData<T> Type;
 
@@ -234,10 +234,9 @@ void wrap_atom_data(Module m)
     ;
 }
 
-template <typename Module>
-void export_atom_data(Module m) {
-  wrap_atom<Module, double>(m);
-  wrap_atom_data<Module, double>(m);
+void export_atom_data(py::module_ m) {
+  wrap_atom<double>(m);
+  wrap_atom_data<double>(m);
 }
 
 #endif

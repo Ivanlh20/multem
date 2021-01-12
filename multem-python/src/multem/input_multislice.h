@@ -1377,8 +1377,8 @@ namespace pybind11 { namespace detail {
 }}
 
 
-template <typename Module, typename T>
-void wrap_input_multislice(Module m)
+template <typename T>
+void wrap_input_multislice(py::module_ m)
 {
   typedef mt::Input<T> Type;
 
@@ -1903,9 +1903,8 @@ void wrap_input_multislice(Module m)
     ;
 }
 
-template <typename Module>
-void export_input_multislice(Module m) {
-  wrap_input_multislice<Module, double>(m);
+void export_input_multislice(py::module_ m) {
+  wrap_input_multislice<double>(m);
 }
 
 #endif

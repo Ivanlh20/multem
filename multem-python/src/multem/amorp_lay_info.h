@@ -55,14 +55,7 @@ namespace pybind11 { namespace detail {
 }}
 
 
-template <typename Module, typename T>
-void wrap_amorp_lay_info(Module m)
-{
-}
-
-template <typename Module>
-void export_amorp_lay_info(Module m) {
-  wrap_amorp_lay_info<Module, double>(m);
+void export_amorp_lay_info(py::module_ m) {
 }
 
 #endif
