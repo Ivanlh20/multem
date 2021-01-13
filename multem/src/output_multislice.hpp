@@ -1257,6 +1257,141 @@ namespace mt {
   }
 
   template <typename T>
+  std::vector<typename Output_Multislice<T>::T_r> Output_Multislice<T>::get_x() const {
+    return std::vector<T_r>(pimpl->x.begin(), pimpl->x.end());
+  }
+
+  template <typename T>
+  void Output_Multislice<T>::set_x(const std::vector<T_r>& x){
+    pimpl->x.assign(x.begin(), x.end());
+  }
+
+  template <typename T>
+  std::vector<typename Output_Multislice<T>::T_r> Output_Multislice<T>::get_y() const {
+    return std::vector<T_r>(pimpl->y.begin(), pimpl->y.end());
+  }
+
+  template <typename T>
+  void Output_Multislice<T>::set_y(const std::vector<T_r>& y){
+    pimpl->y.assign(y.begin(), y.end());
+  }
+
+  template <typename T>
+  std::vector<typename Output_Multislice<T>::T_r> Output_Multislice<T>::get_r() const {
+    return std::vector<T_r>(pimpl->r.begin(), pimpl->r.end());
+  }
+
+  template <typename T>
+  void Output_Multislice<T>::set_r(const std::vector<T_r>& r) {
+    pimpl->r.assign(r.begin(), r.end());
+  }
+
+  template <typename T>
+  std::vector<std::vector<typename Output_Multislice<T>::T_r>> Output_Multislice<T>::get_m2psi_tot() const {
+    std::vector<std::vector<T_r>> result;
+    for (auto &x : pimpl->m2psi_tot) {
+      result.push_back(std::vector<T_r>(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  void Output_Multislice<T>::set_m2psi_tot(const std::vector<std::vector<T_r>>& m2psi_tot) {
+    pimpl->m2psi_tot.resize(m2psi_tot.size());
+    for (auto i = 0; i < m2psi_tot.size(); ++i) {
+      pimpl->m2psi_tot[i].assign(m2psi_tot[i].begin(), m2psi_tot[i].end());
+    }
+  }
+
+  template <typename T>
+  std::vector<std::vector<typename Output_Multislice<T>::T_r>> Output_Multislice<T>::get_m2psi_coh() const {
+    std::vector<std::vector<T_r>> result;
+    for (auto &x : pimpl->m2psi_coh) {
+      result.push_back(std::vector<T_r>(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  void Output_Multislice<T>::set_m2psi_coh(const std::vector<std::vector<T_r>>& m2psi_coh) {
+    pimpl->m2psi_coh.resize(m2psi_coh.size());
+    for (auto i = 0; i < m2psi_coh.size(); ++i) {
+      pimpl->m2psi_coh[i].assign(m2psi_coh[i].begin(), m2psi_coh[i].end());
+    }
+  }
+
+
+  template <typename T>
+  std::vector<std::vector<typename Output_Multislice<T>::T_c>> Output_Multislice<T>::get_psi_coh() const {
+    std::vector<std::vector<T_c>> result;
+    for (auto &x : pimpl->psi_coh) {
+      result.push_back(std::vector<T_c>(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  void Output_Multislice<T>::set_psi_coh(const std::vector<std::vector<T_c>>& psi_coh) {
+    pimpl->psi_coh.resize(psi_coh.size());
+    for (auto i = 0; i < psi_coh.size(); ++i) {
+      pimpl->psi_coh[i].assign(psi_coh[i].begin(), psi_coh[i].end());
+    }
+  }
+
+
+  template <typename T>
+  std::vector<std::vector<typename Output_Multislice<T>::T_r>> Output_Multislice<T>::get_V() const {
+    std::vector<std::vector<T_r>> result;
+    for (auto &x : pimpl->V) {
+      result.push_back(std::vector<T_r>(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  void Output_Multislice<T>::set_V(const std::vector<std::vector<T_r>>& V) {
+    pimpl->V.resize(V.size());
+    for (auto i = 0; i < V.size(); ++i) {
+      pimpl->V[i].assign(V[i].begin(), V[i].end());
+    }
+  }
+
+
+  template <typename T>
+  std::vector<std::vector<typename Output_Multislice<T>::T_c>> Output_Multislice<T>::get_trans() const {
+    std::vector<std::vector<T_c>> result;
+    for (auto &x : pimpl->trans) {
+      result.push_back(std::vector<T_c>(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  void Output_Multislice<T>::set_trans(const std::vector<std::vector<T_c>>& trans) {
+    pimpl->trans.resize(trans.size());
+    for (auto i = 0; i < trans.size(); ++i) {
+      pimpl->trans[i].assign(trans[i].begin(), trans[i].end());
+    }
+  }
+
+  template <typename T>
+  std::vector<std::vector<typename Output_Multislice<T>::T_c>> Output_Multislice<T>::get_psi_0() const{
+    std::vector<std::vector<T_c>> result;
+    for (auto &x : pimpl->psi_0) {
+      result.push_back(std::vector<T_c>(x.begin(), x.end()));
+    }
+    return result;
+  }
+
+  template <typename T>
+  void Output_Multislice<T>::set_psi_0(const std::vector<std::vector<T_c>>& psi_0) {
+    pimpl->psi_0.resize(psi_0.size());
+    for (auto i = 0; i < psi_0.size(); ++i) {
+      pimpl->psi_0[i].assign(psi_0[i].begin(), psi_0[i].end());
+    }
+  }
+
+  template <typename T>
   template <class TOutput_Multislice>
   void Output_Multislice<T>::assign(TOutput_Multislice &output_multislice)
   {

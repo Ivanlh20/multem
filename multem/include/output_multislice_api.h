@@ -82,6 +82,7 @@ namespace mt
 		return output_type == mt::eTEMOT_trans;
 	}
 
+
 	/**************************************************************************************/
 	template <class T>
 	class Output_Multislice : public Input_Multislice<T>
@@ -115,6 +116,33 @@ namespace mt
 
 		DLL_PUBLIC T_r& dr();
 		DLL_PUBLIC const T_r& dr() const;
+
+    DLL_PUBLIC std::vector<T_r> get_x() const;
+    DLL_PUBLIC void set_x(const std::vector<T_r>& x);
+
+    DLL_PUBLIC std::vector<T_r> get_y() const;
+    DLL_PUBLIC void set_y(const std::vector<T_r>& y);
+
+    DLL_PUBLIC std::vector<T_r> get_r() const;
+    DLL_PUBLIC void set_r(const std::vector<T_r>& r);
+
+    DLL_PUBLIC std::vector<std::vector<T_r>> get_m2psi_tot() const;
+    DLL_PUBLIC void set_m2psi_tot(const std::vector<std::vector<T_r>>& m2psi_totx);
+
+    DLL_PUBLIC std::vector<std::vector<T_r>> get_m2psi_coh() const;
+    DLL_PUBLIC void set_m2psi_coh(const std::vector<std::vector<T_r>>& m2psi_coh);
+
+    DLL_PUBLIC std::vector<std::vector<T_c>> get_psi_coh() const;
+    DLL_PUBLIC void set_psi_coh(const std::vector<std::vector<T_c>>& psi_coh);
+
+    DLL_PUBLIC std::vector<std::vector<T_r>> get_V() const;
+    DLL_PUBLIC void set_V(const std::vector<std::vector<T_r>>& V);
+
+    DLL_PUBLIC std::vector<std::vector<T_c>> get_trans() const;
+    DLL_PUBLIC void set_trans(const std::vector<std::vector<T_c>>& trans);
+
+    DLL_PUBLIC std::vector<std::vector<T_c>> get_psi_0() const;
+    DLL_PUBLIC void set_psi_0(const std::vector<std::vector<T_c>>& psi_0);
 
 		template <class TOutput_Multislice>
 		DLL_PUBLIC void assign(TOutput_Multislice &output_multislice);

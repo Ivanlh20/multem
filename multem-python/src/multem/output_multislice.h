@@ -150,27 +150,27 @@ namespace pybind11 { namespace detail {
         self.ny(),
         self.dx(),
         self.dy(),
-        self.dr());//,
-        /* self.x(), */
-        /* self.y(), */
-        /* self.r(), */
+        self.dr(),
+        self.get_x(),
+        self.get_y(),
+        self.get_r(),
         /* self.get_image_tot(), */
         /* self.get_image_coh(), */
-        /* self.get_m2psi_tot(), */
-        /* self.get_m2psi_coh(), */
-        /* self.get_psi_coh(), */
-        /* self.get_V(), */
-        /* self.get_trans(), */
-        /* self.get_psi_0(), */
-        /* self.get_thk_gpu()); */
+        0,0,
+        self.get_m2psi_tot(),
+        self.get_m2psi_coh(),
+        self.get_psi_coh(),
+        self.get_V(),
+        self.get_trans(),
+        self.get_psi_0());
     }
 
     /**
      * Set the state
      */
     static mt::Output_Multislice<T> setstate(py::tuple obj) {
-      /* typedef typename mt::Output_Multislice<T>::vector_type vector_type; */
-      /* typedef typename mt::Output_Multislice<T>::complex_vector_type complex_vector_type; */
+      typedef std::vector<T> vector_type;
+      typedef std::vector<std::complex<T>> complex_vector_type;
       mt::Output_Multislice<T> self;
       self.output_type() = obj[0].cast<mt::eTEM_Output_Type>();
       self.ndetector() = obj[1].cast<int>();
@@ -179,18 +179,17 @@ namespace pybind11 { namespace detail {
       self.dx() = obj[4].cast<T>();
       self.dy() = obj[5].cast<T>();
       self.dr() = obj[6].cast<T>();
-      /* self.x() = obj[7].cast<std::vector<T>>(); */
-      /* self.y() = obj[10].cast<std::vector<T>>(); */
-      /* self.r() = obj[11].cast<std::vector<T>>(); */
+      self.set_x(obj[7].cast<std::vector<T>>());
+      self.set_y(obj[10].cast<std::vector<T>>());
+      self.set_r(obj[11].cast<std::vector<T>>());
       /* self.set_image_tot(obj[12].cast<std::vector<mt::DetInt<vector_type>>>()); */
       /* self.set_image_coh(obj[13].cast<std::vector<mt::DetInt<vector_type>>>()); */
-      /* self.set_m2psi_tot(obj[14].cast<std::vector<vector_type>>()); */
-      /* self.set_m2psi_coh(obj[15].cast<std::vector<vector_type>>()); */
-      /* self.set_psi_coh(obj[16].cast<std::vector<complex_vector_type>>()); */
-      /* self.set_V(obj[17].cast<std::vector<vector_type>>()); */
-      /* self.set_trans(obj[18].cast<std::vector<complex_vector_type>>()); */
-      /* self.set_psi_0(obj[19].cast<std::vector<complex_vector_type>>()); */
-      /* self.set_thk_gpu(obj[20].cast<std::vector<bool>>()); */
+      self.set_m2psi_tot(obj[14].cast<std::vector<vector_type>>());
+      self.set_m2psi_coh(obj[15].cast<std::vector<vector_type>>());
+      self.set_psi_coh(obj[16].cast<std::vector<complex_vector_type>>());
+      self.set_V(obj[17].cast<std::vector<vector_type>>());
+      self.set_trans(obj[18].cast<std::vector<complex_vector_type>>());
+      self.set_psi_0(obj[19].cast<std::vector<complex_vector_type>>());
       return self;
     }
 
@@ -250,29 +249,6 @@ namespace pybind11 { namespace detail {
       self.dr() = dr;
     }
     
-    /* static int get_x(const mt::Output_Multislice<T> &self) { */
-    /*   return self.x(); */
-    /* } */
-
-    /* static void set_x(mt::Output_Multislice<T> &self, int x) { */
-    /*   self.x() = x; */
-    /* } */
-    
-    /* static int get_y(const mt::Output_Multislice<T> &self) { */
-    /*   return self.y(); */
-    /* } */
-
-    /* static void set_y(mt::Output_Multislice<T> &self, int y) { */
-    /*   self.y() = y; */
-    /* } */
-    
-    /* static int get_r(const mt::Output_Multislice<T> &self) { */
-    /*   return self.r(); */
-    /* } */
-
-    /* static void set_r(mt::Output_Multislice<T> &self, int r) { */
-    /*   self.r() = r; */
-    /* } */
   };
 
 }}
@@ -323,18 +299,18 @@ void wrap_output_multislice(py::module_ m, const char *name)
         "dr", 
         &py::detail::Helpers<Type>::get_dr,
         &py::detail::Helpers<Type>::set_dr)
-    /* .def_property( */
-    /*     "x", */ 
-    /*     &Type::get_x, */
-    /*     &Type::set_x) */
-    /* .def_property( */
-    /*     "y", */ 
-    /*     &Type::get_y, */
-    /*     &Type::set_y) */
-    /* .def_property( */
-    /*     "r", */ 
-    /*     &Type::get_r, */
-    /*     &Type::set_r) */
+    .def_property(
+        "x", 
+        &Type::get_x,
+        &Type::set_x)
+    .def_property(
+        "y", 
+        &Type::get_y,
+        &Type::set_y)
+    .def_property(
+        "r", 
+        &Type::get_r,
+        &Type::set_r)
     /* .def_property( */
     /*     "image_tot", */ 
     /*     &Type::get_image_tot, */
@@ -343,34 +319,30 @@ void wrap_output_multislice(py::module_ m, const char *name)
     /*     "image_coh", */ 
     /*     &Type::get_image_coh, */
     /*     &Type::set_image_coh) */
-    /* .def_property( */
-    /*     "m2psi_tot", */ 
-    /*     &Type::get_m2psi_tot, */
-    /*     &Type::set_m2psi_tot) */
-    /* .def_property( */
-    /*     "m2psi_coh", */ 
-    /*     &Type::get_m2psi_coh, */
-    /*     &Type::set_m2psi_coh) */
-    /* .def_property( */
-    /*     "psi_coh", */ 
-    /*     &Type::get_psi_coh, */
-    /*     &Type::set_psi_coh) */
-    /* .def_property( */
-    /*     "V", */ 
-    /*     &Type::get_V, */
-    /*     &Type::set_V) */
-    /* .def_property( */
-    /*     "trans", */ 
-    /*     &Type::get_trans, */
-    /*     &Type::set_trans) */
-    /* .def_property( */
-    /*     "psi_0", */ 
-    /*     &Type::get_psi_0, */
-    /*     &Type::set_psi_0) */
-    /* .def_property( */
-    /*     "thk_gpu", */ 
-    /*     &Type::get_thk_gpu, */
-    /*     &Type::set_thk_gpu) */
+    .def_property(
+        "m2psi_tot", 
+        &Type::get_m2psi_tot,
+        &Type::set_m2psi_tot)
+    .def_property(
+        "m2psi_coh", 
+        &Type::get_m2psi_coh,
+        &Type::set_m2psi_coh)
+    .def_property(
+        "psi_coh", 
+        &Type::get_psi_coh,
+        static_cast<void (Type::*)(const std::vector<std::vector<std::complex<T>>>&)>(&Type::set_psi_coh))
+    .def_property(
+        "V", 
+        &Type::get_V,
+        &Type::set_V)
+    .def_property(
+        "trans", 
+        &Type::get_trans,
+        &Type::set_trans)
+    .def_property(
+        "psi_0", 
+        &Type::get_psi_0,
+        &Type::set_psi_0)
     /* .def_readonly("data", &Type::data) */
     .def("gather", &Type::gather)
     .def("clean_temporal", &Type::clean_temporal)
