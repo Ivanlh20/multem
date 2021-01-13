@@ -1,5 +1,5 @@
 /*
- *  fp_dim.h
+ *  r3d.h
  *
  *  Copyright (C) 2019 Diamond Light Source
  *
@@ -9,40 +9,41 @@
  *  which is included in the root directory of this package.
  */
 
-#ifndef MULTEM_PYTHON_FP_DIM_H
-#define MULTEM_PYTHON_FP_DIM_H
+#ifndef MULTEM_PYTHON_R3D_H
+#define MULTEM_PYTHON_R3D_H
 
 #include <pybind11/pybind11.h>
 #include <multem.h>
-#include <multem/serialization.h>
+#include <multem/ext/serialization.h>
 
 namespace py = pybind11;
 
 namespace pybind11 { namespace detail {
   
   /**
-   * Type cast a mt::FP_Dim object to a tuple
+   * Type cast a mt::r3d<T> object to a tuple
    */
   template <> 
-  class type_caster<mt::FP_Dim> {
+  template <typename T>
+  class type_caster<mt::r3d<T>> {
   public:
   
-    PYBIND11_TYPE_CASTER(mt::FP_Dim, _("mt::FP_Dim"));
+    PYBIND11_TYPE_CASTER(mt::r3d<T>, _("mt::r3d<T>"));
 
     bool load(handle src, bool convert) {
       if (py::isinstance<py::tuple>(src)) {
         py::tuple t = py::cast<py::tuple>(src);
         if (py::len(t) == 3) {
-          value.x = py::cast<bool>(t[0]);
-          value.y = py::cast<bool>(t[1]);
-          value.z = py::cast<bool>(t[2]);
+          value.x = py::cast<double>(t[0]);
+          value.y = py::cast<double>(t[1]);
+          value.z = py::cast<double>(t[2]);
           return true;
         }
       }
       return false;
     }
 
-    static handle cast(mt::FP_Dim src, return_value_policy policy, handle parent) {
+    static handle cast(mt::r3d<T> src, return_value_policy policy, handle parent) {
       return py::make_tuple(
         src.x, 
         src.y, 
@@ -52,11 +53,10 @@ namespace pybind11 { namespace detail {
  
 }}
 
-void export_fp_dim(py::module_ m) {
+void export_r3d(py::module_ m) {
 }
 
 #endif
-
 
 
 

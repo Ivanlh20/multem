@@ -26,7 +26,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH True)
 ##############################################################################
 
 # Add a C/C++ extension
-pybind11_add_module(multem_ext src/multem/multem_ext.cpp)
+pybind11_add_module(multem_ext src/multem/ext/multem_ext.cpp)
 
 # Ensure we are using C++11
 target_compile_features(multem_ext PUBLIC cxx_std_14)
