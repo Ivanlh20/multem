@@ -30,356 +30,6 @@
 
 namespace mt {
   
-
-  /****************************************************************************
-   * The Output interface
-   ***************************************************************************/
-
-  template <typename T>
-  struct Output<T>::Data {
-    Output_Multislice<T> data;
-
-    // Constructors required due to behaviour of Output_Multislice. Would
-    // probably be better if we could fix Output_Multislice so that the normal
-    // copy constructors work.
-    Data() = default;
-    Data(Data&) = default;
-    Data& operator=(Data& other) {
-      data = other.data;
-      return *this;
-    }
-  };
-
-  template <typename T>
-  Output<T>::Output()
-      : impl_(std::make_unique<Data>()) {}
-
-  template <typename T>
-  Output<T>::Output(Output& other)
-      : impl_(std::make_unique<Data>(*other.impl_)) {}
-
-  template <typename T>
-  Output<T>::Output(Output&& other) = default;
-
-  template <typename T>
-  Output<T>::Output(Output<T>::Data& other)
-      : impl_(std::make_unique<Data>(other)) {}
-
-  template <typename T>
-  Output<T>& Output<T>::operator=(Output<T>& other) {
-    *impl_ = *other.impl_;
-    return *this;
-  }
-
-  template <typename T>
-  Output<T>& Output<T>::operator=(Output<T>&&) = default;
-
-  template <typename T>
-  Output<T>::~Output<T>() = default;
-
-  template <typename T>
-  const Output<T>::Data& Output<T>::internal() const {
-    return *impl_;
-  }
-  
-  template <typename T>
-  Output<T>::Data& Output<T>::internal() {
-    return *impl_;
-  }
-
-  template <typename T>
-  void Output<T>::set_input_data(Input_Multislice<T> &input) {
-    impl_->data.set_input_data(&input);
-  }
-
-  template <typename T>
-  eTEM_Output_Type Output<T>::get_output_type() const {
-    return impl_->data.output_type;
-  }
-  
-  template <typename T>
-  void Output<T>::set_output_type(eTEM_Output_Type output_type) {
-    impl_->data.output_type = output_type;
-  }
-
-  template <typename T>
-  int Output<T>::get_ndetector() const {
-    return impl_->data.ndetector;
-  }
-		
-  template <typename T>
-  void Output<T>::set_ndetector(int ndetector) {
-    impl_->data.ndetector = ndetector;
-  }
-
-  template <typename T>
-  int Output<T>::get_nx() const {
-    return impl_->data.nx;
-  }
-
-  template <typename T>
-  void Output<T>::set_nx(int nx) {
-    impl_->data.nx = nx;
-  }
-
-  template <typename T>
-  int Output<T>::get_ny() const {
-    return impl_->data.ny;
-  }
-
-  template <typename T>
-  void Output<T>::set_ny(int ny) {
-    impl_->data.ny = ny;
-  }
-
-  template <typename T>
-  T Output<T>::get_dx() const {
-    return impl_->data.dx;
-  }
-
-  template <typename T>
-  void Output<T>::set_dx(T dx) {
-    impl_->data.dx = dx;
-  }
-
-  template <typename T>
-  T Output<T>::get_dy() const {
-    return impl_->data.dy;
-  }
-
-  template <typename T>
-  void Output<T>::set_dy(T dy) {
-    impl_->data.dy = dy;
-  }
-
-  template <typename T>
-  T Output<T>::get_dr() const {
-    return impl_->data.dr;
-  }
-
-  template <typename T>
-  void Output<T>::set_dr(T dr) {
-    impl_->data.dr = dr;
-  }
-
-  template <typename T>
-  std::vector<T> Output<T>::get_x() const {
-    return std::vector<T>(impl_->data.x.begin(), impl_->data.x.end());
-  }
-
-  template <typename T>
-  void Output<T>::set_x(const std::vector<T>& x) {
-    impl_->data.x.assign(x.begin(), x.end());
-  }
-
-  template <typename T>
-  std::vector<T> Output<T>::get_y() const {
-    return std::vector<T>(impl_->data.y.begin(), impl_->data.y.end());
-  }
-
-  template <typename T>
-  void Output<T>::set_y(const std::vector<T>& y) {
-    impl_->data.y.assign(y.begin(), y.end());
-  }
-
-  template <typename T>
-  std::vector<T> Output<T>::get_r() const {
-    return std::vector<T>(impl_->data.r.begin(), impl_->data.r.end());
-  }
-
-  template <typename T>
-  void Output<T>::set_r(const std::vector<T>& r) {
-    impl_->data.r.assign(r.begin(), r.end());
-  }
-    
-  template <typename T>
-  std::vector<DetInt<typename Output<T>::vector_type>> Output<T>::get_image_tot() const {
-    std::vector<DetInt<vector_type>> result;
-    for (auto &x : impl_->data.image_tot) {
-      DetInt<vector_type> d;
-      for (auto &y : x.image) {
-        d.image.push_back(vector_type(y.begin(), y.end()));
-      }
-      result.push_back(d);
-    }
-    return result;
-  }
-
-  template <typename T>
-  void Output<T>::set_image_tot(const std::vector<DetInt<vector_type>>& image_tot) {
-    typedef typename Output_Multislice<T>::TVector_hr TVector_hr;
-    host_vector<Det_Int<TVector_hr>> result;
-    for (auto &x : image_tot) {
-      Det_Int<TVector_hr> d;
-      for (auto &y : x.image) {
-        d.image.push_back(TVector_hr(y.begin(), y.end()));
-      }
-      result.push_back(d);
-    }
-    impl_->data.image_tot = result;
-  }
-
-  template <typename T>
-  std::vector<DetInt<typename Output<T>::vector_type>> Output<T>::get_image_coh() const {
-    std::vector<DetInt<vector_type>> result;
-    for (auto &x : impl_->data.image_coh) {
-      DetInt<vector_type> d;
-      for (auto &y : x.image) {
-        d.image.push_back(vector_type(y.begin(), y.end()));
-      }
-      result.push_back(d);
-    }
-    return result;
-  }
-
-  template <typename T>
-  void Output<T>::set_image_coh(const std::vector<DetInt<vector_type>>& image_coh) {
-    typedef typename Output_Multislice<T>::TVector_hr vector_type;
-    host_vector<Det_Int<vector_type>> result;
-    for (auto &x : image_coh) {
-      Det_Int<vector_type> d;
-      for (auto &y : x.image) {
-        d.image.push_back(vector_type(y.begin(), y.end()));
-      }
-      result.push_back(d);
-    }
-    impl_->data.image_coh = result;
-  }
-
-  template <typename T>
-  std::vector<typename Output<T>::vector_type> Output<T>::get_m2psi_tot() const {
-    std::vector<vector_type> result;
-    for (auto &x : impl_->data.m2psi_tot) {
-      result.push_back(vector_type(x.begin(), x.end()));
-    }
-    return result;
-  }
-
-  template <typename T>
-  void Output<T>::set_m2psi_tot(const std::vector<vector_type>& m2psi_tot) {
-    typedef typename Output_Multislice<T>::TVector_hr TVector_hr;
-    host_vector<TVector_hr> result;
-    for (auto &x : m2psi_tot) {
-      result.push_back(TVector_hr(x.begin(), x.end()));
-    }
-    impl_->data.m2psi_tot = result;
-  }
-
-  template <typename T>
-  std::vector<typename Output<T>::vector_type> Output<T>::get_m2psi_coh() const {
-    std::vector<vector_type> result;
-    for (auto &x : impl_->data.m2psi_coh) {
-      result.push_back(vector_type(x.begin(), x.end()));
-    }
-    return result;
-  }
-
-  template <typename T>
-  void Output<T>::set_m2psi_coh(const std::vector<vector_type>& m2psi_coh) {
-    typedef typename Output_Multislice<T>::TVector_hr TVector_hr;
-    host_vector<TVector_hr> result;
-    for (auto &x : m2psi_coh) {
-      result.push_back(TVector_hr(x.begin(), x.end()));
-    }
-    impl_->data.m2psi_coh = result;
-  }
-
-  template <typename T>
-  std::vector<typename Output<T>::complex_vector_type> Output<T>::get_psi_coh() const {
-    std::vector<complex_vector_type> result;
-    for (auto &x : impl_->data.psi_coh) {
-      result.push_back(complex_vector_type(x.begin(), x.end()));
-    }
-    return result;
-  }
-
-  template <typename T>
-  void Output<T>::set_psi_coh(const std::vector<complex_vector_type>& psi_coh) {
-    typedef typename Output_Multislice<T>::TVector_hc TVector_hc;
-    host_vector<TVector_hc> result;
-    for (auto &x : psi_coh) {
-      result.push_back(TVector_hc(x.begin(), x.end()));
-    }
-    impl_->data.psi_coh = result;
-  }
-
-  template <typename T>
-  std::vector<typename Output<T>::vector_type> Output<T>::get_V() const {
-    std::vector<vector_type> result;
-    for (auto &x : impl_->data.V) {
-      result.push_back(vector_type(x.begin(), x.end()));
-    }
-    return result;
-  }
-
-  template <typename T>
-  void Output<T>::set_V(const std::vector<vector_type>& V) {
-    typedef typename Output_Multislice<T>::TVector_hr TVector_hr;
-    host_vector<TVector_hr> result;
-    for (auto &x : V) {
-      result.push_back(TVector_hr(x.begin(), x.end()));
-    }
-    impl_->data.V = result;
-  }
-
-  template <typename T>
-  std::vector<typename Output<T>::complex_vector_type> Output<T>::get_trans() const {
-    std::vector<complex_vector_type> result;
-    for (auto &x : impl_->data.trans) {
-      result.push_back(complex_vector_type(x.begin(), x.end()));
-    }
-    return result;
-  }
-
-  template <typename T>
-  void Output<T>::set_trans(const std::vector<complex_vector_type>& trans) {
-    typedef typename Output_Multislice<T>::TVector_hc TVector_hc;
-    host_vector<TVector_hc> result;
-    for (auto &x : trans) {
-      result.push_back(TVector_hc(x.begin(), x.end()));
-    }
-    impl_->data.trans = result;
-  }
-
-  template <typename T>
-  std::vector<typename Output<T>::complex_vector_type> Output<T>::get_psi_0() const {
-    std::vector<complex_vector_type> result;
-    for (auto &x : impl_->data.psi_0) {
-      result.push_back(complex_vector_type(x.begin(), x.end()));
-    }
-    return result;
-  }
-
-  template <typename T>
-  void Output<T>::set_psi_0(const std::vector<complex_vector_type>& psi_0) {
-    typedef typename Output_Multislice<T>::TVector_hc TVector_hc;
-    host_vector<TVector_hc> result;
-    for (auto &x : psi_0) {
-      result.push_back(TVector_hc(x.begin(), x.end()));
-    }
-    impl_->data.psi_0 = result;
-  }
-
-  template <typename T>
-  std::vector<bool> Output<T>::get_thk_gpu() const {
-    return std::vector<bool>(impl_->data.thk_gpu.begin(), impl_->data.thk_gpu.end());
-  }
-
-  template <typename T>
-  void Output<T>::set_thk_gpu(const std::vector<bool>& thk_gpu) {
-    impl_->data.thk_gpu.assign(thk_gpu.begin(), thk_gpu.end());
-  }
-
-  template <typename T>
-  void Output<T>::gather() {
-    impl_->data.gather();
-  }
-  
-  template <typename T>
-  void Output<T>::clean_temporal() {
-    impl_->data.clean_temporal();
-  }
- 
   /****************************************************************************
    * Logging functions
    ***************************************************************************/
@@ -512,7 +162,7 @@ namespace mt {
   namespace detail {
   
     template <typename T, eDevice dev>
-    mt::Output<T> tem_simulation_internal(Input_Multislice<T>& input_multislice) {
+    mt::Output_Multislice<T> tem_simulation_internal(Input_Multislice<T>& input_multislice) {
 
       // Ensure we have the correct function
       MULTEM_ASSERT(input_multislice.system_conf.device == dev);
@@ -530,9 +180,9 @@ namespace mt {
       simulate.set_input_data(&input_multislice, &stream, &fft_2d);
 
       // Initialise the output data
-      mt::Output<T> output_multislice;
-      output_multislice.set_input_data(input_multislice);
-      simulate(output_multislice.internal().data);
+      mt::Output_Multislice<T> output_multislice;
+      output_multislice.set_input_data(&input_multislice);
+      simulate(output_multislice);
       stream.synchronize();
 
       // Finalise the output data
@@ -556,7 +206,7 @@ namespace mt {
   }
 
   template <typename T>
-  mt::Output<T> tem_simulation(Input_Multislice<T>& input_multislice) {
+  mt::Output_Multislice<T> tem_simulation(Input_Multislice<T>& input_multislice) {
     eDevice dev = input_multislice.system_conf.device;
     return (dev == mt::e_device 
         ? detail::tem_simulation_internal<T, mt::e_device>(input_multislice)
@@ -578,11 +228,11 @@ namespace mt {
   template class Input_Multislice<float>;
   template class Input_Multislice<double>;
 
-  template class Output<float>;
-  template class Output<double>;
+  template class Output_Multislice<float>;
+  template class Output_Multislice<double>;
 
-  template mt::Output<float> tem_simulation<float>(Input_Multislice<float>&);
-  template mt::Output<double> tem_simulation<double>(Input_Multislice<double>&);
+  template mt::Output_Multislice<float> tem_simulation<float>(Input_Multislice<float>&);
+  template mt::Output_Multislice<double> tem_simulation<double>(Input_Multislice<double>&);
 
   template std::string mt::to_string<float>(const Lens<float>&, const std::string&);
   template std::string mt::to_string<double>(const Lens<double>&, const std::string&);

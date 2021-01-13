@@ -145,7 +145,7 @@ namespace mt
 						for(auto iDet = 0; iDet<detector.size(); iDet++)
 						{
 							int iscan = this->input_multislice->iscan[0];
-							output_multislice.image_tot[ithk].image[iDet][iscan] += integrated_intensity_over_det(w_i, iDet, *psi_z_o);
+							output_multislice.data().image_tot[ithk].image[iDet][iscan] += integrated_intensity_over_det(w_i, iDet, *psi_z_o);
 						}
 
 						if(this->input_multislice->pn_coh_contrib)
@@ -202,7 +202,7 @@ namespace mt
 						for(auto iDet = 0; iDet<detector.size(); iDet++)
 						{
 							int iscan = this->input_multislice->iscan[0];
-							output_multislice.image_coh[ithk].image[iDet][iscan] = integrated_intensity_over_det(1, iDet, psi_z);
+							output_multislice.data().image_coh[ithk].image[iDet][iscan] = integrated_intensity_over_det(1, iDet, psi_z);
 						}
 					}
 				}
@@ -285,7 +285,7 @@ namespace mt
 					if(this->input_multislice->is_EELS())
 					{
 						int iscan = this->input_multislice->iscan[0];
-						output_multislice.image_tot[ithk].image[0][iscan] += w_i*mt::sum_square_over_Det(*(this->stream), this->input_multislice->grid_2d, 0, this->input_multislice->eels_fr.g_collection, psi_z);
+						output_multislice.data().image_tot[ithk].image[0][iscan] += w_i*mt::sum_square_over_Det(*(this->stream), this->input_multislice->grid_2d, 0, this->input_multislice->eels_fr.g_collection, psi_z);
 					}
 					else
 					{
