@@ -155,13 +155,13 @@ namespace pybind11 { namespace detail {
       self.ct_y0 = obj[11].cast<T>();
       self.amorp_lay_info = obj[12].cast<std::vector<mt::Amorp_Lay_Info<T>>>();
       self.Z = obj[13].cast<std::vector<int>>();
-      self.x = obj[13].cast<std::vector<T>>();
-      self.y = obj[13].cast<std::vector<T>>();
-      self.z = obj[13].cast<std::vector<T>>();
-      self.sigma = obj[13].cast<std::vector<T>>();
-      self.occ = obj[13].cast<std::vector<T>>();
-      self.region = obj[13].cast<std::vector<int>>();
-      self.charge = obj[13].cast<std::vector<int>>();
+      self.x = obj[14].cast<std::vector<T>>();
+      self.y = obj[15].cast<std::vector<T>>();
+      self.z = obj[16].cast<std::vector<T>>();
+      self.sigma = obj[17].cast<std::vector<T>>();
+      self.occ = obj[18].cast<std::vector<T>>();
+      self.region = obj[19].cast<std::vector<int>>();
+      self.charge = obj[20].cast<std::vector<int>>();
       self.get_statistic();
       return self;
     }
@@ -333,6 +333,9 @@ void wrap_atom_data(py::module_ m)
         &py::detail::Helpers<Type>::set_spec_atoms)
     .def("get_statistic", &Type::get_statistic)
     .def("sort_by_z", &Type::sort_by_z)
+    .def(py::pickle(
+        &py::detail::Helpers<Type>::getstate,
+        &py::detail::Helpers<Type>::setstate))
     ;
 }
 

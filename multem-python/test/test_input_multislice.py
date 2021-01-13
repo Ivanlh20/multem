@@ -5,7 +5,7 @@ import pickle
 
 def test_input_multislice_standard():
     
-    input = multem.Input()
+    input = multem.Input_Multislice()
 
     system_conf = multem.System_Configuration()
     system_conf.device = "device"
@@ -153,7 +153,7 @@ def test_input_multislice_standard():
 def test_input_multislice_extended():
     pass
 
-    input = multem.Input()
+    input = multem.Input_Multislice()
 
     input.spec_atoms = [(1, 2, 3, 4, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8, 9)]
 
@@ -286,7 +286,7 @@ def test_input_multislice_extended():
     input.output_area_iy_e = 40
 
     def check():
-        assert input.spec_atoms == pytest.approx([(1, 2, 3, 4, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8, 9)])
+        assert numpy.array(input.spec_atoms) == pytest.approx(numpy.array([(1, 2, 3, 4, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8, 9)]))
 
         assert input.spec_dz == pytest.approx(50.1)
         assert input.spec_lx == pytest.approx(60.1)
