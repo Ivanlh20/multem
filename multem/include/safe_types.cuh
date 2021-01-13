@@ -19,6 +19,28 @@
 #ifndef SAFE_TYPES_H
 #define SAFE_TYPES_H
 
+#if defined _WIN32 || defined __CYGWIN__
+  #ifdef BUILDING_DLL
+    #ifdef __GNUC__
+      #define DLL_PUBLIC __attribute__ ((dllexport))
+    #else
+      #define DLL_PUBLIC __declspec(dllexport)
+    #endif
+  #else
+    #ifdef __GNUC__
+      #define DLL_PUBLIC __attribute__ ((dllimport))
+    #else
+      #define DLL_PUBLIC __declspec(dllimport)
+    #endif
+  #endif
+#else
+  #if __GNUC__ >= 4
+    #define DLL_PUBLIC __attribute__ ((visibility ("default")))
+  #else
+    #define DLL_PUBLIC
+  #endif
+#endif
+
 #ifndef DEVICE_CALLABLE
 	#ifdef __CUDACC__
 		#define DEVICE_CALLABLE __host__ __device__
@@ -1831,7 +1853,7 @@ namespace mt
 			c_c_10(0), c_c_12(0), c_c_21(0), c_c_23(0), c_c_30(0), c_c_32(0), c_c_34(0), c_c_41(0),
 			c_c_43(0), c_c_45(0), c_c_50(0), c_c_52(0), c_c_54(0), c_c_56(0) {}
 
-		void set_input_data(T E_0, Grid_2d<T> &grid_2d);
+		DLL_PUBLIC void set_input_data(T E_0, Grid_2d<T> &grid_2d);
 
 		void set_ti_sigma(T ti_sigma_i)
 		{
@@ -2162,7 +2184,7 @@ namespace mt
 		m_selection(0), collection_angle(0), channelling_type(eCT_Double_Channelling),
 		g_collection(0), factor(0), Z(0), x(0), y(0), occ(0){}
 
-		void set_input_data(eSpace space_i, T E_0_i, T E_loss_i, int m_selection_i, T collection_angle_i, eChannelling_Type channelling_type_i, int Z_i);
+		DLL_PUBLIC void set_input_data(eSpace space_i, T E_0_i, T E_loss_i, int m_selection_i, T collection_angle_i, eChannelling_Type channelling_type_i, int Z_i);
 
 		template <class TEELS>
 		void assign(TEELS &eels)
@@ -2493,18 +2515,18 @@ namespace mt
 			int nstream;
 			bool active;
 
-			System_Configuration();
-			void validate_parameters();
-			void set_device();
- 			int get_device();
-			bool is_host() const;
-			bool is_device() const;
-			bool is_float() const;
-			bool is_double() const;
-			bool is_float_host() const;
-			bool is_double_host() const;
-			bool is_float_device() const;
-			bool is_double_device() const;
+			DLL_PUBLIC System_Configuration();
+			DLL_PUBLIC void validate_parameters();
+			DLL_PUBLIC void set_device();
+ 			DLL_PUBLIC int get_device();
+			DLL_PUBLIC bool is_host() const;
+			DLL_PUBLIC bool is_device() const;
+			DLL_PUBLIC bool is_float() const;
+			DLL_PUBLIC bool is_double() const;
+			DLL_PUBLIC bool is_float_host() const;
+			DLL_PUBLIC bool is_double_host() const;
+			DLL_PUBLIC bool is_float_device() const;
+			DLL_PUBLIC bool is_double_device() const;
 
 		private:
 			int n_gpu;

@@ -387,7 +387,8 @@ namespace mt
 			}
 
 			// find atoms in slice
-			int fd_by_z(TVector_r &z, T z_e, bool Inc_Borders)
+      template <typename VectorType>
+			int fd_by_z(VectorType &z, T z_e, bool Inc_Borders)
 			{
 				int iz_e =-1;
 				z_e = (Inc_Borders)?z_e+Epsilon<T>::rel:z_e;
@@ -408,7 +409,8 @@ namespace mt
 			}
 
 			// find atoms in slice
-			void fd_by_z(TVector_r &z, T z_0, T z_e, int &iz_0, int &iz_e, bool Inc_Borders)
+      template <typename VectorType>
+			void fd_by_z(VectorType &z, T z_0, T z_e, int &iz_0, int &iz_e, bool Inc_Borders)
 			{
 				z_0 = (Inc_Borders)?(z_0-Epsilon<T>::rel):z_0;
 				z_e = (Inc_Borders)?(z_e+Epsilon<T>::rel):z_e;
