@@ -21,56 +21,56 @@ namespace py = pybind11;
 namespace pybind11 { namespace detail {
 
   template <typename T>
-  void check_input_multislice(mt::Input<T> &input) {
+  void check_input_multislice(mt::Input_Multislice<T> &input) {
     bool pbc_xy = true;
 
     // Get atom statistic or delete atoms
     if (input.is_specimen_required()) {
-      input.get_atoms().get_statistic();
+      input.atoms.get_statistic();
     } else {
-      input.get_atoms().clear();
+      input.atoms.clear();
     }
 
     // Delete thick if needed
     if (!input.is_specimen_required() || input.is_whole_spec()) {
-      input.set_thick(std::vector<double>());
+      input.thick.clear();
     }
 
     // Set grid input data
-    input.get_grid_2d().set_input_data(
-        input.get_grid_2d().nx, 
-        input.get_grid_2d().ny, 
-        input.get_grid_2d().lx, 
-        input.get_grid_2d().ly, 
-        input.get_grid_2d().dz, 
-        input.get_grid_2d().bwl, 
+    input.grid_2d.set_input_data(
+        input.grid_2d.nx, 
+        input.grid_2d.ny, 
+        input.grid_2d.lx, 
+        input.grid_2d.ly, 
+        input.grid_2d.dz, 
+        input.grid_2d.bwl, 
         pbc_xy);
 
     // Delete input wave if not user defined
     if (!(input.is_user_define_wave())) {
-      input.set_iw_psi(std::vector<std::complex<T>>());
+      input.iw_psi.clear();
     }
 
     // Set lens input data
-    input.get_cond_lens().set_input_data(
-        input.get_E_0(), 
-        input.get_grid_2d());
-    input.get_obj_lens().set_input_data(
-        input.get_E_0(), 
-        input.get_grid_2d());
+    input.cond_lens.set_input_data(
+        input.E_0, 
+        input.grid_2d);
+    input.obj_lens.set_input_data(
+        input.E_0, 
+        input.grid_2d);
 
     // Set scanning grid
     if (input.is_scanning()) {
-      input.get_scanning().set_grid();
+      input.scanning.set_grid();
     }
 
     // Check STEM, EELS and EFTEM parameters
     if (input.is_STEM()) {
-      T lambda = input.get_cond_lens().lambda;
-      switch (input.get_detector().type) {
+      T lambda = input.cond_lens.lambda;
+      switch (input.detector.type) {
       case mt::eDT_Circular:
         {
-          auto& detector = input.get_detector();
+          auto& detector = input.detector;
           auto inner_ang = detector.inner_ang;
           auto outer_ang = detector.outer_ang;
           std::vector<T> g_inner(inner_ang.size());
@@ -85,23 +85,23 @@ namespace pybind11 { namespace detail {
         break;
       };
     } else if (input.is_EELS()) {
-      input.get_eels_fr().set_input_data(
+      input.eels_fr.set_input_data(
           mt::eS_Reciprocal, 
-          input.get_E_0(), 
-          input.get_eels_fr().E_loss, 
-          input.get_eels_fr().m_selection, 
-          input.get_eels_fr().collection_angle, 
-          input.get_eels_fr().channelling_type, 
-          input.get_eels_fr().Z);
+          input.E_0, 
+          input.eels_fr.E_loss, 
+          input.eels_fr.m_selection, 
+          input.eels_fr.collection_angle, 
+          input.eels_fr.channelling_type, 
+          input.eels_fr.Z);
     } else if (input.is_EFTEM()) {
-      input.get_eels_fr().set_input_data(
+      input.eels_fr.set_input_data(
           mt::eS_Real, 
-          input.get_E_0(), 
-          input.get_eels_fr().E_loss, 
-          input.get_eels_fr().m_selection, 
-          input.get_eels_fr().collection_angle, 
-          input.get_eels_fr().channelling_type, 
-          input.get_eels_fr().Z);
+          input.E_0, 
+          input.eels_fr.E_loss, 
+          input.eels_fr.m_selection, 
+          input.eels_fr.collection_angle, 
+          input.eels_fr.channelling_type, 
+          input.eels_fr.Z);
     }
 
     // Validate the parameters
@@ -109,9 +109,9 @@ namespace pybind11 { namespace detail {
   }
 
   object tem_simulation(
-      mt::Input<double> &input, 
+      mt::Input_Multislice<double> &input, 
       const mt::System_Configuration &sys_conf) {
-    input.set_system_conf(sys_conf);
+    input.system_conf = sys_conf;
     check_input_multislice(input);
     return py::cast(mt::tem_simulation<double>(input));
   }

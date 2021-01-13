@@ -72,6 +72,7 @@ install(FILES include/math.cuh DESTINATION include)
 install(FILES include/safe_types.cuh DESTINATION include)
 install(FILES include/multem/constants.h DESTINATION include/multem)
 install(FILES include/atom_data_api.h DESTINATION include)
+install(FILES include/input_multislice_api.h DESTINATION include)
 
 ##############################################################################
 # Build the test executable

@@ -50,8 +50,9 @@ namespace mt
 				z_plane = get_z_plane(m_input_multislice->potential_slicing, *m_atoms_r);
 			}
 
+      template <typename VectorType>
 			void match_thickness(ePotential_Slicing pot_sli, Atom_Data<T> &atoms, 
-			eThick_Type thick_type, TVector_r &thick)
+			eThick_Type thick_type, VectorType &thick)
 			{
 				if(thick_type == eTT_Whole_Spec)
 				{

@@ -210,7 +210,7 @@ void wrap_det_int(py::module_ m, const char *name)
 template <typename T>
 void wrap_output_multislice(py::module_ m, const char *name)
 {
-  typedef mt::Input<T> Parent;
+  typedef mt::Input_Multislice<T> Parent;
   typedef mt::Output<T> Type;
 
   py::class_<Type, Parent>(m, name)
