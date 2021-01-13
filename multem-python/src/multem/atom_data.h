@@ -20,6 +20,51 @@
 
 namespace py = pybind11;
 
+namespace mt {
+
+  template <typename T>
+  class Atom {
+  public:
+    int Z;
+    T x;
+    T y;
+    T z;
+    T sigma;
+    T occ;
+    int region;
+    int charge;
+
+    Atom()
+      : Z(0),
+        x(0),
+        y(0),
+        z(0),
+        sigma(0),
+        occ(0),
+        region(0),
+        charge(0) {}
+
+    Atom(int Z_in,
+         T x_in,
+         T y_in,
+         T z_in,
+         T sigma_in,
+         T occ_in,
+         T region_in,
+         T charge_in)
+      : Z(Z_in),
+        x(x_in),
+        y(y_in),
+        z(z_in),
+        sigma(sigma_in),
+        occ(occ_in),
+        region(region_in),
+        charge(charge_in) {}
+  };
+  
+
+}
+
 // Make the vector of atoms opaque
 PYBIND11_MAKE_OPAQUE(std::vector<mt::Atom<double>>);
 
@@ -57,52 +102,100 @@ namespace pybind11 { namespace detail {
   };
   
   /**
-   * Define wrapper function for the mt::AtomData class
+   * Define wrapper function for the mt::Atom_Data class
    */
   template <>
   template <typename T>
-  struct Helpers <mt::AtomData<T>> {
+  struct Helpers <mt::Atom_Data<T>> {
 
     /**
      * Get the state
      */
-    static py::tuple getstate(const mt::AtomData<T> &self) {
+    static py::tuple getstate(const mt::Atom_Data<T> &self) {
       return py::make_tuple(
-          self.get_dz(),
-          self.get_l_x(),
-          self.get_l_y(),
-          self.get_l_z(),
-          self.get_ct_na(),
-          self.get_ct_nb(),
-          self.get_ct_nc(),
-          self.get_ct_a(),
-          self.get_ct_b(),
-          self.get_ct_c(),
-          self.get_ct_x0(),
-          self.get_ct_y0(),
-          self.get_amorphous_parameters(),
-          self.get_spec_atoms());
+          self.dz,
+          self.l_x,
+          self.l_y,
+          self.l_z,
+          self.ct_na,
+          self.ct_nb,
+          self.ct_nc,
+          self.ct_a,
+          self.ct_b,
+          self.ct_c,
+          self.ct_x0,
+          self.ct_y0,
+          self.amorp_lay_info,
+          self.Z,
+          self.x,
+          self.y,
+          self.z,
+          self.sigma,
+          self.occ,
+          self.region,
+          self.charge);
     }
 
     /**
      * Set the state
      */
-    static void setstate(mt::AtomData<T>& self, py::tuple obj) {
-      self.set_dz(obj[0].cast<T>());
-      self.set_l_x(obj[1].cast<T>());
-      self.set_l_y(obj[2].cast<T>());
-      self.set_l_z(obj[3].cast<T>());
-      self.set_ct_na(obj[4].cast<int>());
-      self.set_ct_nb(obj[5].cast<int>());
-      self.set_ct_nc(obj[6].cast<int>());
-      self.set_ct_a(obj[7].cast<T>());
-      self.set_ct_b(obj[8].cast<T>());
-      self.set_ct_c(obj[9].cast<T>());
-      self.set_ct_x0(obj[10].cast<T>());
-      self.set_ct_y0(obj[11].cast<T>());
-      self.set_amorphous_parameters(obj[12].cast<std::vector<mt::Amorp_Lay_Info<T>>>());
-      self.set_spec_atoms(obj[13].cast<std::vector<mt::Atom<T>>>());
+    static mt::Atom_Data<T> setstate(py::tuple obj) {
+      mt::Atom_Data<T> self; 
+      self.dz = obj[0].cast<T>();
+      self.l_x = obj[1].cast<T>();
+      self.l_y = obj[2].cast<T>();
+      self.l_z = obj[3].cast<T>();
+      self.ct_na = obj[4].cast<int>();
+      self.ct_nb = obj[5].cast<int>();
+      self.ct_nc = obj[6].cast<int>();
+      self.ct_a = obj[7].cast<T>();
+      self.ct_b = obj[8].cast<T>();
+      self.ct_c = obj[9].cast<T>();
+      self.ct_x0 = obj[10].cast<T>();
+      self.ct_y0 = obj[11].cast<T>();
+      self.amorp_lay_info = obj[12].cast<std::vector<mt::Amorp_Lay_Info<T>>>();
+      self.Z = obj[13].cast<std::vector<int>>();
+      self.x = obj[13].cast<std::vector<T>>();
+      self.y = obj[13].cast<std::vector<T>>();
+      self.z = obj[13].cast<std::vector<T>>();
+      self.sigma = obj[13].cast<std::vector<T>>();
+      self.occ = obj[13].cast<std::vector<T>>();
+      self.region = obj[13].cast<std::vector<int>>();
+      self.charge = obj[13].cast<std::vector<int>>();
       self.get_statistic();
+      return self;
+    }
+  
+    static
+    std::vector<mt::Atom<T>> get_spec_atoms(const mt::Atom_Data<T> &self) {
+      std::vector<mt::Atom<T>> result(self.size());
+      for (auto i = 0; i < result.size(); ++i) {
+        result[i] = mt::Atom<T>(
+            self.Z[i],
+            self.x[i],
+            self.y[i],
+            self.z[i],
+            self.sigma[i],
+            self.occ[i],
+            self.region[i],
+            self.charge[i]);
+      }
+      return result;
+    }
+
+    static
+    void set_spec_atoms(mt::Atom_Data<T> &self, const std::vector<mt::Atom<T>>& spec_atoms) {
+      self.resize(spec_atoms.size());
+      for (auto i = 0; i < spec_atoms.size(); ++i) {
+        self.Z[i] = spec_atoms[i].Z;
+        self.x[i] = spec_atoms[i].x;
+        self.y[i] = spec_atoms[i].y;
+        self.z[i] = spec_atoms[i].z;
+        self.sigma[i] = spec_atoms[i].sigma;
+        self.occ[i] = spec_atoms[i].occ;
+        self.region[i] = spec_atoms[i].region;
+        self.charge[i] = spec_atoms[i].charge;
+      }
     }
 
   };
@@ -170,67 +263,76 @@ void wrap_atom(py::module_ m)
 template <typename T>
 void wrap_atom_data(py::module_ m)
 {
-  typedef mt::AtomData<T> Type;
+  typedef mt::Atom_Data<T> Type;
 
   // Wrap the mt::Input class
-  py::class_<Type>(m, "AtomData")
-    .def_property(
-        "dz",
-        &Type::get_dz,
-        &Type::set_dz)
-    .def_property(
-        "l_x",
-        &Type::get_l_x,
-        &Type::set_l_x)
-    .def_property(
-        "l_y",
-        &Type::get_l_y,
-        &Type::set_l_y)
-    .def_property(
-        "l_z",
-        &Type::get_l_z,
-        &Type::set_l_z)
-    .def_property(
-        "ct_na",
-        &Type::get_ct_na,
-        &Type::set_ct_na)
-    .def_property(
-        "ct_nb",
-        &Type::get_ct_nb,
-        &Type::set_ct_nb)
-    .def_property(
-        "ct_nc",
-        &Type::get_ct_nc,
-        &Type::set_ct_nc)
-    .def_property(
-        "ct_a",
-        &Type::get_ct_a,
-        &Type::set_ct_a)
-    .def_property(
-        "ct_b",
-        &Type::get_ct_b,
-        &Type::set_ct_b)
-    .def_property(
-        "ct_c",
-        &Type::get_ct_c,
-        &Type::set_ct_c)
-    .def_property(
-        "ct_x0",
-        &Type::get_ct_x0,
-        &Type::set_ct_x0)
-    .def_property(
-        "ct_y0",
-        &Type::get_ct_y0,
-        &Type::set_ct_y0)
-    .def_property(
-        "amorphous_parameters",
-        &Type::get_amorphous_parameters,
-        &Type::set_amorphous_parameters)
+  py::class_<Type>(m, "Atom_Data")
+    .def_readwrite("dz", &Type::dz)
+    .def_readwrite("l_x", &Type::l_x)
+    .def_readwrite("l_y", &Type::l_y)
+    .def_readwrite("l_z", &Type::l_z)
+    .def_readwrite("ct_na", &Type::ct_na)
+    .def_readwrite("ct_nb", &Type::ct_nb)
+    .def_readwrite("ct_nc", &Type::ct_nc)
+    .def_readwrite("ct_a", &Type::ct_a)
+    .def_readwrite("ct_b", &Type::ct_b)
+    .def_readwrite("ct_c", &Type::ct_c)
+    .def_readwrite("ct_x0", &Type::ct_x0)
+    .def_readwrite("ct_y0", &Type::ct_y0)
+    .def_readwrite("amorp_lay_info", &Type::amorp_lay_info)
+    .def_readwrite("Z", &Type::Z)
+    .def_readwrite("x", &Type::x)
+    .def_readwrite("y", &Type::y)
+    .def_readwrite("z", &Type::z)
+    .def_readwrite("sigma", &Type::sigma)
+    .def_readwrite("occ", &Type::occ)
+    .def_readwrite("region", &Type::region)
+    .def_readwrite("charge", &Type::charge)
+    .def_readwrite("Z", &Type::Z)
+    .def_readonly("Z_unique", &Type::Z_unique)
+    .def_readonly("Z_min", &Type::Z_min)
+    .def_readonly("Z_max", &Type::Z_max)
+    .def_readonly("x_min", &Type::x_min)
+    .def_readonly("x_max", &Type::x_max)
+    .def_readonly("y_min", &Type::y_min)
+    .def_readonly("y_max", &Type::y_max)
+    .def_readonly("z_min", &Type::z_min)
+    .def_readonly("z_max", &Type::z_max)
+    .def_readonly("sigma_min", &Type::sigma_min)
+    .def_readonly("sigma_max", &Type::sigma_max)
+    .def_readonly("occ_min", &Type::occ_min)
+    .def_readonly("occ_max", &Type::occ_max)
+    .def_readonly("region_min", &Type::region_min)
+    .def_readonly("region_max", &Type::region_max)
+    .def_readonly("R_int_min", &Type::R_int_min)
+    .def_readonly("R_int_max", &Type::R_int_max)
+    .def_readonly("x_mean", &Type::x_mean)
+    .def_readonly("y_mean", &Type::y_mean)
+    .def_readonly("z_mean", &Type::z_mean)
+    .def_readonly("x_std", &Type::x_std)
+    .def_readonly("y_std", &Type::y_std)
+    .def_readonly("z_std", &Type::z_std)
+    .def_readonly("s_x", &Type::s_x)
+    .def_readonly("s_y", &Type::s_y)
+    .def_readonly("s_z", &Type::s_z)
+    .def_readonly("x_int_min", &Type::x_int_min)
+    .def_readonly("x_int_max", &Type::x_int_max)
+    .def_readonly("y_int_min", &Type::y_int_min)
+    .def_readonly("y_int_max", &Type::y_int_max)
+    .def_readonly("z_int_min", &Type::z_int_min)
+    .def_readonly("z_int_max", &Type::z_int_max)
+    .def_readonly("s_x_int", &Type::s_x_int)
+    .def_readonly("s_y_int", &Type::s_y_int)
+    .def_readonly("s_z_int", &Type::s_z_int)
+    .def_readonly("l_x_int", &Type::l_x_int)
+    .def_readonly("l_y_int", &Type::l_y_int)
+    .def_readonly("l_z_int", &Type::l_z_int)
     .def_property(
         "spec_atoms",
-        &Type::get_spec_atoms,
-        &Type::set_spec_atoms)
+        &py::detail::Helpers<Type>::get_spec_atoms,
+        &py::detail::Helpers<Type>::set_spec_atoms)
     .def("get_statistic", &Type::get_statistic)
+    .def("sort_by_z", &Type::sort_by_z)
     ;
 }
 

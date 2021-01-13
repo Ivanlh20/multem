@@ -32,6 +32,29 @@
 #include <multem/constants.h>
 #include <lin_alg_def.cuh>
 #include <safe_types.cuh>
+#include <atom_data_api.h>
+
+#if defined _WIN32 || defined __CYGWIN__
+  #ifdef BUILDING_DLL
+    #ifdef __GNUC__
+      #define DLL_PUBLIC __attribute__ ((dllexport))
+    #else
+      #define DLL_PUBLIC __declspec(dllexport)
+    #endif
+  #else
+    #ifdef __GNUC__
+      #define DLL_PUBLIC __attribute__ ((dllimport))
+    #else
+      #define DLL_PUBLIC __declspec(dllimport)
+    #endif
+  #endif
+#else
+  #if __GNUC__ >= 4
+    #define DLL_PUBLIC __attribute__ ((visibility ("default")))
+  #else
+    #define DLL_PUBLIC
+  #endif
+#endif
 
 namespace mt {
 
@@ -39,116 +62,116 @@ namespace mt {
    * The Atom_Data interface
    ***************************************************************************/
 
-  template <typename T>
-  class Atom {
-  public:
-    int Z;
-    T x;
-    T y;
-    T z;
-    T sigma;
-    T occ;
-    int region;
-    int charge;
+  /* template <typename T> */
+  /* class Atom { */
+  /* public: */
+  /*   int Z; */
+  /*   T x; */
+  /*   T y; */
+  /*   T z; */
+  /*   T sigma; */
+  /*   T occ; */
+  /*   int region; */
+  /*   int charge; */
 
-    Atom()
-      : Z(0),
-        x(0),
-        y(0),
-        z(0),
-        sigma(0),
-        occ(0),
-        region(0),
-        charge(0) {}
+  /*   DLL_PUBLIC Atom() */
+  /*     : Z(0), */
+  /*       x(0), */
+  /*       y(0), */
+  /*       z(0), */
+  /*       sigma(0), */
+  /*       occ(0), */
+  /*       region(0), */
+  /*       charge(0) {} */
 
-    Atom(int Z_in,
-         T x_in,
-         T y_in,
-         T z_in,
-         T sigma_in,
-         T occ_in,
-         T region_in,
-         T charge_in)
-      : Z(Z_in),
-        x(x_in),
-        y(y_in),
-        z(z_in),
-        sigma(sigma_in),
-        occ(occ_in),
-        region(region_in),
-        charge(charge_in) {}
-  };
+  /*   DLL_PUBLIC Atom(int Z_in, */
+  /*        T x_in, */
+  /*        T y_in, */
+  /*        T z_in, */
+  /*        T sigma_in, */
+  /*        T occ_in, */
+  /*        T region_in, */
+  /*        T charge_in) */
+  /*     : Z(Z_in), */
+  /*       x(x_in), */
+  /*       y(y_in), */
+  /*       z(z_in), */
+  /*       sigma(sigma_in), */
+  /*       occ(occ_in), */
+  /*       region(region_in), */
+  /*       charge(charge_in) {} */
+  /* }; */
 
   /**
    * A proxy for the Atom_Data class
    */
-  template <typename T>
-  class AtomData {
-  public:
-    struct Data;
+  /* template <typename T> */
+  /* class AtomData { */
+  /* public: */
+  /*   struct Data; */
 
-    typedef std::size_t size_type;
+  /*   typedef std::size_t size_type; */
 
-    /* AtomData(); */
-    AtomData(const AtomData&);
-    AtomData(AtomData&&);
-    AtomData(const Data&);
-    AtomData& operator=(const AtomData&);
-    AtomData& operator=(AtomData&&);
-    ~AtomData();
+  /*   /1* AtomData(); *1/ */
+  /*   DLL_PUBLIC AtomData(const AtomData&); */
+  /*   DLL_PUBLIC AtomData(AtomData&&); */
+  /*   DLL_PUBLIC AtomData(const Data&); */
+  /*   DLL_PUBLIC AtomData& operator=(const AtomData&); */
+  /*   DLL_PUBLIC AtomData& operator=(AtomData&&); */
+  /*   DLL_PUBLIC ~AtomData(); */
 
-    const Data& internal() const;
+  /*   DLL_PUBLIC const Data& internal() const; */
 
-    T get_dz() const;
-    void set_dz(T dz);
-    
-    T get_l_x() const;
-    void set_l_x(T l_x);
-    
-    T get_l_y() const;
-    void set_l_y(T l_y);
-    
-    T get_l_z() const;
-    void set_l_z(T l_z);
-    
-    int get_ct_na() const;
-    void set_ct_na(int ct_na);
-    
-    int get_ct_nb() const;
-    void set_ct_nb(int ct_nb);
-    
-    int get_ct_nc() const;
-    void set_ct_nc(int ct_nc);
-    
-    T get_ct_a() const;
-    void set_ct_a(T ct_a);
-    
-    T get_ct_b() const;
-    void set_ct_b(T ct_b);
-    
-    T get_ct_c() const;
-    void set_ct_c(T ct_c);
-    
-    T get_ct_x0() const;
-    void set_ct_x0(T ct_x0);
-    
-    T get_ct_y0() const;
-    void set_ct_y0(T ct_y0);
+  /*   DLL_PUBLIC T get_dz() const; */
+  /*   DLL_PUBLIC void set_dz(T dz); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC T get_l_x() const; */
+  /*   DLL_PUBLIC void set_l_x(T l_x); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC T get_l_y() const; */
+  /*   DLL_PUBLIC void set_l_y(T l_y); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC T get_l_z() const; */
+  /*   DLL_PUBLIC void set_l_z(T l_z); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC int get_ct_na() const; */
+  /*   DLL_PUBLIC void set_ct_na(int ct_na); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC int get_ct_nb() const; */
+  /*   DLL_PUBLIC void set_ct_nb(int ct_nb); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC int get_ct_nc() const; */
+  /*   DLL_PUBLIC void set_ct_nc(int ct_nc); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC T get_ct_a() const; */
+  /*   DLL_PUBLIC void set_ct_a(T ct_a); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC T get_ct_b() const; */
+  /*   DLL_PUBLIC void set_ct_b(T ct_b); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC T get_ct_c() const; */
+  /*   DLL_PUBLIC void set_ct_c(T ct_c); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC T get_ct_x0() const; */
+  /*   DLL_PUBLIC void set_ct_x0(T ct_x0); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC T get_ct_y0() const; */
+  /*   DLL_PUBLIC void set_ct_y0(T ct_y0); */
 
-    std::vector<Amorp_Lay_Info<T>> get_amorphous_parameters() const;
-    void set_amorphous_parameters(const std::vector<Amorp_Lay_Info<T>> &amorp_lay_info);
-    
-    std::vector<Atom<T>> get_spec_atoms() const;
-    void set_spec_atoms(const std::vector<Atom<T>>& spec_atoms);
+  /*   DLL_PUBLIC std::vector<Amorp_Lay_Info<T>> get_amorphous_parameters() const; */
+  /*   DLL_PUBLIC void set_amorphous_parameters(const std::vector<Amorp_Lay_Info<T>> &amorp_lay_info); */
+  /*   DLL_PUBLIC */ 
+  /*   DLL_PUBLIC std::vector<Atom<T>> get_spec_atoms() const; */
+  /*   DLL_PUBLIC void set_spec_atoms(const std::vector<Atom<T>>& spec_atoms); */
   
-    void get_statistic();
-    void clear();
-    bool empty() const;
-    size_type size() const;
+  /*   DLL_PUBLIC void get_statistic(); */
+  /*   DLL_PUBLIC void clear(); */
+  /*   DLL_PUBLIC bool empty() const; */
+  /*   DLL_PUBLIC size_type size() const; */
   
-  private:
-    std::unique_ptr<Data> impl_;
-  };
+  /* private: */
+  /*   std::unique_ptr<Data> impl_; */
+  /* }; */
   
   /****************************************************************************
    * The Scanning interface
@@ -249,259 +272,259 @@ namespace mt {
   public:
     struct Data;
 
-    Input();
-    Input(const Input&);
-    Input(Input&&);
-    Input(const Data&);
-    Input& operator=(const Input&);
-    Input& operator=(Input&&);
-    ~Input();
+    DLL_PUBLIC Input();
+    DLL_PUBLIC Input(const Input&);
+    DLL_PUBLIC Input(Input&&);
+    DLL_PUBLIC Input(const Data&);
+    DLL_PUBLIC Input& operator=(const Input&);
+    DLL_PUBLIC Input& operator=(Input&&);
+    DLL_PUBLIC ~Input();
 
-    Data& internal();
+    DLL_PUBLIC Data& internal();
 
-    System_Configuration& get_system_conf() const;
-    void set_system_conf(const System_Configuration& system_conf);
+    DLL_PUBLIC System_Configuration& get_system_conf() const;
+    DLL_PUBLIC void set_system_conf(const System_Configuration& system_conf);
 
-    eElec_Spec_Int_Model get_interaction_model() const;
-    void set_interaction_model(eElec_Spec_Int_Model interaction_model);
+    DLL_PUBLIC eElec_Spec_Int_Model get_interaction_model() const;
+    DLL_PUBLIC void set_interaction_model(eElec_Spec_Int_Model interaction_model);
 
-    ePotential_Type get_potential_type() const;
-    void set_potential_type(ePotential_Type potential_type);
+    DLL_PUBLIC ePotential_Type get_potential_type() const;
+    DLL_PUBLIC void set_potential_type(ePotential_Type potential_type);
 
-    ePhonon_Model get_pn_model() const;
-    void set_pn_model(ePhonon_Model pn_model);
+    DLL_PUBLIC ePhonon_Model get_pn_model() const;
+    DLL_PUBLIC void set_pn_model(ePhonon_Model pn_model);
 
-    bool get_pn_coh_contrib() const;
-    void set_pn_coh_contrib(bool pn_coh_contrib);
+    DLL_PUBLIC bool get_pn_coh_contrib() const;
+    DLL_PUBLIC void set_pn_coh_contrib(bool pn_coh_contrib);
 
-    bool get_pn_single_conf() const;
-    void set_pn_single_conf(bool pn_single_conf);
+    DLL_PUBLIC bool get_pn_single_conf() const;
+    DLL_PUBLIC void set_pn_single_conf(bool pn_single_conf);
 
-    FP_Dim& get_pn_dim() const;
-    void set_pn_dim(const FP_Dim &pn_dim);
+    DLL_PUBLIC FP_Dim& get_pn_dim() const;
+    DLL_PUBLIC void set_pn_dim(const FP_Dim &pn_dim);
 
-    int get_fp_dist() const;
-    void set_fp_dist(int fp_dist);
+    DLL_PUBLIC int get_fp_dist() const;
+    DLL_PUBLIC void set_fp_dist(int fp_dist);
 
-    int get_pn_seed() const;
-    void set_pn_seed(int pn_seed);
+    DLL_PUBLIC int get_pn_seed() const;
+    DLL_PUBLIC void set_pn_seed(int pn_seed);
 
-    int get_pn_nconf() const;
-    void set_pn_nconf(int pn_nconf);
+    DLL_PUBLIC int get_pn_nconf() const;
+    DLL_PUBLIC void set_pn_nconf(int pn_nconf);
 
-    int get_fp_iconf_0() const;
-    void set_fp_iconf_0(int fp_iconf_0);
+    DLL_PUBLIC int get_fp_iconf_0() const;
+    DLL_PUBLIC void set_fp_iconf_0(int fp_iconf_0);
 
-    AtomData<T>& get_atoms() const;
-    void set_atoms(const AtomData<T>& atoms);
+    DLL_PUBLIC Atom_Data<T>& get_atoms() const;
+    DLL_PUBLIC void set_atoms(const Atom_Data<T>& atoms);
 
-    bool get_is_crystal() const;
-    void set_is_crystal(bool is_crystal);
+    DLL_PUBLIC bool get_is_crystal() const;
+    DLL_PUBLIC void set_is_crystal(bool is_crystal);
 
-    double get_spec_rot_theta() const;
-    void set_spec_rot_theta(double spec_rot_theta);
+    DLL_PUBLIC double get_spec_rot_theta() const;
+    DLL_PUBLIC void set_spec_rot_theta(double spec_rot_theta);
 
-    r3d<T>& get_spec_rot_u0() const;
-    void set_spec_rot_u0(const r3d<T>& spec_rot_u0);
+    DLL_PUBLIC r3d<T>& get_spec_rot_u0() const;
+    DLL_PUBLIC void set_spec_rot_u0(const r3d<T>& spec_rot_u0);
 
-    eRot_Point_Type get_spec_rot_center_type() const;
-    void set_spec_rot_center_type(eRot_Point_Type spec_rot_center_type);
+    DLL_PUBLIC eRot_Point_Type get_spec_rot_center_type() const;
+    DLL_PUBLIC void set_spec_rot_center_type(eRot_Point_Type spec_rot_center_type);
 
-    r3d<T>& get_spec_rot_center_p() const;
-    void set_spec_rot_center_p(const r3d<T>& spec_rot_center_p);
+    DLL_PUBLIC r3d<T>& get_spec_rot_center_p() const;
+    DLL_PUBLIC void set_spec_rot_center_p(const r3d<T>& spec_rot_center_p);
 
-    eThick_Type get_thick_type() const;
-    void set_thick_type(eThick_Type thick_type);
+    DLL_PUBLIC eThick_Type get_thick_type() const;
+    DLL_PUBLIC void set_thick_type(eThick_Type thick_type);
 
-    std::vector<T> get_thick() const;
-    void set_thick(const std::vector<T>& thick);
+    DLL_PUBLIC std::vector<T> get_thick() const;
+    DLL_PUBLIC void set_thick(const std::vector<T>& thick);
 
-    ePotential_Slicing get_potential_slicing() const;
-    void set_potential_slicing(ePotential_Slicing potential_slicing);
+    DLL_PUBLIC ePotential_Slicing get_potential_slicing() const;
+    DLL_PUBLIC void set_potential_slicing(ePotential_Slicing potential_slicing);
 
-    Grid_2d<T>& get_grid_2d() const;
-    void set_grid_2d(const Grid_2d<T>& grid_2d);
+    DLL_PUBLIC Grid_2d<T>& get_grid_2d() const;
+    DLL_PUBLIC void set_grid_2d(const Grid_2d<T>& grid_2d);
 
-    Range_2d& get_output_area() const;
-    void set_output_area(const Range_2d& output_area);
+    DLL_PUBLIC Range_2d& get_output_area() const;
+    DLL_PUBLIC void set_output_area(const Range_2d& output_area);
 
-    eTEM_Sim_Type get_simulation_type() const;
-    void set_simulation_type(eTEM_Sim_Type simulation_type);
+    DLL_PUBLIC eTEM_Sim_Type get_simulation_type() const;
+    DLL_PUBLIC void set_simulation_type(eTEM_Sim_Type simulation_type);
 
-    eIncident_Wave_Type get_iw_type() const;
-    void set_iw_type(eIncident_Wave_Type iw_type);
+    DLL_PUBLIC eIncident_Wave_Type get_iw_type() const;
+    DLL_PUBLIC void set_iw_type(eIncident_Wave_Type iw_type);
 
-    std::vector<std::complex<T>> get_iw_psi() const;
-    void set_iw_psi(const std::vector<std::complex<T>>& iw_psi);
+    DLL_PUBLIC std::vector<std::complex<T>> get_iw_psi() const;
+    DLL_PUBLIC void set_iw_psi(const std::vector<std::complex<T>>& iw_psi);
 
-    std::vector<T> get_iw_x() const;
-    void set_iw_x(const std::vector<T>& iw_x);
+    DLL_PUBLIC std::vector<T> get_iw_x() const;
+    DLL_PUBLIC void set_iw_x(const std::vector<T>& iw_x);
 
-    std::vector<T> get_iw_y() const;
-    void set_iw_y(const std::vector<T>& iw_y);
+    DLL_PUBLIC std::vector<T> get_iw_y() const;
+    DLL_PUBLIC void set_iw_y(const std::vector<T>& iw_y);
 
-    double get_E_0() const;
-    void set_E_0(double E_0);
+    DLL_PUBLIC double get_E_0() const;
+    DLL_PUBLIC void set_E_0(double E_0);
 
-    double get_lambda() const;
-    void set_lambda(double lambda);
+    DLL_PUBLIC double get_lambda() const;
+    DLL_PUBLIC void set_lambda(double lambda);
 
-    double get_theta() const;
-    void set_theta(double theta);
+    DLL_PUBLIC double get_theta() const;
+    DLL_PUBLIC void set_theta(double theta);
 
-    double get_phi() const;
-    void set_phi(double phi);
+    DLL_PUBLIC double get_phi() const;
+    DLL_PUBLIC void set_phi(double phi);
 
-    eIllumination_Model get_illumination_model() const;
-    void set_illumination_model(eIllumination_Model illumination_model);
+    DLL_PUBLIC eIllumination_Model get_illumination_model() const;
+    DLL_PUBLIC void set_illumination_model(eIllumination_Model illumination_model);
 
-    eTemporal_Spatial_Incoh get_temporal_spatial_incoh() const;
-    void set_temporal_spatial_incoh(eTemporal_Spatial_Incoh temporal_spatial_incoh);
+    DLL_PUBLIC eTemporal_Spatial_Incoh get_temporal_spatial_incoh() const;
+    DLL_PUBLIC void set_temporal_spatial_incoh(eTemporal_Spatial_Incoh temporal_spatial_incoh);
 
-    Lens<T>& get_cond_lens() const;
-    void set_cond_lens(const Lens<T>& cond_lens);
+    DLL_PUBLIC Lens<T>& get_cond_lens() const;
+    DLL_PUBLIC void set_cond_lens(const Lens<T>& cond_lens);
 
-    Lens<T>& get_obj_lens() const;
-    void set_obj_lens(const Lens<T>& obj_lens);
+    DLL_PUBLIC Lens<T>& get_obj_lens() const;
+    DLL_PUBLIC void set_obj_lens(const Lens<T>& obj_lens);
 
-    Scanning<T>& get_scanning() const;
-    void set_scanning(const Scanning<T>& scanning);
+    DLL_PUBLIC Scanning<T>& get_scanning() const;
+    DLL_PUBLIC void set_scanning(const Scanning<T>& scanning);
 
-    Detector<T, e_host>& get_detector() const;
-    void set_detector(const Detector<T, e_host>& detector);
+    DLL_PUBLIC Detector<T, e_host>& get_detector() const;
+    DLL_PUBLIC void set_detector(const Detector<T, e_host>& detector);
 
-    EELS<T>& get_eels_fr() const;
-    void set_eels_fr(const EELS<T>& eels_fr);
+    DLL_PUBLIC EELS<T>& get_eels_fr() const;
+    DLL_PUBLIC void set_eels_fr(const EELS<T>& eels_fr);
 
-    eOperation_Mode get_operation_mode() const;
-    void set_operation_mode(eOperation_Mode operation_mode);
+    DLL_PUBLIC eOperation_Mode get_operation_mode() const;
+    DLL_PUBLIC void set_operation_mode(eOperation_Mode operation_mode);
 
-    bool get_slice_storage() const;
-    void set_slice_storage(bool slice_storage);
+    DLL_PUBLIC bool get_slice_storage() const;
+    DLL_PUBLIC void set_slice_storage(bool slice_storage);
 
-    bool get_reverse_multislice() const;
-    void set_reverse_multislice(bool reverse_multislice);
+    DLL_PUBLIC bool get_reverse_multislice() const;
+    DLL_PUBLIC void set_reverse_multislice(bool reverse_multislice);
 
-    int get_mul_sign() const;
-    void set_mul_sign(int mul_sign);
+    DLL_PUBLIC int get_mul_sign() const;
+    DLL_PUBLIC void set_mul_sign(int mul_sign);
 
-    double get_Vrl() const;
-    void set_Vrl(double Vrl);
+    DLL_PUBLIC double get_Vrl() const;
+    DLL_PUBLIC void set_Vrl(double Vrl);
 
-    int get_nR() const;
-    void set_nR(int nR);
+    DLL_PUBLIC int get_nR() const;
+    DLL_PUBLIC void set_nR(int nR);
 
-    int get_nrot() const;
-    void set_nrot(int nrot);
+    DLL_PUBLIC int get_nrot() const;
+    DLL_PUBLIC void set_nrot(int nrot);
 
-    eLens_Var_Type get_cdl_var_type() const;
-    void set_cdl_var_type(eLens_Var_Type cdl_var_type);
+    DLL_PUBLIC eLens_Var_Type get_cdl_var_type() const;
+    DLL_PUBLIC void set_cdl_var_type(eLens_Var_Type cdl_var_type);
 
-    std::vector<T> get_cdl_var() const;
-    void set_cdl_var(const std::vector<T>& cdl_var);
+    DLL_PUBLIC std::vector<T> get_cdl_var() const;
+    DLL_PUBLIC void set_cdl_var(const std::vector<T>& cdl_var);
 
-    std::vector<int> get_iscan() const;
-    void set_iscan(const std::vector<int>& iscan);
+    DLL_PUBLIC std::vector<int> get_iscan() const;
+    DLL_PUBLIC void set_iscan(const std::vector<int>& iscan);
 
-    std::vector<T> get_beam_x() const;
-    void set_beam_x(const std::vector<T>& beam_x);
+    DLL_PUBLIC std::vector<T> get_beam_x() const;
+    DLL_PUBLIC void set_beam_x(const std::vector<T>& beam_x);
 
-    std::vector<T> get_beam_y() const;
-    void set_beam_y(const std::vector<T>& beam_y);
+    DLL_PUBLIC std::vector<T> get_beam_y() const;
+    DLL_PUBLIC void set_beam_y(const std::vector<T>& beam_y);
 
-    int get_islice() const;
-    void set_islice(int islice);
+    DLL_PUBLIC int get_islice() const;
+    DLL_PUBLIC void set_islice(int islice);
 
-    bool get_dp_Shift() const;
-    void set_dp_Shift(bool dp_Shift);
+    DLL_PUBLIC bool get_dp_Shift() const;
+    DLL_PUBLIC void set_dp_Shift(bool dp_Shift);
 
-    void set_incident_wave_type(eIncident_Wave_Type iw_type);
+    DLL_PUBLIC void set_incident_wave_type(eIncident_Wave_Type iw_type);
 
-    void validate_parameters();
+    DLL_PUBLIC void validate_parameters();
 
-		bool is_multislice() const;
-		bool is_phase_object() const;
-		bool is_weak_phase_object() const;
-		bool is_still_atom() const;
-		bool is_absorptive_model() const;
-		bool is_frozen_phonon() const;
-		bool is_frozen_phonon_single_conf() const;
-		bool is_whole_spec() const;
-		bool is_through_slices() const;
-		bool is_through_thick() const;
-		bool is_slicing_by_planes() const;
-		bool is_slicing_by_dz() const;
-		bool is_subslicing() const;
-		bool is_subslicing_whole_spec() const;
-		bool is_plane_wave() const;
-		bool is_convergent_wave() const;
-		bool is_user_define_wave() const;
-		bool is_STEM() const;
-		bool is_ISTEM() const;
-		bool is_CBED() const;
-		bool is_CBEI() const;
-		bool is_ED() const;
-		bool is_HRTEM() const;
-		bool is_PED() const;
-		bool is_HCTEM() const;
-		bool is_EWFS() const;
-		bool is_EWRS() const;
-		bool is_EWFS_SC() const;
-		bool is_EWRS_SC() const;
-		bool is_EELS() const;
-		bool is_EFTEM() const;
-		bool is_IWFS() const;
-		bool is_IWRS() const;
-		bool is_PPFS() const;
-		bool is_PPRS() const;
-		bool is_TFFS() const;
-		bool is_TFRS() const;
-		bool is_PropFS() const;
-		bool is_PropRS() const;
-		bool is_STEM_ISTEM() const;
-		bool is_CBED_CBEI() const;
-		bool is_ED_HRTEM() const;
-		bool is_PED_HCTEM() const;
-		bool is_EWFS_EWRS() const;
-		bool is_EWFS_EWRS_SC() const;
-		bool is_EELS_EFTEM() const;
-		bool is_IWFS_IWRS() const;
-		bool is_PPFS_PPRS() const;
-		bool is_TFFS_TFRS() const;
-		bool is_PropFS_PropRS() const;
-		bool is_grid_FS() const;
-		bool is_grid_RS() const;
-		bool is_simulation_type_FS() const;
-		bool is_simulation_type_RS() const;
-		bool is_specimen_required() const;
-		bool is_ISTEM_CBEI_HRTEM_HCTEM_EFTEM() const;
-		bool is_CBED_ED_EWFS_PED() const;
-		bool is_obj_lens_temp_spat() const;
-		bool is_cond_lens_temp_spat() const;
-		bool is_scanning() const;
-		bool is_illu_mod_coherent() const;
-		bool is_illu_mod_partial_coherent() const;
-		bool is_illu_mod_trans_cross_coef() const;
-		bool is_illu_mod_full_integration() const;
-		bool is_incoh_temporal_spatial() const;
-		bool is_incoh_temporal() const;
-		bool is_incoh_spatial() const;
-		bool is_detector_circular() const;
-		bool is_detector_radial() const;
-		bool is_detector_matrix() const;
-		bool is_slice_storage() const;
-		bool is_operation_mode_normal() const;
-		bool is_operation_mode_advanced() const;
-		bool is_lvt_off() const;
-		bool is_lvt_m() const;
-		bool is_lvt_Cs3() const;
-		bool is_lvt_Cs5() const;
-		bool is_lvt_mfa2() const;
-		bool is_lvt_afa2() const;
-		bool is_lvt_mfa3() const;
-		bool is_lvt_afa3() const;
-		bool is_lvt_inner_aper_ang() const;
-		bool is_lvt_outer_aper_ang() const;
+		DLL_PUBLIC bool is_multislice() const;
+		DLL_PUBLIC bool is_phase_object() const;
+		DLL_PUBLIC bool is_weak_phase_object() const;
+		DLL_PUBLIC bool is_still_atom() const;
+		DLL_PUBLIC bool is_absorptive_model() const;
+		DLL_PUBLIC bool is_frozen_phonon() const;
+		DLL_PUBLIC bool is_frozen_phonon_single_conf() const;
+		DLL_PUBLIC bool is_whole_spec() const;
+		DLL_PUBLIC bool is_through_slices() const;
+		DLL_PUBLIC bool is_through_thick() const;
+		DLL_PUBLIC bool is_slicing_by_planes() const;
+		DLL_PUBLIC bool is_slicing_by_dz() const;
+		DLL_PUBLIC bool is_subslicing() const;
+		DLL_PUBLIC bool is_subslicing_whole_spec() const;
+		DLL_PUBLIC bool is_plane_wave() const;
+		DLL_PUBLIC bool is_convergent_wave() const;
+		DLL_PUBLIC bool is_user_define_wave() const;
+		DLL_PUBLIC bool is_STEM() const;
+		DLL_PUBLIC bool is_ISTEM() const;
+		DLL_PUBLIC bool is_CBED() const;
+		DLL_PUBLIC bool is_CBEI() const;
+		DLL_PUBLIC bool is_ED() const;
+		DLL_PUBLIC bool is_HRTEM() const;
+		DLL_PUBLIC bool is_PED() const;
+		DLL_PUBLIC bool is_HCTEM() const;
+		DLL_PUBLIC bool is_EWFS() const;
+		DLL_PUBLIC bool is_EWRS() const;
+		DLL_PUBLIC bool is_EWFS_SC() const;
+		DLL_PUBLIC bool is_EWRS_SC() const;
+		DLL_PUBLIC bool is_EELS() const;
+		DLL_PUBLIC bool is_EFTEM() const;
+		DLL_PUBLIC bool is_IWFS() const;
+		DLL_PUBLIC bool is_IWRS() const;
+		DLL_PUBLIC bool is_PPFS() const;
+		DLL_PUBLIC bool is_PPRS() const;
+		DLL_PUBLIC bool is_TFFS() const;
+		DLL_PUBLIC bool is_TFRS() const;
+		DLL_PUBLIC bool is_PropFS() const;
+		DLL_PUBLIC bool is_PropRS() const;
+		DLL_PUBLIC bool is_STEM_ISTEM() const;
+		DLL_PUBLIC bool is_CBED_CBEI() const;
+		DLL_PUBLIC bool is_ED_HRTEM() const;
+		DLL_PUBLIC bool is_PED_HCTEM() const;
+		DLL_PUBLIC bool is_EWFS_EWRS() const;
+		DLL_PUBLIC bool is_EWFS_EWRS_SC() const;
+		DLL_PUBLIC bool is_EELS_EFTEM() const;
+		DLL_PUBLIC bool is_IWFS_IWRS() const;
+		DLL_PUBLIC bool is_PPFS_PPRS() const;
+		DLL_PUBLIC bool is_TFFS_TFRS() const;
+		DLL_PUBLIC bool is_PropFS_PropRS() const;
+		DLL_PUBLIC bool is_grid_FS() const;
+		DLL_PUBLIC bool is_grid_RS() const;
+		DLL_PUBLIC bool is_simulation_type_FS() const;
+		DLL_PUBLIC bool is_simulation_type_RS() const;
+		DLL_PUBLIC bool is_specimen_required() const;
+		DLL_PUBLIC bool is_ISTEM_CBEI_HRTEM_HCTEM_EFTEM() const;
+		DLL_PUBLIC bool is_CBED_ED_EWFS_PED() const;
+		DLL_PUBLIC bool is_obj_lens_temp_spat() const;
+		DLL_PUBLIC bool is_cond_lens_temp_spat() const;
+		DLL_PUBLIC bool is_scanning() const;
+		DLL_PUBLIC bool is_illu_mod_coherent() const;
+		DLL_PUBLIC bool is_illu_mod_partial_coherent() const;
+		DLL_PUBLIC bool is_illu_mod_trans_cross_coef() const;
+		DLL_PUBLIC bool is_illu_mod_full_integration() const;
+		DLL_PUBLIC bool is_incoh_temporal_spatial() const;
+		DLL_PUBLIC bool is_incoh_temporal() const;
+		DLL_PUBLIC bool is_incoh_spatial() const;
+		DLL_PUBLIC bool is_detector_circular() const;
+		DLL_PUBLIC bool is_detector_radial() const;
+		DLL_PUBLIC bool is_detector_matrix() const;
+		DLL_PUBLIC bool is_slice_storage() const;
+		DLL_PUBLIC bool is_operation_mode_normal() const;
+		DLL_PUBLIC bool is_operation_mode_advanced() const;
+		DLL_PUBLIC bool is_lvt_off() const;
+		DLL_PUBLIC bool is_lvt_m() const;
+		DLL_PUBLIC bool is_lvt_Cs3() const;
+		DLL_PUBLIC bool is_lvt_Cs5() const;
+		DLL_PUBLIC bool is_lvt_mfa2() const;
+		DLL_PUBLIC bool is_lvt_afa2() const;
+		DLL_PUBLIC bool is_lvt_mfa3() const;
+		DLL_PUBLIC bool is_lvt_afa3() const;
+		DLL_PUBLIC bool is_lvt_inner_aper_ang() const;
+		DLL_PUBLIC bool is_lvt_outer_aper_ang() const;
 
   private:
     std::unique_ptr<Data> impl_;
@@ -522,115 +545,102 @@ namespace mt {
     typedef std::vector<T> vector_type;
     typedef std::vector<std::complex<T>> complex_vector_type;
 
-    Output();
-    Output(Output&);
-    Output(Output&&);
-    Output(Data&);
-    Output& operator=(Output&);
-    Output& operator=(Output&&);
-    ~Output();
+    DLL_PUBLIC Output();
+    DLL_PUBLIC Output(Output&);
+    DLL_PUBLIC Output(Output&&);
+    DLL_PUBLIC Output(Data&);
+    DLL_PUBLIC Output& operator=(Output&);
+    DLL_PUBLIC Output& operator=(Output&&);
+    DLL_PUBLIC ~Output();
 
-    const Data& internal() const;
-    Data& internal();
+    DLL_PUBLIC const Data& internal() const;
+    DLL_PUBLIC Data& internal();
 
-    void set_input_data(Input<T> &input);
-		
-    eTEM_Output_Type get_output_type() const;
-    void set_output_type(eTEM_Output_Type output_type);
-		
-    int get_ndetector() const;
-		void set_ndetector(int ndetector);
-    
-    int get_nx() const;
-    void set_nx(int nx);
-    
-    int get_ny() const;
-    void set_ny(int ny);
-    
-    T get_dx() const;
-    void set_dx(T dx);
-    
-    T get_dy() const;
-    void set_dy(T dy);
-		
-    T get_dr() const;
-		void set_dr(T dr);
+    DLL_PUBLIC void set_input_data(Input<T> &input);
 
-    std::vector<T> get_x() const;
-    void set_x(const std::vector<T>& x);
-    
-    std::vector<T> get_y() const;
-    void set_y(const std::vector<T>& y);
-    
-    std::vector<T> get_r() const;
-    void set_r(const std::vector<T>& r);
-    
-    std::vector<DetInt<vector_type>> get_image_tot() const;
-    void set_image_tot(const std::vector<DetInt<vector_type>>& image_tot);
-    
-    std::vector<DetInt<vector_type>> get_image_coh() const;
-    void set_image_coh(const std::vector<DetInt<vector_type>>& image_coh);
-    
-    std::vector<vector_type> get_m2psi_tot() const;
-    void set_m2psi_tot(const std::vector<vector_type>& m2psi_tot);
-    
-    std::vector<vector_type> get_m2psi_coh() const;
-    void set_m2psi_coh(const std::vector<vector_type>& m2psi_coh);
-    
-    std::vector<complex_vector_type> get_psi_coh() const;
-    void set_psi_coh(const std::vector<complex_vector_type>& psi_coh);
-    
-    std::vector<vector_type> get_V() const;
-    void set_V(const std::vector<vector_type>& V);
-    
-    std::vector<complex_vector_type> get_trans() const;
-    void set_trans(const std::vector<complex_vector_type>& trans);
-    
-    std::vector<complex_vector_type> get_psi_0() const;
-    void set_psi_0(const std::vector<complex_vector_type>& psi_0);
+    DLL_PUBLIC eTEM_Output_Type get_output_type() const;
+    DLL_PUBLIC void set_output_type(eTEM_Output_Type output_type);
 
-		std::vector<bool> get_thk_gpu() const;
-		void set_thk_gpu(const std::vector<bool>& thk_gpu);
+    DLL_PUBLIC int get_ndetector() const;
+		DLL_PUBLIC void set_ndetector(int ndetector);
 
-    void gather();
-    void clean_temporal();
+    DLL_PUBLIC int get_nx() const;
+    DLL_PUBLIC void set_nx(int nx);
+
+    DLL_PUBLIC int get_ny() const;
+    DLL_PUBLIC void set_ny(int ny);
+
+    DLL_PUBLIC T get_dx() const;
+    DLL_PUBLIC void set_dx(T dx);
+
+    DLL_PUBLIC T get_dy() const;
+    DLL_PUBLIC void set_dy(T dy);
+
+    DLL_PUBLIC T get_dr() const;
+		DLL_PUBLIC void set_dr(T dr);
+
+    DLL_PUBLIC std::vector<T> get_x() const;
+    DLL_PUBLIC void set_x(const std::vector<T>& x);
+
+    DLL_PUBLIC std::vector<T> get_y() const;
+    DLL_PUBLIC void set_y(const std::vector<T>& y);
+
+    DLL_PUBLIC std::vector<T> get_r() const;
+    DLL_PUBLIC void set_r(const std::vector<T>& r);
+
+    DLL_PUBLIC std::vector<DetInt<vector_type>> get_image_tot() const;
+    DLL_PUBLIC void set_image_tot(const std::vector<DetInt<vector_type>>& image_tot);
+
+    DLL_PUBLIC std::vector<DetInt<vector_type>> get_image_coh() const;
+    DLL_PUBLIC void set_image_coh(const std::vector<DetInt<vector_type>>& image_coh);
+
+    DLL_PUBLIC std::vector<vector_type> get_m2psi_tot() const;
+    DLL_PUBLIC void set_m2psi_tot(const std::vector<vector_type>& m2psi_tot);
+
+    DLL_PUBLIC std::vector<vector_type> get_m2psi_coh() const;
+    DLL_PUBLIC void set_m2psi_coh(const std::vector<vector_type>& m2psi_coh);
+
+    DLL_PUBLIC std::vector<complex_vector_type> get_psi_coh() const;
+    DLL_PUBLIC void set_psi_coh(const std::vector<complex_vector_type>& psi_coh);
+
+    DLL_PUBLIC std::vector<vector_type> get_V() const;
+    DLL_PUBLIC void set_V(const std::vector<vector_type>& V);
+
+    DLL_PUBLIC std::vector<complex_vector_type> get_trans() const;
+    DLL_PUBLIC void set_trans(const std::vector<complex_vector_type>& trans);
+
+    DLL_PUBLIC std::vector<complex_vector_type> get_psi_0() const;
+    DLL_PUBLIC void set_psi_0(const std::vector<complex_vector_type>& psi_0);
+
+		DLL_PUBLIC std::vector<bool> get_thk_gpu() const;
+		DLL_PUBLIC void set_thk_gpu(const std::vector<bool>& thk_gpu);
+
+    DLL_PUBLIC void gather();
+    DLL_PUBLIC void clean_temporal();
   
   private:
     std::unique_ptr<Data> impl_;
 
   };
-  
+ 
   /****************************************************************************
-   * The Multislice interface
+   * Logging functions
    ***************************************************************************/
 
-  /**
-   * A proxy for the Output_Multislice class
-   */
-  /* template <typename T> */
-  /* class MultisliceData { */
-  /* public: */
-  /*   struct Data; */
+  DLL_PUBLIC std::string to_string(const System_Configuration &sys_conf, const std::string &prefix="");
 
-  /*   MultisliceData(); */
-  /*   ~MultisliceData(); */
+  template <typename T>
+  DLL_PUBLIC std::string to_string(const Lens<T> &lens, const std::string &prefix="");
 
-  /*   const Data& internal() const; */
+  template <typename T>
+  DLL_PUBLIC std::string to_string(const Input<T> &input, const std::string &prefix="");
 
-		/* void set_input_data(Input<T> &input); */
-		/* void operator()(Output<T> &output_multislice); */
-    
-  /* private: */
-  /*   std::unique_ptr<Data> impl_; */
-
-  /* }; */
-  
   /****************************************************************************
    * Simulation functions
    ***************************************************************************/
 
   template <typename T>
-  mt::Output<T> tem_simulation(Input<T>&);
+  DLL_PUBLIC mt::Output<T> tem_simulation(Input<T>&);
 
 }  // namespace mt
 

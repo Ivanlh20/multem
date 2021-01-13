@@ -30,246 +30,246 @@
 
 namespace mt {
   
-  /****************************************************************************
-   * The AtomData interface
-   ***************************************************************************/
+  ///****************************************************************************
+  // * The AtomData interface
+  // ***************************************************************************/
 
-  template <typename T>
-  struct AtomData<T>::Data {
-    /* Atom_Data<T> d_; */
-    /* std::reference_wrapper<Atom_Data<T>> data; */
-    Atom_Data<T> &data;
-    Data(Atom_Data<T>& d)
-      : data(d) {}
-    Data(const Data &other)
-      : data(other.data) {}
-    Data& operator=(const Data &other) {
-      data = other.data;
-      return *this;
-    }
-    /* Data() */
-    /*   : data(d_) {}; */
-    /* Data(std::reference_wrapper<Atom_Data<T>> d) */
-    /*   : data(d) {}; */
-  };
+  //template <typename T>
+  //struct AtomData<T>::Data {
+  //  /* Atom_Data<T> d_; */
+  //  /* std::reference_wrapper<Atom_Data<T>> data; */
+  //  Atom_Data<T> &data;
+  //  Data(Atom_Data<T>& d)
+  //    : data(d) {}
+  //  Data(const Data &other)
+  //    : data(other.data) {}
+  //  Data& operator=(const Data &other) {
+  //    data = other.data;
+  //    return *this;
+  //  }
+  //  /* Data() */
+  //  /*   : data(d_) {}; */
+  //  /* Data(std::reference_wrapper<Atom_Data<T>> d) */
+  //  /*   : data(d) {}; */
+  //};
 
-  /* template <typename T> */
-  /* AtomData<T>::AtomData() */
-  /*     : impl_(std::make_unique<Data>()) {} */
+  ///* template <typename T> */
+  ///* AtomData<T>::AtomData() */
+  ///*     : impl_(std::make_unique<Data>()) {} */
 
-  template <typename T>
-  AtomData<T>::AtomData(const AtomData& other)
-      : impl_(std::make_unique<Data>(*other.impl_)) {}
+  //template <typename T>
+  //AtomData<T>::AtomData(const AtomData& other)
+  //    : impl_(std::make_unique<Data>(*other.impl_)) {}
 
-  template <typename T>
-  AtomData<T>::AtomData(AtomData&& other) = default;
+  //template <typename T>
+  //AtomData<T>::AtomData(AtomData&& other) = default;
 
-  template <typename T>
-  AtomData<T>::AtomData(const AtomData<T>::Data& other)
-      : impl_(std::make_unique<Data>(other)) {}
+  //template <typename T>
+  //AtomData<T>::AtomData(const AtomData<T>::Data& other)
+  //    : impl_(std::make_unique<Data>(other)) {}
 
-  template <typename T>
-  AtomData<T>& AtomData<T>::operator=(const AtomData<T>& other) {
-    *impl_ = *other.impl_;
-    return *this;
-  }
+  //template <typename T>
+  //AtomData<T>& AtomData<T>::operator=(const AtomData<T>& other) {
+  //  *impl_ = *other.impl_;
+  //  return *this;
+  //}
 
-  template <typename T>
-  AtomData<T>& AtomData<T>::operator=(AtomData<T>&&) = default;
+  //template <typename T>
+  //AtomData<T>& AtomData<T>::operator=(AtomData<T>&&) = default;
 
-  template <typename T>
-  AtomData<T>::~AtomData<T>() = default;
+  //template <typename T>
+  //AtomData<T>::~AtomData<T>() = default;
 
-  template <typename T>
-  const AtomData<T>::Data& AtomData<T>::internal() const {
-    return *impl_;
-  }
+  //template <typename T>
+  //const AtomData<T>::Data& AtomData<T>::internal() const {
+  //  return *impl_;
+  //}
 
-  template <typename T>
-  T AtomData<T>::get_dz() const {
-    return impl_->data.dz;
-  }
+  //template <typename T>
+  //T AtomData<T>::get_dz() const {
+  //  return impl_->data.dz;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_dz(T dz) {
-    impl_->data.dz = dz;
-  }
-  
-  template <typename T>
-  T AtomData<T>::get_l_x() const {
-    return impl_->data.l_x;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_dz(T dz) {
+  //  impl_->data.dz = dz;
+  //}
+  //
+  //template <typename T>
+  //T AtomData<T>::get_l_x() const {
+  //  return impl_->data.l_x;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_l_x(T l_x) {
-    impl_->data.l_x = l_x;
-  }
-  
-  template <typename T>
-  T AtomData<T>::get_l_y() const {
-    return impl_->data.l_y;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_l_x(T l_x) {
+  //  impl_->data.l_x = l_x;
+  //}
+  //
+  //template <typename T>
+  //T AtomData<T>::get_l_y() const {
+  //  return impl_->data.l_y;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_l_y(T l_y) {
-    impl_->data.l_y = l_y;
-  }
-  
-  template <typename T>
-  T AtomData<T>::get_l_z() const {
-    return impl_->data.l_z;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_l_y(T l_y) {
+  //  impl_->data.l_y = l_y;
+  //}
+  //
+  //template <typename T>
+  //T AtomData<T>::get_l_z() const {
+  //  return impl_->data.l_z;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_l_z(T l_z) {
-    impl_->data.l_z = l_z;
-  }
-  
-  template <typename T>
-  int AtomData<T>::get_ct_na() const {
-    return impl_->data.ct_na;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_l_z(T l_z) {
+  //  impl_->data.l_z = l_z;
+  //}
+  //
+  //template <typename T>
+  //int AtomData<T>::get_ct_na() const {
+  //  return impl_->data.ct_na;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_ct_na(int ct_na) {
-    impl_->data.ct_na = ct_na;
-  }
-  
-  template <typename T>
-  int AtomData<T>::get_ct_nb() const {
-    return impl_->data.ct_nb;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_ct_na(int ct_na) {
+  //  impl_->data.ct_na = ct_na;
+  //}
+  //
+  //template <typename T>
+  //int AtomData<T>::get_ct_nb() const {
+  //  return impl_->data.ct_nb;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_ct_nb(int ct_nb) {
-    impl_->data.ct_nb = ct_nb;
-  }
-  
-  template <typename T>
-  int AtomData<T>::get_ct_nc() const {
-    return impl_->data.ct_nc;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_ct_nb(int ct_nb) {
+  //  impl_->data.ct_nb = ct_nb;
+  //}
+  //
+  //template <typename T>
+  //int AtomData<T>::get_ct_nc() const {
+  //  return impl_->data.ct_nc;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_ct_nc(int ct_nc) {
-    impl_->data.ct_nc = ct_nc;
-  }
-  
-  template <typename T>
-  T AtomData<T>::get_ct_a() const {
-    return impl_->data.ct_a;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_ct_nc(int ct_nc) {
+  //  impl_->data.ct_nc = ct_nc;
+  //}
+  //
+  //template <typename T>
+  //T AtomData<T>::get_ct_a() const {
+  //  return impl_->data.ct_a;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_ct_a(T ct_a) {
-    impl_->data.ct_a = ct_a;
-  }
-  
-  template <typename T>
-  T AtomData<T>::get_ct_b() const {
-    return impl_->data.ct_b;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_ct_a(T ct_a) {
+  //  impl_->data.ct_a = ct_a;
+  //}
+  //
+  //template <typename T>
+  //T AtomData<T>::get_ct_b() const {
+  //  return impl_->data.ct_b;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_ct_b(T ct_b) {
-    impl_->data.ct_b = ct_b;
-  }
-  
-  template <typename T>
-  T AtomData<T>::get_ct_c() const {
-    return impl_->data.ct_c;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_ct_b(T ct_b) {
+  //  impl_->data.ct_b = ct_b;
+  //}
+  //
+  //template <typename T>
+  //T AtomData<T>::get_ct_c() const {
+  //  return impl_->data.ct_c;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_ct_c(T ct_c) {
-    impl_->data.ct_c = ct_c;
-  }
-  
-  template <typename T>
-  T AtomData<T>::get_ct_x0() const {
-    return impl_->data.ct_x0;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_ct_c(T ct_c) {
+  //  impl_->data.ct_c = ct_c;
+  //}
+  //
+  //template <typename T>
+  //T AtomData<T>::get_ct_x0() const {
+  //  return impl_->data.ct_x0;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_ct_x0(T ct_x0) {
-    impl_->data.ct_x0 = ct_x0;
-  }
-  
-  template <typename T>
-  T AtomData<T>::get_ct_y0() const {
-    return impl_->data.ct_y0;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_ct_x0(T ct_x0) {
+  //  impl_->data.ct_x0 = ct_x0;
+  //}
+  //
+  //template <typename T>
+  //T AtomData<T>::get_ct_y0() const {
+  //  return impl_->data.ct_y0;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_ct_y0(T ct_y0) {
-    impl_->data.ct_y0 = ct_y0;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_ct_y0(T ct_y0) {
+  //  impl_->data.ct_y0 = ct_y0;
+  //}
 
-  template <typename T>
-  std::vector<Amorp_Lay_Info<T>> AtomData<T>::get_amorphous_parameters() const {
-    return std::vector<Amorp_Lay_Info<T>>(
-        impl_->data.amorp_lay_info.begin(),
-        impl_->data.amorp_lay_info.end());
-  }
+  //template <typename T>
+  //std::vector<Amorp_Lay_Info<T>> AtomData<T>::get_amorphous_parameters() const {
+  //  return std::vector<Amorp_Lay_Info<T>>(
+  //      impl_->data.amorp_lay_info.begin(),
+  //      impl_->data.amorp_lay_info.end());
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_amorphous_parameters(const std::vector<Amorp_Lay_Info<T>> &amorp_lay_info) {
-    impl_->data.amorp_lay_info.assign(amorp_lay_info.begin(), amorp_lay_info.end());
-  }
-  
-  template <typename T>
-  std::vector<Atom<T>> AtomData<T>::get_spec_atoms() const {
-    const Atom_Data<T>& atoms = impl_->data;
-    std::vector<Atom<T>> result(atoms.size());
-    for (auto i = 0; i < result.size(); ++i) {
-      result[i] = Atom<T>(
-          atoms.Z[i],
-          atoms.x[i],
-          atoms.y[i],
-          atoms.z[i],
-          atoms.sigma[i],
-          atoms.occ[i],
-          atoms.region[i],
-          atoms.charge[i]);
-    }
-    return result;
-  }
+  //template <typename T>
+  //void AtomData<T>::set_amorphous_parameters(const std::vector<Amorp_Lay_Info<T>> &amorp_lay_info) {
+  //  impl_->data.amorp_lay_info.assign(amorp_lay_info.begin(), amorp_lay_info.end());
+  //}
+  //
+  //template <typename T>
+  //std::vector<Atom<T>> AtomData<T>::get_spec_atoms() const {
+  //  const Atom_Data<T>& atoms = impl_->data;
+  //  std::vector<Atom<T>> result(atoms.size());
+  //  for (auto i = 0; i < result.size(); ++i) {
+  //    result[i] = Atom<T>(
+  //        atoms.Z[i],
+  //        atoms.x[i],
+  //        atoms.y[i],
+  //        atoms.z[i],
+  //        atoms.sigma[i],
+  //        atoms.occ[i],
+  //        atoms.region[i],
+  //        atoms.charge[i]);
+  //  }
+  //  return result;
+  //}
 
-  template <typename T>
-  void AtomData<T>::set_spec_atoms(const std::vector<Atom<T>>& spec_atoms) {
-    Atom_Data<T>& atoms = impl_->data;
-    atoms.resize(spec_atoms.size());
-    for (auto i = 0; i < spec_atoms.size(); ++i) {
-      atoms.Z[i] = spec_atoms[i].Z;
-      atoms.x[i] = spec_atoms[i].x;
-      atoms.y[i] = spec_atoms[i].y;
-      atoms.z[i] = spec_atoms[i].z;
-      atoms.sigma[i] = spec_atoms[i].sigma;
-      atoms.occ[i] = spec_atoms[i].occ;
-      atoms.region[i] = spec_atoms[i].region;
-      atoms.charge[i] = spec_atoms[i].charge;
-    }
-  }
+  //template <typename T>
+  //void AtomData<T>::set_spec_atoms(const std::vector<Atom<T>>& spec_atoms) {
+  //  Atom_Data<T>& atoms = impl_->data;
+  //  atoms.resize(spec_atoms.size());
+  //  for (auto i = 0; i < spec_atoms.size(); ++i) {
+  //    atoms.Z[i] = spec_atoms[i].Z;
+  //    atoms.x[i] = spec_atoms[i].x;
+  //    atoms.y[i] = spec_atoms[i].y;
+  //    atoms.z[i] = spec_atoms[i].z;
+  //    atoms.sigma[i] = spec_atoms[i].sigma;
+  //    atoms.occ[i] = spec_atoms[i].occ;
+  //    atoms.region[i] = spec_atoms[i].region;
+  //    atoms.charge[i] = spec_atoms[i].charge;
+  //  }
+  //}
 
-  template <typename T>
-  void AtomData<T>::get_statistic() {
-    impl_->data.get_statistic();
-  }
-  
-  template <typename T>
-  void AtomData<T>::clear() {
-    impl_->data.clear();
-  }
-  
-  template <typename T>
-  bool AtomData<T>::empty() const {
-    return impl_->data.empty();
-  }
-  
-  template <typename T>
-  AtomData<T>::size_type AtomData<T>::size() const {
-    return impl_->data.size();
-  }
+  //template <typename T>
+  //void AtomData<T>::get_statistic() {
+  //  impl_->data.get_statistic();
+  //}
+  //
+  //template <typename T>
+  //void AtomData<T>::clear() {
+  //  impl_->data.clear();
+  //}
+  //
+  //template <typename T>
+  //bool AtomData<T>::empty() const {
+  //  return impl_->data.empty();
+  //}
+  //
+  //template <typename T>
+  //AtomData<T>::size_type AtomData<T>::size() const {
+  //  return impl_->data.size();
+  //}
     
   /****************************************************************************
    * The Input interface
@@ -278,9 +278,6 @@ namespace mt {
   template <typename T>
   struct Input<T>::Data {
     Input_Multislice<T> data;
-    AtomData<T> atom_data_proxy;
-    Data()
-      : atom_data_proxy(typename AtomData<T>::Data(data.atoms)) {}
   };
 
   template <typename T>
@@ -426,14 +423,13 @@ namespace mt {
   }
 
   template <typename T>
-  AtomData<T>& Input<T>::get_atoms() const {
-    return impl_->atom_data_proxy;
+  Atom_Data<T>& Input<T>::get_atoms() const {
+    return impl_->data.atoms;
   }
 
   template <typename T>
-  void Input<T>::set_atoms(const AtomData<T>& atoms) {
-    impl_->data.atoms = atoms.internal().data;
-    impl_->atom_data_proxy = AtomData<T>(typename AtomData<T>::Data(impl_->data.atoms));
+  void Input<T>::set_atoms(const Atom_Data<T>& atoms) {
+    impl_->data.atoms = atoms;
   }
 
   template <typename T>
@@ -1609,38 +1605,132 @@ namespace mt {
   void Output<T>::clean_temporal() {
     impl_->data.clean_temporal();
   }
-  
+ 
   /****************************************************************************
-   * The Multislice interface
+   * Logging functions
    ***************************************************************************/
 
-  /* template <typename T, eDevice dev> */
-  /* struct MultisliceData<T, dev>::Data { */
-  /*   Multislice<T, dev> data; */
-  /* }; */
-
-  /* template <typename T, eDevice dev> */
-  /* MultisliceData<T, dev>::MultisliceData() */
-  /*     : impl_(std::make_unique<Data>()) {} */
-
-  /* template <typename T, eDevice dev> */
-  /* const MultisliceData<T, dev>::Data& MultisliceData<T, dev>::internal() const { */
-  /*   return *impl_; */
-  /* } */
-		
-  /* template <typename T, eDevice dev> */
-  /* void MultisliceData<T, dev>::set_input_data(Input<T> &input, StreamIface<dev> &stream_i, FFTData<T, dev> &fft2_i) { */
-  /*   impl_->data.set_input_data( */
-  /*       &input.internal().data, */
-  /*       &stream_i.internal().data, */
-  /*       &fft2_i.internal().data); */
-  /* } */
-		
-  /* template <typename T, eDevice dev> */
-  /* void MultisliceData<T, dev>::operator()(Output<T> &output) { */
-  /*   impl_->data(output.internal().data); */
-  /* } */
-
+  std::string to_string(const System_Configuration &self, const std::string &prefix) {
+    std::ostringstream msg;
+    msg << prefix << "precision:   " << self.precision << "\n";
+    msg << prefix << "device:      " << self.device << "\n";
+    msg << prefix << "cpu_ncores:  " << self.precision << "\n";
+    msg << prefix << "cpu_nthread: " << self.precision << "\n";
+    msg << prefix << "gpu_device:  " << self.precision << "\n";
+    msg << prefix << "gpu_nstream: " << self.precision << "\n";
+    return msg.str();
+  }
+  
+  template <typename T>
+  std::string to_string(const Lens<T> &self, const std::string &prefix) {
+    std::ostringstream msg;
+    msg << prefix << "m: " << self.m << "\n";
+    msg << prefix << "c_10: " << self.c_10 << "\n";
+    msg << prefix << "c_12: " << self.c_12 << "\n";
+    msg << prefix << "phi_12: " << self.phi_12 << "\n";
+    msg << prefix << "c_21: " << self.c_21 << "\n";
+    msg << prefix << "phi_21: " << self.phi_21 << "\n";
+    msg << prefix << "c_23: " << self.c_23 << "\n";
+    msg << prefix << "phi_23: " << self.phi_23 << "\n";
+    msg << prefix << "c_30: " << self.c_30 << "\n";
+    msg << prefix << "c_32: " << self.c_32 << "\n";
+    msg << prefix << "phi_32: " << self.phi_32 << "\n";
+    msg << prefix << "c_34: " << self.c_34 << "\n";
+    msg << prefix << "phi_34: " << self.phi_34 << "\n";
+    msg << prefix << "c_41: " << self.c_41 << "\n";
+    msg << prefix << "phi_41: " << self.phi_41 << "\n";
+    msg << prefix << "c_43: " << self.c_43 << "\n";
+    msg << prefix << "phi_43: " << self.phi_43 << "\n";
+    msg << prefix << "c_45: " << self.c_45 << "\n";
+    msg << prefix << "phi_45: " << self.phi_45 << "\n";
+    msg << prefix << "c_50: " << self.c_50 << "\n";
+    msg << prefix << "c_52: " << self.c_52 << "\n";
+    msg << prefix << "phi_52: " << self.phi_52 << "\n";
+    msg << prefix << "c_54: " << self.c_54 << "\n";
+    msg << prefix << "phi_54: " << self.phi_54 << "\n";
+    msg << prefix << "c_56: " << self.c_56 << "\n";
+    msg << prefix << "phi_56: " << self.phi_56 << "\n";
+    msg << prefix << "inner_aper_ang: " << self.inner_aper_ang << "\n";
+    msg << prefix << "outer_aper_ang: " << self.outer_aper_ang << "\n";
+    msg << prefix << "ti_a: " << self.ti_a << "\n";
+    msg << prefix << "ti_sigma: " << self.ti_sigma << "\n";
+    msg << prefix << "ti_beta: " << self.ti_beta << "\n";
+    msg << prefix << "ti_npts: " << self.ti_npts << "\n";
+    msg << prefix << "ti_iehwgd: " << self.ti_iehwgd << "\n";
+    msg << prefix << "si_a: " << self.si_a << "\n";
+    msg << prefix << "si_sigma: " << self.si_sigma << "\n";
+    msg << prefix << "si_beta: " << self.si_beta << "\n";
+    msg << prefix << "si_rad_npts: " << self.si_rad_npts << "\n";
+    msg << prefix << "si_azm_npts: " << self.si_azm_npts << "\n";
+    msg << prefix << "si_iehwgd: " << self.si_iehwgd << "\n";
+    msg << prefix << "si_theta_c: " << self.si_theta_c << "\n";
+    msg << prefix << "zero_defocus_type: " << self.zero_defocus_type << "\n";
+    msg << prefix << "zero_defocus_plane: " << self.zero_defocus_plane << "\n";
+    msg << prefix << "lambda: " << self.lambda << "\n";
+    return msg.str();
+  }
+  
+  template <typename T>
+  std::string to_string(const Input<T> &self, const std::string &prefix) {
+    std::ostringstream msg;
+    msg << prefix << "system_conf" << "\n";
+    msg << prefix << to_string(self.get_system_conf(), " -");
+    msg << prefix << "interaction_model: " << self.get_interaction_model() << "\n";
+    msg << prefix << "potential_type: " << self.get_potential_type() << "\n";
+    msg << prefix << "pn_model: " << self.get_pn_model() << "\n";
+    msg << prefix << "pn_coh_contrib: " << self.get_pn_coh_contrib() << "\n";
+    msg << prefix << "pn_single_conf: " << self.get_pn_single_conf() << "\n";
+    /* msg << prefix << "pn_dim: " << self.get_pn_dim() << "\n"; */
+    msg << prefix << "fp_dist: " << self.get_fp_dist() << "\n";
+    msg << prefix << "pn_seed: " << self.get_pn_seed() << "\n";
+    msg << prefix << "pn_nconf: " << self.get_pn_nconf() << "\n";
+    msg << prefix << "fp_iconf_0: " << self.get_fp_iconf_0() << "\n";
+    /* msg << prefix << Helpers<mt::AtomData<T>>::getstate(self.get_atoms()); */
+    msg << prefix << "is_crystal: " << self.get_is_crystal() << "\n";
+    msg << prefix << "spec_rot_theta: " << self.get_spec_rot_theta() << "\n";
+    /* msg << prefix << "spec_rot_u0: " << self.get_spec_rot_u0() << "\n"; */
+    msg << prefix << "spec_rot_center_type: " << self.get_spec_rot_center_type() << "\n";
+    /* msg << prefix << "spec_rot_center_p: " << self.get_spec_rot_center_p() << "\n"; */
+    msg << prefix << "thick_type: " << self.get_thick_type() << "\n";
+    /* msg << prefix << "thick: " << self.get_thick() << "\n"; */
+    msg << prefix << "potential_slicing: " << self.get_potential_slicing() << "\n";
+    /* msg << prefix << "grid_2d: " << self.get_grid_2d() << "\n"; */
+    /* msg << prefix << "output_area: " << self.get_output_area() << "\n"; */
+    msg << prefix << "simulation_type: " << self.get_simulation_type() << "\n";
+    msg << prefix << "iw_type: " << self.get_iw_type() << "\n";
+    /* msg << prefix << "iw_psi: " << self.get_iw_psi() << "\n"; */
+    /* msg << prefix << "iw_x: " << self.get_iw_x() << "\n"; */
+    /* msg << prefix << "iw_y: " << self.get_iw_y() << "\n"; */
+    msg << prefix << "E_0: " << self.get_E_0() << "\n";
+    msg << prefix << "lambda: " << self.get_lambda() << "\n";
+    msg << prefix << "theta: " << self.get_theta() << "\n";
+    msg << prefix << "phi: " << self.get_phi() << "\n";
+    msg << prefix << "illumination_model: " << self.get_illumination_model() << "\n";
+    msg << prefix << "temporal_spatial_incoh: " << self.get_temporal_spatial_incoh() << "\n";
+    msg << prefix << "cond_lens" << "\n";
+    msg << prefix << to_string(self.get_cond_lens(), " -");
+    msg << prefix << "obj_lens" << "\n";
+    msg << prefix << to_string(self.get_obj_lens(), " -");
+    /* msg << prefix << self.get_scanning(); */
+    /* msg << prefix << self.get_detector(); */
+    /* msg << prefix << self.get_eels_fr(); */
+    msg << prefix << "operation_mode: " << self.get_operation_mode() << "\n";
+    msg << prefix << "slice_storage: " << self.get_slice_storage() << "\n";
+    msg << prefix << "reverse_multislice: " << self.get_reverse_multislice() << "\n";
+    msg << prefix << "mul_sign: " << self.get_mul_sign() << "\n";
+    msg << prefix << "Vrl: " << self.get_Vrl() << "\n";
+    msg << prefix << "nR: " << self.get_nR() << "\n";
+    msg << prefix << "nrot: " << self.get_nrot() << "\n";
+    msg << prefix << "cdl_var_type: " << self.get_cdl_var_type() << "\n";
+    /* msg << prefix << "cdl_var: " << self.get_cdl_var() << "\n"; */
+    /* msg << prefix << "iscan: " << self.get_iscan() << "\n"; */
+    /* msg << prefix << "beam_x: " << self.get_beam_x() << "\n"; */
+    /* msg << prefix << "beam_y: " << self.get_beam_y() << "\n"; */
+    msg << prefix << "islice: " << self.get_islice() << "\n";
+    msg << prefix << "dp_Shift: " << self.get_dp_Shift() << "\n";
+    return msg.str();
+  }
+  
   /****************************************************************************
    * Misc function calls
    ***************************************************************************/
@@ -1711,8 +1801,8 @@ namespace mt {
   template class EELS<float>;
   template class EELS<double>;
 
-  template class AtomData<float>;
-  template class AtomData<double>;
+  template class Atom_Data<float>;
+  template class Atom_Data<double>;
   
   template class Input<float>;
   template class Input<double>;
@@ -1722,6 +1812,11 @@ namespace mt {
 
   template mt::Output<float> tem_simulation<float>(Input<float>&);
   template mt::Output<double> tem_simulation<double>(Input<double>&);
+
+  template std::string mt::to_string<float>(const Lens<float>&, const std::string&);
+  template std::string mt::to_string<double>(const Lens<double>&, const std::string&);
+  template std::string mt::to_string<float>(const Input<float>&, const std::string&);
+  template std::string mt::to_string<double>(const Input<double>&, const std::string&);
 
 }  // namespace mt
 

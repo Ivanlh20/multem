@@ -15,13 +15,23 @@ find_package(CUDA REQUIRED)
 find_package(FFTW REQUIRED)
 
 # Turn off LTO (has problems with cuda)
-set(HAS_FLTO False)
-set(HAS_FLTO_THIN False)
+# set(HAS_FLTO False)
+# set(HAS_FLTO_THIN False)
 
 # Add the automatically determined parts of the RPATH which point to directories
 # outside the build tree to the install RPATH. Required for submission to
 # clusters which may not allow export of LD_LIBRARY_PATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH True)
+
+# Set the cmake build type
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Set some compile flags
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 ##############################################################################
 # Build the multem library
@@ -36,6 +46,13 @@ target_compile_features(multem PUBLIC cxx_std_11)
 # Not specifying CUDA architecture throws and error.
 # Setting this option does not pass arch flag to compiler
 set_property(TARGET multem PROPERTY CUDA_ARCHITECTURES OFF)
+
+# Define all symbols as hidden by default
+set_target_properties(multem PROPERTIES CXX_VISIBILITY_PRESET "hidden")
+set_target_properties(multem PROPERTIES CUDA_VISIBILITY_PRESET "hidden")
+
+# Turn on LTO
+set_property(TARGET multem PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
 
 # Set the include directory
 target_include_directories(multem PRIVATE src)
@@ -54,6 +71,7 @@ install(FILES include/lin_alg_def.cuh DESTINATION include)
 install(FILES include/math.cuh DESTINATION include)
 install(FILES include/safe_types.cuh DESTINATION include)
 install(FILES include/multem/constants.h DESTINATION include/multem)
+install(FILES include/atom_data_api.h DESTINATION include)
 
 ##############################################################################
 # Build the test executable
