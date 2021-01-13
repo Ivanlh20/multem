@@ -1749,6 +1749,25 @@ namespace mt
 		return det_type == mt::eDT_Matrix;
 	}
 
+  /********************STEM Intensity***********************/
+	template <class TVector>
+	struct Det_Int
+	{
+		using value_type = typename TVector::value_type;
+		using size_type = std::size_t;
+
+    ~Det_Int() {}
+
+		static const eDevice device = e_host;
+
+		size_type size() const
+		{
+			return image.size();
+		}
+
+    std::vector<TVector> image;
+	};
+	
 
 
 	/****************************lens***************************/
