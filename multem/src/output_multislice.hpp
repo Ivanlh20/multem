@@ -1172,6 +1172,9 @@ namespace mt {
   
   template <typename T>
   Output_Multislice<T>::Output_Multislice(Output_Multislice<T> &&other) = default;
+  
+  template <typename T>
+  Output_Multislice<T>::~Output_Multislice() = default;
 
   template <typename T>
   Output_Multislice<T>::Implementation& Output_Multislice<T>::data() {
