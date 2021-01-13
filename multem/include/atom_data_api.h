@@ -419,8 +419,8 @@ namespace mt {
 			TVector_r x;
 			TVector_r y;
 			TVector_r z;
-      std::vector<float> sigma;
-      std::vector<float> occ;
+      std::vector<T> sigma;
+      std::vector<T> occ;
       std::vector<int> region;
       std::vector<int> charge;
 
@@ -438,11 +438,11 @@ namespace mt {
 			T z_min;
 			T z_max;
 
-			float sigma_min;
-			float sigma_max;
+			T sigma_min;
+			T sigma_max;
 
-			float occ_min;
-			float occ_max;
+			T occ_min;
+			T occ_max;
 
 			int region_min;
 			int region_max;
