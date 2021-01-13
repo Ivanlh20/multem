@@ -1285,6 +1285,58 @@ namespace mt {
   void Output_Multislice<T>::set_r(const std::vector<T_r>& r) {
     pimpl->r.assign(r.begin(), r.end());
   }
+    
+  template <typename T>
+  std::vector<Det_Int<std::vector<T>>> Output_Multislice<T>::get_image_tot() const {
+    std::vector<Det_Int<std::vector<T>>> result;
+    for (auto &x : pimpl->image_tot) {
+      Det_Int<std::vector<T>> d;
+      for (auto &y : x.image) {
+        d.image.push_back(std::vector<T>(y.begin(), y.end()));
+      }
+      result.push_back(d);
+    }
+    return result;
+  }
+  
+  template <typename T>
+  void Output_Multislice<T>::set_image_tot(const std::vector<Det_Int<std::vector<T>>>& image_tot) {
+    pimpl->image_tot.resize(image_tot.size());
+    for (auto i = 0; i < image_tot.size(); ++i) {
+      pimpl->image_tot[i].image.resize(image_tot[i].size());
+      for (auto j = 0; j < image_tot[i].size(); ++j) {
+        pimpl->image_tot[i].image[j].assign(
+            image_tot[i].image[j].begin(),
+            image_tot[i].image[j].end());
+      }
+    }
+  }
+
+  template <typename T>
+  std::vector<Det_Int<std::vector<T>>> Output_Multislice<T>::get_image_coh() const {
+    std::vector<Det_Int<std::vector<T>>> result;
+    for (auto &x : pimpl->image_coh) {
+      Det_Int<std::vector<T>> d;
+      for (auto &y : x.image) {
+        d.image.push_back(std::vector<T>(y.begin(), y.end()));
+      }
+      result.push_back(d);
+    }
+    return result;
+  }
+  
+  template <typename T>
+  void Output_Multislice<T>::set_image_coh(const std::vector<Det_Int<std::vector<T>>>& image_coh) {
+    pimpl->image_coh.resize(image_coh.size());
+    for (auto i = 0; i < image_coh.size(); ++i) {
+      pimpl->image_coh[i].image.resize(image_coh[i].size());
+      for (auto j = 0; j < image_coh[i].size(); ++j) {
+        pimpl->image_coh[i].image[j].assign(
+            image_coh[i].image[j].begin(),
+            image_coh[i].image[j].end());
+      }
+    }
+  }
 
   template <typename T>
   std::vector<std::vector<typename Output_Multislice<T>::T_r>> Output_Multislice<T>::get_m2psi_tot() const {

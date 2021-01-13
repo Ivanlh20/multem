@@ -89,7 +89,7 @@ namespace mt
 	{
 	public:
 		using T_r = T;
-		using T_c = complex<T>;
+		using T_c = std::complex<T>;
 
 		DLL_PUBLIC Output_Multislice();
     DLL_PUBLIC Output_Multislice(const Output_Multislice &other);
@@ -125,9 +125,15 @@ namespace mt
 
     DLL_PUBLIC std::vector<T_r> get_r() const;
     DLL_PUBLIC void set_r(const std::vector<T_r>& r);
+    
+    DLL_PUBLIC std::vector<Det_Int<std::vector<T_r>>> get_image_tot() const;
+    DLL_PUBLIC void set_image_tot(const std::vector<Det_Int<std::vector<T_r>>>& image_tot);
+    
+    DLL_PUBLIC std::vector<Det_Int<std::vector<T_r>>> get_image_coh() const;
+    DLL_PUBLIC void set_image_coh(const std::vector<Det_Int<std::vector<T_r>>>& image_coh);
 
     DLL_PUBLIC std::vector<std::vector<T_r>> get_m2psi_tot() const;
-    DLL_PUBLIC void set_m2psi_tot(const std::vector<std::vector<T_r>>& m2psi_totx);
+    DLL_PUBLIC void set_m2psi_tot(const std::vector<std::vector<T_r>>& m2psi_tot);
 
     DLL_PUBLIC std::vector<std::vector<T_r>> get_m2psi_coh() const;
     DLL_PUBLIC void set_m2psi_coh(const std::vector<std::vector<T_r>>& m2psi_coh);

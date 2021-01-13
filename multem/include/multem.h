@@ -23,19 +23,6 @@
 #ifndef MULTEM_H
 #define MULTEM_H
 
-#include <array>
-#include <cassert>
-#include <complex>
-#include <string>
-#include <vector>
-#include <memory>
-#include <multem/constants.h>
-#include <lin_alg_def.cuh>
-#include <safe_types.cuh>
-#include <atom_data_api.h>
-#include <input_multislice_api.h>
-#include <output_multislice_api.h>
-
 #if defined _WIN32 || defined __CYGWIN__
   #ifdef BUILDING_DLL
     #ifdef __GNUC__
@@ -58,94 +45,21 @@
   #endif
 #endif
 
+#include <array>
+#include <cassert>
+#include <complex>
+#include <string>
+#include <vector>
+#include <memory>
+#include <multem/constants.h>
+#include <lin_alg_def.cuh>
+#include <safe_types.cuh>
+#include <atom_data_api.h>
+#include <input_multislice_api.h>
+#include <output_multislice_api.h>
+
 namespace mt {
   
-  /****************************************************************************
-   * The Scanning interface
-   ***************************************************************************/
-  
-  /**
-   * A class to represent an image
-   */
-  template <typename T>
-  class Image {
-  public:
-
-    typedef T value_type;
-    typedef std::array<std::size_t, 2> shape_type;
-
-    std::vector<value_type> data;
-    shape_type shape;
-
-    Image()
-      : shape({ 0, 0 }) {}
-
-    /**
-     * Construct the image from the pointer
-     * @param data_ The data pointer
-     * @param shape_ The image shape (Y, X)
-     */
-    template <typename U>
-    Image(const U *data_, shape_type shape_)
-      : shape(shape_) {
-      std::size_t size = shape[0]*shape[1];
-      data.assign(data_, data_ + size);
-    }
-  };
-
-  /**
-   * A class to represent a complex image
-   */
-  template <typename T>
-  class Image< std::complex<T> > {
-  public:
-    
-    typedef std::complex<T> value_type;
-    typedef std::array<std::size_t, 2> shape_type;
-
-    std::vector<value_type> data;
-    shape_type shape;
-
-    Image()
-      : shape({ 0, 0 }) {}
-
-    /**
-     * Construct the image from the pointer
-     * @param data_ The data pointer
-     * @param shape_ The image shape (Y, X)
-     */
-    template <typename U>
-    Image(const U *data_, shape_type shape_)
-      : shape(shape_) {
-      std::size_t size = shape[0]*shape[1];
-      data.resize(size);
-      for (auto i = 0; i < size; ++i) {
-        data[i] = value_type(data_[i].real(), data_[i].imag());
-      }
-    }
-    
-  };
-  
-  /****************************************************************************
-   * The Detector interface
-   ***************************************************************************/
-
-  /**
-   * Interface for Det_Int. This can be removed simply by using std::vector in
-   * the Det_Int class rather than thrust::vector
-   */
-  template <typename T>
-  class DetInt {
-  public:
-		using value_type = typename T::value_type;
-		using size_type = std::size_t;
-
-		size_type size() const {
-			return image.size();
-		}
-
-    std::vector<T> image;
-  };
 
   /****************************************************************************
    * Logging functions

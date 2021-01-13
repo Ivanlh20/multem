@@ -254,5 +254,11 @@ namespace std {
   template class vector<double>;
   template class vector<complex<float>>;
   template class vector<complex<double>>;
+  template class vector<vector<float>>;
+  template class vector<vector<double>>;
+  template class vector<vector<complex<float>>>;
+  template class vector<vector<complex<double>>>;
+  template class vector<mt::Det_Int<vector<float>>>;
+  template class vector<mt::Det_Int<vector<double>>>;
 
 }

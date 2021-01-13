@@ -1756,8 +1756,6 @@ namespace mt
 		using value_type = typename TVector::value_type;
 		using size_type = std::size_t;
 
-    ~Det_Int() {}
-
 		static const eDevice device = e_host;
 
 		size_type size() const

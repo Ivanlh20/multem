@@ -154,9 +154,8 @@ namespace pybind11 { namespace detail {
         self.get_x(),
         self.get_y(),
         self.get_r(),
-        /* self.get_image_tot(), */
-        /* self.get_image_coh(), */
-        0,0,
+        self.get_image_tot(),
+        self.get_image_coh(),
         self.get_m2psi_tot(),
         self.get_m2psi_coh(),
         self.get_psi_coh(),
@@ -182,8 +181,8 @@ namespace pybind11 { namespace detail {
       self.set_x(obj[7].cast<std::vector<T>>());
       self.set_y(obj[10].cast<std::vector<T>>());
       self.set_r(obj[11].cast<std::vector<T>>());
-      /* self.set_image_tot(obj[12].cast<std::vector<mt::DetInt<vector_type>>>()); */
-      /* self.set_image_coh(obj[13].cast<std::vector<mt::DetInt<vector_type>>>()); */
+      self.set_image_tot(obj[12].cast<std::vector<mt::Det_Int<vector_type>>>());
+      self.set_image_coh(obj[13].cast<std::vector<mt::Det_Int<vector_type>>>());
       self.set_m2psi_tot(obj[14].cast<std::vector<vector_type>>());
       self.set_m2psi_coh(obj[15].cast<std::vector<vector_type>>());
       self.set_psi_coh(obj[16].cast<std::vector<complex_vector_type>>());
@@ -311,14 +310,14 @@ void wrap_output_multislice(py::module_ m, const char *name)
         "r", 
         &Type::get_r,
         &Type::set_r)
-    /* .def_property( */
-    /*     "image_tot", */ 
-    /*     &Type::get_image_tot, */
-    /*     &Type::set_image_tot) */
-    /* .def_property( */
-    /*     "image_coh", */ 
-    /*     &Type::get_image_coh, */
-    /*     &Type::set_image_coh) */
+    .def_property(
+        "image_tot", 
+        &Type::get_image_tot,
+        &Type::set_image_tot)
+    .def_property(
+        "image_coh", 
+        &Type::get_image_coh,
+        &Type::set_image_coh)
     .def_property(
         "m2psi_tot", 
         &Type::get_m2psi_tot,
