@@ -5,21 +5,21 @@
 #include <pybind11/stl_bind.h>
 #include <pybind11/functional.h>
 #include <multem.h>
-#include <multem/enums.h>
-#include <multem/system_configuration.h>
-#include <multem/grid_2d.h>
-#include <multem/range_2d.h>
-#include <multem/r3d.h>
-#include <multem/fp_dim.h>
-#include <multem/lens.h>
-#include <multem/eels.h>
-#include <multem/amorp_lay_info.h>
-#include <multem/atom_data.h>
-#include <multem/scanning.h>
-#include <multem/detector.h>
-#include <multem/input_multislice.h>
-#include <multem/output_multislice.h>
-#include <multem/multislice.h>
+#include <multem/ext/enums.h>
+#include <multem/ext/system_configuration.h>
+#include <multem/ext/grid_2d.h>
+#include <multem/ext/range_2d.h>
+#include <multem/ext/r3d.h>
+#include <multem/ext/fp_dim.h>
+#include <multem/ext/lens.h>
+#include <multem/ext/eels.h>
+#include <multem/ext/amorp_lay_info.h>
+#include <multem/ext/atom_data.h>
+#include <multem/ext/scanning.h>
+#include <multem/ext/detector.h>
+#include <multem/ext/input_multislice.h>
+#include <multem/ext/output_multislice.h>
+#include <multem/ext/multislice.h>
 
 namespace py = pybind11;
 

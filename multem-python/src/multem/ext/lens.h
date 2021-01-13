@@ -14,7 +14,7 @@
 
 #include <pybind11/pybind11.h>
 #include <multem.h>
-#include <multem/serialization.h>
+#include <multem/ext/serialization.h>
 
 namespace py = pybind11;
 
