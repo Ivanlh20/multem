@@ -296,7 +296,7 @@ namespace mt
 				}
 			}
 
-			void set_incident_wave(TVector_c &psi, Vector<T_r, e_host> &beam_x, Vector<T_r, e_host> &beam_y)
+			void set_incident_wave(TVector_c &psi, const Vector<T_r, e_host> &beam_x, const Vector<T_r, e_host> &beam_y)
 			{
 				T_r gxu = 0;
 				T_r gyu = 0;
@@ -307,8 +307,12 @@ namespace mt
 
 			void set_incident_wave(TVector_c &psi)
 			{
-				auto &beam_x = this->input_multislice->beam_x;
-				auto &beam_y = this->input_multislice->beam_y;
+        Vector<T_r, e_host> beam_x(
+            this->input_multislice->beam_x.begin(), 
+            this->input_multislice->beam_x.end());
+        Vector<T_r, e_host> beam_y(
+            this->input_multislice->beam_y.begin(), 
+            this->input_multislice->beam_y.end());
 
 				set_incident_wave(psi, beam_x, beam_y);
 			}

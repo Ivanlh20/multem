@@ -60,7 +60,7 @@ namespace mt
 			}
 
 			void operator()(Vector<T_c, dev> &psi, T_r gxu, T_r gyu, 
-			Vector<T_r, e_host> &x_b, Vector<T_r, e_host> &y_b, T_r z_init=0)
+			const Vector<T_r, e_host> &x_b, const Vector<T_r, e_host> &y_b, T_r z_init=0)
 			{
 				switch(input_multislice->iw_type)
 				{
