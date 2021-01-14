@@ -20,6 +20,20 @@
 #include <multem/ext/input_multislice.h>
 #include <multem/ext/output_multislice.h>
 #include <multem/ext/multislice.h>
+/* #include <multem/ext/add_amorp_lay.h> */
+/* #include <multem/ext/amorp_spec.h> */
+/* #include <multem/ext/crystal_by_layers.h> */
+#include <multem/ext/crystal_parameters.h>
+/* #include <multem/ext/feg.h> */
+/* #include <multem/ext/fxeg_data.h> */
+/* #include <multem/ext/fxg.h> */
+#include <multem/ext/gmax.h>
+#include <multem/ext/min_spl.h>
+#include <multem/ext/misc.h>
+/* #include <multem/ext/pr.h> */
+/* #include <multem/ext/rdf_3d.h> */
+/* #include <multem/ext/spec_rot.h> */
+/* #include <multem/ext/vp.h> */
 
 namespace py = pybind11;
 
@@ -40,5 +54,19 @@ PYBIND11_MODULE(multem_ext, m)
   export_input_multislice(m);
   export_output_multislice(m);
   export_multislice(m);
+  /* export_add_amorp_lay(m); */
+  /* export_amorp_spec(m); */
+  /* export_crystal_by_layers(m); */
+  export_crystal_parameters(m);
+  /* export_feg(m); */
+  /* export_fxeg_data(m); */
+  /* export_fxg(m); */
+  export_gmax(m);
+  export_min_spl(m);
+  export_misc(m);
+  /* export_pr(m); */
+  /* export_rdf_3d(m); */
+  /* export_spec_rot(m); */
+  /* export_vp(m); */
 }
 
