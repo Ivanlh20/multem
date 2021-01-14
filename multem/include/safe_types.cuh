@@ -169,6 +169,55 @@ namespace mt
 	template <>
 	const float Epsilon<float>::rel = 1e-4f;
 
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE
+	T get_lambda(const T &E_0);
+
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE
+	T get_sigma(const T &E_0);
+
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE
+	T get_gamma(const T &E_0);
+
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE 
+	T rad_2_rAngs(const T &E_0, const T &theta);
+
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE 
+	T hwhm_2_sigma(const T &v);
+
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE 
+	T fwhm_2_sigma(const T &v);
+
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE 
+	T iehwgd_2_sigma(const T &v);
+
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE 
+	T rad_2_sigma(const T &E_0, const T &theta);
+
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE 
+	T get_Vr_factor(const T &E_0, const T &theta);
+
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE 
+	T get_Scherzer_defocus(const T &E_0, const T &c_30);
+
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE 
+	T get_Scherzer_aperture(const T &E_0, const T &c_30);
+
+	template <class T>
+	DLL_PUBLIC DEVICE_CALLABLE FORCE_INLINE 
+	void get_Scherzer_conditions(const T &E_0, const T &c_30, T &defocus, T &aperture);
+
+
 	#ifdef __CUDACC__
 	struct Grid_BT
 	{

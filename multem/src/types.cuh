@@ -204,18 +204,6 @@ namespace mt
 	template <class T>
 	struct is_fundamental;
 
-	template <class T>
-	DEVICE_CALLABLE FORCE_INLINE
-	T get_lambda(const T &E_0);
-
-	template <class T>
-	DEVICE_CALLABLE FORCE_INLINE
-	T get_sigma(const T &E_0);
-
-	template <class T>
-	DEVICE_CALLABLE FORCE_INLINE
-	T get_gamma(const T &E_0);
-
 	/**************************vector**************************/
 	template <class T, eDevice dev>
 	using Vector = typename std::conditional<dev == e_host, typename std::conditional<std::is_fundamental<T>::value ||
