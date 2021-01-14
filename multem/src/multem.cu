@@ -239,6 +239,42 @@ namespace mt {
   template std::string mt::to_string<float>(const Input_Multislice<float>&, const std::string&);
   template std::string mt::to_string<double>(const Input_Multislice<double>&, const std::string&);
 
+	template float get_lambda<float>(const float &E_0);
+	template double get_lambda<double>(const double &E_0);
+
+	template float get_sigma<float>(const float &E_0);
+	template double get_sigma<double>(const double &E_0);
+
+	template float get_gamma<float>(const float &E_0);
+	template double get_gamma<double>(const double &E_0);
+
+	template float rad_2_rAngs<float>(const float &E_0, const float &theta);
+	template double rad_2_rAngs<double>(const double &E_0, const double &theta);
+
+	template float hwhm_2_sigma<float>(const float &v);
+	template double hwhm_2_sigma<double>(const double &v);
+
+	template float fwhm_2_sigma<float>(const float &v);
+	template double fwhm_2_sigma<double>(const double &v);
+
+	template float iehwgd_2_sigma<float>(const float &v);
+	template double iehwgd_2_sigma<double>(const double &v);
+
+	template float rad_2_sigma<float>(const float &E_0, const float &theta);
+	template double rad_2_sigma<double>(const double &E_0, const double &theta);
+
+	template float get_Vr_factor<float>(const float &E_0, const float &theta);
+	template double get_Vr_factor<double>(const double &E_0, const double &theta);
+
+	template float get_Scherzer_defocus<float>(const float &E_0, const float &c_30);
+	template double get_Scherzer_defocus<double>(const double &E_0, const double &c_30);
+
+	template float get_Scherzer_aperture<float>(const float &E_0, const float &c_30);
+	template double get_Scherzer_aperture<double>(const double &E_0, const double &c_30);
+
+	template void get_Scherzer_conditions<float>(const float &E_0, const float &c_30, float &defocus, float &aperture);
+	template void get_Scherzer_conditions<double>(const double &E_0, const double &c_30, double &defocus, double &aperture);
+
 }  // namespace mt
 
 namespace std {
