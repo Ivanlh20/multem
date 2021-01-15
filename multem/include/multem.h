@@ -59,6 +59,8 @@
 #include <output_multislice_api.h>
 #include <amorp_spec_api.h>
 #include <xtl_build.hpp>
+#include <atom_cal_api.h>
+#include <fxeg_data_api.h>
 
 namespace mt {
   

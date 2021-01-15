@@ -1683,6 +1683,8 @@ namespace mt
 			
   Atomic_Data::Atomic_Data(ePotential_Type PotPar_i)
     : pimpl(std::make_unique<Data>(PotPar_i)) {}
+
+  Atomic_Data::~Atomic_Data() = default;
         
   void Atomic_Data::Load_Data(ePotential_Type PotPar_i) {
     pimpl->Load_Data(PotPar_i);
@@ -1720,8 +1722,8 @@ namespace mt
     return pimpl->atomic_radius(Z);
   }
 
-  template <class TAtom_Type>
-  void Atomic_Data::To_atom_type_CPU(int Z_i, double Vrl_i, int nR_i, double R_min_i, TAtom_Type &atom_type) {
+	template <class T, eDevice dev>
+  void Atomic_Data::To_atom_type_CPU(int Z_i, double Vrl_i, int nR_i, double R_min_i, Atom_Type<T, dev> &atom_type) {
       return pimpl->To_atom_type_CPU(Z_i, Vrl_i, nR_i, R_min_i, atom_type);
   }
 

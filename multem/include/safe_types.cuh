@@ -3104,6 +3104,57 @@ namespace mt
 				return r2d<T>(x, y);
 			}
 	};
+  
+  template <class T, eDevice dev>
+	struct Q1;
+	
+  template <class T>
+	struct Q1 <T, e_host>
+	{
+		using value_type = T;
+		using size_type = std::size_t;
+
+		static const eDevice device = e_host;
+
+		size_type size() const
+		{
+			return x.size();
+		}
+
+		void clear()
+		{
+			x.clear();
+			w.clear();
+		}
+
+		void reserve(const size_type &new_size)
+		{
+			x.reserve(new_size);
+			w.reserve(new_size);
+		}
+
+		void resize(const size_type &new_size, const value_type &value = value_type())
+		{
+			x.resize(new_size, value);
+			w.resize(new_size, value);
+		}
+
+		void shrink_to_fit()
+		{
+			x.shrink_to_fit();
+			w.shrink_to_fit();
+		}
+
+		template <class TQ1>
+		void assign(TQ1 &q1)
+		{
+			x.assign(q1.x.begin(), q1.x.end());
+			w.assign(q1.w.begin(), q1.w.end());
+		}
+
+    std::vector<T> x;
+    std::vector<T> w;
+	};
 
   template <typename T, eDevice dev>
   struct PP_Coef;

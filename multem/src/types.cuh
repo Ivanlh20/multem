@@ -554,13 +554,13 @@ namespace mt
 	};
 
 	/************************quadrature x**********************/
-	template <class T, eDevice dev>
-	struct Q1
+	template <class T>
+	struct Q1 <T, e_device>
 	{
 		using value_type = T;
 		using size_type = std::size_t;
 
-		static const eDevice device = dev;
+		static const eDevice device = e_device;
 
 		size_type size() const
 		{
@@ -598,8 +598,8 @@ namespace mt
 			w.assign(q1.w.begin(), q1.w.end());
 		}
 
-		Vector<T, dev> x;
-		Vector<T, dev> w;
+		Vector<T, device> x;
+		Vector<T, device> w;
 	};
 	
   template <class T>

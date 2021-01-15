@@ -28,6 +28,8 @@
 #include <output_multislice.hpp>
 #include <tem_simulation.cuh>
 #include "amorp_spec.hpp"
+#include "fxeg_data.hpp"
+#include "atomic_data.hpp"
 
 namespace mt {
   
@@ -222,6 +224,9 @@ namespace mt {
   
   template class EELS<float>;
   template class EELS<double>;
+
+  template class Atom_Cal<float>;
+  template class Atom_Cal<double>;
   
   template class Amorp_Spec<float>;
   template class Amorp_Spec<double>;
@@ -235,13 +240,18 @@ namespace mt {
   template class Output_Multislice<float>;
   template class Output_Multislice<double>;
 
-  template mt::Output_Multislice<float> tem_simulation<float>(Input_Multislice<float>&);
-  template mt::Output_Multislice<double> tem_simulation<double>(Input_Multislice<double>&);
+  template void Atomic_Data::To_atom_type_CPU<float, e_host>(
+      int, double, int, double, Atom_Type<float, e_host>&);
+  template void Atomic_Data::To_atom_type_CPU<double, e_host>(
+      int, double, int, double, Atom_Type<double, e_host>&);
 
-  template std::string mt::to_string<float>(const Lens<float>&, const std::string&);
-  template std::string mt::to_string<double>(const Lens<double>&, const std::string&);
-  template std::string mt::to_string<float>(const Input_Multislice<float>&, const std::string&);
-  template std::string mt::to_string<double>(const Input_Multislice<double>&, const std::string&);
+  template Output_Multislice<float> tem_simulation<float>(Input_Multislice<float>&);
+  template Output_Multislice<double> tem_simulation<double>(Input_Multislice<double>&);
+
+  template std::string to_string<float>(const Lens<float>&, const std::string&);
+  template std::string to_string<double>(const Lens<double>&, const std::string&);
+  template std::string to_string<float>(const Input_Multislice<float>&, const std::string&);
+  template std::string to_string<double>(const Input_Multislice<double>&, const std::string&);
 
 	template float get_lambda<float>(const float &E_0);
 	template double get_lambda<double>(const double &E_0);
