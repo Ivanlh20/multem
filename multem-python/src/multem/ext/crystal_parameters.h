@@ -42,9 +42,13 @@ public:
   T a;
   T b;
   T c;
+  T alpha;
+  T beta;
+  T gamma;
   std::vector<Layer> layers;
 
-  CrystalParameters() : na(0), nb(0), nc(0), a(0), b(0), c(0) {}
+  CrystalParameters()
+      : na(0), nb(0), nc(0), a(0), b(0), c(0), alpha(0), beta(0), gamma(0) {}
 };
 
 }  // namespace mt
@@ -60,6 +64,9 @@ void export_crystal_parameters(py::module_ m) {
     .def_readwrite("a", &Type::a)
     .def_readwrite("b", &Type::b)
     .def_readwrite("c", &Type::c)
+    .def_readwrite("alpha", &Type::alpha)
+    .def_readwrite("beta", &Type::beta)
+    .def_readwrite("gamma", &Type::gamma)
     .def_readwrite("layers", &Type::layers);
 }
 
