@@ -74,6 +74,12 @@ install(FILES include/multem/constants.h DESTINATION include/multem)
 install(FILES include/atom_data_api.h DESTINATION include)
 install(FILES include/input_multislice_api.h DESTINATION include)
 install(FILES include/output_multislice_api.h DESTINATION include)
+install(FILES include/amorp_spec_api.h DESTINATION include)
+install(FILES include/box_occ_api.h DESTINATION include)
+install(FILES include/cgpu_rand_api.h DESTINATION include)
+install(FILES include/atomic_data_api.h DESTINATION include)
+install(FILES include/stream_api.h DESTINATION include)
+install(FILES include/multem/config.h DESTINATION include/multem)
 
 ##############################################################################
 # Build the test executable

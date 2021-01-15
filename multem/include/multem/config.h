@@ -20,8 +20,8 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef MULTEM_H
-#define MULTEM_H
+#ifndef MULTEM_CONFIG_H
+#define MULTEM_CONFIG_H
 
 #if defined _WIN32 || defined __CYGWIN__
   #ifdef BUILDING_DLL
@@ -44,43 +44,5 @@
     #define DLL_PUBLIC
   #endif
 #endif
-
-#include <array>
-#include <cassert>
-#include <complex>
-#include <string>
-#include <vector>
-#include <memory>
-#include <multem/constants.h>
-#include <lin_alg_def.cuh>
-#include <safe_types.cuh>
-#include <atom_data_api.h>
-#include <input_multislice_api.h>
-#include <output_multislice_api.h>
-#include <amorp_spec_api.h>
-
-namespace mt {
-  
-
-  /****************************************************************************
-   * Logging functions
-   ***************************************************************************/
-
-  DLL_PUBLIC std::string to_string(const System_Configuration &sys_conf, const std::string &prefix="");
-
-  template <typename T>
-  DLL_PUBLIC std::string to_string(const Lens<T> &lens, const std::string &prefix="");
-
-  template <typename T>
-  DLL_PUBLIC std::string to_string(const Input_Multislice<T> &input, const std::string &prefix="");
-
-  /****************************************************************************
-   * Simulation functions
-   ***************************************************************************/
-
-  template <typename T>
-  DLL_PUBLIC mt::Output_Multislice<T> tem_simulation(Input_Multislice<T>&);
-
-}  // namespace mt
 
 #endif

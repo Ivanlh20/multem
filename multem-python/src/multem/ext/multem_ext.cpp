@@ -21,7 +21,7 @@
 #include <multem/ext/output_multislice.h>
 #include <multem/ext/multislice.h>
 /* #include <multem/ext/add_amorp_lay.h> */
-/* #include <multem/ext/amorp_spec.h> */
+#include <multem/ext/amorp_spec.h>
 /* #include <multem/ext/crystal_by_layers.h> */
 #include <multem/ext/crystal_parameters.h>
 /* #include <multem/ext/feg.h> */
@@ -55,7 +55,7 @@ PYBIND11_MODULE(multem_ext, m)
   export_output_multislice(m);
   export_multislice(m);
   /* export_add_amorp_lay(m); */
-  /* export_amorp_spec(m); */
+  export_amorp_spec(m);
   /* export_crystal_by_layers(m); */
   export_crystal_parameters(m);
   /* export_feg(m); */

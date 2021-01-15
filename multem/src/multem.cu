@@ -27,6 +27,7 @@
 #include <input_multislice.cuh>
 #include <output_multislice.hpp>
 #include <tem_simulation.cuh>
+#include "amorp_spec.hpp"
 
 namespace mt {
   
@@ -221,6 +222,9 @@ namespace mt {
   
   template class EELS<float>;
   template class EELS<double>;
+  
+  template class Amorp_Spec<float>;
+  template class Amorp_Spec<double>;
 
   template class Atom_Data<float>;
   template class Atom_Data<double>;

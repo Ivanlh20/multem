@@ -24,15 +24,16 @@
 #endif // _MSC_VER
 
 #include <string>
+#include <atomic_data_api.h>
 #include "math.cuh"
 #include "types.cuh"
 #include "atomic_fcns_mt.hpp"
 
 namespace mt
 {
-	class Atomic_Data{
+	class Atomic_Data::Data{
 		public:
-			Atomic_Data(ePotential_Type PotPar_i = ePT_none)
+			Data(ePotential_Type PotPar_i = ePT_none)
 			{
 				init();
 
@@ -83,9 +84,9 @@ namespace mt
 				return (Z_bound(Z))? data_table[Z-1].name:"";
 			}
 
-			Vector<float, e_host> extract_major_edges(const int &Z)
+      std::vector<float> extract_major_edges(const int &Z)
 			{ 
-				Vector<float, e_host> data;
+        std::vector<float> data;
 				data.reserve(5);
 
 				auto &edges = data_table[Z-1].edges;
@@ -101,9 +102,9 @@ namespace mt
 				return data;
 			}
 
-			Vector<float, e_host> extract_minor_edges(const int &Z)
+      std::vector<float> extract_minor_edges(const int &Z)
 			{ 
-				Vector<float, e_host> data;
+        std::vector<float> data;
 				data.reserve(7);
 
 				auto &edges = data_table[Z-1].edges;
@@ -1679,6 +1680,52 @@ namespace mt
 			Atom_Cal<double> c_atom_cal;
 			Atom_Type<double, e_host> c_atom_type;
 	};
+			
+  Atomic_Data::Atomic_Data(ePotential_Type PotPar_i)
+    : pimpl(std::make_unique<Data>(PotPar_i)) {}
+        
+  void Atomic_Data::Load_Data(ePotential_Type PotPar_i) {
+    pimpl->Load_Data(PotPar_i);
+  }
+
+  std::string Atomic_Data::Z_name(const int &Z) const {
+    return pimpl->Z_name(Z);
+  }
+
+  std::vector<float> Atomic_Data::extract_major_edges(const int &Z) {
+    return pimpl->extract_major_edges(Z);
+  }
+
+  std::vector<float> Atomic_Data::extract_minor_edges(const int &Z) {
+    return pimpl->extract_minor_edges(Z);
+  }
+
+  bool Atomic_Data::Z_bound(const int &Z) const {
+    return pimpl->Z_bound(Z);
+  }
+
+  int Atomic_Data::mass_number(const int &Z) const {
+    return pimpl->mass_number(Z);
+  }
+
+  double Atomic_Data::atomic_mass(const int &Z) const {
+    return pimpl->atomic_mass(Z);
+  }
+
+  double Atomic_Data::nuclear_radius(const int &Z) const {
+    return pimpl->nuclear_radius(Z);
+  }
+
+  double Atomic_Data::atomic_radius(const int &Z) const {
+    return pimpl->atomic_radius(Z);
+  }
+
+  template <class TAtom_Type>
+  void Atomic_Data::To_atom_type_CPU(int Z_i, double Vrl_i, int nR_i, double R_min_i, TAtom_Type &atom_type) {
+      return pimpl->To_atom_type_CPU(Z_i, Vrl_i, nR_i, R_min_i, atom_type);
+  }
+
 
 } // namespace mt
 #endif
+
