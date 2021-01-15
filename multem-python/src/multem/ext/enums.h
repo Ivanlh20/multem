@@ -35,7 +35,7 @@ namespace pybind11 { namespace detail {
             return;
           }
         }
-        std::string tname = typeid(T).name();
+        auto tname = typeid(T).name();
         detail::clean_type_id(tname);
         throw value_error("\"" + std::string(str) + "\" is not a valid value for enum type " + tname);
       });

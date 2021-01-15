@@ -172,7 +172,50 @@ namespace mt {
   }
 
   namespace detail {
-  
+    
+    template <typename T, eDevice dev>
+    mt::Output_Multislice<T> incident_wave_internal(Input_Multislice<T>& input_multislice) {
+
+      // Check input
+      MULTEM_ASSERT(input_multislice.system_conf.device == dev);
+      MULTEM_ASSERT(input_multislice.simulation_type == mt::eTEMST_IWRS); 
+      
+      // Initialise the stream and plan
+      mt::Stream<dev> stream(input_multislice.system_conf.nstream);
+      mt::FFT<T, dev> fft_2d;
+      fft_2d.create_plan_2d(
+          input_multislice.grid_2d.ny, 
+          input_multislice.grid_2d.nx, 
+          input_multislice.system_conf.nstream);
+
+      // Create the incident wave structure
+      mt::Incident_Wave<T, dev> incident_wave;
+      incident_wave.set_input_data(&input_multislice, &stream, &fft_2d);
+
+      // Initialise the output data
+      mt::Output_Multislice<T> output_multislice;
+      output_multislice.set_input_data(&input_multislice);
+      incident_wave(mt::eS_Real, output_multislice);
+      stream.synchronize();
+
+      // Finalise the output data
+      output_multislice.gather();
+      output_multislice.clean_temporal();
+      fft_2d.cleanup();
+
+      // If there is an error then throw
+      auto err = cudaGetLastError();
+      if (err != cudaSuccess) {
+        std::ostringstream msg;
+        msg << "CUDA error: %s\n";
+        msg << cudaGetErrorString(err);
+        throw std::runtime_error(msg.str());
+      }
+
+      // Return the output multislice
+      return output_multislice;
+    }
+    
     template <typename T, eDevice dev>
     mt::Output_Multislice<T> tem_simulation_internal(Input_Multislice<T>& input_multislice) {
 
@@ -216,6 +259,39 @@ namespace mt {
     }
 
   }
+  
+  template <typename T>
+  mt::Output_Multislice<T> incident_wave(Input_Multislice<T>& input_multislice) {
+    eDevice dev = input_multislice.system_conf.device;
+    return (dev == mt::e_device 
+        ? detail::incident_wave_internal<T, mt::e_device>(input_multislice)
+        : detail::incident_wave_internal<T, mt::e_host>(input_multislice));
+  }
+  
+  template <typename T>
+  mt::Output_Multislice<T> microscope_abberations(Input_Multislice<T>& input_multislice) {
+    return mt::Output_Multislice<T>();
+  }
+  
+  template <typename T>
+  mt::Output_Multislice<T> projected_potential(Input_Multislice<T>& input_multislice) {
+    return mt::Output_Multislice<T>();
+  }
+  
+  template <typename T>
+  mt::Output_Multislice<T> propagate(Input_Multislice<T>& input_multislice) {
+    return mt::Output_Multislice<T>();
+  }
+  
+  template <typename T>
+  mt::Output_Multislice<T> spec_planes(Input_Multislice<T>& input_multislice) {
+    return mt::Output_Multislice<T>();
+  }
+
+  template <typename T>
+  mt::Output_Multislice<T> spec_slicing(Input_Multislice<T>& input_multislice) {
+    return mt::Output_Multislice<T>();
+  }
 
   template <typename T>
   mt::Output_Multislice<T> tem_simulation(Input_Multislice<T>& input_multislice) {
@@ -223,6 +299,16 @@ namespace mt {
     return (dev == mt::e_device 
         ? detail::tem_simulation_internal<T, mt::e_device>(input_multislice)
         : detail::tem_simulation_internal<T, mt::e_host>(input_multislice));
+  }
+  
+  template <typename T>
+  mt::Output_Multislice<T> transmission_function(Input_Multislice<T>& input_multislice) {
+    return mt::Output_Multislice<T>();
+  }
+  
+  template <typename T>
+  mt::Output_Multislice<T> wave_function(Input_Multislice<T>& input_multislice) {
+    return mt::Output_Multislice<T>();
   }
   
   /****************************************************************************
@@ -254,14 +340,33 @@ namespace mt {
       int, double, int, double, Atom_Type<float, e_host>&);
   template void Atomic_Data::To_atom_type_CPU<double, e_host>(
       int, double, int, double, Atom_Type<double, e_host>&);
-
+  
+  template Output_Multislice<float> incident_wave<float>(Input_Multislice<float>&);
+  template Output_Multislice<double> incident_wave<double>(Input_Multislice<double>&);
+  
+  template Output_Multislice<float> microscope_abberations<float>(Input_Multislice<float>&);
+  template Output_Multislice<double> microscope_abberations<double>(Input_Multislice<double>&);
+  
+  template Output_Multislice<float> projected_potential<float>(Input_Multislice<float>&);
+  template Output_Multislice<double> projected_potential<double>(Input_Multislice<double>&);
+  
+  template Output_Multislice<float> propagate<float>(Input_Multislice<float>&);
+  template Output_Multislice<double> propagate<double>(Input_Multislice<double>&);
+  
+  template Output_Multislice<float> spec_planes<float>(Input_Multislice<float>&);
+  template Output_Multislice<double> spec_planes<double>(Input_Multislice<double>&);
+  
+  template Output_Multislice<float> spec_slicing<float>(Input_Multislice<float>&);
+  template Output_Multislice<double> spec_slicing<double>(Input_Multislice<double>&);
+  
   template Output_Multislice<float> tem_simulation<float>(Input_Multislice<float>&);
   template Output_Multislice<double> tem_simulation<double>(Input_Multislice<double>&);
+  
+  template Output_Multislice<float> transmission_function<float>(Input_Multislice<float>&);
+  template Output_Multislice<double> transmission_function<double>(Input_Multislice<double>&);
 
-  template std::string to_string<float>(const Lens<float>&, const std::string&);
-  template std::string to_string<double>(const Lens<double>&, const std::string&);
-  template std::string to_string<float>(const Input_Multislice<float>&, const std::string&);
-  template std::string to_string<double>(const Input_Multislice<double>&, const std::string&);
+  template Output_Multislice<float> wave_function<float>(Input_Multislice<float>&);
+  template Output_Multislice<double> wave_function<double>(Input_Multislice<double>&);
 
 	template float get_lambda<float>(const float &E_0);
 	template double get_lambda<double>(const double &E_0);
@@ -307,6 +412,11 @@ namespace mt {
 	
   template void remove_atoms_outside_z_range<float>(Atom_Data<float> &atoms, float z_0, float z_e);
   template void remove_atoms_outside_z_range<double>(Atom_Data<double> &atoms, double z_0, double z_e);
+
+  template std::string to_string<float>(const Lens<float>&, const std::string&);
+  template std::string to_string<double>(const Lens<double>&, const std::string&);
+  template std::string to_string<float>(const Input_Multislice<float>&, const std::string&);
+  template std::string to_string<double>(const Input_Multislice<double>&, const std::string&);
 
 }  // namespace mt
 
