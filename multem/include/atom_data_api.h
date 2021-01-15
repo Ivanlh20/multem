@@ -7,11 +7,6 @@
 
 namespace mt {
 
-  #ifdef __CUDACC__
-	template <class T, eDevice dev>
-	struct Atom_Type;
-  #endif
-
 	template <class T>
 	class Atom_Data
 	{
@@ -263,7 +258,6 @@ namespace mt {
 			}
 
 			// set atoms
-      #ifdef __CUDACC__
 			template<class X>
 			void set_atoms(const Atom_Data<X> &atoms, bool pbc_xy_i = false, 
 			std::vector<Atom_Type<T, e_host>> *atom_type = 0, bool b_statistic=true)
@@ -319,7 +313,6 @@ namespace mt {
 					get_statistic(atom_type);
 				}
 			}
-      #endif
 		
 			int  get_Z(int Z)
 			{
@@ -341,9 +334,7 @@ namespace mt {
 			}
 
 			// get statistic
-      #ifdef __CUDACC__
-			void get_statistic(std::vector<Atom_Type<T, e_host>> *atom_type_ptr);
-      #endif
+			DLL_PUBLIC void get_statistic(std::vector<Atom_Type<T, e_host>> *atom_type_ptr);
 			DLL_PUBLIC void get_statistic();
 
 			// Sort atoms along z-axis.

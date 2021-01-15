@@ -714,13 +714,13 @@ namespace mt
 	};
 	
   /***********Lineal and non-Lineal Coefficients************/
-	template <class T, eDevice dev>
-	struct PP_Coef
+	template <class T>
+	struct PP_Coef <T, e_device>
 	{
 		using value_type = T;
 		using size_type = std::size_t;
 
-		static const eDevice device = dev;
+		static const eDevice device = e_device;
 
 		size_type size() const
 		{
@@ -746,46 +746,30 @@ namespace mt
 			cnl.assign(pp_coef.cnl.begin(), pp_coef.cnl.end());
 		}
 
-		Vector<T, dev> cl; 	// Lineal coefficients fep
-		Vector<T, dev> cnl; // Non-Lineal coefficients fep
+		Vector<T, e_device> cl; 	// Lineal coefficients fep
+		Vector<T, e_device> cnl; // Non-Lineal coefficients fep
 
 	};
 
-	template <class T>
-	struct rPP_Coef
-	{
-		using value_type = T;
+  template <typename T>
+  template <class TPP_Coef>
+  rPP_Coef<T>& rPP_Coef<T>::operator = (TPP_Coef &rhs)
+  {
+    m_size = rhs.size();
+    cl = raw_pointer_cast(rhs.cl.data());
+    cnl = raw_pointer_cast(rhs.cnl.data());
+    return *this;
+  }
 
-		rPP_Coef(): m_size(0), cl(nullptr), cnl(nullptr){}
-
-		template <class TPP_Coef>
-		rPP_Coef<T>& operator = (TPP_Coef &rhs)
-		{
-			m_size = rhs.size();
-			cl = raw_pointer_cast(rhs.cl.data());
-			cnl = raw_pointer_cast(rhs.cnl.data());
-			return *this;
-		}
-
-		template <class TPP_Coef>
-		rPP_Coef(TPP_Coef &pp_coef)
-		{
-			*this = pp_coef;
-		}
-
-		int m_size;
-		T *cl;
-		T *cnl;
-	};
 
 	/************Cubic interpolation coefficients*************/
-	template <class T, eDevice dev>
-	struct CI_Coef
+	template <class T>
+	struct CI_Coef <T, e_device>
 	{
 		using value_type = T;
 		using size_type = std::size_t;
 
-		static const eDevice device = dev;
+		static const eDevice device = e_device;
 
 		size_type size() const
 		{
@@ -809,42 +793,12 @@ namespace mt
 			c3.assign(ci_coef.c3.begin(), ci_coef.c3.end());
 		}
 
-		Vector<T, dev> c0; 	// zero coefficient
-		Vector<T, dev> c1; 	// first coefficient
-		Vector<T, dev> c2; 	// second coefficient
-		Vector<T, dev> c3; 	// third coefficient
+		Vector<T, e_device> c0; 	// zero coefficient
+		Vector<T, e_device> c1; 	// first coefficient
+		Vector<T, e_device> c2; 	// second coefficient
+		Vector<T, e_device> c3; 	// third coefficient
 	};
 
-	template <class T>
-	struct rCI_Coef
-	{
-		using value_type = T;
-
-		rCI_Coef(): m_size(0), c0(nullptr), c1(nullptr), c2(nullptr), c3(nullptr){}
-
-		template <class TCI_Coef>
-		rCI_Coef<T>& operator = (TCI_Coef &ci_coef)
-		{
-			m_size = ci_coef.size();
-			c0 = raw_pointer_cast(ci_coef.c0.data());
-			c1 = raw_pointer_cast(ci_coef.c1.data());
-			c2 = raw_pointer_cast(ci_coef.c2.data());
-			c3 = raw_pointer_cast(ci_coef.c3.data());
-			return *this;
-		}
-
-		template <class TCI_Coef>
-		rCI_Coef(TCI_Coef &ci_coef)
-		{
-			*this = ci_coef;
-		}
-
-		int m_size;
-		T *c0;
-		T *c1;
-		T *c2;
-		T *c3;
-	};
 
   template <typename T>
   struct Detector<T, e_device> {
@@ -1389,178 +1343,29 @@ namespace mt
 			Vector<T, e_host> df;
 	};
 	
-  /*****************************Atomic Coefficients**************************/
-	template <class T, eDevice dev>
-	struct Atom_Coef
-	{
+  template <typename T>
+  struct Atom_Coef <T, e_device> : public Atom_Coef_Impl<Atom_Coef<T, e_device>, T, e_device> {
+
 		using value_type = T;
 		using size_type = std::size_t;
 
-		static const eDevice device = dev;
+		static const eDevice device = e_device;
 
-		Atom_Coef(): charge(0), tag(0), R_min(0), R_max(0), R_tap(0), tap_cf(0){}
-
-		template <class TAtom_Coef>
-		void assign(TAtom_Coef &atom_coef)
-		{
-			charge = atom_coef.charge;
-			tag = atom_coef.tag;
-
-			R_min = atom_coef.R_min;
-			R_max = atom_coef.R_max;
-
-			R_tap = atom_coef.R_tap;
-			tap_cf = atom_coef.tap_cf;
-
-			feg.assign(atom_coef.feg);
-			fxg.assign(atom_coef.fxg);
-			Pr.assign(atom_coef.Pr);
-			Vr.assign(atom_coef.Vr);
-			VR.assign(atom_coef.VR);
-
-			R.assign(atom_coef.R.begin(), atom_coef.R.end());
-			R2.assign(atom_coef.R2.begin(), atom_coef.R2.end());
-			ciVR.assign(atom_coef.ciVR);
-		}
-
-		template <class TAtom_Coef>
-		Atom_Coef<T, dev>& operator=(TAtom_Coef &atom_coef)
-		{
-			assign(atom_coef);
-			return *this;
-		}
-
-		// Minimum interaction radius squared
-		T R2_min() const { return pow(R_min, 2); }
-
-		// Maximum interaction radius squared
-		T R2_max() const { return pow(R_max, 2); }
-
-		// Tapering radius squared
-		T R2_tap() const { return pow(R_tap, 2); }
-
-		int charge; 				// Charge
-		T tag; 						// tag
-
-		T R_min; 					// Minimum interaction radius
-		T R_max; 					// Maximum interaction radius
-		T R_tap; 					// Tapering radius
-		T tap_cf; 					// Tapering cosine factor
-
-		PP_Coef<T, dev> feg; 		// Electron scattering factor coefficients
-		PP_Coef<T, dev> fxg; 		// X-ray scattering factor coefficients
-		PP_Coef<T, dev> Pr; 		// Projected_Potential coefficients
-		PP_Coef<T, dev> Vr; 		// Projected_Potential coefficients
-		PP_Coef<T, dev> VR; 		// Projected potential coefficients
-
-		Vector<T, dev> R; 			// R
-		Vector<T, dev> R2; 			// R2
-		CI_Coef<T, dev> ciVR; 		// Look up table - Projected potential coefficients
-
+		Vector<T, e_device> R; 			// R
+		Vector<T, e_device> R2; 			// R2
 	};
 	
-  /********************************Atomic type*******************************/
-	template <class T, eDevice dev>
-	struct Atom_Type
-	{
+  template <typename T>
+  struct Atom_Type <T, e_device> : public Atom_Type_Impl<Atom_Type<T, e_device>, T, e_device> {
+
 		using value_type = T;
 		using size_type = std::size_t;
 
-		static const eDevice device = dev;
+		static const eDevice device = e_device;
 
-		Atom_Type(): Z(0), m(0), A(0), rn_e(0), rn_c(0), ra_e(0), ra_c(0){}
-
-		template <class TAtom_Type>
-		void assign(TAtom_Type &atom_type)
-		{
-			Z = atom_type.Z;
-			m = atom_type.m;
-			A = atom_type.A;
-			rn_e = atom_type.rn_e;
-			rn_c = atom_type.rn_c;
-			ra_e = atom_type.ra_e;
-			ra_c = atom_type.ra_c;
-
-			coef.resize(atom_type.coef.size());
-			for(auto i= 0; i<atom_type.coef.size(); i++)
-			{
-				coef[i].assign(atom_type.coef[i]);
-			}
-		}
-
-		template <class TAtom_Type>
-		Atom_Type<T, dev>& operator=(TAtom_Type &atom_type)
-		{
-			assign(atom_type);
-			return *this;
-		}
-
-		int check_charge(const int &charge) const
-		{
-			for(auto i= 0; i<coef.size(); i++)
-			{
-				if(coef[i].charge == charge)
-				{
-					return charge;
-				}
-			}
-			return 0;
-		};
-
-		int charge_to_idx(const int &charge) const
-		{
-			int icharge = 0;
-			for(auto i= 0; i<coef.size(); i++)
-			{
-				if(coef[i].charge == charge)
-				{
-					icharge = i;
-					break;
-				}
-			}
-			return icharge;
-		};
-
-		PP_Coef<T, dev>* feg(const int &charge)
-		{
-			int icharge = charge_to_idx(charge);
-			return &(coef[icharge].feg);
-		};
-
-		PP_Coef<T, dev>* fxg(const int &charge)
-		{
-			int icharge = charge_to_idx(charge);
-			return &(coef[icharge].fxg);
-		};
-
-		PP_Coef<T, dev>* Pr(const int &charge)
-		{
-			int icharge = charge_to_idx(charge);
-			return &(coef[icharge].Pr);
-		};
-
-		PP_Coef<T, dev>* Vr(const int &charge)
-		{
-			int icharge = charge_to_idx(charge);
-			return &(coef[icharge].Vr);
-		};
-
-		PP_Coef<T, dev>* VR(const int &charge)
-		{
-			int icharge = charge_to_idx(charge);
-			return &(coef[icharge].VR);
-		};
-
-		int Z; 										// Atomic number
-		T m; 										// Atomic mass
-		int A; 										// Mass number
-		T rn_e; 									// Experimental Nuclear radius
-		T rn_c; 									// Calculated Nuclear radius
-		T ra_e; 									// Experimental atomic radius
-		T ra_c; 									// Calculated atomic radius
-
-		Vector<Atom_Coef<T, dev>, e_host> coef;		// atomic coefficients
+    Vector<Atom_Coef<T, e_device>, e_host> coef;		// atomic coefficients
 	};
+
 	
 
 } // namespace mt

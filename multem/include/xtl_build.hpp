@@ -26,8 +26,8 @@
 #include <vector>
 #include <cstdlib>
 
-#include "types.cuh"
-#include "atomic_data_mt.hpp"
+#include "safe_types.cuh"
+#include "atom_data_api.h"
 
 namespace mt
 {
@@ -36,7 +36,7 @@ namespace mt
 		public:
 			Crystal_Spec(): na(0), nb(0), nc(0), a(0), b(0), c(0){};
 
-			void operator()(const int &na_i, const int &nb_i, const int &nc_i, T a_i, T b_i, T c_i, Vector<Atom_Data<T>, e_host> &ulay_i, Atom_Data<T> &Atoms_o)
+			void operator()(const int &na_i, const int &nb_i, const int &nc_i, T a_i, T b_i, T c_i, std::vector<Atom_Data<T>> &ulay_i, Atom_Data<T> &Atoms_o)
 			{
 				na = na_i;
 				nb = nb_i;
@@ -136,7 +136,7 @@ namespace mt
 				lay.resize(l);
 			}
 
-			std::size_t stack_layers(const int &na, const int &nb, T a, T b, T c, Vector<Atom_Data<T>, e_host> &ulay, Vector<Atom_Data<T>, e_host> &lays)
+			std::size_t stack_layers(const int &na, const int &nb, T a, T b, T c, std::vector<Atom_Data<T>> &ulay, std::vector<Atom_Data<T>> &lays)
 			{
 				std::size_t nAtoms_lays = 0;
 				for(auto i = 0; i < ulay.size(); i++)
@@ -155,8 +155,8 @@ namespace mt
 			T b;
 			T c;
 
-			Vector<Atom_Data<T>, e_host> ulay;
-			Vector<Atom_Data<T>, e_host> lays;
+      std::vector<Atom_Data<T>> ulay;
+      std::vector<Atom_Data<T>> lays;
 	};
 
 } // namespace mt
