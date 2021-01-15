@@ -113,7 +113,7 @@ namespace mt
 			void trans(const int &islice, TOutput_multislice &output_multislice)
 			{
 				trans(islice, trans_0);
-				mt::copy_to_host(output_multislice.stream, trans_0, output_multislice.trans[0]);
+				mt::copy_to_host(output_multislice.data().stream, trans_0, output_multislice.data().trans[0]);
 			}
 
 			void move_atoms(const int &fp_iconf)

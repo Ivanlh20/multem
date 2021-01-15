@@ -99,7 +99,7 @@ namespace mt
 				Vector<T_c, dev> psi(input_multislice->iw_psi.begin(), input_multislice->iw_psi.end());
 				mt::fft2_shift(*stream, input_multislice->grid_2d, psi);
 				this->operator()(space_out, gxu, gyu, z, psi);
-				mt::copy_to_host(output_multislice.stream, psi, output_multislice.psi_coh[0]);
+				mt::copy_to_host(output_multislice.data().stream, psi, output_multislice.data().psi_coh[0]);
 			}
 
 		private:

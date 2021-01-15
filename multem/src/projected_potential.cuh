@@ -185,7 +185,7 @@ namespace mt
 			void operator()(const int &islice, TOutput_multislice &output_multislice)
 			{
 				this->operator()(islice, islice, V_0);
-				mt::copy_to_host(output_multislice.stream, V_0, output_multislice.V[0]);
+				mt::copy_to_host(output_multislice.data().stream, V_0, output_multislice.data().V[0]);
 			}
 
 			Vector<T, dev> V_0;

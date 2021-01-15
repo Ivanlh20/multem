@@ -215,6 +215,144 @@ namespace mt {
       // Return the output multislice
       return output_multislice;
     }
+
+
+    template <typename T, eDevice dev>
+    mt::Output_Multislice<T> microscope_abberations_internal(Input_Multislice<T>& input_multislice) {
+
+      // Ensure we have the correct function
+      MULTEM_ASSERT(input_multislice.system_conf.device == dev);
+
+      // Initialise the stream and plan
+      mt::Stream<dev> stream(input_multislice.system_conf.nstream);
+      mt::FFT<T, dev> fft_2d;
+      fft_2d.create_plan_2d(
+          input_multislice.grid_2d.ny, 
+          input_multislice.grid_2d.nx, 
+          input_multislice.system_conf.nstream);
+
+      // Create the multislice structure
+	    mt::Microscope_Effects<T, dev> microscope_effects;
+	    microscope_effects.set_input_data(&input_multislice, &stream, &fft_2d);
+
+      // Initialise the output data
+      mt::Output_Multislice<T> output_multislice;
+      output_multislice.set_input_data(&input_multislice);
+	    microscope_effects(output_multislice);
+      stream.synchronize();
+
+      // Finalise the output data
+      output_multislice.gather();
+      output_multislice.clean_temporal();
+      fft_2d.cleanup();
+
+      // If there is an error then throw
+      auto err = cudaGetLastError();
+      if (err != cudaSuccess) {
+        std::ostringstream msg;
+        msg << "CUDA error: %s\n";
+        msg << cudaGetErrorString(err);
+        throw std::runtime_error(msg.str());
+      }
+
+      // Return the output multislice
+      return output_multislice;
+    }
+
+    template <typename T, eDevice dev>
+    mt::Output_Multislice<T> projected_potential_internal(Input_Multislice<T>& input_multislice) {
+
+      // Ensure we have the correct function
+      MULTEM_ASSERT(input_multislice.system_conf.device == dev);
+
+      // Initialise the stream and plan
+      mt::Stream<dev> stream(input_multislice.system_conf.nstream);
+
+      // Create the multislice structure
+	    mt::Projected_Potential<T, dev> projected_potential;
+	    projected_potential.set_input_data(&input_multislice, &stream);
+
+      // Initialise the output data
+      mt::Output_Multislice<T> output_multislice;
+      output_multislice.set_input_data(&input_multislice);
+	    projected_potential.move_atoms(input_multislice.pn_nconf);
+	    projected_potential(input_multislice.islice, output_multislice);
+      stream.synchronize();
+
+      // Finalise the output data
+      output_multislice.gather();
+      output_multislice.clean_temporal();
+
+      // If there is an error then throw
+      auto err = cudaGetLastError();
+      if (err != cudaSuccess) {
+        std::ostringstream msg;
+        msg << "CUDA error: %s\n";
+        msg << cudaGetErrorString(err);
+        throw std::runtime_error(msg.str());
+      }
+
+      // Return the output multislice
+      return output_multislice;
+    }
+    
+    template <typename T, eDevice dev>
+    mt::Output_Multislice<T> propagate_internal(Input_Multislice<T>& input_multislice) {
+
+      // Ensure we have the correct function
+      MULTEM_ASSERT(input_multislice.system_conf.device == dev);
+
+      // Initialise the stream and plan
+      mt::Stream<dev> stream(input_multislice.system_conf.nstream);
+      mt::FFT<T, dev> fft_2d;
+      fft_2d.create_plan_2d(
+          input_multislice.grid_2d.ny, 
+          input_multislice.grid_2d.nx, 
+          input_multislice.system_conf.nstream);
+
+      // Create the multislice structure
+	    mt::Propagator<T, dev> propagator;
+	    propagator.set_input_data(&input_multislice, &stream, &fft_2d);
+
+      // Initialise the output data
+      mt::Output_Multislice<T> output_multislice;
+      output_multislice.set_input_data(&input_multislice);
+	    propagator(mt::eS_Real, input_multislice.gx_0(), input_multislice.gy_0(), input_multislice.obj_lens.c_10 , output_multislice);
+      stream.synchronize();
+
+      // Finalise the output data
+      output_multislice.gather();
+      output_multislice.clean_temporal();
+      fft_2d.cleanup();
+
+      // If there is an error then throw
+      auto err = cudaGetLastError();
+      if (err != cudaSuccess) {
+        std::ostringstream msg;
+        msg << "CUDA error: %s\n";
+        msg << cudaGetErrorString(err);
+        throw std::runtime_error(msg.str());
+      }
+
+      // Return the output multislice
+      return output_multislice;
+    }
+    
+    template <typename T>
+    std::vector<T> spec_planes_internal(Input_Multislice<T>& input_multislice) {
+	    mt::Slicing<T> slicing;
+	    slicing.set_input_data(&input_multislice, &(input_multislice.atoms));
+      return std::vector<T>(slicing.z_plane.begin(), slicing.z_plane.end());
+    }
+    
+    template <typename T>
+    std::tuple<Atom_Data<T>, vector<Slice<T>>> spec_slicing_internal(Input_Multislice<T>& input_multislice) {
+	    mt::Spec<T> spec;
+	    spec.set_input_data(&input_multislice);
+	    spec.move_atoms(input_multislice.pn_nconf);
+      std::vector<Slice<T>> slices(spec.slicing.slice.begin(), spec.slicing.slice.end());
+      return std::make_tuple(spec.atoms, slices);
+    }
     
     template <typename T, eDevice dev>
     mt::Output_Multislice<T> tem_simulation_internal(Input_Multislice<T>& input_multislice) {
@@ -258,6 +396,93 @@ namespace mt {
       return output_multislice;
     }
 
+    template <typename T, eDevice dev>
+    mt::Output_Multislice<T> transmission_function_internal(Input_Multislice<T>& input_multislice) {
+
+      // Ensure we have the correct function
+      MULTEM_ASSERT(input_multislice.system_conf.device == dev);
+
+      // Initialise the stream and plan
+      mt::Stream<dev> stream(input_multislice.system_conf.nstream);
+      mt::FFT<T, dev> fft_2d;
+      fft_2d.create_plan_2d(
+          input_multislice.grid_2d.ny, 
+          input_multislice.grid_2d.nx, 
+          input_multislice.system_conf.nstream);
+
+      // Create the multislice structure
+	    mt::Transmission_Function<T, dev> transmission_function;
+	    transmission_function.set_input_data(&input_multislice, &stream, &fft_2d);
+
+      // Initialise the output data
+      mt::Output_Multislice<T> output_multislice;
+      output_multislice.set_input_data(&input_multislice);
+      transmission_function.move_atoms(input_multislice.pn_nconf);
+      transmission_function.trans(input_multislice.islice, output_multislice);
+      stream.synchronize();
+
+      // Finalise the output data
+      output_multislice.gather();
+      output_multislice.clean_temporal();
+      fft_2d.cleanup();
+
+      // If there is an error then throw
+      auto err = cudaGetLastError();
+      if (err != cudaSuccess) {
+        std::ostringstream msg;
+        msg << "CUDA error: %s\n";
+        msg << cudaGetErrorString(err);
+        throw std::runtime_error(msg.str());
+      }
+
+      // Return the output multislice
+      return output_multislice;
+    }
+
+    template <typename T, eDevice dev>
+    mt::Output_Multislice<T> wave_function_internal(Input_Multislice<T>& input_multislice) {
+
+      // Ensure we have the correct function
+      MULTEM_ASSERT(input_multislice.system_conf.device == dev);
+
+      // Initialise the stream and plan
+      mt::Stream<dev> stream(input_multislice.system_conf.nstream);
+      mt::FFT<T, dev> fft_2d;
+      fft_2d.create_plan_2d(
+          input_multislice.grid_2d.ny, 
+          input_multislice.grid_2d.nx, 
+          input_multislice.system_conf.nstream);
+
+      // Create the multislice structure
+	    mt::Wave_Function<T, dev> wave_function;
+      wave_function.set_input_data(&input_multislice, &stream, &fft_2d);
+
+      // Initialise the output data
+      mt::Output_Multislice<T> output_multislice;
+      output_multislice.set_input_data(&input_multislice);
+      wave_function.move_atoms(input_multislice.pn_nconf);
+      wave_function.set_incident_wave(wave_function.psi_z);
+      wave_function.psi(1.0, wave_function.psi_z, output_multislice);
+      stream.synchronize();
+
+      // Finalise the output data
+      output_multislice.gather();
+      output_multislice.clean_temporal();
+      fft_2d.cleanup();
+
+      // If there is an error then throw
+      auto err = cudaGetLastError();
+      if (err != cudaSuccess) {
+        std::ostringstream msg;
+        msg << "CUDA error: %s\n";
+        msg << cudaGetErrorString(err);
+        throw std::runtime_error(msg.str());
+      }
+
+      // Return the output multislice
+      return output_multislice;
+    }
+
   }
   
   template <typename T>
@@ -270,27 +495,36 @@ namespace mt {
   
   template <typename T>
   mt::Output_Multislice<T> microscope_abberations(Input_Multislice<T>& input_multislice) {
-    return mt::Output_Multislice<T>();
+    eDevice dev = input_multislice.system_conf.device;
+    return (dev == mt::e_device 
+        ? detail::microscope_abberations_internal<T, mt::e_device>(input_multislice)
+        : detail::microscope_abberations_internal<T, mt::e_host>(input_multislice));
   }
   
   template <typename T>
   mt::Output_Multislice<T> projected_potential(Input_Multislice<T>& input_multislice) {
-    return mt::Output_Multislice<T>();
+    eDevice dev = input_multislice.system_conf.device;
+    return (dev == mt::e_device 
+        ? detail::projected_potential_internal<T, mt::e_device>(input_multislice)
+        : detail::projected_potential_internal<T, mt::e_host>(input_multislice));
   }
   
   template <typename T>
   mt::Output_Multislice<T> propagate(Input_Multislice<T>& input_multislice) {
-    return mt::Output_Multislice<T>();
+    eDevice dev = input_multislice.system_conf.device;
+    return (dev == mt::e_device 
+        ? detail::propagate_internal<T, mt::e_device>(input_multislice)
+        : detail::propagate_internal<T, mt::e_host>(input_multislice));
   }
   
   template <typename T>
-  mt::Output_Multislice<T> spec_planes(Input_Multislice<T>& input_multislice) {
-    return mt::Output_Multislice<T>();
+  std::vector<T> spec_planes(Input_Multislice<T>& input_multislice) {
+    return detail::spec_planes_internal(input_multislice);
   }
 
   template <typename T>
-  mt::Output_Multislice<T> spec_slicing(Input_Multislice<T>& input_multislice) {
-    return mt::Output_Multislice<T>();
+  std::tuple<Atom_Data<T>, vector<Slice<T>>> spec_slicing(Input_Multislice<T>& input_multislice) {
+    return detail::spec_slicing_internal(input_multislice);
   }
 
   template <typename T>
@@ -303,12 +537,18 @@ namespace mt {
   
   template <typename T>
   mt::Output_Multislice<T> transmission_function(Input_Multislice<T>& input_multislice) {
-    return mt::Output_Multislice<T>();
+    eDevice dev = input_multislice.system_conf.device;
+    return (dev == mt::e_device 
+        ? detail::transmission_function_internal<T, mt::e_device>(input_multislice)
+        : detail::transmission_function_internal<T, mt::e_host>(input_multislice));
   }
   
   template <typename T>
   mt::Output_Multislice<T> wave_function(Input_Multislice<T>& input_multislice) {
-    return mt::Output_Multislice<T>();
+    eDevice dev = input_multislice.system_conf.device;
+    return (dev == mt::e_device 
+        ? detail::wave_function_internal<T, mt::e_device>(input_multislice)
+        : detail::wave_function_internal<T, mt::e_host>(input_multislice));
   }
   
   /****************************************************************************
@@ -353,11 +593,13 @@ namespace mt {
   template Output_Multislice<float> propagate<float>(Input_Multislice<float>&);
   template Output_Multislice<double> propagate<double>(Input_Multislice<double>&);
   
-  template Output_Multislice<float> spec_planes<float>(Input_Multislice<float>&);
-  template Output_Multislice<double> spec_planes<double>(Input_Multislice<double>&);
+  template std::vector<float> spec_planes<float>(Input_Multislice<float>&);
+  template std::vector<double> spec_planes<double>(Input_Multislice<double>&);
   
-  template Output_Multislice<float> spec_slicing<float>(Input_Multislice<float>&);
-  template Output_Multislice<double> spec_slicing<double>(Input_Multislice<double>&);
+  template std::tuple<Atom_Data<float>, std::vector<Slice<float>>> spec_slicing<float>(
+      Input_Multislice<float>&);
+  template std::tuple<Atom_Data<double>, std::vector<Slice<double>>> spec_slicing<double>(
+      Input_Multislice<double>&);
   
   template Output_Multislice<float> tem_simulation<float>(Input_Multislice<float>&);
   template Output_Multislice<double> tem_simulation<double>(Input_Multislice<double>&);
