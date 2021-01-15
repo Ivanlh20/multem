@@ -331,7 +331,7 @@ void wrap_atom_data(py::module_ m)
         "spec_atoms",
         &py::detail::Helpers<Type>::get_spec_atoms,
         &py::detail::Helpers<Type>::set_spec_atoms)
-    .def("get_statistic", &Type::get_statistic)
+    .def("get_statistic", static_cast<void (Type::*)()>(&Type::get_statistic))
     .def("sort_by_z", &Type::sort_by_z)
     .def(py::pickle(
         &py::detail::Helpers<Type>::getstate,

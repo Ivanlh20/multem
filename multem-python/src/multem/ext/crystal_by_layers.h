@@ -13,6 +13,7 @@
 
 #include <pybind11/pybind11.h>
 #include <multem.h>
+#include <multem/ext/crystal_parameters.h>
 
 namespace py = pybind11;
 
@@ -22,7 +23,7 @@ namespace mt {
   Atom_Data<T> crystal_by_layers(const CrystalParameters<T> &params) {
     
     // Get the layer data 
-    std::vector<mt::Atom_Data<double>> layers(params.layers.size());
+    std::vector<mt::Atom_Data<T>> layers(params.layers.size());
     for(auto i = 0; i < params.layers.size(); ++i) {
       layers[i].resize(params.layers[i].size());
       for (auto j = 0; j < params.layers[i].size(); ++j) {
@@ -38,8 +39,8 @@ namespace mt {
     }
 
     // Get the atoms from the crystal specification
-    mt::Crystal_Spec<double> crystal_spec;
-    mt::Atom_Data<double> atoms;
+    mt::Crystal_Spec<T> crystal_spec;
+    mt::Atom_Data<T> atoms;
     crystal_spec(
       params.na, 
       params.nb, 

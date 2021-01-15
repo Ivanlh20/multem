@@ -58,6 +58,7 @@
 #include <input_multislice_api.h>
 #include <output_multislice_api.h>
 #include <amorp_spec_api.h>
+#include <xtl_build.hpp>
 
 namespace mt {
   

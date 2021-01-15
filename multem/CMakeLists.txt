@@ -80,6 +80,7 @@ install(FILES include/cgpu_rand_api.h DESTINATION include)
 install(FILES include/atomic_data_api.h DESTINATION include)
 install(FILES include/stream_api.h DESTINATION include)
 install(FILES include/multem/config.h DESTINATION include/multem)
+install(FILES include/xtl_build.hpp DESTINATION include)
 
 ##############################################################################
 # Build the test executable
