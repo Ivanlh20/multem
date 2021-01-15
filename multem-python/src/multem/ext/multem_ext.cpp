@@ -28,9 +28,8 @@
 #include <multem/ext/gmax.h>
 #include <multem/ext/min_spl.h>
 #include <multem/ext/misc.h>
-/* #include <multem/ext/rdf_3d.h> */
+#include <multem/ext/rdf_3d.h>
 /* #include <multem/ext/spec_rot.h> */
-/* #include <multem/ext/vp.h> */
 
 namespace py = pybind11;
 
@@ -59,8 +58,7 @@ PYBIND11_MODULE(multem_ext, m)
   export_gmax(m);
   export_min_spl(m);
   export_misc(m);
-  /* export_rdf_3d(m); */
+  export_rdf_3d(m);
   /* export_spec_rot(m); */
-  /* export_vp(m); */
 }
 

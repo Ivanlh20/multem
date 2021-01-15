@@ -162,6 +162,15 @@ namespace mt {
    * Misc function calls
    ***************************************************************************/
 
+	template<class T>
+	void rdf_3d(const Atom_Data<T> &atoms, T r_max, int nr, std::vector<T> &r, std::vector<T> &rdf) { 
+    Vector<T, e_host> r_temp(r.size());
+    Vector<T, e_host> rdf_temp(r.size());
+	  rdf_3d(atoms, r_max, nr, r_temp, rdf_temp);
+    r.assign(r_temp.begin(), r_temp.end());
+    rdf.assign(rdf_temp.begin(), rdf_temp.end());
+  }
+
   namespace detail {
   
     template <typename T, eDevice dev>
@@ -219,6 +228,7 @@ namespace mt {
   /****************************************************************************
    * Explict instantiation of template classes and functions
    ***************************************************************************/
+
   template class Lens<float>;
   template class Lens<double>;
   
@@ -288,6 +298,9 @@ namespace mt {
 
 	template void get_Scherzer_conditions<float>(const float &E_0, const float &c_30, float &defocus, float &aperture);
 	template void get_Scherzer_conditions<double>(const double &E_0, const double &c_30, double &defocus, double &aperture);
+
+	template void rdf_3d<float>(const Atom_Data<float> &atoms, float r_max, int nr, std::vector<float> &r, std::vector<float> &rdf);
+	template void rdf_3d<double>(const Atom_Data<double> &atoms, double r_max, int nr, std::vector<double> &r, std::vector<double> &rdf);
 
 }  // namespace mt
 

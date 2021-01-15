@@ -19,9 +19,9 @@ namespace py = pybind11;
 namespace mt {
   
   template <typename T>
-  std::tuple<std::vector<T>, std::vector<T>> rdf_3d(
+  std::tuple<std::vector<T>, std::vector<T>> get_rdf_3d(
       const mt::Atom_Data<T> &atoms,
-      double r_max,
+      T r_max,
       std::size_t nr) {
 
     std::vector<T> r(nr);
@@ -35,8 +35,8 @@ namespace mt {
 }
 
 void export_rdf_3d(py::module_ m) {
-  m.def("rdf_3d", &mt::rdf_3d<float>);
-  m.def("rdf_3d", &mt::rdf_3d<double>);
+  m.def("rdf_3d", &mt::get_rdf_3d<float>);
+  m.def("rdf_3d", &mt::get_rdf_3d<double>);
 }
 
 #endif
