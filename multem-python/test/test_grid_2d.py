@@ -24,7 +24,6 @@ def test_grid_2d():
     grid_2d.gl2_max = 3.1
     grid_2d.alpha = 20
 
-
     def check():
         assert grid_2d.nx == 10
         assert grid_2d.ny == 20

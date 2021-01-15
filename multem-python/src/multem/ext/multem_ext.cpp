@@ -37,8 +37,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(multem_ext, m)
-{
+PYBIND11_MODULE(multem_ext, m) {
   export_add_amorp_lay(m);
   export_amorp_lay_info(m);
   export_amorp_spec(m);
@@ -73,4 +72,3 @@ PYBIND11_MODULE(multem_ext, m)
   export_transmission_function(m);
   export_wave_function(m);
 }
-

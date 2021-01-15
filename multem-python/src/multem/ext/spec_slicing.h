@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 
@@ -42,14 +42,13 @@ namespace pybind11 { namespace detail {
     }
 
     // Set grid input data
-    input.grid_2d.set_input_data(
-        input.grid_2d.nx, 
-        input.grid_2d.ny, 
-        input.grid_2d.lx, 
-        input.grid_2d.ly, 
-        input.grid_2d.dz, 
-        input.grid_2d.bwl, 
-        pbc_xy);
+    input.grid_2d.set_input_data(input.grid_2d.nx,
+                                 input.grid_2d.ny,
+                                 input.grid_2d.lx,
+                                 input.grid_2d.ly,
+                                 input.grid_2d.dz,
+                                 input.grid_2d.bwl,
+                                 pbc_xy);
 
     // Delete input wave if not user defined
     if (!(input.is_user_define_wave())) {
@@ -57,12 +56,8 @@ namespace pybind11 { namespace detail {
     }
 
     // Set lens input data
-    input.cond_lens.set_input_data(
-        input.E_0, 
-        input.grid_2d);
-    input.obj_lens.set_input_data(
-        input.E_0, 
-        input.grid_2d);
+    input.cond_lens.set_input_data(input.E_0, input.grid_2d);
+    input.obj_lens.set_input_data(input.E_0, input.grid_2d);
 
     // Set scanning grid
     if (input.is_scanning()) {
@@ -79,7 +74,7 @@ namespace pybind11 { namespace detail {
     return py::cast(mt::spec_slicing<T>(input));
   }
 
-}}
+}}  // namespace pybind11::detail
 
 void export_spec_slicing(py::module_ &m) {
   m.def("spec_slicing", &py::detail::spec_slicing<float>);
@@ -87,7 +82,3 @@ void export_spec_slicing(py::module_ &m) {
 }
 
 #endif
-
-
-
-

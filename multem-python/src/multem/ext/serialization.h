@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 
@@ -25,6 +25,6 @@ namespace pybind11 { namespace detail {
   template <typename T>
   struct Helpers {};
 
-}}
+}}  // namespace pybind11::detail
 
 #endif

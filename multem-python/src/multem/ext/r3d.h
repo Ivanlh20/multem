@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 
@@ -19,15 +19,14 @@
 namespace py = pybind11;
 
 namespace pybind11 { namespace detail {
-  
+
   /**
    * Type cast a mt::r3d<T> object to a tuple
    */
-  template <> 
+  template <>
   template <typename T>
   class type_caster<mt::r3d<T>> {
   public:
-  
     PYBIND11_TYPE_CASTER(mt::r3d<T>, _("mt::r3d<T>"));
 
     bool load(handle src, bool convert) {
@@ -44,21 +43,12 @@ namespace pybind11 { namespace detail {
     }
 
     static handle cast(mt::r3d<T> src, return_value_policy policy, handle parent) {
-      return py::make_tuple(
-        src.x, 
-        src.y, 
-        src.z).release();
+      return py::make_tuple(src.x, src.y, src.z).release();
     }
   };
- 
-}}
 
-void export_r3d(py::module_ m) {
-}
+}}  // namespace pybind11::detail
+
+void export_r3d(py::module_ m) {}
 
 #endif
-
-
-
-
-

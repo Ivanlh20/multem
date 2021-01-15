@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 
@@ -19,62 +19,60 @@
 namespace py = pybind11;
 
 namespace pybind11 { namespace detail {
-  
+
   /**
    * Define wrapper function for the mt::Lens class
    */
   template <>
   template <typename T>
-  struct Helpers <mt::Lens<T>> {
-
+  struct Helpers<mt::Lens<T>> {
     /**
      * Get the state
      */
     static py::tuple getstate(const mt::Lens<T> &self) {
-      return py::make_tuple(
-        self.m,
-        self.c_10,
-        self.c_12,
-        self.phi_12,
-        self.c_21,
-        self.phi_21,
-        self.c_23,
-        self.phi_23,
-        self.c_30,
-        self.c_32,
-        self.phi_32,
-        self.c_34,
-        self.phi_34,
-        self.c_41,
-        self.phi_41,
-        self.c_43,
-        self.phi_43,
-        self.c_45,
-        self.phi_45,
-        self.c_50,
-        self.c_52,
-        self.phi_52,
-        self.c_54,
-        self.phi_54,
-        self.c_56,
-        self.phi_56,
-        self.inner_aper_ang,
-        self.outer_aper_ang,
-        self.ti_a,
-        self.ti_sigma,
-        self.ti_beta,
-        self.ti_npts,
-        self.ti_iehwgd,
-        self.si_a,
-        self.si_sigma,
-        self.si_beta,
-        self.si_rad_npts,
-        self.si_azm_npts,
-        self.si_iehwgd,
-        self.si_theta_c,
-        self.zero_defocus_type,
-        self.zero_defocus_plane,
-        self.lambda);
+      return py::make_tuple(self.m,
+                            self.c_10,
+                            self.c_12,
+                            self.phi_12,
+                            self.c_21,
+                            self.phi_21,
+                            self.c_23,
+                            self.phi_23,
+                            self.c_30,
+                            self.c_32,
+                            self.phi_32,
+                            self.c_34,
+                            self.phi_34,
+                            self.c_41,
+                            self.phi_41,
+                            self.c_43,
+                            self.phi_43,
+                            self.c_45,
+                            self.phi_45,
+                            self.c_50,
+                            self.c_52,
+                            self.phi_52,
+                            self.c_54,
+                            self.phi_54,
+                            self.c_56,
+                            self.phi_56,
+                            self.inner_aper_ang,
+                            self.outer_aper_ang,
+                            self.ti_a,
+                            self.ti_sigma,
+                            self.ti_beta,
+                            self.ti_npts,
+                            self.ti_iehwgd,
+                            self.si_a,
+                            self.si_sigma,
+                            self.si_beta,
+                            self.si_rad_npts,
+                            self.si_azm_npts,
+                            self.si_iehwgd,
+                            self.si_theta_c,
+                            self.zero_defocus_type,
+                            self.zero_defocus_plane,
+                            self.lambda);
     }
 
     /**
@@ -127,16 +125,12 @@ namespace pybind11 { namespace detail {
       self.lambda = obj[42].cast<T>();
       return self;
     }
-
   };
-  
 
-}}
-
+}}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_lens(py::module_ m)
-{
+void wrap_lens(py::module_ m) {
   typedef mt::Lens<T> Type;
 
   // Wrap the mt::Input class
@@ -185,10 +179,8 @@ void wrap_lens(py::module_ m)
     .def_readwrite("zero_defocus_type", &Type::zero_defocus_type)
     .def_readwrite("zero_defocus_plane", &Type::zero_defocus_plane)
     .def_readwrite("lambda_", &Type::lambda)
-    .def(py::pickle(
-        &py::detail::Helpers<Type>::getstate,
-        &py::detail::Helpers<Type>::setstate))
-    ;
+    .def(py::pickle(&py::detail::Helpers<Type>::getstate,
+                    &py::detail::Helpers<Type>::setstate));
 }
 
 void export_lens(py::module_ m) {
@@ -196,4 +188,3 @@ void export_lens(py::module_ m) {
 }
 
 #endif
-
