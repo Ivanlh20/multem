@@ -93,8 +93,7 @@ namespace mt
 				Vector<T_r, dev> m2psi_tot(input_multislice->grid_2d.nxy());
 				this->operator()(psi, m2psi_tot);
 				mt::fft2_shift(*stream, input_multislice->grid_2d, m2psi_tot);
-
-				mt::copy_to_host(output_multislice.stream, m2psi_tot, output_multislice.m2psi_tot[0]);
+				mt::copy_to_host(output_multislice.data().stream, m2psi_tot, output_multislice.data().m2psi_tot[0]);
 			}
 
 			template <class TOutput_multislice>
