@@ -26,9 +26,11 @@
 
 namespace mt
 {
-	class Atomic_Data{
+	class Atomic_Data {
 		public:
 			DLL_PUBLIC Atomic_Data(ePotential_Type PotPar_i = ePT_none);
+      DLL_PUBLIC ~Atomic_Data();
+
 			DLL_PUBLIC void Load_Data(ePotential_Type PotPar_i);
 
 			DLL_PUBLIC std::string Z_name(const int &Z) const;
@@ -40,8 +42,8 @@ namespace mt
 			DLL_PUBLIC double nuclear_radius(const int &Z) const;
 			DLL_PUBLIC double atomic_radius(const int &Z) const;
 
-			template <class TAtom_Type>
-			DLL_PUBLIC void To_atom_type_CPU(int Z_i, double Vrl_i, int nR_i, double R_min_i, TAtom_Type &atom_type);
+			template <class T, eDevice dev>
+			DLL_PUBLIC void To_atom_type_CPU(int Z_i, double Vrl_i, int nR_i, double R_min_i, Atom_Type<T, dev> &atom_type);
 
 		private:
       class Data;

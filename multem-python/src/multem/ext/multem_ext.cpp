@@ -24,9 +24,7 @@
 #include <multem/ext/amorp_spec.h>
 #include <multem/ext/crystal_by_layers.h>
 #include <multem/ext/crystal_parameters.h>
-/* #include <multem/ext/feg.h> */
-/* #include <multem/ext/fxeg_data.h> */
-/* #include <multem/ext/fxg.h> */
+#include <multem/ext/feg.h>
 #include <multem/ext/gmax.h>
 #include <multem/ext/min_spl.h>
 #include <multem/ext/misc.h>
@@ -58,9 +56,7 @@ PYBIND11_MODULE(multem_ext, m)
   export_amorp_spec(m);
   export_crystal_by_layers(m);
   export_crystal_parameters(m);
-  /* export_feg(m); */
-  /* export_fxeg_data(m); */
-  /* export_fxg(m); */
+  export_feg(m);
   export_gmax(m);
   export_min_spl(m);
   export_misc(m);
