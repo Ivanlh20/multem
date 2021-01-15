@@ -301,6 +301,12 @@ namespace mt {
 
 	template void rdf_3d<float>(const Atom_Data<float> &atoms, float r_max, int nr, std::vector<float> &r, std::vector<float> &rdf);
 	template void rdf_3d<double>(const Atom_Data<double> &atoms, double r_max, int nr, std::vector<double> &r, std::vector<double> &rdf);
+	
+  template void rotate_atoms<float>(Atom_Data<float> &atoms, float theta, r3d<float> u0, r3d<float> p0);
+  template void rotate_atoms<double>(Atom_Data<double> &atoms, double theta, r3d<double> u0, r3d<double> p0);
+	
+  template void remove_atoms_outside_z_range<float>(Atom_Data<float> &atoms, float z_0, float z_e);
+  template void remove_atoms_outside_z_range<double>(Atom_Data<double> &atoms, double z_0, double z_e);
 
 }  // namespace mt
 

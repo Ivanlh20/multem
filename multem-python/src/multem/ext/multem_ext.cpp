@@ -29,7 +29,7 @@
 #include <multem/ext/min_spl.h>
 #include <multem/ext/misc.h>
 #include <multem/ext/rdf_3d.h>
-/* #include <multem/ext/spec_rot.h> */
+#include <multem/ext/spec_rot.h>
 
 namespace py = pybind11;
 
@@ -59,6 +59,6 @@ PYBIND11_MODULE(multem_ext, m)
   export_min_spl(m);
   export_misc(m);
   export_rdf_3d(m);
-  /* export_spec_rot(m); */
+  export_spec_rot(m);
 }
 

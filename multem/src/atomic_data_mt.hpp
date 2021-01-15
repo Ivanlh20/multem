@@ -56,8 +56,8 @@ namespace mt
 
 	template <class T>
 	class Atom_Data;
-
-	template <class T>
+	
+  template <class T>
 	void rotate_atoms(Atom_Data<T> &atoms, T theta, r3d<T> u0, r3d<T> p0)
 	{
 		const auto Rm = get_rotation_matrix(theta, u0);
@@ -98,6 +98,7 @@ namespace mt
 		atoms.resize(iatoms_z);
 		atoms.shrink_to_fit();
 	}
+
 
   template <typename T>
   struct Atom_Data<T>::sort_atoms_by_z
