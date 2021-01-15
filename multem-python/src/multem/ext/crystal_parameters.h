@@ -30,9 +30,9 @@ namespace mt {
     int na;
     int nb;
     int nc;
-    double a;
-    double b;
-    double c;
+    T a;
+    T b;
+    T c;
     std::vector<Layer> layers;
 
     CrystalParameters()

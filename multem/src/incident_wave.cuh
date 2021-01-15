@@ -114,10 +114,10 @@ namespace mt
 			void operator()(const eSpace &space, TOutput_multislice &output_multislice)
 			{
 				Vector<T_c, dev> psi(input_multislice->grid_2d.nxy());
-				T_r gxu = input_multislice->gx_0();
-				T_r gyu = input_multislice->gy_0();
-				Vector<T_r, e_host> &iw_x = input_multislice->iw_x;
-				Vector<T_r, e_host> &iw_y = input_multislice->iw_y;
+				auto gxu = input_multislice->gx_0();
+				auto gyu = input_multislice->gy_0();
+				auto &iw_x = input_multislice->iw_x;
+				auto &iw_y = input_multislice->iw_y;
 
 				this->operator()(psi, gxu, gyu, iw_x, iw_y);
 
@@ -127,7 +127,7 @@ namespace mt
 					mt::scale(*stream, input_multislice->grid_2d.inxy(), psi);
 				}
 
-				mt::copy_to_host(output_multislice.stream, psi, output_multislice.psi_0[0]);
+				mt::copy_to_host(output_multislice.data().stream, psi, output_multislice.data().psi_0[0]);
 			}
 
 		private:

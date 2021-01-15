@@ -1,5 +1,5 @@
 /*
- *  multislice.h
+ *  tem_simulation.h
  *
  *  Copyright (C) 2019 Diamond Light Source
  *
@@ -9,8 +9,8 @@
  *  which is included in the root directory of this package.
  */
 
-#ifndef MULTEM_PYTHON_MULTISLICE_H
-#define MULTEM_PYTHON_MULTISLICE_H
+#ifndef MULTEM_PYTHON_TEM_SIMULATION_H
+#define MULTEM_PYTHON_TEM_SIMULATION_H
 
 #include <pybind11/pybind11.h>
 #include <multem.h>
@@ -21,7 +21,7 @@ namespace py = pybind11;
 namespace pybind11 { namespace detail {
 
   template <typename T>
-  void check_input_multislice(mt::Input_Multislice<T> &input) {
+  void check_input_for_tem_simulation(mt::Input_Multislice<T> &input) {
     bool pbc_xy = true;
 
     // Get atom statistic or delete atoms
@@ -66,7 +66,7 @@ namespace pybind11 { namespace detail {
 
     // Check STEM, EELS and EFTEM parameters
     if (input.is_STEM()) {
-      T lambda = input.cond_lens.lambda;
+      auto lambda = input.cond_lens.lambda;
       switch (input.detector.type) {
       case mt::eDT_Circular:
         {
@@ -108,18 +108,20 @@ namespace pybind11 { namespace detail {
     input.validate_parameters();
   }
 
+  template <typename T>
   object tem_simulation(
-      mt::Input_Multislice<double> &input, 
+      mt::Input_Multislice<T> &input, 
       const mt::System_Configuration &sys_conf) {
     input.system_conf = sys_conf;
-    check_input_multislice(input);
-    return py::cast(mt::tem_simulation<double>(input));
+    check_input_for_tem_simulation(input);
+    return py::cast(mt::tem_simulation<T>(input));
   }
 
 }}
 
-void export_multislice(py::module_ &m) {
-  m.def("tem_simulation", &py::detail::tem_simulation);
+void export_tem_simulation(py::module_ &m) {
+  m.def("tem_simulation", &py::detail::tem_simulation<float>);
+  m.def("tem_simulation", &py::detail::tem_simulation<double>);
 }
 
 #endif

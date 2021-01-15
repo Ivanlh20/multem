@@ -84,7 +84,32 @@ namespace mt {
    ***************************************************************************/
 
   template <typename T>
+  DLL_PUBLIC mt::Output_Multislice<T> incident_wave(Input_Multislice<T>&);
+  
+  template <typename T>
+  DLL_PUBLIC mt::Output_Multislice<T> microscope_abberations(Input_Multislice<T>&);
+  
+  template <typename T>
+  DLL_PUBLIC mt::Output_Multislice<T> projected_potential(Input_Multislice<T>&);
+  
+  template <typename T>
+  DLL_PUBLIC mt::Output_Multislice<T> propagate(Input_Multislice<T>&);
+  
+  template <typename T>
+  DLL_PUBLIC mt::Output_Multislice<T> spec_planes(Input_Multislice<T>&);
+  
+  template <typename T>
+  DLL_PUBLIC mt::Output_Multislice<T> spec_slicing(Input_Multislice<T>&);
+  
+  template <typename T>
   DLL_PUBLIC mt::Output_Multislice<T> tem_simulation(Input_Multislice<T>&);
+  
+  template <typename T>
+  DLL_PUBLIC mt::Output_Multislice<T> transmission_function(Input_Multislice<T>&);
+  
+  template <typename T>
+  DLL_PUBLIC mt::Output_Multislice<T> wave_function(Input_Multislice<T>&);
+  
 
 }  // namespace mt
 

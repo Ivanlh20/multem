@@ -29,7 +29,7 @@ namespace mt {
       mt::eAmorp_Lay_Type lay_pos = mt::eALT_Top,
       int seed = 300183) {
 
-    int region = atoms.region_max+1;
+    auto region = atoms.region_max+1;
 
     atoms.amorp_lay_info.resize(1);
     if(lay_pos == mt::eALT_Top)
