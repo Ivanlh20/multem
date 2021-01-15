@@ -19,6 +19,7 @@
  * along with multem-python. If not, see <http:// www.gnu.org/licenses/>.
  */
 #include <pybind11/pybind11.h>
+#include <pybind11/complex.h>
 
 #include <multem.h>
 #include <multem/ext/add_amorp_lay.h>
