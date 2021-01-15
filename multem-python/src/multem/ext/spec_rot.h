@@ -21,10 +21,10 @@ namespace mt {
   template <typename T>
   void spec_rot(
       Atom_Data<T> &atoms,
-      double theta,
-      const mt::r3d<T> &u0,
+      T theta,
+      mt::r3d<T> u0,
       mt::eRot_Point_Type &rot_point_type,
-      const mt::r3d<T> &p0) {
+      mt::r3d<T> p0) {
 
     u0.normalized();
 	
@@ -32,7 +32,7 @@ namespace mt {
       p0 = r3d<T>(atoms.x_mean, atoms.y_mean, atoms.z_mean);
     }
 
-    mt::rotate_atoms(atoms, theta * mt::c_deg_2_rad, u0, p0);
+    mt::rotate_atoms(atoms, (T)(theta * mt::c_deg_2_rad), u0, p0);
   }
 
 }

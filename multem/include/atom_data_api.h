@@ -1,6 +1,7 @@
 #ifndef MULTEM_ATOM_DATA_API
 #define MULTEM_ATOM_DATA_API
 
+#include <multem/config.h>
 #include "math.cuh"
 #include "safe_types.cuh"
 #include "lin_alg_def.cuh"
@@ -511,6 +512,12 @@ namespace mt {
 				return atom;
 			}
 	};
+
+	template <class T>
+	DLL_PUBLIC void rotate_atoms(Atom_Data<T> &atoms, T theta, r3d<T> u0, r3d<T> p0);
+
+	template <class T>
+	DLL_PUBLIC void remove_atoms_outside_z_range(Atom_Data<T> &atoms, T z_0, T z_e);
 
 }
 
