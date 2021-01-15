@@ -1707,7 +1707,7 @@ namespace mt
 	}
 
 	template<class TVector>
-	void rdf_3d(Atom_Data<Value_type<TVector>> &atoms, Value_type<TVector> r_max, int nr, TVector &r, TVector &rdf)
+	void rdf_3d(const Atom_Data<Value_type<TVector>> &atoms, Value_type<TVector> r_max, int nr, TVector &r, TVector &rdf)
 	{
 		using T = Value_type<TVector>;
 

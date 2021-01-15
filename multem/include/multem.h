@@ -64,6 +64,8 @@
 
 namespace mt {
   
+	template<class T>
+	DLL_PUBLIC void rdf_3d(const Atom_Data<T> &atoms, T r_max, int nr, std::vector<T> &r, std::vector<T> &rdf);
 
   /****************************************************************************
    * Logging functions
