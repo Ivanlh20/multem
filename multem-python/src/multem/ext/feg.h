@@ -78,6 +78,92 @@ namespace mt {
 
     return std::make_tuple(fxg, dfxg);
   }
+  
+  template <typename T>
+  std::tuple<std::vector<T>, std::vector<T>> pr(
+    ePotential_Type potential_type,
+    int Z,
+    int charge,
+    std::vector<T> r) {
+
+    std::vector<T> Pr(r.size());
+    std::vector<T> dPr(r.size());
+
+    mt::Atom_Type<T, mt::e_host> atom_type;
+    mt::Atomic_Data atomic_data(potential_type);
+    atomic_data.To_atom_type_CPU(Z, mt::c_Vrl, mt::c_nR, 0.0, atom_type);
+
+    mt::Atom_Cal<T> atomic_fcns_mt;
+    atomic_fcns_mt.Set_Atom_Type(potential_type, charge, &atom_type);
+    atomic_fcns_mt.Pr_dPr(r.size(), r.data(), Pr.data(), dPr.data());
+
+    return std::make_tuple(Pr, dPr);
+  }
+  
+  template <typename T>
+  std::tuple<std::vector<T>, std::vector<T>> vp(
+      ePotential_Type potential_type,
+      int Z,
+      int charge,
+      std::vector<T> R) {
+    
+    std::vector<T> VR(R.size());
+    std::vector<T> dVR(R.size());
+
+    mt::Atom_Type<T, mt::e_host> atom_type;
+    mt::Atomic_Data atomic_data(potential_type);
+    atomic_data.To_atom_type_CPU(Z, mt::c_Vrl, mt::c_nR, 0.0, atom_type);
+
+    mt::Atom_Cal<T> atomic_fcns_mt;
+    atomic_fcns_mt.Set_Atom_Type(potential_type, charge, &atom_type);
+    atomic_fcns_mt.VR_dVR(R.size(), R.data(), VR.data(), dVR.data());
+
+    return std::make_tuple(VR, dVR);
+  }
+  
+  template <typename T>
+  std::tuple<std::vector<T>, std::vector<T>> vr(
+      ePotential_Type potential_type,
+      int Z,
+      int charge,
+      std::vector<T> r) {
+    
+    std::vector<T> Vr(r.size());
+    std::vector<T> dVr(r.size());
+
+    mt::Atom_Type<T, mt::e_host> atom_type;
+    mt::Atomic_Data atomic_data(potential_type);
+    atomic_data.To_atom_type_CPU(Z, mt::c_Vrl, mt::c_nR, 0.0, atom_type);
+
+    mt::Atom_Cal<T> atomic_fcns_mt;
+    atomic_fcns_mt.Set_Atom_Type(potential_type, charge, &atom_type);
+    atomic_fcns_mt.Vr_dVr(r.size(), r.data(), Vr.data(), dVr.data());
+
+    return std::make_tuple(Vr, dVr);
+  }
+  
+  template <typename T>
+  std::tuple<std::vector<T>, std::vector<T>> vz(
+      ePotential_Type potential_type,
+      int Z,
+      int charge,
+      double z0,
+      double ze,
+      std::vector<T> R) {
+
+    std::vector<T> Vz(R.size());
+    std::vector<T> dVz(R.size());
+
+    mt::Atom_Type<T, mt::e_host> atom_type;
+    mt::Atomic_Data atomic_data(potential_type);
+    atomic_data.To_atom_type_CPU(Z, mt::c_Vrl, mt::c_nR, 0.0, atom_type);
+
+    mt::Atom_Cal<T> atomic_fcns_mt;
+    atomic_fcns_mt.Set_Atom_Type(potential_type, charge, &atom_type);
+    atomic_fcns_mt.Vz_dVz(z0, ze, R.size(), R.data(), Vz.data(), dVz.data());
+
+    return std::make_tuple(Vz, dVz);
+  }
 
 }
 
@@ -90,6 +176,18 @@ void export_feg(py::module_ m) {
   
   m.def("fxg", &mt::fxg<float>);
   m.def("fxg", &mt::fxg<double>);
+
+  m.def("pr", &mt::pr<float>);
+  m.def("pr", &mt::pr<double>);
+
+  m.def("vp", &mt::vp<float>);
+  m.def("vp", &mt::vp<double>);
+
+  m.def("vr", &mt::vp<float>);
+  m.def("vr", &mt::vp<double>);
+  
+  m.def("vz", &mt::vz<float>);
+  m.def("vz", &mt::vz<double>);
 }
 
 #endif
