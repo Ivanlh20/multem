@@ -30,4 +30,3 @@ def test_grid_2d():
     scanning = pickle.loads(pickle.dumps(scanning))
 
     check()
-

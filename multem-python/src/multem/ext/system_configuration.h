@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 
@@ -24,19 +24,17 @@ namespace pybind11 { namespace detail {
    * Define helper function for the multem::SystemConfiguration class
    */
   template <>
-  struct Helpers <mt::System_Configuration> {
-   
+  struct Helpers<mt::System_Configuration> {
     /**
      * Get the state
      */
     static py::tuple getstate(const mt::System_Configuration &self) {
-      return py::make_tuple(
-        self.device,
-        self.precision,
-        self.cpu_ncores,
-        self.cpu_nthread,
-        self.gpu_device,
-        self.gpu_nstream);
+      return py::make_tuple(self.device,
+                            self.precision,
+                            self.cpu_ncores,
+                            self.cpu_nthread,
+                            self.gpu_device,
+                            self.gpu_nstream);
     }
 
     /**
@@ -54,11 +52,9 @@ namespace pybind11 { namespace detail {
     }
   };
 
-}}
+}}  // namespace pybind11::detail
 
-
-void export_system_configuration(py::module_ m)
-{
+void export_system_configuration(py::module_ m) {
   typedef mt::System_Configuration Type;
   py::class_<Type>(m, "System_Configuration")
     .def(py::init<>())
@@ -68,10 +64,8 @@ void export_system_configuration(py::module_ m)
     .def_readwrite("cpu_nthread", &Type::cpu_nthread)
     .def_readwrite("gpu_device", &Type::gpu_device)
     .def_readwrite("gpu_nstream", &Type::gpu_nstream)
-    .def(py::pickle(
-        &py::detail::Helpers<Type>::getstate,
-        &py::detail::Helpers<Type>::setstate))
-    ;
+    .def(py::pickle(&py::detail::Helpers<Type>::getstate,
+                    &py::detail::Helpers<Type>::setstate));
 }
 
 #endif

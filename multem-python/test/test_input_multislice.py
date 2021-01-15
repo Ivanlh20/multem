@@ -3,8 +3,9 @@ import multem
 import numpy
 import pickle
 
+
 def test_input_multislice_standard():
-    
+
     input = multem.Input_Multislice()
 
     system_conf = multem.System_Configuration()
@@ -26,9 +27,9 @@ def test_input_multislice_standard():
     input.pn_coh_contrib = True
     input.pn_single_conf = False
     input.pn_nconf = 20
-    input.pn_dim = (1,1,1)
+    input.pn_dim = (1, 1, 1)
     input.pn_seed = 40
-    
+
     input.fp_dist = 10
     input.fp_iconf_0 = 11
     input.is_crystal = True
@@ -69,10 +70,10 @@ def test_input_multislice_standard():
     input.nR = 20
     input.nrot = 30
     input.cdl_var_type = "off"
-    input.cdl_var = [ 1, 2, 3 ]
-    input.iscan = [ 4, 5, 6 ]
-    input.beam_x = [ 7, 8, 9 ]
-    input.beam_y = [ 10, 11, 12 ]
+    input.cdl_var = [1, 2, 3]
+    input.iscan = [4, 5, 6]
+    input.beam_x = [7, 8, 9]
+    input.beam_y = [10, 11, 12]
     input.islice = 13
     input.dp_Shift = True
 
@@ -93,7 +94,7 @@ def test_input_multislice_standard():
         assert input.pn_coh_contrib == True
         assert input.pn_single_conf == False
         assert input.pn_nconf == 20
-        assert input.pn_dim == (1,1,1)
+        assert input.pn_dim == (1, 1, 1)
         assert input.pn_seed == 40
 
         assert input.fp_dist == 10
@@ -101,7 +102,9 @@ def test_input_multislice_standard():
         assert input.is_crystal == True
 
         assert input.spec_rot_theta == 0
-        assert input.spec_rot_u0 == pytest.approx(numpy.array((1, 2, 3)) / numpy.linalg.norm((1,2,3)))
+        assert input.spec_rot_u0 == pytest.approx(
+            numpy.array((1, 2, 3)) / numpy.linalg.norm((1, 2, 3))
+        )
         assert input.spec_rot_center_type.name == "User_Define"
         assert input.spec_rot_center_p == pytest.approx((4, 5, 6))
 
@@ -136,10 +139,10 @@ def test_input_multislice_standard():
         assert input.nR == pytest.approx(20)
         assert input.nrot == pytest.approx(30)
         assert input.cdl_var_type.name == "off"
-        assert input.cdl_var == pytest.approx([ 1, 2, 3 ])
-        assert input.iscan == pytest.approx([ 4, 5, 6 ])
-        assert input.beam_x == pytest.approx([ 7, 8, 9 ])
-        assert input.beam_y == pytest.approx([ 10, 11, 12 ])
+        assert input.cdl_var == pytest.approx([1, 2, 3])
+        assert input.iscan == pytest.approx([4, 5, 6])
+        assert input.beam_x == pytest.approx([7, 8, 9])
+        assert input.beam_y == pytest.approx([10, 11, 12])
         assert input.islice == 13
         assert input.dp_Shift == True
 
@@ -204,15 +207,15 @@ def test_input_multislice_extended():
     input.cond_lens_inner_aper_ang = 2.6
     input.cond_lens_outer_aper_ang = 2.7
 
-    input.cond_lens_ti_a = 0.1 
-    input.cond_lens_ti_sigma = 1.1 
-    input.cond_lens_ti_beta = 2.1 
-    input.cond_lens_ti_npts = 10 
-    input.cond_lens_si_a = 4.1 
-    input.cond_lens_si_sigma = 6.1 
-    input.cond_lens_si_beta = 6.1 
-    input.cond_lens_si_rad_npts = 20 
-    input.cond_lens_si_azm_npts = 30 
+    input.cond_lens_ti_a = 0.1
+    input.cond_lens_ti_sigma = 1.1
+    input.cond_lens_ti_beta = 2.1
+    input.cond_lens_ti_npts = 10
+    input.cond_lens_si_a = 4.1
+    input.cond_lens_si_sigma = 6.1
+    input.cond_lens_si_beta = 6.1
+    input.cond_lens_si_rad_npts = 20
+    input.cond_lens_si_azm_npts = 30
 
     input.cond_lens_zero_defocus_type = "User_Define"
     input.cond_lens_zero_defocus_plane = 0.123
@@ -246,10 +249,10 @@ def test_input_multislice_extended():
     input.obj_lens_inner_aper_ang = 0.26
     input.obj_lens_outer_aper_ang = 0.27
 
-    input.obj_lens_ti_a = 7.1 
-    input.obj_lens_ti_sigma = 6.1 
-    input.obj_lens_ti_beta = 8.1 
-    input.obj_lens_ti_npts = 13 
+    input.obj_lens_ti_a = 7.1
+    input.obj_lens_ti_sigma = 6.1
+    input.obj_lens_ti_beta = 8.1
+    input.obj_lens_ti_npts = 13
 
     input.obj_lens_zero_defocus_type = "User_Define"
     input.obj_lens_zero_defocus_plane = 1.1
@@ -286,7 +289,9 @@ def test_input_multislice_extended():
     input.output_area_iy_e = 40
 
     def check():
-        assert numpy.array(input.spec_atoms) == pytest.approx(numpy.array([(1, 2, 3, 4, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8, 9)]))
+        assert numpy.array(input.spec_atoms) == pytest.approx(
+            numpy.array([(1, 2, 3, 4, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8, 9)])
+        )
 
         assert input.spec_dz == pytest.approx(50.1)
         assert input.spec_lx == pytest.approx(60.1)
@@ -335,15 +340,15 @@ def test_input_multislice_extended():
         assert input.cond_lens_inner_aper_ang == pytest.approx(2.6)
         assert input.cond_lens_outer_aper_ang == pytest.approx(2.7)
 
-        assert input.cond_lens_ti_a == pytest.approx(0.1 )
-        assert input.cond_lens_ti_sigma == pytest.approx(1.1 )
-        assert input.cond_lens_ti_beta == pytest.approx(2.1 )
-        assert input.cond_lens_ti_npts == pytest.approx(10 )
-        assert input.cond_lens_si_a == pytest.approx(4.1 )
-        assert input.cond_lens_si_sigma == pytest.approx(6.1 )
-        assert input.cond_lens_si_beta == pytest.approx(6.1 )
-        assert input.cond_lens_si_rad_npts == pytest.approx(20 )
-        assert input.cond_lens_si_azm_npts == pytest.approx(30 )
+        assert input.cond_lens_ti_a == pytest.approx(0.1)
+        assert input.cond_lens_ti_sigma == pytest.approx(1.1)
+        assert input.cond_lens_ti_beta == pytest.approx(2.1)
+        assert input.cond_lens_ti_npts == pytest.approx(10)
+        assert input.cond_lens_si_a == pytest.approx(4.1)
+        assert input.cond_lens_si_sigma == pytest.approx(6.1)
+        assert input.cond_lens_si_beta == pytest.approx(6.1)
+        assert input.cond_lens_si_rad_npts == pytest.approx(20)
+        assert input.cond_lens_si_azm_npts == pytest.approx(30)
 
         assert input.cond_lens_zero_defocus_type.name == pytest.approx("User_Define")
         assert input.cond_lens_zero_defocus_plane == pytest.approx(0.123)
@@ -377,10 +382,10 @@ def test_input_multislice_extended():
         assert input.obj_lens_inner_aper_ang == pytest.approx(0.26)
         assert input.obj_lens_outer_aper_ang == pytest.approx(0.27)
 
-        assert input.obj_lens_ti_a == pytest.approx(7.1 )
-        assert input.obj_lens_ti_sigma == pytest.approx(6.1 )
-        assert input.obj_lens_ti_beta == pytest.approx(8.1 )
-        assert input.obj_lens_ti_npts == pytest.approx(13 )
+        assert input.obj_lens_ti_a == pytest.approx(7.1)
+        assert input.obj_lens_ti_sigma == pytest.approx(6.1)
+        assert input.obj_lens_ti_beta == pytest.approx(8.1)
+        assert input.obj_lens_ti_npts == pytest.approx(13)
 
         assert input.obj_lens_zero_defocus_type.name == "User_Define"
         assert input.obj_lens_zero_defocus_plane == pytest.approx(1.1)
@@ -421,4 +426,3 @@ def test_input_multislice_extended():
     input = pickle.loads(pickle.dumps(input))
 
     check()
-

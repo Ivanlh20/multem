@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 
@@ -20,15 +20,14 @@
 namespace py = pybind11;
 
 namespace pybind11 { namespace detail {
-  
+
   /**
    * Type cast a mt::Amorp_Lay_Info<T> object to a tuple
    */
-  template <> 
+  template <>
   template <typename T>
   class type_caster<mt::Amorp_Lay_Info<T>> {
   public:
-  
     PYBIND11_TYPE_CASTER(mt::Amorp_Lay_Info<T>, _("mt::Amorp_Lay_Info<T>"));
 
     bool load(handle src, bool convert) {
@@ -44,22 +43,15 @@ namespace pybind11 { namespace detail {
       return false;
     }
 
-    static handle cast(mt::Amorp_Lay_Info<T> src, return_value_policy policy, handle parent) {
-      return py::make_tuple(
-        src.z_0, 
-        src.z_e, 
-        src.dz).release();
+    static handle cast(mt::Amorp_Lay_Info<T> src,
+                       return_value_policy policy,
+                       handle parent) {
+      return py::make_tuple(src.z_0, src.z_e, src.dz).release();
     }
   };
- 
-}}
 
+}}  // namespace pybind11::detail
 
-void export_amorp_lay_info(py::module_ m) {
-}
+void export_amorp_lay_info(py::module_ m) {}
 
 #endif
-
-
-
-

@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 
@@ -22,36 +22,21 @@ namespace py = pybind11;
 
 namespace mt {
 
-  template <typename T>
-  class Atom {
-  public:
-    int Z;
-    T x;
-    T y;
-    T z;
-    T sigma;
-    T occ;
-    int region;
-    int charge;
+template <typename T>
+class Atom {
+public:
+  int Z;
+  T x;
+  T y;
+  T z;
+  T sigma;
+  T occ;
+  int region;
+  int charge;
 
-    Atom()
-      : Z(0),
-        x(0),
-        y(0),
-        z(0),
-        sigma(0),
-        occ(0),
-        region(0),
-        charge(0) {}
+  Atom() : Z(0), x(0), y(0), z(0), sigma(0), occ(0), region(0), charge(0) {}
 
-    Atom(int Z_in,
-         T x_in,
-         T y_in,
-         T z_in,
-         T sigma_in,
-         T occ_in,
-         T region_in,
-         T charge_in)
+  Atom(int Z_in, T x_in, T y_in, T z_in, T sigma_in, T occ_in, T region_in, T charge_in)
       : Z(Z_in),
         x(x_in),
         y(y_in),
@@ -60,23 +45,21 @@ namespace mt {
         occ(occ_in),
         region(region_in),
         charge(charge_in) {}
-  };
-  
+};
 
-}
+}  // namespace mt
 
 // Make the vector of atoms opaque
 PYBIND11_MAKE_OPAQUE(std::vector<mt::Atom<double>>);
 
 namespace pybind11 { namespace detail {
-  
+
   /**
    * Define wrapper function for the AtomList class
    */
   template <>
   template <typename T>
-  struct Helpers <std::vector<mt::Atom<T>>> {
-
+  struct Helpers<std::vector<mt::Atom<T>>> {
     /**
      * Get the state
      */
@@ -98,49 +81,46 @@ namespace pybind11 { namespace detail {
       }
       return self;
     }
-
   };
-  
+
   /**
    * Define wrapper function for the mt::Atom_Data class
    */
   template <>
   template <typename T>
-  struct Helpers <mt::Atom_Data<T>> {
-
+  struct Helpers<mt::Atom_Data<T>> {
     /**
      * Get the state
      */
     static py::tuple getstate(const mt::Atom_Data<T> &self) {
-      return py::make_tuple(
-          self.dz,
-          self.l_x,
-          self.l_y,
-          self.l_z,
-          self.ct_na,
-          self.ct_nb,
-          self.ct_nc,
-          self.ct_a,
-          self.ct_b,
-          self.ct_c,
-          self.ct_x0,
-          self.ct_y0,
-          self.amorp_lay_info,
-          self.Z,
-          self.x,
-          self.y,
-          self.z,
-          self.sigma,
-          self.occ,
-          self.region,
-          self.charge);
+      return py::make_tuple(self.dz,
+                            self.l_x,
+                            self.l_y,
+                            self.l_z,
+                            self.ct_na,
+                            self.ct_nb,
+                            self.ct_nc,
+                            self.ct_a,
+                            self.ct_b,
+                            self.ct_c,
+                            self.ct_x0,
+                            self.ct_y0,
+                            self.amorp_lay_info,
+                            self.Z,
+                            self.x,
+                            self.y,
+                            self.z,
+                            self.sigma,
+                            self.occ,
+                            self.region,
+                            self.charge);
     }
 
     /**
      * Set the state
      */
     static mt::Atom_Data<T> setstate(py::tuple obj) {
-      mt::Atom_Data<T> self; 
+      mt::Atom_Data<T> self;
       self.dz = obj[0].cast<T>();
       self.l_x = obj[1].cast<T>();
       self.l_y = obj[2].cast<T>();
@@ -165,26 +145,24 @@ namespace pybind11 { namespace detail {
       self.get_statistic();
       return self;
     }
-  
-    static
-    std::vector<mt::Atom<T>> get_spec_atoms(const mt::Atom_Data<T> &self) {
+
+    static std::vector<mt::Atom<T>> get_spec_atoms(const mt::Atom_Data<T> &self) {
       std::vector<mt::Atom<T>> result(self.size());
       for (auto i = 0; i < result.size(); ++i) {
-        result[i] = mt::Atom<T>(
-            self.Z[i],
-            self.x[i],
-            self.y[i],
-            self.z[i],
-            self.sigma[i],
-            self.occ[i],
-            self.region[i],
-            self.charge[i]);
+        result[i] = mt::Atom<T>(self.Z[i],
+                                self.x[i],
+                                self.y[i],
+                                self.z[i],
+                                self.sigma[i],
+                                self.occ[i],
+                                self.region[i],
+                                self.charge[i]);
       }
       return result;
     }
 
-    static
-    void set_spec_atoms(mt::Atom_Data<T> &self, const std::vector<mt::Atom<T>>& spec_atoms) {
+    static void set_spec_atoms(mt::Atom_Data<T> &self,
+                               const std::vector<mt::Atom<T>> &spec_atoms) {
       self.resize(spec_atoms.size());
       for (auto i = 0; i < spec_atoms.size(); ++i) {
         self.Z[i] = spec_atoms[i].Z;
@@ -197,18 +175,15 @@ namespace pybind11 { namespace detail {
         self.charge[i] = spec_atoms[i].charge;
       }
     }
-
   };
-  
 
   /**
    * Type cast a mt::Atom object to a tuple
    */
-  template <> 
+  template <>
   template <typename T>
   class type_caster<mt::Atom<T>> {
   public:
-  
     PYBIND11_TYPE_CASTER(mt::Atom<T>, _("mt::Atom<T>"));
 
     bool load(handle src, bool convert) {
@@ -231,38 +206,28 @@ namespace pybind11 { namespace detail {
 
     static handle cast(mt::Atom<T> src, return_value_policy policy, handle parent) {
       return py::make_tuple(
-        src.Z, 
-        src.x, 
-        src.y, 
-        src.z, 
-        src.sigma, 
-        src.occ, 
-        src.region, 
-        src.charge).release();
+               src.Z, src.x, src.y, src.z, src.sigma, src.occ, src.region, src.charge)
+        .release();
     }
   };
-  
-}}
+
+}}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_atom(py::module_ m)
-{
+void wrap_atom(py::module_ m) {
   typedef std::vector<mt::Atom<T>> Type;
-  
+
   // Wrap the vector of atoms
   py::bind_vector<Type>(m, "AtomList")
-    .def(py::pickle(
-        &py::detail::Helpers<Type>::getstate,
-        &py::detail::Helpers<Type>::setstate))
-    ;
+    .def(py::pickle(&py::detail::Helpers<Type>::getstate,
+                    &py::detail::Helpers<Type>::setstate));
 
   // Allow implicit conversion
   py::implicitly_convertible<py::list, Type>();
 }
 
 template <typename T>
-void wrap_atom_data(py::module_ m)
-{
+void wrap_atom_data(py::module_ m) {
   typedef mt::Atom_Data<T> Type;
 
   // Wrap the mt::Input class
@@ -327,16 +292,13 @@ void wrap_atom_data(py::module_ m)
     .def_readonly("l_x_int", &Type::l_x_int)
     .def_readonly("l_y_int", &Type::l_y_int)
     .def_readonly("l_z_int", &Type::l_z_int)
-    .def_property(
-        "spec_atoms",
-        &py::detail::Helpers<Type>::get_spec_atoms,
-        &py::detail::Helpers<Type>::set_spec_atoms)
+    .def_property("spec_atoms",
+                  &py::detail::Helpers<Type>::get_spec_atoms,
+                  &py::detail::Helpers<Type>::set_spec_atoms)
     .def("get_statistic", static_cast<void (Type::*)()>(&Type::get_statistic))
     .def("sort_by_z", &Type::sort_by_z)
-    .def(py::pickle(
-        &py::detail::Helpers<Type>::getstate,
-        &py::detail::Helpers<Type>::setstate))
-    ;
+    .def(py::pickle(&py::detail::Helpers<Type>::getstate,
+                    &py::detail::Helpers<Type>::setstate));
 }
 
 void export_atom_data(py::module_ m) {
@@ -345,6 +307,3 @@ void export_atom_data(py::module_ m) {
 }
 
 #endif
-
-
-

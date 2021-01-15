@@ -1,4 +1,3 @@
-import pytest
 import multem
 import pickle
 
@@ -26,6 +25,3 @@ def test_range_2d():
     range_2d = pickle.loads(pickle.dumps(range_2d))
 
     check()
-
-
-

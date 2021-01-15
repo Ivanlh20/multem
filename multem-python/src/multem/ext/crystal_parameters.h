@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 #ifndef MULTEM_PYTHON_CRYSTAL_PARAMETERS
@@ -18,38 +18,28 @@ namespace py = pybind11;
 
 namespace mt {
 
-  /**
-   * A class to hold crystal parameters
-   */
-  template <typename T>
-  class CrystalParameters {
-  public:
-    
-    typedef std::vector<Atom<T>> Layer;
+/**
+ * A class to hold crystal parameters
+ */
+template <typename T>
+class CrystalParameters {
+public:
+  typedef std::vector<Atom<T>> Layer;
 
-    int na;
-    int nb;
-    int nc;
-    T a;
-    T b;
-    T c;
-    std::vector<Layer> layers;
+  int na;
+  int nb;
+  int nc;
+  T a;
+  T b;
+  T c;
+  std::vector<Layer> layers;
 
-    CrystalParameters()
-      : na(0),
-        nb(0),
-        nc(0),
-        a(0),
-        b(0),
-        c(0) {}
+  CrystalParameters() : na(0), nb(0), nc(0), a(0), b(0), c(0) {}
+};
 
-  };
-
-}
-
+}  // namespace mt
 
 void export_crystal_parameters(py::module_ m) {
-
   typedef mt::CrystalParameters<double> Type;
 
   py::class_<Type>(m, "CrystalParameters")
@@ -60,9 +50,7 @@ void export_crystal_parameters(py::module_ m) {
     .def_readwrite("a", &Type::a)
     .def_readwrite("b", &Type::b)
     .def_readwrite("c", &Type::c)
-    .def_readwrite("layers", &Type::layers)
-    ;
+    .def_readwrite("layers", &Type::layers);
 }
 
 #endif
-

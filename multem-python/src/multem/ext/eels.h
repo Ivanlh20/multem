@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 
@@ -19,35 +19,33 @@
 namespace py = pybind11;
 
 namespace pybind11 { namespace detail {
-  
+
   /**
    * Define wrapper function for the mt::EELS class
    */
   template <>
   template <typename T>
-  struct Helpers <mt::EELS<T>> {
-
+  struct Helpers<mt::EELS<T>> {
     /**
      * Get the state
      */
     static py::tuple getstate(const mt::EELS<T> &self) {
-      return py::make_tuple(
-        self.space,
-        self.E_0,
-        self.E_loss,
-        self.ge,
-        self.ge2,
-        self.gc,
-        self.gc2,
-        self.m_selection,
-        self.collection_angle,
-        self.channelling_type,
-        self.factor,
-        self.Z,
-        self.x,
-        self.y,
-        self.occ,
-        self.g_collection);
+      return py::make_tuple(self.space,
+                            self.E_0,
+                            self.E_loss,
+                            self.ge,
+                            self.ge2,
+                            self.gc,
+                            self.gc2,
+                            self.m_selection,
+                            self.collection_angle,
+                            self.channelling_type,
+                            self.factor,
+                            self.Z,
+                            self.x,
+                            self.y,
+                            self.occ,
+                            self.g_collection);
     }
 
     /**
@@ -73,16 +71,12 @@ namespace pybind11 { namespace detail {
       self.g_collection = obj[15].cast<T>();
       return self;
     }
-
   };
-  
 
-}}
-
+}}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_eels(py::module_ m)
-{
+void wrap_eels(py::module_ m) {
   typedef mt::EELS<T> Type;
 
   // Wrap the mt::Input class
@@ -104,10 +98,8 @@ void wrap_eels(py::module_ m)
     .def_readwrite("y", &Type::y)
     .def_readwrite("occ", &Type::occ)
     .def_readwrite("g_collection", &Type::g_collection)
-    .def(py::pickle(
-        &py::detail::Helpers<Type>::getstate,
-        &py::detail::Helpers<Type>::setstate))
-    ;
+    .def(py::pickle(&py::detail::Helpers<Type>::getstate,
+                    &py::detail::Helpers<Type>::setstate));
 }
 
 void export_eels(py::module_ m) {
@@ -115,8 +107,3 @@ void export_eels(py::module_ m) {
 }
 
 #endif
-
-
-
-
-

@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 
@@ -19,14 +19,13 @@
 namespace py = pybind11;
 
 namespace pybind11 { namespace detail {
-  
+
   /**
    * Type cast a mt::FP_Dim object to a tuple
    */
-  template <> 
+  template <>
   class type_caster<mt::FP_Dim> {
   public:
-  
     PYBIND11_TYPE_CASTER(mt::FP_Dim, _("mt::FP_Dim"));
 
     bool load(handle src, bool convert) {
@@ -43,22 +42,12 @@ namespace pybind11 { namespace detail {
     }
 
     static handle cast(mt::FP_Dim src, return_value_policy policy, handle parent) {
-      return py::make_tuple(
-        src.x, 
-        src.y, 
-        src.z).release();
+      return py::make_tuple(src.x, src.y, src.z).release();
     }
   };
- 
-}}
 
-void export_fp_dim(py::module_ m) {
-}
+}}  // namespace pybind11::detail
+
+void export_fp_dim(py::module_ m) {}
 
 #endif
-
-
-
-
-
-

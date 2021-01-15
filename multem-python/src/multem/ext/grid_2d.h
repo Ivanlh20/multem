@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 
@@ -19,36 +19,34 @@
 namespace py = pybind11;
 
 namespace pybind11 { namespace detail {
-  
+
   /**
    * Define wrapper function for the mt::Grid_2d_ class
    */
   template <>
   template <typename T>
-  struct Helpers <mt::Grid_2d<T>> {
-
+  struct Helpers<mt::Grid_2d<T>> {
     /**
      * Get the state
      */
     static py::tuple getstate(const mt::Grid_2d<T> &self) {
-      return py::make_tuple(
-          self.nx,
-          self.ny,
-          self.nxh,
-          self.nyh,
-          self.lx,
-          self.ly,
-          self.dz,
-          self.bwl,
-          self.pbc_xy,
-          self.Rx_0,
-          self.Ry_0,
-          self.dRx,
-          self.dRy,
-          self.dgx,
-          self.dgy,
-          self.gl2_max,
-          self.alpha);
+      return py::make_tuple(self.nx,
+                            self.ny,
+                            self.nxh,
+                            self.nyh,
+                            self.lx,
+                            self.ly,
+                            self.dz,
+                            self.bwl,
+                            self.pbc_xy,
+                            self.Rx_0,
+                            self.Ry_0,
+                            self.dRx,
+                            self.dRy,
+                            self.dgx,
+                            self.dgy,
+                            self.gl2_max,
+                            self.alpha);
     }
 
     /**
@@ -75,16 +73,12 @@ namespace pybind11 { namespace detail {
       self.alpha = obj[16].cast<T>();
       return self;
     }
-
   };
-  
 
-}}
-
+}}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_grid_2d(py::module_ m)
-{
+void wrap_grid_2d(py::module_ m) {
   typedef mt::Grid_2d<T> Type;
 
   // Wrap the mt::Input class
@@ -107,10 +101,8 @@ void wrap_grid_2d(py::module_ m)
     .def_readwrite("dgy", &Type::dgy)
     .def_readwrite("gl2_max", &Type::gl2_max)
     .def_readwrite("alpha", &Type::alpha)
-    .def(py::pickle(
-        &py::detail::Helpers<Type>::getstate,
-        &py::detail::Helpers<Type>::setstate))
-    ;
+    .def(py::pickle(&py::detail::Helpers<Type>::getstate,
+                    &py::detail::Helpers<Type>::setstate));
 }
 
 void export_grid_2d(py::module_ m) {
@@ -118,7 +110,3 @@ void export_grid_2d(py::module_ m) {
 }
 
 #endif
-
-
-
-

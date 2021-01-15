@@ -46,4 +46,3 @@ def test_eels():
     eels = pickle.loads(pickle.dumps(eels))
 
     check()
-

@@ -5,7 +5,7 @@
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
+ *  This code is distributed under the GPLv3 license, a copy of
  *  which is included in the root directory of this package.
  */
 
@@ -20,7 +20,6 @@ namespace py = pybind11;
 
 namespace pybind11 { namespace detail {
 
-
   /**
    * A class to hold output data
    */
@@ -29,14 +28,14 @@ namespace pybind11 { namespace detail {
 
   /*   std::vector< Image<double> > image_tot; */
   /*   std::vector< Image<double> > image_coh; */
-    
+
   /*   Image<double> m2psi_tot; */
   /*   Image<double> m2psi_coh; */
   /*   Image<double> V; */
   /*   Image< std::complex<double> > psi_coh; */
 
   /* }; */
-  
+
   /**
    * Get the py::buffer_info from a std::vector
    * @param self A std::vector
@@ -52,7 +51,7 @@ namespace pybind11 { namespace detail {
   /*     { self.size() }, */
   /*     { sizeof(T) }); */
   /* } */
-  
+
   /**
    * Get the py::buffer_info from a multem::Image
    * @param self A multem::Image
@@ -62,20 +61,19 @@ namespace pybind11 { namespace detail {
   /* py::buffer_info as_buffer_info(multem::Image<T> &self) { */
   /*   typedef typename multem::Image<T>::value_type value_type; */
   /*   return py::buffer_info( */
-  /*       self.data.data(), */ 
-  /*       sizeof(value_type), */ 
+  /*       self.data.data(), */
+  /*       sizeof(value_type), */
   /*       py::format_descriptor<value_type>::format(), */
   /*       2, */
-  /*       { */ 
-  /*         self.shape[0], */ 
-  /*         self.shape[1] */ 
+  /*       { */
+  /*         self.shape[0], */
+  /*         self.shape[1] */
   /*       }, */
-  /*       { */ 
+  /*       { */
   /*         sizeof(value_type) * self.shape[1], */
-  /*         sizeof(value_type) */ 
+  /*         sizeof(value_type) */
   /*       }); */
   /* } */
-
 
   /**
    * Get the py::array_t from a std::vector
@@ -96,13 +94,13 @@ namespace pybind11 { namespace detail {
   /* py::array_t<T> as_array_t(multem::Image<T> &self) { */
   /*   return py::array_t<T>(as_buffer_info(self)); */
   /* } */
-  
+
   /**
    * Define helper functions for the mt::DetInt class
    */
-  //template <>
-  //template <typename T>
-  //struct Helpers < mt::DetInt<T> > {
+  // template <>
+  // template <typename T>
+  // struct Helpers < mt::DetInt<T> > {
 
   //  /**
   //   * Create a mt::DetInt from a py::array_t
@@ -115,9 +113,9 @@ namespace pybind11 { namespace detail {
   //    /* MULTEM_ASSERT(buffer.shape[0] >= 0); */
   //    /* MULTEM_ASSERT(buffer.shape[1] >= 0); */
   //    return mt::DetInt<T>(
-  //      (T *) buffer.ptr, 
+  //      (T *) buffer.ptr,
   //      typename mt::DetInt<T>::shape_type({
-  //        (std::size_t) buffer.shape[0], 
+  //        (std::size_t) buffer.shape[0],
   //        (std::size_t) buffer.shape[1]}));
   //  }
 
@@ -131,37 +129,34 @@ namespace pybind11 { namespace detail {
   //  }
   //};
 
-
   /**
    * Define helper function for the multem::Output_Multislice class
    */
   template <>
   template <typename T>
-  struct Helpers <mt::Output_Multislice<T>> {
-
+  struct Helpers<mt::Output_Multislice<T>> {
     /**
      * Get the state
      */
     static py::tuple getstate(const mt::Output_Multislice<T> &self) {
-      return py::make_tuple(
-        self.output_type(),
-        self.ndetector(),
-        self.nx(),
-        self.ny(),
-        self.dx(),
-        self.dy(),
-        self.dr(),
-        self.get_x(),
-        self.get_y(),
-        self.get_r(),
-        self.get_image_tot(),
-        self.get_image_coh(),
-        self.get_m2psi_tot(),
-        self.get_m2psi_coh(),
-        self.get_psi_coh(),
-        self.get_V(),
-        self.get_trans(),
-        self.get_psi_0());
+      return py::make_tuple(self.output_type(),
+                            self.ndetector(),
+                            self.nx(),
+                            self.ny(),
+                            self.dx(),
+                            self.dy(),
+                            self.dr(),
+                            self.get_x(),
+                            self.get_y(),
+                            self.get_r(),
+                            self.get_image_tot(),
+                            self.get_image_coh(),
+                            self.get_m2psi_tot(),
+                            self.get_m2psi_coh(),
+                            self.get_psi_coh(),
+                            self.get_V(),
+                            self.get_trans(),
+                            self.get_psi_0());
     }
 
     /**
@@ -196,10 +191,11 @@ namespace pybind11 { namespace detail {
       return self.output_type();
     }
 
-    static void set_output_type(mt::Output_Multislice<T> &self, mt::eTEM_Output_Type output_type) {
+    static void set_output_type(mt::Output_Multislice<T> &self,
+                                mt::eTEM_Output_Type output_type) {
       self.output_type() = output_type;
     }
-    
+
     static int get_ndetector(const mt::Output_Multislice<T> &self) {
       return self.ndetector();
     }
@@ -207,7 +203,7 @@ namespace pybind11 { namespace detail {
     static void set_ndetector(mt::Output_Multislice<T> &self, int ndetector) {
       self.ndetector() = ndetector;
     }
-    
+
     static int get_nx(const mt::Output_Multislice<T> &self) {
       return self.nx();
     }
@@ -215,7 +211,7 @@ namespace pybind11 { namespace detail {
     static void set_nx(mt::Output_Multislice<T> &self, int nx) {
       self.nx() = nx;
     }
-    
+
     static int get_ny(const mt::Output_Multislice<T> &self) {
       return self.ny();
     }
@@ -223,7 +219,7 @@ namespace pybind11 { namespace detail {
     static void set_ny(mt::Output_Multislice<T> &self, int ny) {
       self.ny() = ny;
     }
-    
+
     static T get_dx(const mt::Output_Multislice<T> &self) {
       return self.dx();
     }
@@ -231,7 +227,7 @@ namespace pybind11 { namespace detail {
     static void set_dx(mt::Output_Multislice<T> &self, T dx) {
       self.dx() = dx;
     }
-    
+
     static T get_dy(const mt::Output_Multislice<T> &self) {
       return self.dy();
     }
@@ -239,7 +235,7 @@ namespace pybind11 { namespace detail {
     static void set_dy(mt::Output_Multislice<T> &self, T dy) {
       self.dy() = dy;
     }
-    
+
     static T get_dr(const mt::Output_Multislice<T> &self) {
       return self.dr();
     }
@@ -247,14 +243,12 @@ namespace pybind11 { namespace detail {
     static void set_dr(mt::Output_Multislice<T> &self, T dr) {
       self.dr() = dr;
     }
-    
   };
 
-}}
+}}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_det_int(py::module_ m, const char *name)
-{
+void wrap_det_int(py::module_ m, const char *name) {
   /* return py::class_< mt::DetInt<T> >(m, name, py::buffer_protocol()) */
   /*     .def(py::init<>()) */
   /*     .def(py::init(&py::detail::Helpers<mt::DetInt<T>>::init_from_array_t)) */
@@ -263,92 +257,48 @@ void wrap_det_int(py::module_ m, const char *name)
 }
 
 template <typename T>
-void wrap_output_multislice(py::module_ m, const char *name)
-{
+void wrap_output_multislice(py::module_ m, const char *name) {
   typedef mt::Input_Multislice<T> Parent;
   typedef mt::Output_Multislice<T> Type;
 
   py::class_<Type, Parent>(m, name)
     .def(py::init<>())
+    .def_property("output_type",
+                  &py::detail::Helpers<Type>::get_output_type,
+                  &py::detail::Helpers<Type>::set_output_type)
+    .def_property("ndetector",
+                  &py::detail::Helpers<Type>::get_ndetector,
+                  &py::detail::Helpers<Type>::set_ndetector)
     .def_property(
-        "output_type", 
-        &py::detail::Helpers<Type>::get_output_type,
-        &py::detail::Helpers<Type>::set_output_type)
+      "nx", &py::detail::Helpers<Type>::get_nx, &py::detail::Helpers<Type>::set_nx)
     .def_property(
-        "ndetector", 
-        &py::detail::Helpers<Type>::get_ndetector,
-        &py::detail::Helpers<Type>::set_ndetector)
+      "ny", &py::detail::Helpers<Type>::get_ny, &py::detail::Helpers<Type>::set_ny)
     .def_property(
-        "nx", 
-        &py::detail::Helpers<Type>::get_nx,
-        &py::detail::Helpers<Type>::set_nx)
+      "dx", &py::detail::Helpers<Type>::get_dx, &py::detail::Helpers<Type>::set_dx)
     .def_property(
-        "ny", 
-        &py::detail::Helpers<Type>::get_ny,
-        &py::detail::Helpers<Type>::set_ny)
+      "dy", &py::detail::Helpers<Type>::get_dy, &py::detail::Helpers<Type>::set_dy)
     .def_property(
-        "dx", 
-        &py::detail::Helpers<Type>::get_dx,
-        &py::detail::Helpers<Type>::set_dx)
+      "dr", &py::detail::Helpers<Type>::get_dr, &py::detail::Helpers<Type>::set_dr)
+    .def_property("x", &Type::get_x, &Type::set_x)
+    .def_property("y", &Type::get_y, &Type::set_y)
+    .def_property("r", &Type::get_r, &Type::set_r)
+    .def_property("image_tot", &Type::get_image_tot, &Type::set_image_tot)
+    .def_property("image_coh", &Type::get_image_coh, &Type::set_image_coh)
+    .def_property("m2psi_tot", &Type::get_m2psi_tot, &Type::set_m2psi_tot)
+    .def_property("m2psi_coh", &Type::get_m2psi_coh, &Type::set_m2psi_coh)
     .def_property(
-        "dy", 
-        &py::detail::Helpers<Type>::get_dy,
-        &py::detail::Helpers<Type>::set_dy)
-    .def_property(
-        "dr", 
-        &py::detail::Helpers<Type>::get_dr,
-        &py::detail::Helpers<Type>::set_dr)
-    .def_property(
-        "x", 
-        &Type::get_x,
-        &Type::set_x)
-    .def_property(
-        "y", 
-        &Type::get_y,
-        &Type::set_y)
-    .def_property(
-        "r", 
-        &Type::get_r,
-        &Type::set_r)
-    .def_property(
-        "image_tot", 
-        &Type::get_image_tot,
-        &Type::set_image_tot)
-    .def_property(
-        "image_coh", 
-        &Type::get_image_coh,
-        &Type::set_image_coh)
-    .def_property(
-        "m2psi_tot", 
-        &Type::get_m2psi_tot,
-        &Type::set_m2psi_tot)
-    .def_property(
-        "m2psi_coh", 
-        &Type::get_m2psi_coh,
-        &Type::set_m2psi_coh)
-    .def_property(
-        "psi_coh", 
-        &Type::get_psi_coh,
-        static_cast<void (Type::*)(const std::vector<std::vector<std::complex<T>>>&)>(&Type::set_psi_coh))
-    .def_property(
-        "V", 
-        &Type::get_V,
-        &Type::set_V)
-    .def_property(
-        "trans", 
-        &Type::get_trans,
-        &Type::set_trans)
-    .def_property(
-        "psi_0", 
-        &Type::get_psi_0,
-        &Type::set_psi_0)
+      "psi_coh",
+      &Type::get_psi_coh,
+      static_cast<void (Type::*)(const std::vector<std::vector<std::complex<T>>> &)>(
+        &Type::set_psi_coh))
+    .def_property("V", &Type::get_V, &Type::set_V)
+    .def_property("trans", &Type::get_trans, &Type::set_trans)
+    .def_property("psi_0", &Type::get_psi_0, &Type::set_psi_0)
     /* .def_readonly("data", &Type::data) */
     .def("gather", &Type::gather)
     .def("clean_temporal", &Type::clean_temporal)
-    .def(py::pickle(
-        &py::detail::Helpers<Type>::getstate,
-        &py::detail::Helpers<Type>::setstate))
-    ;
+    .def(py::pickle(&py::detail::Helpers<Type>::getstate,
+                    &py::detail::Helpers<Type>::setstate));
 }
 
 void export_output_multislice(py::module_ m) {
@@ -358,4 +308,3 @@ void export_output_multislice(py::module_ m) {
 }
 
 #endif
-

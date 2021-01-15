@@ -100,5 +100,3 @@ def test_lens():
     lens = pickle.loads(pickle.dumps(lens))
 
     check()
-
-
