@@ -174,11 +174,21 @@ classdef parameters
       obj_lens_phi_56(1,1) double = 0.00;  					% [phi_A5]	Azimuthal angle of 6-fold astigmatism (Angstrom)
 
       obj_lens_inner_aper_ang(1,1) double = 0.00;  			% Inner aperture (mrad) 
-      obj_lens_outer_aper_ang(1,1) double = 24.0;  			% Outer aperture (mrad)
+      obj_lens_outer_aper_ang(1,1) double = 24.0;  			% Outer aperture (mrad)         
+     %%%%%%%%%% source spread function %%%%%%%%%%%%
+      
+      obj_lens_si_a(1,1) double = 1.0                       % Height proportion of a normalized Gaussian [0, 1]
+      obj_lens_si_sigma(1,1) double = 0.0072; 			    % standard deviation: For parallel ilumination(Angstrom^-1); otherwise (Angstrom)
+      obj_lens_si_beta(1,1) double = 0.0;                 	% Standard deviation of the source spread function for the Exponential component: For parallel ilumination(�^-1); otherwise (�)
+      obj_lens_si_rad_npts(1,1) uint64 = 4;                 % # of integration points. It will be only used if illumination_model=4
+      obj_lens_si_azm_npts(1,1) uint64 = 4;                 % # of radial integration points. It will be only used if illumination_model=4
       %%%%%%%%% defocus spread function %%%%%%%%%%%%
       
-      obj_lens_ti_sigma(1,1) double = 32;                   % standard deviation (Angstrom)
-      obj_lens_ti_npts(1,1) uint64 = 10;                    % # of integration points. It will be only used if illumination_model=4
+      obj_lens_ti_a(1,1) double = 1.0;                      % Height proportion of a normalized Gaussian [0, 1]
+      obj_lens_ti_sigma(1,1) double = 32.0; 				% standard deviation (Angstrom)
+      obj_lens_ti_beta(1,1) double = 0.0;                 	% Standard deviation of the defocus spread for the Exponential component
+      obj_lens_ti_npts(1,1) uint64 = 10;  			        % # of integration points. It will be only used if illumination_model=4
+
       %%%%%%%%% zero defocus reference %%%%%%%%%%%%
       
       obj_lens_zero_defocus_type(1,1) uint64 {mustBeLessThanOrEqual(obj_lens_zero_defocus_type,4),mustBePositive} = 1; 		% eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
