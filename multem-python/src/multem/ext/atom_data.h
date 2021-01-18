@@ -24,6 +24,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
+#include <pybind11/numpy.h>
 #include <multem.h>
 #include <multem/ext/serialization.h>
 
@@ -59,6 +60,7 @@ public:
 }  // namespace mt
 
 // Make the vector of atoms opaque
+PYBIND11_MAKE_OPAQUE(std::vector<mt::Atom<float>>);
 PYBIND11_MAKE_OPAQUE(std::vector<mt::Atom<double>>);
 
 namespace pybind11 { namespace detail {
@@ -170,8 +172,9 @@ namespace pybind11 { namespace detail {
       return result;
     }
 
-    static void set_spec_atoms(mt::Atom_Data<T> &self,
-                               const std::vector<mt::Atom<T>> &spec_atoms) {
+    template <typename U>
+    static void set_spec_atoms_internal(
+        mt::Atom_Data<T> &self, const std::vector<mt::Atom<U>> &spec_atoms) {
       self.resize(spec_atoms.size());
       for (auto i = 0; i < spec_atoms.size(); ++i) {
         self.Z[i] = spec_atoms[i].Z;
@@ -182,6 +185,20 @@ namespace pybind11 { namespace detail {
         self.occ[i] = spec_atoms[i].occ;
         self.region[i] = spec_atoms[i].region;
         self.charge[i] = spec_atoms[i].charge;
+      }
+    }
+
+
+    static void set_spec_atoms(mt::Atom_Data<T>& self,
+                               const py::object &spec_atoms) {
+      try {
+        Helpers<mt::Atom_Data<T>>::set_spec_atoms_internal(
+            self, 
+            spec_atoms.cast<const std::vector<mt::Atom<double>>&>());
+      } catch (py::cast_error e) {
+        Helpers<mt::Atom_Data<T>>::set_spec_atoms_internal(
+            self, 
+            spec_atoms.cast<const std::vector<mt::Atom<float>>&>());
       }
     }
   };
@@ -223,24 +240,40 @@ namespace pybind11 { namespace detail {
 }}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_atom(py::module_ m) {
+void wrap_atom(py::module_ m, const char *name) {
   typedef std::vector<mt::Atom<T>> Type;
 
+  // Register the numpy datatype
+  PYBIND11_NUMPY_DTYPE(mt::Atom<T>, Z, x, y, z, sigma, occ, region, charge);
+
   // Wrap the vector of atoms
-  py::bind_vector<Type>(m, "AtomList")
+  py::bind_vector<Type>(m, name, py::buffer_protocol())
+   .def_buffer([](Type &self) -> py::buffer_info {
+        return py::buffer_info(
+            self.data(),                                  /* Pointer to buffer */
+            sizeof(mt::Atom<T>),                          /* Size of one scalar */
+            py::format_descriptor<mt::Atom<T>>::format(), /* Python struct-style format descriptor */
+            1,                                            /* Number of dimensions */
+            { self.size() },                              /* Buffer dimensions */
+            { sizeof(mt::Atom<T>) }                       /* Strides (in bytes) for each index */
+        );
+    })
     .def(py::pickle(&py::detail::Helpers<Type>::getstate,
                     &py::detail::Helpers<Type>::setstate));
 
   // Allow implicit conversion
   py::implicitly_convertible<py::list, Type>();
+  py::implicitly_convertible<py::array_t<mt::Atom<T>>, Type>();
+
+
 }
 
 template <typename T>
-void wrap_atom_data(py::module_ m) {
+void wrap_atom_data(py::module_ m, const char *name) {
   typedef mt::Atom_Data<T> Type;
 
   // Wrap the mt::Input class
-  py::class_<Type>(m, "Atom_Data")
+  py::class_<Type>(m, name)
     .def_readwrite("dz", &Type::dz)
     .def_readwrite("l_x", &Type::l_x)
     .def_readwrite("l_y", &Type::l_y)
@@ -306,13 +339,15 @@ void wrap_atom_data(py::module_ m) {
                   &py::detail::Helpers<Type>::set_spec_atoms)
     .def("get_statistic", static_cast<void (Type::*)()>(&Type::get_statistic))
     .def("sort_by_z", &Type::sort_by_z)
+    .def("__len__", &Type::size)
     .def(py::pickle(&py::detail::Helpers<Type>::getstate,
                     &py::detail::Helpers<Type>::setstate));
 }
 
 void export_atom_data(py::module_ m) {
-  wrap_atom<double>(m);
-  wrap_atom_data<double>(m);
+  wrap_atom<float>(m, "AtomList_f");
+  wrap_atom<double>(m, "AtomList_d");
+  wrap_atom_data<double>(m, "Atom_Data");
 }
 
 #endif

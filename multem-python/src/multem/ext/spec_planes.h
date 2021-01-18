@@ -24,6 +24,7 @@
 #include <pybind11/pybind11.h>
 #include <multem.h>
 #include <multem/ext/serialization.h>
+#include <multem/ext/traits.h>
 
 namespace py = pybind11;
 
@@ -32,6 +33,9 @@ namespace pybind11 { namespace detail {
   template <typename T>
   void check_input_for_spec_planes(mt::Input_Multislice<T> &input) {
     bool pbc_xy = true;
+
+    // Check input system conf
+    MULTEM_ASSERT(input.system_conf.precision = type_precision<T>::value);
 
     // Set parameters
     input.pn_coh_contrib = false;

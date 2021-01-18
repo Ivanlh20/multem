@@ -48,6 +48,7 @@
 #include <multem/ext/range_2d.h>
 #include <multem/ext/rdf_3d.h>
 #include <multem/ext/scanning.h>
+#include <multem/ext/slice.h>
 #include <multem/ext/spec_planes.h>
 #include <multem/ext/spec_rot.h>
 #include <multem/ext/spec_slicing.h>
@@ -85,6 +86,7 @@ PYBIND11_MODULE(multem_ext, m) {
   export_r3d(m);
   export_rdf_3d(m);
   export_scanning(m);
+  export_slice(m);
   export_spec_planes(m);
   export_spec_rot(m);
   export_spec_slicing(m);

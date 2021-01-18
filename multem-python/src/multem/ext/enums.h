@@ -50,8 +50,9 @@ namespace pybind11 { namespace detail {
                         + "\" is not a valid value for enum type " + tname);
     });
 
-    // Allow implicit conversions from string to enum
+    // Allow implicit conversions from string and int to enum
     implicitly_convertible<str, T>();
+    implicitly_convertible<int, T>();
     return obj;
   }
 
