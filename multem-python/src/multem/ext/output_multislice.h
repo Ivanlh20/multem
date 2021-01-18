@@ -312,8 +312,8 @@ void wrap_output_multislice(py::module_ m, const char *name) {
 
 void export_output_multislice(py::module_ m) {
   /* wrap_det_int<double>(m, "DetIntD"); */
-  /* wrap_output_multislice<float>(m, "OutputF"); */
-  wrap_output_multislice<double>(m, "OutputD");
+  wrap_output_multislice<float>(m, "Output_f");
+  wrap_output_multislice<double>(m, "Output_d");
 }
 
 #endif

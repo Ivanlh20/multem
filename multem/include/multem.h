@@ -51,6 +51,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <multem/error.h>
 #include <multem/constants.h>
 #include <lin_alg_def.cuh>
 #include <safe_types.cuh>
@@ -99,7 +100,7 @@ namespace mt {
   DLL_PUBLIC std::vector<T> spec_planes(Input_Multislice<T>&);
   
   template <typename T>
-  DLL_PUBLIC std::tuple<Atom_Data<T>, vector<Slice<T>>> spec_slicing(Input_Multislice<T>&);
+  DLL_PUBLIC std::tuple<Atom_Data<T>, std::vector<Slice<T>>> spec_slicing(Input_Multislice<T>&);
   
   template <typename T>
   DLL_PUBLIC mt::Output_Multislice<T> tem_simulation(Input_Multislice<T>&);

@@ -72,11 +72,11 @@ namespace pybind11 { namespace detail {
 }}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_detector(py::module_ m) {
+void wrap_detector(py::module_ m, const char *name) {
   typedef mt::Detector<T, mt::e_host> Type;
 
   // Wrap the mt::Input class
-  py::class_<Type>(m, "Detector")
+  py::class_<Type>(m, name)
     .def(py::init<>())
     .def("size", &Type::size)
     .def("clear", &Type::clear)
@@ -97,7 +97,8 @@ void wrap_detector(py::module_ m) {
 }
 
 void export_detector(py::module_ m) {
-  wrap_detector<double>(m);
+  wrap_detector<float>(m, "Detector_f");
+  wrap_detector<double>(m, "Detector_d");
 }
 
 #endif

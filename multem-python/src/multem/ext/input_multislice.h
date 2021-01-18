@@ -28,6 +28,20 @@
 namespace py = pybind11;
 
 namespace pybind11 { namespace detail {
+  
+  template <typename T>
+  mt::Input_Multislice<T> Input_Multislice_constructor_internal(const mt::System_Configuration &system_conf) {
+    mt::Input_Multislice<T> result;
+    result.system_conf = system_conf;
+    return result;
+  }
+
+  inline
+  py::object Input_Multislice_constructor(const mt::System_Configuration &system_conf) {
+    return system_conf.precision == mt::eP_float
+      ? py::cast(Input_Multislice_constructor_internal<float>(system_conf))
+      : py::cast(Input_Multislice_constructor_internal<double>(system_conf));
+  }
 
   /**
    * Define helper function for the mt::Input_Multislice class
@@ -199,10 +213,10 @@ namespace pybind11 { namespace detail {
       const mt::Input_Multislice<T>& self) {
       return Helpers<mt::Atom_Data<T>>::get_spec_atoms(self.atoms);
     }
-
+    
     static void set_spec_atoms(mt::Input_Multislice<T>& self,
-                               const std::vector<mt::Atom<T>>& spec_atoms) {
-      Helpers<mt::Atom_Data<T>>::set_spec_atoms(self.atoms, spec_atoms);
+                               const py::object &spec_atoms) {
+        Helpers<mt::Atom_Data<T>>::set_spec_atoms(self.atoms, spec_atoms);
     }
 
     static T get_spec_dz(const mt::Input_Multislice<T>& self) {
@@ -1172,13 +1186,12 @@ namespace pybind11 { namespace detail {
 }}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_input_multislice(py::module_ m) {
+void wrap_input_multislice(py::module_ m, const char *name) {
   typedef mt::Input_Multislice<T> Type;
 
   // Wrap the mt::Input_Multislice class
-  py::class_<Type>(m, "Input_Multislice")
-    .def(py::init<>())
-    .def_readwrite("system_conf", &Type::system_conf)
+  py::class_<Type>(m, name)
+    .def_readonly("system_conf", &Type::system_conf)
     .def_readwrite("interaction_model", &Type::interaction_model)
     .def_readwrite("potential_type", &Type::potential_type)
     .def_readwrite("pn_model", &Type::pn_model)
@@ -1596,7 +1609,11 @@ void wrap_input_multislice(py::module_ m) {
 }
 
 void export_input_multislice(py::module_ m) {
-  wrap_input_multislice<double>(m);
+
+  m.def("Input_Multislice", &py::detail::Input_Multislice_constructor);
+
+  wrap_input_multislice<float>(m, "Input_Multislice_f");
+  wrap_input_multislice<double>(m, "Input_Multislice_d");
 }
 
 #endif

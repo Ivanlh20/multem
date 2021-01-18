@@ -20,6 +20,8 @@ test_data = [
     multem.crystalline_materials.Pd110_xtl,
     multem.crystalline_materials.Pt001_xtl,
     multem.crystalline_materials.Pt110_xtl,
+    multem.crystalline_materials.Si001_xtl,
+    multem.crystalline_materials.SrTiO3001_xtl,
 ]
 
 

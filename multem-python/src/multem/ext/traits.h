@@ -18,39 +18,30 @@
  * You should have received a copy of the GNU General Public License
  * along with multem-python. If not, see <http:// www.gnu.org/licenses/>.
  */
-#ifndef MULTEM_PYTHON_AMORP_SPEC
-#define MULTEM_PYTHON_AMORP_SPEC
+#ifndef MULTEM_PYTHON_TRAITS_H
+#define MULTEM_PYTHON_TRAITS_H
 
 #include <pybind11/pybind11.h>
 #include <multem.h>
 
 namespace py = pybind11;
 
-namespace mt {
+namespace pybind11 { namespace detail {
 
-template <typename T>
-Atom_Data<T> amorp_spec(T l_x, T l_y, T l_z, T r_min, int Z, T rms_3d, T rho, int seed = 300183) {
-  mt::Atom_Data<T> atoms;
-  atoms.l_x = l_x;
-  atoms.l_y = l_y;
-  atoms.l_z = l_z;
-  atoms.amorp_lay_info.resize(1);
-  atoms.amorp_lay_info[0].z_0 = 0;
-  atoms.amorp_lay_info[0].z_e = l_z;
-  atoms.amorp_lay_info[0].dz = 2.0;
-  atoms.amorp_lay_info[0].type = mt::eALT_Bottom;
-  atoms.amorp_lay_info[0].region = 0;
+  template <typename T>
+  struct type_precision {
+  };
 
-  mt::Amorp_Spec<T> spec;
-  spec.create(atoms, r_min, Z, rms_3d, rho, seed);
+  template <>
+  struct type_precision <float> {
+    static const mt::ePrecision value = mt::eP_float;
+  };
+  
+  template <>
+  struct type_precision <double> {
+    static const mt::ePrecision value = mt::eP_double;
+  };
 
-  return atoms;
-}
-
-}  // namespace mt
-
-void export_amorp_spec(py::module_ m) {
-  m.def("amorp_spec", &mt::amorp_spec<double>);
-}
+}}
 
 #endif

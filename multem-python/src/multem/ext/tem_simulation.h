@@ -24,6 +24,7 @@
 #include <pybind11/pybind11.h>
 #include <multem.h>
 #include <multem/ext/serialization.h>
+#include <multem/ext/traits.h>
 
 namespace py = pybind11;
 
@@ -32,6 +33,9 @@ namespace pybind11 { namespace detail {
   template <typename T>
   void check_input_for_tem_simulation(mt::Input_Multislice<T> &input) {
     bool pbc_xy = true;
+
+    // Check input system conf
+    MULTEM_ASSERT(input.system_conf.precision = type_precision<T>::value);
 
     // Get atom statistic or delete atoms
     if (input.is_specimen_required()) {
@@ -109,9 +113,7 @@ namespace pybind11 { namespace detail {
   }
 
   template <typename T>
-  object tem_simulation(mt::Input_Multislice<T> &input,
-                        const mt::System_Configuration &sys_conf) {
-    input.system_conf = sys_conf;
+  object tem_simulation(mt::Input_Multislice<T> &input) {
     check_input_for_tem_simulation(input);
     return py::cast(mt::tem_simulation<T>(input));
   }
