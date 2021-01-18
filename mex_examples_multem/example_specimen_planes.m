@@ -19,11 +19,16 @@ input_multem.spec_rot_u0 = [1 0 0]; 					% unitary vector
 input_multem.spec_rot_center_type = 1; 			% 1: geometric center, 2: User define		
 input_multem.spec_rot_center_p = [0 0 0];					% rotation point
 
-na = 6; nb = 6; nc = 10; ncu = 2; rms3d = 0.15;
+na = 6; nb = 6; nc = 10; ncu = 2; rmsd_3d = 0.085;
 
 [input_multem.spec_atoms, input_multem.spec_lx...
 , input_multem.spec_ly, input_multem.spec_lz...
-, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rms3d);
+, a, b, c, input_multem.spec_dz] = Au110_xtl(na, nb, nc, ncu, rmsd_3d);
+
+[input_multem.spec_atoms, input_multem.spec_lx...
+, input_multem.spec_ly, input_multem.spec_lz] = graphene(10, 2.46, 0.085);
+
+ilm_write_ap_pdb('graphene.pdb', input_multem.spec_atoms);
 
 % occ = 1;
 % region = 0;

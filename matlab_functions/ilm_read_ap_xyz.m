@@ -1,5 +1,5 @@
 % Read atomic positions from xyz file
-function [atoms, lx, ly, lz] = ilm_read_ap_xyz(path, rms3d)
+function [atoms, lx, ly, lz] = ilm_read_ap_xyz(path, rmsd_3d)
     ces = {'H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca', ...
     'Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn', 'Ga','Ge','As','Se','Br','Kr','Rb','Sr','Y','Zr', ...
     'Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn', 'Sb','Te','I','Xe','Cs','Ba','La','Ce','Pr','Nd',...
@@ -14,7 +14,7 @@ function [atoms, lx, ly, lz] = ilm_read_ap_xyz(path, rms3d)
         text = strtrim(upper(sscanf(fgetl(fid),'%c')));
         if (~isempty(text))
             C = textscan(text, '%s %f %f %f');
-            atoms = [atoms; [find(strcmpi(ces, strtrim(C{1}))), C{2}, C{3}, C{4}, rms3d, 1.0]];
+            atoms = [atoms; [find(strcmpi(ces, strtrim(C{1}))), C{2}, C{3}, C{4}, rmsd_3d, 1.0]];
         end
     end
     fclose(fid);

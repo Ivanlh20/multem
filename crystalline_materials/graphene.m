@@ -10,7 +10,7 @@ function [atoms, lx, ly, lz] = graphene(n, a, rms)
     region = 0;
     charge = 0;
     % C = 6
-    % Z x y z rms3d occupancy region charge
+    % Z x y z rmsd_3d occupancy region charge
     xtl_parm.uLayer(1).atoms = [6, 0.0, 0.0, 0.0, rms, occ, region, charge;...
     6, 1/3, 0.0, 0.0, rms, occ, region, charge; 6, 1/2, 1/2, 0.0, rms, occ, region, charge; 6, 5/6, 1/2, 0.0, rms, occ, region, charge];
 

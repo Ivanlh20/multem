@@ -5,9 +5,9 @@ addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-na = 20; nb = 20; nc = 30; ncu = 2; rms3d = 0.085;
+na = 20; nb = 20; nc = 30; ncu = 2; rmsd_3d = 0.085;
 
-[atoms, lx, ly, ~, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rms3d);
+[atoms, lx, ly, ~, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 lz = 20;
 Z = 6;

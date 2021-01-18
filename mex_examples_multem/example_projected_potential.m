@@ -22,11 +22,11 @@ input_multem.pn_seed = 300183;                  % Random seed(frozen phonon)
 input_multem.pn_single_conf = 1;                % 1: true, 0:false
 input_multem.pn_nconf = 1;                      % true: phonon configuration, false: number of frozen phonon configurations
 
-na = 4; nb = 4; nc = 4; ncu = 2; rms3d = 0.085;
+na = 4; nb = 4; nc = 4; ncu = 2; rmsd_3d = 0.085;
 
 [input_multem.spec_atoms, input_multem.spec_lx...
 , input_multem.spec_ly, input_multem.spec_lz...
-, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rms3d);
+, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
 
 input_multem.nx = 2048; 
 input_multem.ny = 2048;

@@ -1326,6 +1326,23 @@ data_table[102].edges[0] = 0.00;	data_table[102].edges[1] = 0.00;	data_table[102
 						VR.cl[j] = c_Potf*c_Pi*cl/cnl;
 						VR.cnl[j] = c_Pi2/cnl;
 					}
+					else
+					{
+						feg.cl[j] = 0.0;
+						feg.cnl[j] = 1.0;
+
+						fxg.cl[j] = 0.0;
+						fxg.cnl[j] = 1.0;
+
+						Pr.cl[j] = 0.0;
+						Pr.cnl[j] = 1.0;
+
+						Vr.cl[j] = 0.0;
+						Vr.cnl[j] = 1.0;
+
+						VR.cl[j] = 0.0;
+						VR.cnl[j] = 1.0;
+					}
 				}
 			}
 
@@ -1446,6 +1463,23 @@ data_table[102].edges[0] = 0.00;	data_table[102].edges[1] = 0.00;	data_table[102
 
 						VR.cl[j] = 2.0*c_Potf*c_Pi2*cl/pow(cnl, 1.5);
 						VR.cnl[j] = c_2Pi/sqrt(cnl);
+					}
+					else
+					{
+						feg.cl[j] = 0.0;
+						feg.cnl[j] = 1.0;
+
+						fxg.cl[j] = 0.0;
+						fxg.cnl[j] = 1.0;
+
+						Pr.cl[j] = 0.0;
+						Pr.cnl[j] = 1.0;
+
+						Vr.cl[j] = 0.0;
+						Vr.cnl[j] = 1.0;
+
+						VR.cl[j] = 0.0;
+						VR.cnl[j] = 1.0;
 					}
 				}
 			}

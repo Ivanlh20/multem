@@ -16,9 +16,9 @@ lx = 100;
 ly = 100;
 lz = 100;
 
-na = 8; nb = 8; nc = 8; ncu = 2; rms3d = 0.085;
+na = 8; nb = 8; nc = 8; ncu = 2; rmsd_3d = 0.085;
 
-[atoms, ~] = Au001_xtl(na, nb, nc, ncu, rms3d);
+[atoms, ~] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
 atoms = ilm_center_spec(atoms, lx, ly, lz);
 
 theta = 45;                                 % angle (�)

@@ -120,13 +120,20 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.cond_lens_inner_aper_ang = 0.0;                % Inner aperture (mrad) 
     input_multem.cond_lens_outer_aper_ang = 21.0;   			% Outer aperture (mrad)
 
-    %%%%%%%%%% source spread function %%%%%%%%%%%%
-    input_multem.cond_lens_ssf_sigma = 0.0072;                  % standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
-    input_multem.cond_lens_ssf_npoints = 8;              		% # of integration points. It will be only used if illumination_model=4
-
     %%%%%%%%% defocus spread function %%%%%%%%%%%%
-    input_multem.cond_lens_dsf_sigma = 32;                 		% standard deviation (Å)
-    input_multem.cond_lens_dsf_npoints  = 10;                	% # of integration points. It will be only used if illumination_model=4
+    dsf_sigma = ilc_iehwgd_2_sigma(32);                         % from defocus spread to standard deviation
+    input_multem.cond_lens_ti_a = 1.0;
+    input_multem.cond_lens_ti_sigma = dsf_sigma;                % standard deviation
+    input_multem.cond_lens_ti_beta = 1;
+    input_multem.cond_lens_ti_npts = 5;                         % # of integration points. It will be only used if illumination_model=4
+
+    %%%%%%%%%% source spread function %%%%%%%%%%%%
+    ssf_sigma = ilc_hwhm_2_sigma(0.45);                         % half width at half maximum to standard deviation
+    input_multem.cond_lens_si_a = 1.0;
+    input_multem.cond_lens_si_sigma = ssf_sigma;                % standard deviation: For parallel ilumination(Å^-1); otherwise
+    input_multem.cond_lens_si_beta = 1.0;
+    input_multem.cond_lens_si_rad_npts = 8;                     % # of integration points. It will be only used if illumination_model=4
+    input_multem.cond_lens_si_azm_npts = 12;                    % # of integration points. It will be only used if illumination_model=4
 
     %%%%%%%%% zero defocus reference %%%%%%%%%%%%
     input_multem.cond_lens_zero_defocus_type = 1;   			% eZDT_First = 1, eZDT_User_Define = 4

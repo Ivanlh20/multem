@@ -38,11 +38,11 @@ input_multem.pn_dim = 110;                       % phonon dimensions (xyz)
 input_multem.pn_seed = 300183;                   % Random seed(frozen phonon)
 
 %%%%%%%%%%%%%%%%%%%%%%% Specimen information %%%%%%%%%%%%%%%%%%%%%%%
-na = 8; nb = 8; nc = 5; ncu = 2; rms3d = 0.085;
+na = 8; nb = 8; nc = 5; ncu = 2; rmsd_3d = 0.085;
 
 [input_multem.spec_atoms, input_multem.spec_lx...
 , input_multem.spec_ly, input_multem.spec_lz...
-, a, b, c, input_multem.spec_dz] = Au110_xtl(na, nb, nc, ncu, rms3d);
+, a, b, c, input_multem.spec_dz] = Au110_xtl(na, nb, nc, ncu, rmsd_3d);
 
 %%%%%%%%%%%%%%%%%%%%%% Specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.thick_type = 2;                     % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
@@ -75,14 +75,15 @@ input_multem.cond_lens_inner_aper_ang = 0.0;   % Inner aperture (mrad)
 input_multem.cond_lens_outer_aper_ang = 21.0;  % Outer aperture (mrad)
 
 %%%%%%%%% defocus spread function %%%%%%%%%%%%
-dsf_sigma = ilc_iehwgd_2_sigma(32); % from defocus spread to standard deviation
-input_multem.cond_lens_ti_sigma = dsf_sigma;   % standard deviation (�)
-input_multem.cond_lens_ti_npts = 5;         % # of integration points. It will be only used if illumination_model=4
+dsf_sigma = ilc_iehwgd_2_sigma(32);             % from defocus spread to standard deviation
+input_multem.cond_lens_ti_sigma = dsf_sigma;    % standard deviation (Å)
+input_multem.cond_lens_ti_npts = 5;             % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%%% source spread function %%%%%%%%%%%%
-ssf_sigma = ilc_hwhm_2_sigma(0.45); % half width at half maximum to standard deviation
-input_multem.cond_lens_si_sigma = ssf_sigma;  	% standard deviation: For parallel ilumination(�^-1); otherwise (�)
-input_multem.cond_lens_si_rad_npts = 4;         % # of integration points. It will be only used if illumination_model=4
+ssf_sigma = ilc_hwhm_2_sigma(0.45);             % half width at half maximum to standard deviation
+input_multem.cond_lens_si_sigma = ssf_sigma;  	% standard deviation: For parallel ilumination(Å^-1); otherwise (Å)
+input_multem.cond_lens_si_rad_npts = 8;         % # of integration points. It will be only used if illumination_model=4
+input_multem.cond_lens_si_azm_npts = 12;        % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%% zero defocus reference %%%%%%%%%%%%
 input_multem.cond_lens_zero_defocus_type = 1;   % eZDT_First = 1, eZDT_User_Define = 4
