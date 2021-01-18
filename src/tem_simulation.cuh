@@ -412,6 +412,92 @@ namespace mt
 				}
 			}
 
+			template <class TOutput_multislice>
+			void EDX(TOutput_multislice &output_multislice)
+			{
+				ext_niter = wave_function.slicing.slice.size()*input_multislice->number_conf();
+				ext_iter = 0;
+
+				if(input_multislice->is_EELS())
+				{
+					ext_niter *= input_multislice->scanning.size();
+				}
+				/*****************************************************************/
+
+				T_r w = input_multislice->get_phonon_rot_weight();
+
+				auto psi = [&](T_r w, Vector<T_c, dev> &psi_z, TOutput_multislice &output_multislice)
+				{
+					T_r gx_0 = input_multislice->gx_0();
+					T_r gy_0 = input_multislice->gy_0();
+
+					for(auto islice = 0; islice < wave_function.slicing.slice.size(); islice++)
+					{
+						if(input_multislice->eels_fr.is_Mixed_Channelling())
+						{
+							wave_function.trans(islice, wave_function.slicing.slice.size()-1, trans_thk);
+						}			
+
+						for(auto iatoms = wave_function.slicing.slice[islice].iatom_0; iatoms <= wave_function.slicing.slice[islice].iatom_e; iatoms++)
+						{
+							if(wave_function.atoms.Z[iatoms] == input_multislice->eels_fr.Z)
+							{
+								input_multislice->set_eels_fr_atom(iatoms, wave_function.atoms);
+								energy_loss.set_atom_type(input_multislice->eels_fr);
+
+								for(auto ikn = 0; ikn < energy_loss.kernel.size(); ikn++)
+								{
+									mt::multiply(*stream, energy_loss.kernel[ikn], psi_z, wave_function.psi_z);
+									wave_function.psi(islice, wave_function.slicing.slice.size()-1, w, trans_thk, output_multislice);
+								}
+							}
+
+							if(ext_stop_sim) break;
+						}
+						wave_function.psi_slice(gx_0, gy_0, islice, psi_z);
+
+						ext_iter++;
+						if(ext_stop_sim) break;
+					}
+				};
+
+				output_multislice.init();
+
+				input_multislice->iscan.resize(1);
+				input_multislice->beam_x.resize(1);
+				input_multislice->beam_y.resize(1);
+
+				if(input_multislice->is_EELS())
+				{
+					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
+					{
+						wave_function.move_atoms(iconf);		
+						for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
+						{
+							input_multislice->iscan[0] = iscan;
+							input_multislice->set_iscan_beam_position();
+							wave_function.set_incident_wave(psi_thk);
+							psi(w, psi_thk, output_multislice);
+
+							if(ext_stop_sim) break;
+						}
+
+						if(ext_stop_sim) break;
+					}
+				}
+				else
+				{
+					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
+					{
+						wave_function.move_atoms(iconf);		
+						wave_function.set_incident_wave(psi_thk);
+						psi(w, psi_thk, output_multislice);
+
+						if(ext_stop_sim) break;
+					}
+				}
+			}
+
 			Input_Multislice<T_r> *input_multislice;
 			Stream<dev> *stream;
 			FFT<T_r, dev> *fft_2d;
