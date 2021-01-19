@@ -195,7 +195,7 @@ namespace pybind11 { namespace detail {
         Helpers<mt::Atom_Data<T>>::set_spec_atoms_internal(
             self, 
             spec_atoms.cast<const std::vector<mt::Atom<double>>&>());
-      } catch (py::cast_error e) {
+      } catch (const std::exception &e) {
         Helpers<mt::Atom_Data<T>>::set_spec_atoms_internal(
             self, 
             spec_atoms.cast<const std::vector<mt::Atom<float>>&>());
@@ -347,7 +347,8 @@ void wrap_atom_data(py::module_ m, const char *name) {
 void export_atom_data(py::module_ m) {
   wrap_atom<float>(m, "AtomList_f");
   wrap_atom<double>(m, "AtomList_d");
-  wrap_atom_data<double>(m, "Atom_Data");
+  wrap_atom_data<float>(m, "Atom_Data_f");
+  wrap_atom_data<double>(m, "Atom_Data_d");
 }
 
 #endif

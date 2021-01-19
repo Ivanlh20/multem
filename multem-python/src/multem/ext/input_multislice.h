@@ -973,13 +973,13 @@ namespace pybind11 { namespace detail {
       self.scanning.pbc = scanning_periodic;
     }
 
-    static bool get_scanning_square(const mt::Input_Multislice<T>& self) {
+    static bool get_scanning_square_pxs(const mt::Input_Multislice<T>& self) {
       return self.scanning.spxs;
     }
 
-    static void set_scanning_square(mt::Input_Multislice<T>& self,
-                                    bool scanning_square) {
-      self.scanning.spxs = scanning_square;
+    static void set_scanning_square_pxs(mt::Input_Multislice<T>& self,
+                                    bool scanning_square_pxs) {
+      self.scanning.spxs = scanning_square_pxs;
     }
 
     static int get_scanning_ns(const mt::Input_Multislice<T>& self) {
@@ -1534,9 +1534,9 @@ void wrap_input_multislice(py::module_ m, const char *name) {
     .def_property("scanning_periodic",
                   &py::detail::Helpers<Type>::get_scanning_periodic,
                   &py::detail::Helpers<Type>::set_scanning_periodic)
-    .def_property("scanning_square",
-                  &py::detail::Helpers<Type>::get_scanning_square,
-                  &py::detail::Helpers<Type>::set_scanning_square)
+    .def_property("scanning_square_pxs",
+                  &py::detail::Helpers<Type>::get_scanning_square_pxs,
+                  &py::detail::Helpers<Type>::set_scanning_square_pxs)
     .def_property("scanning_ns",
                   &py::detail::Helpers<Type>::get_scanning_ns,
                   &py::detail::Helpers<Type>::set_scanning_ns)
