@@ -40,6 +40,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # Add a C/C++ library
 add_library(multem SHARED src/multem.cu)
 
+# Set a marco to tell us we are compiling
+target_compile_definitions(multem PRIVATE BUILDING_LIBRARY=1)
+
 # Ensure we are using C++11
 target_compile_features(multem PUBLIC cxx_std_11)
 

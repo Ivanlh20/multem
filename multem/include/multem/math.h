@@ -19,18 +19,9 @@
 #ifndef MULTEM_MATH_H
 #define MULTEM_MATH_H
 
+#include <multem/config.h>
 #include <cstdlib>
 #include <algorithm>
-
-#ifndef DEVICE_CALLABLE
-	#ifdef __CUDACC__
-		#define DEVICE_CALLABLE __host__ __device__
- #define FORCE_INLINE __forceinline__
-	#else
-		#define DEVICE_CALLABLE
-		#define FORCE_INLINE inline
-	#endif
-#endif
 
 //#ifdef __CUDACC__
 //	#pragma message("Cuda MATH_H")

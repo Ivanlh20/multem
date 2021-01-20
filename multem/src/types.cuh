@@ -19,16 +19,6 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#ifndef DEVICE_CALLABLE
-	#ifdef __CUDACC__
-		#define DEVICE_CALLABLE __host__ __device__
-		#define FORCE_INLINE __forceinline__
-	#else
-		#define DEVICE_CALLABLE
-		#define FORCE_INLINE inline
-	#endif
-#endif
-
 //#ifdef __CUDACC__
 //	#pragma message("Cuda TYPES_H")
 //#else
