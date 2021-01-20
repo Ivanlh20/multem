@@ -22,7 +22,7 @@
 #define MULTEM_PYTHON_SERIALIZATION_H
 
 #include <pybind11/pybind11.h>
-#include <multem.h>
+#include <multem/multem.h>
 
 namespace py = pybind11;
 

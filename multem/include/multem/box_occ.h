@@ -16,16 +16,16 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef BOX_OCC_H
-#define BOX_OCC_H
+#ifndef MULTEM_BOX_OCC_H
+#define MULTEM_BOX_OCC_H
 
 #include <vector>
 #include <deque>
 
-#include "safe_types.cuh"
-#include "math.cuh"
-#include "lin_alg_def.cuh"
-#include "atom_data_api.h"
+#include <multem/types.h>
+#include <multem/math.h>
+#include <multem/lin_alg_def.h>
+#include <multem/atom_data.h>
 
 namespace mt
 {

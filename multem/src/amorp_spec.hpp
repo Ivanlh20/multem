@@ -26,7 +26,7 @@
 #include "atomic_data.hpp"
 #include "cgpu_rand.cuh"
 #include "box_occ.hpp"
-#include <amorp_spec_api.h>
+#include <multem/amorp_spec.h>
 
 namespace mt
 {

@@ -22,7 +22,7 @@
 #define MULTEM_PYTHON_ADD_AMORP_LAY
 
 #include <pybind11/pybind11.h>
-#include <multem.h>
+#include <multem/multem.h>
 #include <multem/ext/atom_data.h>
 
 namespace py = pybind11;

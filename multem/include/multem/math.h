@@ -16,8 +16,8 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef MATH_H
-#define MATH_H
+#ifndef MULTEM_MATH_H
+#define MULTEM_MATH_H
 
 #include <cstdlib>
 #include <algorithm>

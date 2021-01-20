@@ -66,24 +66,7 @@ target_link_libraries(multem PUBLIC
 
 # Install the python extension
 install(TARGETS multem LIBRARY DESTINATION lib)
-install(FILES include/multem.h DESTINATION include)
-install(FILES include/lin_alg_def.cuh DESTINATION include)
-install(FILES include/math.cuh DESTINATION include)
-install(FILES include/safe_types.cuh DESTINATION include)
-install(FILES include/multem/constants.h DESTINATION include/multem)
-install(FILES include/atom_data_api.h DESTINATION include)
-install(FILES include/input_multislice_api.h DESTINATION include)
-install(FILES include/output_multislice_api.h DESTINATION include)
-install(FILES include/amorp_spec_api.h DESTINATION include)
-install(FILES include/box_occ_api.h DESTINATION include)
-install(FILES include/cgpu_rand_api.h DESTINATION include)
-install(FILES include/atomic_data_api.h DESTINATION include)
-install(FILES include/stream_api.h DESTINATION include)
-install(FILES include/multem/config.h DESTINATION include/multem)
-install(FILES include/multem/error.h DESTINATION include/multem)
-install(FILES include/xtl_build.hpp DESTINATION include)
-install(FILES include/atom_cal_api.h DESTINATION include)
-install(FILES include/fxeg_data_api.h DESTINATION include)
+install(DIRECTORY include/multem DESTINATION include)
 
 ##############################################################################
 # Build the test executable

@@ -19,7 +19,7 @@
 #ifndef FXEG_DATA_H
 #define FXEG_DATA_H
 
-#include <fxeg_data_api.h>
+#include <multem/fxeg_data.h>
 #include "math.cuh"
 #include "types.cuh"
 

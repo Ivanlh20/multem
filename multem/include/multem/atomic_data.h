@@ -16,13 +16,13 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef ATOMIC_DATA_API_H
-#define ATOMIC_DATA_API_H
+#ifndef MULTEM_ATOMIC_DATA_H
+#define MULTEM_ATOMIC_DATA_H
 
 #include <string>
 #include <multem/config.h>
-#include "math.cuh"
-#include "safe_types.cuh"
+#include <multem/math.h>
+#include <multem/types.h>
 
 namespace mt
 {

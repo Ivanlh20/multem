@@ -1,10 +1,10 @@
-#ifndef MULTEM_ATOM_DATA_API
-#define MULTEM_ATOM_DATA_API
+#ifndef MULTEM_ATOM_DATA_H
+#define MULTEM_ATOM_DATA_H
 
 #include <multem/config.h>
-#include "math.cuh"
-#include "safe_types.cuh"
-#include "lin_alg_def.cuh"
+#include <multem/math.h>
+#include <multem/types.h>
+#include <multem/lin_alg_def.h>
 
 namespace mt {
 

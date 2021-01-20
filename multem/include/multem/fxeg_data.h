@@ -16,8 +16,8 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef FXEG_DATA_API_H
-#define FXEG_DATA_API_H
+#ifndef MULTEM_FXEG_DATA_H
+#define MULTEM_FXEG_DATA_H
 
 #include <vector>
 #include <multem/config.h>

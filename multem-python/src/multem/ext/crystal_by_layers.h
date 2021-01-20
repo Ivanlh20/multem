@@ -22,7 +22,7 @@
 #define MULTEM_PYTHON_CRYSTAL_BY_LAYERS
 
 #include <pybind11/pybind11.h>
-#include <multem.h>
+#include <multem/multem.h>
 #include <multem/ext/crystal_parameters.h>
 
 namespace py = pybind11;

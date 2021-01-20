@@ -16,30 +16,8 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef SAFE_TYPES_H
-#define SAFE_TYPES_H
-
-#if defined _WIN32 || defined __CYGWIN__
-  #ifdef BUILDING_DLL
-    #ifdef __GNUC__
-      #define DLL_PUBLIC __attribute__ ((dllexport))
-    #else
-      #define DLL_PUBLIC __declspec(dllexport)
-    #endif
-  #else
-    #ifdef __GNUC__
-      #define DLL_PUBLIC __attribute__ ((dllimport))
-    #else
-      #define DLL_PUBLIC __declspec(dllimport)
-    #endif
-  #endif
-#else
-  #if __GNUC__ >= 4
-    #define DLL_PUBLIC __attribute__ ((visibility ("default")))
-  #else
-    #define DLL_PUBLIC
-  #endif
-#endif
+#ifndef MULTEM_TYPES_H
+#define MULTEM_TYPES_H
 
 #ifndef DEVICE_CALLABLE
 	#ifdef __CUDACC__
@@ -60,9 +38,10 @@
 #include <thread>
 #include <mutex>
 
+#include <multem/config.h>
 #include <multem/constants.h>
-#include "math.cuh"
-#include "lin_alg_def.cuh"
+#include <multem/math.h>
+#include <multem/lin_alg_def.h>
 
 using std::vector;
 
@@ -898,6 +877,8 @@ namespace mt
 						}
 					}
 					break;
+          case eDST_Closest:
+          break;
 				}
 				return pn;
 			}

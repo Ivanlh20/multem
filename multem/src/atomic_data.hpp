@@ -24,7 +24,7 @@
 #endif // _MSC_VER
 
 #include <string>
-#include <atomic_data_api.h>
+#include <multem/atomic_data.h>
 #include "math.cuh"
 #include "types.cuh"
 #include "atomic_fcns_mt.hpp"

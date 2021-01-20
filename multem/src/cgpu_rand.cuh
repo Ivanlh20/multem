@@ -19,7 +19,7 @@
 #ifndef CGPU_RAND_H
 #define CGPU_RAND_H
 
-#include <cgpu_rand_api.h>
+#include <multem/cgpu_rand.h>
 //#include <random>
 //
 //#include "math.cuh"

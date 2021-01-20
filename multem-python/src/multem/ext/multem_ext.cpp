@@ -21,7 +21,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/complex.h>
 
-#include <multem.h>
+#include <multem/multem.h>
 #include <multem/ext/add_amorp_lay.h>
 #include <multem/ext/amorp_lay_info.h>
 #include <multem/ext/amorp_spec.h>
