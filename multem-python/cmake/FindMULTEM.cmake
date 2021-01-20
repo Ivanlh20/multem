@@ -45,7 +45,7 @@ if( MULTEM_ROOT )
   #find includes
   find_path(
     MULTEM_INCLUDES
-    NAMES "multem.h"
+    NAMES "multem/multem.h"
     PATHS ${MULTEM_ROOT}
     PATH_SUFFIXES "include"
     NO_DEFAULT_PATH
@@ -61,7 +61,7 @@ else()
 
   find_path(
     MULTEM_INCLUDES
-    NAMES "multem.h"
+    NAMES "multem/multem.h"
     PATHS ${PKG_MULTEM_INCLUDE_DIRS} ${INCLUDE_INSTALL_DIR}
   )
 
