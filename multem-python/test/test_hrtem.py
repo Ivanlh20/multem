@@ -1,17 +1,17 @@
 import multem
 import numpy
 import time
-from multem.cu001_crystal import cu001_crystal
+from multem.crystalline_materials import Cu001_xtl
 
 
 def test_hrtem():
     # print("GPU available: %s" % multem.is_gpu_available())
-
-    input_multislice = multem.Input_Multislice()
     system_conf = multem.System_Configuration()
 
     system_conf.precision = "float"
     system_conf.device = "device"
+
+    input_multislice = multem.Input_Multislice(system_conf)
 
     # Set simulation experiment
     input_multislice.simulation_type = "HRTEM"
@@ -51,7 +51,7 @@ def test_hrtem():
         b,
         c,
         input_multislice.spec_dz,
-    ) = cu001_crystal(na, nb, nc, ncu, rms3d)
+    ) = Cu001_xtl(na, nb, nc, ncu, rms3d)
 
     # Set the amorphous layers
     input_multislice.spec_amorp = [(0, 0, 2.0)]
@@ -104,7 +104,7 @@ def test_hrtem():
 
     # Do the simulation
     print(1)
-    output_multislice = multem.tem_simulation(input_multislice, system_conf)
+    output_multislice = multem.tem_simulation(input_multislice)
     print(2)
 
 

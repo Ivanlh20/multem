@@ -42,9 +42,9 @@ namespace pybind11 { namespace detail {
       if (py::isinstance<py::tuple>(src)) {
         py::tuple t = py::cast<py::tuple>(src);
         if (py::len(t) == 3) {
-          value.x = py::cast<double>(t[0]);
-          value.y = py::cast<double>(t[1]);
-          value.z = py::cast<double>(t[2]);
+          value.x = py::cast<T>(t[0]);
+          value.y = py::cast<T>(t[1]);
+          value.z = py::cast<T>(t[2]);
           return true;
         }
       }

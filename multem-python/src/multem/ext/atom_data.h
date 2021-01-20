@@ -236,6 +236,13 @@ namespace pybind11 { namespace detail {
         .release();
     }
   };
+  
+  py::object Atom_Data_constructor(const std::string &dtype) {
+    MULTEM_ASSERT(dtype == "float" || dtype == "double");
+    return (dtype == "float"
+      ? py::cast(mt::Atom_Data<float>())
+      : py::cast(mt::Atom_Data<double>()));
+  }
 
 }}  // namespace pybind11::detail
 
@@ -345,6 +352,12 @@ void wrap_atom_data(py::module_ m, const char *name) {
 }
 
 void export_atom_data(py::module_ m) {
+  
+  m.def(
+      "Atom_Data", 
+      &py::detail::Atom_Data_constructor, 
+      py::arg("dtype") = "double");
+  
   wrap_atom<float>(m, "AtomList_f");
   wrap_atom<double>(m, "AtomList_d");
   wrap_atom_data<float>(m, "Atom_Data_f");

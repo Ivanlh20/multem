@@ -68,6 +68,13 @@ namespace pybind11 { namespace detail {
       return self;
     }
   };
+  
+  py::object Detector_constructor(const std::string &dtype) {
+    MULTEM_ASSERT(dtype == "float" || dtype == "double");
+    return (dtype == "float"
+      ? py::cast(mt::Detector<float, mt::e_host>())
+      : py::cast(mt::Detector<double, mt::e_host>()));
+  }
 
 }}  // namespace pybind11::detail
 
@@ -97,6 +104,12 @@ void wrap_detector(py::module_ m, const char *name) {
 }
 
 void export_detector(py::module_ m) {
+
+  m.def(
+      "Detector", 
+      &py::detail::Detector_constructor, 
+      py::arg("dtype") = "double");
+
   wrap_detector<float>(m, "Detector_f");
   wrap_detector<double>(m, "Detector_d");
 }

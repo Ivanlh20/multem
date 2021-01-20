@@ -218,7 +218,7 @@ namespace mt {
 
 
     template <typename T, eDevice dev>
-    mt::Output_Multislice<T> microscope_abberations_internal(Input_Multislice<T>& input_multislice) {
+    mt::Output_Multislice<T> microscope_aberrations_internal(Input_Multislice<T>& input_multislice) {
 
       // Ensure we have the correct function
       MULTEM_ASSERT(input_multislice.system_conf.device == dev);
@@ -494,11 +494,11 @@ namespace mt {
   }
   
   template <typename T>
-  mt::Output_Multislice<T> microscope_abberations(Input_Multislice<T>& input_multislice) {
+  mt::Output_Multislice<T> microscope_aberrations(Input_Multislice<T>& input_multislice) {
     eDevice dev = input_multislice.system_conf.device;
     return (dev == mt::e_device 
-        ? detail::microscope_abberations_internal<T, mt::e_device>(input_multislice)
-        : detail::microscope_abberations_internal<T, mt::e_host>(input_multislice));
+        ? detail::microscope_aberrations_internal<T, mt::e_device>(input_multislice)
+        : detail::microscope_aberrations_internal<T, mt::e_host>(input_multislice));
   }
   
   template <typename T>
@@ -584,8 +584,8 @@ namespace mt {
   template Output_Multislice<float> incident_wave<float>(Input_Multislice<float>&);
   template Output_Multislice<double> incident_wave<double>(Input_Multislice<double>&);
   
-  template Output_Multislice<float> microscope_abberations<float>(Input_Multislice<float>&);
-  template Output_Multislice<double> microscope_abberations<double>(Input_Multislice<double>&);
+  template Output_Multislice<float> microscope_aberrations<float>(Input_Multislice<float>&);
+  template Output_Multislice<double> microscope_aberrations<double>(Input_Multislice<double>&);
   
   template Output_Multislice<float> projected_potential<float>(Input_Multislice<float>&);
   template Output_Multislice<double> projected_potential<double>(Input_Multislice<double>&);

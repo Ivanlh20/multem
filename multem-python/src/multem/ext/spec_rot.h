@@ -23,31 +23,46 @@
 
 #include <pybind11/pybind11.h>
 #include <multem.h>
+#include <multem/ext/atom_data.h>
 
 namespace py = pybind11;
 
 namespace mt {
 
-template <typename T>
-void spec_rot(Atom_Data<T> &atoms,
-              T theta,
-              mt::r3d<T> u0,
-              mt::eRot_Point_Type &rot_point_type,
-              mt::r3d<T> p0) {
-  u0.normalized();
+  template <typename T>
+  void spec_rot(Atom_Data<T> &atoms,
+                T theta,
+                mt::r3d<T> u0,
+                mt::eRot_Point_Type &rot_point_type,
+                mt::r3d<T> p0) {
+    u0.normalized();
 
-  if (rot_point_type == mt::eRPT_geometric_center) {
-    p0 = r3d<T>(atoms.x_mean, atoms.y_mean, atoms.z_mean);
+    if (rot_point_type == mt::eRPT_geometric_center) {
+      p0 = r3d<T>(atoms.x_mean, atoms.y_mean, atoms.z_mean);
+    }
+
+    mt::rotate_atoms(atoms, (T)(theta * mt::c_deg_2_rad), u0, p0);
   }
-
-  mt::rotate_atoms(atoms, (T)(theta * mt::c_deg_2_rad), u0, p0);
-}
+  
+  template <typename T>
+  Atom_Data<T> spec_rot2(const std::vector<Atom<T>> &spec_atoms,
+                 T theta,
+                 r3d<T> u0,
+                 eRot_Point_Type &rot_point_type,
+                 r3d<T> p0) {
+    Atom_Data<T> atoms;
+    py::detail::Helpers<Atom_Data<T>>::set_spec_atoms_internal(atoms, spec_atoms);
+    spec_rot(atoms, theta, u0, rot_point_type, p0);
+    return atoms;
+  }
 
 }  // namespace mt
 
 void export_spec_rot(py::module_ m) {
   m.def("spec_rot", &mt::spec_rot<float>);
   m.def("spec_rot", &mt::spec_rot<double>);
+  m.def("spec_rot", &mt::spec_rot2<float>);
+  m.def("spec_rot", &mt::spec_rot2<double>);
 }
 
 #endif

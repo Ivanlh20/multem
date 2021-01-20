@@ -60,14 +60,21 @@ namespace pybind11 { namespace detail {
     }
   };
 
+  py::object Scanning_constructor(const std::string &dtype) {
+    MULTEM_ASSERT(dtype == "float" || dtype == "double");
+    return (dtype == "float"
+      ? py::cast(mt::Scanning<float>())
+      : py::cast(mt::Scanning<double>()));
+  }
+
 }}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_scanning(py::module_ m) {
+void wrap_scanning(py::module_ m, const char *name) {
   typedef mt::Scanning<T> Type;
 
   // Wrap the mt::Input class
-  py::class_<Type>(m, "Scanning")
+  py::class_<Type>(m, name)
     .def(py::init<>())
     .def_readwrite("type", &Type::type)
     .def_readwrite("pbc", &Type::pbc)
@@ -82,7 +89,14 @@ void wrap_scanning(py::module_ m) {
 }
 
 void export_scanning(py::module_ m) {
-  wrap_scanning<double>(m);
+
+  m.def(
+      "Scanning", 
+      &py::detail::Scanning_constructor, 
+      py::arg("dtype") = "double");
+
+  wrap_scanning<float>(m, "Scanning_f");
+  wrap_scanning<double>(m, "Scanning_d");
 }
 
 #endif

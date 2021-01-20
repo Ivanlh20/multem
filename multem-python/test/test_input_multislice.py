@@ -3,20 +3,21 @@ import multem
 import numpy
 import pickle
 
+test_data = ["float", "double"]
 
-def test_input_multislice_standard():
 
-    input = multem.Input_Multislice()
+@pytest.mark.parametrize("dtype", test_data)
+def test_input_multislice_standard(dtype):
 
     system_conf = multem.System_Configuration()
     system_conf.device = "device"
-    system_conf.precision = "float"
+    system_conf.precision = dtype
     system_conf.cpu_ncores = 1
     system_conf.cpu_nthread = 2
     system_conf.gpu_device = 3
     system_conf.gpu_nstream = 4
 
-    input.system_conf = system_conf
+    input = multem.Input_Multislice(system_conf)
 
     input.interaction_model = "Multislice"
     input.potential_type = "Lobato_0_12"
@@ -56,6 +57,9 @@ def test_input_multislice_standard():
     input.theta = 4.1
     input.phi = 5.9
 
+    input.grid_2d.nx = 1000
+    input.grid_2d.ny = 2000
+
     input.illumination_model = "Partial_Coherent"
     input.temporal_spatial_incoh = "Temporal_Spatial"
 
@@ -79,7 +83,7 @@ def test_input_multislice_standard():
 
     def check():
         assert input.system_conf.device.name == "device"
-        assert input.system_conf.precision.name == "float"
+        assert input.system_conf.precision.name == dtype
         assert input.system_conf.cpu_ncores == 1
         assert input.system_conf.cpu_nthread == 2
         assert input.system_conf.gpu_device == 3
@@ -96,6 +100,9 @@ def test_input_multislice_standard():
         assert input.pn_nconf == 20
         assert input.pn_dim == (1, 1, 1)
         assert input.pn_seed == 40
+
+        assert input.grid_2d.nx == 1000
+        assert input.grid_2d.ny == 2000
 
         assert input.fp_dist == 10
         assert input.fp_iconf_0 == 11
@@ -153,10 +160,17 @@ def test_input_multislice_standard():
     check()
 
 
-def test_input_multislice_extended():
-    pass
+@pytest.mark.parametrize("dtype", test_data)
+def test_input_multislice_extended(dtype):
+    system_conf = multem.System_Configuration()
+    system_conf.device = "device"
+    system_conf.precision = dtype
+    system_conf.cpu_ncores = 1
+    system_conf.cpu_nthread = 2
+    system_conf.gpu_device = 3
+    system_conf.gpu_nstream = 4
 
-    input = multem.Input_Multislice()
+    input = multem.Input_Multislice(system_conf)
 
     input.spec_atoms = [(1, 2, 3, 4, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8, 9)]
 
@@ -289,8 +303,8 @@ def test_input_multislice_extended():
     input.output_area_iy_e = 40
 
     def check():
-        assert numpy.array(input.spec_atoms) == pytest.approx(
-            numpy.array([(1, 2, 3, 4, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8, 9)])
+        assert input.spec_atoms == pytest.approx(
+            [(1, 2, 3, 4, 5, 6, 7, 8), (2, 3, 4, 5, 6, 7, 8, 9)]
         )
 
         assert input.spec_dz == pytest.approx(50.1)
@@ -305,7 +319,9 @@ def test_input_multislice_extended():
         assert input.spec_cryst_c == pytest.approx(140.1)
         assert input.spec_cryst_x0 == pytest.approx(150.1)
         assert input.spec_cryst_y0 == pytest.approx(160.1)
-        assert input.spec_amorp == pytest.approx([(0.1, 0.2, 0.3), (0.4, 0.5, 0.6)])
+        assert input.spec_amorp == pytest.approx(
+            numpy.array([(0.1, 0.2, 0.3), (0.4, 0.5, 0.6)])
+        )
 
         assert input.nx == 1
         assert input.ny == 2

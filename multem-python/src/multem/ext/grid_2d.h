@@ -83,15 +83,22 @@ namespace pybind11 { namespace detail {
       return self;
     }
   };
+  
+  py::object Grid_2d_constructor(const std::string &dtype) {
+    MULTEM_ASSERT(dtype == "float" || dtype == "double");
+    return (dtype == "float"
+      ? py::cast(mt::Grid_2d<float>())
+      : py::cast(mt::Grid_2d<double>()));
+  }
 
 }}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_grid_2d(py::module_ m) {
+void wrap_grid_2d(py::module_ m, const char *name) {
   typedef mt::Grid_2d<T> Type;
 
   // Wrap the mt::Input class
-  py::class_<Type>(m, "Grid_2d")
+  py::class_<Type>(m, name)
     .def(py::init<>())
     .def_readwrite("nx", &Type::nx)
     .def_readwrite("ny", &Type::ny)
@@ -115,7 +122,14 @@ void wrap_grid_2d(py::module_ m) {
 }
 
 void export_grid_2d(py::module_ m) {
-  wrap_grid_2d<double>(m);
+
+  m.def(
+      "Grid_2d", 
+      &py::detail::Grid_2d_constructor, 
+      py::arg("dtype") = "double");
+
+  wrap_grid_2d<float>(m, "Grid_2d_f");
+  wrap_grid_2d<double>(m, "Grid_2d_d");
 }
 
 #endif

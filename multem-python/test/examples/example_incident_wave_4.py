@@ -8,16 +8,15 @@ import test.data
 
 def run():
 
-    ##################### Set system configuration #####################
     system_conf = multem.System_Configuration()
     system_conf.precision = "float"
     system_conf.device = "device"
     system_conf.cpu_nthread = 4
     system_conf.gpu_device = 0
 
-    input_multem = multem.Input_Multislice(system_conf)  # Load default values
+    input_multem = multem.Input_Multislice(system_conf)
 
-    input_multem.E_0 = 300  # Acceleration Voltage (keV)
+    input_multem.E_0 = 300
     input_multem.theta = 0.0
     input_multem.phi = 0.0
 
@@ -27,47 +26,30 @@ def run():
     input_multem.spec_lx = 50
     input_multem.spec_ly = 50
 
-    ########################### Incident wave ##########################
-    input_multem.iw_type = (
-        2  # 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
-    )
+    input_multem.iw_type = "Convergent_Wave"
     input_multem.iw_psi = list(
         test.data.read_psi_0(input_multem.nx, input_multem.ny).flatten()
-    )  # user define incident wave
-    input_multem.iw_x = [0.5 * input_multem.spec_lx]  # x position
-    input_multem.iw_y = [0.5 * input_multem.spec_ly]  # y position
-    input_multem.iw_x = list(10 + numpy.array([0, 25, 0, 25]))  # x position
-    input_multem.iw_y = list(10 + numpy.array([5, 5, 25, 25]))  # y position
-    # input_multem.iw_x = 10+[0, 25]    # x position
-    # input_multem.iw_y = 10+[5, 25]    # y position
-    ######################## condenser lens ########################
-    input_multem.cond_lens_m = 0  # Vortex momentum
-    input_multem.cond_lens_c_10 = -14.0312  # Defocus (�)
-    input_multem.cond_lens_c_30 = 1e-03  # Third order spherical aberration (mm)
-    input_multem.cond_lens_c_50 = 0.00  # Fifth order spherical aberration (mm)
-    input_multem.cond_lens_c_12 = 0.0  # Twofold astigmatism (�)
-    input_multem.cond_lens_phi_12 = (
-        0.0  # Azimuthal angle of the twofold astigmatism (�)
     )
-    input_multem.cond_lens_c_23 = 0.0  # Threefold astigmatism (�)
-    input_multem.cond_lens_phi_23 = (
-        0.0  # Azimuthal angle of the threefold astigmatism (�)
-    )
-    input_multem.cond_lens_inner_aper_ang = 0  # Inner aperture (mrad)
-    input_multem.cond_lens_outer_aper_ang = 21.0  # Outer aperture (mrad)
-    input_multem.cond_lens_ti_sigma = 32  # standard deviation (�)
-    input_multem.cond_lens_ti_npts = (
-        10  # # of integration points. It will be only used if illumination_model=4
-    )
-    input_multem.cond_lens_si_sigma = (
-        0.2  # standard deviation: For parallel ilumination(�^-1) otherwise (�)
-    )
-    input_multem.cond_lens_si_rad_npts = (
-        8  # # of integration points. It will be only used if illumination_model=4
-    )
-    input_multem.cond_lens_zero_defocus_type = (
-        "First"
-    )  # eZDT_First = 1, eZDT_User_Define = 4
+    input_multem.iw_x = [0.5 * input_multem.spec_lx]
+    input_multem.iw_y = [0.5 * input_multem.spec_ly]
+    input_multem.iw_x = list(10 + numpy.array([0, 25, 0, 25]))
+    input_multem.iw_y = list(10 + numpy.array([5, 5, 25, 25]))
+
+    input_multem.cond_lens_m = 0
+    input_multem.cond_lens_c_10 = -14.0312
+    input_multem.cond_lens_c_30 = 1e-03
+    input_multem.cond_lens_c_50 = 0.00
+    input_multem.cond_lens_c_12 = 0.0
+    input_multem.cond_lens_phi_12 = 0.0
+    input_multem.cond_lens_c_23 = 0.0
+    input_multem.cond_lens_phi_23 = 0.0
+    input_multem.cond_lens_inner_aper_ang = 0
+    input_multem.cond_lens_outer_aper_ang = 21.0
+    input_multem.cond_lens_ti_sigma = 32
+    input_multem.cond_lens_ti_npts = 10
+    input_multem.cond_lens_si_sigma = 0.2
+    input_multem.cond_lens_si_rad_npts = 8
+    input_multem.cond_lens_zero_defocus_type = "First"
     input_multem.cond_lens_zero_defocus_plane = 0
     input_multem.cond_lens_c_10 = multem.scherzer_defocus(
         input_multem.E_0, input_multem.cond_lens_c_30
@@ -76,23 +58,8 @@ def run():
     input_multem.cond_lens_c_10 = input_multem.cond_lens_c_10
 
     st = time.perf_counter()
-    output_incident_wave = multem.incident_wave
+    output_incident_wave = multem.incident_wave(input_multem)
     print("Time: %.4f seconds" % (time.perf_counter() - st))
-
-    # psi_0 = flipud(output_incident_wave.psi_0)
-
-    # sub#plot(1, 2, 1)
-    # imagesc(output_incident_wave.x, output_incident_wave.y, abs(psi_0)**2)
-    # title('intensity')
-    # #axis image
-    # #colormap gray
-
-    # sub#plot(1, 2, 2)
-    # imagesc(output_incident_wave.x, output_incident_wave.y, angle(psi_0))
-    # title('phase')
-    # #axis image
-    # #colormap gray
-    # pause(0.2)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,6 @@ test_data = [
     "test.examples.example_add_amorphous_layer",
     "test.examples.example_amorphous_specimen",
     "test.examples.example_beam_self_interaction",
-    "test.examples.example_check_STEM_input",
     "test.examples.example_crystal_by_layers",
     "test.examples.example_feg",
     "test.examples.example_fxg",
