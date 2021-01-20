@@ -16,16 +16,8 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#include "types.cuh"
+#include <multem/multem.h>
 #include "matlab_types.cuh"
-#include "traits.cuh"
-#include "stream.cuh"
-#include "fft.cuh"
-#include "atomic_data_mt.hpp"
-#include "input_multislice.cuh"
-#include "output_multislice.hpp"
-
-#include "microscope_effects.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -155,12 +147,15 @@ void set_struct_microscope_aberrations(TOutput_Multislice &output_multislice, mx
 
 	mx_output_multislice = mxCreateStructArray(2, dims_output_multislice, number_of_fields_output_multislice, field_names_output_multislice);
 
-	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx);
-	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y);
+  auto x = output_multislice.get_x();
+  auto y = output_multislice.get_y();
+  auto m2psi_tot = output_multislice.get_m2psi_tot();
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx());
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy());
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, x.size(), x);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, y.size(), y);
 	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thick", 1, output_multislice.thick.size(), output_multislice.thick);
-	mx_create_set_matrix_field<rmatrix_c>(mx_output_multislice, "m2psi", output_multislice.ny, output_multislice.nx, output_multislice.m2psi_tot[0]);
+	mx_create_set_matrix_field<rmatrix_c>(mx_output_multislice, "m2psi", output_multislice.ny(), output_multislice.nx(), m2psi_tot[0]);
 }
 
 template <class T, mt::eDevice dev>
@@ -170,23 +165,7 @@ void run_microscope_aberrations(mt::System_Configuration &system_conf, const mxA
 	read_input_multislice(mx_input_multislice, input_multislice);
 	input_multislice.system_conf = system_conf;
 
-	mt::Stream<dev> stream(system_conf.nstream);
-	mt::FFT<T, dev> fft_2d;
-	fft_2d.create_plan_2d(input_multislice.grid_2d.ny, input_multislice.grid_2d.nx, system_conf.nstream);
-
-	mt::Microscope_Effects<T, dev> microscope_effects;
-	microscope_effects.set_input_data(&input_multislice, &stream, &fft_2d);
-
-	mt::Output_Multislice<T> output_multislice;
-	output_multislice.set_input_data(&input_multislice);
-
-	microscope_effects(output_multislice);
-
-	stream.synchronize();
-
-	output_multislice.gather();
-	output_multislice.clean_temporal();
-	fft_2d.cleanup();
+  auto output_multislice = mt::microscope_aberrations(input_multislice);
 
 	set_struct_microscope_aberrations(output_multislice, mx_output_multislice);
 }

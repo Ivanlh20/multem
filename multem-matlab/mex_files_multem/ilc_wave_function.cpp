@@ -16,19 +16,8 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#include "types.cuh"
+#include <multem/multem.h>
 #include "matlab_types.cuh"
-#include "traits.cuh"
-#include "stream.cuh"
-#include "fft.cuh"
-#include "atomic_data_mt.hpp"
-#include "slicing.hpp"
-#include "input_multislice.cuh"
-#include "output_multislice.hpp"
-#include "cpu_fcns.hpp"
-#include "gpu_fcns.cuh"
-#include "cgpu_fcns.cuh"
-#include "wave_function.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -75,7 +64,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	auto ct_y0 = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_y0");
 
 	auto mx_spec_amorp = mxGetField(mx_input_multislice, 0, "spec_amorp");
-	mt::Vector<mt::Amorp_Lay_Info<T_r>, mt::e_host> amorp_lay_info(mxGetN(mx_spec_amorp));
+  std::vector<mt::Amorp_Lay_Info<T_r>> amorp_lay_info(mxGetN(mx_spec_amorp));
 	for (auto i = 0; i < amorp_lay_info.size(); i++)
 	{
 		amorp_lay_info[i].z_0 = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_0");
@@ -102,7 +91,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	if (!input_multislice.is_whole_spec() && full)
 	{
 		auto thick = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "thick");
-		mt::assign(thick, input_multislice.thick);
+    thick.assign(input_multislice.thick.begin(), input_multislice.thick.end());
 	}
 
 	/************************ Potential slicing ************************/
@@ -221,10 +210,13 @@ void set_struct_wave_function(TOutput_Multislice &output_multislice, mxArray *&m
 
 	mx_output_multislice = mxCreateStructArray(2, dims_output_multislice, number_of_fields_output_multislice, field_names_output_multislice);
 
-	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx);
-	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y);
+  auto x = output_multislice.get_x();
+  auto y = output_multislice.get_y();
+  auto psi_coh = output_multislice.get_psi_coh();
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx());
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy());
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, x.size(), x);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, y.size(), y);
 	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thick", 1, output_multislice.thick.size(), output_multislice.thick);
 
 	mx_field_psi = mxCreateStructArray(2, dims_psi, number_of_fields_psi, field_names_psi);
@@ -232,7 +224,7 @@ void set_struct_wave_function(TOutput_Multislice &output_multislice, mxArray *&m
 
 	for (auto ithk = 0; ithk < output_multislice.thick.size(); ithk++)
 	{
-		mx_create_set_matrix_field<rmatrix_c>(mx_field_psi, ithk, "psi_coh", output_multislice.ny, output_multislice.nx, output_multislice.psi_coh[ithk]);
+		mx_create_set_matrix_field<rmatrix_c>(mx_field_psi, ithk, "psi_coh", output_multislice.ny(), output_multislice.nx(), psi_coh[ithk]);
 	}
 }
 
@@ -243,26 +235,7 @@ void run_wave_function(mt::System_Configuration &system_conf, const mxArray *mx_
 	read_input_multislice(mx_input_multislice, input_multislice);
 	input_multislice.system_conf = system_conf;
 
-	mt::Stream<dev> stream(system_conf.nstream);
-	mt::FFT<T, dev> fft_2d;
-	fft_2d.create_plan_2d(input_multislice.grid_2d.ny, input_multislice.grid_2d.nx, system_conf.nstream);
-
-	mt::Wave_Function<T, dev> wave_function;
-	wave_function.set_input_data(&input_multislice, &stream, &fft_2d);
-
-	mt::Output_Multislice<T> output_multislice;
-	output_multislice.set_input_data(&input_multislice);
-
-	wave_function.move_atoms(input_multislice.pn_nconf);
-	wave_function.set_incident_wave(wave_function.psi_z);
-	wave_function.psi(1.0, wave_function.psi_z, output_multislice);
-
-	stream.synchronize();
-
-	output_multislice.gather();
-	output_multislice.clean_temporal();
-
-	fft_2d.cleanup();
+  auto output_multislice = mt::wave_function(input_multislice);
 
 	set_struct_wave_function(output_multislice, mx_output_multislice);
 }

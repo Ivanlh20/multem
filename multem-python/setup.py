@@ -16,7 +16,7 @@ def main():
     setup(
         package_dir={"multem": "src"},
         packages=["multem"],
-        install_requires=["numpy"],
+        install_requires=["numpy", "scipy"],
         setup_requires=["pytest-runner"],
         tests_require=tests_require,
         test_suite="test",

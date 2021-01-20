@@ -17,7 +17,7 @@
  */
 
 #include <algorithm>
-#include "fxeg_data.hpp"
+#include <multem/multem.h>
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -28,7 +28,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	int ng;
 	double g[1024], g2[1024], fxg[1024], feg[1024];
-	fxeg_Tabulated_Data fxeg_data;
+  mt::fxeg_Tabulated_Data fxeg_data;
 
 	auto Z = mx_get_scalar<int>(prhs[0]); 
 	auto type = mx_get_scalar<int>(prhs[1]); 

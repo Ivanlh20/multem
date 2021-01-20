@@ -23,11 +23,11 @@
 #include <type_traits>
 #include <cmath>
 
-#include "types.cuh"
-#include "traits.cuh"
-#include "lin_alg_def.cuh"
+#include <multem/multem.h>
+/* #include "traits.cuh" */
+/* #include "lin_alg_def.cuh" */
 #include "matlab_types.cuh"
-#include "stream.cuh"
+/* #include "stream.cuh" */
 #include <mex.h>
 
 using mt::rmatrix_r;
@@ -228,8 +228,7 @@ const char *field_name, const int &rows, const int &cols, TVector &field_value)
 {
 	mxArray *mxfield;
 	T matrix = mx_create_matrix<T>(rows, cols, mxfield);
-	mt::Stream<mt::e_host> stream(1);
-	mt::copy_to_host(stream, field_value, matrix);
+  matrix.assign(field_value.begin(), field_value.end());
 	mxSetField(mx_struct, idx, field_name, mxfield);
 }
 

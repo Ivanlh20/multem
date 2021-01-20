@@ -21,14 +21,14 @@
  */
 
 #include <iostream>
-#include <multem/multem.h>
-#include <types.cuh>
-#include <input_multislice.cuh>
-#include <output_multislice.hpp>
-#include <tem_simulation.cuh>
+#include "types.cuh"
+#include "input_multislice.cuh"
+#include "output_multislice.hpp"
+#include "tem_simulation.cuh"
 #include "amorp_spec.hpp"
 #include "fxeg_data.hpp"
 #include "atomic_data.hpp"
+#include <multem/multem.h>
 
 namespace mt {
   

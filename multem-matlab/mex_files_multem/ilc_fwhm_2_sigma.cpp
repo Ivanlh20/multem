@@ -16,8 +16,7 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#include "matlab_types.cuh"
-#include "cgpu_fcns.cuh"
+#include <multem/multem.h>
 
 #include <mex.h>
 #include "matlab_mex.cuh"
