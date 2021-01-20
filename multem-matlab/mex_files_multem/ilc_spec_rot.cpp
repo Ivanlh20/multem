@@ -16,11 +16,8 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#include "types.cuh"
+#include <multem/multem.h>
 #include "matlab_types.cuh"
-#include "traits.cuh"
-#include "atomic_data_mt.hpp"
-#include "input_multislice.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"

@@ -18,15 +18,7 @@
 
 #include <algorithm>
 
-#include "types.cuh"
-#include "matlab_types.cuh"
-#include "traits.cuh"
-#include "cgpu_fcns.cuh"
-#include "input_multislice.cuh"
-#include "output_multislice.hpp"
-#include "atomic_data_mt.hpp"
-#include "tem_simulation.cuh"
-#include "timing.cuh"
+#include <multem/multem.h>
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -79,7 +71,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 		auto ct_y0 = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_y0");
 
 		auto mx_spec_amorp = mxGetField(mx_input_multislice, 0, "spec_amorp");
-		mt::Vector<mt::Amorp_Lay_Info<T_r>, mt::e_host> amorp_lay_info(mxGetN(mx_spec_amorp));
+    std::vector<mt::Amorp_Lay_Info<T_r>> amorp_lay_info(mxGetN(mx_spec_amorp));
 		for (auto i = 0; i < amorp_lay_info.size(); i++)
 		{
 			amorp_lay_info[i].z_0 = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_0");
@@ -106,7 +98,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 		if (!input_multislice.is_whole_spec() && full)
 		{
 			auto thick = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "thick");
-			mt::assign(thick, input_multislice.thick);
+			thick.assign(input_multislice.thick.begin(), input_multislice.thick.end());
 		}
 
 		/************************ Potential slicing ************************/
@@ -127,7 +119,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	if (input_multislice.is_user_define_wave() && full)
 	{
 		auto iw_psi = mx_get_matrix_field<rmatrix_c>(mx_input_multislice, "iw_psi");
-		mt::assign(iw_psi, input_multislice.iw_psi);
+		iw_psi.assign(input_multislice.iw_psi.begin(), input_multislice.iw_psi.end());
 	}
 
 	// read beam_x and beam_y
@@ -308,7 +300,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 					// mt::scale(input_multislice.detector.x[i], 1.0/lambda);
 
 					auto fx = mx_get_matrix_field<rmatrix_r>(mx_detector, i, "fx");
-					mt::assign(fx, input_multislice.detector.fx[i]);
+		      fx.assign(input_multislice.detector.fx[i].begin(), input_multislice.detector.fx[i].end());
 				}
 			}
 		}
@@ -328,7 +320,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 					// mt::fft2_shift(input_multislice.grid_2d, input_multislice.detector.R[i]);
 
 					auto fR = mx_get_matrix_field<rmatrix_r>(mx_detector, i, "fR");
-					mt::assign(fR, input_multislice.detector.fR[i]);
+		      fR.assign(input_multislice.detector.fR[i].begin(), input_multislice.detector.fR[i].end());
 				}
 			}
 		}
@@ -387,10 +379,12 @@ void set_struct_multislice(TOutput_Multislice &output_multislice, mxArray *&mx_o
 
 	mx_output_multislice = mxCreateStructArray(2, dims_output_multislice, number_of_fields_output_multislice, field_names_output_multislice);
 
-	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx);
-	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y);
+  auto x = output_multislice.get_x();
+  auto y = output_multislice.get_y();
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx());
+	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy());
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, x.size(), x);
+	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, y.size(), y);
 	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thick", 1, output_multislice.thick.size(), output_multislice.thick);
 
 	if (output_multislice.is_STEM() || output_multislice.is_EELS())
@@ -412,10 +406,12 @@ void set_struct_multislice(TOutput_Multislice &output_multislice, mxArray *&mx_o
 		// mwSize dims_detector[2] = {1, output_multislice.ndetector};
 		mwSize dims_detector[2];
 		dims_detector[0] = 1;
-		dims_detector[1] = output_multislice.ndetector;
+		dims_detector[1] = output_multislice.ndetector();
 
-		int nx = (output_multislice.scanning.is_line()) ? 1 : output_multislice.nx;
-		int ny = output_multislice.ny;
+		int nx = (output_multislice.scanning.is_line()) ? 1 : output_multislice.nx();
+		int ny = output_multislice.ny();
+    auto image_tot = output_multislice.get_image_tot();
+    auto image_coh = output_multislice.get_image_coh();
 		for (auto ithk = 0; ithk < output_multislice.thick.size(); ithk++)
 		{
 			mx_field_detector_tot = mxCreateStructArray(2, dims_detector, number_of_fields_detector, field_names_detector);
@@ -426,12 +422,12 @@ void set_struct_multislice(TOutput_Multislice &output_multislice, mxArray *&mx_o
 				mxSetField(mx_field_data, ithk, "image_coh", mx_field_detector_coh);
 			}
 
-			for (auto iDet = 0; iDet < output_multislice.ndetector; iDet++)
+			for (auto iDet = 0; iDet < output_multislice.ndetector(); iDet++)
 			{
-				mx_create_set_matrix_field<rmatrix_r>(mx_field_detector_tot, iDet, "image", ny, nx, output_multislice.image_tot[ithk].image[iDet]);
+				mx_create_set_matrix_field<rmatrix_r>(mx_field_detector_tot, iDet, "image", ny, nx, image_tot[ithk].image[iDet]);
 				if (output_multislice.pn_coh_contrib)
 				{
-					mx_create_set_matrix_field<rmatrix_r>(mx_field_detector_coh, iDet, "image", ny, nx, output_multislice.image_coh[ithk].image[iDet]);
+					mx_create_set_matrix_field<rmatrix_r>(mx_field_detector_coh, iDet, "image", ny, nx, image_coh[ithk].image[iDet]);
 				}
 			}
 		}
@@ -448,13 +444,15 @@ void set_struct_multislice(TOutput_Multislice &output_multislice, mxArray *&mx_o
 		mx_field_data = mxCreateStructArray(2, dims_data, number_of_fields_data, field_names_data);
 		mxSetField(mx_output_multislice, 0, "data", mx_field_data);
 
+    auto m2psi_tot = output_multislice.get_m2psi_tot();
+    auto psi_coh = output_multislice.get_psi_coh();
 		for (auto ithk = 0; ithk < output_multislice.thick.size(); ithk++)
 		{
 			if (!output_multislice.is_EWFS_EWRS_SC())
 			{
-				mx_create_set_matrix_field<rmatrix_r>(mx_field_data, ithk, "m2psi_tot", output_multislice.ny, output_multislice.nx, output_multislice.m2psi_tot[ithk]);
+				mx_create_set_matrix_field<rmatrix_r>(mx_field_data, ithk, "m2psi_tot", output_multislice.ny(), output_multislice.nx(), m2psi_tot[ithk]);
 			}
-			mx_create_set_matrix_field<rmatrix_c>(mx_field_data, ithk, "psi_coh", output_multislice.ny, output_multislice.nx, output_multislice.psi_coh[ithk]);
+			mx_create_set_matrix_field<rmatrix_c>(mx_field_data, ithk, "psi_coh", output_multislice.ny(), output_multislice.nx(), psi_coh[ithk]);
 		}
 	}
 	else
@@ -469,12 +467,14 @@ void set_struct_multislice(TOutput_Multislice &output_multislice, mxArray *&mx_o
 		mx_field_data = mxCreateStructArray(2, dims_data, number_of_fields_data, field_names_data);
 		mxSetField(mx_output_multislice, 0, "data", mx_field_data);
 
+    auto m2psi_tot = output_multislice.get_m2psi_tot();
+    auto m2psi_coh = output_multislice.get_m2psi_coh();
 		for (auto ithk = 0; ithk < output_multislice.thick.size(); ithk++)
 		{
-			mx_create_set_matrix_field<rmatrix_r>(mx_field_data, ithk, "m2psi_tot", output_multislice.ny, output_multislice.nx, output_multislice.m2psi_tot[ithk]);
+			mx_create_set_matrix_field<rmatrix_r>(mx_field_data, ithk, "m2psi_tot", output_multislice.ny(), output_multislice.nx(), m2psi_tot[ithk]);
 			if (output_multislice.pn_coh_contrib)
 			{
-				mx_create_set_matrix_field<rmatrix_r>(mx_field_data, ithk, "m2psi_coh", output_multislice.ny, output_multislice.nx, output_multislice.m2psi_coh[ithk]);
+				mx_create_set_matrix_field<rmatrix_r>(mx_field_data, ithk, "m2psi_coh", output_multislice.ny(), output_multislice.nx(), m2psi_coh[ithk]);
 			}
 		}
 	}
@@ -488,33 +488,9 @@ mxArray *&mx_output_multislice)
 	read_input_multislice(mx_input_multislice, input_multislice);
 	input_multislice.system_conf = system_conf;
 
-	mt::Stream<dev> stream(system_conf.nstream);
-
-	mt::FFT<T, dev> fft_2d;
-	fft_2d.create_plan_2d(input_multislice.grid_2d.ny, input_multislice.grid_2d.nx, system_conf.nstream);
-
-	mt::Multislice<T, dev> tem_simulation;
-	tem_simulation.set_input_data(&input_multislice, &stream, &fft_2d);
-
-	mt::Output_Multislice<T> output_multislice;
-	output_multislice.set_input_data(&input_multislice);
-
-	tem_simulation(output_multislice);
-	stream.synchronize();
-
-	output_multislice.gather();
-	output_multislice.clean_temporal();
-	fft_2d.cleanup();
+  auto output_multislice = mt::tem_simulation(input_multislice);
 
 	set_struct_multislice(output_multislice, mx_output_multislice);
-
-	auto err = cudaGetLastError();
-	if (err != cudaSuccess) {
-		mexPrintf("CUDA error: %s\n", cudaGetErrorString(err));
-	}
-	//auto t3 = time.elapsed_ms();
-	//mexPrintf("creation, execution, phase grating, deleting time = %7.5f, %7.5f, %7.5f, %7.5f\n", t1, t2, tx, t3);
-	//mexPrintf("send device = %d, get device = %d\n", system_conf.gpu_device, system_conf.get_device());
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])

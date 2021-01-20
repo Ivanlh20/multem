@@ -17,7 +17,7 @@
  */
 
 #include "matlab_types.cuh"
-#include "cgpu_fcns.cuh"
+#include <multem/multem.h>
 
 #include <mex.h>
 #include "matlab_mex.cuh"

@@ -23,7 +23,6 @@
 #include "types.cuh"
 #include "traits.cuh"
 #include "stream.cuh"
-#include "matlab_types.cuh"
 #include "atomic_data_mt.hpp"
 #include "input_multislice.cuh"
 #include "cpu_fcns.hpp"

@@ -16,9 +16,7 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#include "types.cuh"
-#include "atomic_data_mt.hpp"
-#include "xtl_build.hpp"
+#include <multem/multem.h>
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -26,7 +24,7 @@
 using mt::rmatrix_r;
 
 /*******************Matlab to layer unit cell*********************/
-void read_input_data(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, mt::Vector<mt::Atom_Data<double>, mt::e_host> &uLayer)
+void read_input_data(const mxArray *mxCrystal, int &na, int &nb, int &nc, double &a, double &b, double &c, std::vector<mt::Atom_Data<double>> &uLayer)
 {
 	na = mx_get_scalar_field<int>(mxCrystal, "na"); 
 	nb = mx_get_scalar_field<int>(mxCrystal, "nb");
@@ -53,7 +51,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	int na, nb, nc;
 	double a, b, c;
-	mt::Vector<mt::Atom_Data<double>, mt::e_host> uLayer;
+  std::vector<mt::Atom_Data<double>> uLayer;
 	mt::Atom_Data<double> atoms;
 	mt::Crystal_Spec<double> xtl_build;
 

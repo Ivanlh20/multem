@@ -16,12 +16,8 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#include "types.cuh"
+#include <multem/multem.h>
 #include "matlab_types.cuh"
-#include "traits.cuh"
-#include "atomic_data_mt.hpp"
-#include "input_multislice.cuh"
-#include "slicing.hpp"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -63,7 +59,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	auto ct_y0 = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_y0");
 
 	auto mx_spec_amorp = mxGetField(mx_input_multislice, 0, "spec_amorp");
-	mt::Vector<mt::Amorp_Lay_Info<T_r>, mt::e_host> amorp_lay_info(mxGetN(mx_spec_amorp));
+  std::vector<mt::Amorp_Lay_Info<T_r>> amorp_lay_info(mxGetN(mx_spec_amorp));
 	for(auto i = 0; i<amorp_lay_info.size(); i++)
 	{
 		amorp_lay_info[i].z_0 = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_0");
@@ -102,11 +98,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	read_input_multislice(prhs[0], input_multislice);
 
 	/***************************************************************************/
-	mt::Slicing<double> slicing;
-	slicing.set_input_data(&input_multislice, &(input_multislice.atoms));
+  auto z_plane = mt::spec_planes(input_multislice);
 
 	// /************************Output data**************************/
-	auto rplanes = mx_create_matrix<rmatrix_r>(slicing.z_plane.size(), 1, plhs[0]);
+	auto rplanes = mx_create_matrix<rmatrix_r>(z_plane.size(), 1, plhs[0]);
 
-	rplanes.assign(slicing.z_plane.begin(), slicing.z_plane.end());
+	rplanes.assign(z_plane.begin(), z_plane.end());
 }

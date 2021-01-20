@@ -46,6 +46,7 @@
 #include <multem/multem.h>
 #include <multem/output_multislice.h>
 #include <multem/stream.h>
+#include <multem/traits.h>
 #include <multem/types.h>
 #include <multem/xtl_build.h>
 

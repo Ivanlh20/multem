@@ -16,10 +16,8 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#include "types.cuh"
+#include <multem/multem.h>
 #include "matlab_types.cuh"
-#include "atomic_data_mt.hpp"
-#include "cpu_fcns.hpp"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -27,7 +25,7 @@
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 {
 	auto ratoms = mx_get_matrix<rmatrix_r>(prhs[0]);
-	auto r_max = mx_get_scalar<double>(prhs[1]);
+	auto r_max = mx_get_scalar<float>(prhs[1]);
 	auto nr = (nrhs>2)?mx_get_scalar<int>(prhs[2]):10;
 
 	/*******************************************************************/
@@ -41,6 +39,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 
 	mt::rdf_3d(atoms, r_max, nr, r, rdf);
 
-	thrust::copy(r.begin(), r.end(), rr_o.begin());
-	thrust::copy(rdf.begin(), rdf.end(), rrdf_o.begin());
+	std::copy(r.begin(), r.end(), rr_o.begin());
+	std::copy(rdf.begin(), rdf.end(), rrdf_o.begin());
 }

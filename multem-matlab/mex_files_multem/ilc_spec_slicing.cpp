@@ -16,12 +16,8 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#include "types.cuh"
+#include <multem/multem.h>
 #include "matlab_types.cuh"
-#include "traits.cuh"
-#include "atomic_data_mt.hpp"
-#include "spec.hpp"
-#include "input_multislice.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
@@ -63,7 +59,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	auto ct_y0 = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_y0");
 
 	auto mx_spec_amorp = mxGetField(mx_input_multislice, 0, "spec_amorp");
-	mt::Vector<mt::Amorp_Lay_Info<T_r>, mt::e_host> amorp_lay_info(mxGetN(mx_spec_amorp));
+  std::vector<mt::Amorp_Lay_Info<T_r>> amorp_lay_info(mxGetN(mx_spec_amorp));
 	for(auto i = 0; i<amorp_lay_info.size(); i++)
 	{
 		amorp_lay_info[i].z_0 = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_0");
@@ -102,35 +98,33 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mt::Input_Multislice<my_type> input_multislice;
 	read_input_multislice(prhs[0], input_multislice);
 
-	mt::Spec<my_type> spec;
-	spec.set_input_data(&input_multislice);
-	spec.move_atoms(input_multislice.pn_nconf);
+  auto spec = mt::spec_slicing(input_multislice);
+  auto& atoms = std::get<0>(spec);
+  auto& slice = std::get<1>(spec);
 
 	// /************************Output data**************************/
-	auto atomsM = mx_create_matrix<rmatrix_r>(spec.atoms.size(), 8, plhs[0]);
-	auto sliceM = mx_create_matrix<rmatrix_r>(spec.slicing.slice.size(), 6, plhs[1]);
+	auto atomsM = mx_create_matrix<rmatrix_r>(atoms.size(), 8, plhs[0]);
+	auto sliceM = mx_create_matrix<rmatrix_r>(slice.size(), 6, plhs[1]);
 
 	for(auto i = 0; i<atomsM.rows; i++)
 	{
-		atomsM.real[0*atomsM.rows+i] = spec.atoms.Z[i];
-		atomsM.real[1*atomsM.rows+i] = spec.atoms.x[i];
-		atomsM.real[2*atomsM.rows+i] = spec.atoms.y[i];
-		atomsM.real[3*atomsM.rows+i] = spec.atoms.z[i];
-		atomsM.real[4*atomsM.rows+i] = spec.atoms.sigma[i];
-		atomsM.real[5*atomsM.rows+i] = spec.atoms.occ[i];
-		atomsM.real[6*atomsM.rows+i] = spec.atoms.region[i];
-		atomsM.real[7*atomsM.rows+i] = spec.atoms.charge[i];
+		atomsM.real[0*atomsM.rows+i] = atoms.Z[i];
+		atomsM.real[1*atomsM.rows+i] = atoms.x[i];
+		atomsM.real[2*atomsM.rows+i] = atoms.y[i];
+		atomsM.real[3*atomsM.rows+i] = atoms.z[i];
+		atomsM.real[4*atomsM.rows+i] = atoms.sigma[i];
+		atomsM.real[5*atomsM.rows+i] = atoms.occ[i];
+		atomsM.real[6*atomsM.rows+i] = atoms.region[i];
+		atomsM.real[7*atomsM.rows+i] = atoms.charge[i];
 	}
 
 	for(auto i = 0; i<sliceM.rows; i++)
 	{
-		auto slice = spec.slicing.slice[i];
-
-		sliceM.real[0*sliceM.rows+i] = slice.z_0;
-		sliceM.real[1*sliceM.rows+i] = slice.z_e;
-		sliceM.real[2*sliceM.rows+i] = slice.z_int_0;
-		sliceM.real[3*sliceM.rows+i] = slice.z_int_e;
-		sliceM.real[4*sliceM.rows+i] = slice.iatom_0+1;
-		sliceM.real[5*sliceM.rows+i] = slice.iatom_e+1;
+		sliceM.real[0*sliceM.rows+i] = slice[i].z_0;
+		sliceM.real[1*sliceM.rows+i] = slice[i].z_e;
+		sliceM.real[2*sliceM.rows+i] = slice[i].z_int_0;
+		sliceM.real[3*sliceM.rows+i] = slice[i].z_int_e;
+		sliceM.real[4*sliceM.rows+i] = slice[i].iatom_0+1;
+		sliceM.real[5*sliceM.rows+i] = slice[i].iatom_e+1;
 	}
 }

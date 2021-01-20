@@ -16,10 +16,9 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#include "types.cuh"
+#include <multem/multem.h>
+#include <multem/types.h>
 #include "matlab_types.cuh"
-#include "atomic_data_mt.hpp"
-#include "amorp_spec.hpp"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
