@@ -18,8 +18,6 @@ def run():
     region = 0
     charge = 0
 
-    # Au = 79
-    # Z x y z sigma occupancy
     rmsd_3d = 0.085
 
     params.layers = [
@@ -43,9 +41,6 @@ def run():
     [atoms, lx, ly, lz, a, b, c, dz] = multem.crystalline_materials.SrTiO3001_xtl(
         na, nb, nc, 2, 0.085
     )
-    [lx, ly]
-    # show crystal
-    # ilm_show_crystal(1, Crys3D)
 
 
 if __name__ == "__main__":

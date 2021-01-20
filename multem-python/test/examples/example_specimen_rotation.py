@@ -1,10 +1,10 @@
+import numpy
 import multem
 import multem.crystalline_materials
 
 
 def run():
 
-    # create specimen
     lx = 100
     ly = 100
     lz = 100
@@ -18,27 +18,21 @@ def run():
     [atoms, _, _, _, _, _, _, _] = multem.crystalline_materials.Au001_xtl(
         na, nb, nc, ncu, rmsd_3d
     )
-    atoms = ilm_center_spec(atoms, lx, ly, lz)
 
-    theta = 45  # angle (�)
-    u0 = [1, 1, 0]  # unitary vector
-    rot_point_type = 1  # 1: geometric center, 2: User define
-    p0 = [0, 0, 0]  # rotation point
+    atoms = numpy.array(atoms)
+    xc = atoms["x"].max() - atoms["x"].min()
+    yc = atoms["y"].max() - atoms["y"].min()
+    zc = atoms["z"].max() - atoms["z"].min()
+    atoms["x"] += lx / 2.0 - xc
+    atoms["y"] += ly / 2.0 - yc
+    atoms["z"] += lz / 2.0 - zc
 
-    # rotate specimen
+    theta = 45
+    u0 = (1, 1, 0)
+    rot_point_type = "geometric_center"
+    p0 = (0, 0, 0)
+
     atoms_r = multem.spec_rot(atoms, theta, u0, rot_point_type, p0)
-
-    # sub#plot(1, 2, 1)
-    # plot3(atoms(:, 2), atoms(:, 3), atoms(:, 4), 'o', 'MarkerSize', 2, 'MarkerFaceColor', 'auto')
-    # axis equal
-    # axis([0 lx 0 ly 0 lz])
-    # view([1 0 1])
-
-    # sub#plot(1, 2, 2)
-    # plot3(atoms_r(:, 2), atoms_r(:, 3), atoms_r(:, 4), 'o', 'MarkerSize', 2, 'MarkerFaceColor', 'auto')
-    # axis equal
-    # axis([0 lx 0 ly 0 lz])
-    # view([0 0 1])
 
 
 if __name__ == "__main__":

@@ -88,7 +88,7 @@ namespace mt {
   DLL_PUBLIC mt::Output_Multislice<T> incident_wave(Input_Multislice<T>&);
   
   template <typename T>
-  DLL_PUBLIC mt::Output_Multislice<T> microscope_abberations(Input_Multislice<T>&);
+  DLL_PUBLIC mt::Output_Multislice<T> microscope_aberrations(Input_Multislice<T>&);
   
   template <typename T>
   DLL_PUBLIC mt::Output_Multislice<T> projected_potential(Input_Multislice<T>&);

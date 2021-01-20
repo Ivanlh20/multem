@@ -81,15 +81,22 @@ namespace pybind11 { namespace detail {
       return self;
     }
   };
+  
+  py::object EELS_constructor(const std::string &dtype) {
+    MULTEM_ASSERT(dtype == "float" || dtype == "double");
+    return (dtype == "float"
+      ? py::cast(mt::EELS<float>())
+      : py::cast(mt::EELS<double>()));
+  }
 
 }}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_eels(py::module_ m) {
+void wrap_eels(py::module_ m, const char *name) {
   typedef mt::EELS<T> Type;
 
   // Wrap the mt::Input class
-  py::class_<Type>(m, "EELS")
+  py::class_<Type>(m, name)
     .def(py::init<>())
     .def_readwrite("space", &Type::space)
     .def_readwrite("E_0", &Type::E_0)
@@ -112,7 +119,14 @@ void wrap_eels(py::module_ m) {
 }
 
 void export_eels(py::module_ m) {
-  wrap_eels<double>(m);
+
+  m.def(
+      "EELS", 
+      &py::detail::EELS_constructor, 
+      py::arg("dtype") = "double");
+
+  wrap_eels<float>(m, "EELS_f");
+  wrap_eels<double>(m, "EELS_d");
 }
 
 #endif

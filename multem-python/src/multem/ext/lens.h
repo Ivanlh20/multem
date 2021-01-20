@@ -135,15 +135,22 @@ namespace pybind11 { namespace detail {
       return self;
     }
   };
+  
+  py::object Lens_constructor(const std::string &dtype) {
+    MULTEM_ASSERT(dtype == "float" || dtype == "double");
+    return (dtype == "float"
+      ? py::cast(mt::Lens<float>())
+      : py::cast(mt::Lens<double>()));
+  }
 
 }}  // namespace pybind11::detail
 
 template <typename T>
-void wrap_lens(py::module_ m) {
+void wrap_lens(py::module_ m, const char *name) {
   typedef mt::Lens<T> Type;
 
   // Wrap the mt::Input class
-  py::class_<Type>(m, "Lens")
+  py::class_<Type>(m, name)
     .def(py::init<>())
     .def_readwrite("m", &Type::m)
     .def_readwrite("c_10", &Type::c_10)
@@ -193,7 +200,14 @@ void wrap_lens(py::module_ m) {
 }
 
 void export_lens(py::module_ m) {
-  wrap_lens<double>(m);
+
+  m.def(
+      "Lens", 
+      &py::detail::Lens_constructor, 
+      py::arg("dtype") = "double");
+
+  wrap_lens<float>(m, "Lens_f");
+  wrap_lens<double>(m, "Lens_d");
 }
 
 #endif

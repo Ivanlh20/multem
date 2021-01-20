@@ -100,7 +100,7 @@ namespace mt {
   /******************************e_device type******************************/
   enum eDevice {
     e_host = 1,
-    e_device = 2,
+    e_device = "device",
     e_host_device = 3
   };
 

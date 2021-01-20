@@ -18,8 +18,8 @@
  * You should have received a copy of the GNU General Public License
  * along with multem-python. If not, see <http:// www.gnu.org/licenses/>.
  */
-#ifndef MULTEM_PYTHON_MICROSCOPE_ABBERATIONS_H
-#define MULTEM_PYTHON_MICROSCOPE_ABBERATIONS_H
+#ifndef MULTEM_PYTHON_MICROSCOPE_ABERRATIONS_H
+#define MULTEM_PYTHON_MICROSCOPE_ABERRATIONS_H
 
 #include <pybind11/pybind11.h>
 #include <multem.h>
@@ -31,7 +31,7 @@ namespace py = pybind11;
 namespace pybind11 { namespace detail {
 
   template <typename T>
-  void check_input_for_microscope_abberations(mt::Input_Multislice<T> &input) {
+  void check_input_for_microscope_aberrations(mt::Input_Multislice<T> &input) {
     bool pbc_xy = true;
 
     // Check input system conf
@@ -68,16 +68,16 @@ namespace pybind11 { namespace detail {
   }
 
   template <typename T>
-  object microscope_abberations(mt::Input_Multislice<T> &input) {
-    check_input_for_microscope_abberations(input);
-    return py::cast(mt::microscope_abberations<T>(input));
+  object microscope_aberrations(mt::Input_Multislice<T> &input) {
+    check_input_for_microscope_aberrations(input);
+    return py::cast(mt::microscope_aberrations<T>(input));
   }
 
 }}  // namespace pybind11::detail
 
-void export_microscope_abberations(py::module_ &m) {
-  m.def("microscope_abberations", &py::detail::microscope_abberations<float>);
-  m.def("microscope_abberations", &py::detail::microscope_abberations<double>);
+void export_microscope_aberrations(py::module_ &m) {
+  m.def("microscope_aberrations", &py::detail::microscope_aberrations<float>);
+  m.def("microscope_aberrations", &py::detail::microscope_aberrations<double>);
 }
 
 #endif

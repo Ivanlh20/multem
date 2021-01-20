@@ -38,7 +38,7 @@
 #include <multem/ext/incident_wave.h>
 #include <multem/ext/input_multislice.h>
 #include <multem/ext/lens.h>
-#include <multem/ext/microscope_abberations.h>
+#include <multem/ext/microscope_aberrations.h>
 #include <multem/ext/min_spl.h>
 #include <multem/ext/misc.h>
 #include <multem/ext/output_multislice.h>
@@ -76,7 +76,7 @@ PYBIND11_MODULE(multem_ext, m) {
   export_input_multislice(m);
   export_incident_wave(m);
   export_lens(m);
-  export_microscope_abberations(m);
+  export_microscope_aberrations(m);
   export_min_spl(m);
   export_misc(m);
   export_output_multislice(m);
