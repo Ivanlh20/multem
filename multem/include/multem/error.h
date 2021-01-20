@@ -1,12 +1,21 @@
 /*
- *  error.h
- *
- *  Copyright (C) 2019 Diamond Light Source
+ * This file is part of MULTEM.
+ * Copyright (C) 2019 Diamond Light Source
  *
  *  Author: James Parkhurst
  *
- *  This code is distributed under the GPLv3 license, a copy of 
- *  which is included in the root directory of this package.
+ * MULTEM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * MULTEM is distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 #ifndef MULTEM_ERROR_H
 #define MULTEM_ERROR_H

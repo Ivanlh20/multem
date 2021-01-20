@@ -30,7 +30,7 @@
 #include "types.cuh"
 #include "traits.cuh"
 #include "lin_alg_def.cuh"
-#include <atom_data_api.h>
+#include <multem/atom_data.h>
 #include <thrust/sort.h>
 
 namespace mt

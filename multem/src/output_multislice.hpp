@@ -28,7 +28,7 @@
 #include "input_multislice.cuh"
 #include "cpu_fcns.hpp"
 #include "gpu_fcns.cuh"
-#include <output_multislice_api.h>
+#include <multem/output_multislice.h>
 
 namespace mt {
   

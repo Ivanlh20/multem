@@ -16,14 +16,14 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef MULTEM_ATOM_CAL_API_H
-#define MULTEM_ATOM_CAL_API_H
+#ifndef MULTEM_ATOM_CAL_H
+#define MULTEM_ATOM_CAL_H
 
 #include <functional>
 
 #include <multem/config.h>
-#include "math.cuh"
-#include "safe_types.cuh"
+#include <multem/math.h>
+#include <multem/types.h>
 
 namespace mt
 {
@@ -38,10 +38,10 @@ namespace mt
 
 			DLL_PUBLIC inline void feg(const T &g, T &y);
 			DLL_PUBLIC void feg(const int &ng, T *g, T *y);
-			DLL_PUBLIC 
+
       DLL_PUBLIC inline void feg_dfeg(const T &g, T &y, T &dy);
 			DLL_PUBLIC void feg_dfeg(const int &ng, T *g, T *y, T *dy);
-			DLL_PUBLIC 
+
       DLL_PUBLIC inline void fxg(const T &g, T &y);
 			DLL_PUBLIC void fxg(const int &ng, T *g, T *y);
 

@@ -19,7 +19,7 @@
 #ifndef INPUT_MULTISLICE_H
 #define INPUT_MULTISLICE_H
 
-#include <input_multislice_api.h>
+#include <multem/input_multislice.h>
 #include "types.cuh"
 #include "atomic_data_mt.hpp"
 #include "slicing.hpp"

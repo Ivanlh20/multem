@@ -16,18 +16,14 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef XTL_BUILD_H
-#define XTL_BUILD_H
-
-#ifdef _MSC_VER
-#pragma once
-#endif// _MSC_VER
+#ifndef MULTEM_XTL_BUILD_H
+#define MULTEM_XTL_BUILD_H
 
 #include <vector>
 #include <cstdlib>
 
-#include "safe_types.cuh"
-#include "atom_data_api.h"
+#include <multem/types.h>
+#include <multem/atom_data.h>
 
 namespace mt
 {

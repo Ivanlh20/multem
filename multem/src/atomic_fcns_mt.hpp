@@ -25,7 +25,7 @@
 
 #include <functional>
 
-#include <atom_cal_api.h>
+#include <multem/atom_cal.h>
 #include "math.cuh"
 #include "types.cuh"
 #include "quadrature.hpp"

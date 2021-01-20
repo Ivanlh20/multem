@@ -16,13 +16,13 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef LIN_ALG_DEF_H
-#define LIN_ALG_DEF_H
+#ifndef MULTEM_LIN_ALG_DEF_H
+#define MULTEM_LIN_ALG_DEF_H
 
 #include <random>
 #include <vector>
 
-#include "math.cuh"
+#include <multem/math.h>
 
 namespace mt
 {

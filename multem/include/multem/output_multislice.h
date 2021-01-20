@@ -16,15 +16,15 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef OUTPUT_MULTISLICE_API_H
-#define OUTPUT_MULTISLICE_API_H
+#ifndef MULTEM_OUTPUT_MULTISLICE_H
+#define MULTEM_OUTPUT_MULTISLICE_H
 
 #include <vector>
 #include <algorithm>
 
-#include "math.cuh"
-#include "safe_types.cuh"
-#include "input_multislice_api.h"
+#include <multem/math.h>
+#include <multem/types.h>
+#include <multem/input_multislice.h>
 
 namespace mt
 {

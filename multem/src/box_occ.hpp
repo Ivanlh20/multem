@@ -21,7 +21,7 @@
 
 #include <vector>
 #include <deque>
-#include <box_occ_api.h>
+#include <multem/box_occ.h>
 #include "types.cuh"
 #include "math.cuh"
 #include "lin_alg_def.cuh"

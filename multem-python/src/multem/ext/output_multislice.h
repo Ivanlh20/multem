@@ -22,7 +22,7 @@
 #define MULTEM_PYTHON_OUTPUT_MULTISLICE_H
 
 #include <pybind11/pybind11.h>
-#include <multem.h>
+#include <multem/multem.h>
 #include <multem/ext/serialization.h>
 
 namespace py = pybind11;

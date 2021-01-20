@@ -45,9 +45,9 @@
 #include <mutex>
 
 #include <multem/constants.h>
+#include <multem/types.h>
 #include "math.cuh"
 #include "lin_alg_def.cuh"
-#include "safe_types.cuh"
 
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>

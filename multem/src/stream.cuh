@@ -21,7 +21,7 @@
 
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <stream_api.h>
+#include <multem/stream.h>
 
 namespace mt
 {

@@ -16,17 +16,17 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef MULTEM_AMORP_SPEC_API_H
-#define MULTEM_AMORP_SPEC_API_H
+#ifndef MULTEM_AMORP_SPEC_H
+#define MULTEM_AMORP_SPEC_H
 
-#include "math.cuh"
-#include "safe_types.cuh"
-#include "lin_alg_def.cuh"
+#include <multem/math.h>
+#include <multem/types.h>
+#include <multem/lin_alg_def.h>
 #include <multem/config.h>
-#include <atom_data_api.h>
-#include "atomic_data_api.h"
-#include "cgpu_rand_api.h"
-#include "box_occ_api.h"
+#include <multem/atom_data.h>
+#include <multem/atomic_data.h>
+#include <multem/cgpu_rand.h>
+#include <multem/box_occ.h>
 
 namespace mt
 {

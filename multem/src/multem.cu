@@ -21,8 +21,7 @@
  */
 
 #include <iostream>
-#include <multem.h>
-#include <multem/error.h>
+#include <multem/multem.h>
 #include <types.cuh>
 #include <input_multislice.cuh>
 #include <output_multislice.hpp>

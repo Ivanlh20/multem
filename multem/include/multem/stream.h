@@ -16,8 +16,8 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef STREAM_API_H
-#define STREAM_API_H
+#ifndef MULTEM_STREAM_H
+#define MULTEM_STREAM_H
 
 #include <thread>
 #include <functional>

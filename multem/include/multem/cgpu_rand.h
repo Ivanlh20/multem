@@ -16,16 +16,16 @@
  * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef CGPU_RAND_API_H
-#define CGPU_RAND_API_H
+#ifndef MULTEM_CGPU_RAND_H
+#define MULTEM_CGPU_RAND_H
 
 #include <random>
 
 #include <multem/constants.h>
-#include "math.cuh"
-#include "safe_types.cuh"
-#include "lin_alg_def.cuh"
-#include <stream_api.h>
+#include <multem/math.h>
+#include <multem/types.h>
+#include <multem/lin_alg_def.h>
+#include <multem/stream.h>
 
 #ifdef __CUDACC__
 	#include <cuda.h>

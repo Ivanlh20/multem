@@ -23,45 +23,31 @@
 #ifndef MULTEM_H
 #define MULTEM_H
 
-#if defined _WIN32 || defined __CYGWIN__
-  #ifdef BUILDING_DLL
-    #ifdef __GNUC__
-      #define DLL_PUBLIC __attribute__ ((dllexport))
-    #else
-      #define DLL_PUBLIC __declspec(dllexport)
-    #endif
-  #else
-    #ifdef __GNUC__
-      #define DLL_PUBLIC __attribute__ ((dllimport))
-    #else
-      #define DLL_PUBLIC __declspec(dllimport)
-    #endif
-  #endif
-#else
-  #if __GNUC__ >= 4
-    #define DLL_PUBLIC __attribute__ ((visibility ("default")))
-  #else
-    #define DLL_PUBLIC
-  #endif
-#endif
-
 #include <array>
 #include <cassert>
 #include <complex>
 #include <string>
 #include <vector>
 #include <memory>
-#include <multem/error.h>
+
+#include <multem/amorp_spec.h>
+#include <multem/atom_cal.h>
+#include <multem/atom_data.h>
+#include <multem/atomic_data.h>
+#include <multem/box_occ.h>
+#include <multem/cgpu_rand.h>
+#include <multem/config.h>
 #include <multem/constants.h>
-#include <lin_alg_def.cuh>
-#include <safe_types.cuh>
-#include <atom_data_api.h>
-#include <input_multislice_api.h>
-#include <output_multislice_api.h>
-#include <amorp_spec_api.h>
-#include <xtl_build.hpp>
-#include <atom_cal_api.h>
-#include <fxeg_data_api.h>
+#include <multem/error.h>
+#include <multem/fxeg_data.h>
+#include <multem/input_multislice.h>
+#include <multem/lin_alg_def.h>
+#include <multem/math.h>
+#include <multem/multem.h>
+#include <multem/output_multislice.h>
+#include <multem/stream.h>
+#include <multem/types.h>
+#include <multem/xtl_build.h>
 
 namespace mt {
   
