@@ -19,16 +19,6 @@
 #ifndef MULTEM_TYPES_H
 #define MULTEM_TYPES_H
 
-#ifndef DEVICE_CALLABLE
-	#ifdef __CUDACC__
-		#define DEVICE_CALLABLE __host__ __device__
-		#define FORCE_INLINE __forceinline__
-	#else
-		#define DEVICE_CALLABLE
-		#define FORCE_INLINE inline
-	#endif
-#endif
-
 #include <cfloat>
 #include <type_traits>
 #include <stdio.h>

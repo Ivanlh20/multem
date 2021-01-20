@@ -23,8 +23,27 @@
 #ifndef MULTEM_CONFIG_H
 #define MULTEM_CONFIG_H
 
+// The BUILDING_LIBRARY macro is set by cmake when building the shared library.
+// In this case we want to set the appropriate DEVICE_CALLABLE and FORCE_INLINE
+// flags. However, we don't want to FORCE_INLINE when compiling against the
+// library because some functions will have their implementation visible
+#ifdef BUILDING_LIBRARY
+  #ifndef DEVICE_CALLABLE
+  	#ifdef __CUDACC__
+  		#define DEVICE_CALLABLE __host__ __device__
+  		#define FORCE_INLINE __forceinline__
+  	#else
+  		#define DEVICE_CALLABLE
+  		#define FORCE_INLINE inline
+  	#endif
+  #endif
+#else
+  #define DEVICE_CALLABLE
+  #define FORCE_INLINE
+#endif
+
 #if defined _WIN32 || defined __CYGWIN__
-  #ifdef BUILDING_DLL
+  #ifdef BUILDING_LIBRARY
     #ifdef __GNUC__
       #define DLL_PUBLIC __attribute__ ((dllexport))
     #else
