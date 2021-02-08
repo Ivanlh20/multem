@@ -42,7 +42,7 @@ input_multem.cond_lens_phi_12 = 0.0;             % Azimuthal angle of the twofol
 input_multem.cond_lens_c_23 = 0.0;             % Threefold astigmatism (�)
 input_multem.cond_lens_phi_23 = 0.0;             % Azimuthal angle of the threefold astigmatism (�)
 input_multem.cond_lens_inner_aper_ang = 0.0;       % Inner aperture (mrad) 
-input_multem.cond_lens_outer_aper_ang = 2.5;      % Outer aperture (mrad)
+input_multem.cond_lens_outer_aper_ang = 1.5;      % Outer aperture (mrad)
 input_multem.cond_lens_ti_sigma = 32;                % standard deviation (�)
 input_multem.cond_lens_ti_npts = 10;               % # of integration points. It will be only used if illumination_model=4
 input_multem.cond_lens_si_sigma = 0.2;             % standard deviation: For parallel ilumination(�^-1); otherwise (�)

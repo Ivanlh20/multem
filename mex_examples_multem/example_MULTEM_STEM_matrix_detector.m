@@ -123,7 +123,7 @@ g = sqrt(gx.^2+gy.^2);
 g_min = ilm_mrad_2_rAng(input_multem.E_0, input_multem.detector.cir(1).inner_ang);
 g_max = ilm_mrad_2_rAng(input_multem.E_0, input_multem.detector.cir(1).outer_ang);
 detector((g_min<=g)&(g<g_max)) = 1;
-
+ilm_rAng_2_mrad
 input_multem.detector.type = 3;  % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
 input_multem.detector.matrix(1).fR = detector;
 
