@@ -34,7 +34,7 @@ input_multem.iw_y = 0.0;    % y position
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.cond_lens_m = 0;                  % Vortex momentum
-input_multem.cond_lens_c_10 = 0;             % Defocus (�)
+input_multem.cond_lens_c_10 = -100;             % Defocus (�)
 input_multem.cond_lens_c_30 = 0.00;            % Third order spherical aberration (mm)
 input_multem.cond_lens_c_50 = 0.00;             % Fifth order spherical aberration (mm)
 input_multem.cond_lens_c_12 = 0;             % Twofold astigmatism (�)
@@ -42,7 +42,7 @@ input_multem.cond_lens_phi_12 = 0.0;             % Azimuthal angle of the twofol
 input_multem.cond_lens_c_23 = 0.0;             % Threefold astigmatism (�)
 input_multem.cond_lens_phi_23 = 0.0;             % Azimuthal angle of the threefold astigmatism (�)
 input_multem.cond_lens_inner_aper_ang = 0.0;       % Inner aperture (mrad) 
-input_multem.cond_lens_outer_aper_ang = 1.5;      % Outer aperture (mrad)
+input_multem.cond_lens_outer_aper_ang = 20;      % Outer aperture (mrad)
 input_multem.cond_lens_ti_sigma = 32;                % standard deviation (�)
 input_multem.cond_lens_ti_npts = 10;               % # of integration points. It will be only used if illumination_model=4
 input_multem.cond_lens_si_sigma = 0.2;             % standard deviation: For parallel ilumination(�^-1); otherwise (�)
@@ -57,7 +57,7 @@ ay = 0:input_multem.spec_ly/input_multem.ny:input_multem.spec_ly;
 
 thick = 300;
 for df = (df0+thick)
-    input_multem.cond_lens_c_10 = df;      %Angs
+%     input_multem.cond_lens_c_10 = df;      %Angs
 
     tic;
     output_incident_wave = input_multem.ilc_incident_wave; 
