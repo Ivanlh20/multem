@@ -62,7 +62,7 @@ namespace mt
 				slicing.set_input_data(input_multislice, &atoms_u, &atoms);
 
 				/***************************************************************************/
-				if((atoms_u.s_z_int < 2.0*input_multislice->grid_2d.dz) || ((slicing.z_plane.size() == 1) && input_multislice->is_slicing_by_planes()))
+				if((input_multislice->is_phase_object()) || (atoms_u.s_z_int < 2.0*input_multislice->grid_2d.dz) || ((slicing.z_plane.size() == 1) && input_multislice->is_slicing_by_planes()))
 				{
 					input_multislice->grid_2d.dz = atoms_u.s_z_int;
 					input_multislice->interaction_model = eESIM_Phase_Object;
