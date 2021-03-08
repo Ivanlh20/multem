@@ -60,12 +60,14 @@ namespace mt
 				{
 					case eIM_Coherent:
 					{
-						CTF_TEM(input_multislice->temporal_spatial_incoh, fpsi, m2psi_tot);
+						CTF_TEM(input_multislice->temporal_spatial_incoh, fpsi, psi);
+						mt::square(*stream, psi, m2psi_tot);
 					}
 					break;
 					case eIM_Partial_Coherent:
 					{
-						PCTF_LI_WPO_TEM(input_multislice->temporal_spatial_incoh, fpsi, m2psi_tot);
+						PCTF_LI_WPO_TEM(input_multislice->temporal_spatial_incoh, fpsi, psi);
+						mt::square(*stream, psi, m2psi_tot);
 					}
 					break;
 					case eIM_Trans_Cross_Coef:
@@ -88,21 +90,42 @@ namespace mt
 				mt::fft2_shift(*stream, input_multislice->grid_2d, psi);
 				fft_2d->forward(psi);
 				mt::scale(*stream, input_multislice->grid_2d.inxy(), psi);
-
 				Vector<T_r, dev> m2psi_tot(input_multislice->grid_2d.nxy());
 				this->operator()(psi, m2psi_tot);
+				mt::fft2_shift(*stream, input_multislice->grid_2d, m2psi_tot);
+
 				mt::copy_to_host(output_multislice.stream, m2psi_tot, output_multislice.m2psi_tot[0]);
 			}
 
+			template <class TOutput_multislice>
+			void apply_ctf(TOutput_multislice &output_multislice)
+			{
+				Vector<T_c, dev> psi(input_multislice->iw_psi.begin(), input_multislice->iw_psi.end());
+
+				mt::fft2_shift(*stream, input_multislice->grid_2d, psi);
+				fft_2d->forward(psi);
+				mt::scale(*stream, input_multislice->grid_2d.inxy(), psi);
+				if (input_multislice->is_illu_mod_coherent())
+				{
+					CTF_TEM(input_multislice->temporal_spatial_incoh, psi, psi);
+				}
+				else
+				{
+					PCTF_LI_WPO_TEM(input_multislice->temporal_spatial_incoh, psi, psi);
+				}
+				mt::fft2_shift(*stream, input_multislice->grid_2d, psi);
+
+				mt::copy_to_host(output_multislice.stream, psi, output_multislice.psi_coh[0]);
+			}
+
 		private:
-			void CTF_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<T_c, dev> &fpsi, Vector<T_r, dev> &m2psi_tot)
+			void CTF_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<T_c, dev> &fpsi, Vector<T_c, dev> &psi)
 			{
 				mt::apply_CTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, 0, 0, fpsi, psi);
 				fft_2d->inverse(psi);
-				mt::square(*stream, psi, m2psi_tot);
 			}
 
-			void PCTF_LI_WPO_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<T_c, dev> &fpsi, Vector<T_r, dev> &m2psi_tot)
+			void PCTF_LI_WPO_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<T_c, dev> &fpsi, Vector<T_c, dev> &psi)
 			{
 				T_r ti_sigma = input_multislice->obj_lens.ti_sigma;
 				T_r si_sigma = input_multislice->obj_lens.si_sigma;
@@ -123,7 +146,6 @@ namespace mt
 
 				mt::apply_PCTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, fpsi, psi);
 				fft_2d->inverse(psi);
-				mt::square(*stream, psi, m2psi_tot);
 
 				input_multislice->obj_lens.set_ti_sigma(ti_sigma);
 				input_multislice->obj_lens.set_si_sigma(si_sigma);

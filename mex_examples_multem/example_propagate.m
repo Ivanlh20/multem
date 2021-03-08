@@ -1,4 +1,4 @@
-% Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear; clc;
 addpath([fileparts(pwd) filesep 'mex_bin'])
@@ -25,7 +25,7 @@ input_multem.pn_seed = 300183;
 input_multem.pn_single_conf = 0;                % 1: true, 0:false
 input_multem.pn_nconf = 5;
 
-input_multem.illumination_model = 2;            % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
+input_multem.illumination_model = 1;            % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
 input_multem.temporal_spatial_incoh = 1;        % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 
 input_multem.bwl = 0;
