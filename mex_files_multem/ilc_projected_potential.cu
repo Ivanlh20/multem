@@ -1,181 +1,154 @@
 /*
- * This file is part of MULTEM.
+ * This file is part of Multem.
  * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- * MULTEM is free software: you can redistribute it and/or modify
+ * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * Multem is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
+#define MATLAB_BLAS_LAPACK
+
 #include "types.cuh"
-#include "matlab_types.cuh"
-#include "traits.cuh"
-#include "stream.cuh"
-#include "atomic_data_mt.hpp"
-#include "input_multislice.cuh"
-#include "output_multislice.hpp"
+#include "type_traits_gen.cuh"
+#include "cgpu_stream.cuh"
+#include "particles.cuh"
+#include "in_classes.cuh"
+#include "output_multem.hpp"
 
 #include "projected_potential.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using mt::rmatrix_r;
+using mt::pMLD;
 
-template <class TInput_Multislice>
-void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice, bool full = true)
+template <class TIn_Multislice>
+void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
 {
-	using T_r = mt::Value_type<TInput_Multislice>;
+	using T_r = mt::Value_type<TIn_Multislice>;
 
 	/************************ simulation type **************************/
-	input_multislice.simulation_type = mt::eTEMST_PPRS;
+	in_multem.simulation_type = mt::eTEMST_PPRS;
 	
-	/*******************************************************************/
-	input_multislice.interaction_model = mx_get_scalar_field<mt::eElec_Spec_Int_Model>(mx_input_multislice, "interaction_model");
-	input_multislice.potential_type = mx_get_scalar_field<mt::ePotential_Type>(mx_input_multislice, "potential_type");
+	/***************************************************************************************/
+	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Model>(mex_in_multem, "interaction_model");
+	in_multem.pot_parm_typ = mex_get_num_from_field<mt::ePot_Parm_Typ>(mex_in_multem, "pot_parm_typ");
 
-	/************** Electron-Phonon interaction model ******************/
-	input_multislice.pn_model = mx_get_scalar_field<mt::ePhonon_Model>(mx_input_multislice, "pn_model"); 
-	input_multislice.pn_coh_contrib = true;
-	input_multislice.pn_single_conf = true;
-	input_multislice.pn_nconf = mx_get_scalar_field<int>(mx_input_multislice, "pn_nconf");
-	input_multislice.pn_dim.set(mx_get_scalar_field<int>(mx_input_multislice, "pn_dim"));
-	input_multislice.pn_seed = mx_get_scalar_field<int>(mx_input_multislice, "pn_seed");
+	/************** Electron-Phonon_Par interaction model **************/
+	mex_read_phonon_par(mex_in_multem, in_multem.phonon_par);
+	in_multem.phonon_par.coh_contrib = true;
+	in_multem.phonon_par.single_conf = true;
 
 	/**************************** Specimen *****************************/
-	auto atoms = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "spec_atoms");
+	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
+	auto bs_y = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_y");
+	auto bs_z = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_z");
+	auto sli_thk = mex_get_num_from_field<T_r>(mex_in_multem, "spec_dz");
+	dt_bool pbc_xy = true;
 
-	auto lx = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_lx");
-	auto ly = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_ly");
-	auto lz = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_lz");
-	auto dz = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_dz");
-	bool pbc_xy = true; 
-
-	auto ct_na = mx_get_scalar_field<int>(mx_input_multislice, "spec_cryst_na");
-	auto ct_nb = mx_get_scalar_field<int>(mx_input_multislice, "spec_cryst_nb");
-	auto ct_nc = mx_get_scalar_field<int>(mx_input_multislice, "spec_cryst_nc");
-	auto ct_a = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_a");
-	auto ct_b = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_b");
-	auto ct_c = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_c");
-	auto ct_x0 = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_x0");
-	auto ct_y0 = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_y0");
-
-	auto mx_spec_amorp = mxGetField(mx_input_multislice, 0, "spec_amorp");
-	mt::Vector<mt::Amorp_Lay_Info<T_r>, mt::e_host> amorp_lay_info(mxGetN(mx_spec_amorp));
-	for(auto i = 0; i<amorp_lay_info.size(); i++)
+	if (full)
 	{
-		amorp_lay_info[i].z_0 = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_0");
-		amorp_lay_info[i].z_e = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_e");
-		amorp_lay_info[i].dz = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "dz");
+		/************************* atomic positions ************************/
+		mex_read_atoms<T_r>(mex_in_multem, bs_x, bs_y, bs_z, sli_thk, in_multem.atoms);
 	}
 
-	if(full)
-	{
-		input_multislice.atoms.set_crystal_parameters(ct_na, ct_nb, ct_nc, ct_a, ct_b, ct_c, ct_x0, ct_y0);
-		input_multislice.atoms.set_amorphous_parameters(amorp_lay_info);
-		input_multislice.atoms.set_atoms(atoms.rows, atoms.cols, atoms.real, lx, ly, lz, dz);
-	}
-
-	/************************ Specimen rotation *************************/
-	input_multislice.spec_rot_theta = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_rot_theta")*mt::c_deg_2_rad;
-	input_multislice.spec_rot_u0 = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_u0");
-	input_multislice.spec_rot_u0.normalized();
-	input_multislice.spec_rot_center_type = mx_get_scalar_field<mt::eRot_Point_Type>(mx_input_multislice, "spec_rot_center_type");
-	input_multislice.spec_rot_center_p = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_center_p");
+	/************************ Specimen rotation ************************/
+	mex_read_rot_par<T_r>(mex_in_multem, in_multem.rot_par);
 
 	/************************ Potential slicing ************************/
-	input_multislice.potential_slicing = mx_get_scalar_field<mt::ePotential_Slicing>(mx_input_multislice, "potential_slicing");
+	in_multem.potential_slicing = mex_get_num_from_field<mt::ePot_Sli_Typ>(mex_in_multem, "potential_slicing");
 
 	/************************** xy sampling ****************************/
-	auto nx = mx_get_scalar_field<int>(mx_input_multislice, "nx");
-	auto ny = mx_get_scalar_field<int>(mx_input_multislice, "ny");
-	bool bwl = mx_get_scalar_field<bool>(mx_input_multislice, "bwl");
+	auto nx = mex_get_num_from_field<dt_int32>(mex_in_multem, "nx");
+	auto ny = mex_get_num_from_field<dt_int32>(mex_in_multem, "ny");
+	dt_bool bwl = mex_get_num_from_field<dt_bool>(mex_in_multem, "bwl");
 
-	input_multislice.grid_2d.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
+	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thk, bwl, pbc_xy);
 
 	/************************ simulation type **************************/
-	input_multislice.islice = mx_get_scalar_field<int>(mx_input_multislice, "islice")-1;
+	in_multem.islice = mex_get_num_from_field<dt_int32>(mex_in_multem, "islice")-1;
 
-	/********************* select output region *************************/
-	input_multislice.output_area.ix_0 = mx_get_scalar_field<int>(mx_input_multislice, "output_area_ix_0")-1;
-	input_multislice.output_area.iy_0 = mx_get_scalar_field<int>(mx_input_multislice, "output_area_iy_0")-1;
-	input_multislice.output_area.ix_e = mx_get_scalar_field<int>(mx_input_multislice, "output_area_ix_e")-1;
-	input_multislice.output_area.iy_e = mx_get_scalar_field<int>(mx_input_multislice, "output_area_iy_e")-1;
+	/******************** select output region ************************/
+	mex_read_output_area(mex_in_multem, in_multem.output_area);
 
 	/********************* validate parameters *************************/
-	input_multislice.validate_parameters();
+	in_multem.validate_parameters();
  }
 
-template<class TOutput_Multislice>
-void set_struct_projected_potential(TOutput_Multislice &output_multislice, mxArray *&mx_output_multislice)
+template <class TOutput_Multem>
+void set_struct_projected_potential(TOutput_Multem &output_multem, mxArray*& mex_output_multem)
 {
-	const char *field_names_output_multislice[] = {"dx", "dy", "x", "y", "thick", "V"};
-	int number_of_fields_output_multislice = 6;
-	mwSize dims_output_multislice[2] = {1, 1};
+	const char *field_names_output_multem[] = {"dx", "dy", "x", "y", "thick", "V"};
+	dt_int32 number_of_fields_output_multem = 6;
+	mwSize dims_output_multem[2] = {1, 1};
 
-	mx_output_multislice = mxCreateStructArray(2, dims_output_multislice, number_of_fields_output_multislice, field_names_output_multislice);
+	mex_output_multem = mxCreateStructArray(2, dims_output_multem, number_of_fields_output_multem, field_names_output_multem);
 
-	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dx", output_multislice.dx);
-	mx_create_set_scalar_field<rmatrix_r>(mx_output_multislice, 0, "dy", output_multislice.dy);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "x", 1, output_multislice.x.size(), output_multislice.x);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "y", 1, output_multislice.y.size(), output_multislice.y);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "thick", 1, output_multislice.thick.size(), output_multislice.thick);
-	mx_create_set_matrix_field<rmatrix_r>(mx_output_multislice, "V", output_multislice.ny, output_multislice.nx, output_multislice.V[0]);
+	mex_create_set_num_field<pMLD>(mex_output_multem, 0, "dx", output_multem.dx);
+	mex_create_set_num_field<pMLD>(mex_output_multem, 0, "dy", output_multem.dy);
+	mex_create_set_pVctr_field<pMLD>(mex_output_multem, "x", 1, output_multem.x.size(), output_multem.x);
+	mex_create_set_pVctr_field<pMLD>(mex_output_multem, "y", 1, output_multem.y.size(), output_multem.y);
+	mex_create_set_pVctr_field<pMLD>(mex_output_multem, "thick", 1, output_multem.thick.size(), output_multem.thick);
+	mex_create_set_pVctr_field<pMLD>(mex_output_multem, "V", output_multem.ny, output_multem.nx, output_multem.V[0]);
 }
 
-template <class T, mt::eDevice dev>
-void run_projected_potential(mt::System_Configuration &system_conf, const mxArray *mx_input_multislice, mxArray *&mx_output_multislice)
+template <class T, mt::eDev Dev>
+void run_projected_potential(mt::System_Config &system_config, const mxArray *mex_in_multem, mxArray*& mex_output_multem)
 {
-	mt::Input_Multislice<T> input_multislice;
-	read_input_multislice(mx_input_multislice, input_multislice);
-	input_multislice.system_conf = system_conf;
+	mt::In_Multem<T> in_multem;
+	read_in_multem(mex_in_multem, in_multem);
+	in_multem.system_config = system_config;
 
-	mt::Stream<dev> stream(system_conf.nstream);
-	mt::Projected_Potential<T, dev> projected_potential;
-	projected_potential.set_input_data(&input_multislice, &stream);
+	mt::Stream<Dev> stream(system_config.n_stream);
+	mt::Projected_Potential<T, Dev> projected_potential;
+	projected_potential.set_in_data(&in_multem, &stream);
 
-	mt::Output_Multislice<T> output_multislice;
-	output_multislice.set_input_data(&input_multislice);
+	mt::Output_Multem<T> output_multem;
+	output_multem.set_in_data(&in_multem);
 
-	projected_potential.move_atoms(input_multislice.pn_nconf);
-	projected_potential(input_multislice.islice, output_multislice);
+	projected_potential.move_atoms(in_multem.phonon_par.nconf);
+	projected_potential(in_multem.islice, output_multem);
 
 	stream.synchronize();
 
-	output_multislice.gather();
-	output_multislice.clean_temporal();
+	output_multem.gather();
+	output_multem.clean_temporal();
 
-	set_struct_projected_potential(output_multislice, mx_output_multislice);
+	set_struct_projected_potential(output_multem, mex_output_multem);
 }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[])
 {
-	auto system_conf = mt::read_system_conf(prhs[0]);
-	int idx_0 = (system_conf.active)?1:0;
+	// the output potential is in V - Angstrom
+	auto system_config = mex_read_system_config(prhs[0]);
+	system_config.set_gpu();
 
-	if(system_conf.is_float_host())
+	dt_int32 idx_0 = (system_config.active)?1:0;
+
+	if (system_config.is_float32_cpu())
 	{
-		run_projected_potential<float, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
+		run_projected_potential<dt_float32, mt::edev_cpu>(system_config, prhs[idx_0], plhs[0]);
 	}
-	else if(system_conf.is_double_host())
+	else if (system_config.is_float64_cpu())
 	{
-		run_projected_potential<double, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
+		run_projected_potential<dt_float64, mt::edev_cpu>(system_config, prhs[idx_0], plhs[0]);
 	}
-	else if(system_conf.is_float_device())
+	else if (system_config.is_float32_gpu())
 	{
-		run_projected_potential<float, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
+		run_projected_potential<dt_float32, mt::edev_gpu>(system_config, prhs[idx_0], plhs[0]);
 	}
-	else if(system_conf.is_double_device())
+	else if (system_config.is_float64_gpu())
 	{
-		run_projected_potential<double, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
+		run_projected_potential<dt_float64, mt::edev_gpu>(system_config, prhs[idx_0], plhs[0]);
 	}
 }

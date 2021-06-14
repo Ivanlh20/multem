@@ -1,5 +1,3 @@
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
-
 clear; clc;
 addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
@@ -28,8 +26,8 @@ toc;
 na = 1;
 nb = 1;
 nc = 1;
-[Crys3D, lx, ly, lz, a, b, c, dz] = SrTiO3001_xtl(na, nb, nc, 2, 0.085);
+[Crys3D, lx, ly, lz, a, b, c, dz] = SrTiO3001Crystal(na, nb, nc, 2, 0.085);
 [lx, ly]
 % show crystal
 clf;
-ilm_show_crystal(1, Crys3D);
+ilm_show_xtl(1, Crys3D);

@@ -1,59 +1,57 @@
 /*
- * This file is part of MULTEM.
- * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+ * This file is part of Multem.
+ * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
  *
- * MULTEM is free software: you can redistribute it and/or modify
+ * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * Multem is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
+#define MATLAB_BLAS_LAPACK
+
 #include "types.cuh"
-#include "matlab_types.cuh"
-#include "traits.cuh"
-#include "atomic_data_mt.hpp"
-#include "input_multislice.cuh"
+#include "type_traits_gen.cuh"
+#include "particles.cuh"
+#include "in_classes.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
 
-using mt::rmatrix_r;
+using mt::pMLD;
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[])
 {	
-	using T = double;
+	using T = dt_float64;
 
 	/*************************Input data**************************/
-	auto r_atoms = mx_get_matrix<rmatrix_r>(prhs[0]);
-	auto theta = mx_get_scalar<double>(prhs[1])*mt::c_deg_2_rad;
-	auto r_u0 = mx_get_matrix<rmatrix_r>(prhs[2]);
-	auto rot_point_type = mx_get_scalar<mt::eRot_Point_Type>(prhs[3]);
-	auto r_p0 = mx_get_matrix<rmatrix_r>(prhs[4]);
+	auto r_atoms = mex_get_pvctr<pMLD>(prhs[0]);
+	auto theta = mex_get_num<dt_float64>(prhs[1])*mt::c_deg_2_rad;
+	auto u0 = mex_get_r_3d<T>(prhs[2], R_3d<T>(0, 0, 1));
+	auto rot_point_type = mex_get_num<mt::eRot_Point_Typ>(prhs[3]);
+	auto p0 = mex_get_r_3d<T>(prhs[4], R_3d<T>(0, 0, 0));
 
 	/************************Output data**************************/
-	mt::Atom_Data<T> atoms;
-	atoms.set_atoms(r_atoms.rows, r_atoms.cols, r_atoms.real);
+	mt::Ptc_Atom<T> atoms;
+	atoms.set_ptc(r_atoms.rows, r_atoms.cols, r_atoms.real);
+	u0.normalize();
 
-	mt::r3d<T> u0 = (r_u0.size()>=3)?mt::r3d<T>(r_u0[0], r_u0[1], r_u0[2]):mt::r3d<T>(0, 0, 1);
-	u0.normalized();
-	mt::r3d<T> p0 = (r_p0.size()>=3)?mt::r3d<T>(r_p0[0], r_p0[1], r_p0[2]):mt::r3d<T>(0, 0, 0);
-
-	if(rot_point_type == mt::eRPT_geometric_center)
+	if (rot_point_type == mt::erpt_Geometric_Center)
 	{
-		p0 = r3d<T>(atoms.x_mean, atoms.y_mean, atoms.z_mean);
+		p0 = R_3d<T>(atoms.x_mean, atoms.y_mean, atoms.z_mean);
 	}
 
 	mt::rotate_atoms(atoms, theta, u0, p0);
 
-	auto r_atoms_o = mx_create_matrix<rmatrix_r>(atoms.size(), 8, plhs[0]);
+	auto r_atoms_o = mex_create_pVctr<pMLD>(atoms.size(), 8, plhs[0]);
 
 	for(auto i = 0; i<r_atoms_o.rows; i++)
 	{

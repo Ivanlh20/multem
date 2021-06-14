@@ -19,18 +19,15 @@ function [] = ilm_mex(option, m_file, src, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     CUDA_PATH = getenv('CUDA_PATH');
     
-    CUDA_PATH = '';
-    
     if(isempty(CUDA_PATH))
         if(ispc)
-            CUDA_PATH = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0';
+            CUDA_PATH = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1';
         elseif(ismac)
-            CUDA_PATH = '/Developer/NVIDIA/CUDA-10.0';
+            CUDA_PATH = '/Developer/NVIDIA/CUDA-10.1';
         else
-            CUDA_PATH = '/usr/local/cuda-10.0';
+            CUDA_PATH = '/usr/local/cuda-10.1';
         end
     end
-
     CUDA_PATH = ilm_replace_filesep(CUDA_PATH);
     
     %%%%%%%%%%%%%%%%%%%% get cuda version  %%%%%%%%%%%%%%%%%%%%%%%
@@ -82,26 +79,23 @@ function [] = ilm_mex(option, m_file, src, varargin)
     CARD_70="-gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot;";
     CARD_MULT = join([CARD_30, CARD_35, CARD_50, CARD_60, CARD_70], ' ');
 
-    if 1
-        gpu = gpuDevice();
-        gpu_card = round(str2double(gpu.ComputeCapability));
-
-        switch gpu_card
-            case 3
-                ARCH_FLAGS = CARD_30;
-            case 5
-                ARCH_FLAGS = CARD_50;
-            case 6
-                ARCH_FLAGS = CARD_60;
-            case 7
-                ARCH_FLAGS = CARD_70;
-            otherwise
-                ARCH_FLAGS = CARD_30;
-        end
-    else
-        ARCH_FLAGS = CARD_MULT;
-    end
+%     gpu = gpuDevice();
+%     gpu_card = round(str2double(gpu.ComputeCapability));
+    gpu_card = 6;
     
+    switch gpu_card
+        case 3
+            ARCH_FLAGS = CARD_30;
+        case 5
+            ARCH_FLAGS = CARD_50;
+        case 6
+            ARCH_FLAGS = CARD_60;
+        case 7
+            ARCH_FLAGS = CARD_70;
+        otherwise
+            ARCH_FLAGS = CARD_30;
+    end
+
     %%%%%%%%%%%%%%% read template mex_cuda file %%%%%%%%%%%%%%%%%
     if(ispc)
         mex_cuda_filename = 'mex_CUDA_win64.xml';
@@ -140,7 +134,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
         LAPACK_LIBS = '-llapack';
         
     elseif(ismac)
-        % OS = /usr/bin/ld: 
+        % OS = Windows 10
         FFTW_LIB_PATH = [];
         FFTW_LIBS = '-lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';
         BLAS_LIB_PATH = [];
@@ -159,10 +153,10 @@ function [] = ilm_mex(option, m_file, src, varargin)
         FFTW_LIB_PATH = '/usr/lib/x86_64-linux-gnu';
         FFTW_LIBS = '-lfftw3f -lfftw3 -lfftw3f_threads -lfftw3_threads';
 		
-        BLAS_LIB_PATH = '/usr/lib/x86_64-linux-gnu/blas';
+        BLAS_LIB_PATH = '/usr/lib/x86_64-linux-gnu';
         BLAS_LIBS = '-lblas';
 		
-        LAPACK_LIB_PATH = '/usr/lib/x86_64-linux-gnu/lapack';
+        LAPACK_LIB_PATH = '/usr/lib/x86_64-linux-gnu';
         LAPACK_LIBS = '-llapack';
     end
     
@@ -190,8 +184,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
     
     INCLUDE = ['-I"', CUDA_INC_PATH, '" -I"', src, '"'];
     LIBRARY = ['-L"', CUDA_LIB_PATH, '" ', CUDA_LIBS, ' -L"', FFTW_LIB_PATH, '" ', FFTW_LIBS, ' -L"', BLAS_LIB_PATH, '" ', BLAS_LIBS, ' -L"', LAPACK_LIB_PATH, '" ', LAPACK_LIBS];    
-    mex_comand = ['mex -R2017b -f ', mex_cuda_filename, ' -v'];
-    
+    mex_comand = ['mex -R2018a -f ', mex_cuda_filename, ' -v'];
     if (strcmpi(option, 'debug'))
         mex_comand = [mex_comand, ' -g'];
     end

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include <string>
 #include "math.cuh"
 #include "types.cuh"
-#include "atomic_fcns_mt.hpp"
+#include "atom_cal.hpp"
 
 namespace mt
 {
@@ -534,7 +534,7 @@ namespace mt
 				data_table[99].edges[0] = 0.00;	data_table[99].edges[1] = 0.00;	data_table[99].edges[2] = 0.00;	data_table[99].edges[3] = 0.00;	data_table[99].edges[4] = 0.00;	data_table[99].edges[5] = 0.00;	data_table[99].edges[6] = 0.00;	data_table[99].edges[7] = 0.00;	data_table[99].edges[8] = 0.00;	data_table[99].edges[9] = 0.00;	data_table[99].edges[10] = 0.00;	data_table[99].edges[11] = 0.00;
 				data_table[100].edges[0] = 0.00;	data_table[100].edges[1] = 0.00;	data_table[100].edges[2] = 0.00;	data_table[100].edges[3] = 0.00;	data_table[100].edges[4] = 0.00;	data_table[100].edges[5] = 0.00;	data_table[100].edges[6] = 0.00;	data_table[100].edges[7] = 0.00;	data_table[100].edges[8] = 0.00;	data_table[100].edges[9] = 0.00;	data_table[100].edges[10] = 0.00;	data_table[100].edges[11] = 0.00;
 				data_table[101].edges[0] = 0.00;	data_table[101].edges[1] = 0.00;	data_table[101].edges[2] = 0.00;	data_table[101].edges[3] = 0.00;	data_table[101].edges[4] = 0.00;	data_table[101].edges[5] = 0.00;	data_table[101].edges[6] = 0.00;	data_table[101].edges[7] = 0.00;	data_table[101].edges[8] = 0.00;	data_table[101].edges[9] = 0.00;	data_table[101].edges[10] = 0.00;	data_table[101].edges[11] = 0.00;
-				data_table[102].edges[0] = 0.00;	data_table[102].edges[1] = 0.00;	data_table[102].edges[2] = 0.00;	data_table[102].edges[3] = 0.00;	data_table[102].edges[4] = 0.00;	data_table[102].edges[5] = 0.00;	data_table[102].edges[6] = 0.00;	data_table[102].edges[7] = 0.00;	data_table[102].edges[8] = 0.00;	data_table[102].edges[9] = 0.00;	data_table[102].edges[10] = 0.00;	data_table[102].edges[11] = 0.00;
+data_table[102].edges[0] = 0.00;	data_table[102].edges[1] = 0.00;	data_table[102].edges[2] = 0.00;	data_table[102].edges[3] = 0.00;	data_table[102].edges[4] = 0.00;	data_table[102].edges[5] = 0.00;	data_table[102].edges[6] = 0.00;	data_table[102].edges[7] = 0.00;	data_table[102].edges[8] = 0.00;	data_table[102].edges[9] = 0.00;	data_table[102].edges[10] = 0.00;	data_table[102].edges[11] = 0.00;
 			}
 
 			// 1: Doyle and Turner parameterization - 4 Gaussians - [0, 4]
@@ -1326,23 +1326,6 @@ namespace mt
 						VR.cl[j] = c_Potf*c_Pi*cl/cnl;
 						VR.cnl[j] = c_Pi2/cnl;
 					}
-					else
-					{
-						feg.cl[j] = 0.0;
-						feg.cnl[j] = 1.0;
-
-						fxg.cl[j] = 0.0;
-						fxg.cnl[j] = 1.0;
-
-						Pr.cl[j] = 0.0;
-						Pr.cnl[j] = 1.0;
-
-						Vr.cl[j] = 0.0;
-						Vr.cnl[j] = 1.0;
-
-						VR.cl[j] = 0.0;
-						VR.cnl[j] = 1.0;
-					}
 				}
 			}
 
@@ -1463,23 +1446,6 @@ namespace mt
 
 						VR.cl[j] = 2.0*c_Potf*c_Pi2*cl/pow(cnl, 1.5);
 						VR.cnl[j] = c_2Pi/sqrt(cnl);
-					}
-					else
-					{
-						feg.cl[j] = 0.0;
-						feg.cnl[j] = 1.0;
-
-						fxg.cl[j] = 0.0;
-						fxg.cnl[j] = 1.0;
-
-						Pr.cl[j] = 0.0;
-						Pr.cnl[j] = 1.0;
-
-						Vr.cl[j] = 0.0;
-						Vr.cnl[j] = 1.0;
-
-						VR.cl[j] = 0.0;
-						VR.cnl[j] = 1.0;
 					}
 				}
 			}
@@ -1610,15 +1576,12 @@ namespace mt
 						coef.R_min = R_min;
 						c_atom_cal.Set_Atom_Type(potential_type, coef.charge, &atom_type);
 						coef.R_max = (coef.charge == 0)?c_atom_cal.AtomicRadius_Cutoff(3, Vrl):atom_type.coef[0].R_max;
-						coef.R_max = ::fmax(coef.R_max, T(2)*R_min);
-
 						if(isZero(coef.R_max))
 						{
 							coef.R_max = 1.75*atom_type.ra_e;
 						}
 
-						//coef.R_tap = 0.85*coef.R_max;
-						coef.R_tap = coef.R_min + 0.85*(coef.R_max - coef.R_min);
+						coef.R_tap = 0.85*coef.R_max;
 						coef.tap_cf = c_i2Pi/(coef.R2_max()-coef.R2_tap());
 
 						// R and R2

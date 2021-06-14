@@ -1,19 +1,19 @@
 /*
- * This file is part of MULTEM.
- * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+ * This file is part of Multem.
+ * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
  *
- * MULTEM is free software: you can redistribute it and/or modify
+ * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * Multem is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef PROJECTED_POTENTIAL_H
@@ -21,56 +21,56 @@
 
 #include "math.cuh"
 #include "types.cuh"
-#include "traits.cuh"
-#include "stream.cuh"
-#include "quadrature.hpp"
-#include "input_multislice.cuh"
-#include "output_multislice.hpp"
+#include "type_traits_gen.cuh"
+#include "cgpu_stream.cuh"
+#include "quad_data.cuh"
+#include "in_classes.cuh"
+#include "output_multem.hpp"
 #include "cpu_fcns.hpp"
 #include "gpu_fcns.cuh"
 #include "cgpu_fcns.cuh"
 #include "spec.hpp"
 
 namespace mt
-{
-	template <class T, eDevice dev>
+ 
+	template <class T, eDev Dev>
 	class Projected_Potential: public Spec<T>{
 		public:
-			using size_type = std::size_t;
+			using size_type = dt_uint64;
 
-			static const eDevice device = dev;
+			static const eDev device = Dev;
 
-			Projected_Potential(): stream(nullptr), n_atoms_s(512){}
+			Projected_Potential(): stream(nullptr), n_atoms_s(512) {}
 
-			void set_input_data(Input_Multislice<T> *input_multislice_i, Stream<dev> *stream_i)
+			void set_in_data(In_Multem<T> *in_multem_i, Stream<Dev> *stream_i)
 			{	
-				Spec<T>::set_input_data(input_multislice_i);
+				Spec<T>::set_in_data(in_multem_i);
 				stream = stream_i;
 
-				Quadrature quadrature;
-				quadrature(0, c_nqz, qz); // 0: int_-1^1 y(x) dx - TanhSinh quadrature
+				Quad_Data quad_data;
+				quad_data(0, c_nqz, qz);		// 0: int_-1^1 y(x) dx - tanh_sinh quad_data
 
-				atom_type.resize(c_nAtomsTypes);
+				atom_type.resize(c_n_atom_typ);
 				for(auto iatom_type = 0; iatom_type<atom_type.size(); iatom_type++)
 				{
 					atom_type[iatom_type].assign(Spec<T>::atom_type[iatom_type]);
 				}
 
-				n_atoms_s = (device==e_host)?(stream->size()):512;
+				n_atoms_s = (device==edev_cpu)?(stream->size()):256;
 
-				int nv = max(this->input_multislice->grid_2d.nx_dRx(this->atoms.l_x_int), this->input_multislice->grid_2d.ny_dRy(this->atoms.l_y_int));
+				dt_int32 nv = max(this->in_multem->grid_2d.rx_2_irx_cd(this->atoms.bs_x_int), this->in_multem->grid_2d.ry_2_iry_cd(this->atoms.bs_y_int));
 
 				stream_data.resize(n_atoms_s);
 
 				for(auto i = 0; i<stream_data.size(); i++)
 				{
-					if(device==e_host)
+					if (device==edev_cpu)
 					{
 						stream_data.iv[i].resize(nv);
 						stream_data.v[i].resize(nv);
 					}
 
-					if(this->input_multislice->is_subslicing())
+					if (this->in_multem->is_subslicing())
 					{
 						stream_data.c0[i].resize(c_nR);
 						stream_data.c1[i].resize(c_nR);
@@ -82,82 +82,82 @@ namespace mt
 				atom_Vp_h.resize(n_atoms_s);
 				atom_Vp.resize(n_atoms_s);
 
-				V_0.resize(this->input_multislice->grid_2d.nxy());
+				V_0.resize(this->in_multem->grid_2d.size());
 			}
 
-			/************************Host************************/
-			template<eDevice devn = dev>
-			enable_if_dev_host<devn, void>
-			operator()(const T &z_0, const T &z_e, const int &iatom_0, const int &iatom_e, Vector<T, dev> &V)
+			/***************************************** cpu *****************************************/
+			template <eDev devn = Dev>
+			enable_if_edev_cpu<devn, void>
+			operator()(const T& z_0, const T& z_e, const dt_int32& iatom_0, const dt_int32& iatom_e, Vctr<T, Dev>& V)
 			{
-				auto eval_cubic_poly = [](Stream<e_host> &stream, Grid_2d<T> &grid_2d, 
-				Vector<Atom_Vp<T>, e_host> &atom, Vector<T, dev> &M_o)
+				auto fcn_eval_poly3 = [](Stream<edev_cpu>& stream, Grid_2d<T>& grid_2d, 
+				Vctr<Ptc_pVp<T>, edev_cpu>& atom, Vctr<T, Dev>& mx_o)
 				{
-					if(stream.n_act_stream<= 0)
+					if (stream.n_stream_act<= 0)
 					{
 						return;
 					}
 
-					for(auto istream = 0; istream < stream.n_act_stream-1; istream++)
+					for(auto istm = 0; istm < stream.n_stream_act-1; istm++)
 					{
-						stream[istream] = std::thread(std::bind(host_detail::eval_cubic_poly<T>, std::ref(stream), std::ref(grid_2d), std::ref(atom[istream]), std::ref(M_o)));
+						stream[istm] = std::thread(std::bind(cpu_detail::fcn_eval_poly3<T>, std::ref(stream), std::ref(grid_2d), std::ref(atom[istm]), std::ref(mx_o)));
 					}
 
-					host_detail::eval_cubic_poly<T>(stream, grid_2d, atom[stream.n_act_stream-1], M_o);
+					cpu_detail::fcn_eval_poly3<T>(stream, grid_2d, atom[stream.n_stream_act-1], mx_o);
 
 					stream.synchronize();
 				};
 
 				mt::fill(*stream, V, T(0));
 
-				int iatoms = iatom_0;
+				dt_int32 iatoms = iatom_0;
 				while (iatoms <= iatom_e)
 				{
-					stream->set_n_act_stream(iatom_e-iatoms+1);
-					set_atom_Vp(z_0, z_e, iatoms, stream->n_act_stream, atom_Vp);
-					//get_cubic_poly_coef_Vz(*stream, atom_Vp);
-					eval_cubic_poly(*stream, this->input_multislice->grid_2d, atom_Vp, V);
-					iatoms += stream->n_act_stream;
+					stream->set_n_stream_act(iatom_e-iatoms+1);
+					set_atom_Vp(z_0, z_e, iatoms, stream->n_stream_act, atom_Vp);
+					// get_cubic_poly_coef_Vz(*stream, atom_Vp);
+					fcn_eval_poly3(*stream, this->in_multem->grid_2d, atom_Vp, V);
+					iatoms += stream->n_stream_act;
 				}
 
 				stream->synchronize();
 			}
 
-			/***********************Device***********************/
+			/*************************************** device ****************************************/
 		#ifdef __CUDACC__
-			template<eDevice devn = dev>
-			enable_if_dev_device<devn, void>
-			operator()(const T &z_0, const T &z_e, const int &iatom_0, const int &iatom_e, Vector<T, dev> &V)
+			template <eDev devn = Dev>
+			enable_if_edev_gpu<devn, void>
+			operator()(const T& z_0, const T& z_e, const dt_int32& iatom_0, const dt_int32& iatom_e, Vctr<T, Dev>& V)
 			{
-				auto get_eval_cubic_poly_gridBT = [](int natoms)->Grid_BT
+				auto get_eval_cubic_poly_gridBT = [](dt_int32 natoms)->D_Grid_Blk
 				{
-					Grid_BT grid_bt;
-					grid_bt.Blk = dim3(natoms, 1, 1);
-					grid_bt.Thr = dim3(c_thrnxny, c_thrnxny, 1);
+					D_Grid_Blk d_grid_blk;
+					d_grid_blk.grid = dim3(natoms, 1, 1);
+					d_grid_blk.blk = dim3(c_thr_2d_x, c_thr_2d_y, 1);
 
-					return grid_bt;
+					return d_grid_blk;
 				};
 
 				mt::fill(*stream, V, T(0));
 
-				int iatoms = iatom_0;
+				dt_int32 iatoms = iatom_0;
 				while (iatoms <= iatom_e)
 				{
-					int n_atoms = min(n_atoms_s, iatom_e-iatoms+1);
+					dt_int32 n_atoms = min(n_atoms_s, iatom_e-iatoms+1);
 					set_atom_Vp(z_0, z_e, iatoms, n_atoms, atom_Vp);
-					//get_cubic_poly_coef_Vz(*stream, atom_Vp_h);
+					// get_cubic_poly_coef_Vz(*stream, atom_Vp_h);
 
-					auto grid_bt = get_eval_cubic_poly_gridBT(n_atoms);
-					device_detail::eval_cubic_poly<T><<<grid_bt.Blk, grid_bt.Thr>>>(this->input_multislice->grid_2d, atom_Vp, V);
+					auto d_grid_blk = get_eval_cubic_poly_gridBT(n_atoms);
+					gpu_detail::fcn_eval_poly3<T><<<d_grid_blk.grid, d_grid_blk.blk>>>(this->in_multem->grid_2d, atom_Vp, V);
 
 					iatoms += n_atoms;
 				}
 			}
 		#endif
 
-			void operator()(const int &islice_0, const int &islice_e, Vector<T, dev> &V)
+			void operator()(const dt_int32& islice_0, const dt_int32& islice_e, Vctr<T, Dev>& V)
 			{
-				if((islice_0<0) || (islice_e>=this->slicing.slice.size()))
+				if ((islice_0<0) || (islice_e>=this->slicing.slice.size()))
 				{
 					mt::fill(*stream, V, 0.0);
 					return;
@@ -166,46 +166,46 @@ namespace mt
 				this->slicing.slice[islice_0].iatom_0, this->slicing.slice[islice_e].iatom_e, V);
 			}
 
-			void operator()(const int &islice_0, const int &islice_e)
+			void operator()(const dt_int32& islice_0, const dt_int32& islice_e)
 			{
 				this->operator()(islice_0, islice_e, V_0);
 			}
 
-			void operator()(const int &islice, Vector<T, dev> &V)
+			void operator()(const dt_int32& islice, Vctr<T, Dev>& V)
 			{
 				this->operator()(islice, islice, V);
 			}
 
-			void operator()(const int &islice)
+			void operator()(const dt_int32& islice)
 			{
 				this->operator()(islice, islice, V_0);
 			}
 
 			template <class TOutput_multislice>
-			void operator()(const int &islice, TOutput_multislice &output_multislice)
+			void operator()(const dt_int32& islice, TOutput_multislice &output_multem)
 			{
 				this->operator()(islice, islice, V_0);
-				mt::copy_to_host(output_multislice.stream, V_0, output_multislice.V[0]);
+				mt::cpy_to_host(output_multem.stream, V_0, output_multem.V[0]);
 			}
 
-			Vector<T, dev> V_0;
-			Stream<dev> *stream;
+			Vctr<T, Dev> V_0;
+			Stream<Dev> *stream;
 		private:
-			int n_atoms_s;
+			dt_int32 n_atoms_s;
 
 			struct Stream_Data
 			{
 				using value_type = T;
-				using size_type = std::size_t;
+				using size_type = dt_uint64;
 
-				static const eDevice device = e_host;
+				static const eDev device = edev_cpu;
 
 				size_type size() const
 				{
 					return iv.size();
 				}
 
-				void resize(const size_type &new_size)
+				void resize(const size_type& new_size)
 				{
 					iv.resize(new_size);
 					v.resize(new_size);
@@ -215,81 +215,81 @@ namespace mt
 					c3.resize(new_size);
 				}
 
-				Vector<Vector<int, dev>, e_host> iv;
-				Vector<Vector<T, dev>, e_host> v;
-				Vector<Vector<T, dev>, e_host> c0; 		// zero coefficient
-				Vector<Vector<T, dev>, e_host> c1; 		// first coefficient
-				Vector<Vector<T, dev>, e_host> c2; 		// second coefficient
-				Vector<Vector<T, dev>, e_host> c3; 		// third coefficient
+				Vctr<Vctr<dt_int32, Dev>, edev_cpu> iv;
+				Vctr<Vctr<T, Dev>, edev_cpu> v;
+				Vctr<Vctr<T, Dev>, edev_cpu> c0;		// zero coefficient
+				Vctr<Vctr<T, Dev>, edev_cpu> c1;		// first coefficient
+				Vctr<Vctr<T, Dev>, edev_cpu> c2;		// second coefficient
+				Vctr<Vctr<T, Dev>, edev_cpu> c3;		// third coefficient
 			};
 
-			void set_atom_Vp(const T &z_0, const T &z_e, int iatoms, int n_atoms, Vector<Atom_Vp<T>, dev> &atom_Vp)
+			void set_atom_Vp(const T& z_0, const T& z_e, dt_int32 iatoms, dt_int32 n_atoms, Vctr<Ptc_pVp<T>, Dev>& atom_Vp)
 			{
-				for(auto istream = 0; istream < n_atoms; istream++)
+				for(auto istm = 0; istm < n_atoms; istm++)
 				{
-					auto iZ = (this->atoms.Z[iatoms] % 1000)-1;
+					auto iZ = this->atoms.Z[iatoms]-1;
 					auto charge = this->atoms.charge[iatoms];
-					int icharge = atom_type[iZ].charge_to_idx(charge);
+					dt_int32 icharge = atom_type[iZ].charge_to_ind(charge);
 					auto &coef = atom_type[iZ].coef[icharge];
 
-					atom_Vp_h[istream].charge = charge;
-					atom_Vp_h[istream].x = this->atoms.x[iatoms];
-					atom_Vp_h[istream].y = this->atoms.y[iatoms];
-					atom_Vp_h[istream].occ = this->atoms.occ[iatoms];
-					atom_Vp_h[istream].R2_min = coef.R2_min();
-					atom_Vp_h[istream].R2_max = coef.R2_max();
-					atom_Vp_h[istream].R2 = raw_pointer_cast(coef.R2.data());
-					atom_Vp_h[istream].set_ix0_ixn(this->input_multislice->grid_2d, coef.R_max);
-					atom_Vp_h[istream].set_iy0_iyn(this->input_multislice->grid_2d, coef.R_max);
-					atom_Vp_h[istream].R2_tap = coef.R2_tap();
-					atom_Vp_h[istream].tap_cf = coef.tap_cf;
+					atom_Vp_h[istm].charge = charge;
+					atom_Vp_h[istm].x = this->atoms.x[iatoms];
+					atom_Vp_h[istm].y = this->atoms.y[iatoms];
+					atom_Vp_h[istm].occ = this->atoms.occ[iatoms];
+					atom_Vp_h[istm].R2_min = coef.R2_min();
+					atom_Vp_h[istm].R2_max = coef.R2_max();
+					atom_Vp_h[istm].R2 = raw_pointer_cast(coef.R2.data());
+					atom_Vp_h[istm].set_ix0_ixn(this->in_multem->grid_2d, coef.R_max);
+					atom_Vp_h[istm].set_iy0_iyn(this->in_multem->grid_2d, coef.R_max);
+					atom_Vp_h[istm].R2_tap = coef.R2_tap();
+					atom_Vp_h[istm].coef_tap = coef.coef_tap;
 
-					if(device==e_host)
+					if (device==edev_cpu)
 					{
-						atom_Vp_h[istream].iv = raw_pointer_cast(stream_data.iv[istream].data());
-						atom_Vp_h[istream].v = raw_pointer_cast(stream_data.v[istream].data());
+						atom_Vp_h[istm].iv = raw_pointer_cast(stream_data.iv[istm].data());
+						atom_Vp_h[istm].v = raw_pointer_cast(stream_data.v[istm].data());
 					}
 
-					if(this->input_multislice->is_subslicing())
+					if (this->in_multem->is_subslicing())
 					{
-						atom_Vp_h[istream].z0h = 0.5*(z_0 - this->atoms.z[iatoms]); 
-						atom_Vp_h[istream].zeh = 0.5*(z_e - this->atoms.z[iatoms]);
-						atom_Vp_h[istream].split = (atom_Vp_h[istream].z0h<0) && (0<atom_Vp_h[istream].zeh);
-						atom_Vp_h[istream].cl = raw_pointer_cast(coef.Vr.cl.data());
-						atom_Vp_h[istream].cnl = raw_pointer_cast(coef.Vr.cnl.data());
-						atom_Vp_h[istream].c0 = raw_pointer_cast(stream_data.c0[istream].data());
-						atom_Vp_h[istream].c1 = raw_pointer_cast(stream_data.c1[istream].data());
-						atom_Vp_h[istream].c2 = raw_pointer_cast(stream_data.c2[istream].data());
-						atom_Vp_h[istream].c3 = raw_pointer_cast(stream_data.c3[istream].data());
+						atom_Vp_h[istm].z0h = 0.5*(z_0 - this->atoms.z[iatoms]);
+						atom_Vp_h[istm].zeh = 0.5*(z_e - this->atoms.z[iatoms]);
+						atom_Vp_h[istm].split = (atom_Vp_h[istm].z0h<0) && (0<atom_Vp_h[istm].zeh);
+						atom_Vp_h[istm].cl = raw_pointer_cast(coef.Vr.cl.data());
+						atom_Vp_h[istm].cnl = raw_pointer_cast(coef.Vr.cnl.data());
+						atom_Vp_h[istm].c0 = raw_pointer_cast(stream_data.c0[istm].data());
+						atom_Vp_h[istm].c1 = raw_pointer_cast(stream_data.c1[istm].data());
+						atom_Vp_h[istm].c2 = raw_pointer_cast(stream_data.c2[istm].data());
+						atom_Vp_h[istm].c3 = raw_pointer_cast(stream_data.c3[istm].data());
 					}
 					else
 					{
-						atom_Vp_h[istream].c0 = raw_pointer_cast(coef.ciVR.c0.data());
-						atom_Vp_h[istream].c1 = raw_pointer_cast(coef.ciVR.c1.data());
-						atom_Vp_h[istream].c2 = raw_pointer_cast(coef.ciVR.c2.data());
-						atom_Vp_h[istream].c3 = raw_pointer_cast(coef.ciVR.c3.data());
+						atom_Vp_h[istm].c0 = raw_pointer_cast(coef.ciVR.c0.data());
+						atom_Vp_h[istm].c1 = raw_pointer_cast(coef.ciVR.c1.data());
+						atom_Vp_h[istm].c2 = raw_pointer_cast(coef.ciVR.c2.data());
+						atom_Vp_h[istm].c3 = raw_pointer_cast(coef.ciVR.c3.data());
 					}
 					iatoms++;
 				}
 				thrust::copy(atom_Vp_h.begin(), atom_Vp_h.begin()+n_atoms, atom_Vp.begin());
 			}
 			
-			void get_cubic_poly_coef_Vz(Stream<dev> &stream, Vector<Atom_Vp<T>, e_host> &atom_Vp)
+			void get_cubic_poly_coef_Vz(Stream<Dev>& stream, Vctr<Ptc_pVp<T>, edev_cpu>& atom_Vp)
 			{
-				if(this->input_multislice->is_subslicing())
+				if (this->in_multem->is_subslicing())
 				{
-					mt::linear_Vz(stream, this->input_multislice->potential_type, qz, atom_Vp);
-					mt::cubic_poly_coef(stream, atom_Vp);
+					mt::linear_Vz(stream, this->in_multem->pot_parm_typ, qz, atom_Vp);
+					mt::fcn_vd_2_coef_poly3(stream, atom_Vp);
 				}
 			}
 
-			Q1<T, dev> qz;
-			Vector<Atom_Type<T, dev>, e_host> atom_type; // Atom types
+			Quad_Coef_1d<T, Dev> qz;
+			Vctr<Atomic_Info_1<T, Dev>, edev_cpu> atom_type;		// Atom types
 
 			Stream_Data stream_data;
-			Vector<Atom_Vp<T>, e_host> atom_Vp_h;
-			Vector<Atom_Vp<T>, dev> atom_Vp;
+			Vctr<Ptc_pVp<T>, edev_cpu> atom_Vp_h;
+			Vctr<Ptc_pVp<T>, Dev> atom_Vp;
 	};
 
-} // namespace mt
+}
 #endif

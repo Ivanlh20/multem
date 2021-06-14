@@ -1,164 +1,277 @@
 /*
- * This file is part of MULTEM.
- * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+ * This file is part of Multem.
+ * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
  *
- * MULTEM is free software: you can redistribute it and/or modify
+ * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * Multem is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef XTL_BUILD_H
-#define XTL_BUILD_H
+	#define XTL_BUILD_H
 
-#ifdef _MSC_VER
-#pragma once
-#endif// _MSC_VER
+	#ifdef _MSC_VER
+		#pragma once
+	#endif 
 
-#include <vector>
-#include <cstdlib>
+	#include <vector>
+	#include <cstdlib>
+	#include <string>
 
-#include "types.cuh"
-#include "atomic_data_mt.hpp"
+	#include "types.cuh"
+	#include "particles.cuh"
+	#include "in_classes.cuh"
+	#include "space_group.hpp"
 
-namespace mt
-{
-	template <class T>
-	class Crystal_Spec{
-		public:
-			Crystal_Spec(): na(0), nb(0), nc(0), a(0), b(0), c(0){};
-
-			void operator()(const int &na_i, const int &nb_i, const int &nc_i, T a_i, T b_i, T c_i, Vector<Atom_Data<T>, e_host> &ulay_i, Atom_Data<T> &Atoms_o)
+	namespace mt
+	{
+		// from space group number to xtl system number
+		dt_int32 xtl_sgn_2_csn(const dt_int32& sgn)
+		{
+			if (fcn_chk_bound(sgn, 1, 3))					// triclinic or anorthic
 			{
-				na = na_i;
-				nb = nb_i;
-				nc = nc_i; 
-
-				a = a_i;
-				b = b_i;
-				c = c_i;
-
-				ulay.resize(ulay_i.size());
-				lays.resize(ulay_i.size()); 
-
-				for(auto i = 0; i < ulay.size(); i++)
-				{
-					ulay[i].set_atoms(ulay_i[i]);
-					lays[i].resize(ulay[i].size()*(na+1)*(nb+1));
-				}
-
-				auto nAtomslays = stack_layers(na, nb, a, b, c, ulay, lays);
-				Atoms_o.resize(nc*nAtomslays + lays[0].size());
-
-				Atoms_o.l_x = static_cast<T>(na)*a;
-				Atoms_o.l_y = static_cast<T>(nb)*b;
-
-				std::size_t l = 0;
-				for(auto k = 0; k < nc; k++)
-				{
-					for(auto i = 0; i < lays.size(); i++)
-					{
-						for(auto j = 0; j < lays[i].size(); j++)
-						{
-							Atoms_o.Z[l] = lays[i].Z[j];
-							Atoms_o.x[l] = lays[i].x[j];
-							Atoms_o.y[l] = lays[i].y[j];
-							Atoms_o.z[l] = lays[i].z[j] + c*static_cast<T>(k);
-							Atoms_o.sigma[l] = lays[i].sigma[j];
-							Atoms_o.occ[l] = lays[i].occ[j];
-							Atoms_o.region[l] = lays[i].region[j];
-							Atoms_o.charge[l] = lays[i].charge[j];
-							l++;
-						}
-					}
-				}
-
-				// Last layer
-				for(auto j = 0; j < lays[0].size(); j++)
-				{
-					Atoms_o.Z[l] = lays[0].Z[j];
-					Atoms_o.charge[l] = lays[0].charge[j];
-					Atoms_o.x[l] = lays[0].x[j];
-					Atoms_o.y[l] = lays[0].y[j];
-					Atoms_o.z[l] = lays[0].z[j] + c*static_cast<T>(nc);
-					Atoms_o.sigma[l] = lays[0].sigma[j];
-					Atoms_o.occ[l] = lays[0].occ[j];
-					Atoms_o.region[l] = lays[0].region[j];
-					Atoms_o.charge[l] = lays[0].charge[j];
-					l++;
-				}
-				Atoms_o.get_statistic();
+				return 1;
+			}
+			else if (fcn_chk_bound(sgn, 3, 16))				// monoclinic
+			{
+				return 2;
+			}
+			else if (fcn_chk_bound(sgn, 16, 75))			// orthorhombic
+			{
+				return 3;
+			}
+			else if (fcn_chk_bound(sgn, 75, 143))			// tetragonal
+			{
+				return 4;
+			}
+			else if (fcn_chk_bound(sgn, 143, 168))			// rhombohedral or trigonal
+			{
+				return 5;
+			}
+			else if (fcn_chk_bound(sgn, 168, 195))			// hexagonal
+			{
+				return 6;
+			}
+			else if (fcn_chk_bound(sgn, 195, 231))			// cubic
+			{
+				return 7;
 			}
 
-		private:
-			void ulayer_2_layer(const int &na, const int &nb, T a, T b, T c, Atom_Data<T> &ulay, Atom_Data<T> &lay)
+			return 1;
+		}
+
+		// from xtl system string to xtl system number
+		dt_int32 xtl_css_2_csn(std::string cs_str)
+		{
+			fcn_str_rtrim_ip(cs_str);
+
+			cs_str = mt::fcn_str_2_lower(cs_str);
+			//std::transform(cs_str.begin(), cs_str.end(), cs_str.begin(), ::tolower);
+
+			if (fcn_str_cmp(cs_str, "triclinic")||fcn_str_cmp(cs_str, "a"))				// triclinic or anorthic
 			{
-				T x, y;
+				return 1;
+			}
+			else if (fcn_str_cmp(cs_str, "monoclinic")||fcn_str_cmp(cs_str, "m")) 		// monoclinic
+			{
+				return 2;
+			}
+			else if (fcn_str_cmp(cs_str, "orthorhombic")||fcn_str_cmp(cs_str, "o")) 	// orthorhombic
+			{
+				return 3;
+			}
+			else if (fcn_str_cmp(cs_str, "tetragonal")||fcn_str_cmp(cs_str, "t")) 		// tetragonal
+			{
+				return 4;
+			}
+			else if (fcn_str_cmp(cs_str, "rhombohedral")||fcn_str_cmp(cs_str, "r")) 	// rhombohedral or trigonal
+			{
+				return 5;
+			}
+			else if (fcn_str_cmp(cs_str, "hexagonal")||fcn_str_cmp(cs_str, "h")) 		// hexagonal
+			{
+				return 6;
+			}
+			else if (fcn_str_cmp(cs_str, "cubic")||fcn_str_cmp(cs_str, "c")) 			// cubic
+			{
+				return 7;
+			}
 
-				T xmin = 0.0 - Epsilon<T>::rel; 
-				T xmax = na*a + Epsilon<T>::rel;
+			return 1;
+		}
 
-				T ymin = 0.0 - Epsilon<T>::rel; 
-				T ymax = nb*b + Epsilon<T>::rel;
+		// from xtl system number to space group range
+		std::pair<dt_int32, dt_int32> xtl_csn_2_sgr(const dt_int32& csn)
+		{
+			switch(csn)				
+			{
+				case 1:						// triclinic or anorthic
+					return {1, 2};
+				case 2:						// monoclinic
+					return {3, 15};
+				case 3:						// orthorhombic
+					return {16, 74};
+				case 4:						// tetragonal
+					return {75, 142};
+				case 5:						// rhombohedral or trigonal
+					return {143, 167};
+				case 6:						// hexagonal
+					return {168, 194};
+				case 7:						// cubic
+					return {195, 230};
+			}
 
-				std::size_t l = 0;
-				for(auto j = 0; j <= nb; j++)
+			return {0, 0};
+		}
+
+		// from xtl system string to space group range
+		std::pair<dt_int32, dt_int32> xtl_css_2_sgr(const std::string& cs_str)
+		{
+			auto csn = xtl_css_2_csn(cs_str);
+
+			return xtl_csn_2_sgr(csn);
+		}
+
+		template <class T>
+		class Xtl_Build{
+			public:
+				Xtl_Build(): na(0), nb(0), nc(0), a(0), b(0), c(0) {};
+
+				Xtl_Build(const In_Xtl_Build<T>& in_xtl_build)
 				{
-					for(auto i = 0; i <= na; i++)
+					set_in_data(in_xtl_build);
+				}
+
+				void set_in_data(const In_Xtl_Build<T>& in_xtl_build)
+				{
+					a = in_xtl_build.a;
+					b = in_xtl_build.b;
+					c = in_xtl_build.c;
+
+					alpha = in_xtl_build.alpha;
+					beta = in_xtl_build.beta;
+					gamma = in_xtl_build.gamma;
+
+					n_a = in_xtl_build.n_a;
+					n_b = in_xtl_build.n_b;
+					n_c = in_xtl_build.n_c;
+
+					sgn = in_xtl_build.sgn;
+					pbc = in_xtl_build.pbc;
+
+					asym_uc = in_xtl_build.asym_uc;
+					base = in_xtl_build.base;
+
+					if (in_xtl_build.base.size()==0)
 					{
-						for(auto k = 0; k < ulay.size(); k++)
+						base = space_group(asym_uc, sgn);
+					}
+				}
+			
+				Ptc_Atom<T> operator()() const
+				{
+					const auto dsm = direct_struct_metric();
+					const R_3d<T> box_n = R_3d<T>(T(n_a), T(n_b), T(n_c)) + T(1e-4);
+
+					const dt_int32 n_base = base.size();
+
+					dt_int32 nt_a = n_a;
+					dt_int32 nt_b = n_b;
+					dt_int32 nt_c = n_c;
+
+					if (!pbc)
+					{
+						nt_a++;
+						nt_b++;
+						nt_c++;
+					}
+					else
+					{
+						nt_a = max(1, nt_a);
+						nt_b = max(1, nt_b);
+						nt_c = max(1, nt_c);
+					}
+
+					Ptc_Atom<T> xtl;
+					xtl.reserve(nt_a*nt_b*nt_c*n_base);
+					xtl.cols_used = base.cols_used;
+
+					for(auto ic = 0; ic < nt_c; ic++)
+					{
+						for(auto ib = 0; ib < nt_b; ib++)
 						{
-							x = (i + ulay.x[k])*a;
-							y = (j + ulay.y[k])*b; 			
-							if(Check_Bound(x, xmin, xmax, y, ymin, ymax))
+							for(auto ia = 0; ia < nt_a; ia++)
 							{
-								lay.Z[l] = ulay.Z[k];
-								lay.x[l] = x;
-								lay.y[l] = y;
-								lay.z[l] = c*ulay.z[k];
-								lay.sigma[l] = ulay.sigma[k];
-								lay.occ[l] = ulay.occ[k];
-								lay.region[l] = ulay.region[k];
-								lay.charge[l] = ulay.charge[k];
-								l++;
+								for(auto ik = 0; ik < n_base; ik++)
+								{
+									auto atom = base.get(ik);
+
+									atom.x += T(ia);
+									atom.y += T(ib);
+									atom.z += T(ic);
+
+									if ((atom.x<box_n.x) && (atom.y<box_n.y) && (atom.z<box_n.z))
+									{
+										atom.set_pos(dsm*atom.get_pos());
+
+										xtl.push_back(atom);
+									}
+								}
 							}
 						}
 					}
-				}
-				lay.resize(l);
-			}
+					xtl.shrink_to_fit();
 
-			std::size_t stack_layers(const int &na, const int &nb, T a, T b, T c, Vector<Atom_Data<T>, e_host> &ulay, Vector<Atom_Data<T>, e_host> &lays)
-			{
-				std::size_t nAtoms_lays = 0;
-				for(auto i = 0; i < ulay.size(); i++)
+					return xtl;
+				}
+
+				Mx_3x3<T> direct_struct_metric() const
 				{
-					ulayer_2_layer(na, nb, a, b, c, ulay[i], lays[i]);
-					nAtoms_lays += lays[i].size();
+					T cos_alpha = cos(alpha);
+					T cos_beta = cos(beta);
+					T cos_gamma = cos(gamma);
+ 
+					T sin_gamma = sin(gamma);
+ 
+					T F_bga = cos_beta*cos_gamma - cos_alpha;
+ 
+					T vol2 = ::square(a*b*c)*(1-::square(cos_alpha)-::square(cos_beta)-::square(cos_gamma)+2*cos_alpha*cos_beta*cos_gamma);
+					T vol = ::sqrt(vol2);
+ 
+					return {a, 0, 0, b*cos_gamma, b*sin_gamma, 0, c*cos_beta, -c*F_bga/sin_gamma, vol/(a*b*sin_gamma)};
 				}
-				return nAtoms_lays;
-			}
 
-			int na;
-			int nb;
-			int nc;
+			private:
 
-			T a;
-			T b;
-			T c;
+				T a;		// lattice constant a
+				T b;		// lattice constant b
+				T c;		// lattice constant c
 
-			Vector<Atom_Data<T>, e_host> ulay;
-			Vector<Atom_Data<T>, e_host> lays;
-	};
+				T alpha;		// angle between b & c
+				T beta;		// angle between c & a
+				T gamma;		// angle between a & b
 
-} // namespace mt
+				dt_int32 n_a;
+				dt_int32 n_b;
+				dt_int32 n_c;
+
+				dt_int32 sgn;		// space group number
+				dt_bool pbc;
+
+				Ptc_Atom<T> asym_uc;		// normalized positions in the asymmetric unit cell
+				Ptc_Atom<T> base;		// normalized positions of atom in the unit cell
+				Space_Group<T> space_group;
+		};
+
+	}
 
 #endif

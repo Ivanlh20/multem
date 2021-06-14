@@ -1,116 +1,89 @@
 /*
- * This file is part of MULTEM.
- * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+ * This file is part of Multem.
+ * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
  *
- * MULTEM is free software: you can redistribute it and/or modify
+ * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * Multem is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
+#define MATLAB_BLAS_LAPACK
+
 #include "types.cuh"
-#include "matlab_types.cuh"
-#include "traits.cuh"
-#include "atomic_data_mt.hpp"
+#include "type_traits_gen.cuh"
+#include "particles.cuh"
 #include "spec.hpp"
-#include "input_multislice.cuh"
+#include "in_classes.cuh"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
+#include "matlab_multem_io.cuh"
 
-using mt::rmatrix_r;
+using mt::pMLD;
 
-template <class TInput_Multislice>
-void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice &input_multislice)
+template <class TIn_Multislice>
+void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem)
 {
-	using T_r = mt::Value_type<TInput_Multislice>;
+	using T_r = mt::Value_type<TIn_Multislice>;
 
-	input_multislice.interaction_model = mx_get_scalar_field<mt::eElec_Spec_Int_Model>(mx_input_multislice, "interaction_model");
-	input_multislice.potential_type = mt::ePT_Lobato_0_12;
+	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Model>(mex_in_multem, "interaction_model");
+	in_multem.pot_parm_typ = mt::ePPT_lobato_0_12;
 
-	/************** Electron-Phonon interaction model ******************/
-	input_multislice.pn_model = mx_get_scalar_field<mt::ePhonon_Model>(mx_input_multislice, "pn_model"); 
-	input_multislice.pn_coh_contrib = false;
-	input_multislice.pn_single_conf = true;
-	input_multislice.pn_nconf = mx_get_scalar_field<int>(mx_input_multislice, "pn_nconf");
-	input_multislice.pn_dim.set(mx_get_scalar_field<int>(mx_input_multislice, "pn_dim"));
-	input_multislice.pn_seed = mx_get_scalar_field<int>(mx_input_multislice, "pn_seed");
+	/************** Electron-Phonon_Par interaction model **************/
+	mex_read_phonon_par(mex_in_multem, in_multem.phonon_par);
+	in_multem.phonon_par.coh_contrib = true;
+	in_multem.phonon_par.single_conf = true;
 
 	/**************************** Specimen *****************************/
-	auto atoms = mx_get_matrix_field<rmatrix_r>(mx_input_multislice, "spec_atoms");
+	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
+	auto bs_y = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_y");
+	auto bs_z = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_z");
+	auto sli_thk = mex_get_num_from_field<T_r>(mex_in_multem, "spec_dz");
+	dt_bool pbc_xy = false;
 
-	auto lx = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_lx");
-	auto ly = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_ly");
-	auto lz = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_lz");
-	auto dz = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_dz");
-	bool pbc_xy = false; 
+	/************************* atomic positions ************************/
+	mex_read_atoms<T_r>(mex_in_multem, bs_x, bs_y, bs_z, sli_thk, in_multem.atoms);
 
-	auto ct_na = mx_get_scalar_field<int>(mx_input_multislice, "spec_cryst_na");
-	auto ct_nb = mx_get_scalar_field<int>(mx_input_multislice, "spec_cryst_nb");
-	auto ct_nc = mx_get_scalar_field<int>(mx_input_multislice, "spec_cryst_nc");
-	auto ct_a = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_a");
-	auto ct_b = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_b");
-	auto ct_c = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_c");
-	auto ct_x0 = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_x0");
-	auto ct_y0 = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_cryst_y0");
-
-	auto mx_spec_amorp = mxGetField(mx_input_multislice, 0, "spec_amorp");
-	mt::Vector<mt::Amorp_Lay_Info<T_r>, mt::e_host> amorp_lay_info(mxGetN(mx_spec_amorp));
-	for(auto i = 0; i<amorp_lay_info.size(); i++)
-	{
-		amorp_lay_info[i].z_0 = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_0");
-		amorp_lay_info[i].z_e = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "z_e");
-		amorp_lay_info[i].dz = mx_get_scalar_field<T_r>(mx_spec_amorp, i, "dz");
-	}
-
-	input_multislice.atoms.set_crystal_parameters(ct_na, ct_nb, ct_nc, ct_a, ct_b, ct_c, ct_x0, ct_y0);
-	input_multislice.atoms.set_amorphous_parameters(amorp_lay_info);
-	input_multislice.atoms.set_atoms(atoms.rows, atoms.cols, atoms.real, lx, ly, lz, dz);
-
-	/************************ Specimen rotation *************************/
-	input_multislice.spec_rot_theta = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_rot_theta")*mt::c_deg_2_rad;
-	input_multislice.spec_rot_u0 = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_u0");
-	input_multislice.spec_rot_u0.normalized();
-	input_multislice.spec_rot_center_type = mx_get_scalar_field<mt::eRot_Point_Type>(mx_input_multislice, "spec_rot_center_type");
-	input_multislice.spec_rot_center_p = mx_get_r3d_field<T_r>(mx_input_multislice, "spec_rot_center_p");
+	/************************ Specimen rotation ************************/
+	mex_read_rot_par<T_r>(mex_in_multem, in_multem.rot_par);
 
 	/************************ Potential slicing ************************/
-	input_multislice.potential_slicing = mx_get_scalar_field<mt::ePotential_Slicing>(mx_input_multislice, "potential_slicing");
+	in_multem.potential_slicing = mex_get_num_from_field<mt::ePot_Sli_Typ>(mex_in_multem, "potential_slicing");
 
 	/************************** xy sampling ****************************/
 	auto nx = 1024;
 	auto ny = 1024;
-	bool bwl = false;
+	dt_bool bwl = false;
 
-	input_multislice.grid_2d.set_input_data(nx, ny, lx, ly, dz, bwl, pbc_xy);
+	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thk, bwl, pbc_xy);
 
-	input_multislice.validate_parameters();
+	in_multem.validate_parameters();
  }
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[])
 {	
-	using my_type = float;
 	/*************************Input data**************************/
-	mt::Input_Multislice<my_type> input_multislice;
-	read_input_multislice(prhs[0], input_multislice);
+	mt::In_Multem<dt_float64> in_multem;
+	read_in_multem(prhs[0], in_multem);
 
-	mt::Spec<my_type> spec;
-	spec.set_input_data(&input_multislice);
-	spec.move_atoms(input_multislice.pn_nconf);
+	mt::Spec<dt_float64> spec;
+	spec.set_in_data(&in_multem);
+	spec.move_atoms(in_multem.phonon_par.nconf);
 
 	// /************************Output data**************************/
-	auto atomsM = mx_create_matrix<rmatrix_r>(spec.atoms.size(), 8, plhs[0]);
-	auto sliceM = mx_create_matrix<rmatrix_r>(spec.slicing.slice.size(), 6, plhs[1]);
+	auto atomsM = mex_create_pVctr<pMLD>(spec.atoms.size(), 8, plhs[0]);
+	auto sliceM = mex_create_pVctr<pMLD>(spec.slicing.slice.size(), 6, plhs[1]);
 
-	for(auto i = 0; i<atomsM.rows; i++)
+	for(auto i = 0; i < atomsM.rows; i++)
 	{
 		atomsM.real[0*atomsM.rows+i] = spec.atoms.Z[i];
 		atomsM.real[1*atomsM.rows+i] = spec.atoms.x[i];

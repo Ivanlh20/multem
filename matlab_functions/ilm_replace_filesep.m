@@ -1,4 +1,4 @@
-function[str]=ilm_replace_filesep(str, ss_rep)
+function[str] = ilm_replace_filesep(str, ss_rep)
     if nargin < 2
         ss_rep = filesep;
     end

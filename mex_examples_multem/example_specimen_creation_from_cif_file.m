@@ -1,7 +1,7 @@
 % Specimen creation
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
 
-clear all;clc;
+clear;clc;
 
 ncu = 2;
 rmsd_3d = 0.085;
@@ -23,8 +23,8 @@ pbc = true;
 
 figure(1); clf;
 subplot(1, 2, 1);
-ilm_show_crystal(0, atoms_0, false);
+ilm_show_xtl(0, atoms_0, false);
 title('pbc=false');
 subplot(1, 2, 2);
-ilm_show_crystal(0, atoms_1, false);
+ilm_show_xtl(0, atoms_1, false);
 title('pbc=true');

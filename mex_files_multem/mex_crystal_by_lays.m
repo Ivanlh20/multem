@@ -1,3 +1,3 @@
-clc; clear all;
+clc; clear;
 
 ilm_mex('release', 'ilc_crystal_by_lays.cpp', '../src');

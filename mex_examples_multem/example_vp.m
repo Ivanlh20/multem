@@ -1,11 +1,9 @@
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
-
 clear; clc;
 addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-Z = 49;
+Z = 78;
 charge = 0;
 
 Rmin = 1e-02; Rmax = 5.0; nR = 512;

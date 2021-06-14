@@ -1,19 +1,19 @@
 /*
- * This file is part of MULTEM.
- * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+ * This file is part of Multem.
+ * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
  *
- * MULTEM is free software: you can redistribute it and/or modify
+ * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * Multem is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef MICROSCOPE_EFFECTS_H
@@ -24,50 +24,48 @@
 #include "cpu_fcns.hpp"
 #include "gpu_fcns.cuh"
 #include "cgpu_fcns.cuh"
-#include "quadrature.hpp"
+#include "quad_data.cuh"
 
 namespace mt
 {
-	template <class T, eDevice dev>
+	template <class T, eDev Dev>
 	class Microscope_Effects
 	{
 		public:
 			using T_r = T;
 			using T_c = complex<T>;
 
-			Microscope_Effects(): input_multislice(nullptr), stream(nullptr), fft_2d(nullptr){}			
+			Microscope_Effects(): in_multem(nullptr), stream(nullptr), fft_2d(nullptr) {}			
 			
-			void set_input_data(Input_Multislice<T_r> *input_multislice_i, Stream<dev> *stream_i, FFT<T_r, dev> *fft2_i)
+			void set_in_data(In_Multem<T_r> *in_multem_i, Stream<Dev> *stream_i, FFT<T_r, Dev> *fft2_i)
 			{
-				input_multislice = input_multislice_i;
+				in_multem = in_multem_i;
 				stream = stream_i;
 				fft_2d = fft2_i;
 
-				psi.resize(input_multislice->grid_2d.nxy());
+				psi.resize(in_multem->grid_2d.size());
 
-				if((input_multislice->illumination_model == eIM_Coherent)||(input_multislice->illumination_model == eIM_Partial_Coherent))
+				if ((in_multem->illumination_model == eIM_Coherent)||(in_multem->illumination_model == eIM_Partial_Coherent))
 				{
 					return;
 				}
 
 				// Load quadratures
-				obj_lens_temporal_spatial_quadratures(input_multislice->obj_lens, qt, qs);
+				obj_lens_temporal_spatial_quadratures(in_multem->obj_lens, qt, qs);
 			}
 
-			void operator()(Vector<T_c, dev> &fpsi, Vector<T_r, dev> &m2psi_tot)
+			void operator()(Vctr<T_c, Dev>& fpsi, Vctr<T_r, Dev>& m2psi_tot)
 			{
-				switch(input_multislice->illumination_model)
+				switch(in_multem->illumination_model)
 				{
 					case eIM_Coherent:
 					{
-						CTF_TEM(input_multislice->temporal_spatial_incoh, fpsi, psi);
-						mt::square(*stream, psi, m2psi_tot);
+						CTF_TEM(in_multem->temporal_spatial_incoh, fpsi, m2psi_tot);
 					}
 					break;
 					case eIM_Partial_Coherent:
 					{
-						PCTF_LI_WPO_TEM(input_multislice->temporal_spatial_incoh, fpsi, psi);
-						mt::square(*stream, psi, m2psi_tot);
+						PCTF_LI_WPO_TEM(in_multem->temporal_spatial_incoh, fpsi, m2psi_tot);
 					}
 					break;
 					case eIM_Trans_Cross_Coef:
@@ -77,83 +75,63 @@ namespace mt
 					break;
 					case eIM_Full_Integration:
 					{
-						num_int_TEM(input_multislice->temporal_spatial_incoh, fpsi, m2psi_tot);
+						num_int_TEM(in_multem->temporal_spatial_incoh, fpsi, m2psi_tot);
 					}
 					break;
 				}
 			}
 
 			template <class TOutput_multislice>
-			void operator()(TOutput_multislice &output_multislice)
+			void operator()(TOutput_multislice &output_multem)
 			{
-				Vector<T_c, dev> psi(input_multislice->iw_psi.begin(), input_multislice->iw_psi.end());
-				mt::fft2_shift(*stream, input_multislice->grid_2d, psi);
+				Vctr<T_c, Dev> psi(in_multem->iw_psi.begin(), in_multem->iw_psi.end());
+				mt::fcn_fftsft_2d(*stream, in_multem->grid_2d, psi);
 				fft_2d->forward(psi);
-				mt::scale(*stream, input_multislice->grid_2d.inxy(), psi);
-				Vector<T_r, dev> m2psi_tot(input_multislice->grid_2d.nxy());
+				mt::fcn_scale(*stream, in_multem->grid_2d.isize_r(), psi);
+
+				Vctr<T_r, Dev> m2psi_tot(in_multem->grid_2d.size());
 				this->operator()(psi, m2psi_tot);
-				mt::fft2_shift(*stream, input_multislice->grid_2d, m2psi_tot);
-
-				mt::copy_to_host(output_multislice.stream, m2psi_tot, output_multislice.m2psi_tot[0]);
-			}
-
-			template <class TOutput_multislice>
-			void apply_ctf(TOutput_multislice &output_multislice)
-			{
-				Vector<T_c, dev> psi(input_multislice->iw_psi.begin(), input_multislice->iw_psi.end());
-
-				mt::fft2_shift(*stream, input_multislice->grid_2d, psi);
-				fft_2d->forward(psi);
-				mt::scale(*stream, input_multislice->grid_2d.inxy(), psi);
-				if (input_multislice->is_illu_mod_coherent())
-				{
-					CTF_TEM(input_multislice->temporal_spatial_incoh, psi, psi);
-				}
-				else
-				{
-					PCTF_LI_WPO_TEM(input_multislice->temporal_spatial_incoh, psi, psi);
-				}
-				mt::fft2_shift(*stream, input_multislice->grid_2d, psi);
-
-				mt::copy_to_host(output_multislice.stream, psi, output_multislice.psi_coh[0]);
+				mt::cpy_to_host(output_multem.stream, m2psi_tot, output_multem.m2psi_tot[0]);
 			}
 
 		private:
-			void CTF_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<T_c, dev> &fpsi, Vector<T_c, dev> &psi)
+			void CTF_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vctr<T_c, Dev>& fpsi, Vctr<T_r, Dev>& m2psi_tot)
 			{
-				mt::apply_CTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, 0, 0, fpsi, psi);
+				mt::fcn_apply_ctf(*stream, in_multem->grid_2d, in_multem->obj_lens, 0, 0, fpsi, psi);
 				fft_2d->inverse(psi);
+				mt::square(*stream, psi, m2psi_tot);
 			}
 
-			void PCTF_LI_WPO_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<T_c, dev> &fpsi, Vector<T_c, dev> &psi)
+			void PCTF_LI_WPO_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vctr<T_c, Dev>& fpsi, Vctr<T_r, Dev>& m2psi_tot)
 			{
-				T_r ti_sigma = input_multislice->obj_lens.ti_sigma;
-				T_r si_sigma = input_multislice->obj_lens.si_sigma;
+				T_r tp_inc_sigma = in_multem->obj_lens.tp_inc_sigma;
+				T_r spt_inc_sigma = in_multem->obj_lens.spt_inc_sigma;
 
 				switch(temporal_spatial_incoh)
 				{
 					case eTSI_Temporal:	// Temporal
 					{
-						input_multislice->obj_lens.set_si_sigma(0);
+						in_multem->obj_lens.set_spt_inc_sigma(0);
 					}
 					break;
 					case eTSI_Spatial:	// Spatial
 					{
-						input_multislice->obj_lens.set_ti_sigma(0);
+						in_multem->obj_lens.set_tp_inc_sigma(0);
 					}
 					break;
 				}
 
-				mt::apply_PCTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, fpsi, psi);
+				mt::fcn_apply_pctf(*stream, in_multem->grid_2d, in_multem->obj_lens, fpsi, psi);
 				fft_2d->inverse(psi);
+				mt::square(*stream, psi, m2psi_tot);
 
-				input_multislice->obj_lens.set_ti_sigma(ti_sigma);
-				input_multislice->obj_lens.set_si_sigma(si_sigma);
+				in_multem->obj_lens.set_tp_inc_sigma(tp_inc_sigma);
+				in_multem->obj_lens.set_spt_inc_sigma(spt_inc_sigma);
 			}
 
-			void num_int_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vector<T_c, dev> &fpsi, Vector<T_r, dev> &m2psi_tot)
+			void num_int_TEM(const eTemporal_Spatial_Incoh &temporal_spatial_incoh, Vctr<T_c, Dev>& fpsi, Vctr<T_r, Dev>& m2psi_tot)
 			{
-				T_r c_10_0 = input_multislice->obj_lens.c_10;
+				T_r c_10_0 = in_multem->obj_lens.c_10;
 
 				fill(*stream, m2psi_tot, 0.0);
 				switch(temporal_spatial_incoh)
@@ -164,12 +142,12 @@ namespace mt
 						{
 							for(auto j = 0; j<qt.size(); j++)
 							{
-								auto c_10 = input_multislice->obj_lens.ti_iehwgd*qt.x[j]+c_10_0;
-								input_multislice->obj_lens.set_defocus(c_10); 
+								auto c_10 = in_multem->obj_lens.tp_inc_iehwgd*qt.x[j]+c_10_0;
+								in_multem->obj_lens.set_defocus(c_10);
 								
-								mt::apply_CTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, qs.x[i], qs.y[i], fpsi, psi);
+								mt::fcn_apply_ctf(*stream, in_multem->grid_2d, in_multem->obj_lens, qs.x[i], qs.y[i], fpsi, psi);
 								fft_2d->inverse(psi);
-								mt::add_scale_square(*stream, qs.w[i]*qt.w[j], psi, m2psi_tot);
+								mt::add_scale_norm_2(*stream, qs.w[i]*qt.w[j], psi, m2psi_tot);
 							}
 						}
 					}
@@ -178,12 +156,12 @@ namespace mt
 					{
 						for(auto j = 0; j<qt.size(); j++)
 						{
-							auto c_10 = input_multislice->obj_lens.ti_iehwgd*qt.x[j]+c_10_0;
-							input_multislice->obj_lens.set_defocus(c_10); 
+							auto c_10 = in_multem->obj_lens.tp_inc_iehwgd*qt.x[j]+c_10_0;
+							in_multem->obj_lens.set_defocus(c_10);
 
-							mt::apply_CTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, 0.0, 0.0, fpsi, psi);
+							mt::fcn_apply_ctf(*stream, in_multem->grid_2d, in_multem->obj_lens, 0.0, 0.0, fpsi, psi);
 							fft_2d->inverse(psi);
-							mt::add_scale_square(*stream, qt.w[j], psi, m2psi_tot);
+							mt::add_scale_norm_2(*stream, qt.w[j], psi, m2psi_tot);
 						}
 					}
 					break;
@@ -191,26 +169,26 @@ namespace mt
 					{
 						for(auto i = 0; i<qs.size(); i++)
 						{
-							mt::apply_CTF(*stream, input_multislice->grid_2d, input_multislice->obj_lens, qs.x[i], qs.y[i], fpsi, psi);
+							mt::fcn_apply_ctf(*stream, in_multem->grid_2d, in_multem->obj_lens, qs.x[i], qs.y[i], fpsi, psi);
 							fft_2d->inverse(psi);
-							mt::add_scale_square(*stream, qs.w[i], psi, m2psi_tot);
+							mt::add_scale_norm_2(*stream, qs.w[i], psi, m2psi_tot);
 						}
 					}
 				}
 
-				input_multislice->obj_lens.set_defocus(c_10_0);
+				in_multem->obj_lens.set_defocus(c_10_0);
 			}
 			
-			Input_Multislice<T_r> *input_multislice;
-			Stream<dev> *stream;
-			FFT<T_r, dev> *fft_2d;
+			In_Multem<T_r> *in_multem;
+			Stream<Dev> *stream;
+			FFT<T_r, Dev> *fft_2d;
 
-			Vector<T_c, dev> psi;
+			Vctr<T_c, Dev> psi;
 
-			Q1<T_r, e_host> qt;
-			Q2<T_r, e_host> qs;
+			Quad_Coef_1d<T_r, edev_cpu> qt;
+			Quad_Coef_2d<T_r, edev_cpu> qs;
 	};
 
-} // namespace mt
+}
 
 #endif

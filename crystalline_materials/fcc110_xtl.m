@@ -11,17 +11,19 @@ function [atoms, lx, ly, lz, a, b, c, dz] = fcc110_xtl(Z, l_c, na, nb, nc, ncu, 
     xtl_parm.beta = 90;
     xtl_parm.gamma = 90;
 
-    xtl_parm.nuLayer = 2;
+    xtl_parm.sgn = 1;
+    xtl_parm.pbc = false;
+    xtl_parm.asym_uc = [];
 
     occ = 1;
     region = 0;
     charge = 0;
     
     % Z x y z rmsd_3d occupancy region charge
-    xtl_parm.uLayer(1).atoms = [Z, 0.0, 0.0, 0.0, rmsd_3d, occ, region, charge];
-    xtl_parm.uLayer(2).atoms = [Z, 0.5, 0.5, 0.5, rmsd_3d, occ, region, charge];    
-
-    atoms = ilc_crystal_by_lays(xtl_parm);
+    xtl_parm.base = [Z, 0.00, 0.00, 0.00, rmsd_3d, occ, region, charge;...
+                        Z, 0.50, 0.50, 0.50, rmsd_3d, occ, region, charge];
+                    
+    atoms = ilc_xtl_build(xtl_parm);
 
     dz = xtl_parm.c/ncu;
     

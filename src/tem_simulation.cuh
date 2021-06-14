@@ -1,19 +1,19 @@
 /*
- * This file is part of MULTEM.
+ * This file is part of Multem.
  * Copyright 2014 Ivan Lobato <Ivanlh20@gmail.com>
  *
- * MULTEM is free software: you can redistribute it and/or modify
+ * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * Multem is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef TEM_SIMULATION_H
@@ -22,219 +22,200 @@
 #include <fftw3.h>
 #include "math.cuh"
 #include "types.cuh"
-#include "traits.cuh"
-#include "input_multislice.cuh"
-#include "output_multislice.hpp"
+#include "type_traits_gen.cuh"
+#include "in_classes.cuh"
+#include "output_multem.hpp"
 #include "cpu_fcns.hpp"
 #include "gpu_fcns.cuh"
 #include "cgpu_fcns.cuh"
 #include "energy_loss.cuh"
 #include "wave_function.cuh"
 #include "timing.cuh"
-#include "matlab_mex.cuh"
 
 namespace mt
 {
-	template <class T, eDevice dev>
-	class Multislice
+	template <class T, eDev Dev>
+	class Tem_Simulation
 	{
 		public:
 			using T_r = T;
 			using T_c = complex<T>;
 
-			static const eDevice device = dev;
+			static const eDev device = Dev;
 
-			static bool ext_stop_sim;
-			static int ext_niter;
-			static int ext_iter;
+			static dt_bool ext_stop_sim;
+			static dt_int32 ext_niter;
+			static dt_int32 ext_iter;
 
-			void set_input_data(Input_Multislice<T_r> *input_multislice_i, Stream<dev> *stream_i, FFT<T_r, dev> *fft2_i)
+			Tem_Simulation(): in_multem(nullptr) {}
+
+			Tem_Simulation(In_Multem<T> *in_multem_i)
 			{
-				input_multislice = input_multislice_i;
-				stream = stream_i;
-				fft_2d = fft2_i;
+				set_in_data(in_multem_i);
+			}
 
-				if(input_multislice->is_EELS_EFTEM())
+			void set_in_data(In_Multem<T> *in_multem_i)
+			{
+				in_multem = in_multem_i;
+
+				stream.resize(in_multem->system_config.n_stream);
+
+				fft_2d.create_plan_2d(in_multem->grid_2d.ny, in_multem->grid_2d.nx, in_multem->system_config.n_stream);
+
+				if (in_multem->is_EELS_EFTEM())
 				{
-					energy_loss.set_input_data(input_multislice, stream, fft_2d);
-					psi_thk.resize(input_multislice->grid_2d.nxy());
-					if(input_multislice->eels_fr.is_Mixed_Channelling())
+					energy_loss.set_in_data(in_multem, &stream, &fft_2d);
+					psi_thk.resize(in_multem->grid_2d.size());
+					if (in_multem->eels_fr.is_Mixed_Chan())
 					{
-						trans_thk.resize(input_multislice->grid_2d.nxy());
+						trans_thk.resize(in_multem->grid_2d.size());
 					}
 				}
 
-				wave_function.set_input_data(input_multislice, stream, fft_2d);
+				wave_function.set_in_data(in_multem, &stream, &fft_2d);
 			}
 
 			template <class TOutput_multislice>
-			void operator()(TOutput_multislice &output_multislice)
+			void operator()(TOutput_multislice &output_multem)
 			{
-				if(input_multislice->is_STEM_ISTEM())
+				if (in_multem->is_STEM_ISTEM())
 				{
-					STEM_ISTEM(output_multislice);
+					STEM_ISTEM(output_multem);
 				}
-				else if(input_multislice->is_CBED_CBEI())
+				else if (in_multem->is_CBED_CBEI())
 				{
-					CBED_CBEI(output_multislice);
+					CBED_CBEI(output_multem);
 				}
-				else if(input_multislice->is_ED_HRTEM())
+				else if (in_multem->is_ED_HRTEM())
 				{
-					ED_HRTEM(output_multislice);
+					ED_HRTEM(output_multem);
 				}
-				else if(input_multislice->is_PED_HCTEM())
+				else if (in_multem->is_PED_HCTEM())
 				{
-					PED_HCTEM(output_multislice);
+					PED_HCTEM(output_multem);
 				}
-				else if(input_multislice->is_EWFS_EWRS())
+				else if (in_multem->is_EWFS_EWRS())
 				{
-					EWFS_EWRS(output_multislice);
+					EWFS_EWRS(output_multem);
 				}
-				else if(input_multislice->is_EELS_EFTEM())
+				else if (in_multem->is_EELS_EFTEM())
 				{
-					EELS_EFTEM(output_multislice);
+					EELS_EFTEM(output_multem);
 				}
+
+				stream.synchronize();
+
+				output_multem.gather();
+				output_multem.clean_temporal();
+			}
+
+			void cleanup()
+			{
+				psi_thk.clear();
+				trans_thk.clear();
+
+				fft_2d.cleanup();
+				stream.cleanup();
 			}
 
 		private:
 			template <class TOutput_multislice>
-			void STEM_ISTEM(TOutput_multislice &output_multislice)
+			void STEM_ISTEM(TOutput_multislice &output_multem)
 			{
-				ext_niter = input_multislice->scanning.size()*input_multislice->number_conf();
+				ext_niter = in_multem->scanning.size()*in_multem->number_pn_conf();
 				ext_iter = 0;
-				/*****************************************************************/
+				/***************************************************************************************/
 
-				T_r w_pr_0 = input_multislice->get_phonon_rot_weight();
+				T_r w = in_multem->get_phonon_rot_weight();
 
-				output_multislice.init();
+				output_multem.init();
 
-				input_multislice->iscan.resize(1);
-				input_multislice->beam_x.resize(1);
-				input_multislice->beam_y.resize(1);
+				in_multem->ibeam.resize(1);
+				in_multem->beam_x.resize(1);
+				in_multem->beam_y.resize(1);
 
-				if(input_multislice->is_STEM() && input_multislice->pn_coh_contrib)
+				
+				if (in_multem->is_STEM() && in_multem->phonon_par.coh_contrib)
 				{
-					for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
+					for(auto ibeam = 0; ibeam < in_multem->scanning.size(); ibeam++)
 					{	
-						output_multislice.init_psi_coh();
-						input_multislice->iscan[0] = iscan;
-						input_multislice->set_iscan_beam_position();	
-						for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
+						output_multem.init_psi_coh();
+						in_multem->ibeam[0] = ibeam;
+						in_multem->set_iscan_beam_position();
+						for(auto iconf = in_multem->phonon_par.iconf_0; iconf <= in_multem->phonon_par.nconf; iconf++)
 						{
 							wave_function.move_atoms(iconf);
 							wave_function.set_incident_wave(wave_function.psi_z);
-							wave_function.psi(w_pr_0, wave_function.psi_z, output_multislice);
+							wave_function.psi(w, wave_function.psi_z, output_multem);
 
 							ext_iter++;
-							if(ext_stop_sim) break;
+							if (ext_stop_sim) break;
 						}
-						wave_function.set_m2psi_coh(output_multislice);
+						wave_function.set_m2psi_coh(output_multem);
 
-						if(ext_stop_sim) break;
+						if (ext_stop_sim) break;
 					}
 				}
 				else
 				{
-					if(input_multislice->is_illu_mod_full_integration())
+					for(auto iconf = in_multem->phonon_par.iconf_0; iconf <= in_multem->phonon_par.nconf; iconf++)
 					{
-						Q1<double, e_host> qt;
-						Q2<double, e_host> qs;
-
-						ext_niter *= qt.size();
-						
-						// Load quadratures
-						cond_lens_temporal_spatial_quadratures(input_multislice->cond_lens, qt, qs);
-						double c_10_0 = input_multislice->cond_lens.c_10;
-						
-						for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
+						wave_function.move_atoms(iconf);
+						for(auto ibeam = 0; ibeam < in_multem->scanning.size(); ibeam++)
 						{
-							wave_function.move_atoms(iconf);
-							
-							// temporal incoherence
-							for(auto itemp = 0; itemp<qt.size(); itemp++)
-							{
-								auto c_10 = c_10_0 + qt.x[itemp];
-								auto w = w_pr_0*qt.w[itemp];
-								input_multislice->cond_lens.set_defocus(c_10); 
-								
-								for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
-								{
-									input_multislice->iscan[0] = iscan;
-									input_multislice->set_iscan_beam_position();
-									wave_function.set_incident_wave(wave_function.psi_z);
-									wave_function.psi(w, wave_function.psi_z, output_multislice);
+							in_multem->ibeam[0] = ibeam;
+							in_multem->set_iscan_beam_position();
+							wave_function.set_incident_wave(wave_function.psi_z);
+							wave_function.psi(w, wave_function.psi_z, output_multem);
 
-									ext_iter++;
-									if(ext_stop_sim) break;
-								}
-								if(ext_stop_sim) break;
-							}
-							if(ext_stop_sim) break;
+							ext_iter++;
+							if (ext_stop_sim) break;
 						}
-
-						wave_function.set_m2psi_coh(output_multislice);
-						
-						input_multislice->cond_lens.set_defocus(c_10_0);
+						if (ext_stop_sim) break;
 					}
-					else
-					{
-						for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
-						{
-							wave_function.move_atoms(iconf);	
-							for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
-							{
-								input_multislice->iscan[0] = iscan;
-								input_multislice->set_iscan_beam_position();
-								wave_function.set_incident_wave(wave_function.psi_z);
-								wave_function.psi(w_pr_0, wave_function.psi_z, output_multislice);
 
-								ext_iter++;
-								if(ext_stop_sim) break;
-							}
-							if(ext_stop_sim) break;
-						}
-
-						wave_function.set_m2psi_coh(output_multislice);
-					}
+					wave_function.set_m2psi_coh(output_multem);
 				}
 			}
 
 			template <class TOutput_multislice>
-			void CBED_CBEI(TOutput_multislice &output_multislice)
+			void CBED_CBEI(TOutput_multislice &output_multem)
 			{
-				output_multislice.init();
+				output_multem.init();
 
-				if(input_multislice->is_illu_mod_full_integration())
+				in_multem->ibeam.resize(1);
+				in_multem->beam_x.resize(1);
+				in_multem->beam_y.resize(1);
+
+				Quad_Coef_1d<dt_float64, edev_cpu> qt;
+				Quad_Coef_2d<dt_float64, edev_cpu> qs;
+
+				// Load quadratures
+				cond_lens_temporal_spatial_quadratures(in_multem->cond_lens, qt, qs);
+
+				/***************************************************************************************/
+				dt_float64 w_pr_0 = in_multem->get_phonon_rot_weight();
+				dt_float64 c_10_0 = in_multem->cond_lens.c_10;
+				const dt_int32 n_beams = in_multem->number_of_beams();
+
+				ext_niter = qs.size()*qt.size()*in_multem->number_pn_conf();
+				ext_iter = 0;
+
+				for(auto iconf = in_multem->phonon_par.iconf_0; iconf <= in_multem->phonon_par.nconf; iconf++)
 				{
-					Q1<double, e_host> qt;
-					Q2<double, e_host> qs;
+					wave_function.move_atoms(iconf);
 
-					// Load quadratures
-					cond_lens_temporal_spatial_quadratures(input_multislice->cond_lens, qt, qs);
-
-					/*****************************************************************/
-					double w_pr_0 = input_multislice->get_phonon_rot_weight();
-					double c_10_0 = input_multislice->cond_lens.c_10;
-					const int nbeams = input_multislice->number_of_beams();
-
-					Vector<T_r, e_host> beam_x(nbeams);
-					Vector<T_r, e_host> beam_y(nbeams);
-
-					ext_niter = qs.size()*qt.size()*input_multislice->number_conf();
-					ext_iter = 0;
-
-					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
+					for(auto ibeam=0; ibeam<n_beams; ibeam++)
 					{
-						wave_function.move_atoms(iconf);		
+						in_multem->ibeam[0] = ibeam;
+						in_multem->beam_x[0] = in_multem->beam_x[ibeam];
+						in_multem->beam_y[0] = in_multem->beam_y[ibeam];
 
 						// spatial incoherence
 						for(auto ispat = 0; ispat<qs.size(); ispat++)
 						{
-							for(auto ibeam = 0; ibeam<nbeams; ibeam++)
-							{
-								beam_x[ibeam] = input_multislice->iw_x[ibeam] + qs.x[ispat];
-								beam_y[ibeam] = input_multislice->iw_y[ibeam] + qs.y[ispat];
-							}
+							auto beam_x = qs.x[ispat] + in_multem->beam_x[0];
+							auto beam_y = qs.y[ispat] + in_multem->beam_y[0];
 
 							// temporal incoherence
 							for(auto itemp = 0; itemp<qt.size(); itemp++)
@@ -242,281 +223,380 @@ namespace mt
 								auto c_10 = c_10_0 + qt.x[itemp];
 								auto w = w_pr_0*qs.w[ispat]*qt.w[itemp];
 
-								input_multislice->cond_lens.set_defocus(c_10); 
+								in_multem->cond_lens.set_defocus(c_10);
 								wave_function.set_incident_wave(wave_function.psi_z, beam_x, beam_y);
-								wave_function.psi(w, wave_function.psi_z, output_multislice);
+								wave_function.psi(w, wave_function.psi_z, output_multem);
 
 								ext_iter++;
-								if(ext_stop_sim) break;
+								if (ext_stop_sim) break;
 							}
-							if(ext_stop_sim) break;
 						}
-
-						if(ext_stop_sim) break;
 					}
-					wave_function.set_m2psi_coh(output_multislice);
 
-					input_multislice->cond_lens.set_defocus(c_10_0);
-					input_multislice->set_beam_position(input_multislice->iw_x, input_multislice->iw_y);
+					if (ext_stop_sim) break;
 				}
-				else
-				{
-					EWFS_EWRS(output_multislice);
-				}
+				wave_function.set_m2psi_coh(output_multem);
+
+				in_multem->cond_lens.set_defocus(c_10_0);
+				in_multem->set_beam_position(in_multem->beam_x, in_multem->beam_y);
 			}
 
 			template <class TOutput_multislice>
-			void ED_HRTEM(TOutput_multislice &output_multislice)
+			void ED_HRTEM(TOutput_multislice &output_multem)
 			{
-				EWFS_EWRS(output_multislice);
+				EWFS_EWRS(output_multem);
 			}
 
 			template <class TOutput_multislice>
-			void PED_HCTEM(TOutput_multislice &output_multislice)
+			void PED_HCTEM(TOutput_multislice &output_multem)
 			{
-				ext_niter = input_multislice->nrot*input_multislice->number_conf();
+				ext_niter = in_multem->nrot*in_multem->number_pn_conf();
 				ext_iter = 0;
-				/*****************************************************************/
+				/***************************************************************************************/
 
-				T_r w = input_multislice->get_phonon_rot_weight();
+				T_r w = in_multem->get_phonon_rot_weight();
 
-				output_multislice.init();
+				output_multem.init();
 
-				for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
+				for(auto iconf = in_multem->phonon_par.iconf_0; iconf <= in_multem->phonon_par.nconf; iconf++)
 				{
-					wave_function.move_atoms(iconf);		
-					for(auto irot = 0; irot < input_multislice->nrot; irot++)
+					wave_function.move_atoms(iconf);
+					for(auto irot = 0; irot < in_multem->nrot; irot++)
 					{
-						input_multislice->set_phi(irot);
+						in_multem->set_phi(irot);
 						wave_function.set_incident_wave(wave_function.psi_z);
-						wave_function.psi(w, wave_function.psi_z, output_multislice);
+						wave_function.psi(w, wave_function.psi_z, output_multem);
 
 						ext_iter++;
-						if(ext_stop_sim) break;
+						if (ext_stop_sim) break;
 					}
-					if(ext_stop_sim) break;
+					if (ext_stop_sim) break;
 				}
 
-				wave_function.set_m2psi_coh(output_multislice);
+				wave_function.set_m2psi_coh(output_multem);
 			}
 
 			template <class TOutput_multislice>
-			void EWFS_EWRS(TOutput_multislice &output_multislice)
+			void EWFS_EWRS(TOutput_multislice &output_multem)
 			{
-				ext_niter = input_multislice->number_conf();
+				ext_niter = in_multem->number_pn_conf();
 				ext_iter = 0;
-				/*****************************************************************/
+				/***************************************************************************************/
 
-				T_r w = input_multislice->get_phonon_rot_weight();
+				T_r w = in_multem->get_phonon_rot_weight();
 
-				output_multislice.init();
+				output_multem.init();
 
-				for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
+				for(auto iconf = in_multem->phonon_par.iconf_0; iconf <= in_multem->phonon_par.nconf; iconf++)
 				{
 					wave_function.move_atoms(iconf);
 
 					wave_function.set_incident_wave(wave_function.psi_z);
 
-					wave_function.psi(w, wave_function.psi_z, output_multislice);
+					wave_function.psi(w, wave_function.psi_z, output_multem);
 
 					ext_iter++;
-					if(ext_stop_sim) break;
+					if (ext_stop_sim) break;
 				}
 
-				wave_function.set_m2psi_coh(output_multislice);
+				wave_function.set_m2psi_coh(output_multem);
 			}
 
 			template <class TOutput_multislice>
-			void EELS_EFTEM(TOutput_multislice &output_multislice)
+			void EELS_EFTEM(TOutput_multislice &output_multem)
 			{
-				ext_niter = wave_function.slicing.slice.size()*input_multislice->number_conf();
+				ext_niter = wave_function.slicing.slice.size()*in_multem->number_pn_conf();
 				ext_iter = 0;
 
-				if(input_multislice->is_EELS())
+				if (in_multem->is_STEM_ISTEM_EELS())
 				{
-					ext_niter *= input_multislice->scanning.size();
+					ext_niter *= in_multem->scanning.size();
 				}
-				/*****************************************************************/
+				/***************************************************************************************/
 
-				T_r w = input_multislice->get_phonon_rot_weight();
+				T_r w = in_multem->get_phonon_rot_weight();
 
-				auto psi = [&](T_r w, Vector<T_c, dev> &psi_z, TOutput_multislice &output_multislice)
+				auto psi = [&](T_r w, Vctr<T_c, Dev>& psi_z, TOutput_multislice &output_multem)
 				{
-					T_r gx_0 = input_multislice->gx_0();
-					T_r gy_0 = input_multislice->gy_0();
+					T_r gx_0 = in_multem->gx_0();
+					T_r gy_0 = in_multem->gy_0();
 
 					for(auto islice = 0; islice < wave_function.slicing.slice.size(); islice++)
 					{
-						if(input_multislice->eels_fr.is_Mixed_Channelling())
+						if (in_multem->eels_fr.is_Mixed_Chan())
 						{
 							wave_function.trans(islice, wave_function.slicing.slice.size()-1, trans_thk);
 						}			
 
 						for(auto iatoms = wave_function.slicing.slice[islice].iatom_0; iatoms <= wave_function.slicing.slice[islice].iatom_e; iatoms++)
 						{
-							if(wave_function.atoms.Z[iatoms] == input_multislice->eels_fr.Z)
+							if (wave_function.atoms.Z[iatoms] == in_multem->eels_fr.Z)
 							{
-								input_multislice->set_eels_fr_atom(iatoms, wave_function.atoms);
-								energy_loss.set_atom_type(input_multislice->eels_fr);
+								in_multem->set_eels_fr_atom(iatoms, wave_function.atoms);
+								energy_loss.set_atom_type(in_multem->eels_fr);
 
 								for(auto ikn = 0; ikn < energy_loss.kernel.size(); ikn++)
 								{
-									mt::multiply(*stream, energy_loss.kernel[ikn], psi_z, wave_function.psi_z);
-									wave_function.psi(islice, wave_function.slicing.slice.size()-1, w, trans_thk, output_multislice);
+									mt::ew_mult(stream, energy_loss.kernel[ikn], psi_z, wave_function.psi_z);
+									wave_function.psi(islice, wave_function.slicing.slice.size()-1, w, trans_thk, output_multem);
 								}
 							}
 
-							if(ext_stop_sim) break;
+							if (ext_stop_sim) break;
 						}
 						wave_function.psi_slice(gx_0, gy_0, islice, psi_z);
 
 						ext_iter++;
-						if(ext_stop_sim) break;
+						if (ext_stop_sim) break;
 					}
 				};
 
-				output_multislice.init();
+				output_multem.init();
 
-				input_multislice->iscan.resize(1);
-				input_multislice->beam_x.resize(1);
-				input_multislice->beam_y.resize(1);
+				in_multem->ibeam.resize(1);
+				in_multem->beam_x.resize(1);
+				in_multem->beam_y.resize(1);
 
-				if(input_multislice->is_EELS())
+				if (in_multem->is_STEM_ISTEM_EELS())
 				{
-					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
+					for(auto iconf = in_multem->phonon_par.iconf_0; iconf <= in_multem->phonon_par.nconf; iconf++)
 					{
-						wave_function.move_atoms(iconf);		
-						for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
+						wave_function.move_atoms(iconf);
+						for(auto ibeam = 0; ibeam < in_multem->scanning.size(); ibeam++)
 						{
-							input_multislice->iscan[0] = iscan;
-							input_multislice->set_iscan_beam_position();
+							in_multem->ibeam[0] = ibeam;
+							in_multem->set_iscan_beam_position();
 							wave_function.set_incident_wave(psi_thk);
-							psi(w, psi_thk, output_multislice);
+							psi(w, psi_thk, output_multem);
 
-							if(ext_stop_sim) break;
+							if (ext_stop_sim) break;
 						}
 
-						if(ext_stop_sim) break;
+						if (ext_stop_sim) break;
 					}
 				}
 				else
 				{
-					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
+					for(auto iconf = in_multem->phonon_par.iconf_0; iconf <= in_multem->phonon_par.nconf; iconf++)
 					{
-						wave_function.move_atoms(iconf);		
+						wave_function.move_atoms(iconf);
 						wave_function.set_incident_wave(psi_thk);
-						psi(w, psi_thk, output_multislice);
+						psi(w, psi_thk, output_multem);
 
-						if(ext_stop_sim) break;
+						if (ext_stop_sim) break;
 					}
 				}
 			}
 
-			template <class TOutput_multislice>
-			void EDX(TOutput_multislice &output_multislice)
-			{
-				ext_niter = wave_function.slicing.slice.size()*input_multislice->number_conf();
-				ext_iter = 0;
+			In_Multem<T_r> *in_multem;
+			Stream<Dev> stream;
+			FFT<T_r, Dev> fft_2d;
 
-				if(input_multislice->is_EELS())
-				{
-					ext_niter *= input_multislice->scanning.size();
-				}
-				/*****************************************************************/
+			Wave_Function<T_r, Dev> wave_function;
+			Energy_Loss<T_r, Dev> energy_loss;
 
-				T_r w = input_multislice->get_phonon_rot_weight();
-
-				auto psi = [&](T_r w, Vector<T_c, dev> &psi_z, TOutput_multislice &output_multislice)
-				{
-					T_r gx_0 = input_multislice->gx_0();
-					T_r gy_0 = input_multislice->gy_0();
-
-					for(auto islice = 0; islice < wave_function.slicing.slice.size(); islice++)
-					{
-						if(input_multislice->eels_fr.is_Mixed_Channelling())
-						{
-							wave_function.trans(islice, wave_function.slicing.slice.size()-1, trans_thk);
-						}			
-
-						for(auto iatoms = wave_function.slicing.slice[islice].iatom_0; iatoms <= wave_function.slicing.slice[islice].iatom_e; iatoms++)
-						{
-							if(wave_function.atoms.Z[iatoms] == input_multislice->eels_fr.Z)
-							{
-								input_multislice->set_eels_fr_atom(iatoms, wave_function.atoms);
-								energy_loss.set_atom_type(input_multislice->eels_fr);
-
-								for(auto ikn = 0; ikn < energy_loss.kernel.size(); ikn++)
-								{
-									mt::multiply(*stream, energy_loss.kernel[ikn], psi_z, wave_function.psi_z);
-									wave_function.psi(islice, wave_function.slicing.slice.size()-1, w, trans_thk, output_multislice);
-								}
-							}
-
-							if(ext_stop_sim) break;
-						}
-						wave_function.psi_slice(gx_0, gy_0, islice, psi_z);
-
-						ext_iter++;
-						if(ext_stop_sim) break;
-					}
-				};
-
-				output_multislice.init();
-
-				input_multislice->iscan.resize(1);
-				input_multislice->beam_x.resize(1);
-				input_multislice->beam_y.resize(1);
-
-				if(input_multislice->is_EELS())
-				{
-					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
-					{
-						wave_function.move_atoms(iconf);		
-						for(auto iscan = 0; iscan < input_multislice->scanning.size(); iscan++)
-						{
-							input_multislice->iscan[0] = iscan;
-							input_multislice->set_iscan_beam_position();
-							wave_function.set_incident_wave(psi_thk);
-							psi(w, psi_thk, output_multislice);
-
-							if(ext_stop_sim) break;
-						}
-
-						if(ext_stop_sim) break;
-					}
-				}
-				else
-				{
-					for(auto iconf = input_multislice->fp_iconf_0; iconf <= input_multislice->pn_nconf; iconf++)
-					{
-						wave_function.move_atoms(iconf);		
-						wave_function.set_incident_wave(psi_thk);
-						psi(w, psi_thk, output_multislice);
-
-						if(ext_stop_sim) break;
-					}
-				}
-			}
-
-			Input_Multislice<T_r> *input_multislice;
-			Stream<dev> *stream;
-			FFT<T_r, dev> *fft_2d;
-
-			Wave_Function<T_r, dev> wave_function;
-			Energy_Loss<T_r, dev> energy_loss;
-
-			Vector<T_c, dev> psi_thk;
-			Vector<T_c, dev> trans_thk;
+			Vctr<T_c, Dev> psi_thk;
+			Vctr<T_c, Dev> trans_thk;
 	};
 
-	template <class T, eDevice dev>
-	bool Multislice<T, dev>::ext_stop_sim = false;
+	template <class T, eDev Dev>
+	dt_bool Tem_Simulation<T, Dev>::ext_stop_sim = false;
 
-	template <class T, eDevice dev>
-	int Multislice<T, dev>::ext_niter = 0;
+	template <class T, eDev Dev>
+	dt_int32 Tem_Simulation<T, Dev>::ext_niter = 0;
 
-	template <class T, eDevice dev>
-	int Multislice<T, dev>::ext_iter = 0;
-} // namespace mt
+	template <class T, eDev Dev>
+	dt_int32 Tem_Simulation<T, Dev>::ext_iter = 0;
+
+	template <class T, eDev Dev>
+	class Multem
+	{
+		public:
+			Multem(): n_devices(1), in_multem(nullptr) {}
+
+			Multem(In_Multem<T> *in_multem_i)
+			{
+				set_in_data(in_multem_i);
+			}
+
+			void set_in_data(In_Multem<T> *in_multem_i)
+			{
+				in_multem = in_multem_i;
+				n_devices = 1;
+				if (in_multem->is_STEM_ISTEM()||in_multem->is_CBED_CBEI())
+				{
+					n_devices = in_multem->system_config.get_n_sel_gpu();
+				}
+				output_multem_v.resize(n_devices);
+			}
+
+			template <class TOutput_Multem>
+			void operator()(TOutput_Multem &output_multem)
+			{
+				if (in_multem->is_STEM_ISTEM())
+				{
+					STEM_ISTEM(output_multem);
+				}
+				else if (in_multem->is_CBED_CBEI())
+				{
+					CBED_CBEI(output_multem);
+				}
+				else if (in_multem->is_ED_HRTEM())
+				{
+					ED_HRTEM(output_multem);
+				}
+				else if (in_multem->is_PED_HCTEM())
+				{
+					PED_HCTEM(output_multem);
+				}
+				else if (in_multem->is_EWFS_EWRS())
+				{
+					EWFS_EWRS(output_multem);
+				}
+				else if (in_multem->is_EELS_EFTEM())
+				{
+					EELS_EFTEM(output_multem);
+				}
+			}
+		private:
+			template <class TOutput_Multem>
+			void STEM_ISTEM(TOutput_Multem &output_multem)
+			{
+ 				vector<std::thread> threads;
+				threads.reserve(n_devices);
+
+				auto stem_istem_thr =[&](dt_int32 ithr)
+				{
+					In_Multem<T> in_multem_thr = *in_multem;
+					in_multem_thr.scanning.type = eST_user_def;
+					in_multem_thr.scanning.R = in_multem->extract_beam_pos(ithr, n_devices);
+					in_multem_thr.validate_parameters();
+
+ 					in_multem_thr.system_config.set_gpu_by_ind(ithr);
+
+					Tem_Simulation<T, Dev> tem_simulation(&in_multem_thr);
+					output_multem_v[ithr].set_in_data(&in_multem_thr);
+
+					tem_simulation(output_multem_v[ithr]);
+					tem_simulation.cleanup();
+				};
+
+				for(auto ithr=0; ithr<n_devices; ithr++)
+				{
+					threads.emplace_back(stem_istem_thr, ithr);
+				}
+
+				for(auto ithr=0; ithr<n_devices; ithr++)
+				{
+					if (threads[ithr].joinable())
+					{
+						threads[ithr].join();
+					}
+				}
+
+				output_multem.joint_data(output_multem_v);
+			}
+
+			template <class TOutput_Multem>
+			void CBED_CBEI(TOutput_Multem &output_multem)
+			{
+ 				vector<std::thread> threads;
+				threads.reserve(n_devices);
+
+				auto cbed_cbei_thr =[&](dt_int32 ithr)
+				{
+					In_Multem<T> in_multem_thr = *in_multem;
+					in_multem_thr.beam_x = in_multem->extract_probe_pos_x(ithr, n_devices);
+					in_multem_thr.beam_y = in_multem->extract_probe_pos_y(ithr, n_devices);
+					in_multem_thr.validate_parameters();
+
+ 					in_multem_thr.system_config.set_gpu_by_ind(ithr);
+
+					Tem_Simulation<T, Dev> tem_simulation;
+					tem_simulation.set_in_data(&in_multem_thr);
+					output_multem_v[ithr].set_in_data(&in_multem_thr);
+
+					tem_simulation(output_multem_v[ithr]);
+					tem_simulation.cleanup();
+				};
+
+				for(auto ithr=0; ithr<n_devices; ithr++)
+				{
+					threads.emplace_back(cbed_cbei_thr, ithr);
+				}
+
+				for(auto ithr=0; ithr<n_devices; ithr++)
+				{
+					if (threads[ithr].joinable())
+					{
+						threads[ithr].join();
+					}
+				}
+
+				output_multem.joint_data(output_multem_v);
+			}
+
+			template <class TOutput_Multem>
+			void ED_HRTEM(TOutput_Multem &output_multem)
+			{
+				In_Multem<T> in_multem_thr = *in_multem;
+				in_multem_thr.system_config.set_gpu_by_ind(0);
+
+				Tem_Simulation<T, Dev> tem_simulation;
+				tem_simulation.set_in_data(&in_multem_thr);
+				output_multem.set_in_data(&in_multem_thr);
+
+				tem_simulation(output_multem);
+				tem_simulation.cleanup();
+			}
+
+			template <class TOutput_Multem>
+			void PED_HCTEM(TOutput_Multem &output_multem)
+			{
+				In_Multem<T> in_multem_thr = *in_multem;
+				in_multem_thr.system_config.set_gpu_by_ind(0);
+
+				Tem_Simulation<T, Dev> tem_simulation;
+				tem_simulation.set_in_data(&in_multem_thr);
+				output_multem.set_in_data(&in_multem_thr);
+
+				tem_simulation(output_multem);
+				tem_simulation.cleanup();
+			}
+
+			template <class TOutput_Multem>
+			void EWFS_EWRS(TOutput_Multem &output_multem)
+			{
+				In_Multem<T> in_multem_thr = *in_multem;
+				in_multem_thr.system_config.set_gpu_by_ind(0);
+
+				Tem_Simulation<T, Dev> tem_simulation;
+				tem_simulation.set_in_data(&in_multem_thr);
+				output_multem.set_in_data(&in_multem_thr);
+
+				tem_simulation(output_multem);
+				tem_simulation.cleanup();
+			}
+
+			template <class TOutput_Multem>
+			void EELS_EFTEM(TOutput_Multem &output_multem)
+			{
+				In_Multem<T> in_multem_thr = *in_multem;
+				in_multem_thr.system_config.set_gpu_by_ind(0);
+
+				Tem_Simulation<T, Dev> tem_simulation;
+				tem_simulation.set_in_data(&in_multem_thr);
+				output_multem.set_in_data(&in_multem_thr);
+
+				tem_simulation(output_multem);
+				tem_simulation.cleanup();
+			}
+
+			dt_int32 n_devices;
+			In_Multem<T> *in_multem;
+			vector<Output_Multem<T>> output_multem_v;
+	};
+
+}
 
 #endif

@@ -1,6 +1,6 @@
 /*
  * This file is part of MULTEM.
- * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2017 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * MULTEM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "math.cuh"
 #include "types.cuh"
 #include "lin_alg_def.cuh"
-#include "atomic_data_mt.hpp"
+#include "atom_data.hpp"
 #include "slicing.hpp"
 #include "memory_info.cuh"
 
@@ -516,7 +516,7 @@ namespace mt
 		eOperation_Mode operation_mode;						// eOM_Normal = 1, eOM_Advanced = 2
 		bool slice_storage;									// true, false
 		bool reverse_multislice;							// true, false
-		int mul_sign;										// tem_simulation sign
+		int mul_sign;										// multislice sign
 
 		T Vrl; 												// Atomic potential cut-off
 		int nR; 											// Number of grid_bt points
@@ -649,7 +649,7 @@ namespace mt
 
 			lambda = get_lambda(E_0);
 
-			// tem_simulation sign
+			// multislice sign
 			mul_sign = (reverse_multislice) ? -1 : 1;
 
 			theta = set_incident_angle(theta);
@@ -719,12 +719,6 @@ namespace mt
 				atoms.get_statistic();
 				// reset theta
 				spec_rot_theta = 0;
-			}
-
-			// temporal fix for phase object
-			if (!is_multislice() && is_whole_spec())
-			{
-				potential_slicing = ePS_dz_Proj;
 			}
 
 			// match slicing with the require thickness

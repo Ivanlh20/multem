@@ -1,31 +1,30 @@
 /*
- * This file is part of MULTEM.
- * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+ * This file is part of Multem.
+ * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
  *
- * MULTEM is free software: you can redistribute it and/or modify
+ * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * Multem is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef SPECIMEN_H
-#define SPECIMEN_H
+#ifndef SPEC_H
+#define SPEC_H
 
 #include "math.cuh"
 #include "types.cuh"
-#include "lin_alg_def.cuh"
 #include "cgpu_rand.cuh"
-#include "atomic_data.hpp"
-#include "atomic_data_mt.hpp"
-#include "input_multislice.cuh"
+#include "atomic_data_mt.cuh"
+#include "particles.cuh"
+#include "in_classes.cuh"
 #include "cgpu_fcns.cuh"
 #include "cpu_fcns.hpp"
 #include "slicing.hpp"
@@ -37,67 +36,67 @@ namespace mt
 	{
 		public:
 			using T_r = T;
-			using size_type = std::size_t;
+			using size_type = dt_uint64;
 
-			Spec(): input_multislice(nullptr){}
+			Spec(): in_multem(nullptr) {}
 
-			void set_input_data(Input_Multislice<T> *input_multislice_i)
+			void set_in_data(In_Multem<T> *in_multem_i)
 			{
-				input_multislice = input_multislice_i;
+				in_multem = in_multem_i;
 
-				/***************************************************************************/
-				Atomic_Data atomic_data(input_multislice->potential_type);
+				 /***************************************************************************************/
+				Atomic_Data atomic_data_mt(in_multem->pot_parm_typ);
 
-				atom_type.resize(c_nAtomsTypes); 
-				for(auto i = 0; i<atom_type.size(); i++)
+				atom_type.resize(c_n_atom_typ);
+				for(auto i = 0; i < atom_type.size(); i++)
 				{
-					atomic_data.To_atom_type_CPU(i+1, input_multislice->Vrl, input_multislice->nR, input_multislice->grid_2d.dR_min(), atom_type[i]);
+					atomic_data_mt.To_atom_type_CPU(i+1, in_multem->Vrl, in_multem->nR, in_multem->grid_2d.dR_min(), atom_type[i]);
 				}
 
-				/***************************************************************************/
-				atoms_u.set_atoms(input_multislice->atoms, input_multislice->grid_2d.pbc_xy, &atom_type);
+				 /***************************************************************************************/
+				atoms_u.set_ptc(in_multem->atoms, in_multem->grid_2d.pbc_xy, &atom_type);
 				atoms_u.sort_by_z();
 
-				/***************************************************************************/
-				slicing.set_input_data(input_multislice, &atoms_u, &atoms);
+				 /***************************************************************************************/
+				slicing.set_in_data(in_multem, &atoms_u, &atoms);
 
-				/***************************************************************************/
-				if((input_multislice->is_phase_object()) || (atoms_u.s_z_int < 2.0*input_multislice->grid_2d.dz) || ((slicing.z_plane.size() == 1) && input_multislice->is_slicing_by_planes()))
+				 /***************************************************************************************/
+				if ((atoms_u.s_z_int < 2.0*in_multem->grid_2d.sli_thk) || ((slicing.z_plane.size() == 1) && in_multem->is_slicing_by_planes()))
 				{
-					input_multislice->grid_2d.dz = atoms_u.s_z_int;
-					input_multislice->interaction_model = eESIM_Phase_Object;
-					input_multislice->islice = 0;
-					input_multislice->pn_dim.z = false;
-					if(input_multislice->is_through_slices())
+					in_multem->grid_2d.sli_thk = atoms_u.s_z_int;
+					in_multem->interaction_model = eESIM_Phase_Object;
+					in_multem->islice = 0;
+					in_multem->phonon_par.dim_z = false;
+					if (in_multem->is_through_slices())
 					{
-						input_multislice->thick_type = eTT_Through_Thick;
+						in_multem->thick_type = eTT_Through_Thick;
 					}
-					input_multislice->slice_storage = input_multislice->slice_storage || !input_multislice->is_whole_spec();
-					atoms_u.dz = input_multislice->grid_2d.dz;
+					in_multem->slice_storage = in_multem->slice_storage || !in_multem->is_whole_spec();
+					atoms_u.sli_thk = in_multem->grid_2d.sli_thk;
 				}
 
-				atoms.set_atoms(atoms_u, false, &atom_type);
+				atoms.set_ptc(atoms_u, false, &atom_type);
 				// This is needed for memory preallocation in Transmission function
 				slicing.calculate();
 			}
 
-			/* Move atoms (cgpu_rand distribution will be included in the future) */
-			void move_atoms(const int &fp_iconf)
+			/* Move atoms (random distribution will be included in the future) */
+			void move_atoms(const dt_int32& fp_iconf)
 			{
-				// set phonon configuration
-				if(input_multislice->is_frozen_phonon())
+				// set phonon_par configuration
+				if (in_multem->is_frozen_phonon())
 				{
-					rand.seed(input_multislice->pn_seed, fp_iconf);
-					rand.set_activation(input_multislice->pn_dim.x, input_multislice->pn_dim.y, input_multislice->pn_dim.z);
+					rand.seed(in_multem->phonon_par.seed, fp_iconf);
+					rand.set_act_dim(in_multem->phonon_par.dim_x, in_multem->phonon_par.dim_y, in_multem->phonon_par.dim_z);
 				}
 
 				// move atoms
-				for(int iatoms = 0; iatoms<atoms_u.size(); iatoms++)
+				for(dt_int32 iatoms = 0; iatoms<atoms_u.size(); iatoms++)
 				{
 					atoms.Z[iatoms] = atoms_u.Z[iatoms];
-					auto r = atoms_u.to_r3d(iatoms);
+					auto r = atoms_u.get_pos(iatoms);
 
-					if(input_multislice->is_frozen_phonon())
+					if (in_multem->is_frozen_phonon())
 					{
 						auto sigma_x = atoms_u.sigma[iatoms];
 						auto sigma_y = atoms_u.sigma[iatoms];
@@ -114,7 +113,7 @@ namespace mt
 					atoms.charge[iatoms] = atoms_u.charge[iatoms];
 				}
 
-				if(input_multislice->pn_dim.z)
+				if (in_multem->phonon_par.dim_z)
 				{
 					atoms.sort_by_z();
 				}
@@ -126,26 +125,26 @@ namespace mt
 				slicing.calculate();
 			}
 
-			T dz(const int &islice)
+			T sli_thk(const dt_int32& islice)
 			{
-				return slicing.dz(islice)/cos(input_multislice->theta);
+				return slicing.sli_thk(islice)/cos(in_multem->theta);
 			}
 
-			T dz_m(const int &islice_0, const int &islice_e)
+			T dz_m(const dt_int32& islice_0, const dt_int32& islice_e)
 			{
-				return slicing.dz_m(islice_0, islice_e)/cos(input_multislice->theta);
+				return slicing.dz_m(islice_0, islice_e)/cos(in_multem->theta);
 			}
 
-			Input_Multislice<T> *input_multislice; 			
+			In_Multem<T> *in_multem;
 
-			Atom_Data<T> atoms; 								// displaced atoms
-			Slicing<T> slicing; 								// slicing procedure
-			Vector<Atom_Type<T, e_host>, e_host> atom_type;		// Atom types
+			Ptc_Atom<T> atoms;		// displaced atoms
+			Slicing<T> slicing;		// slicing procedure
+			Vctr<Atom_Typ_cpu<T>, edev_cpu> atom_type;		// Atom types
 		private:
-			Randn_3d<T, e_host> rand;
-			Atom_Data<T> atoms_u;
+			Randn_3d<T, edev_cpu> rand;
+			Ptc_Atom<T> atoms_u;
 	};
 
-} // namespace mt
+}
 
 #endif

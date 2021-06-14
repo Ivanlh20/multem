@@ -1,47 +1,45 @@
 /*
- * This file is part of MULTEM.
- * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+ * This file is part of Multem.
+ * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
  *
- * MULTEM is free software: you can redistribute it and/or modify
+ * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * Multem is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#include "types.cuh"
-#include "atomic_fcns_mt.hpp"
-#include "atomic_data.hpp"
+#define MATLAB_BLAS_LAPACK
 
-#include <mex.h>
+#include "atomic_fcns_mt.cuh"
+
+#include "mex.h"
 #include "matlab_mex.cuh"
 
-using mt::rmatrix_r;
-
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[])
 {
-	auto potential_type = mx_get_scalar<mt::ePotential_Type>(prhs[0]);
-	auto Z = mx_get_scalar<int>(prhs[1]);
-	auto charge = mx_get_scalar<int>(prhs[2]);
-	auto z0 = mx_get_scalar<double>(prhs[3]);
-	auto ze = mx_get_scalar<double>(prhs[4]);
-	auto R = mx_get_matrix<rmatrix_r>(prhs[5]);
+	using T = dt_float64;
 
-	auto VR = mx_create_matrix<rmatrix_r>(R.rows, R.cols, plhs[0]);
-	auto dVR = mx_create_matrix<rmatrix_r>(R.rows, R.cols, plhs[1]);
+	auto pot_parm_typ = mex_get_num<mt::ePot_Parm_Typ>(prhs[0]);
+	auto Z = mex_get_num<dt_int32>(prhs[1]);
+	auto charge = mex_get_num<dt_int32>(prhs[2]);
+	auto z0 = mex_get_num<dt_float64>(prhs[3]);
+	auto ze = mex_get_num<dt_float64>(prhs[4]);
+	auto r = mex_get_pvctr<T>(prhs[5]);
 
-	mt::Atom_Type<double, mt::e_host> atom_type;
-	mt::Atomic_Data atomic_data(potential_type);
-	atomic_data.To_atom_type_CPU(Z, mt::c_Vrl, mt::c_nR, 0.0, atom_type);
+	/***************************************************************************************/
+	auto vz = mex_create_pVctr<T>(r.shape(), plhs[0]);
+	auto dvz = mex_create_pVctr<T>(r.shape(), plhs[1]);
 
-	mt::Atom_Cal<double> atomic_fcns_mt;
-	atomic_fcns_mt.Set_Atom_Type(potential_type, charge, &atom_type);
-	atomic_fcns_mt.Vz_dVz(z0, ze, R.m_size, R.real, VR.real, dVR.real);
+	mt::Atomic_Info_cpu<T> atomic_info = mt::Atomic_Data(Z, pot_parm_typ, charge);
+	mt::Atomic_Fcns<T> atomic_fcns_mt(atomic_info.coef[0]);
+
+	atomic_fcns_mt.vz_dvz(z0, ze, r.ptr_32(), vz.ptr_32(), dvz.ptr_32());
 }

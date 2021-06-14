@@ -1,141 +1,145 @@
 /*
- * This file is part of MULTEM.
- * Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+ * This file is part of Multem.
+ * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
  *
- * MULTEM is free software: you can redistribute it and/or modify
+ * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version of the License, or
  * (at your option) any later version.
  *
- * MULTEM is distributed in the hope that it will be useful, 
+ * Multem is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MULTEM. If not, see <http:// www.gnu.org/licenses/>.
+ * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
 #ifndef BLAS_H
-#define BLAS_H
+	#define BLAS_H
 
-#include "math.cuh"
-#include "types.cuh"
-#include "traits.cuh"
+	#ifdef _MSC_VER
+		#pragma once
+	#endif 
 
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <cublas_v2.h>
+	#include "math.cuh"
+	#include "types.cuh"
+	#include "type_traits_gen.cuh"
 
-namespace bs
-{
-	template <class T, mt::eDevice dev>
-	struct GEAM;
+	#include <cuda.h>
+	#include <cuda_runtime.h>
+	#include <cublas_v2.h>
 
-	template <class T>
-	struct GEAM<T, mt::e_host>
+	namespace blass
 	{
-		public:
-			using value_type = T;
-			using TVector_c = mt::Vector<T, mt::e_host>;
+		template <class T, mt::eDev Dev>
+		struct GEAM;
 
-			const mt::eDevice device;
+		template <class T>
+		struct GEAM<T, mt::edev_cpu>
+		{
+			public:
+				using value_type = T;
+				using TVctr_c = mt::Vctr<T, mt::edev_cpu>;
 
-			GEAM(): device(mt::e_host) {}
-	};
+				const mt::eDev device;
 
-	template <class T>
-	struct GEAM<T, mt::e_device>
-	{
-		public:
-			using value_type = T;
-			using TVector = mt::Vector<T, mt::e_device>;
+				GEAM(): device(mt::edev_cpu) {}
+		};
 
-			const mt::eDevice device;
+		template <class T>
+		struct GEAM<T, mt::edev_gpu>
+		{
+			public:
+				using value_type = T;
+				using TVctr = mt::Vctr<T, mt::edev_gpu>;
 
-			GEAM(): device(mt::e_device)
-			{ 
-				cublasCreate(&handle);
-			}
+				const mt::eDev device;
 
-			~GEAM()
-			{ 
-				cublasDestroy(handle); 
-			}
+				GEAM(): device(mt::edev_gpu)
+				{ 
+					cublasCreate(&handle);
+				}
 
-			void operator()(mt::eOP trsa, mt::eOP trsb, int m, int n, T alpha, TVector &A, T beta, TVector &B, TVector &C)
-			{
-				cublasOperation_t transa = op_2_cbop(trsa);
-				cublasOperation_t transb = op_2_cbop(trsb);
+				~GEAM()
+				{ 
+					cublasDestroy(handle);
+				}
 
-				geam(handle, transa, transb, m, n, alpha, A, m, beta, B, m, C, m);
-			}
+				void operator()(mt::eOP trsa, mt::eOP trsb, dt_int32 m, dt_int32 n, T alpha, TVctr& A, T beta, TVctr& B, TVctr& C)
+				{
+					cublasOperation_t transa = op_2_cbop(trsa);
+					cublasOperation_t transb = op_2_cbop(trsb);
 
-		private:
+					geam(handle, transa, transb, m, n, alpha, A, m, beta, B, m, C, m);
+				}
 
-			cublasOperation_t op_2_cbop(mt::eOP op)
-			{
-				return static_cast<cublasOperation_t>(static_cast<int>(op)-1);
-			}
+			private:
 
-			void geam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, 
-			int m, int n, float alpha, device_vector<float> &A, int lda, float beta, 
-			device_vector<float> &B, int ldb, device_vector<float> &C, int ldc)
-			{
-				float *ralpha = reinterpret_cast<float*>(&alpha);
-				float *rbeta = reinterpret_cast<float*>(&beta);
+				cublasOperation_t op_2_cbop(mt::eOP op)
+				{
+					return static_cast<cublasOperation_t>(static_cast<dt_int32>(op)-1);
+				}
 
-				float *rA = reinterpret_cast<float*>(raw_pointer_cast(A.data()));
-				float *rB = reinterpret_cast<float*>(raw_pointer_cast(B.data()));
-				float *rC = reinterpret_cast<float*>(raw_pointer_cast(C.data()));
+				void geam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, 
+				dt_int32 m, dt_int32 n, dt_float32 alpha, mt::Vctr<dt_float32, mt::edev_gpu>& A, dt_int32 lda, dt_float32 beta, 
+				mt::Vctr<T, mt::edev_cpu>& B, dt_int32 ldb, mt::Vctr<dt_float32, mt::edev_gpu>& C, dt_int32 ldc)
+				{
+					dt_float32 *ralpha = reinterpret_cast<dt_float32*>(&alpha);
+					dt_float32 *rbeta = reinterpret_cast<dt_float32*>(&beta);
 
-				auto result = cublasSgeam(handle, transa, transb, m, n, ralpha, rA, lda, rbeta, rB, ldb, rC, ldc);
-			}
+					dt_float32 *rA = reinterpret_cast<dt_float32*>(A.data());
+					dt_float32 *rB = reinterpret_cast<dt_float32*>(B.data());
+					dt_float32 *rC = reinterpret_cast<dt_float32*>(C.data());
 
-			void geam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, 
-			int m, int n, double alpha, device_vector<double> &A, int lda, double beta, 
-			device_vector<double> &B, int ldb, device_vector<double> &C, int ldc)
-			{
-				double *ralpha = reinterpret_cast<double*>(&alpha);
-				double *rbeta = reinterpret_cast<double*>(&beta);
+					auto result = cublasSgeam(handle, transa, transb, m, n, ralpha, rA, lda, rbeta, rB, ldb, rC, ldc);
+				}
 
-				double *rA = reinterpret_cast<double*>(raw_pointer_cast(A.data()));
-				double *rB = reinterpret_cast<double*>(raw_pointer_cast(B.data()));
-				double *rC = reinterpret_cast<double*>(raw_pointer_cast(C.data()));
+				void geam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, 
+				dt_int32 m, dt_int32 n, dt_float64 alpha, mt::Vctr<dt_float64, mt::edev_gpu>& A, dt_int32 lda, dt_float64 beta, 
+				mt::Vctr<dt_float64, mt::edev_gpu>& B, dt_int32 ldb, mt::Vctr<dt_float64, mt::edev_gpu>& C, dt_int32 ldc)
+				{
+					dt_float64 *ralpha = reinterpret_cast<dt_float64*>(&alpha);
+					dt_float64 *rbeta = reinterpret_cast<dt_float64*>(&beta);
 
-				cublasDgeam(handle, transa, transb, m, n, ralpha, rA, lda, rbeta, rB, ldb, rC, ldc);
-			}
+					dt_float64 *rA = reinterpret_cast<dt_float64*>(A.data());
+					dt_float64 *rB = reinterpret_cast<dt_float64*>(B.data());
+					dt_float64 *rC = reinterpret_cast<dt_float64*>(C.data());
 
-			void geam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, 
-			int m, int n, complex<float> alpha, device_vector<complex<float>> &A, int lda, complex<float> beta, 
-			device_vector<complex<float>> &B, int ldb, device_vector<complex<float>> &C, int ldc)
-			{
-				cuComplex *ralpha = reinterpret_cast<cuComplex*>(&alpha);
-				cuComplex *rbeta = reinterpret_cast<cuComplex*>(&beta);
+					cublasDgeam(handle, transa, transb, m, n, ralpha, rA, lda, rbeta, rB, ldb, rC, ldc);
+				}
 
-				cuComplex *rA = reinterpret_cast<cuComplex*>(raw_pointer_cast(A.data()));
-				cuComplex *rB = reinterpret_cast<cuComplex*>(raw_pointer_cast(B.data()));
-				cuComplex *rC = reinterpret_cast<cuComplex*>(raw_pointer_cast(C.data()));
+				void geam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, 
+				dt_int32 m, dt_int32 n, dt_cfloat32 alpha, mt::Vctr<dt_cfloat32, mt::edev_gpu>& A, dt_int32 lda, dt_cfloat32 beta, 
+				mt::Vctr<dt_cfloat32, mt::edev_gpu>& B, dt_int32 ldb, mt::Vctr<dt_cfloat32, mt::edev_gpu>& C, dt_int32 ldc)
+				{
+					cuComplex *ralpha = reinterpret_cast<cuComplex*>(&alpha);
+					cuComplex *rbeta = reinterpret_cast<cuComplex*>(&beta);
 
-				cublasCgeam(handle, transa, transb, m, n, ralpha, rA, lda, rbeta, rB, ldb, rC, ldc);
-			}
+					cuComplex *rA = reinterpret_cast<cuComplex*>(A.data());
+					cuComplex *rB = reinterpret_cast<cuComplex*>(B.data());
+					cuComplex *rC = reinterpret_cast<cuComplex*>(C.data());
 
-			void geam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, 
-			int m, int n, complex<double> alpha, device_vector<complex<double>> &A, int lda, complex<double> beta, 
-			device_vector<complex<double>> &B, int ldb, device_vector<complex<double>> &C, int ldc)
-			{
-				cuDoubleComplex *ralpha = reinterpret_cast<cuDoubleComplex*>(&alpha);
-				cuDoubleComplex *rbeta = reinterpret_cast<cuDoubleComplex*>(&beta);
+					cublasCgeam(handle, transa, transb, m, n, ralpha, rA, lda, rbeta, rB, ldb, rC, ldc);
+				}
 
-				cuDoubleComplex *rA = reinterpret_cast<cuDoubleComplex*>(raw_pointer_cast(A.data()));
-				cuDoubleComplex *rB = reinterpret_cast<cuDoubleComplex*>(raw_pointer_cast(B.data()));
-				cuDoubleComplex *rC = reinterpret_cast<cuDoubleComplex*>(raw_pointer_cast(C.data()));
+				void geam(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, 
+				dt_int32 m, dt_int32 n, dt_cfloat64 alpha, mt::Vctr<dt_cfloat64, mt::edev_gpu>& A, dt_int32 lda, dt_cfloat64 beta, 
+				mt::Vctr<dt_cfloat64, mt::edev_gpu>& B, dt_int32 ldb, mt::Vctr<dt_cfloat64, mt::edev_gpu>& C, dt_int32 ldc)
+				{
+					cuDoubleComplex *ralpha = reinterpret_cast<cuDoubleComplex*>(&alpha);
+					cuDoubleComplex *rbeta = reinterpret_cast<cuDoubleComplex*>(&beta);
 
-				cublasZgeam(handle, transa, transb, m, n, ralpha, rA, lda, rbeta, rB, ldb, rC, ldc);
-			}
+					cuDoubleComplex *rA = reinterpret_cast<cuDoubleComplex*>(A.data());
+					cuDoubleComplex *rB = reinterpret_cast<cuDoubleComplex*>(B.data());
+					cuDoubleComplex *rC = reinterpret_cast<cuDoubleComplex*>(C.data());
 
-			cublasHandle_t handle;
-	};
-} // namespace blas
+					cublasZgeam(handle, transa, transb, m, n, ralpha, rA, lda, rbeta, rB, ldb, rC, ldc);
+				}
+
+				cublasHandle_t handle;
+		};
+	} // namespace blas
 
 #endif
