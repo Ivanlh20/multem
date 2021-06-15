@@ -50,6 +50,7 @@
 					nz = fcn_cceil<dt_int32>(bs.z/a_min);
 
 					occ.clear();
+					occ.shrink_to_fit();
 					occ.resize({ny, nx, nz}, -1);
 				}
 
@@ -67,11 +68,11 @@
 				template <class TPtc_3d>
 				dt_bool check_r_min(const TPtc_3d& atoms, R_3d<T> r)
 				{
-					r = (r-r_0)/a_min;
+					const auto r_idx = (r-r_0)/a_min;
 
-					const auto ix_m = fcn_cfloor<dt_int32>(r.x);
-					const auto iy_m = fcn_cfloor<dt_int32>(r.y);
-					const auto iz_m = fcn_cfloor<dt_int32>(r.z);
+					const auto ix_m = fcn_cfloor<dt_int32>(r_idx.x);
+					const auto iy_m = fcn_cfloor<dt_int32>(r_idx.y);
+					const auto iz_m = fcn_cfloor<dt_int32>(r_idx.z);
 
 					const auto bb_bound = fcn_chk_bound(ix_m, 0, nx) && fcn_chk_bound(iy_m, 0, ny) && fcn_chk_bound(iz_m, 0, nz);
 

@@ -3,6 +3,7 @@ addpath(['..', filesep, 'matlab_functions'])
 addpath(['..', filesep, 'crystalline_materials'])
 addpath(['..', filesep, 'mex_bin'])
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 bs = [50, 50, 50];
 
 Z = 6;
@@ -17,7 +18,7 @@ tic;
 atoms = ilc_amorp_build(Z, rms_3d, occ, region, bs, d_min, rho, seed);
 toc;
 
-size(atoms, 1)
+disp(size(atoms))
 figure(1); clf;
 plot3(atoms(:, 2), atoms(:, 3), atoms(:, 4), '.r');
 axis equal;

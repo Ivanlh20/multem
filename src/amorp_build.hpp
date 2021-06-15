@@ -36,67 +36,82 @@
 
 				Ptc_Atom<T> operator()(dt_int32 Z, T rms_3d, T occ, T d_min, T rho, dt_int32 seed, Spec_Lay_Info<T> spec_lay_info)
 				{
-					Ptc_Atom<T> atoms;
-					this->operator()(atoms, Z, rms_3d, occ, d_min, rho, seed, spec_lay_info);
-
-					return atoms;
-				}
-
-				void operator()(Ptc_Atom<T>& atoms, dt_int32 Z, T rms_3d, T occ, T d_min, T rho, dt_int32 seed, Spec_Lay_Info<T> spec_lay_info)
-				{
-					// calculate density = #atoms/A^3
-					const auto rho_n_A3 = density_n_A3(Z, rho);
-
 					// calculate number of atoms for the amorphous spec
-					const auto n_atoms_amorp = n_amorp_atoms(rho_n_A3, spec_lay_info.bs);
+					const auto n_atoms_amorp = n_amorp_atoms(Z, rho, spec_lay_info.bs);
 
-					m_atoms.bs = atoms.bs;
-					m_atoms.cols_used = atoms.cols_used;
+					Ptc_Atom<T> atoms;
+					atoms.bs = spec_lay_info.bs;
+					atoms.cols_used = 7;
+					atoms.reserve(n_atoms_amorp);
 
+					// set box occupancy input data
 					box_occ.set_in_data(d_min, spec_lay_info.bs, spec_lay_info.r_0);
-
-					// set atoms
-					dt_int32 iatom_0 = 0;
-					dt_int32 n_atoms = iatom_0 + n_atoms_amorp;
-
-					if (atoms.empty())
-					{
-						m_atoms.reserve(n_atoms);
-					}
-					else
-					{
-						const dt_int32 n_atoms_0 = atoms.size();
-						m_atoms.reserve(n_atoms_0);
-
-						T depth = 0.1; // set depth
-						// select atoms within the depth
-						const T z_0 = spec_lay_info.r_0.z - depth;
-						const T z_e = spec_lay_info.r_0.z + spec_lay_info.bs.z + depth;
-
-						for(auto iatom = 0; iatom < n_atoms_0; iatom++)
-						{
-							if (fcn_chk_bound(atoms.z[iatom], z_0, z_e))
-							{
-								m_atoms.push_back(atoms.get(iatom));
-								iatom_0++;
-							}
-						}
-						n_atoms = iatom_0 + n_atoms_amorp;
-						m_atoms.reserve(n_atoms);
-	
-						// set occupancy
-						for (auto iatom = 0; iatom < iatom_0; iatom++)
-						{
-							box_occ.set(m_atoms.get_pos(iatom), iatom);
-						}
-					}
 
 					// set random input data
 					randu_3d.set_in_data(seed, spec_lay_info.bs, spec_lay_info.r_0); 
 
 					const dt_int32 region = spec_lay_info.region;
 
+					dt_int32 iatom_c = 0;
+					for(dt_int32 iatom = 0; iatom < n_atoms_amorp; iatom++)
+					{
+						R_3d<T> r;
+						if (rnd_point(atoms, r))
+						{
+							const Ptc_s_Atom<T> atom_ik(Z, r, rms_3d, occ, region, c_dflt_charge);
+
+							atoms.push_back(atom_ik);
+
+							box_occ.set(r, iatom_c);
+							iatom_c++;
+						}
+					}
+
+					atoms.shrink_to_fit();
+					atoms.sort_by_z();
+
+					return atoms;
+				}
+
+				void operator()(Ptc_Atom<T>& atoms, dt_int32 Z, T rms_3d, T occ, T d_min, T rho, dt_int32 seed, Spec_Lay_Info<T> spec_lay_info)
+				{
+					// calculate number of atoms for the amorphous spec
+					const auto n_atoms_amorp = n_amorp_atoms(Z, rho, spec_lay_info.bs);
+
+					Ptc_Atom<T> m_atoms;
+					m_atoms.bs = fmax(atoms.bs, spec_lay_info.bs);
+					m_atoms.cols_used = atoms.cols_used;
+
+					// set box occupancy input data
+					box_occ.set_in_data(d_min, spec_lay_info.bs, spec_lay_info.r_0);
+
+					// select atoms within the depth
+					const T depth = 0.1; // set depth
+					const T z_0 = spec_lay_info.r_0.z - depth;
+					const T z_e = spec_lay_info.z_e() + depth;
+
+					m_atoms.reserve(atoms.size());
+
+					dt_int32 iatom_0 = 0;
+					for(auto iatom = 0; iatom < atoms.size(); iatom++)
+					{
+						if (fcn_chk_bound(atoms.z[iatom], z_0, z_e))
+						{
+							const auto atom_ik = atoms.get(iatom);
+							m_atoms.push_back(atom_ik);
+							// set occupancy
+							box_occ.set(atom_ik.get_pos(), iatom_0);
+							iatom_0++;
+						}
+					}
+					const dt_int32 n_atoms = iatom_0 + n_atoms_amorp;
+					m_atoms.reserve(n_atoms);
 					atoms.reserve(atoms.size() + n_atoms_amorp);
+
+					// set random input data
+					randu_3d.set_in_data(seed, spec_lay_info.bs, spec_lay_info.r_0); 
+
+					const dt_int32 region = spec_lay_info.region;
 
 					dt_int32 iatom_c = iatom_0;
 					for(dt_int32 iatom = iatom_0; iatom < n_atoms; iatom++)
@@ -120,32 +135,30 @@
 					atoms.sort_by_z();
 				}
 
-				Ptc_Atom<T> m_atoms;
-
 			private:
 				const dt_int32 n_trial;
 
 				Randu_3d_cpu<T> randu_3d;
 
 				Box_Occ_3d<dt_float64> box_occ;
-
-				dt_int32 n_amorp_atoms(const T& rho_n_A3, const R_3d<T>& bs) const 
-				{ 
-					return fcn_cceil<dt_int32>(rho_n_A3*vol(bs));	
-				}					
 				
 				T vol(const R_3d<T>& bs) const
 				{ 
 					return bs.x*bs.y*bs.z;
 				}
 
-				T density_n_A3(dt_int32 Z, T m_rho)
+				T rho_n_A3(dt_int32 Z, T rho) const
 				{
 					Atomic_Info_cpu<T> atomic_info = Atomic_Data(Z);
 					const T m = atomic_info.atomic_mass();
 
-					return m_rho*c_Na<T>/(m*c_cm3_A3<T>);
+					return rho*c_Na<T>/(m*c_cm3_A3<T>);
 				}
+
+				dt_int32 n_amorp_atoms(dt_int32 Z, const T& rho, const R_3d<T>& bs) const 
+				{ 
+					return fcn_cceil<dt_int32>(rho_n_A3(Z, rho)*vol(bs));	
+				}					
 
 				dt_bool rnd_point(const Ptc_Atom<T>& atoms, R_3d<T>& r_o)
 				{

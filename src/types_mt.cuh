@@ -210,6 +210,16 @@
 						type = spec_lay_info.type;
 					}
 				}
+				
+				R_3d<T> r_e() const 
+				{ 
+					return r_0 + bs; 
+				};	
+				
+				T z_e() const 
+				{ 
+					return r_0.z + bs.z; 
+				};
 
 				dt_bool is_spec_lay_top() const 
 				{ 
