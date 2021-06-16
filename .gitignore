@@ -259,7 +259,6 @@ matlab_functions/ilm_plot_ellipse.m
 matlab_functions/ilm_plot_rectangle.m
 matlab_functions/ilm_plot_vectors_3d.m
 matlab_functions/ilm_pn_border.m
-matlab_functions/ilm_pn_fact.m
 matlab_functions/ilm_polyfit_w.m
 matlab_functions/ilm_proj_cube.m
 matlab_functions/ilm_propagator.m
