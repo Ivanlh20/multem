@@ -24,8 +24,8 @@
 	#include "macros.cuh"
 	#include "const_enum.cuh"
 	#include "math.cuh"
-	#include "R_2d.cuh"
-	#include "R_3d.cuh"
+	#include "r_2d.cuh"
+	#include "r_3d.cuh"
 	#include "cgpu_vctr.cuh"
 	#include "cgpu_stream.cuh"
 
