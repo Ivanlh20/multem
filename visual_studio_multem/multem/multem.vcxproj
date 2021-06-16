@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="main.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\research\Matlab_code\MEXIVAN\Gaussian Exponential fit\hSAGaussianExpFit.h" />
+    <ClInclude Include="..\..\..\research\Matlab_code\MEXIVAN\Gaussian fit\hSAGaussianFit.h" />
+    <ClInclude Include="..\..\..\research\Matlab_code\MEXIVAN\Solution 2D Radial Schrodinger equation\hNumerovMethod.h" />
+    <ClInclude Include="..\..\gui_multem\gui_multem.cuh" />
+    <ClInclude Include="..\..\src\amorp_build.hpp" />
+    <ClInclude Include="..\..\src\atomic_data_mt.cuh" />
+    <ClInclude Include="..\..\src\atomic_fcns_mt.cuh" />
+    <ClInclude Include="..\..\src\blas.cuh" />
+    <ClInclude Include="..\..\src\border.cuh" />
+    <ClInclude Include="..\..\src\box_occ.hpp" />
+    <ClInclude Include="..\..\src\cb_spl_intrpl.hpp" />
+    <ClInclude Include="..\..\src\cgpu_classes.cuh" />
+    <ClInclude Include="..\..\src\cgpu_detail.cuh" />
+    <ClInclude Include="..\..\src\cgpu_detail_mt.cuh" />
+    <ClInclude Include="..\..\src\cgpu_fcns.cuh" />
+    <ClInclude Include="..\..\src\cgpu_fcns_gen.cuh" />
+    <ClInclude Include="..\..\src\cgpu_fft.cuh" />
+    <ClInclude Include="..\..\src\cgpu_info.cuh" />
+    <ClInclude Include="..\..\src\cgpu_rand.cuh" />
+    <ClInclude Include="..\..\src\cgpu_spt_ptc.cuh" />
+    <ClInclude Include="..\..\src\cgpu_stream.cuh" />
+    <ClInclude Include="..\..\src\cgpu_vctr.cuh" />
+    <ClInclude Include="..\..\src\intrpl_coef.cuh" />
+    <ClInclude Include="..\..\src\const_enum.cuh" />
+    <ClInclude Include="..\..\src\const_enum_mt.cuh" />
+    <ClInclude Include="..\..\src\cpu_detail.hpp" />
+    <ClInclude Include="..\..\src\cpu_fcns.hpp" />
+    <ClInclude Include="..\..\src\cpu_fcns_image.hpp" />
+    <ClInclude Include="..\..\src\cpu_fcns_mt.hpp" />
+    <ClInclude Include="..\..\src\energy_loss.cuh" />
+    <ClInclude Include="..\..\src\eval_fit_atomic_columns.hpp" />
+    <ClInclude Include="..\..\src\eval_fit_atomic_columns_c.hpp" />
+    <ClInclude Include="..\..\src\eval_fit_atomic_columns_c_old.hpp" />
+    <ClInclude Include="..\..\src\eval_fit_gaussians.hpp" />
+    <ClInclude Include="..\..\src\fcns_elem.cuh" />
+    <ClInclude Include="..\..\src\fcns_wd.cuh" />
+    <ClInclude Include="..\..\src\fxeg_data.hpp" />
+    <ClInclude Include="..\..\src\gpu_detail.cuh" />
+    <ClInclude Include="..\..\src\gpu_detail_mt.cuh" />
+    <ClInclude Include="..\..\src\gpu_fcns.cuh" />
+    <ClInclude Include="..\..\src\gpu_fcns_mt.cuh" />
+    <ClInclude Include="..\..\src\grid.cuh" />
+    <ClInclude Include="..\..\src\igrid.cuh" />
+    <ClInclude Include="..\..\src\in_classes.cuh" />
+    <ClInclude Include="..\..\src\in_classes_mt.cuh" />
+    <ClInclude Include="..\..\src\incident_wave.cuh" />
+    <ClInclude Include="..\..\src\kahan_sum.cuh" />
+    <ClInclude Include="..\..\src\lapack.hpp" />
+    <ClInclude Include="..\..\src\lens.cuh" />
+    <ClInclude Include="..\..\src\macros.cuh" />
+    <ClInclude Include="..\..\src\math.cuh" />
+    <ClInclude Include="..\..\src\matlab_mex.cuh" />
+    <ClInclude Include="..\..\src\matlab_multem_io.cuh" />
+    <ClInclude Include="..\..\src\memcpy.cuh" />
+    <ClInclude Include="..\..\src\microscope_effects.cuh" />
+    <ClInclude Include="..\..\src\mx_2x2.cuh" />
+    <ClInclude Include="..\..\src\mx_3x3.cuh" />
+    <ClInclude Include="..\..\src\output_multem.hpp" />
+    <ClInclude Include="..\..\src\particle_fcns.hpp" />
+    <ClInclude Include="..\..\src\particles.cuh" />
+    <ClInclude Include="..\..\src\peak_finding.cuh" />
+    <ClInclude Include="..\..\src\pn_fact.hpp" />
+    <ClInclude Include="..\..\src\projected_potential.cuh" />
+    <ClInclude Include="..\..\src\propagator.cuh" />
+    <ClInclude Include="..\..\src\quad_data.cuh" />
+    <ClInclude Include="..\..\src\r_2d.cuh" />
+    <ClInclude Include="..\..\src\r_3d.cuh" />
+    <ClInclude Include="..\..\src\range.cuh" />
+    <ClInclude Include="..\..\src\region.cuh" />
+    <ClInclude Include="..\..\src\shape_t.hpp" />
+    <ClInclude Include="..\..\src\slicing.hpp" />
+    <ClInclude Include="..\..\src\space_group.hpp" />
+    <ClInclude Include="..\..\src\spec.hpp" />
+    <ClInclude Include="..\..\src\tem_simulation.cuh" />
+    <ClInclude Include="..\..\src\ithread_rect.cuh" />
+    <ClInclude Include="..\..\src\timing.cuh" />
+    <ClInclude Include="..\..\src\transmission_fcn.cuh" />
+    <ClInclude Include="..\..\src\type_traits_gen.cuh" />
+    <ClInclude Include="..\..\src\type_traits_mt.cuh" />
+    <ClInclude Include="..\..\src\types.cuh" />
+    <ClInclude Include="..\..\src\types_mt.cuh" />
+    <ClInclude Include="..\..\src\wave_function.cuh" />
+    <ClInclude Include="..\..\src\xtl_build.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\..\..\research\Matlab_code\MEXIVAN\Gaussian Exponential fit\get_Gaussians_Exp_fit.cpp" />
+    <CudaCompile Include="..\..\..\research\Matlab_code\MEXIVAN\Gaussian fit\get_Gaussians_fit.cpp" />
+    <CudaCompile Include="..\..\..\research\Matlab_code\MEXIVAN\Solution 2D Radial Schrodinger equation\getSol2DRadSchEqu.cpp" />
+    <CudaCompile Include="..\..\..\research\Matlab_code\MEXIVAN\Solution 2D Radial Schrodinger equation\hNumerovMethod.cpp" />
+    <CudaCompile Include="..\..\gui_multem\gui_multem.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_add_gauss_nois.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_add_pbdr.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_add_poiss_nois.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_add_unif_nois.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_anscombe.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_anscombe_inv.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_at_tr_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_binarize.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_cb_spl_intrpl.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_chi2_pcf_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_crt_sft_1d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_crt_sft_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_crt_sft_2d_br.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_crt_tr_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_cv_gauss.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_data_aug_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_dcv_gauss.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_eval_2_gauss_pac.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_eval_atomic_columns.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_eval_ellipt_gauss_2d.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_eval_gauss_1p_pac.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fd_peaks.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fd_peaks_2d.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fd_sft_1d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fd_sft_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fd_sft_2d_br.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fd_tr_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fd_tr_rot_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fd_tr_scy_shx_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fft2_tr_at_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fit_2_gauss_pac.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fit_atomic_columns.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fit_atomic_columns_c.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fit_ellipt_gauss_2d.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fit_gauss_1d.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fit_gauss_1p_pac.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fit_peak_pos_2d.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fit_peaks_iter.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fltr_mean.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fltr_median.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fltr_median_bc.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fltr_median_pos.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fltr_poiss_nois.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fltr_poiss_nois_bc.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fltr_wiener.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_fltr_wiener_bc.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_grad.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_hist.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_info_lim_2d.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_interp_profilc_e.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_interp_rn_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_match_vectors.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_morp_op_close.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_morp_op_dilate.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_morp_op_erode.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_morp_op_open.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_morp_op_tophat.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_neigh_2d.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_opt_flow.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_otsu_thr.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_pcf_1d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_pcf_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_pcf_2d_br.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_pn_fact.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_proj_im.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_psd.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_quad_coef.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_rad_dist.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_rad_dist_2d.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_repl_bdr.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_rot_sca_sft_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_rot_tr_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_rs_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_scy_scx_tr_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_scy_shx_tr_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_sd_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_sd_nr_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_sd_r_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_sft_1d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_sft_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_sft_2d_br.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_snr.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_snr_poiss_nois.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_spt_gauss_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_spt_gauss_3d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_tr_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_tr_at_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_tr_rot_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_tr_scy_scx_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_tr_scy_shx_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_uniq_vctr.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_wd_butwth.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_wd_exp.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_wd_fermi.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_wd_gauss.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_wd_hann.cu" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_xy_2_repl_xym.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_xy_2_xyc.cpp" />
+    <CudaCompile Include="..\..\mex_files_general\ilc_xy_match_one_2_one.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_amorp_lay_add.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_amorp_build.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_atomic_info.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_atomic_radius.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_det_min_spl.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_e_interact_parm_kva.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_feg.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_feg_parm_coef.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_fwhm_2_sigma.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_fxeg_data.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_fxg.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_g_max.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_gamma.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_hwhm_2_sigma.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_iehwgd_2_sigma.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_incident_wave.cu" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_lambda.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_max_dist.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_microscope_aberrations.cu" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_min_dist.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_mrad_2_rangs.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_mrad_2_sigma.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_multem.cu" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_pr.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_projected_potential.cu" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_propagate.cu" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_rangs_2_mrad.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_rdf.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_scherzer_aperture.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_scherzer_defocus.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_spec_planes.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_spec_rot.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_spec_slicing.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_transf_exp_factor.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_transmission_fcn.cu" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_vr.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_vz.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_vzp.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_wave_function.cu" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_xtl_build.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_xtl_build_base.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_xtl_csn_2_sgr.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_xtl_css_2_csn.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_xtl_css_2_sgr.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_xtl_sgn_2_csn.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_eiger_min.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_atomic_data.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_atomic_fcns.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_cgpu_rand.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_cgpu_vctr.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_cos_tapering.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_crop_shift.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_detector_int.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_fft.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_fft2d_batch_comparison.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_flsf.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_functor.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_gels.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_gelsd.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_gesv.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_grid_1d.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_grid_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_grid_3d.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_igrid.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_lens.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_matlab_types.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_mx_2x2.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_mx_3x3.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_particles.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_polar.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_quadrature.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_r_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_r_3d.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_shape.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_traits.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_trs_2d.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_vctr_fcns.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_wd_fcns.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{7AF61FF5-2F37-48B5-A7B5-0DB32777F186}</ProjectGuid>
+    <RootNamespace>multem</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <CudaToolkitCustomDir>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1</CudaToolkitCustomDir>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.1.props" />
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>D:\multem\src;C:\Program Files\MATLAB\R2018a\extern\include;D:\research\Other_codes\lapacke\include;$(IncludePath)</IncludePath>
+    <ReferencePath>D:\multem\src;$(ReferencePath)</ReferencePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalUsingDirectories>D:\multem\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <AdditionalIncludeDirectories>D:\multem\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Program Files\MATLAB\R2020b\extern\include;D:\multem\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.1.targets" />
+  </ImportGroup>
+</Project>

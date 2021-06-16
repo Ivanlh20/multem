@@ -2750,7 +2750,7 @@
 			template <class SU>
 			void ix_0_ix_e(const T& x, const T& x_max, SU& ix_0, SU& ix_e) const 
 			{
-				fcn_get_idx_0_idx_n(x, x_max, drx, pbc_x, this->nx-1, ix_0, ix_n);
+				fcn_get_idx_0_idx_n(x, x_max, drx, pbc_x, this->nx-1, ix_0, ix_e);
 				ix_e += ix_0;
 			}
 

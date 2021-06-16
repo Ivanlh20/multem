@@ -775,7 +775,7 @@
 		if (mxA!=nullptr)
 		{
 			auto pvctr = mex_get_vctr<T>(mxA);
-			return (vctr.size()>=2)?mt::R_2d<T>(vctr.data()):r_0;
+			return (pvctr.size()>=2)?mt::R_2d<T>(pvctr.data()):r_0;
 		}
 		else
 		{

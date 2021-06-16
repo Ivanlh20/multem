@@ -229,7 +229,10 @@
 			/* copy assignment operator */
 			Atomic_Info<T, Dev>& operator=(const Atomic_Info<T, Dev>& atomic_info)
 			{
-				assign(atomic_info);
+				if (this != &atomic_info)
+				{
+					this->assign(atomic_info);
+				}
 			
 				return *this;
 			}
@@ -248,10 +251,10 @@
 			{ 
 				name = atomic_info.name;
 				Z = atomic_info.Z;
-				m = atomic_info.m;
 				A = atomic_info.A;
-				rn = atomic_info.rn;
-				ra = atomic_info.ra;
+				m = T(atomic_info.m);
+				rn = T(atomic_info.rn);
+				ra = T(atomic_info.ra);
 
 				eels_maj_edg.assign(atomic_info.eels_maj_edg);
 				eels_min_edg.assign(atomic_info.eels_min_edg);

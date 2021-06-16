@@ -444,9 +444,10 @@
 		CGPU_EXEC 
 		T fcn_get_len_crv(dt_int32 ix_0, dt_int32 ix_e, Ctpr<T> x, Ctpr<T> y, const T& ln_max, dt_int32& iln)
 		{
+			T ln = 0;
+
 			if (ix_0 < ix_e)
 			{
-				T ln = 0;
 				iln = ix_e;
 				for(auto ik = ix_0; ik < ix_e-1; ik++)
 				{
@@ -462,7 +463,6 @@
 			}
 			else
 			{
-				T ln = 0;
 				iln = ix_e;
 				for(auto ik = ix_0; ik > ix_e; ik--)
 				{
@@ -476,8 +476,6 @@
 					}
 				}
 			}
-
-			return ln;
 		}
 
 		// get index to maximum distance

@@ -1621,7 +1621,7 @@
 
 					r = fabs(r);
 
-					r. = ::fmin(r, fabs(r-bs));
+					r = ::fmin(r, fabs(r-bs));
 
 					return mt::norm_2(r);
 				}				
@@ -1632,7 +1632,7 @@
 
 					r = fabs(r);
 
-					r. = ::fmin(r, fabs(r-bs));
+					r = ::fmin(r, fabs(r-bs));
 
 					return mt::norm_2(r);
 				}
@@ -3226,16 +3226,16 @@
 					ptc.y[ia_z] = ptc.y[ia];
 					ptc.z[ia_z] = ptc.z[ia];
 
-					if (cols_used>4)
+					if (ptc.cols_used>4)
 						ptc.sigma[ia_z] = ptc.sigma[ia];
 
-					if (cols_used>5)
+					if (ptc.cols_used>5)
 						ptc.occ[ia_z] = ptc.occ[ia];
 
-					if (cols_used>6)
+					if (ptc.cols_used>6)
 						ptc.region[ia_z] = ptc.region[ia];
 
-					if (cols_used>7)
+					if (ptc.cols_used>7)
 						ptc.charge[ia_z] = ptc.charge[ia];
 
 					ia_z++;
