@@ -325,7 +325,7 @@
 
 				void set_sc_sft(const R_2d<T>& sc, const R_2d<T>& sft)
 				{
-					m_sc = bs;
+					m_sc = sc;
 					m_sft = sft;
 				}
 

@@ -177,7 +177,7 @@
 
 				Spec_Lay_Info<T>& operator=(Spec_Lay_Info<T> &spec_lay_info)
 				{
-					if (this != &ptc_s)
+					if (this != &spec_lay_info)
 					{
 						bs = spec_lay_info.bs;
 						r_0 = spec_lay_info.r_0;
@@ -251,10 +251,12 @@
 
 					dt_int32 f_region = 0;
 					dt_int32 c_region = 0;
+					const T z_0 = r_0.z;
+					const T z_e = z_e();
 					for(auto iatoms = 0; iatoms < atoms.size(); iatoms++)
 					{
 						auto z = atoms.z[iatoms];
-						if ((z_0<r.z) && (z<r.z_e))
+						if ((z_0<z) && (z<z_e))
 						{
 							f_region += atoms.region[iatoms];
 							c_region++;

@@ -277,7 +277,8 @@
 
 					stream.set_n_stream_act(x.size());
 					stream.set_grid(x.size(), 1);
-					stream.exec(thr_neighbors_sort);
+					// check out
+					//stream.exec(thr_neighbors_sort);
 
 					// get average minimum radius
 					T r_min = 0;
@@ -552,7 +553,8 @@
 					};
 					stream.set_n_stream_act(x.size());
 					stream.set_grid(x.size(), 1);
-					stream.exec(thr_radius_min);
+					// check out
+					//stream.exec(thr_radius_min);
 
 					return radius;
 				}

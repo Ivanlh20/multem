@@ -144,7 +144,7 @@
 		template <class T>
 		class Xtl_Build{
 			public:
-				Xtl_Build(): na(0), nb(0), nc(0), a(0), b(0), c(0) {};
+				Xtl_Build(): n_a(0), n_b(0), n_c(0), a(0), b(0), c(0) {};
 
 				Xtl_Build(const In_Xtl_Build<T>& in_xtl_build)
 				{

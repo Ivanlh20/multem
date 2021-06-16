@@ -476,6 +476,8 @@
 					}
 				}
 			}
+
+			return ln;
 		}
 
 		// get index to maximum distance
