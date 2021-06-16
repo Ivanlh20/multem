@@ -112,7 +112,7 @@ namespace mt
 				T_r int_val = 0;
 				switch (detector.type)
 				{
-					case mt::edt_Circular:
+					case mt::edt_circular:
 					{
 						auto g_inner = detector.g_inner[iDet];
 						auto g_outer = detector.g_outer[iDet];
@@ -120,12 +120,12 @@ namespace mt
 						int_val = w_i*mt::fcn_int_det_ring_norm_2(*(this->stream), this->in_multem->grid_2d, g_inner, g_outer, psi_z);
 					}
 					break;
-					case mt::edt_Radial:
+					case mt::edt_radial:
 					{
 						int_val = 0;
 					}
 					break;
-					case mt::edt_Matrix:
+					case mt::edt_matrix:
 					{
 						int_val = w_i*mt::fcn_int_det_ring_norm_2(*(this->stream), this->in_multem->grid_2d, detector.fR[iDet], psi_z);
 					}
@@ -285,7 +285,7 @@ namespace mt
 				if (this->in_multem->is_multislice())
 				{
 					// time.tic();
-					propagator(eS_Real, gxu, gyu, this->sli_thk(islice), psi_z);
+					propagator(esp_real, gxu, gyu, this->sli_thk(islice), psi_z);
 					// time.toc();
 					// mexPrintf("time = %7.5f\n", time.elapsed_ms());
 				}
@@ -317,14 +317,14 @@ namespace mt
 					if (this->in_multem->eels_fr.is_Single_Chan())
 					{
 						T_r sli_thk = this->dz_m(islice_0, islice_e);
-						propagator(eS_Real, gx_0, gy_0, sli_thk, psi_z);
+						propagator(esp_real, gx_0, gy_0, sli_thk, psi_z);
 					}
 					else if (this->in_multem->eels_fr.is_Mixed_Chan())
 					{
 						T_r sli_thk = 0.5*this->dz_m(islice_0, islice_e);
-						propagator(eS_Real, gx_0, gy_0, sli_thk, psi_z);
+						propagator(esp_real, gx_0, gy_0, sli_thk, psi_z);
 						mt::ew_mult(*(this->stream), trans, psi_z);
-						propagator(eS_Real, gx_0, gy_0, sli_thk, psi_z);
+						propagator(esp_real, gx_0, gy_0, sli_thk, psi_z);
 					}
 					else if (this->in_multem->eels_fr.is_Double_Chan())
 					{
@@ -335,7 +335,7 @@ namespace mt
 					}
 
 					phase_multiplication(gx_0, gy_0, psi_z);
-					propagator(eS_Reciprocal, gx_0, gy_0, this->slicing.thick[ithk].z_back_prop, psi_z);
+					propagator(esp_fourier, gx_0, gy_0, this->slicing.thick[ithk].z_back_prop, psi_z);
 
 					if (this->in_multem->is_STEM_ISTEM_EELS())
 					{

@@ -2994,25 +2994,25 @@
 		// {
 		// 	switch (show_data)
 		// 	{
-		// 	case eSCD_CReal:
+		// 	case escd_creal:
 		// 	{
 		// 		for(auto ixy = 0; ixy < cdata.size(); ixy++)
 		// 			data[ixy] = cdata[ixy].real();
 		// 	}
 		// 	break;
-		// 	case eSCD_CImag:
+		// 	case escs_cimag:
 		// 	{
 		// 		for(auto ixy = 0; ixy < cdata.size(); ixy++)
 		// 			data[ixy] = cdata[ixy].imag();
 		// 	}
 		// 	break;
-		// 	case eSCD_CMod:
+		// 	case escd_cmod:
 		// 	{
 		// 		for(auto ixy = 0; ixy < cdata.size(); ixy++)
 		// 			data[ixy] = abs(cdata[ixy]);
 		// 	}
 		// 	break;
-		// 	case eSCD_CPhase:
+		// 	case escd_cphase:
 		// 	{
 		// 		for(auto ixy = 0; ixy < cdata.size(); ixy++)
 		// 			data[ixy] = arg(cdata[ixy]);
@@ -3066,23 +3066,23 @@
 		// 		{
 		// 			switch (pot_parm_typ)
 		// 			{
-		// 			case ePPT_doyle_0_4:
-		// 				cpu_detail::linear_Vz<ePPT_doyle_0_4, 0, TAtom>(qz, atom);
+		// 			case eppt_doyle_0_4:
+		// 				cpu_detail::linear_Vz<eppt_doyle_0_4, 0, TAtom>(qz, atom);
 		// 				break;
-		// 			case ePPT_peng_0_4:
-		// 				cpu_detail::linear_Vz<ePPT_peng_0_4, 0, TAtom>(qz, atom);
+		// 			case eppt_peng_0_4:
+		// 				cpu_detail::linear_Vz<eppt_peng_0_4, 0, TAtom>(qz, atom);
 		// 				break;
-		// 			case ePPT_peng_0_12:
-		// 				cpu_detail::linear_Vz<ePPT_peng_0_12, 0, TAtom>(qz, atom);
+		// 			case eppt_peng_0_12:
+		// 				cpu_detail::linear_Vz<eppt_peng_0_12, 0, TAtom>(qz, atom);
 		// 				break;
-		// 			case ePPT_kirkland_0_12:
-		// 				cpu_detail::linear_Vz<ePPT_kirkland_0_12, 0, TAtom>(qz, atom);
+		// 			case eppt_kirkland_0_12:
+		// 				cpu_detail::linear_Vz<eppt_kirkland_0_12, 0, TAtom>(qz, atom);
 		// 				break;
-		// 			case ePPT_weickenmeier_0_12:
-		// 				cpu_detail::linear_Vz<ePPT_weickenmeier_0_12, 0, TAtom>(qz, atom);
+		// 			case eppt_weickenmeier_0_12:
+		// 				cpu_detail::linear_Vz<eppt_weickenmeier_0_12, 0, TAtom>(qz, atom);
 		// 				break;
-		// 			case ePPT_lobato_0_12:
-		// 				cpu_detail::linear_Vz<ePPT_lobato_0_12, 0, TAtom>(qz, atom);
+		// 			case eppt_lobato_0_12:
+		// 				cpu_detail::linear_Vz<eppt_lobato_0_12, 0, TAtom>(qz, atom);
 		// 				break;
 		// 			}
 		// 		}
@@ -3090,23 +3090,23 @@
 		// 		{
 		// 			switch (pot_parm_typ)
 		// 			{
-		// 			case ePPT_doyle_0_4:
-		// 				cpu_detail::linear_Vz<ePPT_doyle_0_4, 1, TAtom>(qz, atom);
+		// 			case eppt_doyle_0_4:
+		// 				cpu_detail::linear_Vz<eppt_doyle_0_4, 1, TAtom>(qz, atom);
 		// 				break;
-		// 			case ePPT_peng_0_4:
-		// 				cpu_detail::linear_Vz<ePPT_peng_0_4, 1, TAtom>(qz, atom);
+		// 			case eppt_peng_0_4:
+		// 				cpu_detail::linear_Vz<eppt_peng_0_4, 1, TAtom>(qz, atom);
 		// 				break;
-		// 			case ePPT_peng_0_12:
-		// 				cpu_detail::linear_Vz<ePPT_peng_0_12, 1, TAtom>(qz, atom);
+		// 			case eppt_peng_0_12:
+		// 				cpu_detail::linear_Vz<eppt_peng_0_12, 1, TAtom>(qz, atom);
 		// 				break;
-		// 			case ePPT_kirkland_0_12:
-		// 				cpu_detail::linear_Vz<ePPT_kirkland_0_12, 1, TAtom>(qz, atom);
+		// 			case eppt_kirkland_0_12:
+		// 				cpu_detail::linear_Vz<eppt_kirkland_0_12, 1, TAtom>(qz, atom);
 		// 				break;
-		// 			case ePPT_weickenmeier_0_12:
-		// 				cpu_detail::linear_Vz<ePPT_weickenmeier_0_12, 1, TAtom>(qz, atom);
+		// 			case eppt_weickenmeier_0_12:
+		// 				cpu_detail::linear_Vz<eppt_weickenmeier_0_12, 1, TAtom>(qz, atom);
 		// 				break;
-		// 			case ePPT_lobato_0_12:
-		// 				cpu_detail::linear_Vz<ePPT_lobato_0_12, 1, TAtom>(qz, atom);
+		// 			case eppt_lobato_0_12:
+		// 				cpu_detail::linear_Vz<eppt_lobato_0_12, 1, TAtom>(qz, atom);
 		// 				break;
 		// 			}
 		// 		}

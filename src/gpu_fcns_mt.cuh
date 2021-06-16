@@ -267,13 +267,13 @@
 
 			iGrid_1d igrid(vzp_i.size());
 
-			if (esim==eESIM_Weak_Phase_Object)
+			if (esim==eesim_weak_phase_object)
 			{
-				gpu_detail_mt::fcn_trans_fcn<eESIM_Weak_Phase_Object, U><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vzp_i.ptr_32(), w, tfcn_o.ptr_32());
+				gpu_detail_mt::fcn_trans_fcn<eesim_weak_phase_object, U><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vzp_i.ptr_32(), w, tfcn_o.ptr_32());
 			}
 			else
 			{
-				gpu_detail_mt::fcn_trans_fcn<eESIM_Phase_Object, U><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vzp_i.ptr_32(), w, tfcn_o.ptr_32());
+				gpu_detail_mt::fcn_trans_fcn<eesim_phase_object, U><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vzp_i.ptr_32(), w, tfcn_o.ptr_32());
 			}
 		}
 	}

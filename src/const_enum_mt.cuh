@@ -38,19 +38,19 @@
 		/************************** slice memory type ************************/
 		enum eSlice_Memory_Typ
 		{
-			eSMT_Transmission = 1, eSMT_Potential = 2, eSMT_none = 3
+			esmt_none = 0, esmt_transmission = 1, esmt_potential = 2
 		};
 
 		/************************ microscope effects *************************/
 		enum eIllumination_Model
 		{
-			eIM_Coherent = 1, eIM_Partial_Coherent = 2, eIM_Trans_Cross_Coef = 3, eIM_Full_Integration = 4, eIM_none = 5
+			eim_none = 0, eim_coherent = 1, eim_partial_coherent = 2, eim_trans_cross_coef = 3, eim_full_integration = 4
 		};
 
 		/************************ spatial and temporal ***********************/
 		enum eTemporal_Spatial_Incoh
 		{
-			eTSI_Temporal_Spatial = 1, eTSI_Temporal = 2, eTSI_Spatial = 3, eTSI_none = 4
+			etsi_none = 0, etsi_temporal_spatial = 1, etsi_temporal = 2, etst_spatial = 3
 		};
 
 		/************************** lens variable type ***********************/
@@ -62,52 +62,52 @@
 		};
 
 		/************************* simulation type ***************************/
-		enum eTEM_Sim_Typ
+		enum eEM_Sim_Typ
 		{
-			eTEMST_STEM = 11, eTEMST_ISTEM = 12, 
-			eTEMST_CBED = 21, eTEMST_CBEI = 22, 
-			eTEMST_ED = 31, eTEMST_HRTEM = 32, 
-			eTEMST_PED = 41, eTEMST_HCTEM = 42, 
-			eTEMST_EWFS = 51, eTEMST_EWRS = 52, 
-			eTEMST_STEM_EELS = 61, eTEMST_ISTEM_EELS = 62, 
-			eTEMST_EFTEMFS = 71, eTEMST_EFTEMRS = 72, 
-			eTEMST_IWFS = 81, eTEMST_IWRS = 82, 
-			eTEMST_PPFS = 91, eTEMST_PPRS = 92, 			// projected potential
-			eTEMST_TFFS = 101, eTEMST_TFRS = 102, 			// transmission function
-			eTEMST_PropFS = 111, eTEMST_PropRS = 112		// fcn_propagate
+			eemst_stem = 11, eemst_istem = 12, 
+			eemst_cbed = 21, eemst_cbei = 22, 
+			eemst_ed = 31, eemst_hrtem = 32, 
+			eemst_ped = 41, eemst_hctem = 42, 
+			eemst_ewfs = 51, eemst_ewrs = 52, 
+			eemst_stem_eels = 61, eemst_istem_eels = 62, 
+			eemst_eftemfs = 71, eemst_eftemrs = 72, 
+			eemst_iwfs = 81, eemst_iwrs = 82, 
+			eemst_ppfs = 91, eemst_pprs = 92, 			// projected potential
+			eemst_tffs = 101, eemst_tfrs = 102, 			// transmission function
+			eemst_propfs = 111, eemst_proprs = 112		// fcn_propagate
 		};
 
 		/********************* simulation data output ************************/
-		enum eTEM_Output_Typ
+		enum eEM_Output_Typ
 		{
-			eTEMOT_image_tot_coh = 1, eTEMOT_image_tot = 2, 
-			eTEMOT_m2psi_tot_coh = 3, eTEMOT_m2psi_tot = 4, 
-			eTEMOT_m2psi_tot_psi_coh = 5, eTEMOT_psi_coh = 6, 
-			eTEMOT_psi_0 = 7, eTEMOT_V = 8, eTEMOT_trans = 9
+			eemot_image_tot_coh = 1, eemot_image_tot = 2, 
+			eemot_m2psi_tot_coh = 3, eemot_m2psi_tot = 4, 
+			eemot_m2psi_tot_psi_coh = 5, eemot_psi_coh = 6, 
+			eemot_psi_0 = 7, eemot_V = 8, eemot_trans = 9
 		};
 
 		/************** electron specimen interaction model ******************/
 		enum eElec_Spec_Int_Model
 		{
-			eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
+			eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
 		};
 
 		/*************************** phonon model ****************************/
 		enum ePhonon_Model
 		{
-			ePM_Still_Atom = 1, ePM_Absorptive_Model = 2, ePM_Frozen_Phonon = 3, ePM_user_def = 4
+			epm_still_atom = 1, epm_absorptive_model = 2, epm_frozen_phonon = 3, epm_user_def = 4
 		};
 
 		/************************ phonon model output ************************/
 		enum ePhonon_Model_Output
 		{
-			ePMO_Total = 1, ePMO_Coherent = 2
+			epmo_total = 1, epmo_coherent = 2, epmo_total_coherent = 3
 		};
 
 		/******************** potential slicing Type *************************/
 		enum ePot_Sli_Typ
 		{
-			ePST_Planes = 1, ePST_dz_Proj = 2, ePST_dz_Sub = 3, ePST_Auto = 4
+			epst_planes = 1, epst_dz_Proj = 2, epst_dz_Sub = 3, epst_auto = 4
 		};
 
 		/********************** feg parameterization *************************/
@@ -121,45 +121,45 @@
 
 		enum ePot_Parm_Typ
 		{
-			ePPT_none = 0, ePPT_doyle_0_4 = 1, ePPT_peng_0_4 = 2, ePPT_peng_0_12 = 3, 
-			ePPT_kirkland_0_12 = 4, ePPT_weickenmeier_0_12 = 5, ePPT_lobato_0_12 = 6, 
-			ePPT_peng_ion_0_4 = 10
+			eppt_none = 0, eppt_doyle_0_4 = 1, eppt_peng_0_4 = 2, eppt_peng_0_12 = 3, 
+			eppt_kirkland_0_12 = 4, eppt_weickenmeier_0_12 = 5, eppt_lobato_0_12 = 6, 
+			eppt_peng_ion_0_4 = 10
 		};
 
 		/*********************** incident wave type **************************/
 		enum eIncident_Wave_Typ
 		{
-			eIWT_Plane_Wave = 1, eIWT_Convergent_Wave = 2, eIWT_user_def_Wave = 3, eIWT_Auto = 4
+			eiwt_plane_wave = 1, eiwt_convergent_wave = 2, eiwt_user_def_Wave = 3, eiwt_auto = 4
 		};
 
 		/************************ amorphous layer type ***********************/
 		enum eSpec_Lay_Typ
 		{
-			eSLT_none = 0, eSLT_Top = 1, eSLT_Bottom = 2, eSLT_Middle = 3, eSLT_user_def = 4
+			eslt_none = 0, eslt_top = 1, eslt_bottom = 2, eslt_middle = 3, eslt_user_def = 4
 		};
 
 		/************************* defocus plane type ************************/
 		enum eZero_Defocus_Typ
 		{
-			eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_user_def = 4
+			ezdt_first = 1, ezdt_middle = 2, ezdt_last = 3, ezdt_user_def = 4
 		};
 
 		/************************** thickness Type ***************************/
 		enum eThick_Typ
 		{
-			eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
+			ett_whole_spec = 1, ett_through_thick = 2, ett_through_slices = 3
 		};
 
 		/**************************** scan type ******************************/
 		enum eScan_Typ
 		{
-			eST_Line = 1, eST_Area = 2, eST_user_def = 3
+			est_line = 1, est_area = 2, eST_user_def = 3
 		};
 
 		/************************* detector type *****************************/
 		enum eDetector_Typ
 		{
-			edt_Circular = 1, edt_Radial = 2, edt_Matrix = 3
+			edt_circular = 1, edt_radial = 2, edt_matrix = 3
 		};
 
 		/************************ channelling type **************************/
@@ -168,7 +168,7 @@
 		// 3: double channelling
 		enum eChan_Typ
 		{
-			eCT_Single_Chan = 1, eCT_Mixed_Chan = 2, eCT_Double_Chan = 3
+			ect_single_chan = 1, ect_mixed_chan = 2, eCT_double_chan = 3
 		};
 
 	}
@@ -180,63 +180,63 @@
 		inline
 		dt_bool is_spec_lay_top(const eSpec_Lay_Typ &type)
 		{
-			return type == mt::eSLT_Top;
+			return type == mt::eslt_top;
 		}		
 		
 		inline
 		dt_bool is_spec_lay_bottom(const eSpec_Lay_Typ &type)
 		{
-			return type == mt::eSLT_Bottom;
+			return type == mt::eslt_bottom;
 		}
 		
 		inline
 		dt_bool is_spec_lay_middle(const eSpec_Lay_Typ &type)
 		{
-			return type == mt::eSLT_Middle;
+			return type == mt::eslt_middle;
 		}
 		
 		inline
 		dt_bool is_spec_lay_user_def(const eSpec_Lay_Typ &type)
 		{
-			return type == mt::eSLT_user_def;
+			return type == mt::eslt_user_def;
 		}
 
 		/***************************************************************************************/
 		inline
 		dt_bool is_multislice(const eElec_Spec_Int_Model &int_model)
 		{
-			return int_model == mt::eESIM_Multislice;
+			return int_model == mt::eesim_multislice;
 		}
 
 		inline
 		dt_bool is_phase_object(const eElec_Spec_Int_Model &int_model)
 		{
-			return int_model == mt::eESIM_Phase_Object;
+			return int_model == mt::eesim_phase_object;
 		}
 
 		inline
 		dt_bool is_weak_phase_object(const eElec_Spec_Int_Model &int_model)
 		{
-			return int_model == mt::eESIM_Weak_Phase_Object;
+			return int_model == mt::eesim_weak_phase_object;
 		}
 
 		/***************************************************************************************/
 		inline
 		dt_bool is_still_atom(const ePhonon_Model &pn_model)
 		{
-			return pn_model == ePM_Still_Atom;
+			return pn_model == epm_still_atom;
 		}
 
 		inline
 		dt_bool is_absorptive_model(const ePhonon_Model &pn_model)
 		{
-			return pn_model == ePM_Absorptive_Model;
+			return pn_model == epm_absorptive_model;
 		}
 
 		inline
 		dt_bool is_frozen_phonon(const ePhonon_Model &pn_model)
 		{
-			return pn_model == ePM_Frozen_Phonon;
+			return pn_model == epm_frozen_phonon;
 		}
 
 		inline
@@ -249,38 +249,38 @@
 		inline
 		dt_bool is_whole_spec(const eThick_Typ &thick_type)
 		{
-			return thick_type == eTT_Whole_Spec;
+			return thick_type == ett_whole_spec;
 		}
 
 		inline
 		dt_bool is_through_slices(const eThick_Typ &thick_type)
 		{
-			return thick_type == eTT_Through_Slices;
+			return thick_type == ett_through_slices;
 		}
 
 		inline
 		dt_bool is_through_thick(const eThick_Typ &thick_type)
 		{
-			return thick_type == eTT_Through_Thick;
+			return thick_type == ett_through_thick;
 		}
 
 		/***************************************************************************************/
 		inline
 		dt_bool is_slicing_by_planes(const eElec_Spec_Int_Model &int_model, const ePot_Sli_Typ &pot_slic)
 		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::ePST_Planes);
+			return mt::is_multislice(int_model) && (pot_slic == mt::epst_planes);
 		}
 
 		inline
 		dt_bool is_slicing_by_dz(const eElec_Spec_Int_Model &int_model, const ePot_Sli_Typ &pot_slic)
 		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::ePST_dz_Proj);
+			return mt::is_multislice(int_model) && (pot_slic == mt::epst_dz_Proj);
 		}
 
 		inline
 		dt_bool is_subslicing(const eElec_Spec_Int_Model &int_model, const ePot_Sli_Typ &pot_slic)
 		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::ePST_dz_Sub);
+			return mt::is_multislice(int_model) && (pot_slic == mt::epst_dz_Sub);
 		}
 
 		inline
@@ -293,264 +293,264 @@
 		inline
 		dt_bool is_plane_wave(eIncident_Wave_Typ iw_type)
 		{
-			return iw_type == eIWT_Plane_Wave;
+			return iw_type == eiwt_plane_wave;
 		}
 
 		inline
 		dt_bool is_convergent_wave(eIncident_Wave_Typ iw_type)
 		{
-			return iw_type == eIWT_Convergent_Wave;
+			return iw_type == eiwt_convergent_wave;
 		}
 
 		inline
 		dt_bool is_user_define_wave(eIncident_Wave_Typ iw_type)
 		{
-			return iw_type == eIWT_user_def_Wave;
+			return iw_type == eiwt_user_def_Wave;
 		}
 
 		/***************************************************************************************/
 		inline
-		dt_bool is_STEM(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_STEM(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_STEM;
+			return sim_type == mt::eemst_stem;
 		}
 
 		inline
-		dt_bool is_ISTEM(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_ISTEM(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_ISTEM;
+			return sim_type == mt::eemst_istem;
 		}
 
 		inline
-		dt_bool is_CBED(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_CBED(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_CBED;
+			return sim_type == mt::eemst_cbed;
 		}
 
 		inline
-		dt_bool is_CBEI(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_CBEI(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_CBEI;
+			return sim_type == mt::eemst_cbei;
 		}
 
 		inline
-		dt_bool is_ED(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_ED(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_ED;
+			return sim_type == mt::eemst_ed;
 		}
 
 		inline
-		dt_bool is_HRTEM(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_HRTEM(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_HRTEM;
+			return sim_type == mt::eemst_hrtem;
 		}
 
 		inline
-		dt_bool is_PED(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_PED(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_PED;
+			return sim_type == mt::eemst_ped;
 		}
 
 		inline
-		dt_bool is_HCTEM(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_HCTEM(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_HCTEM;
+			return sim_type == mt::eemst_hctem;
 		}
 
 		inline
-		dt_bool is_EWFS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_EWFS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_EWFS;
+			return sim_type == mt::eemst_ewfs;
 		}
 
 		inline
-		dt_bool is_EWRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_EWRS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_EWRS;
+			return sim_type == mt::eemst_ewrs;
 		}
 
 		inline
-		dt_bool is_EWFS_SC(const eTEM_Sim_Typ &sim_type, const ePhonon_Model &pn_model, const dt_bool &pn_float32_conf)
+		dt_bool is_EWFS_SC(const eEM_Sim_Typ &sim_type, const ePhonon_Model &pn_model, const dt_bool &pn_float32_conf)
 		{
 			return is_EWFS(sim_type) && (!is_frozen_phonon(pn_model) || is_frozen_phonon_float32_conf(pn_model, pn_float32_conf));
 		}
 
 		inline
-		dt_bool is_EWRS_SC(const eTEM_Sim_Typ &sim_type, const ePhonon_Model &pn_model, const dt_bool &pn_float32_conf)
+		dt_bool is_EWRS_SC(const eEM_Sim_Typ &sim_type, const ePhonon_Model &pn_model, const dt_bool &pn_float32_conf)
 		{
 			return is_EWRS(sim_type) && (!is_frozen_phonon(pn_model) || is_frozen_phonon_float32_conf(pn_model, pn_float32_conf));
 		}
 
 		inline
-		dt_bool is_STEM_EELS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_STEM_EELS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_STEM_EELS;
+			return sim_type == mt::eemst_stem_eels;
 		}
 
 		inline
-		dt_bool is_ISTEM_EELS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_ISTEM_EELS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_ISTEM_EELS;
+			return sim_type == mt::eemst_istem_eels;
 		}
 
 		inline
-		dt_bool is_STEM_ISTEM_EELS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_STEM_ISTEM_EELS(const eEM_Sim_Typ &sim_type)
 		{
 			return is_STEM_EELS(sim_type) || is_ISTEM_EELS(sim_type);
 		}
 
 		inline
-		dt_bool is_EFTEMFS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_EFTEMFS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_EFTEMFS;
+			return sim_type == mt::eemst_eftemfs;
 		}
 
 		inline
-		dt_bool is_EFTEMRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_EFTEMRS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_EFTEMRS;
+			return sim_type == mt::eemst_eftemrs;
 		}
 
 		inline
-		dt_bool is_EFTEM(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_EFTEM(const eEM_Sim_Typ &sim_type)
 		{
 			return is_EFTEMFS(sim_type) || is_EFTEMRS(sim_type);
 		}
 
 		inline
-		dt_bool is_IWFS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_IWFS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_IWFS;
+			return sim_type == mt::eemst_iwfs;
 		}
 
 		inline
-		dt_bool is_IWRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_IWRS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_IWRS;
+			return sim_type == mt::eemst_iwrs;
 		}
 
 		inline
-		dt_bool is_PPFS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_PPFS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_PPFS;
+			return sim_type == mt::eemst_ppfs;
 		}
 
 		inline
-		dt_bool is_PPRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_PPRS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_PPRS;
+			return sim_type == mt::eemst_pprs;
 		}
 
 		inline
-		dt_bool is_TFFS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_TFFS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_TFFS;
+			return sim_type == mt::eemst_tffs;
 		}
 
 		inline
-		dt_bool is_TFRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_TFRS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_TFRS;
+			return sim_type == mt::eemst_tfrs;
 		}
 
 		inline
-		dt_bool is_PropFS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_PropFS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_PropFS;
+			return sim_type == mt::eemst_propfs;
 		}
 
 		inline
-		dt_bool is_PropRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_PropRS(const eEM_Sim_Typ &sim_type)
 		{
-			return sim_type == mt::eTEMST_PropRS;
+			return sim_type == mt::eemst_proprs;
 		}
 
 		inline
-		dt_bool is_STEM_ISTEM(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_STEM_ISTEM(const eEM_Sim_Typ &sim_type)
 		{
 			return is_STEM(sim_type) || is_ISTEM(sim_type);
 		}
 
 		inline
-		dt_bool is_CBED_CBEI(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_CBED_CBEI(const eEM_Sim_Typ &sim_type)
 		{
 			return is_CBED(sim_type) || is_CBEI(sim_type);
 		}
 
 		inline
-		dt_bool is_ED_HRTEM(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_ED_HRTEM(const eEM_Sim_Typ &sim_type)
 		{
 			return is_ED(sim_type) || is_HRTEM(sim_type);
 		}
 
 		inline
-		dt_bool is_PED_HCTEM(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_PED_HCTEM(const eEM_Sim_Typ &sim_type)
 		{
 			return is_PED(sim_type) || is_HCTEM(sim_type);
 		}
 
 		inline
-		dt_bool is_EWFS_EWRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_EWFS_EWRS(const eEM_Sim_Typ &sim_type)
 		{
 			return is_EWFS(sim_type) || is_EWRS(sim_type);
 		}
 
 		inline
-		dt_bool is_EWFS_EWRS_SC(const eTEM_Sim_Typ &sim_type, const ePhonon_Model &pn_model, const dt_bool &pn_float32_conf)
+		dt_bool is_EWFS_EWRS_SC(const eEM_Sim_Typ &sim_type, const ePhonon_Model &pn_model, const dt_bool &pn_float32_conf)
 		{
 			return is_EWFS_SC(sim_type, pn_model, pn_float32_conf) || is_EWRS_SC(sim_type, pn_model, pn_float32_conf);
 		}
 
 		inline
-		dt_bool is_EWFS_convergent_wave(const eTEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
+		dt_bool is_EWFS_convergent_wave(const eEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
 		{
 			return is_EWFS(sim_type) && is_convergent_wave(iw_type);
 		}
 
 		inline
-		dt_bool is_EWRS_convergent_wave(const eTEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
+		dt_bool is_EWRS_convergent_wave(const eEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
 		{
 			return is_EWRS(sim_type) && is_convergent_wave(iw_type);
 		}
 
 		inline
-		dt_bool is_EW_convergent_wave(const eTEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
+		dt_bool is_EW_convergent_wave(const eEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
 		{
 			return is_EWFS_EWRS(sim_type) && is_convergent_wave(iw_type);
 		}
 
 		inline
-		dt_bool is_EELS_EFTEM(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_EELS_EFTEM(const eEM_Sim_Typ &sim_type)
 		{
 			return is_STEM_ISTEM_EELS(sim_type) || is_EFTEM(sim_type);
 		}
 
 		inline
-		dt_bool is_IWFS_IWRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_IWFS_IWRS(const eEM_Sim_Typ &sim_type)
 		{
 			return is_IWFS(sim_type) || is_IWRS(sim_type);
 		}
 
 		inline
-		dt_bool is_PPFS_PPRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_PPFS_PPRS(const eEM_Sim_Typ &sim_type)
 		{
 			return is_PPFS(sim_type) || is_PPRS(sim_type);
 		}
 
 		inline
-		dt_bool is_TFFS_TFRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_TFFS_TFRS(const eEM_Sim_Typ &sim_type)
 		{
 			return is_TFFS(sim_type) || is_TFRS(sim_type);
 		}
 
 		inline
-		dt_bool is_PropFS_PropRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_PropFS_PropRS(const eEM_Sim_Typ &sim_type)
 		{
 			return is_PropFS(sim_type) || is_PropRS(sim_type);
 		}
 
 		inline
-		dt_bool is_grid_FS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_grid_FS(const eEM_Sim_Typ &sim_type)
 		{
 			auto bb = is_CBED(sim_type) || is_ED(sim_type) || is_PED(sim_type) || is_EWFS(sim_type);
 			bb = bb || is_EFTEMFS(sim_type) || is_IWFS(sim_type) || is_PPFS(sim_type) || is_TFFS(sim_type);
@@ -558,13 +558,13 @@
 		}
 
 		inline
-		dt_bool is_grid_RS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_grid_RS(const eEM_Sim_Typ &sim_type)
 		{
 			return !is_grid_FS(sim_type);
 		}
 
 		inline
-		dt_bool is_simulation_type_FS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_simulation_type_FS(const eEM_Sim_Typ &sim_type)
 		{
 			auto bb = is_STEM(sim_type) || is_CBED(sim_type) || is_ED(sim_type);
 			bb = bb || is_PED(sim_type) || is_EWFS(sim_type) || is_STEM_EELS(sim_type);
@@ -573,61 +573,61 @@
 		}
 
 		inline
-		dt_bool is_simulation_type_RS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_simulation_type_RS(const eEM_Sim_Typ &sim_type)
 		{
 			return !is_simulation_type_FS(sim_type);
 		}
 
 		inline
-		dt_bool is_specimen_required(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_specimen_required(const eEM_Sim_Typ &sim_type)
 		{
 			return !(is_IWFS_IWRS(sim_type) || is_PropFS_PropRS(sim_type));
 		}
 
 		inline
-		dt_bool is_ISTEM_CBEI_HRTEM_HCTEM_EFTEMRS(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_ISTEM_CBEI_HRTEM_HCTEM_EFTEMRS(const eEM_Sim_Typ &sim_type)
 		{
 			return is_ISTEM(sim_type) || is_CBEI(sim_type) || is_HRTEM(sim_type) || is_HCTEM(sim_type) || is_EFTEMRS(sim_type);
 		}
 
 		inline
-		dt_bool is_CBED_ED_EWFS_PED(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_CBED_ED_EWFS_PED(const eEM_Sim_Typ &sim_type)
 		{
 			return is_CBED(sim_type) || is_ED(sim_type) || is_EWFS(sim_type) || is_PED(sim_type);
 		}
 
 		inline
-		dt_bool is_obj_lens_temp_spat(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_obj_lens_temp_spat(const eEM_Sim_Typ &sim_type)
 		{
 			return is_ISTEM(sim_type) || is_CBEI(sim_type) || is_HRTEM(sim_type) || is_HCTEM(sim_type) || is_EFTEMRS(sim_type);
 		}
 
 		inline
-		dt_bool is_cond_lens_temp_spat(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_cond_lens_temp_spat(const eEM_Sim_Typ &sim_type)
 		{
 			return is_STEM_ISTEM(sim_type) || is_CBED_CBEI(sim_type) || is_STEM_ISTEM_EELS(sim_type) || is_EFTEM(sim_type);
 		}
 
 		inline
-		eSpace get_simulation_space(const eTEM_Sim_Typ &sim_type)
+		eSpace get_simulation_space(const eEM_Sim_Typ &sim_type)
 		{
-			return (is_simulation_type_FS(sim_type) || is_ISTEM_CBEI_HRTEM_HCTEM_EFTEMRS(sim_type))?mt::eS_Reciprocal:mt::eS_Real;
+			return (is_simulation_type_FS(sim_type) || is_ISTEM_CBEI_HRTEM_HCTEM_EFTEMRS(sim_type))?mt::esp_fourier:mt::esp_real;
 		}
 
 		inline
-		dt_bool is_scanning(const eTEM_Sim_Typ &sim_type)
+		dt_bool is_scanning(const eEM_Sim_Typ &sim_type)
 		{
 			return is_STEM_ISTEM(sim_type) || is_STEM_ISTEM_EELS(sim_type);
 		}
 
 		inline
-		eIncident_Wave_Typ validate_incident_wave_type(const eTEM_Sim_Typ &sim_type, eIncident_Wave_Typ iw_type)
+		eIncident_Wave_Typ validate_incident_wave_type(const eEM_Sim_Typ &sim_type, eIncident_Wave_Typ iw_type)
 		{
-			if (iw_type == eIWT_Auto)
+			if (iw_type == eiwt_auto)
 			{
 				auto bb = is_scanning(sim_type) || is_CBED_CBEI(sim_type);
 				bb = bb || ((is_EWFS_EWRS(sim_type) || is_EFTEM(sim_type) || is_IWFS_IWRS(sim_type)) && is_convergent_wave(iw_type));
-				iw_type = (bb)?mt::eIWT_Convergent_Wave:mt::eIWT_Plane_Wave;
+				iw_type = (bb)?mt::eiwt_convergent_wave:mt::eiwt_plane_wave;
 			}
 
 			return iw_type;

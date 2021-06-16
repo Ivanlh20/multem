@@ -119,33 +119,33 @@
 		#define SWITCH_FCN_ATOMIC_V(pot_parm_typ, fcn, ...)										\
 		switch(pot_parm_typ)																	\
 		{																						\
-			case ePPT_doyle_0_4:																\
+			case eppt_doyle_0_4:																\
 			{																					\
-				return cgpu_detail_mt::fcn<ePPT_doyle_0_4, T>(__VA_ARGS__);						\
+				return cgpu_detail_mt::fcn<eppt_doyle_0_4, T>(__VA_ARGS__);						\
 			}																					\
-			case ePPT_peng_0_4:																	\
+			case eppt_peng_0_4:																	\
 			{																					\
-				return cgpu_detail_mt::fcn<ePPT_peng_0_4, T>(__VA_ARGS__);						\
+				return cgpu_detail_mt::fcn<eppt_peng_0_4, T>(__VA_ARGS__);						\
 			}																					\
-			case ePPT_peng_0_12:																\
+			case eppt_peng_0_12:																\
 			{																					\
-				return cgpu_detail_mt::fcn<ePPT_peng_0_12, T>(__VA_ARGS__);						\
+				return cgpu_detail_mt::fcn<eppt_peng_0_12, T>(__VA_ARGS__);						\
 			}																					\
-			case ePPT_kirkland_0_12:															\
+			case eppt_kirkland_0_12:															\
 			{																					\
-				return cgpu_detail_mt::fcn<ePPT_kirkland_0_12, T>(__VA_ARGS__);					\
+				return cgpu_detail_mt::fcn<eppt_kirkland_0_12, T>(__VA_ARGS__);					\
 			}																					\
-			case ePPT_weickenmeier_0_12:														\
+			case eppt_weickenmeier_0_12:														\
 			{																					\
-				return cgpu_detail_mt::fcn<ePPT_weickenmeier_0_12, T>(__VA_ARGS__);				\
+				return cgpu_detail_mt::fcn<eppt_weickenmeier_0_12, T>(__VA_ARGS__);				\
 			}																					\
-			case ePPT_lobato_0_12:																\
+			case eppt_lobato_0_12:																\
 			{																					\
-				return cgpu_detail_mt::fcn<ePPT_lobato_0_12, T>(__VA_ARGS__);					\
+				return cgpu_detail_mt::fcn<eppt_lobato_0_12, T>(__VA_ARGS__);					\
 			}																					\
-			case ePPT_peng_ion_0_4:																\
+			case eppt_peng_ion_0_4:																\
 			{																					\
-				return cgpu_detail_mt::fcn<ePPT_peng_ion_0_4, T>(__VA_ARGS__);					\
+				return cgpu_detail_mt::fcn<eppt_peng_ion_0_4, T>(__VA_ARGS__);					\
 			}																					\
 			default:																			\
 			{																					\
@@ -156,39 +156,39 @@
 		#define SWITCH_FCN_ATOMIC_VD(pot_parm_typ, fcn, ...)									\
 		switch(pot_parm_typ)																	\
 		{																						\
-			case ePPT_doyle_0_4:																\
+			case eppt_doyle_0_4:																\
 			{																					\
-				cgpu_detail_mt::fcn<ePPT_doyle_0_4, T>(__VA_ARGS__);							\
+				cgpu_detail_mt::fcn<eppt_doyle_0_4, T>(__VA_ARGS__);							\
 			}																					\
 			break;																				\
-			case ePPT_peng_0_4:																	\
+			case eppt_peng_0_4:																	\
 			{																					\
-				cgpu_detail_mt::fcn<ePPT_peng_0_4, T>(__VA_ARGS__);								\
+				cgpu_detail_mt::fcn<eppt_peng_0_4, T>(__VA_ARGS__);								\
 			}																					\
 			break;																				\
-			case ePPT_peng_0_12:																\
+			case eppt_peng_0_12:																\
 			{																					\
-				cgpu_detail_mt::fcn<ePPT_peng_0_12, T>(__VA_ARGS__);							\
+				cgpu_detail_mt::fcn<eppt_peng_0_12, T>(__VA_ARGS__);							\
 			}																					\
 			break;																				\
-			case ePPT_kirkland_0_12:															\
+			case eppt_kirkland_0_12:															\
 			{																					\
-				cgpu_detail_mt::fcn<ePPT_kirkland_0_12, T>(__VA_ARGS__);						\
+				cgpu_detail_mt::fcn<eppt_kirkland_0_12, T>(__VA_ARGS__);						\
 			}																					\
 			break;																				\
-			case ePPT_weickenmeier_0_12:														\
+			case eppt_weickenmeier_0_12:														\
 			{																					\
-				cgpu_detail_mt::fcn<ePPT_weickenmeier_0_12, T>(__VA_ARGS__);					\
+				cgpu_detail_mt::fcn<eppt_weickenmeier_0_12, T>(__VA_ARGS__);					\
 			}																					\
 			break;																				\
-			case ePPT_lobato_0_12:																\
+			case eppt_lobato_0_12:																\
 			{																					\
-				cgpu_detail_mt::fcn<ePPT_lobato_0_12, T>(__VA_ARGS__);							\
+				cgpu_detail_mt::fcn<eppt_lobato_0_12, T>(__VA_ARGS__);							\
 			}																					\
 			break;																				\
-			case ePPT_peng_ion_0_4:																\
+			case eppt_peng_ion_0_4:																\
 			{																					\
-				cgpu_detail_mt::fcn<ePPT_peng_ion_0_4, T>(__VA_ARGS__);							\
+				cgpu_detail_mt::fcn<eppt_peng_ion_0_4, T>(__VA_ARGS__);							\
 			}																					\
 			break;																				\
 		}
@@ -215,33 +215,33 @@
 		{
 			switch(pot_parm_typ)															
 			{																				
-				case ePPT_doyle_0_4:														
+				case eppt_doyle_0_4:														
 				{																			
-					return cgpu_detail_mt::fcn_fxg<ePPT_doyle_0_4, T>(g, Z, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_fxg<eppt_doyle_0_4, T>(g, Z, coef.cl, coef.cnl);
 				}																			
-				case ePPT_peng_0_4:															
+				case eppt_peng_0_4:															
 				{																			
-					return cgpu_detail_mt::fcn_fxg<ePPT_peng_0_4, T>(g, Z, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_fxg<eppt_peng_0_4, T>(g, Z, coef.cl, coef.cnl);
 				}																			
-				case ePPT_peng_0_12:														
+				case eppt_peng_0_12:														
 				{																			
-					return cgpu_detail_mt::fcn_fxg<ePPT_peng_0_12, T>(g, Z, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_fxg<eppt_peng_0_12, T>(g, Z, coef.cl, coef.cnl);
 				}																			
-				case ePPT_kirkland_0_12:													
+				case eppt_kirkland_0_12:													
 				{																			
-					return cgpu_detail_mt::fcn_fxg<ePPT_kirkland_0_12, T>(g, Z, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_fxg<eppt_kirkland_0_12, T>(g, Z, coef.cl, coef.cnl);
 				}
-				case ePPT_weickenmeier_0_12:														
+				case eppt_weickenmeier_0_12:														
 				{																			
-					return cgpu_detail_mt::fcn_fxg<ePPT_weickenmeier_0_12, T>(g, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_fxg<eppt_weickenmeier_0_12, T>(g, coef.cl, coef.cnl);
 				}																			
-				case ePPT_lobato_0_12:															
+				case eppt_lobato_0_12:															
 				{																			
-					return cgpu_detail_mt::fcn_fxg<ePPT_lobato_0_12, T>(g, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_fxg<eppt_lobato_0_12, T>(g, coef.cl, coef.cnl);
 				}	
-				case ePPT_peng_ion_0_4:														
+				case eppt_peng_ion_0_4:														
 				{																			
-					return cgpu_detail_mt::fcn_fxg<ePPT_peng_ion_0_4, T>(g, Z, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_fxg<eppt_peng_ion_0_4, T>(g, Z, coef.cl, coef.cnl);
 				}																			
 				default:																	
 				{																			
@@ -256,39 +256,39 @@
 		{
 			switch(pot_parm_typ)																
 			{																					
-				case ePPT_doyle_0_4:															
+				case eppt_doyle_0_4:															
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<ePPT_doyle_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_fxg_dfxg<eppt_doyle_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
-				case ePPT_peng_0_4:																
+				case eppt_peng_0_4:																
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<ePPT_peng_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_fxg_dfxg<eppt_peng_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
-				case ePPT_peng_0_12:															
+				case eppt_peng_0_12:															
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<ePPT_peng_0_12, T>(g, Z, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_fxg_dfxg<eppt_peng_0_12, T>(g, Z, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;													
-				case ePPT_kirkland_0_12:														
+				case eppt_kirkland_0_12:														
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<ePPT_kirkland_0_12, T>(g, Z, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_fxg_dfxg<eppt_kirkland_0_12, T>(g, Z, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;	
-				case ePPT_weickenmeier_0_12:															
+				case eppt_weickenmeier_0_12:															
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<ePPT_weickenmeier_0_12, T>(g, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_fxg_dfxg<eppt_weickenmeier_0_12, T>(g, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
-				case ePPT_lobato_0_12:																
+				case eppt_lobato_0_12:																
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<ePPT_lobato_0_12, T>(g, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_fxg_dfxg<eppt_lobato_0_12, T>(g, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;
-				case ePPT_peng_ion_0_4:															
+				case eppt_peng_ion_0_4:															
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<ePPT_peng_ion_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_fxg_dfxg<eppt_peng_ion_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
 			}
@@ -346,33 +346,33 @@
 		{
 			switch(pot_parm_typ)															
 			{																				
-				case ePPT_doyle_0_4:														
+				case eppt_doyle_0_4:														
 				{																			
-					return cgpu_detail_mt::fcn_vzp<ePPT_doyle_0_4, T>(r, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_vzp<eppt_doyle_0_4, T>(r, coef.cl, coef.cnl);
 				}																			
-				case ePPT_peng_0_4:															
+				case eppt_peng_0_4:															
 				{																			
-					return cgpu_detail_mt::fcn_vzp<ePPT_peng_0_4, T>(r, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_vzp<eppt_peng_0_4, T>(r, coef.cl, coef.cnl);
 				}																			
-				case ePPT_peng_0_12:														
+				case eppt_peng_0_12:														
 				{																			
-					return cgpu_detail_mt::fcn_vzp<ePPT_peng_0_12, T>(r, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_vzp<eppt_peng_0_12, T>(r, coef.cl, coef.cnl);
 				}																			
-				case ePPT_kirkland_0_12:													
+				case eppt_kirkland_0_12:													
 				{																			
-					return cgpu_detail_mt::fcn_vzp<ePPT_kirkland_0_12, T>(r, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_vzp<eppt_kirkland_0_12, T>(r, coef.cl, coef.cnl);
 				}
-				case ePPT_weickenmeier_0_12:														
+				case eppt_weickenmeier_0_12:														
 				{																			
-					return cgpu_detail_mt::fcn_vzp<ePPT_weickenmeier_0_12, T>(r, coef.cl, coef.cnl, pquad->m_size, pquad->x, pquad->w);
+					return cgpu_detail_mt::fcn_vzp<eppt_weickenmeier_0_12, T>(r, coef.cl, coef.cnl, pquad->m_size, pquad->x, pquad->w);
 				}																			
-				case ePPT_lobato_0_12:															
+				case eppt_lobato_0_12:															
 				{																			
-					return cgpu_detail_mt::fcn_vzp<ePPT_lobato_0_12, T>(r, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_vzp<eppt_lobato_0_12, T>(r, coef.cl, coef.cnl);
 				}
-				case ePPT_peng_ion_0_4:														
+				case eppt_peng_ion_0_4:														
 				{																			
-					return cgpu_detail_mt::fcn_vzp<ePPT_peng_ion_0_4, T>(r, coef.cl, coef.cnl);
+					return cgpu_detail_mt::fcn_vzp<eppt_peng_ion_0_4, T>(r, coef.cl, coef.cnl);
 				}																			
 				default:																	
 				{																			
@@ -387,39 +387,39 @@
 		{
 			switch(pot_parm_typ)																
 			{																					
-				case ePPT_doyle_0_4:															
+				case eppt_doyle_0_4:															
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<ePPT_doyle_0_4, T>(r, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_vzp_dvzp<eppt_doyle_0_4, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
-				case ePPT_peng_0_4:																
+				case eppt_peng_0_4:																
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<ePPT_peng_0_4, T>(r, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_vzp_dvzp<eppt_peng_0_4, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
-				case ePPT_peng_0_12:															
+				case eppt_peng_0_12:															
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<ePPT_peng_0_12, T>(r, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_vzp_dvzp<eppt_peng_0_12, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
-				case ePPT_kirkland_0_12:														
+				case eppt_kirkland_0_12:														
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<ePPT_kirkland_0_12, T>(r, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_vzp_dvzp<eppt_kirkland_0_12, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;	
-				case ePPT_weickenmeier_0_12:															
+				case eppt_weickenmeier_0_12:															
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<ePPT_weickenmeier_0_12, T>(r, coef.cl, coef.cnl, pquad->m_size, pquad->x, pquad->w, y, dy);
+					cgpu_detail_mt::fcn_vzp_dvzp<eppt_weickenmeier_0_12, T>(r, coef.cl, coef.cnl, pquad->m_size, pquad->x, pquad->w, y, dy);
 				}																				
 				break;																			
-				case ePPT_lobato_0_12:																
+				case eppt_lobato_0_12:																
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<ePPT_lobato_0_12, T>(r, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_vzp_dvzp<eppt_lobato_0_12, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;	
-				case ePPT_peng_ion_0_4:	
+				case eppt_peng_ion_0_4:	
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<ePPT_peng_ion_0_4, T>(r, coef.cl, coef.cnl, y, dy);
+					cgpu_detail_mt::fcn_vzp_dvzp<eppt_peng_ion_0_4, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
 			}
@@ -587,13 +587,13 @@
 
 			iGrid_1d igrid(vzp_i.size());
 
-			if (esim==eESIM_Weak_Phase_Object)
+			if (esim==eesim_weak_phase_object)
 			{
-				fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, cgpu_detail_mt::fcn_trans_fcn<eESIM_Weak_Phase_Object, U>, igrid, vzp_i.m_data, w, tfcn_o.m_data);
+				fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, cgpu_detail_mt::fcn_trans_fcn<eesim_weak_phase_object, U>, igrid, vzp_i.m_data, w, tfcn_o.m_data);
 			}
 			else
 			{
-				fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, cgpu_detail_mt::fcn_trans_fcn<eESIM_Phase_Object, U>, igrid, vzp_i.m_data, w, tfcn_o.m_data);
+				fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, cgpu_detail_mt::fcn_trans_fcn<eesim_phase_object, U>, igrid, vzp_i.m_data, w, tfcn_o.m_data);
 			}
 		}
 	}

@@ -37,7 +37,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 {
 	using T_r = mt::Value_type<TIn_Multislice>;gr
 
-	in_multem.simulation_type = mt::eTEMST_IWRS;
+	in_multem.simulation_type = mt::eemst_iwrs;
 
 	/**************************** Specimen *****************************/
 	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
@@ -119,7 +119,7 @@ void run_incident_wave(mt::System_Config &system_config, const mxArray *mex_in_m
 	mt::Output_Multem<T> output_multem;
 	output_multem.set_in_data(&in_multem);
 
-	incident_wave(mt::eS_Real, output_multem);
+	incident_wave(mt::esp_real, output_multem);
 
 	stream.synchronize();
 

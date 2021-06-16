@@ -59,14 +59,14 @@ namespace mt
 						fft_2d->forward(psi_i, psi_o);
 						mt::fcn_fermi_aperture(*stream, in_multem->grid_2d, psi_o);
 						
-						if (space_out == eS_Real)
+						if (space_out == esp_real)
 						{
 							fft_2d->inverse(psi_o);
 						}
 					}
 					else
 					{
-						if (space_out == eS_Reciprocal)
+						if (space_out == esp_fourier)
 						{
 							fft_2d->forward(psi_i, psi_o);
 							mt::fcn_scale(*stream, in_multem->grid_2d.isize_r(), psi_o);
@@ -79,7 +79,7 @@ namespace mt
 
 					mt::fcn_propagate(*stream, in_multem->grid_2d, in_multem->get_propagator_factor(z), gxu, gyu, psi_o, psi_o);
 
-					if (space_out == eS_Real)
+					if (space_out == esp_real)
 					{
 						fft_2d->inverse(psi_o, psi_o);
 					}

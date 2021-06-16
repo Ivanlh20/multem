@@ -40,7 +40,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	using T_r = mt::Value_type<TIn_Multislice>;
 
 	/************************ simulation type **************************/
-	in_multem.simulation_type = mt::eTEMST_TFRS;
+	in_multem.simulation_type = mt::eemst_tfrs;
 
 	/***************************************************************************************/
 	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Model>(mex_in_multem, "interaction_model");

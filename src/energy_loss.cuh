@@ -62,7 +62,7 @@
 			T lrtz_factor;			// lorentz factor = sum 1/(g^2+ge^2)
 
 			/************************************* constructors ************************************/
-			EELS(): space(eS_Real), E_0(0), m_sel(0), coll_angle(0), chan_type(eCT_Double_Chan), 
+			EELS(): space(esp_real), E_0(0), m_sel(0), coll_angle(0), chan_type(eCT_double_chan), 
 			g_coll(0), lrtz_factor(1), Z(0), x(0), y(0), occ(0), E_loss(0), ge(0), ge2(0), gc(0), gc2(0){}
 
 			/* copy constructor */
@@ -182,27 +182,27 @@
 
 			dt_bool is_Single_Chan() const
 			{
-				return chan_type == eCT_Single_Chan;
+				return chan_type == ect_single_chan;
 			}
 
 			dt_bool is_Mixed_Chan() const
 			{
-				return chan_type == eCT_Mixed_Chan;
+				return chan_type == ect_mixed_chan;
 			}
 
 			dt_bool is_Double_Chan() const
 			{
-				return chan_type == eCT_Double_Chan;
+				return chan_type == eCT_double_chan;
 			}
 
  			dt_bool is_real_space() const
 			{
-				return space == eS_Real;
+				return space == esp_real;
 			}
 
  			dt_bool is_reciprocal_space() const
 			{
-				return space == eS_Reciprocal;
+				return space == esp_fourier;
 			}
 		};
 

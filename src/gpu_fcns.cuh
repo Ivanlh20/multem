@@ -1157,23 +1157,23 @@
 	// 			{
 	// 				switch(pot_parm_typ)
 	// 				{
-	// 					case ePPT_doyle_0_4:
-	// 						gpu_detail::linear_Vz<ePPT_doyle_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_doyle_0_4:
+	// 						gpu_detail::linear_Vz<eppt_doyle_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case ePPT_peng_0_4:
-	// 						gpu_detail::linear_Vz<ePPT_peng_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_peng_0_4:
+	// 						gpu_detail::linear_Vz<eppt_peng_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case ePPT_peng_0_12:
-	// 						gpu_detail::linear_Vz<ePPT_peng_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_peng_0_12:
+	// 						gpu_detail::linear_Vz<eppt_peng_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case ePPT_kirkland_0_12:
-	// 						gpu_detail::linear_Vz<ePPT_kirkland_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_kirkland_0_12:
+	// 						gpu_detail::linear_Vz<eppt_kirkland_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case ePPT_weickenmeier_0_12:
-	// 						gpu_detail::linear_Vz<ePPT_weickenmeier_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_weickenmeier_0_12:
+	// 						gpu_detail::linear_Vz<eppt_weickenmeier_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case ePPT_lobato_0_12:
-	// 						gpu_detail::linear_Vz<ePPT_lobato_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_lobato_0_12:
+	// 						gpu_detail::linear_Vz<eppt_lobato_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
 	// 				}
 	// 			}
@@ -1181,23 +1181,23 @@
 	// 			{
 	// 				switch(pot_parm_typ)
 	// 				{
-	// 					case ePPT_doyle_0_4:
-	// 						gpu_detail::linear_Vz<ePPT_doyle_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_doyle_0_4:
+	// 						gpu_detail::linear_Vz<eppt_doyle_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case ePPT_peng_0_4:
-	// 						gpu_detail::linear_Vz<ePPT_peng_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_peng_0_4:
+	// 						gpu_detail::linear_Vz<eppt_peng_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case ePPT_peng_0_12:
-	// 						gpu_detail::linear_Vz<ePPT_peng_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_peng_0_12:
+	// 						gpu_detail::linear_Vz<eppt_peng_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case ePPT_kirkland_0_12:
-	// 						gpu_detail::linear_Vz<ePPT_kirkland_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_kirkland_0_12:
+	// 						gpu_detail::linear_Vz<eppt_kirkland_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case ePPT_weickenmeier_0_12:
-	// 						gpu_detail::linear_Vz<ePPT_weickenmeier_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_weickenmeier_0_12:
+	// 						gpu_detail::linear_Vz<eppt_weickenmeier_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case ePPT_lobato_0_12:
-	// 						gpu_detail::linear_Vz<ePPT_lobato_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eppt_lobato_0_12:
+	// 						gpu_detail::linear_Vz<eppt_lobato_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
 	// 				}		
 	// 			}

@@ -395,7 +395,7 @@
 		/* Show Data Type */
 		enum eShow_CData
 		{
-			eSCD_CReal = 1, eSCD_CImag = 2, eSCD_CMod = 3, eSCD_CPhase = 4
+			escd_creal = 1, escs_cimag = 2, escd_cmod = 3, escd_cphase = 4
 		};
 
 		/** Operation mode */
@@ -406,16 +406,16 @@
 
 		enum eRot_Point_Typ
 		{
-			erpt_Geometric_Center = 1, erpt_user_def = 2
+			erpt_geometric_ctr = 1, erpt_user_def = 2
 		};
 
 		/* Real or Fourier space */
 		enum eSpace
 		{
-			eS_Real = 1, eS_Reciprocal = 2
+			esp_real = 1, esp_fourier = 2
 		};
 
-		/* Defocus plane type */
+		/* match boder */
 		enum eMatch_Border
 		{
 			emb_min = 1, emb_max = 2, emb_minmax = 3
@@ -424,7 +424,7 @@
 		/*** Output type */
 		enum eOutput_Typ
 		{
-			eOT_Matlab = 1, eOT_Vector = 2
+			eot_matlab = 1, eot_vector = 2
 		};
 
 		/* Data sel type */
@@ -442,7 +442,7 @@
 		/* structuring element */
 		enum eStr_Ele
 		{
-			eSE_Disk = 1, eSE_Square = 2
+			ese_disk = 1, ese_square = 2
 		};
 
 		/** operation */

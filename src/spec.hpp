@@ -64,12 +64,12 @@ namespace mt
 				if ((atoms_u.s_z_int < 2.0*in_multem->grid_2d.sli_thk) || ((slicing.z_plane.size() == 1) && in_multem->is_slicing_by_planes()))
 				{
 					in_multem->grid_2d.sli_thk = atoms_u.s_z_int;
-					in_multem->interaction_model = eESIM_Phase_Object;
+					in_multem->interaction_model = eesim_phase_object;
 					in_multem->islice = 0;
 					in_multem->phonon_par.dim_z = false;
 					if (in_multem->is_through_slices())
 					{
-						in_multem->thick_type = eTT_Through_Thick;
+						in_multem->thick_type = ett_through_thick;
 					}
 					in_multem->slice_storage = in_multem->slice_storage || !in_multem->is_whole_spec();
 					atoms_u.sli_thk = in_multem->grid_2d.sli_thk;

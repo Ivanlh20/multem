@@ -1693,11 +1693,6 @@
 				{
 					fcn_ptc_pos_apply_ltf(mx, p, *this); 
 				}
-
-				void rotate(const T& theta, const R_2d<T>& p)
-				{
-					mt::fcn_ptc_pos_rotate(theta, p, *this);
-				}
 		};
 	}
 	
@@ -2550,7 +2545,7 @@
 			const auto Rm = fcn_rot_mx_2d(theta);
 			const auto p_sft = p - Rm*p;
 
-			mt::fcn_ptc_pos_apply_ltf(Rm, p_sft, ptc);
+			fcn_ptc_pos_apply_ltf(Rm, p_sft, ptc);
 		}
 	}
 
@@ -2625,7 +2620,7 @@
 			const auto Rm = fcn_rot_mx_3d(theta, u_0);
 			const auto p_sft = p - Rm*p;
 
-			mt::fcn_ptc_pos_apply_ltf(Rm, p_sft, ptc);
+			fcn_ptc_pos_apply_ltf(Rm, p_sft, ptc);
 		}
 	}
 	

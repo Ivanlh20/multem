@@ -43,8 +43,8 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	using T_r = mt::Value_type<TIn_Multislice>;
 
 	/************************ simulation type **************************/
-	in_multem.simulation_type = mex_get_num_from_field<mt::eTEM_Sim_Typ>(mex_in_multem, "simulation_type");
-	in_multem.simulation_type = (in_multem.is_EWRS())?mt::eTEMST_EWRS:mt::eTEMST_EWFS;
+	in_multem.simulation_type = mex_get_num_from_field<mt::eEM_Sim_Typ>(mex_in_multem, "simulation_type");
+	in_multem.simulation_type = (in_multem.is_EWRS())?mt::eemst_ewrs:mt::eemst_ewfs;
 
 	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Model>(mex_in_multem, "interaction_model");
 	in_multem.pot_parm_typ = mex_get_num_from_field<mt::ePot_Parm_Typ>(mex_in_multem, "pot_parm_typ");
@@ -105,8 +105,8 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	in_multem.phi = mex_get_num_from_field<T_r>(mex_in_multem, "phi")*mt::c_deg_2_rad;
 
 	/********************* Illumination model *************************/
-	in_multem.illumination_model = mt::eIM_Coherent;
-	in_multem.temporal_spatial_incoh = mt::eTSI_Temporal_Spatial;
+	in_multem.illumination_model = mt::eim_coherent;
+	in_multem.temporal_spatial_incoh = mt::etsi_temporal_spatial;
 
 	/*********************** Condenser lens ***************************/
 	mex_read_cond_lens<T_r>(mex_in_multem, in_multem.cond_lens);

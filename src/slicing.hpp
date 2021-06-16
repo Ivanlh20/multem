@@ -53,7 +53,7 @@ namespace mt
 			void match_thickness(ePot_Sli_Typ pot_sli, Ptc_Atom<T>& atoms, 
 			eThick_Typ thick_type, TVctr_r &thick)
 			{
-				if (thick_type == eTT_Whole_Spec)
+				if (thick_type == ett_whole_spec)
 				{
 					thick.resize(1);
 					thick[0] = atoms.z_max;
@@ -62,7 +62,7 @@ namespace mt
 
 				auto z_plane = get_z_plane(pot_sli, atoms);
 
-				if (thick_type == eTT_Through_Slices)
+				if (thick_type == ett_through_slices)
 				{
 					z_plane = get_z_slice(pot_sli, z_plane, atoms);
 				}
@@ -157,7 +157,7 @@ namespace mt
 				T z_ct_min = z_ct.front();
 				T z_ct_max = z_ct.back();
 
-				if (pot_sli==ePST_Planes)
+				if (pot_sli==epst_planes)
 				{
 					z_plane = identify_planes(z_ct);
 				}
@@ -195,7 +195,7 @@ namespace mt
 			{
 				TVctr_r z_slice;
 
-				if ((pot_sli!=ePST_dz_Sub) && (z_plane.size() == 1))
+				if ((pot_sli!=epst_dz_Sub) && (z_plane.size() == 1))
 				{
 					z_slice.resize(2);
 					z_slice[0] = atoms.z_int_min;
@@ -215,7 +215,7 @@ namespace mt
 				}
 				z_slice[z_slice.size()-1] = z_slice[z_slice.size()-2]+get_spacing(z_plane_sli.size(), z_plane_sli, atoms.sli_thk);
 
-				if (pot_sli==ePST_dz_Sub)
+				if (pot_sli==epst_dz_Sub)
 				{
 					T dz_b = get_spacing(1, z_plane_sli, atoms.sli_thk);
 					if (atoms.z_int_min<z_slice.front()-dz_b)
@@ -255,7 +255,7 @@ namespace mt
 
 				auto get_islice = [thick_type](TVctr_r &z_slice, const T& z)->dt_int32
 				{
-					if (thick_type==eTT_Through_Slices)
+					if (thick_type==ett_through_slices)
 					{
 						for(auto i = 0; i<z_slice.size()-1; i++)
 						{
@@ -347,21 +347,21 @@ namespace mt
 					slice[islice].z_e = z_slice[islice + 1];
 					switch(in_multem->potential_slicing)
 					{
-						case ePST_Planes:
+						case epst_planes:
 						{
 							slice[islice].z_int_0 = slice[islice].z_0;
 							slice[islice].z_int_e = slice[islice].z_e;
 							Inc_Borders = false;
 						}
 						break;
-						case ePST_dz_Proj:
+						case epst_dz_Proj:
 						{
 							slice[islice].z_int_0 = slice[islice].z_0;
 							slice[islice].z_int_e = slice[islice].z_e;
 							Inc_Borders = false;
 						}
 						break;
-						case ePST_dz_Sub:
+						case epst_dz_Sub:
 						{
 							T z_m = slice[islice].z_m();
 

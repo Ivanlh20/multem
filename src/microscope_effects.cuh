@@ -45,7 +45,7 @@ namespace mt
 
 				psi.resize(in_multem->grid_2d.size());
 
-				if ((in_multem->illumination_model == eIM_Coherent)||(in_multem->illumination_model == eIM_Partial_Coherent))
+				if ((in_multem->illumination_model == eim_coherent)||(in_multem->illumination_model == eim_partial_coherent))
 				{
 					return;
 				}
@@ -58,22 +58,22 @@ namespace mt
 			{
 				switch(in_multem->illumination_model)
 				{
-					case eIM_Coherent:
+					case eim_coherent:
 					{
 						CTF_TEM(in_multem->temporal_spatial_incoh, fpsi, m2psi_tot);
 					}
 					break;
-					case eIM_Partial_Coherent:
+					case eim_partial_coherent:
 					{
 						PCTF_LI_WPO_TEM(in_multem->temporal_spatial_incoh, fpsi, m2psi_tot);
 					}
 					break;
-					case eIM_Trans_Cross_Coef:
+					case eim_trans_cross_coef:
 					{
 
 					}
 					break;
-					case eIM_Full_Integration:
+					case eim_full_integration:
 					{
 						num_int_TEM(in_multem->temporal_spatial_incoh, fpsi, m2psi_tot);
 					}
@@ -109,12 +109,12 @@ namespace mt
 
 				switch(temporal_spatial_incoh)
 				{
-					case eTSI_Temporal:	// Temporal
+					case etsi_temporal:	// Temporal
 					{
 						in_multem->obj_lens.set_spt_inc_sigma(0);
 					}
 					break;
-					case eTSI_Spatial:	// Spatial
+					case etst_spatial:	// Spatial
 					{
 						in_multem->obj_lens.set_tp_inc_sigma(0);
 					}

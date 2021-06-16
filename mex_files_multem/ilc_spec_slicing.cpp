@@ -36,7 +36,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem)
 	using T_r = mt::Value_type<TIn_Multislice>;
 
 	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Model>(mex_in_multem, "interaction_model");
-	in_multem.pot_parm_typ = mt::ePPT_lobato_0_12;
+	in_multem.pot_parm_typ = mt::eppt_lobato_0_12;
 
 	/************** Electron-Phonon_Par interaction model **************/
 	mex_read_phonon_par(mex_in_multem, in_multem.phonon_par);

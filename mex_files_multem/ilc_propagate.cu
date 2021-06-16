@@ -38,7 +38,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 {
 	using T_r = mt::Value_type<TIn_Multislice>;
 
-	in_multem.simulation_type = mt::eTEMST_PropRS;
+	in_multem.simulation_type = mt::eemst_proprs;
 
 	/**************************** Specimen *****************************/
 	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
@@ -116,7 +116,7 @@ void run_propagate(mt::System_Config &system_config, const mxArray *mex_in_multe
 	mt::Output_Multem<T> output_multem;
 	output_multem.set_in_data(&in_multem);
 
-	propagator(mt::eS_Real, in_multem.gx_0(), in_multem.gy_0(), in_multem.obj_lens.c_10 , output_multem);
+	propagator(mt::esp_real, in_multem.gx_0(), in_multem.gy_0(), in_multem.obj_lens.c_10 , output_multem);
 
 	stream.synchronize();
 

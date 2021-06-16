@@ -37,7 +37,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 {
 	using T_r = mt::Value_type<TIn_Multislice>;
 
-	in_multem.simulation_type = mt::eTEMST_HRTEM;
+	in_multem.simulation_type = mt::eemst_hrtem;
 
 	/**************************** Specimen *****************************/
 	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
@@ -83,7 +83,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	in_multem.obj_lens.set_in_data(in_multem.E_0, in_multem.grid_2d);
 
 	/********************* zero defocus reference ********************/
-	in_multem.obj_lens.zero_defocus_type = mt::eZDT_Last;
+	in_multem.obj_lens.zero_defocus_type = mt::ezdt_last;
 	in_multem.obj_lens.zero_defocus_plane = 0.0;
 
 	/******************** select output region ************************/

@@ -41,7 +41,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	using T_r = mt::Value_type<TIn_Multislice>;
 
 	/************************ simulation type **************************/
-	in_multem.simulation_type = mex_get_num_from_field<mt::eTEM_Sim_Typ>(mex_in_multem, "simulation_type");
+	in_multem.simulation_type = mex_get_num_from_field<mt::eEM_Sim_Typ>(mex_in_multem, "simulation_type");
 
 	/***************************************************************************************/
 	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Model>(mex_in_multem, "interaction_model");
@@ -147,7 +147,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 		auto m_sel = mex_get_num_from_field<dt_int32>(mex_in_multem, "eels_m_sel");
 		auto chan_type = mex_get_num_from_field<mt::eChan_Typ>(mex_in_multem, "eels_chan_type");
 
- 		mt::eSpace space = mt::eS_Reciprocal;
+ 		mt::eSpace space = mt::esp_fourier;
 		in_multem.eels_fr.set_in_data(space, in_multem.E_0, E_loss, m_sel, coll_angle, chan_type, Z);
 	}
 	else if (in_multem.is_EFTEM())
@@ -158,7 +158,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 		auto m_sel = mex_get_num_from_field<dt_int32>(mex_in_multem, "eftem_m_sel");
 		auto chan_type = mex_get_num_from_field<mt::eChan_Typ>(mex_in_multem, "eftem_chan_type");
 
-		mt::eSpace space = (in_multem.is_EFTEMRS())?mt::eS_Real:mt::eS_Reciprocal;
+		mt::eSpace space = (in_multem.is_EFTEMRS())?mt::esp_real:mt::esp_fourier;
 		in_multem.eels_fr.set_in_data(space, in_multem.E_0, E_loss, m_sel, coll_angle, chan_type, Z);
 	}
 

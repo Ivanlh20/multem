@@ -50,7 +50,7 @@
 
 			System_Config system_config;						// System information
 
-			eElec_Spec_Int_Model interaction_model;			// eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
+			eElec_Spec_Int_Model interaction_model;			// eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
 			ePot_Parm_Typ pot_parm_typ;						// potential type: 1: doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 
 			Phonon_Par phonon_par;							// phonon parameters
@@ -60,16 +60,16 @@
 
 			Rot_Par<T> rot_par;								// specimen rotation parameters
 
-			eThick_Typ thick_type;							// eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
+			eThick_Typ thick_type;							// ett_whole_spec = 1, ett_through_thick = 2, ett_through_slices = 3
 			Vctr_cpu<T> thick;								// Array of thicknesses 
 
-			ePot_Sli_Typ potential_slicing;					// ePST_Planes = 1, ePST_dz_Proj = 2, ePST_dz_Sub = 3, ePST_Auto = 4
+			ePot_Sli_Typ potential_slicing;					// epst_planes = 1, epst_dz_Proj = 2, epst_dz_Sub = 3, epst_auto = 4
 
 			Grid_2d<T> grid_2d;								// grid information
 
 			iThread_Rect_2d output_area;					// Output region information
 
-			eTEM_Sim_Typ simulation_type;					// 11: Scan, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
+			eEM_Sim_Typ simulation_type;					// 11: Scan, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
 
 			eIncident_Wave_Typ iw_type;						// 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
 			Vctr_cpu<complex<T>> iw_psi;					// user define incident wave
@@ -111,11 +111,11 @@
 			dt_int32 islice;
 			dt_bool dp_Shift;								// Shift diffraction pattern
 
-			In_Multem():simulation_type(eTEMST_EWRS), interaction_model(eESIM_Multislice), 
-				potential_slicing(ePST_Planes), pot_parm_typ(ePPT_lobato_0_12), illumination_model(eIM_Partial_Coherent), 
-				temporal_spatial_incoh(eTSI_Temporal_Spatial), thick_type(eTT_Whole_Spec), 
+			In_Multem():simulation_type(eemst_ewrs), interaction_model(eesim_multislice), 
+				potential_slicing(epst_planes), pot_parm_typ(eppt_lobato_0_12), illumination_model(eim_partial_coherent), 
+				temporal_spatial_incoh(etsi_temporal_spatial), thick_type(ett_whole_spec), 
 				operation_mode(eOM_Normal), slice_storage(false), reverse_multislice(false), 
-				mul_sign(1), E_0(300), lambda(0), theta(0), phi(0), nrot(1), Vrl(c_vr_min), nR(c_nR), iw_type(eIWT_Plane_Wave), 
+				mul_sign(1), E_0(300), lambda(0), theta(0), phi(0), nrot(1), Vrl(c_vr_min), nR(c_nR), iw_type(eiwt_plane_wave), 
 				is_xtl(false), islice(0), dp_Shift(false) {};
 
 			In_Multem(const In_Multem<T>& in_multem)
@@ -250,8 +250,8 @@
 				if (is_EELS_EFTEM())
 				{
 					phonon_par.coh_contrib = false;
-					interaction_model = mt::eESIM_Multislice;
-					illumination_model = eIM_Coherent;
+					interaction_model = mt::eesim_multislice;
+					illumination_model = eim_coherent;
 
 					auto coll_angle_max = fcn_rangs_2_rad(E_0, 2*grid_2d.g_max());
 					auto coll_angle = (fcn_is_zero(eels_fr.coll_angle)||(eels_fr.coll_angle<0))?coll_angle_max:eels_fr.coll_angle;
@@ -268,13 +268,13 @@
 				if (is_EWFS_EWRS())
 				{
 					phonon_par.coh_contrib = true;
-					illumination_model = eIM_Coherent;
+					illumination_model = eim_coherent;
 				}
 
 				// It will be changed when you include spatial incoherences (beta)
 				if (is_CBED_CBEI() && !is_illu_mod_full_integration())
 				{
-					illumination_model = eIM_Coherent;
+					illumination_model = eim_coherent;
 				}
 
 				slice_storage = is_slice_storage();
@@ -282,17 +282,17 @@
 				if (!is_multislice())
 				{
 					islice = 0;
-					potential_slicing = ePST_Planes;
+					potential_slicing = epst_planes;
 					if (is_through_slices())
 					{
-						thick_type = eTT_Through_Thick;
+						thick_type = ett_through_thick;
 					}
 					slice_storage = slice_storage || !is_whole_spec();
 				}
 
 				if (is_subslicing() && is_through_thick())
 				{
-					thick_type = eTT_Whole_Spec;
+					thick_type = ett_whole_spec;
 				}
 
 				if (!is_subslicing())
@@ -302,7 +302,7 @@
 
 				if (is_spec_rot_active())
 				{
-					thick_type = eTT_Whole_Spec;
+					thick_type = ett_whole_spec;
 					// get geometric center
 					if (rot_par.is_geometric_center())
 					{
@@ -336,7 +336,7 @@
 
 				if (fcn_is_zero(cond_lens.spt_inc_sigma))
 				{
-					temporal_spatial_incoh = eTSI_Temporal;
+					temporal_spatial_incoh = etsi_temporal;
 				}
 
 				if (!is_illu_mod_full_integration())
@@ -375,7 +375,7 @@
 					cond_lens.zero_defocus_plane = cond_lens.get_zero_defocus_plane(atoms.z_min, atoms.z_max);
 				}
 
-				cond_lens.zero_defocus_type = eZDT_user_def;
+				cond_lens.zero_defocus_type = ezdt_user_def;
 
 				// set objetive lens parameters
 				obj_lens.set_in_data(E_0, grid_2d);
@@ -883,38 +883,38 @@
 			/***************************************************************************************/
 			dt_bool is_illu_mod_coherent() const
 			{
-				return illumination_model == eIM_Coherent;
+				return illumination_model == eim_coherent;
 			}
 
 			dt_bool is_illu_mod_partial_coherent() const
 			{
-				return illumination_model == eIM_Partial_Coherent;
+				return illumination_model == eim_partial_coherent;
 			}
 
 			dt_bool is_illu_mod_trans_cross_coef() const
 			{
-				return illumination_model == eIM_Trans_Cross_Coef;
+				return illumination_model == eim_trans_cross_coef;
 			}
 
 			dt_bool is_illu_mod_full_integration() const
 			{
-				return illumination_model == eIM_Full_Integration;
+				return illumination_model == eim_full_integration;
 			}
 
 			/***************************************************************************************/
 			dt_bool is_incoh_temporal_spatial() const
 			{
-				return temporal_spatial_incoh == eTSI_Temporal_Spatial;
+				return temporal_spatial_incoh == etsi_temporal_spatial;
 			}
 
 			dt_bool is_incoh_temporal() const
 			{
-				return temporal_spatial_incoh == eTSI_Temporal;
+				return temporal_spatial_incoh == etsi_temporal;
 			}
 
 			dt_bool is_incoh_spatial() const
 			{
-				return temporal_spatial_incoh == eTSI_Spatial;
+				return temporal_spatial_incoh == etst_spatial;
 			}
 
 			/***************************************************************************************/

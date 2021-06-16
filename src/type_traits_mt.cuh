@@ -32,68 +32,68 @@
 	{
 		/***************************************************************************************/
 		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_ePPT_doyle_0_4 = typename std::enable_if<pot_parm_typ==ePPT_doyle_0_4, U>::type;
+		using enable_if_eppt_doyle_0_4 = typename std::enable_if<pot_parm_typ==eppt_doyle_0_4, U>::type;
 
 		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_ePPT_peng_0_4 = typename std::enable_if<pot_parm_typ==ePPT_peng_0_4, U>::type;
+		using enable_if_eppt_peng_0_4 = typename std::enable_if<pot_parm_typ==eppt_peng_0_4, U>::type;
 
 		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_ePPT_peng_0_12 = typename std::enable_if<pot_parm_typ==ePPT_peng_0_12, U>::type;
+		using enable_if_eppt_peng_0_12 = typename std::enable_if<pot_parm_typ==eppt_peng_0_12, U>::type;
 
 		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_ePPT_kirkland_0_12 = typename std::enable_if<pot_parm_typ==ePPT_kirkland_0_12, U>::type;
+		using enable_if_eppt_kirkland_0_12 = typename std::enable_if<pot_parm_typ==eppt_kirkland_0_12, U>::type;
 
 		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_ePPT_weickenmeier_0_12 = typename std::enable_if<pot_parm_typ==ePPT_weickenmeier_0_12, U>::type;
+		using enable_if_eppt_weickenmeier_0_12 = typename std::enable_if<pot_parm_typ==eppt_weickenmeier_0_12, U>::type;
 
 		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_ePPT_lobato_0_12 = typename std::enable_if<pot_parm_typ==ePPT_lobato_0_12, U>::type;
+		using enable_if_eppt_lobato_0_12 = typename std::enable_if<pot_parm_typ==eppt_lobato_0_12, U>::type;
 
 		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_ePPT_peng_ion_0_4 = typename std::enable_if<pot_parm_typ==ePPT_peng_ion_0_4, U>::type;
+		using enable_if_eppt_peng_ion_0_4 = typename std::enable_if<pot_parm_typ==eppt_peng_ion_0_4, U>::type;
 
 		/****************************** types ********************************/
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_STEM = typename std::enable_if<simulation_type == eTEMST_STEM, U>::type;
+		using enable_if_STEM = typename std::enable_if<simulation_type == eemst_stem, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_ISTEM = typename std::enable_if<simulation_type == eTEMST_ISTEM, U>::type;
+		using enable_if_ISTEM = typename std::enable_if<simulation_type == eemst_istem, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_CBED = typename std::enable_if<simulation_type == eTEMST_CBED, U>::type;
+		using enable_if_CBED = typename std::enable_if<simulation_type == eemst_cbed, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_CBEI = typename std::enable_if<simulation_type == eTEMST_CBEI, U>::type;
+		using enable_if_CBEI = typename std::enable_if<simulation_type == eemst_cbei, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_ED = typename std::enable_if<simulation_type == eTEMST_ED, U>::type;
+		using enable_if_ED = typename std::enable_if<simulation_type == eemst_ed, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_HRTEM = typename std::enable_if<simulation_type == eTEMST_HRTEM, U>::type;
+		using enable_if_HRTEM = typename std::enable_if<simulation_type == eemst_hrtem, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_PED = typename std::enable_if<simulation_type == eTEMST_PED, U>::type;
+		using enable_if_PED = typename std::enable_if<simulation_type == eemst_ped, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_HCTEM = typename std::enable_if<simulation_type == eTEMST_HCTEM, U>::type;
+		using enable_if_HCTEM = typename std::enable_if<simulation_type == eemst_hctem, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_EWFS = typename std::enable_if<simulation_type == eTEMST_EWFS, U>::type;
+		using enable_if_EWFS = typename std::enable_if<simulation_type == eemst_ewfs, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_EWRS = typename std::enable_if<simulation_type == eTEMST_EWRS, U>::type;
+		using enable_if_EWRS = typename std::enable_if<simulation_type == eemst_ewrs, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_EELS = typename std::enable_if<simulation_type == eTEMST_STEM_EELS, U>::type;
+		using enable_if_EELS = typename std::enable_if<simulation_type == eemst_stem_eels, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_EFTEM = typename std::enable_if<simulation_type == eTEMST_EFTEMRS, U>::type;
+		using enable_if_EFTEM = typename std::enable_if<simulation_type == eemst_eftemrs, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_ProbeFS = typename std::enable_if<simulation_type == eTEMST_IWFS, U>::type;
+		using enable_if_ProbeFS = typename std::enable_if<simulation_type == eemst_iwfs, U>::type;
 
 		template <dt_int32 simulation_type, class U=void>
-		using enable_if_ProbeRS = typename std::enable_if<simulation_type == eTEMST_IWRS, U>::type;
+		using enable_if_ProbeRS = typename std::enable_if<simulation_type == eemst_iwrs, U>::type;
 
 	}
 

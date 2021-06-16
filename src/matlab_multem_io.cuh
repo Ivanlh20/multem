@@ -256,7 +256,7 @@ void mex_read_detector(const mxArray *mex_array, T E_0, mt::Detector<T, mt::edev
 
 	switch (detector.type)
 	{
-		case mt::edt_Circular:
+		case mt::edt_circular:
 		{
 			mex_detector = mxGetField(mex_detector, 0, "cir");
 			dt_int32 ndetector = mex_get_MxN(mex_detector);
@@ -273,7 +273,7 @@ void mex_read_detector(const mxArray *mex_array, T E_0, mt::Detector<T, mt::edev
 			}
 		}
 		break;
-		case mt::edt_Radial:
+		case mt::edt_radial:
 		{
 			mex_detector = mxGetField(mex_detector, 0, "radial");
 			dt_int32 ndetector = mxGetN(mex_detector);
@@ -292,7 +292,7 @@ void mex_read_detector(const mxArray *mex_array, T E_0, mt::Detector<T, mt::edev
 			}
 		}
 		break;
-		case mt::edt_Matrix:
+		case mt::edt_matrix:
 		{
 			mex_detector = mxGetField(mex_detector, 0, "matrix");
 			dt_int32 ndetector = mxGetN(mex_detector);

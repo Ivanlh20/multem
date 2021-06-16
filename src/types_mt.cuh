@@ -170,10 +170,10 @@
 				eSpec_Lay_Typ type;		// specimen layer type
 				T sli_thk;				// Slice thickness
 
-				Spec_Lay_Info(): bs(), r_0(), region(c_dflt_region), type(eSLT_none), sli_thk(2) {};
+				Spec_Lay_Info(): bs(), r_0(), region(c_dflt_region), type(eslt_none), sli_thk(2) {};
 
 				Spec_Lay_Info(const R_3d<T>& bs, R_3d<T> r_0 = R_3d<T>(), dt_int32 region = c_dflt_region, 
-				eSpec_Lay_Typ type = eSLT_none, T sli_thk = 2.0): bs(bs), r_0(r_0), region(region), type(type), sli_thk(sli_thk) {};
+				eSpec_Lay_Typ type = eslt_none, T sli_thk = 2.0): bs(bs), r_0(r_0), region(region), type(type), sli_thk(sli_thk) {};
 
 				Spec_Lay_Info<T>& operator=(Spec_Lay_Info<T> &spec_lay_info)
 				{
@@ -525,7 +525,7 @@
 			R_3d<T> center_p;		// rotation point
 
 			Rot_Par(): theta(0), u0(0, 0, 1), 
-			center_type(erpt_Geometric_Center), center_p(1, 0, 0) {}
+			center_type(erpt_geometric_ctr), center_p(1, 0, 0) {}
 
 			void validate_parameter()
 			{
@@ -534,7 +534,7 @@
 
 			dt_bool is_geometric_center() const
 			{
-				return center_type == erpt_Geometric_Center;
+				return center_type == erpt_geometric_ctr;
 			}
 
 			dt_bool is_user_define() const
@@ -562,7 +562,7 @@
 			dt_bool dim_y;		// y - phonon dimension (true, false)
 			dt_bool dim_z;		// z - phonon dimension (true, false)
 
-			Phonon_Par(): model(ePM_Still_Atom), coh_contrib(false), single_conf(false), dist(1), seed(300183), 
+			Phonon_Par(): model(epm_still_atom), coh_contrib(false), single_conf(false), dist(1), seed(300183), 
 			nconf(1), iconf_0(1), dim_x(true), dim_y(true), dim_z(false) {}
 
 			void set_dim(const dt_int32& Dim)
@@ -630,17 +630,17 @@
 
 			dt_bool is_still_atom() const
 			{
-				return model == ePM_Still_Atom;
+				return model == epm_still_atom;
 			}
 
 			dt_bool is_absorptive_model() const
 			{
-				return model == ePM_Absorptive_Model;
+				return model == epm_absorptive_model;
 			}
 
 			dt_bool is_frozen_phonon() const
 			{
-				return model == ePM_Frozen_Phonon;
+				return model == epm_frozen_phonon;
 			}
 
 			dt_bool is_frozen_phonon_float32_conf() const
@@ -658,19 +658,19 @@
 		inline
 		dt_bool is_detector_circular(const eDetector_Typ &det_type)
 		{
-			return det_type == mt::edt_Circular;
+			return det_type == mt::edt_circular;
 		}
 
 		inline
 		dt_bool is_detector_radial(const eDetector_Typ &det_type)
 		{
-			return det_type == mt::edt_Radial;
+			return det_type == mt::edt_radial;
 		}
 
 		inline
 		dt_bool is_detector_matrix(const eDetector_Typ &det_type)
 		{
-			return det_type == mt::edt_Matrix;
+			return det_type == mt::edt_matrix;
 		}
 
 		template <class T, eDev Dev>
@@ -681,24 +681,24 @@
 
 			static const eDev device = Dev;
 
-			Detector(): type(mt::edt_Circular) {}
+			Detector(): type(mt::edt_circular) {}
 
 			size_type size() const
 			{
 				size_type size_out = 0;
 				switch (type)
 				{
-					case mt::edt_Circular:
+					case mt::edt_circular:
 					{
 						size_out = g_inner.size();
 					}
 					break;
-					case mt::edt_Radial:
+					case mt::edt_radial:
 					{
 						size_out = fx.size();
 					}
 						break;
-					case mt::edt_Matrix:
+					case mt::edt_matrix:
 					{
 						size_out = fR.size();
 					}
@@ -722,20 +722,20 @@
 			{
 				switch (type)
 				{
-					case mt::edt_Circular:
+					case mt::edt_circular:
 					{
 						g_inner.resize(new_size);
 						g_outer.resize(new_size);
 					}
 					break;
-					case mt::edt_Radial:
+					case mt::edt_radial:
 					{
 						fx.resize(new_size);
 						fcn.resize(new_size);
 						grid_1d.resize(new_size);
 					}
 						break;
-					case mt::edt_Matrix:
+					case mt::edt_matrix:
 					{
 						fR.resize(new_size);
 						fcn.resize(new_size);
@@ -791,7 +791,7 @@
 				return mt::is_detector_matrix(type);
 			}
 
-			eDetector_Typ type;		// mt::edt_Circular = 1, mt::edt_Radial = 2, mt::edt_Matrix = 3
+			eDetector_Typ type;		// mt::edt_circular = 1, mt::edt_radial = 2, mt::edt_matrix = 3
 			Vctr<T, edev_cpu> g_inner;		// Inner aperture Ang^-1
 			Vctr<T, edev_cpu> g_outer;		// Outer aperture Ang^-1
 			Vctr<Vctr<T, Dev>, edev_cpu> fx;		// radial sensitivity value
@@ -844,7 +844,7 @@
 					return R.size();
 				}
 
-				Scan(): type(eST_Line), pbc(false), ns(1), nx(0), ny(0), 
+				Scan(): type(est_line), pbc(false), ns(1), nx(0), ny(0), 
 				dR(0, 0), R_0(0, 0), R_e(0, 0) {};
 
 				template <class TScanning> 
@@ -872,7 +872,7 @@
 
 				void set_default()
 				{
-					type = eST_Line;
+					type = est_line;
 					pbc = false;
 					ns = 1;
 					R_0 = T(0);
@@ -994,12 +994,12 @@
 
 				dt_bool is_line() const
 				{
-					return type == eST_Line;
+					return type == est_line;
 				}
 
 				dt_bool is_area() const
 				{
-					return type == eST_Area;
+					return type == est_area;
 				}
 
  				dt_bool is_user_define() const

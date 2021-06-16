@@ -509,7 +509,7 @@
 			/***************************************************************************************/
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_doyle_0_4<pot_parm_typ, T>
+			enable_if_eppt_doyle_0_4<pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 4, cl, cnl);
@@ -517,7 +517,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_doyle_0_4<pot_parm_typ, void>
+			enable_if_eppt_doyle_0_4<pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 4, cl, cnl, y, dy);
@@ -525,7 +525,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_4<pot_parm_typ, T>
+			enable_if_eppt_peng_0_4<pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -533,7 +533,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_4<pot_parm_typ, void>
+			enable_if_eppt_peng_0_4<pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -541,7 +541,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_12<pot_parm_typ, T>
+			enable_if_eppt_peng_0_12<pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -549,7 +549,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_12<pot_parm_typ, void>
+			enable_if_eppt_peng_0_12<pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -557,7 +557,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_kirkland_0_12<pot_parm_typ, T>
+			enable_if_eppt_kirkland_0_12<pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_lorentzian_v(x, 0, 3, cl, cnl) + fcn_spt_gauss_v(x, 3, 6, cl, cnl);
@@ -565,7 +565,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_kirkland_0_12<pot_parm_typ, void>
+			enable_if_eppt_kirkland_0_12<pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_lorentzian_vd(x, 0, 3, cl, cnl, y, dy);
@@ -574,7 +574,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_weickenmeier_0_12<pot_parm_typ, T>
+			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				const T x2 = x*x;
@@ -603,7 +603,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_weickenmeier_0_12<pot_parm_typ, void>
+			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				const T x2 = x*x;
@@ -632,7 +632,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_lobato_0_12<pot_parm_typ, T>
+			enable_if_eppt_lobato_0_12<pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				const T x2 = x*x;
@@ -650,7 +650,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_lobato_0_12<pot_parm_typ, void>
+			enable_if_eppt_lobato_0_12<pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				const T x2 = x*x;
@@ -667,7 +667,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_ion_0_4<pot_parm_typ, T>
+			enable_if_eppt_peng_ion_0_4<pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				auto y = fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -678,7 +678,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_ion_0_4<pot_parm_typ, void>
+			enable_if_eppt_peng_ion_0_4<pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -713,7 +713,7 @@
 			/***************************************************************************************/
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_doyle_0_4<pot_parm_typ, T>
+			enable_if_eppt_doyle_0_4<pot_parm_typ, T>
 			fcn_fxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				auto y = fcn_feg<pot_parm_typ, T>(x, cl, cnl);
@@ -724,7 +724,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_doyle_0_4<pot_parm_typ, void>
+			enable_if_eppt_doyle_0_4<pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_feg_dfeg<pot_parm_typ, T>(x, cl, cnl, y, dy);
@@ -734,7 +734,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_4<pot_parm_typ, T>
+			enable_if_eppt_peng_0_4<pot_parm_typ, T>
 			fcn_fxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				auto y = fcn_feg<pot_parm_typ, T>(x, cl, cnl);
@@ -745,7 +745,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_4<pot_parm_typ, void>
+			enable_if_eppt_peng_0_4<pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_feg_dfeg<pot_parm_typ, T>(x, cl, cnl, y, dy);
@@ -755,7 +755,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_12<pot_parm_typ, T>
+			enable_if_eppt_peng_0_12<pot_parm_typ, T>
 			fcn_fxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				auto y = fcn_feg<pot_parm_typ, T>(x, cl, cnl);
@@ -766,7 +766,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_12<pot_parm_typ, void>
+			enable_if_eppt_peng_0_12<pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_feg_dfeg<pot_parm_typ, T>(x, cl, cnl, y, dy);
@@ -776,7 +776,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_kirkland_0_12<pot_parm_typ, T>
+			enable_if_eppt_kirkland_0_12<pot_parm_typ, T>
 			fcn_fxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				auto y = fcn_feg<pot_parm_typ, T>(x, cl, cnl);
@@ -787,7 +787,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_kirkland_0_12<pot_parm_typ, void>
+			enable_if_eppt_kirkland_0_12<pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_feg_dfeg<pot_parm_typ, T>(x, cl, cnl, y, dy);
@@ -797,7 +797,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_weickenmeier_0_12<pot_parm_typ, T>
+			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, T>
 			fcn_fxg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 6, cl, cnl);
@@ -805,7 +805,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_weickenmeier_0_12<pot_parm_typ, void>
+			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 6, cl, cnl, y, dy);
@@ -813,7 +813,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_lobato_0_12<pot_parm_typ, T>
+			enable_if_eppt_lobato_0_12<pot_parm_typ, T>
 			fcn_fxg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				const T x2 = x*x;
@@ -831,7 +831,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_lobato_0_12<pot_parm_typ, void>
+			enable_if_eppt_lobato_0_12<pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				const T x2 = x*x;
@@ -850,7 +850,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_ion_0_4<pot_parm_typ, T>
+			enable_if_eppt_peng_ion_0_4<pot_parm_typ, T>
 			fcn_fxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				auto y = fcn_feg<pot_parm_typ, T>(x, cl, cnl);
@@ -861,7 +861,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_ion_0_4<pot_parm_typ, void>
+			enable_if_eppt_peng_ion_0_4<pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_feg_dfeg<pot_parm_typ, T>(x, cl, cnl, y, dy);
@@ -881,9 +881,9 @@
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			GPU_EXEC pFcn_clnl_3_1<T> pgpu_fcn_fxg_spec = fcn_fxg<pot_parm_typ, T>;
 
-			pFCN_TEMPLATE_AF_SPEC(fxg, pFcn_clnl_3_1, ePPT_weickenmeier_0_12);
+			pFCN_TEMPLATE_AF_SPEC(fxg, pFcn_clnl_3_1, eppt_weickenmeier_0_12);
 
-			pFCN_TEMPLATE_AF_SPEC(fxg, pFcn_clnl_3_1, ePPT_lobato_0_12);
+			pFCN_TEMPLATE_AF_SPEC(fxg, pFcn_clnl_3_1, eppt_lobato_0_12);
 
 			/***************************************************************************************/
 			template <class T>
@@ -897,16 +897,16 @@
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			GPU_EXEC pFcn_clnl_3_2<T> pgpu_fcn_fxg_dfxg_spec = fcn_fxg_dfxg<pot_parm_typ, T>;
 
-			pFCN_TEMPLATE_AF_SPEC(fxg_dfxg, pFcn_clnl_3_2, ePPT_weickenmeier_0_12);
+			pFCN_TEMPLATE_AF_SPEC(fxg_dfxg, pFcn_clnl_3_2, eppt_weickenmeier_0_12);
 
-			pFCN_TEMPLATE_AF_SPEC(fxg_dfxg, pFcn_clnl_3_2, ePPT_lobato_0_12);
+			pFCN_TEMPLATE_AF_SPEC(fxg_dfxg, pFcn_clnl_3_2, eppt_lobato_0_12);
 
 			/***************************************************************************************/
 			/****************************************** pr *****************************************/
 			/***************************************************************************************/
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_doyle_0_4<pot_parm_typ, T>
+			enable_if_eppt_doyle_0_4<pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_pr_gauss_feg_v(x, 0, 4, cl, cnl);
@@ -914,7 +914,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_doyle_0_4<pot_parm_typ, void>
+			enable_if_eppt_doyle_0_4<pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_pr_gauss_feg_vd(x, 0, 4, cl, cnl, y, dy);
@@ -922,7 +922,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_4<pot_parm_typ, T>
+			enable_if_eppt_peng_0_4<pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_pr_gauss_feg_v(x, 0, 5, cl, cnl);
@@ -930,7 +930,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_4<pot_parm_typ, void>
+			enable_if_eppt_peng_0_4<pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_pr_gauss_feg_vd(x, 0, 5, cl, cnl, y, dy);
@@ -938,7 +938,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_12<pot_parm_typ, T>
+			enable_if_eppt_peng_0_12<pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -946,7 +946,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_12<pot_parm_typ, void>
+			enable_if_eppt_peng_0_12<pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_pr_gauss_feg_vd(x, 0, 5, cl, cnl, y, dy);
@@ -954,7 +954,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_kirkland_0_12<pot_parm_typ, T>
+			enable_if_eppt_kirkland_0_12<pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_yukawa_v(x, 0, 3, cl, cnl) + fcn_spt_pr_gauss_feg_v(x, 3, 6, cl, cnl);
@@ -962,7 +962,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_kirkland_0_12<pot_parm_typ, void>
+			enable_if_eppt_kirkland_0_12<pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_yukawa_vd(x, 0, 3, cl, cnl, y, dy);
@@ -971,7 +971,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_weickenmeier_0_12<pot_parm_typ, T>
+			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 6, cl, cnl);
@@ -979,7 +979,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_weickenmeier_0_12<pot_parm_typ, void>
+			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 6, cl, cnl, y, dy);
@@ -987,7 +987,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_lobato_0_12<pot_parm_typ, T>
+			enable_if_eppt_lobato_0_12<pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_exp_v(x, 0, 5, cl, cnl);
@@ -995,7 +995,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_lobato_0_12<pot_parm_typ, void>
+			enable_if_eppt_lobato_0_12<pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_exp_vd(x, 0, 5, cl, cnl, y, dy);
@@ -1003,7 +1003,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_ion_0_4<pot_parm_typ, T>
+			enable_if_eppt_peng_ion_0_4<pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_pr_gauss_feg_v(x, 0, 5, cl, cnl);
@@ -1011,7 +1011,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_ion_0_4<pot_parm_typ, void>
+			enable_if_eppt_peng_ion_0_4<pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_pr_gauss_feg_vd(x, 0, 5, cl, cnl, y, dy);
@@ -1040,7 +1040,7 @@
 			/***************************************************************************************/
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_doyle_0_4<pot_parm_typ, T>
+			enable_if_eppt_doyle_0_4<pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 4, cl, cnl);
@@ -1048,7 +1048,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_doyle_0_4<pot_parm_typ, void>
+			enable_if_eppt_doyle_0_4<pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 4, cl, cnl, y, dy);
@@ -1056,7 +1056,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_4<pot_parm_typ, T>
+			enable_if_eppt_peng_0_4<pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -1064,7 +1064,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_4<pot_parm_typ, void>
+			enable_if_eppt_peng_0_4<pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -1072,7 +1072,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_12<pot_parm_typ, T>
+			enable_if_eppt_peng_0_12<pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -1080,7 +1080,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_12<pot_parm_typ, void>
+			enable_if_eppt_peng_0_12<pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -1088,7 +1088,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_kirkland_0_12<pot_parm_typ, T>
+			enable_if_eppt_kirkland_0_12<pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_yukawa_v(x, 0, 3, cl, cnl) + fcn_spt_gauss_v(x, 3, 6, cl, cnl);
@@ -1096,7 +1096,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_kirkland_0_12<pot_parm_typ, void>
+			enable_if_eppt_kirkland_0_12<pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_yukawa_vd(x, 0, 3, cl, cnl, y, dy);
@@ -1105,7 +1105,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_weickenmeier_0_12<pot_parm_typ, T>
+			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				const T ix = T(1)/x;
@@ -1122,7 +1122,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_weickenmeier_0_12<pot_parm_typ, void>
+			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				const T c_pii2 = 1.772453850905516027298;
@@ -1141,7 +1141,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_lobato_0_12<pot_parm_typ, T>
+			enable_if_eppt_lobato_0_12<pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				const T ix = T(1)/x;
@@ -1158,7 +1158,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_lobato_0_12<pot_parm_typ, void>
+			enable_if_eppt_lobato_0_12<pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				const T ix = T(1)/x;
@@ -1176,7 +1176,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_ion_0_4<pot_parm_typ, T>
+			enable_if_eppt_peng_ion_0_4<pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				auto y = fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -1187,7 +1187,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_ion_0_4<pot_parm_typ, void>
+			enable_if_eppt_peng_ion_0_4<pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -1255,7 +1255,7 @@
 			 /***************************************************************************************/
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_doyle_0_4<pot_parm_typ, T>
+			enable_if_eppt_doyle_0_4<pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 4, cl, cnl);
@@ -1263,7 +1263,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_doyle_0_4<pot_parm_typ, void>
+			enable_if_eppt_doyle_0_4<pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 4, cl, cnl, y, dy);
@@ -1271,7 +1271,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_4<pot_parm_typ, T>
+			enable_if_eppt_peng_0_4<pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -1279,7 +1279,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_4<pot_parm_typ, void>
+			enable_if_eppt_peng_0_4<pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -1287,7 +1287,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_12<pot_parm_typ, T>
+			enable_if_eppt_peng_0_12<pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				 return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -1295,7 +1295,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_0_12<pot_parm_typ, void>
+			enable_if_eppt_peng_0_12<pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -1303,7 +1303,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_kirkland_0_12<pot_parm_typ, T>
+			enable_if_eppt_kirkland_0_12<pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				T y = 0;
@@ -1320,7 +1320,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_kirkland_0_12<pot_parm_typ, void>
+			enable_if_eppt_kirkland_0_12<pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				y = dy = 0;
@@ -1336,7 +1336,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_weickenmeier_0_12<pot_parm_typ, T>
+			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, const dt_int32& n_q, Ctpr<T> qx, Ctpr<T> qw)
 			{
 				return fcn_int_vz_ninfty_pinfty(x, cl, cnl, n_q, qx, qw, fcn_vr<pot_parm_typ, T>);
@@ -1344,7 +1344,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_weickenmeier_0_12<pot_parm_typ, void>
+			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, const dt_int32& n_q, Ctpr<T> qx, Ctpr<T> qw, T& y, T& dy)
 			{
 				fcn_int_vz_dvz_ninfty_pinfty(x, cl, cnl, n_q, qx, qw, y, dy, fcn_vr_dvr<pot_parm_typ, T>);
@@ -1352,7 +1352,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_lobato_0_12<pot_parm_typ, T>
+			enable_if_eppt_lobato_0_12<pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				T y = 0;
@@ -1367,7 +1367,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_lobato_0_12<pot_parm_typ, void>
+			enable_if_eppt_lobato_0_12<pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				y = dy = 0;
@@ -1383,7 +1383,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_ion_0_4<pot_parm_typ, T>
+			enable_if_eppt_peng_ion_0_4<pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				auto y = fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -1394,7 +1394,7 @@
 
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_ePPT_peng_ion_0_4<pot_parm_typ, void>
+			enable_if_eppt_peng_ion_0_4<pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -1414,7 +1414,7 @@
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			GPU_EXEC pFcn_clnl_6_1<T> pgpu_fcn_vzp_spec = fcn_vzp<pot_parm_typ, T>;
 
-			pFCN_TEMPLATE_AF_SPEC(vzp, pFcn_clnl_6_1, ePPT_weickenmeier_0_12);
+			pFCN_TEMPLATE_AF_SPEC(vzp, pFcn_clnl_6_1, eppt_weickenmeier_0_12);
 
 			/***************************************************************************************/
 			template <class T>
@@ -1428,7 +1428,7 @@
 			template <ePot_Parm_Typ pot_parm_typ, class T>
 			GPU_EXEC pFcn_clnl_6_2<T> pgpu_fcn_vzp_dvzp_spec = fcn_vzp_dvzp<pot_parm_typ, T>;
 
-			pFCN_TEMPLATE_AF_SPEC(vzp_dvzp, pFcn_clnl_6_2, ePPT_weickenmeier_0_12);
+			pFCN_TEMPLATE_AF_SPEC(vzp_dvzp, pFcn_clnl_6_2, eppt_weickenmeier_0_12);
 		}
 	}
 
@@ -1642,7 +1642,7 @@
 			{
 				const auto ind = igrid.sub_2_ind(ix);
 
-				if (esim == eESIM_Weak_Phase_Object)
+				if (esim == eesim_weak_phase_object)
 				{
 					tfcn_o[ind] =complex<T>(T(1), w*vzp_i[ind]);
 				}

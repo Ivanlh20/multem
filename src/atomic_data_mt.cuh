@@ -51,7 +51,7 @@
 			mutable LNL_Coef<T, Dev> vzp;		// projected potential coefficients
 
 			/************************************* constructors ************************************/
-			Atomic_Coef():pot_parm_typ(ePPT_lobato_0_12), Z(0), charge(0) {}
+			Atomic_Coef():pot_parm_typ(eppt_lobato_0_12), Z(0), charge(0) {}
 
 			Atomic_Coef(const size_type& new_size): Atomic_Coef()
 			{
@@ -130,7 +130,7 @@
 
 			void clear()
 			{
-				pot_parm_typ = ePPT_lobato_0_12;
+				pot_parm_typ = eppt_lobato_0_12;
 				Z = 0;
 				charge = 0;
 
@@ -355,7 +355,7 @@
 			// get atomic info
 			Atomic_Info_cpu<T> operator()(const dt_int32& Z)		
 			{
-				return operator()(Z, ePPT_lobato_0_12);
+				return operator()(Z, eppt_lobato_0_12);
 			}
 
 			// get atomic info
@@ -365,37 +365,37 @@
 
 				switch(pot_parm_typ)
 				{
-					case ePPT_doyle_0_4:
+					case eppt_doyle_0_4:
 					{
 						atomic_info.add_atomic_coef(atomic_coef_doyle_neutral_0_4(Z));
 					}
 					break;
-					case ePPT_peng_0_4:
+					case eppt_peng_0_4:
 					{
 						atomic_info.add_atomic_coef(atomic_coef_peng_neutral_0_4(Z));
 					}
 					break;
-					case ePPT_peng_0_12:
+					case eppt_peng_0_12:
 					{
 						atomic_info.add_atomic_coef(atomic_coef_peng_neutral_0_12(Z));
 					}
 					break;
-					case ePPT_kirkland_0_12:
+					case eppt_kirkland_0_12:
 					{
 						atomic_info.add_atomic_coef(atomic_coef_kirkland_neutral_0_12(Z));
 					}
 					break;
-					case ePPT_weickenmeier_0_12:
+					case eppt_weickenmeier_0_12:
 					{
 						atomic_info.add_atomic_coef(atomic_coef_weickenmeier_neutral_0_12(Z));
 					}
 					break;
-					case ePPT_lobato_0_12:
+					case eppt_lobato_0_12:
 					{
 						atomic_info.add_atomic_coef(atomic_coef_lobato_neutral_0_12(Z));
 					}
 					break;
-					case ePPT_peng_ion_0_4:
+					case eppt_peng_ion_0_4:
 					{
 						auto atomic_coef = atomic_coef_peng_ion_0_4(Z, charge);
 
@@ -421,37 +421,37 @@
 				{
 					switch(pot_parm_typ)
 					{
-						case ePPT_doyle_0_4:
+						case eppt_doyle_0_4:
 						{
 							atomic_info.add_atomic_coef(atomic_coef_doyle_neutral_0_4(Z));
 						}
 						break;
-						case ePPT_peng_0_4:
+						case eppt_peng_0_4:
 						{
 							atomic_info.add_atomic_coef(atomic_coef_peng_neutral_0_4(Z));
 						}
 						break;
-						case ePPT_peng_0_12:
+						case eppt_peng_0_12:
 						{
 							atomic_info.add_atomic_coef(atomic_coef_peng_neutral_0_12(Z));
 						}
 						break;
-						case ePPT_kirkland_0_12:
+						case eppt_kirkland_0_12:
 						{
 							atomic_info.add_atomic_coef(atomic_coef_kirkland_neutral_0_12(Z));
 						}
 						break;
-						case ePPT_weickenmeier_0_12:
+						case eppt_weickenmeier_0_12:
 						{
 							atomic_info.add_atomic_coef(atomic_coef_weickenmeier_neutral_0_12(Z));
 						}
 						break;
-						case ePPT_lobato_0_12:
+						case eppt_lobato_0_12:
 						{
 							atomic_info.add_atomic_coef(atomic_coef_lobato_neutral_0_12(Z));
 						}
 						break;
-						case ePPT_peng_ion_0_4:
+						case eppt_peng_ion_0_4:
 						{
 							auto atomic_coef = atomic_coef_peng_ion_0_4(Z, charge[ik]);
 
@@ -2610,7 +2610,7 @@
 				auto feg_coef = load_feg_doyle_neutral_0_4(Z);
 
 				auto atomic_coef = atomic_coef_gaussian(feg_coef);
-				atomic_coef.pot_parm_typ = ePPT_doyle_0_4;
+				atomic_coef.pot_parm_typ = eppt_doyle_0_4;
 				atomic_coef.Z = Z;
 				atomic_coef.charge = 0;
 
@@ -2624,7 +2624,7 @@
 
 				auto atomic_coef = atomic_coef_gaussian(feg_coef);
 
-				atomic_coef.pot_parm_typ = ePPT_peng_0_4;
+				atomic_coef.pot_parm_typ = eppt_peng_0_4;
 				atomic_coef.Z = Z;
 				atomic_coef.charge = 0;
 
@@ -2642,7 +2642,7 @@
 				}
 
 				auto atomic_coef = atomic_coef_gaussian(feg_coef);
-				atomic_coef.pot_parm_typ = ePPT_peng_0_12;
+				atomic_coef.pot_parm_typ = eppt_peng_0_12;
 				atomic_coef.Z = Z;
 				atomic_coef.charge = 0;
 
@@ -2655,7 +2655,7 @@
 				auto feg_coef = load_feg_kirkland_neutral_0_12(Z);
 
 				Atomic_Coef_cpu<T> atomic_coef(feg_coef.size(), T(0));
-				atomic_coef.pot_parm_typ = ePPT_kirkland_0_12;
+				atomic_coef.pot_parm_typ = eppt_kirkland_0_12;
 				atomic_coef.Z = Z;
 				atomic_coef.charge = 0;
 
@@ -2716,7 +2716,7 @@
 				auto feg_coef = load_feg_weickenmeier_neutral_0_12(Z);
 
 				Atomic_Coef_cpu<T> atomic_coef(feg_coef.size(), T(0));
-				atomic_coef.pot_parm_typ = ePPT_weickenmeier_0_12;
+				atomic_coef.pot_parm_typ = eppt_weickenmeier_0_12;
 				atomic_coef.Z = Z;
 				atomic_coef.charge = 0;
 
@@ -2758,7 +2758,7 @@
 				auto feg_coef = load_feg_lobato_neutral_0_12(Z);
 
 				Atomic_Coef_cpu<T> atomic_coef(feg_coef.size(), T(0));
-				atomic_coef.pot_parm_typ = ePPT_lobato_0_12;
+				atomic_coef.pot_parm_typ = eppt_lobato_0_12;
 				atomic_coef.Z = Z;
 				atomic_coef.charge = 0;
 
@@ -2797,7 +2797,7 @@
 				}
 
 				Atomic_Coef_cpu<T> atomic_coef(feg_coef.size()+1, T(0));
-				atomic_coef.pot_parm_typ = ePPT_peng_ion_0_4;
+				atomic_coef.pot_parm_typ = eppt_peng_ion_0_4;
 				atomic_coef.Z = Z;
 				atomic_coef.charge = charge;
 

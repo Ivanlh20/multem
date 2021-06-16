@@ -89,7 +89,7 @@
 			T spt_inc_iehwgd;				// e^-1 half-width value of the Gaussian distribution
 			T spt_inc_theta_c;				// divergence semi-angle (rad)
 
-			eZero_Defocus_Typ zdt;			// Defocus type: eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_user_def = 4
+			eZero_Defocus_Typ zdt;			// Defocus type: ezdt_first = 1, ezdt_middle = 2, ezdt_last = 3, ezdt_user_def = 4
 			T zdp;							// plane
 
 			T lambda;						// wavelength(Angstrom)
@@ -129,7 +129,7 @@
 				c_50(0), c_52(0), phi_52(0), c_54(0), phi_54(0), c_56(0), phi_56(0), 
 				inner_aper_ang(0), outer_aper_ang(0), tp_inc_a(1.0), tp_inc_sigma(0), tp_inc_beta(0), tp_inc_npts(0), tp_inc_iehwgd(0), 
 				spt_inc_a(1.0), spt_inc_sigma(0), spt_inc_beta(0), spt_inc_rad_npts(0), spt_inc_azm_npts(0), spt_inc_iehwgd(0), spt_inc_theta_c(0), 
-				zdt(eZDT_Last), zdp(0), lambda(0), g2_inner(0), g2_outer(0), ngxs(0), ngys(0), dgxs(0), dgys(0), g2_maxs(0), 
+				zdt(ezdt_last), zdp(0), lambda(0), g2_inner(0), g2_outer(0), ngxs(0), ngys(0), dgxs(0), dgys(0), g2_maxs(0), 
 				c_c_10(0), c_c_12(0), c_c_21(0), c_c_23(0), c_c_30(0), c_c_32(0), c_c_34(0), c_c_41(0), 
 				c_c_43(0), c_c_45(0), c_c_50(0), c_c_52(0), c_c_54(0), c_c_56(0) {}
 
@@ -421,15 +421,15 @@
 			{
 				switch(zdt)
 				{
-					case eZDT_First:
+					case ezdt_first:
 					{
 						return z_min;
 					}
-					case eZDT_Middle:
+					case ezdt_middle:
 					{
 						return T(0.5)*(z_min + z_max);
 					}
-					case eZDT_Last:
+					case ezdt_last:
 					{
 						return z_max;
 					}
@@ -442,22 +442,22 @@
 
 			dt_bool is_zdt_First() const 
 			{
-				return zdt == eZDT_First;
+				return zdt == ezdt_first;
 			}
 
 			dt_bool is_zdt_Middle() const 
 			{
-				return zdt == eZDT_Middle;
+				return zdt == ezdt_middle;
 			}
 
 			dt_bool is_zdt_Last() const 
 			{
-				return zdt == eZDT_Last;
+				return zdt == ezdt_last;
 			}
 
 			dt_bool is_zdt_user_def() const 
 			{
-				return zdt == eZDT_user_def;
+				return zdt == ezdt_user_def;
 			}
 
 			T gxs(const dt_int32& ix) const 

@@ -36,7 +36,7 @@ void mex_run(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[
 	const auto bs = mex_get_r_3d<T>(prhs[5]);
 	const auto d_min = mex_get_num<T>(prhs[6]);
 	const auto rho = mex_get_num<T>(prhs[7]);
-	const auto spec_lay_typ = (nrhs>8)?mex_get_enum<mt::eSpec_Lay_Typ>(prhs[8]):mt::eSLT_Top;
+	const auto spec_lay_typ = (nrhs>8)?mex_get_enum<mt::eSpec_Lay_Typ>(prhs[8]):mt::eslt_top;
 	const dt_int32 seed = (nrhs>9)?mex_get_num<dt_int32>(prhs[9]):300183;
 
 	/***************************************************************************************/

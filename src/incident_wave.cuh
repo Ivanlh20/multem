@@ -63,12 +63,12 @@
 				{
 					switch(in_multem->iw_type)
 					{
-						case eIWT_Plane_Wave:
+						case eiwt_plane_wave:
 						{
 							mt::fill(*stream, psi, T_c(1.0, 0.0));
 						}
 						break;
-						case eIWT_Convergent_Wave:
+						case eiwt_convergent_wave:
 						{
 							auto f_0 = in_multem->cond_lens.c_10;
 							auto f_s = f_0 - (in_multem->cond_lens.zero_defocus_plane-z_init);
@@ -87,7 +87,7 @@
 							in_multem->cond_lens.set_defocus(f_0);
 						}
 						break;
-						case eIWT_user_def_Wave:
+						case eiwt_user_def_Wave:
 						{
 							// we need to include defocus
 							auto f_s = -(in_multem->cond_lens.zero_defocus_plane-z_init);
@@ -108,7 +108,7 @@
 					Vctr<T_c, Dev> psi(in_multem->grid_2d.size());
 					this->operator()(psi, in_multem->gu_0(), in_multem->beam_pos_i);
 
-					if (space == eS_Reciprocal)
+					if (space == esp_fourier)
 					{
 						fft_2d->forward(psi);
 						mt::fcn_scale(*stream, in_multem->grid_2d.isize_r(), psi);
