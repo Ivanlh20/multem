@@ -57,7 +57,6 @@ src/input_multislice.cuh
 src/input_tomography.cuh
 src/output_multem.hpp
 src/peak_finding.cuh
-src/pn_fact.hpp
 src/projected_potential.cuh
 src/transmission_fcn.cuh
 src/wave_function.cuh
@@ -259,6 +258,7 @@ matlab_functions/ilm_plot_ellipse.m
 matlab_functions/ilm_plot_rectangle.m
 matlab_functions/ilm_plot_vectors_3d.m
 matlab_functions/ilm_pn_border.m
+matlab_functions/ilm_pn_fact.m
 matlab_functions/ilm_polyfit_w.m
 matlab_functions/ilm_proj_cube.m
 matlab_functions/ilm_propagator.m
