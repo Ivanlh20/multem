@@ -21,7 +21,6 @@
 #include "const_enum.cuh"
 #include "types_mt.cuh"
 #include "particles.cuh"
-#include "amorp_build.hpp"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
