@@ -406,7 +406,7 @@
 
 		enum eRot_Point_Typ
 		{
-			erpt_geometric_ctr = 1, erpt_user_def = 2
+			erpt_none = 0, erpt_geometric_ctr = 1, erpt_user_def = 2
 		};
 
 		/* Real or Fourier space */
@@ -496,6 +496,28 @@
 			eqt_laguerre = 19, eqt_hermite = 20, eqt_exponential = 21, 
 			eqt_rational = 22
 		};
+	}
+	
+	/* constant -  enumeration comparison */
+	namespace mt
+	{
+		inline
+		dt_bool is_rot_pt_none(const eRot_Point_Typ &type)
+		{
+			return type == mt::erpt_none;
+		}
+
+		inline
+		dt_bool is_rot_pt_geometric_ctr(const eRot_Point_Typ &type)
+		{
+			return type == mt::erpt_geometric_ctr;
+		}		
+		
+		inline
+		dt_bool is_rot_pt_user_def(const eRot_Point_Typ &type)
+		{
+			return type == mt::erpt_user_def;
+		}
 	}
 
 	/* R_xd */

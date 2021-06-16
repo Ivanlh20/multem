@@ -519,27 +519,31 @@
 		template <class T>
 		struct Rot_Par
 		{
-			T theta;		// angle
-			R_3d<T> u0;		// unitary vector			
-			eRot_Point_Typ center_type;		// 1: geometric center, 2: User define		
-			R_3d<T> center_p;		// rotation point
+			T theta;						// angle
+			R_3d<T> u_0;					// unitary vector			
+			eRot_Point_Typ ctr_type;		// 1: geometric center, 2: User define		
+			R_3d<T> ctr_p;					// rotation point
 
-			Rot_Par(): theta(0), u0(0, 0, 1), 
-			center_type(erpt_geometric_ctr), center_p(1, 0, 0) {}
+			Rot_Par(): theta(0), u_0(0, 0, 1), ctr_type(erpt_geometric_ctr), ctr_p(1, 0, 0) {}
 
 			void validate_parameter()
 			{
 				u0.normalize();
 			}
 
-			dt_bool is_geometric_center() const
+			dt_bool is_rot_pt_none() const
 			{
-				return center_type == erpt_geometric_ctr;
+				return mt::is_rot_pt_none(center_type);
 			}
 
-			dt_bool is_user_define() const
+			dt_bool is_rot_pt_geometric_ctr() const
 			{
-				return center_type == erpt_user_def;
+				return  mt::is_rot_pt_geometric_ctr(center_type);
+			}
+
+			dt_bool is_rot_pt_user_def() const
+			{
+				return  mt::is_rot_pt_user_def(center_type);
 			}
 
 			dt_bool is_rot_active() const

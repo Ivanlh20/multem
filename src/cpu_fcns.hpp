@@ -377,7 +377,7 @@
 					pstream->stream_mutex.unlock();
 				};
 
-				pstream->exec_xd_fcn<edim_1>(mx_i.size(), thr_sum);
+				pstream->exec_xd_fcn<edim_1>(mx_i.size_32(), thr_sum);
 			}
 
 			return sum_total;
@@ -407,7 +407,7 @@
 					pstream->stream_mutex.unlock();
 				};
 
-				pstream->exec_xd_fcn<edim_1>(mx_i.size(), thr_sum_norm_2);
+				pstream->exec_xd_fcn<edim_1>(mx_i.size_32(), thr_sum_norm_2);
 			}
 
 			return sum_total;
@@ -438,7 +438,7 @@
 					pstream->stream_mutex.unlock();
 				};
 
-				pstream->exec_xd_fcn<edim_1>(mx_i.size(), thr_sum_norm_2_sft);
+				pstream->exec_xd_fcn<edim_1>(mx_i.size_32(), thr_sum_norm_2_sft);
 			}
 
 			return sum_total;
@@ -468,7 +468,7 @@
 					pstream->stream_mutex.unlock();
 				};
 
-				pstream->exec_xd_fcn<edim_1>(mx_i.size(), thr_sum_max_real);
+				pstream->exec_xd_fcn<edim_1>(mx_i.size_32(), thr_sum_max_real);
 			}
 
 			return sum_total;
@@ -498,7 +498,7 @@
 					pstream->stream_mutex.unlock();
 				};
 
-				pstream->exec_xd_fcn<edim_1>(mx_i.size(), thr_sum_abs_real);
+				pstream->exec_xd_fcn<edim_1>(mx_i.size_32(), thr_sum_abs_real);
 			}
 
 			return sum_total;
@@ -528,7 +528,7 @@
 					pstream->stream_mutex.unlock();
 				};
 
-				pstream->exec_xd_fcn<edim_1>(mx_i.size(), thr_sum_abs);
+				pstream->exec_xd_fcn<edim_1>(mx_i.size_32(), thr_sum_abs);
 			}
 
 			return sum_total;
@@ -559,7 +559,7 @@
 					pstream->stream_mutex.unlock();
 				};
 
-				pstream->exec_xd_fcn<edim_1>(mx_i.size(), thr_sum_abs_sft);
+				pstream->exec_xd_fcn<edim_1>(mx_i.size_32(), thr_sum_abs_sft);
 			}
 
 			return sum_total;

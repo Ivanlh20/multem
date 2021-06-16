@@ -3031,7 +3031,7 @@
 				void set_ptc(const pVctr_cpu_64<U>& ptc, const R_3d<U>& bs, dt_bool pbc_xy = false, dt_bool b_statistic = true)
 				{
 					clear();
-					cols_used = ptc.s1();
+					cols_used = ptc.s1_32();
 					reserve(ptc.size());
 
 					mt::ptc_detail::set_ptc_pbc_xy(ptc, 0, bs, pbc_xy, b_statistic, *this);
@@ -3171,17 +3171,17 @@
 
 					occ_lim.x = c_dflt_occ;
 					occ_lim.y = c_dflt_occ;
-					if (cols_used>4)
+					if (cols_used>5)
 						mt::fcn_minmax_element(occ, occ_lim.x, occ_lim.y);
 
 					region_lim.x = c_dflt_region;
 					region_lim.y = c_dflt_region;
-					if (cols_used>4)
+					if (cols_used>6)
 						mt::fcn_minmax_element(region, region_lim.x, region_lim.y);
 
 					charge_lim.x = c_dflt_charge;
 					charge_lim.y = c_dflt_charge;
-					if (cols_used>4)
+					if (cols_used>7)
 						mt::fcn_minmax_element(region, charge_lim.x, charge_lim.y);
 
 					this->bs.z = ::fmax(this->sz.z, this->bs.z);

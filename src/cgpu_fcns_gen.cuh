@@ -178,7 +178,7 @@
 		CGPU_EXEC
 		T fcn_div(const T& x, const U& y)
 		{
-			return (fcn_is_zero(y))?T(0): x/static_cast<T>(y);
+			return (fcn_is_zero(y))?T(0):x/static_cast<T>(y);
 		}
 
 		template <class T>

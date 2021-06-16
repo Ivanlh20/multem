@@ -779,7 +779,7 @@
 		}
 		else
 		{
-			return {T(0), T(0)};
+			return r_0;
 		}
 	}
 
@@ -793,7 +793,7 @@
 		}
 		else
 		{
-			return {T(0), T(0), T(0)};
+			return r_0;
 		}
 	}
 

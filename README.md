@@ -14,7 +14,7 @@ The Matlab interface is the recommended way for researchers.
 
 ## Remarks
 
-In order to use the GPU capability of MULTEM, you need a Nvidia Graphic card with **compute capability greater than 2.0** and **CUDA 10.0** installed in your operating system. You can check the compute capability of your graphic card using the following nvidia website: https://developer.nvidia.com/cuda-gpus.
+In order to use the GPU capability of MULTEM, you need a Nvidia Graphic card with **compute capability greater than 2.0** and **CUDA 11.0** installed in your operating system. You can check the compute capability of your graphic card using the following nvidia website: https://developer.nvidia.com/cuda-gpus.
 
 ### Using precompiled GUI interface
 
@@ -35,7 +35,7 @@ The precompiled mexfiles are only available for Windows operating system and Ubu
 
 ### Building MULTEM for Matlab
 
-The following steps work using Matlab 2020b and CUDA 10.0. It assumes that Visual studio 2017 community, g++7.5 or Clang(Xcode 10.x) compiler is installed in your operating system. Additionally, Multem also requires fftw3, blas and lapack libraries.
+The following steps work using Matlab 2020b and CUDA 11.0. It assumes that Visual studio 2017 community, g++7.5 or Clang(Xcode 10.x) compiler is installed in your operating system. Additionally, Multem also requires fftw3, blas and lapack libraries.
 
 - Firstly, a C++ compiler must be set for Matlab by executing the following comand: `mex -setup cpp`. Be aware that Matlab 2020b only supports the above compilers.
 - Then add the following folders to the Matlab path: crystalline_materials, matlab_functions and mex_bin.
@@ -50,8 +50,7 @@ The following steps work using Matlab 2020b and CUDA 10.0. It assumes that Visua
   **for Windows:**
   
   	- Verify the installation of Visual studio 2017 community.
-  	- Verify the installation of Cuda 10.0 (https://developer.nvidia.com/cuda-downloads).
-    - Replace the Thrust library folder in location: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0\include\thrust
+  	- Verify the installation of Cuda 11.0 (https://developer.nvidia.com/cuda-downloads).
   	
   **for Linux:**
   
@@ -75,7 +74,7 @@ The following steps work using Matlab 2020b and CUDA 10.0. It assumes that Visua
 
     - Replace the Thrust library folder in location: /usr/local/cuda/include/thrust
     
-- Verify the installation path of cuda 10.0, fftw3, blas and lapack. Their installation paths should be specified in the [ilm_mex.m](./matlab_functions/ilm_mex.m).
+- Verify the installation path of cuda 11.0, fftw3, blas and lapack. Their installation paths should be specified in the [ilm_mex.m](./matlab_functions/ilm_mex.m).
 
 **Please cite MULTEM in your publications if it helps your research:**
 ```bibtex
