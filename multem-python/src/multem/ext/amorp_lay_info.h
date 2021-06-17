@@ -33,7 +33,6 @@ namespace pybind11 { namespace detail {
   /**
    * Type cast a mt::Amorp_Lay_Info<T> object to a tuple
    */
-  template <>
   template <typename T>
   class type_caster<mt::Amorp_Lay_Info<T>> {
   public:

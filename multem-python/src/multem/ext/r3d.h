@@ -32,7 +32,6 @@ namespace pybind11 { namespace detail {
   /**
    * Type cast a mt::r3d<T> object to a tuple
    */
-  template <>
   template <typename T>
   class type_caster<mt::r3d<T>> {
   public:

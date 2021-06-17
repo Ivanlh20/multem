@@ -21,6 +21,7 @@
 #ifndef MULTEM_PYTHON_ATOM_DATA_H
 #define MULTEM_PYTHON_ATOM_DATA_H
 
+#include <vector>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
@@ -68,7 +69,6 @@ namespace pybind11 { namespace detail {
   /**
    * Define wrapper function for the AtomList class
    */
-  template <>
   template <typename T>
   struct Helpers<std::vector<mt::Atom<T>>> {
     /**
@@ -97,7 +97,6 @@ namespace pybind11 { namespace detail {
   /**
    * Define wrapper function for the mt::Atom_Data class
    */
-  template <>
   template <typename T>
   struct Helpers<mt::Atom_Data<T>> {
     /**
@@ -206,7 +205,6 @@ namespace pybind11 { namespace detail {
   /**
    * Type cast a mt::Atom object to a tuple
    */
-  template <>
   template <typename T>
   class type_caster<mt::Atom<T>> {
   public:

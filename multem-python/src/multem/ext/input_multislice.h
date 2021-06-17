@@ -46,7 +46,6 @@ namespace pybind11 { namespace detail {
   /**
    * Define helper function for the mt::Input_Multislice class
    */
-  template <>
   template <typename T>
   struct Helpers<mt::Input_Multislice<T>> {
     /**

@@ -36,7 +36,6 @@ namespace pybind11 { namespace detail {
   /**
    * Define wrapper function for the mt::Slice<T> class
    */
-  template <>
   template <typename T>
   struct Helpers<mt::Slice<T>> {
     /**
@@ -66,7 +65,6 @@ namespace pybind11 { namespace detail {
   /**
    * Define wrapper function for the SliceList class
    */
-  template <>
   template <typename T>
   struct Helpers<std::vector<mt::Slice<T>>> {
     /**
