@@ -32,7 +32,6 @@ namespace pybind11 { namespace detail {
   /**
    * Define helper function for the multem::Det_Int class
    */
-  template <>
   template <typename T>
   struct Helpers<mt::Det_Int<T>> {
     /**
@@ -55,7 +54,6 @@ namespace pybind11 { namespace detail {
   /**
    * Define helper function for the multem::Output_Multislice class
    */
-  template <>
   template <typename T>
   struct Helpers<mt::Output_Multislice<T>> {
     /**

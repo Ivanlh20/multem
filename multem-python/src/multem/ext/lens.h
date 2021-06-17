@@ -32,7 +32,6 @@ namespace pybind11 { namespace detail {
   /**
    * Define wrapper function for the mt::Lens class
    */
-  template <>
   template <typename T>
   struct Helpers<mt::Lens<T>> {
     /**

@@ -32,7 +32,6 @@ namespace pybind11 { namespace detail {
   /**
    * Define wrapper function for the mt::Grid_2d_ class
    */
-  template <>
   template <typename T>
   struct Helpers<mt::Grid_2d<T>> {
     /**
