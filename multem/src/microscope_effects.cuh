@@ -114,7 +114,7 @@ namespace mt
 				}
 				mt::fft2_shift(*stream, input_multislice->grid_2d, psi);
 
-				mt::copy_to_host(output_multislice.data().stream, m2psi_tot, output_multislice.data().m2psi_tot[0]);
+				mt::copy_to_host(output_multislice.data().stream, psi, output_multislice.data().m2psi_coh[0]);
 			}
 
 		private:
