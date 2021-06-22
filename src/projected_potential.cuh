@@ -70,7 +70,7 @@ namespace mt
 						stream_data.v[i].resize(nv);
 					}
 
-					if (this->in_multem->is_subslicing())
+					if (this->in_multem->is_spec_slic_dz_sub())
 					{
 						stream_data.c0[i].resize(c_nR);
 						stream_data.c1[i].resize(c_nR);
@@ -250,7 +250,7 @@ namespace mt
 						atom_Vp_h[istm].v = raw_pointer_cast(stream_data.v[istm].data());
 					}
 
-					if (this->in_multem->is_subslicing())
+					if (this->in_multem->is_spec_slic_dz_sub())
 					{
 						atom_Vp_h[istm].z0h = 0.5*(z_0 - this->atoms.z[iatoms]);
 						atom_Vp_h[istm].zeh = 0.5*(z_e - this->atoms.z[iatoms]);
@@ -276,7 +276,7 @@ namespace mt
 			
 			void get_cubic_poly_coef_Vz(Stream<Dev>& stream, Vctr<Ptc_pVp<T>, edev_cpu>& atom_Vp)
 			{
-				if (this->in_multem->is_subslicing())
+				if (this->in_multem->is_spec_slic_dz_sub())
 				{
 					mt::linear_Vz(stream, this->in_multem->atomic_pot_parm_typ, qz, atom_Vp);
 					mt::fcn_vd_2_coef_poly3(stream, atom_Vp);

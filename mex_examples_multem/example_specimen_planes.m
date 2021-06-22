@@ -6,16 +6,16 @@ addpath(['..', filesep, 'mex_bin'])
 
 input_multem = ilm_dflt_input_multem(); % Load default values;
 
-input_multem.atomic_vib_model = 1; % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
-input_multem.interaction_model = 1; % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
-input_multem.pot_slic_typ = 1; % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
+input_multem.atomic_vib_model = 1; % eavm_still_atom = 1, eavm_absorptive_pot = 2, eavm_frozen_phonon = 3, eavm_user_def = 4
+input_multem.interaction_model = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
+input_multem.spec_slic(1).typ = 1; % esst_planes = 1, esst_dz_proj = 2, esst_planes_sub = 3, esst_dz_sub = 4, esst_auto = 5
 input_multem.atomic_vib_dim = [true, true, false];
 input_multem.atomic_vib_seed = 300183;
 input_multem.atomic_vib_nconf = 1;
 
 input_multem.spec_rot_theta = 0; % final angle
 input_multem.spec_rot_u_0 = [1 0 0]; % unitary vector			
-input_multem.spec_rot_ctr_type = 1; % 1: geometric center, 2: User define		
+input_multem.spec_rot_ctr_typ = 1; % 1: geometric center, 2: User define		
 input_multem.spec_rot_ctr_p = [0 0 0]; % rotation point
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -23,9 +23,9 @@ na = 6; nb = 6;nc = 10; ncu = 2; rmsd_3d = 0.15;
 
 [input_multem.spec_atoms, input_multem.spec_bs_x...
 , input_multem.spec_bs_y, input_multem.spec_bs_z...
-, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
+, a, b, c, input_multem.spec_slic(1).dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
 
-input_multem.spec_dz = 2;
+input_multem.spec_slic(1).dz = 2;
 
 disp([min(input_multem.spec_atoms(:, 4)), max(input_multem.spec_atoms(:, 4))])
 

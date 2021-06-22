@@ -1,4 +1,4 @@
-% Specimen creation
+% specimen creation
 % Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear;clc;

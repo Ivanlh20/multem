@@ -41,7 +41,7 @@ void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_
 	in_multem.simulation_type = mt::eemst_pprs;
 	
 	/***************************************************************************************/
-	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Model>(mex_in_multem, "interaction_model");
+	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Mod>(mex_in_multem, "interaction_model");
 	in_multem.atomic_pot_parm_typ = mex_get_num_from_field<mt::eAtomic_Pot_Parm_Typ>(mex_in_multem, "atomic_pot_parm_typ");
 
 	/************** Electron-Atomic_Vib interaction model **************/
@@ -66,7 +66,7 @@ void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_
 	mex_read_rot_parm<T_r>(mex_in_multem, in_multem.rot_par);
 
 	/************************ Potential slicing ************************/
-	in_multem.pot_slic_typ = mex_get_num_from_field<mt::ePot_Slic_Typ>(mex_in_multem, "pot_slic_typ");
+	in_multem.pot_slic_typ = mex_get_num_from_field<mt::eSpec_Slic_Typ>(mex_in_multem, "pot_slic_typ");
 
 	/************************** xy sampling ****************************/
 	auto nx = mex_get_num_from_field<dt_int32>(mex_in_multem, "nx");

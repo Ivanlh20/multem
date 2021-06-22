@@ -1,5 +1,5 @@
 function [] = ilm_show_slicing(input_multem, inFP, nf)
-    [Atoms, Slice] = getSliceSpecimen(input_multem.spec_atoms, input_multem.spec_bs_x, input_multem.spec_bs_y, input_multem.spec_dz, inFP, input_multem.DimFP, input_multem.SeedFP);
+    [Atoms, Slice] = getSliceSpecimen(input_multem.spec_atoms, input_multem.spec_bs_x, input_multem.spec_bs_y, input_multem.spec_slic(1).dz, inFP, input_multem.DimFP, input_multem.SeedFP);
     S = getAtomTypes(input_multem.pot_parm_typ);
     z0 = min(Atoms(:, 3))-S(Atoms(1, 4)).Rmax;
     ze = max(Atoms(:, 3))+S(Atoms(end, 4)).Rmax;

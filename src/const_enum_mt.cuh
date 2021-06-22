@@ -54,7 +54,7 @@
 		};
 
 		/*************** electron specimen interaction model ******************/
-		enum eElec_Spec_Int_Model
+		enum eElec_Spec_Int_Mod
 		{
 			eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
 		};
@@ -71,10 +71,10 @@
 			estt_whole_spec = 1, estt_through_thick = 2, estt_through_slices = 3
 		};
 
-		/******************** potential slicing type *************************/
-		enum ePot_Slic_Typ
+		/******************** specimen slicing type *************************/
+		enum eSpec_Slic_Typ
 		{
-			epst_planes = 1, epst_dz_Proj = 2, epst_dz_Sub = 3, epst_auto = 4
+			esst_planes_proj = 1, esst_dz_proj = 2, esst_planes_sub = 3, esst_dz_sub = 4, esst_auto = 5
 		};
 
 		/********************** feg parameterization *************************/
@@ -491,19 +491,19 @@
 	namespace mt
 	{
 		inline
-		dt_bool is_multislice(const eElec_Spec_Int_Model& int_model)
+		dt_bool is_multislice(const eElec_Spec_Int_Mod& int_model)
 		{
 			return int_model == mt::eesim_multislice;
 		}
 
 		inline
-		dt_bool is_phase_object(const eElec_Spec_Int_Model& int_model)
+		dt_bool is_phase_object(const eElec_Spec_Int_Mod& int_model)
 		{
 			return int_model == mt::eesim_phase_object;
 		}
 
 		inline
-		dt_bool is_weak_phase_object(const eElec_Spec_Int_Model& int_model)
+		dt_bool is_weak_phase_object(const eElec_Spec_Int_Mod& int_model)
 		{
 			return int_model == mt::eesim_weak_phase_object;
 		}
@@ -559,31 +559,31 @@
 		}
 	}
 
-	/* potential slicing type */
+	/* specimen slicing type */
 	namespace mt
 	{
 		inline
-		dt_bool is_slicing_by_planes(const eElec_Spec_Int_Model& int_model, const ePot_Slic_Typ& pot_slic)
+		dt_bool is_spec_slic_by_planes_proj(const eElec_Spec_Int_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
 		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::epst_planes);
+			return mt::is_multislice(int_model) && (pot_slic == mt::esst_planes_proj);
 		}
 
 		inline
-		dt_bool is_slicing_by_dz(const eElec_Spec_Int_Model& int_model, const ePot_Slic_Typ& pot_slic)
+		dt_bool is_spec_slic_by_dz_proj(const eElec_Spec_Int_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
 		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::epst_dz_Proj);
+			return mt::is_multislice(int_model) && (pot_slic == mt::esst_dz_proj);
 		}
 
 		inline
-		dt_bool is_subslicing(const eElec_Spec_Int_Model& int_model, const ePot_Slic_Typ& pot_slic)
+		dt_bool is_spec_slic_dz_sub(const eElec_Spec_Int_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
 		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::epst_dz_Sub);
+			return mt::is_multislice(int_model) && (pot_slic == mt::esst_dz_sub);
 		}
 
 		inline
-		dt_bool is_subslicing_whole_spec(const eElec_Spec_Int_Model& int_model, const ePot_Slic_Typ& pot_slic, const eSim_Thick_Typ& thick_type)
+		dt_bool is_spec_slic_dz_sub_whole_spec(const eElec_Spec_Int_Mod& int_model, const eSpec_Slic_Typ& pot_slic, const eSim_Thick_Typ& thick_type)
 		{
-			return mt::is_subslicing(int_model, pot_slic) && is_sim_whole_spec(thick_type);
+			return mt::is_spec_slic_dz_sub(int_model, pot_slic) && is_sim_whole_spec(thick_type);
 		}
 	}
 

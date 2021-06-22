@@ -532,6 +532,16 @@
 		using R_xd = typename std::conditional<Dim == edim_1, T, R_xtd<T, Dim>>::type;
 	}
 
+	/* pointers functions */
+	namespace mt
+	{
+		template <class T>
+		dt_bool fcn_is_null_ptr(T* ptr) 
+		{ 
+			return atoms==nullptr; 
+		};
+	}
+
 	/* cuda grid and block constants */
 	namespace mt
 	{

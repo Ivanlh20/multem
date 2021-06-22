@@ -1,26 +1,26 @@
-function tfm_check_stem_setup(input_multislice, n_detector)
+function tfm_check_stem_setup(input_multem, n_detector)
     
-    fcn_check_probe(input_multislice);
-    fcn_check_slicing(input_multislice);
-    fcn_check_detector_coverage(input_multislice, n_detector);
+    fcn_check_probe(input_multem);
+    fcn_check_slicing(input_multem);
+    fcn_check_detector_coverage(input_multem, n_detector);
 
-    function fcn_check_probe(input_multislice)
+    function fcn_check_probe(input_multem)
         system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
         system_conf.device = 1;                              % eD_CPU = 1, eD_GPU = 2
         system_conf.cpu_nthread = 1; 
         system_conf.gpu_device = 0;
         
-        input_multislice.iw_type = 2;                       % 2 = convergent beam
-        input_multislice.iw_x = 0.5*input_multislice.spec_lx;
-        input_multislice.iw_y = 0.5*input_multislice.spec_ly;
+        input_multem.iw_type = 2;                       % 2 = convergent beam
+        input_multem.iw_x = 0.5*input_multem.spec_lx;
+        input_multem.iw_y = 0.5*input_multem.spec_ly;
 
-        output_incident_wave = ilc_incident_wave(system_conf, input_multislice); 
+        output_incident_wave = ilc_incident_wave(system_conf, input_multem); 
 
         psi_0 = output_incident_wave.psi_0;
         figure(1); clf
         subplot(1,2,1)
-        imagesc(0:output_incident_wave.dx:(input_multislice.spec_lx),...
-                0:output_incident_wave.dy:(input_multislice.spec_ly),...
+        imagesc(0:output_incident_wave.dx:(input_multem.spec_lx),...
+                0:output_incident_wave.dy:(input_multem.spec_ly),...
                 abs(psi_0).^2);
         title('Probe profile (intensity)');
         axis image;
@@ -28,8 +28,8 @@ function tfm_check_stem_setup(input_multislice, n_detector)
         colormap jet;
         
         subplot(1,2,2)
-        imagesc(0:output_incident_wave.dx:(input_multislice.spec_lx),...
-                0:output_incident_wave.dy:(input_multislice.spec_ly),...
+        imagesc(0:output_incident_wave.dx:(input_multem.spec_lx),...
+                0:output_incident_wave.dy:(input_multem.spec_ly),...
                 angle(psi_0));
         title('Probe profile (Phase)');
         axis image;
@@ -37,10 +37,10 @@ function tfm_check_stem_setup(input_multislice, n_detector)
         colormap jet;
     end
 
-    function fcn_check_slicing(input_multislice)
+    function fcn_check_slicing(input_multem)
 
         % Slicing
-        [atoms, Slice] = ilc_spec_slicing(input_multislice);   
+        [atoms, Slice] = ilc_spec_slicing(input_multem);   
         [nslice, ~] = size(Slice);
 
         figure(2); clf;
@@ -55,15 +55,15 @@ function tfm_check_stem_setup(input_multislice, n_detector)
         ylabel('z');
         xlabel('x');
         axis equal;
-        axis([min(atoms(:, 3)) max(atoms(:, 3)) -5 input_multislice.spec_lz + 5]);
+        axis([min(atoms(:, 3)) max(atoms(:, 3)) -5 input_multem.spec_lz + 5]);
         legend({'Atom positions','Slice boundaries'},'Location','southoutside')
         set(gca,'YDir','reverse')
         
         subplot(1,2,2);
-        plot3(input_multislice.spec_atoms(:,2), input_multislice.spec_atoms(:,3), input_multislice.spec_atoms(:,4),'or');
+        plot3(input_multem.spec_atoms(:,2), input_multem.spec_atoms(:,3), input_multem.spec_atoms(:,4),'or');
         hold on;
-        plot3([input_multislice.scanning_x0; input_multislice.scanning_xe; input_multislice.scanning_xe; input_multislice.scanning_x0;input_multislice.scanning_x0],...
-              [input_multislice.scanning_y0; input_multislice.scanning_y0; input_multislice.scanning_ye; input_multislice.scanning_ye;input_multislice.scanning_y0],...
+        plot3([input_multem.scanning_x0; input_multem.scanning_xe; input_multem.scanning_xe; input_multem.scanning_x0;input_multem.scanning_x0],...
+              [input_multem.scanning_y0; input_multem.scanning_y0; input_multem.scanning_ye; input_multem.scanning_ye;input_multem.scanning_y0],...
               [0; 0; 0; 0; 0],'-k');
         hold off;
         axis equal;
@@ -77,15 +77,15 @@ function tfm_check_stem_setup(input_multislice, n_detector)
         view([0 0 1])
     end
 
-    function fcn_check_detector_coverage(input_multislice, detector)
+    function fcn_check_detector_coverage(input_multem, detector)
 
-        E_0 = input_multislice.E_0;
-        nx = input_multislice.nx;
-        ny = input_multislice.ny;
-        lx = input_multislice.spec_lx;
-        ly = input_multislice.spec_ly;
-        ri_detector = input_multislice.detector.cir(detector).inner_ang;
-        ro_detector = input_multislice.detector.cir(detector).outer_ang;
+        E_0 = input_multem.E_0;
+        nx = input_multem.nx;
+        ny = input_multem.ny;
+        lx = input_multem.spec_lx;
+        ly = input_multem.spec_ly;
+        ri_detector = input_multem.detector.cir(detector).inner_ang;
+        ro_detector = input_multem.detector.cir(detector).outer_ang;
 
         clc;    
         gmax(1)=nx/(2*lx); gmax(2) = ny/(2*ly);

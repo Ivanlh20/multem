@@ -2,29 +2,29 @@ clear;clc;
 
 input_multem = ilm_dflt_input_multem(); % Load default values;
 
-input_multem.atomic_vib_model = 1; % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
-input_multem.interaction_model = 1; % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
-input_multem.pot_slic_typ = 3; % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
+input_multem.atomic_vib_model = 1; % eavm_still_atom = 1, eavm_absorptive_pot = 2, eavm_frozen_phonon = 3, eavm_user_def = 4
+input_multem.interaction_model = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
+input_multem.spec_slic(1).typ = 3; % esst_planes = 1, esst_dz_proj = 2, esst_planes_sub = 3, esst_dz_sub = 4, esst_auto = 5
 input_multem.atomic_vib_dim = [true, true, false];
 input_multem.atomic_vib_seed = 300183;
 input_multem.atomic_vib_nconf = 1;
 
 input_multem.spec_rot_theta = 0; % final angle
 input_multem.spec_rot_u_0 = [0 1 1]; % unitary vector			
-input_multem.spec_rot_ctr_type = 1; % 1: geometric center, 2: User define		
+input_multem.spec_rot_ctr_typ = 1; % 1: geometric center, 2: User define		
 input_multem.spec_rot_ctr_p = [0 0 0]; % rotation point
 
 input_multem.spec_bs_x = 10;
 input_multem.spec_bs_y = 10;
 input_multem.spec_bs_z = 10;
-input_multem.spec_dz = 0.5;
+input_multem.spec_slic(1).dz = 0.5;
 
 occ = 1;
 region = 0;
 charge = 0;
 input_multem.spec_atoms = [29, 2, 2, 0.0, 0.8, 1.0, charge;29, 6, 2, 0.0, 0.8, 1.0, charge];
 [input_multem.spec_atoms, input_multem.spec_bs_x, input_multem.spec_bs_y, lz] = graphene(1, 1.42, sqrt(0.5/(8*pi^2)));
-input_multem.spec_dz = 0.5;
+input_multem.spec_slic(1).dz = 0.5;
 
 % get spec slicing
 tic;

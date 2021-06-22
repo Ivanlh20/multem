@@ -515,7 +515,7 @@
 		void fcn_kh_sum(T& sum, T val, T& error)
 		{
 			val = val - error;
-			T t = sum + val;
+			const auto t = sum + val;
 			error = (t-sum) - val;
 			sum = t;
 		}

@@ -1636,7 +1636,7 @@
 	{
 		namespace cgpu_detail_mt
 		{
-			template <eElec_Spec_Int_Model esim, class T>
+			template <eElec_Spec_Int_Mod esim, class T>
 			CGPU_EXEC_INL 
 			void fcn_trans_fcn(const dt_int32& ix, const iGrid_1d& igrid, Ctpr<T>* vzp_i, const T& w, complex<T>* tfcn_o)
 			{

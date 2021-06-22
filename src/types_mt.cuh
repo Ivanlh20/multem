@@ -270,25 +270,6 @@
 		template <class T>
 		using Vctr_Spec_Lay_Info = Vctr_std<Spec_Lay_Info<T>>;
 
-		/************************* slice thickness ***************************/
-		template <class T>
-		struct Slice
-		{
-			Slice(): z_0(0), z_e(0), z_int_0(0), 
-			z_int_e(0), iatom_0(1), iatom_e(0), ithk(-1) {}
-
-			T z_0;					// Initial z-position
-			T z_e;					// Final z-position
-			T z_int_0;				// Initial z-position
-			T z_int_e;				// Final z-position
-			dt_int32 iatom_0;		// Index to initial z-position
-			dt_int32 iatom_e;		// Index to final z-position
-			dt_int32 ithk;			// thick index
-
-			T sli_thk() const { return fabs(z_e-z_0); }
-
-			T z_m() const { return 0.5*(z_e+z_0); }
-		};
 
 		/**************************** thickness ******************************/
 		template <class T>

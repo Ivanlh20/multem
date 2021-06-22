@@ -13,12 +13,12 @@ system_conf.gpu_device = 0;
 
 % eTEMST_EWFS=51, eTEMST_EWRS=52
 input_multem.em_sim_typ = 52;
-input_multem.interaction_model = 1; % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
-input_multem.pot_slic_typ = 1; % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
+input_multem.interaction_model = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
+input_multem.spec_slic(1).typ = 1; % esst_planes = 1, esst_dz_proj = 2, esst_planes_sub = 3, esst_dz_sub = 4, esst_auto = 5
 
-input_multem.atomic_pot_parm_typ = 6; % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
+input_multem.atomic_pot_parm_typ = 6; % eappt_doyle_0_4 = 1, eappt_peng_0_4 = 2, eappt_peng_0_12 = 3, eappt_kirkland_0_12 = 4, eappt_weickenmeier_0_12 = 5, eappt_lobato_0_12 = 6
 
-input_multem.atomic_vib_model = 1; % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+input_multem.atomic_vib_model = 1; % eavm_still_atom = 1, eavm_absorptive_pot = 2, eavm_frozen_phonon = 3, eavm_user_def = 4
 input_multem.atomic_vib_dim = [true, true, false]; % phonon dimensions
 input_multem.atomic_vib_seed = 300183; % Random seed(frozen phonon)
 input_multem.atomic_vib_sgl_conf = 0; % 1: true, 0:false (extract single configuration)
@@ -37,7 +37,7 @@ na = 8;nb = 8;nc = 3;ncu = 2;rmsd_3d = 0.085;
 
 [input_multem.spec_atoms, input_multem.spec_bs_x...
 , input_multem.spec_bs_y, input_multem.spec_bs_z...
-, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
+, a, b, c, input_multem.spec_slic(1).dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
 
 input_multem.thick_typ = 1; % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
 input_multem.thick = 0:2*c:1000; % Array of thickes

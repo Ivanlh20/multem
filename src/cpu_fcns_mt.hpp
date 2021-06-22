@@ -581,7 +581,7 @@
 	{
 		template <class T, class TVctr_1, class TVctr_2>
 		enable_if_vctr_cpu_and_vctr_cpu<TVctr_1, TVctr_2, void>
-		transmission_fcn(eElec_Spec_Int_Model esim, TVctr_1& vzp_i, T w, TVctr_2& tfcn_o, Stream_cpu* pstream = nullptr)
+		transmission_fcn(eElec_Spec_Int_Mod esim, TVctr_1& vzp_i, T w, TVctr_2& tfcn_o, Stream_cpu* pstream = nullptr)
 		{	
 			using U = Value_type<TVctr_2>;
 

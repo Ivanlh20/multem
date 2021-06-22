@@ -40,7 +40,7 @@
 
 		/**************************** Input multem *****************************/
 		template <class T>
-		struct Slicing;
+		struct Spec_Slic;
 
 		template <class T>
 		class In_Multem
@@ -50,7 +50,7 @@
 
 			System_Config system_config;					// System information
 
-			eElec_Spec_Int_Model interaction_model;			// eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
+			eElec_Spec_Int_Mod interaction_model;			// eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
 			eAtomic_Pot_Parm_Typ atomic_pot_parm_typ;		// potential type: 1: doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 
 			Atomic_Vib atomic_vib;							// phonon parameters
@@ -63,7 +63,7 @@
 			eSim_Thick_Typ thick_type;						// estt_whole_spec = 1, estt_through_thick = 2, estt_through_slices = 3
 			Vctr_cpu<T> thick;								// Array of thicknesses 
 
-			ePot_Slic_Typ pot_slic_typ;						// epst_planes = 1, epst_dz_Proj = 2, epst_dz_Sub = 3, epst_auto = 4
+			eSpec_Slic_Typ pot_slic_typ;						// esst_planes_proj = 1, esst_dz_proj = 2, esst_dz_sub = 3, esst_auto = 4
 
 			Grid_2d<T> grid_2d;								// grid information
 
@@ -112,7 +112,7 @@
 			dt_bool dp_Shift;								// Shift diffraction pattern
 
 			In_Multem():simulation_type(eemst_ewrs), interaction_model(eesim_multislice), 
-				pot_slic_typ(epst_planes), atomic_pot_parm_typ(eappt_lobato_0_12), illumination_model(eim_partial_coherent), 
+				pot_slic_typ(esst_planes_proj), atomic_pot_parm_typ(eappt_lobato_0_12), illumination_model(eim_partial_coherent), 
 				temporal_spatial_incoh(etsi_temporal_spatial), thick_type(estt_whole_spec), 
 				operation_mode(eOM_Normal), slice_storage(false), reverse_multislice(false), 
 				mul_sign(1), E_0(300), lambda(0), theta(0), phi(0), nrot(1), Vrl(c_vr_min), nR(c_nR), iw_type(eiwt_plane_wave), 
@@ -282,7 +282,7 @@
 				if (!is_multislice())
 				{
 					islice = 0;
-					pot_slic_typ = epst_planes;
+					pot_slic_typ = esst_planes_proj;
 					if (is_sim_through_slices())
 					{
 						thick_type = estt_through_thick;
@@ -290,12 +290,12 @@
 					slice_storage = slice_storage || !is_sim_whole_spec();
 				}
 
-				if (is_subslicing() && is_sim_through_thick())
+				if (is_spec_slic_dz_sub() && is_sim_through_thick())
 				{
 					thick_type = estt_whole_spec;
 				}
 
-				if (!is_subslicing())
+				if (!is_spec_slic_dz_sub())
 				{
 					atomic_vib.dim_z = false;
 				}
@@ -317,7 +317,7 @@
 				}
 
 				// match slicing with the require thickness
-				Slicing<T> slicing;
+				Spec_Slic<T> slicing;
 				slicing.match_thickness(pot_slic_typ, atoms, thick_type, thick);
 
 				// remove atoms outside the thickness range
@@ -597,24 +597,24 @@
 			}
 
 			/***************************************************************************************/
-			dt_bool is_slicing_by_planes() const
+			dt_bool is_spec_slic_by_planes_proj() const
 			{
-				return mt::is_slicing_by_planes(interaction_model, pot_slic_typ);
+				return mt::is_spec_slic_by_planes_proj(interaction_model, pot_slic_typ);
 			}
 
-			dt_bool is_slicing_by_dz() const
+			dt_bool is_spec_slic_by_dz_proj() const
 			{
-				return mt::is_slicing_by_dz(interaction_model, pot_slic_typ);
+				return mt::is_spec_slic_by_dz_proj(interaction_model, pot_slic_typ);
 			}
 
-			dt_bool is_subslicing() const
+			dt_bool is_spec_slic_dz_sub() const
 			{
-				return mt::is_subslicing(interaction_model, pot_slic_typ);
+				return mt::is_spec_slic_dz_sub(interaction_model, pot_slic_typ);
 			}
 
-			dt_bool is_subslicing_whole_spec() const
+			dt_bool is_spec_slic_dz_sub_whole_spec() const
 			{
-				return mt::is_subslicing_whole_spec(interaction_model, pot_slic_typ, thick_type);
+				return mt::is_spec_slic_dz_sub_whole_spec(interaction_model, pot_slic_typ, thick_type);
 			}
 
 			/***************************************************************************************/

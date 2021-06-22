@@ -5,7 +5,7 @@ addpath(['..', filesep, 'mex_bin'])
 
 na = 10; nb = 10; nc = 20; ncu = 2;rmsd_3d = 0.085;
 
-[atoms, lx, ly, lz, a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
+[atoms, lx, ly, lz, a, b, c, input_multem.spec_slic(1).dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
 % ilm_show_xtl(1, atoms)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

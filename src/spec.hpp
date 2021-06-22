@@ -61,7 +61,7 @@ namespace mt
 				slicing.set_in_data(in_multem, &atoms_u, &atoms);
 
 				 /***************************************************************************************/
-				if ((atoms_u.s_z_int < 2.0*in_multem->grid_2d.sli_thk) || ((slicing.z_plane.size() == 1) && in_multem->is_slicing_by_planes()))
+				if ((atoms_u.s_z_int < 2.0*in_multem->grid_2d.sli_thk) || ((slicing.z_plane.size() == 1) && in_multem->is_spec_slic_by_planes_proj()))
 				{
 					in_multem->grid_2d.sli_thk = atoms_u.s_z_int;
 					in_multem->interaction_model = eesim_phase_object;
@@ -138,7 +138,7 @@ namespace mt
 			In_Multem<T> *in_multem;
 
 			Ptc_Atom<T> atoms;		// displaced atoms
-			Slicing<T> slicing;		// slicing procedure
+			Spec_Slic<T> slicing;		// slicing procedure
 			Vctr<Atom_Typ_cpu<T>, edev_cpu> atom_type;		// Atom types
 		private:
 			Randn_3d<T, edev_cpu> rand;
