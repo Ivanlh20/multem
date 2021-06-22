@@ -31,12 +31,12 @@ void set_output_data(const mt::Vctr_cpu<mt::Atomic_Info_cpu<T>>& atomic_info, mx
 	dt_int32 number_of_fields = 8;
 	mwSize dims[2] = {1, atomic_info.size()};
 
-	mxArray *mx_field_coef = nullptr;
+	mxArray* mx_field_coef = nullptr;
 	const char *field_names_Coef[] = {"charge", "feg", "fxg", "pr", "vr", "vzp"};
 	dt_int32 number_of_fields_Coef = 6;
 	mwSize dims_Coef[2] = {1, 1};
 
-	mxArray *mx_field_coef_par = nullptr;
+	mxArray* mx_field_coef_par = nullptr;
 	const char *field_names_coef_par[] = {"cl", "cnl"};
 	dt_int32 number_of_fields_coef_par = 2;
 	mwSize dims_coef_par[2] = {1, 1};
@@ -101,15 +101,15 @@ void set_output_data(const mt::Vctr_cpu<mt::Atomic_Info_cpu<T>>& atomic_info, mx
 
 void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[])
 {
-	auto pot_parm_typ = mex_get_enum<mt::ePot_Parm_Typ>(prhs[0]);
+	auto atomic_pot_parm_typ = mex_get_enum<mt::eAtomic_Pot_Parm_Typ>(prhs[0]);
 
 	mt::Vctr_cpu<mt::Atomic_Info_cpu<dt_float64>> atomic_info(mt::c_n_atom_typ);
-	mt::Atomic_Data atomic_data_mt(pot_parm_typ);
+	mt::Atomic_Data atomic_data_mt(atomic_pot_parm_typ);
 
 	for(auto ik = 0; ik < atomic_info.size(); ik++)
 	{
 		auto Z = ik+1;
-		atomic_info[ik] = atomic_data_mt(Z, pot_parm_typ);
+		atomic_info[ik] = atomic_data_mt(Z, atomic_pot_parm_typ);
 	}
 
 	set_output_data(atomic_info, plhs[0]);

@@ -287,7 +287,7 @@
 					return *this;
 				}
 
-				void validate_parameters()
+				void set_dep_var()
 				{
 					// check precision
 					if (!(is_float32() || is_float64()))

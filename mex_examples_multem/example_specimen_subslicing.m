@@ -2,17 +2,17 @@ clear;clc;
 
 input_multem = ilm_dflt_input_multem(); % Load default values;
 
-input_multem.pn_model = 1; % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+input_multem.atomic_vib_model = 1; % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multem.interaction_model = 1; % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
-input_multem.potential_slicing = 3; % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
-input_multem.pn_dim = 110;
-input_multem.pn_seed = 300183;
-input_multem.pn_nconf = 1;
+input_multem.pot_slic_typ = 3; % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
+input_multem.atomic_vib_dim = [true, true, false];
+input_multem.atomic_vib_seed = 300183;
+input_multem.atomic_vib_nconf = 1;
 
 input_multem.spec_rot_theta = 0; % final angle
-input_multem.spec_rot_u0 = [0 1 1]; % unitary vector			
-input_multem.spec_rot_center_type = 1; % 1: geometric center, 2: User define		
-input_multem.spec_rot_center_p = [0 0 0]; % rotation point
+input_multem.spec_rot_u_0 = [0 1 1]; % unitary vector			
+input_multem.spec_rot_ctr_type = 1; % 1: geometric center, 2: User define		
+input_multem.spec_rot_ctr_p = [0 0 0]; % rotation point
 
 input_multem.spec_bs_x = 10;
 input_multem.spec_bs_y = 10;
@@ -28,14 +28,14 @@ input_multem.spec_dz = 0.5;
 
 % get spec slicing
 tic;
-input_multem.pn_model = 1;
+input_multem.atomic_vib_model = 1;
 [atoms0, Slice0] = ilc_spec_slicing(input_multem);
 toc;
 
 [nslice0, ~] = size(Slice0);
 
 tic;
-input_multem.pn_model = 3;
+input_multem.atomic_vib_model = 3;
 [atoms, Slice] = ilc_spec_slicing(input_multem);
 toc;
 

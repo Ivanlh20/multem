@@ -167,13 +167,13 @@
 				R_3d<T> bs;				// box size
 				R_3d<T> r_0;			// initial position
 				dt_int32 region;		// region
-				eSpec_Lay_Typ type;		// specimen layer type
+				eSpec_Lay_Pos type;		// specimen layer type
 				T sli_thk;				// Slice thickness
 
-				Spec_Lay_Info(): bs(), r_0(), region(c_dflt_region), type(eslt_none), sli_thk(2) {};
+				Spec_Lay_Info(): bs(), r_0(), region(c_dflt_region), type(eslp_none), sli_thk(2) {};
 
 				Spec_Lay_Info(const R_3d<T>& bs, R_3d<T> r_0 = R_3d<T>(), dt_int32 region = c_dflt_region, 
-				eSpec_Lay_Typ type = eslt_none, T sli_thk = 2.0): bs(bs), r_0(r_0), region(region), type(type), sli_thk(sli_thk) {};
+				eSpec_Lay_Pos type = eslp_none, T sli_thk = 2.0): bs(bs), r_0(r_0), region(region), type(type), sli_thk(sli_thk) {};
 
 				Spec_Lay_Info<T>& operator=(Spec_Lay_Info<T> &spec_lay_info)
 				{
@@ -277,13 +277,13 @@
 			Slice(): z_0(0), z_e(0), z_int_0(0), 
 			z_int_e(0), iatom_0(1), iatom_e(0), ithk(-1) {}
 
-			T z_0;		// Initial z-position
-			T z_e;		// Final z-position
-			T z_int_0;		// Initial z-position
-			T z_int_e;		// Final z-position
+			T z_0;					// Initial z-position
+			T z_e;					// Final z-position
+			T z_int_0;				// Initial z-position
+			T z_int_e;				// Final z-position
 			dt_int32 iatom_0;		// Index to initial z-position
 			dt_int32 iatom_e;		// Index to final z-position
-			dt_int32 ithk;		// thick index
+			dt_int32 ithk;			// thick index
 
 			T sli_thk() const { return fabs(z_e-z_0); }
 
@@ -515,168 +515,8 @@
 				dt_float64 dv;
 		};
 
-		/*********************** rotation parameters *************************/
-		template <class T>
-		struct Rot_Par
-		{
-			T theta;						// angle
-			R_3d<T> u_0;					// unitary vector			
-			eRot_Point_Typ ctr_type;		// 1: geometric center, 2: User define		
-			R_3d<T> ctr_p;					// rotation point
-
-			Rot_Par(): theta(0), u_0(0, 0, 1), ctr_type(erpt_geometric_ctr), ctr_p(1, 0, 0) {}
-
-			void validate_parameter()
-			{
-				u0.normalize();
-			}
-
-			dt_bool is_rot_pt_none() const
-			{
-				return mt::is_rot_pt_none(center_type);
-			}
-
-			dt_bool is_rot_pt_geometric_ctr() const
-			{
-				return  mt::is_rot_pt_geometric_ctr(center_type);
-			}
-
-			dt_bool is_rot_pt_user_def() const
-			{
-				return  mt::is_rot_pt_user_def(center_type);
-			}
-
-			dt_bool is_rot_active() const
-			{
-				return fcn_is_nzero(theta);
-			}
-		};
-
-		/******************* phonon model parameters *************************/
-		struct Phonon_Par
-		{
-			ePhonon_Model model;		// 1: Still atom model, 2: Absorptive potential model, 3: Frozen phonon
-			dt_bool coh_contrib;		// true, false
-			dt_bool single_conf;		// single configuration: true, false			
-			dt_int32 dist;		// 1: Gaussian (Phonon_Par distribution)
-			dt_int32 seed;		// Random seed (frozen phonon)
-			dt_int32 nconf;		// true: single phonon configuration, false: number of frozen phonon configurations
-			dt_int32 iconf_0;		// initial configuration
-			dt_bool dim_x;		// x - phonon dimension (true, false)
-			dt_bool dim_y;		// y - phonon dimension (true, false)
-			dt_bool dim_z;		// z - phonon dimension (true, false)
-
-			Phonon_Par(): model(epm_still_atom), coh_contrib(false), single_conf(false), dist(1), seed(300183), 
-			nconf(1), iconf_0(1), dim_x(true), dim_y(true), dim_z(false) {}
-
-			void set_dim(const dt_int32& Dim)
-			{
-				switch (Dim)
-				{
-					case 111:
-					{
-						dim_x = true;
-						dim_y = true;
-						dim_z = true;
-					}
-					break;
-					case 110:
-					{
-						dim_x = true;
-						dim_y = true;
-						dim_z = false;
-					}
-					break;
-					case 101:
-					{
-						dim_x = true;
-						dim_y = false;
-						dim_z = true;
-					}
-					break;
-					case 11:
-					{
-						dim_x = false;
-						dim_y = true;
-						dim_z = true;
-					}
-					break;
-					case 100:
-					{
-						dim_x = true;
-						dim_y = false;
-						dim_z = false;
-					}
-					break;
-					case 10:
-					{
-						dim_x = false;
-						dim_y = true;
-						dim_z = false;
-					}
-					break;
-					case 1:
-					{
-						dim_x = false;
-						dim_y = false;
-						dim_z = true;
-					}
-					break;
-				}
-			}
-
-			void validate_parameter()
-			{
-				seed = max(1, seed);
-				nconf = (!is_frozen_phonon())?1:max(1, nconf);
-				iconf_0 = (!is_frozen_phonon())?1:(single_conf)?nconf:1;
-			}
-
-			dt_bool is_still_atom() const
-			{
-				return model == epm_still_atom;
-			}
-
-			dt_bool is_absorptive_model() const
-			{
-				return model == epm_absorptive_model;
-			}
-
-			dt_bool is_frozen_phonon() const
-			{
-				return model == epm_frozen_phonon;
-			}
-
-			dt_bool is_frozen_phonon_float32_conf() const
-			{
-				return is_frozen_phonon() && single_conf;
-			}
-
-			dt_int32 number_conf()
-			{
-				return (nconf-iconf_0+1);
-			}
-		};
 
 		/************************** stem fetector ****************************/
-		inline
-		dt_bool is_detector_circular(const eDetector_Typ &det_type)
-		{
-			return det_type == mt::edt_circular;
-		}
-
-		inline
-		dt_bool is_detector_radial(const eDetector_Typ &det_type)
-		{
-			return det_type == mt::edt_radial;
-		}
-
-		inline
-		dt_bool is_detector_matrix(const eDetector_Typ &det_type)
-		{
-			return det_type == mt::edt_matrix;
-		}
-
 		template <class T, eDev Dev>
 		struct Detector
 		{
@@ -822,204 +662,13 @@
 			Vctr<TVctr, edev_cpu> image;
 		};
 
-		/******************************** scan *******************************/
-		template <class T>
-		struct Scan
-		{
-			public:
-				using value_type = T;
-				using size_type = dt_int32;
-
-				eScan_Typ type;		// 1: Line, 2: Area, 3: User_Define
-				dt_bool pbc;		// periodic boundary conditions
-				dt_int32 ns;		// number of sampling points
-				dt_int32 nx;
-				dt_int32 ny;
-				R_2d<T> R_0;		// initial scanning position
-				R_2d<T> R_e;		// final scanning position
-
-				R_2d<T> dR;
-
-				Vctr<R_2d<T>, edev_cpu> R;
-				Vctr<T, edev_cpu> mR;
-
-				size_type size() const
-				{
-					return R.size();
-				}
-
-				Scan(): type(est_line), pbc(false), ns(1), nx(0), ny(0), 
-				dR(0, 0), R_0(0, 0), R_e(0, 0) {};
-
-				template <class TScanning> 
-				void assign(TScanning &scanning)
-				{
-					type = scanning.type;
-					pbc = scanning.pbc;
-					ns = scanning.ns;
-					nx = scanning.nx;
-					ny = scanning.ny;
-					R_0 = scanning.R_0;
-					R_e = scanning.R_e;
-					dR = scanning.dR;
-
-					R = scanning.R;
-					mR = scanning.mR;
-				}
-
-				template <class TScanning> 
-				Scan<T>& operator=(TScanning &scanning)
-				{
-					assign(scanning);
-					return *this;
-				}
-
-				void set_default()
-				{
-					type = est_line;
-					pbc = false;
-					ns = 1;
-					R_0 = T(0);
-					R_e = T(0);
-					dR = T(0);
-					R.clear();
-					mR.clear();
-				}
-
-				// dt_int32 size() const { return nx*ny; }
-
-				T rx(const dt_int32& ix) const 
-				{
-					return (R_0.x + ix*dR.x);
-				}
-
-				T ry(const dt_int32& iy) const
-				{ 
-					return (R_0.y + iy*dR.y);
-				}
-
-				Vctr<T, edev_cpu> x()
-				{
-					Vctr<T, edev_cpu> x;
-					x.reserve(R.size());
-					for(auto ik = 0; ik<R.size(); ik++)
-					{
-						x.push_back(R[ik].x);
-					}
-					return x;
-				}
-
-				Vctr<T, edev_cpu> y()
-				{
-					Vctr<T, edev_cpu> y;
-					y.reserve(R.size());
-					for(auto ik = 0; ik<R.size(); ik++)
-					{
-						y.push_back(R[ik].y);
-					}
-					return y;
-				}
-
-				void set_grid()
-				{
-					if (!is_user_define() & (ns <= 0))
-					{
-						ns = nx = ny = 0;
-						R.clear();
-						mR.clear();
-
-						return;
-					}
-
-					nx = ny = ns;
-					if (is_line())
-					{
-						auto R_u = R_e-R_0;
-						T ds = R_u.norm();
-						T theta = atan2(R_u.y, R_u.x);
-						T cos_theta = cos(theta);
-						cos_theta = (fcn_is_zero(cos_theta))?0:cos_theta;
-						T sin_theta = sin(theta);
-						theta = (fcn_is_zero(theta))?0:theta;
-
-						dR.x = ds*cos_theta/((pbc)?ns:(ns-1));
-						dR.y = ds*sin_theta/((pbc)?ns:(ns-1));
-
-						R.resize(ns);
-						mR.resize(ns);
-
-						for(auto ixy = 0; ixy < ns; ixy++)
-						{
-							R[ixy] = R_2d<T>(rx(ixy), ry(ixy));
-							mR[ixy] = norm(R[ixy]-R_0);
-						}
-					}
-					else if (is_area())
-					{
-						auto R_u = R_e-R_0;
-						if (fabs(R_u.x)>fabs(R_u.y))
-						{
-							dR.x = R_u.x/((pbc)?ns:(ns-1));
-							dR.y = std::copysign(dR.x, R_u.y);
-							ny = dt_int32(::floor(R_u.y/dR.y+Epsilon<T>::rel+0.5));
-							ny += (pbc)?0:1;
-						}
-						else
-						{
-							dR.y = R_u.y/((pbc)?ns:(ns-1));
-							dR.x = std::copysign(dR.y, R_u.x);
-							nx = dt_int32(::floor(R_u.x/dR.x+Epsilon<T>::rel+0.5));
-							nx += (pbc)?0:1;
-						}
-
-						R.resize(size());
-						mR.resize(size());
-
-						for(auto ix = 0; ix<nx; ix++)
-						{
-							for(auto iy = 0; iy<ny; iy++)
-							{
-								const dt_int32 ixy = ix*ny+iy;
-								R[ixy] = R_2d<T>(rx(ix), ry(iy));
-								mR[ixy] = norm(R[ixy]-R_0);
-							}
-						}
-					}
-					else
-					{
-						nx = ns = R.size();
-						ny = 1;
-						dR = T(0);
-					}
-
-					R.shrink_to_fit();
-					mR.shrink_to_fit();
-				}
-
-				dt_bool is_line() const
-				{
-					return type == est_line;
-				}
-
-				dt_bool is_area() const
-				{
-					return type == est_area;
-				}
-
- 				dt_bool is_user_define() const
-				{
-					return type == eST_user_def;
-				}
-			private:
-		};
-
 		/******************** radial schrodinger equation ********************/
 		template <class T>
 		class In_Rad_Schr
 		{
 		public:
 			T E_0;		// Acceleration Voltage
-			ePot_Parm_Typ pot_parm_typ;		// Parameterization type
+			eAtomic_Pot_Parm_Typ atomic_pot_parm_typ;		// Parameterization type
 			dt_int32 n;		// Principal quantum number
 			dt_int32 nr;		// number of grid points
 			dt_int32 natomsM;		// number of atoms

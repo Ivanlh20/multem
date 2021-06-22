@@ -152,7 +152,7 @@ namespace mt
 							output_multem.image_tot(ithk, iDet, ibeam) += integrated_intensity_over_det(w_i, iDet, *psi_z_o);
 						}
 
-						if (this->in_multem->phonon_par.coh_contrib)
+						if (this->in_multem->atomic_vib.coh_contrib)
 						{
 							output_multem.add_sc_psi_coh(ithk, 0, w_i, *psi_z_o);
 						}
@@ -172,7 +172,7 @@ namespace mt
 
 						output_multem.add_sc_crop_sft_m2psi_tot_from_psi(ithk_beam, w_i, *psi_z_o);
 
- 						if (this->in_multem->phonon_par.coh_contrib)
+ 						if (this->in_multem->atomic_vib.coh_contrib)
 						{
 							output_multem.add_sc_psi_coh(ithk_beam, w_i, *psi_z_o);
 						}
@@ -184,7 +184,7 @@ namespace mt
 						microscope_effects(*psi_z_o, m2psi_z);
 						output_multem.add_sc_crop_sft_m2psi_tot_from_m2psi(ithk_beam, w_i, m2psi_z);
 
- 						if (this->in_multem->phonon_par.coh_contrib)
+ 						if (this->in_multem->atomic_vib.coh_contrib)
 						{
 							output_multem.add_sc_psi_coh(ithk_beam, w_i, *psi_z_o);
 						}
@@ -194,7 +194,7 @@ namespace mt
 						microscope_effects(*psi_z_o, m2psi_z);
 						output_multem.add_sc_crop_sft_m2psi_tot_from_m2psi(ithk, w_i, m2psi_z);
 
-						if (this->in_multem->phonon_par.coh_contrib)
+						if (this->in_multem->atomic_vib.coh_contrib)
 						{
 							output_multem.add_sc_psi_coh(ithk, w_i, *psi_z_o);
 						}
@@ -203,7 +203,7 @@ namespace mt
 					{
 						output_multem.add_sc_crop_sft_m2psi_tot_from_psi(ithk, w_i, *psi_z_o);
 
-						if (this->in_multem->phonon_par.coh_contrib)
+						if (this->in_multem->atomic_vib.coh_contrib)
 						{
 							output_multem.add_sc_psi_coh(ithk, w_i, *psi_z_o);
 						}
@@ -216,7 +216,7 @@ namespace mt
 			template <class TOutput_multislice>
 			void set_m2psi_coh(TOutput_multislice &output_multem)
 			{
-				if (!this->in_multem->phonon_par.coh_contrib || this->in_multem->is_EWFS_EWRS())
+				if (!this->in_multem->atomic_vib.coh_contrib || this->in_multem->is_EWFS_EWRS())
 				{
 					return;
 				}

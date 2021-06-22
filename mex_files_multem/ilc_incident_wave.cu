@@ -33,7 +33,7 @@ using mt::pMLD;
 using mt::pMx_c;
 
 template <class TIn_Multislice>
-void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
+void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
 {
 	using T_r = mt::Value_type<TIn_Multislice>;gr
 
@@ -82,7 +82,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	mex_read_output_area(mex_in_multem, in_multem.output_area);
 
 	/********************* validate parameters *************************/
-	in_multem.validate_parameters();
+	in_multem.set_dep_var();
 }
 
 template <class TOutput_Multem>
@@ -103,7 +103,7 @@ void set_struct_incident_wave(TOutput_Multem &output_multem, mxArray*& mex_outpu
 }
 
 template <class T, mt::eDev Dev>
-void run_incident_wave(mt::System_Config &system_config, const mxArray *mex_in_multem, mxArray*& mex_output_multem)
+void run_incident_wave(mt::System_Config &system_config, const mxArray* mex_in_multem, mxArray*& mex_output_multem)
 {
 	mt::In_Multem<T> in_multem;
 	read_in_multem(mex_in_multem, in_multem);

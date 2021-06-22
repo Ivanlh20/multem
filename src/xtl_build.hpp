@@ -29,7 +29,7 @@
 
 	#include "types.cuh"
 	#include "particles.cuh"
-	#include "in_classes.cuh"
+	#include "in_xtl_build.hpp"
 	#include "space_group.hpp"
 
 	namespace mt

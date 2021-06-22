@@ -31,26 +31,26 @@
 	namespace mt
 	{
 		/***************************************************************************************/
-		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_eppt_doyle_0_4 = typename std::enable_if<pot_parm_typ==eppt_doyle_0_4, U>::type;
+		template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class U=void>
+		using enable_if_eappt_doyle_0_4 = typename std::enable_if<atomic_pot_parm_typ==eappt_doyle_0_4, U>::type;
 
-		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_eppt_peng_0_4 = typename std::enable_if<pot_parm_typ==eppt_peng_0_4, U>::type;
+		template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class U=void>
+		using enable_if_eappt_peng_0_4 = typename std::enable_if<atomic_pot_parm_typ==eappt_peng_0_4, U>::type;
 
-		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_eppt_peng_0_12 = typename std::enable_if<pot_parm_typ==eppt_peng_0_12, U>::type;
+		template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class U=void>
+		using enable_if_eappt_peng_0_12 = typename std::enable_if<atomic_pot_parm_typ==eappt_peng_0_12, U>::type;
 
-		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_eppt_kirkland_0_12 = typename std::enable_if<pot_parm_typ==eppt_kirkland_0_12, U>::type;
+		template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class U=void>
+		using enable_if_eappt_kirkland_0_12 = typename std::enable_if<atomic_pot_parm_typ==eappt_kirkland_0_12, U>::type;
 
-		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_eppt_weickenmeier_0_12 = typename std::enable_if<pot_parm_typ==eppt_weickenmeier_0_12, U>::type;
+		template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class U=void>
+		using enable_if_eappt_weickenmeier_0_12 = typename std::enable_if<atomic_pot_parm_typ==eappt_weickenmeier_0_12, U>::type;
 
-		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_eppt_lobato_0_12 = typename std::enable_if<pot_parm_typ==eppt_lobato_0_12, U>::type;
+		template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class U=void>
+		using enable_if_eappt_lobato_0_12 = typename std::enable_if<atomic_pot_parm_typ==eappt_lobato_0_12, U>::type;
 
-		template <ePot_Parm_Typ pot_parm_typ, class U=void>
-		using enable_if_eppt_peng_ion_0_4 = typename std::enable_if<pot_parm_typ==eppt_peng_ion_0_4, U>::type;
+		template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class U=void>
+		using enable_if_eappt_peng_ion_0_4 = typename std::enable_if<atomic_pot_parm_typ==eappt_peng_ion_0_4, U>::type;
 
 		/****************************** types ********************************/
 		template <dt_int32 simulation_type, class U=void>

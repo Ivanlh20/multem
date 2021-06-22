@@ -23,7 +23,7 @@
 #include "cgpu_stream.cuh"
 #include "cgpu_fft.cuh"
 #include "particles.cuh"
-#include "slicing.hpp"
+#include "spec_slic.hpp"
 #include "in_classes.cuh"
 #include "output_multem.hpp"
 #include "cpu_fcns.hpp"
@@ -38,7 +38,7 @@ using mt::pMLD;
 using mt::pMx_c;
 
 template <class TIn_Multislice>
-void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
+void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
 {
 	using T_r = mt::Value_type<TIn_Multislice>;
 
@@ -47,12 +47,12 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	in_multem.simulation_type = (in_multem.is_EWRS())?mt::eemst_ewrs:mt::eemst_ewfs;
 
 	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Model>(mex_in_multem, "interaction_model");
-	in_multem.pot_parm_typ = mex_get_num_from_field<mt::ePot_Parm_Typ>(mex_in_multem, "pot_parm_typ");
+	in_multem.atomic_pot_parm_typ = mex_get_num_from_field<mt::eAtomic_Pot_Parm_Typ>(mex_in_multem, "atomic_pot_parm_typ");
 
-	/************** Electron-Phonon_Par interaction model **************/
-	mex_read_phonon_par(mex_in_multem, in_multem.phonon_par);
-	in_multem.phonon_par.coh_contrib = true;
-	in_multem.phonon_par.single_conf = true;
+	/************** Electron-Atomic_Vib interaction model **************/
+	mex_read_atomic_vib(mex_in_multem, in_multem.atomic_vib);
+	in_multem.atomic_vib.coh_contrib = true;
+	in_multem.atomic_vib.sgl_conf = true;
 
 	/**************************** Specimen *****************************/
 	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
@@ -68,22 +68,22 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	}
 
 	/************************ Specimen rotation ************************/
-	mex_read_rot_par<T_r>(mex_in_multem, in_multem.rot_par);
+	mex_read_rot_parm<T_r>(mex_in_multem, in_multem.rot_par);
 
 	/************************ Specimen thickness ***********************/
-	in_multem.thick_type = mex_get_num_from_field<mt::eThick_Typ>(mex_in_multem, "thick_type");
-	if (!in_multem.is_whole_spec() && full)
+	in_multem.thick_type = mex_get_num_from_field<mt::eSim_Thick_Typ>(mex_in_multem, "thick_type");
+	if (!in_multem.is_sim_whole_spec() && full)
 	{
 		mex_read_spec_thick<T_r>(mex_in_multem, in_multem.thick);
 	}
 
 	/************************ Potential slicing ************************/
-	in_multem.potential_slicing = mex_get_num_from_field<mt::ePot_Sli_Typ>(mex_in_multem, "potential_slicing");
+	in_multem.pot_slic_typ = mex_get_num_from_field<mt::ePot_Slic_Typ>(mex_in_multem, "pot_slic_typ");
 
 	/************************** xy sampling ****************************/
 	auto nx = mex_get_num_from_field<dt_int32>(mex_in_multem, "nx");
 	auto ny = mex_get_num_from_field<dt_int32>(mex_in_multem, "ny");
-	dt_bool bwl = mex_get_num_from_field<dt_bool>(mex_in_multem, "bwl");
+	dt_bool bwl = mex_get_bool_from_field(mex_in_multem, "bwl");
 
 	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thk, bwl, pbc_xy);
 
@@ -120,7 +120,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	mex_read_output_area(mex_in_multem, in_multem.output_area);
 
 	/********************* validate parameters *************************/
-	in_multem.validate_parameters();
+	in_multem.set_dep_var();
 }
 
 template <class TOutput_Multem>
@@ -130,7 +130,7 @@ void set_struct_wave_function(TOutput_Multem &output_multem, mxArray*& mex_outpu
 	dt_int32 number_of_fields_output_multem = 6;
 	mwSize dims_output_multem[2] = { 1, 1 };
 
-	mxArray *mex_field_psi;
+	mxArray* mex_field_psi;
 	const char *field_names_psi[] = { "psi_coh" };
 	dt_int32 number_of_fields_psi = 1;
 	mwSize dims_psi[2] = { 1, output_multem.thick.size() };
@@ -153,7 +153,7 @@ void set_struct_wave_function(TOutput_Multem &output_multem, mxArray*& mex_outpu
 }
 
 template <class T, mt::eDev Dev>
-void run_wave_function(mt::System_Config &system_config, const mxArray *mex_in_multem, mxArray*& mex_output_multem)
+void run_wave_function(mt::System_Config &system_config, const mxArray* mex_in_multem, mxArray*& mex_output_multem)
 {
 	mt::In_Multem<T> in_multem;
 	read_in_multem(mex_in_multem, in_multem);
@@ -169,7 +169,7 @@ void run_wave_function(mt::System_Config &system_config, const mxArray *mex_in_m
 	mt::Output_Multem<T> output_multem;
 	output_multem.set_in_data(&in_multem);
 
-	wave_function.move_atoms(in_multem.phonon_par.nconf);
+	wave_function.move_atoms(in_multem.atomic_vib.nconf);
 	wave_function.set_incident_wave(wave_function.psi_z);
 	wave_function.psi(1.0, wave_function.psi_z, output_multem);
 

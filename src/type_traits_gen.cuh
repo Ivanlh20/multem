@@ -44,7 +44,7 @@
 		struct is_diff_decay: std::integral_constant<bool, !is_same_decay<T, U>::value> {};
 	}	
 	
-	/* enable if  */
+	/* enable if */
 	namespace mt
 	{
 		template <class T, class U, class V=void>
@@ -623,7 +623,7 @@
 		using enable_if_edim_3 = typename std::enable_if<Dim==edim_3, U>::type;
 	}
 
-	/* types conversion  */
+	/* types conversion */
 	namespace mt
 	{
 		template <class T>

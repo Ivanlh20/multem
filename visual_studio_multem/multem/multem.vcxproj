@@ -66,8 +66,9 @@
     <ClInclude Include="..\..\src\grid.cuh" />
     <ClInclude Include="..\..\src\igrid.cuh" />
     <ClInclude Include="..\..\src\in_classes.cuh" />
-    <ClInclude Include="..\..\src\in_classes_mt.cuh" />
+    <ClInclude Include="..\..\src\in_multem.cuh" />
     <ClInclude Include="..\..\src\incident_wave.cuh" />
+    <ClInclude Include="..\..\src\in_xtl_build.hpp" />
     <ClInclude Include="..\..\src\kahan_sum.cuh" />
     <ClInclude Include="..\..\src\lapack.hpp" />
     <ClInclude Include="..\..\src\lens.cuh" />
@@ -91,8 +92,9 @@
     <ClInclude Include="..\..\src\r_3d.cuh" />
     <ClInclude Include="..\..\src\range.cuh" />
     <ClInclude Include="..\..\src\region.cuh" />
+    <ClInclude Include="..\..\src\scan_pat.cpp" />
     <ClInclude Include="..\..\src\shape_t.hpp" />
-    <ClInclude Include="..\..\src\slicing.hpp" />
+    <ClInclude Include="..\..\src\spec_slic.hpp" />
     <ClInclude Include="..\..\src\space_group.hpp" />
     <ClInclude Include="..\..\src\spec.hpp" />
     <ClInclude Include="..\..\src\tem_simulation.cuh" />
@@ -284,18 +286,23 @@
     <CudaCompile Include="..\..\mex_files_test\ilc_test_quadrature.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_r_2d.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_r_3d.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_scan_pat.cpp" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_shape.cpp" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_traits.cpp" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_trs_2d.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_vctr_fcns.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_wd_fcns.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\atomic_vib.cpp" />
+    <ClCompile Include="..\..\src\rot_parm.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{7AF61FF5-2F37-48B5-A7B5-0DB32777F186}</ProjectGuid>
     <RootNamespace>multem</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
-    <CudaToolkitCustomDir>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1</CudaToolkitCustomDir>
+    <CudaToolkitCustomDir>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2</CudaToolkitCustomDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -326,7 +333,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.1.props" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.2.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -396,6 +403,6 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.1.targets" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.2.targets" />
   </ImportGroup>
 </Project>

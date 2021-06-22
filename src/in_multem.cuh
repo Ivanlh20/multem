@@ -16,15 +16,15 @@
  * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#ifndef IN_CLASSES_MT_H
-	#define IN_CLASSES_MT_H
+#ifndef IN_MULTEM_H
+	#define IN_MULTEM_H
 
 	#include <algorithm>
 
 	#include "math.cuh"
 	#include "types.cuh"
 	#include "particles.cuh"
-	#include "slicing.hpp"
+	#include "spec_slic.hpp"
 	#include "cgpu_info.cuh"
 	#include "cgpu_vctr.cuh"
 
@@ -48,28 +48,28 @@
 		public:
 			using value_type = T;
 
-			System_Config system_config;						// System information
+			System_Config system_config;					// System information
 
 			eElec_Spec_Int_Model interaction_model;			// eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
-			ePot_Parm_Typ pot_parm_typ;						// potential type: 1: doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
+			eAtomic_Pot_Parm_Typ atomic_pot_parm_typ;		// potential type: 1: doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 
-			Phonon_Par phonon_par;							// phonon parameters
+			Atomic_Vib atomic_vib;							// phonon parameters
 
 			Ptc_Atom<T> atoms;								// atoms
-			dt_bool is_xtl;
+			dt_bool is_xtl;									// is a crystalline specimen?
 
-			Rot_Par<T> rot_par;								// specimen rotation parameters
+			Rot_Parm<T> rot_par;							// specimen rotation parameters
 
-			eThick_Typ thick_type;							// ett_whole_spec = 1, ett_through_thick = 2, ett_through_slices = 3
+			eSim_Thick_Typ thick_type;						// estt_whole_spec = 1, estt_through_thick = 2, estt_through_slices = 3
 			Vctr_cpu<T> thick;								// Array of thicknesses 
 
-			ePot_Sli_Typ potential_slicing;					// epst_planes = 1, epst_dz_Proj = 2, epst_dz_Sub = 3, epst_auto = 4
+			ePot_Slic_Typ pot_slic_typ;						// epst_planes = 1, epst_dz_Proj = 2, epst_dz_Sub = 3, epst_auto = 4
 
 			Grid_2d<T> grid_2d;								// grid information
 
 			iThread_Rect_2d output_area;					// Output region information
 
-			eEM_Sim_Typ simulation_type;					// 11: Scan, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
+			eEM_Sim_Typ simulation_type;					// 11: Scan_Pat, 12: ISTEM, 21: cbed, 22: cbei, 31: ED, 32: hrtem, 41: ped, 42: hci, ... 51: EW Fourier, 52: EW real
 
 			eIncident_Wave_Typ iw_type;						// 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
 			Vctr_cpu<complex<T>> iw_psi;					// user define incident wave
@@ -87,7 +87,7 @@
 			Lens<T> cond_lens;								// Condenser lens
 			Lens<T> obj_lens;								// Objective lens
 
-			Scan<T> scanning;								// Scan
+			Scan_Pat<T> scanning;								// Scan_Pat
 
 			Detector<T, edev_cpu> detector;					// STEM Detectors
 
@@ -112,8 +112,8 @@
 			dt_bool dp_Shift;								// Shift diffraction pattern
 
 			In_Multem():simulation_type(eemst_ewrs), interaction_model(eesim_multislice), 
-				potential_slicing(epst_planes), pot_parm_typ(eppt_lobato_0_12), illumination_model(eim_partial_coherent), 
-				temporal_spatial_incoh(etsi_temporal_spatial), thick_type(ett_whole_spec), 
+				pot_slic_typ(epst_planes), atomic_pot_parm_typ(eappt_lobato_0_12), illumination_model(eim_partial_coherent), 
+				temporal_spatial_incoh(etsi_temporal_spatial), thick_type(estt_whole_spec), 
 				operation_mode(eOM_Normal), slice_storage(false), reverse_multislice(false), 
 				mul_sign(1), E_0(300), lambda(0), theta(0), phi(0), nrot(1), Vrl(c_vr_min), nR(c_nR), iw_type(eiwt_plane_wave), 
 				is_xtl(false), islice(0), dp_Shift(false) {};
@@ -129,7 +129,7 @@
 				system_config = in_multem.system_config;
 
 				interaction_model = in_multem.interaction_model;
-				pot_parm_typ = in_multem.pot_parm_typ;
+				atomic_pot_parm_typ = in_multem.atomic_pot_parm_typ;
 
 				operation_mode = in_multem.operation_mode;
 				slice_storage = in_multem.slice_storage;
@@ -138,7 +138,7 @@
 				Vrl = in_multem.Vrl;
 				nR = in_multem.nR;
 
-				phonon_par = in_multem.phonon_par;
+				atomic_vib = in_multem.atomic_vib;
 
 				atoms = in_multem.atoms;
 				is_xtl = in_multem.is_xtl;
@@ -148,7 +148,7 @@
 				thick_type = in_multem.thick_type;
 				thick = in_multem.thick;
 
-				potential_slicing = in_multem.potential_slicing;
+				pot_slic_typ = in_multem.pot_slic_typ;
 
 				grid_2d = in_multem.grid_2d;
 
@@ -191,11 +191,11 @@
 				return *this;
 			}
 
-			void validate_parameters()
+			void set_dep_var()
 			{
-				phonon_par.validate_parameter();
+				atomic_vib.set_dep_var();
 
-				rot_par.validate_parameter();
+				rot_par.set_dep_var();
 
 				islice = max(0, islice);
 
@@ -212,7 +212,7 @@
 				dp_Shift = (is_PED())?true:false;
 
 				/************************ incident beam ****************************/
-				if ((is_plane_wave()) || (is_scanning() && !scanning.is_user_define()))
+				if ((is_plane_wave()) || (is_scanning() && !scanning.is_scan_pat_user_def()))
 				{
 					beam_pos_i.resize(1);
 				}
@@ -222,7 +222,7 @@
 				/************************** Scanning *******************************/
  				if (is_scanning())
 				{
-					if (scanning.is_user_define())
+					if (scanning.is_scan_pat_user_def())
 					{
 						scanning.R = beam_pos_i.p;
 					}
@@ -249,7 +249,7 @@
 
 				if (is_EELS_EFTEM())
 				{
-					phonon_par.coh_contrib = false;
+					atomic_vib.coh_contrib = false;
 					interaction_model = mt::eesim_multislice;
 					illumination_model = eim_coherent;
 
@@ -267,7 +267,7 @@
 
 				if (is_EWFS_EWRS())
 				{
-					phonon_par.coh_contrib = true;
+					atomic_vib.coh_contrib = true;
 					illumination_model = eim_coherent;
 				}
 
@@ -282,27 +282,27 @@
 				if (!is_multislice())
 				{
 					islice = 0;
-					potential_slicing = epst_planes;
-					if (is_through_slices())
+					pot_slic_typ = epst_planes;
+					if (is_sim_through_slices())
 					{
-						thick_type = ett_through_thick;
+						thick_type = estt_through_thick;
 					}
-					slice_storage = slice_storage || !is_whole_spec();
+					slice_storage = slice_storage || !is_sim_whole_spec();
 				}
 
-				if (is_subslicing() && is_through_thick())
+				if (is_subslicing() && is_sim_through_thick())
 				{
-					thick_type = ett_whole_spec;
+					thick_type = estt_whole_spec;
 				}
 
 				if (!is_subslicing())
 				{
-					phonon_par.dim_z = false;
+					atomic_vib.dim_z = false;
 				}
 
 				if (is_spec_rot_active())
 				{
-					thick_type = ett_whole_spec;
+					thick_type = estt_whole_spec;
 					// get geometric center
 					if (rot_par.is_geometric_center())
 					{
@@ -318,7 +318,7 @@
 
 				// match slicing with the require thickness
 				Slicing<T> slicing;
-				slicing.match_thickness(potential_slicing, atoms, thick_type, thick);
+				slicing.match_thickness(pot_slic_typ, atoms, thick_type, thick);
 
 				// remove atoms outside the thickness range
 				T ee_z = 0.1;
@@ -368,14 +368,14 @@
 				cond_lens.set_in_data(E_0, grid_2d);
 				if (atoms.empty())
 				{
-					cond_lens.zero_defocus_plane = 0;
+					cond_lens.zero_def_plane = 0;
 				}
 				else
 				{
-					cond_lens.zero_defocus_plane = cond_lens.get_zero_defocus_plane(atoms.z_min, atoms.z_max);
+					cond_lens.zero_def_plane = cond_lens.get_zero_def_plane(atoms.z_min, atoms.z_max);
 				}
 
-				cond_lens.zero_defocus_type = ezdt_user_def;
+				cond_lens.zero_def_typ = ezdt_user_def;
 
 				// set objetive lens parameters
 				obj_lens.set_in_data(E_0, grid_2d);
@@ -395,7 +395,7 @@
 			inline
 			dt_int32 number_pn_conf()
 			{
-				return phonon_par.number_conf();
+				return atomic_vib.number_conf();
 			}
 
 			dt_int32 number_of_beams()
@@ -424,7 +424,7 @@
 			{
 				if ((is_STEM() || is_STEM_EELS()))
 				{
-					if (scanning.is_user_define())
+					if (scanning.is_scan_pat_user_def())
 					{
 						output_area.ix_0 = 0;
 						output_area.ix_e = scanning.R.size();
@@ -560,61 +560,61 @@
 
 			/***************************************************************************************/
 
-			dt_bool is_still_atom() const
+			dt_bool is_avm_still_atom() const
 			{
-				return phonon_par.is_still_atom();
+				return atomic_vib.is_avm_still_atom();
 			}
 
-			dt_bool is_absorptive_model() const
+			dt_bool is_avm_absorptive_pot() const
 			{
-				return phonon_par.is_absorptive_model();
+				return atomic_vib.is_avm_absorptive_pot();
 			}
 
-			dt_bool is_frozen_phonon() const
+			dt_bool is_avm_frozen_phonon() const
 			{
-				return phonon_par.is_frozen_phonon();
+				return atomic_vib.is_avm_frozen_phonon();
 			}
 
-			dt_bool is_frozen_phonon_float32_conf() const
+			dt_bool is_avm_frozen_phonon_sgl_conf() const
 			{
-				return phonon_par.is_frozen_phonon_float32_conf();
+				return atomic_vib.is_avm_frozen_phonon_sgl_conf();
 			}
 
 			/***************************************************************************************/
-			dt_bool is_whole_spec() const
+			dt_bool is_sim_whole_spec() const
 			{
-				return mt::is_whole_spec(thick_type);
+				return mt::is_sim_whole_spec(thick_type);
 			}
 
-			dt_bool is_through_slices() const
+			dt_bool is_sim_through_slices() const
 			{
-				return mt::is_through_slices(thick_type);
+				return mt::is_sim_through_slices(thick_type);
 			}
 
-			dt_bool is_through_thick() const
+			dt_bool is_sim_through_thick() const
 			{
-				return mt::is_through_thick(thick_type);
+				return mt::is_sim_through_thick(thick_type);
 			}
 
 			/***************************************************************************************/
 			dt_bool is_slicing_by_planes() const
 			{
-				return mt::is_slicing_by_planes(interaction_model, potential_slicing);
+				return mt::is_slicing_by_planes(interaction_model, pot_slic_typ);
 			}
 
 			dt_bool is_slicing_by_dz() const
 			{
-				return mt::is_slicing_by_dz(interaction_model, potential_slicing);
+				return mt::is_slicing_by_dz(interaction_model, pot_slic_typ);
 			}
 
 			dt_bool is_subslicing() const
 			{
-				return mt::is_subslicing(interaction_model, potential_slicing);
+				return mt::is_subslicing(interaction_model, pot_slic_typ);
 			}
 
 			dt_bool is_subslicing_whole_spec() const
 			{
-				return mt::is_subslicing_whole_spec(interaction_model, potential_slicing, thick_type);
+				return mt::is_subslicing_whole_spec(interaction_model, pot_slic_typ, thick_type);
 			}
 
 			/***************************************************************************************/
@@ -686,12 +686,12 @@
 
 			dt_bool is_EWFS_SC() const
 			{
-				return mt::is_EWFS_SC(simulation_type, phonon_par.model, phonon_par.single_conf);
+				return mt::is_EWFS_SC(simulation_type, atomic_vib.model, atomic_vib.sgl_conf);
 			}
 
 			dt_bool is_EWRS_SC() const
 			{
-				return mt::is_EWRS_SC(simulation_type, phonon_par.model, phonon_par.single_conf);
+				return mt::is_EWRS_SC(simulation_type, atomic_vib.model, atomic_vib.sgl_conf);
 			}
 
  			dt_bool is_STEM_EELS() const
@@ -791,7 +791,7 @@
 
 			dt_bool is_EWFS_EWRS_SC() const
 			{
-				return mt::is_EWFS_EWRS_SC(simulation_type, phonon_par.model, phonon_par.single_conf);
+				return mt::is_EWFS_EWRS_SC(simulation_type, atomic_vib.model, atomic_vib.sgl_conf);
 			}
 
 			dt_bool is_EELS_EFTEM() const
@@ -937,7 +937,7 @@
 			dt_bool is_slice_storage() const
 			{
 				dt_bool slice_storage = is_PED_HCTEM() || is_EELS_EFTEM();
-				slice_storage = slice_storage || is_ISTEM() || (is_STEM() && !phonon_par.coh_contrib);
+				slice_storage = slice_storage || is_ISTEM() || (is_STEM() && !atomic_vib.coh_contrib);
 				slice_storage = slice_storage || (is_CBED_CBEI() && is_illu_mod_full_integration());
 
 				return slice_storage;

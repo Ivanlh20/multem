@@ -33,7 +33,7 @@ using mt::pMLD;
 using mt::pMx_c;
 
 template <class TIn_Multislice>
-void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
+void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
 {
 	using T_r = mt::Value_type<TIn_Multislice>;
 
@@ -83,14 +83,14 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	in_multem.obj_lens.set_in_data(in_multem.E_0, in_multem.grid_2d);
 
 	/********************* zero defocus reference ********************/
-	in_multem.obj_lens.zero_defocus_type = mt::ezdt_last;
-	in_multem.obj_lens.zero_defocus_plane = 0.0;
+	in_multem.obj_lens.zero_def_typ = mt::ezdt_last;
+	in_multem.obj_lens.zero_def_plane = 0.0;
 
 	/******************** select output region ************************/
 	mex_read_output_area(mex_in_multem, in_multem.output_area);
 
 	/********************* validate parameters *************************/
-	in_multem.validate_parameters();
+	in_multem.set_dep_var();
 }
 
 template <class TOutput_Multem>
@@ -111,7 +111,7 @@ void set_struct_microscope_aberrations(TOutput_Multem &output_multem, mxArray*& 
 }
 
 template <class T, mt::eDev Dev>
-void run_microscope_aberrations(mt::System_Config &system_config, const mxArray *mex_in_multem, mxArray*& mex_output_multem)
+void run_microscope_aberrations(mt::System_Config &system_config, const mxArray* mex_in_multem, mxArray*& mex_output_multem)
 {
 	mt::In_Multem<T> in_multem;
 	read_in_multem(mex_in_multem, in_multem);

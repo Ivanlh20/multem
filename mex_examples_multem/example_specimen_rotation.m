@@ -4,8 +4,6 @@ addpath(['..', filesep, 'matlab_functions'])
 addpath(['..', filesep, 'crystalline_materials'])
 addpath(['..', filesep, 'mex_bin'])
 
-clear;clc;
-
 % create specimen
 lx = 100;
 ly = 100;

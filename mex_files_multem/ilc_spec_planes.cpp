@@ -21,27 +21,23 @@
 #include "types.cuh"
 #include "type_traits_gen.cuh"
 #include "particles.cuh"
-#include "in_classes.cuh"
-#include "slicing.hpp"
+#include "in_multem.cuh"
+#include "spec_slic.hpp"
 
 #include <mex.h>
 #include "matlab_mex.cuh"
 #include "matlab_multem_io.cuh"
 
-using mt::pMLD;
-
-template <class TIn_Multislice>
-void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem)
+template <class T_r>
+void read_in_multem(const mxArray* mex_in_multem, mt::In_Multem<T_r> &in_multem)
 {
-	using T_r = mt::Value_type<TIn_Multislice>;
-
 	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Model>(mex_in_multem, "interaction_model");
-	in_multem.pot_parm_typ = mt::eppt_lobato_0_12;
+	in_multem.atomic_pot_parm_typ = mt::eappt_lobato_0_12;
 
-	/************** Electron-Phonon_Par interaction model **************/
-	mex_read_phonon_par(mex_in_multem, in_multem.phonon_par);
-	in_multem.phonon_par.coh_contrib = false;
-	in_multem.phonon_par.single_conf = true;
+	/************** Electron-Atomic_Vib interaction model **************/
+	mex_read_atomic_vib(mex_in_multem, in_multem.atomic_vib);
+	in_multem.atomic_vib.coh_contrib = false;
+	in_multem.atomic_vib.sgl_conf = true;
 
 	/**************************** Specimen *****************************/
 	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
@@ -49,15 +45,16 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem)
 	auto bs_z = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_z");
 	auto sli_thk = mex_get_num_from_field<T_r>(mex_in_multem, "spec_dz");
 	dt_bool pbc_xy = false;
+	dt_bool b_statistic = true;
 
 	/************************* atomic positions ************************/
-	mex_read_atoms<T_r>(mex_in_multem, bs_x, bs_y, bs_z, sli_thk, in_multem.atoms);
+	mex_read_atoms<T_r>(mex_in_multem, {bs_x, bs_y, bs_z}, pbc_xy, b_statistic, in_multem.atoms);
 
 	/************************ Specimen rotation ************************/
-	mex_read_rot_par<T_r>(mex_in_multem, in_multem.rot_par);
+	mex_read_rot_parm<T_r>(mex_in_multem, in_multem.rot_par);
 
 	/************************ Potential slicing ************************/
-	in_multem.potential_slicing = mex_get_num_from_field<mt::ePot_Sli_Typ>(mex_in_multem, "potential_slicing");
+	in_multem.pot_slic_typ = mex_get_enum_from_field<mt::ePot_Slic_Typ>(mex_in_multem, "pot_slic_typ");
 
 	/************************** xy sampling ****************************/
 	auto nx = 1024;
@@ -66,7 +63,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem)
 
 	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thk, bwl, pbc_xy);
 
-	in_multem.validate_parameters();
+	in_multem.set_dep_var();
  }
 
 void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[])

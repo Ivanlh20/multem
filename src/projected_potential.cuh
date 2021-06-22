@@ -278,7 +278,7 @@ namespace mt
 			{
 				if (this->in_multem->is_subslicing())
 				{
-					mt::linear_Vz(stream, this->in_multem->pot_parm_typ, qz, atom_Vp);
+					mt::linear_Vz(stream, this->in_multem->atomic_pot_parm_typ, qz, atom_Vp);
 					mt::fcn_vd_2_coef_poly3(stream, atom_Vp);
 				}
 			}

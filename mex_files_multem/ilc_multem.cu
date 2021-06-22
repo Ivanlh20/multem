@@ -36,7 +36,7 @@ using mt::pMLD;
 using mt::pMx_c;
 
 template <class TIn_Multislice>
-void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
+void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
 {
 	using T_r = mt::Value_type<TIn_Multislice>;
 
@@ -45,14 +45,14 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 
 	/***************************************************************************************/
 	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Model>(mex_in_multem, "interaction_model");
-	in_multem.pot_parm_typ = mex_get_num_from_field<mt::ePot_Parm_Typ>(mex_in_multem, "pot_parm_typ");
+	in_multem.atomic_pot_parm_typ = mex_get_num_from_field<mt::eAtomic_Pot_Parm_Typ>(mex_in_multem, "atomic_pot_parm_typ");
 
 	/***************************************************************************************/
 	in_multem.operation_mode = mex_get_num_from_field<mt::eOperation_Mode>(mex_in_multem, "operation_mode");
-	in_multem.reverse_multislice = mex_get_num_from_field<dt_bool>(mex_in_multem, "reverse_multislice");
+	in_multem.reverse_multislice = mex_get_bool_from_field(mex_in_multem, "reverse_multislice");
 
-	/************** Electron-Phonon_Par interaction model **************/
-	mex_read_phonon_par(mex_in_multem, in_multem.phonon_par);
+	/************** Electron-Atomic_Vib interaction model **************/
+	mex_read_atomic_vib(mex_in_multem, in_multem.atomic_vib);
 
 	/**************************** Specimen *****************************/
 	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
@@ -70,23 +70,23 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 		}
 
 		/************************ Specimen rotation ************************/
-		mex_read_rot_par<T_r>(mex_in_multem, in_multem.rot_par);
+		mex_read_rot_parm<T_r>(mex_in_multem, in_multem.rot_par);
 
 		/************************ Specimen thickness ***********************/
-		in_multem.thick_type = mex_get_num_from_field<mt::eThick_Typ>(mex_in_multem, "thick_type");
-		if (!in_multem.is_whole_spec() && full)
+		in_multem.thick_type = mex_get_num_from_field<mt::eSim_Thick_Typ>(mex_in_multem, "thick_type");
+		if (!in_multem.is_sim_whole_spec() && full)
 		{
 			mex_read_spec_thick<T_r>(mex_in_multem, in_multem.thick);
 		}
 
 		/************************ Potential slicing ************************/
-		in_multem.potential_slicing = mex_get_num_from_field<mt::ePot_Sli_Typ>(mex_in_multem, "potential_slicing");
+		in_multem.pot_slic_typ = mex_get_num_from_field<mt::ePot_Slic_Typ>(mex_in_multem, "pot_slic_typ");
 	}
 
 	/************************** xy sampling ****************************/
 	auto nx = mex_get_num_from_field<dt_int32>(mex_in_multem, "nx");
 	auto ny = mex_get_num_from_field<dt_int32>(mex_in_multem, "ny");
-	dt_bool bwl = mex_get_num_from_field<dt_bool>(mex_in_multem, "bwl");
+	dt_bool bwl = mex_get_bool_from_field(mex_in_multem, "bwl");
 
 	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thk, bwl, pbc_xy);
 
@@ -122,7 +122,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	/************************** ISTEM/STEM ***************************/
 	if (in_multem.is_scanning())
 	{
-		mex_read_scanning<T_r>(mex_in_multem, in_multem.scanning);
+		mex_read_scan<T_r>(mex_in_multem, in_multem.scanning);
 	}
 
 	if (in_multem.is_STEM())
@@ -166,7 +166,7 @@ void read_in_multem(const mxArray *mex_in_multem, TIn_Multislice &in_multem, dt_
 	mex_read_output_area(mex_in_multem, in_multem.output_area);
 
 	/********************* validate parameters *************************/
-	in_multem.validate_parameters();
+	in_multem.set_dep_var();
 }
 
 template <class TOutput_Multem>
@@ -186,18 +186,18 @@ void set_struct_multem(TOutput_Multem &output_multem, mxArray*& mex_output_multe
 
 	if (output_multem.is_STEM() || output_multem.is_STEM_ISTEM_EELS())
 	{
-		mxArray *mex_field_data;
+		mxArray* mex_field_data;
 		const char *field_names_data_full[] = { "image_tot", "image_coh" };
 		const char *field_names_data_partial[] = { "image_tot" };
-		const char **field_names_data = (output_multem.phonon_par.coh_contrib)?field_names_data_full:field_names_data_partial;
-		dt_int32 number_of_fields_data = (output_multem.phonon_par.coh_contrib)?2:1;
+		const char **field_names_data = (output_multem.atomic_vib.coh_contrib)?field_names_data_full:field_names_data_partial;
+		dt_int32 number_of_fields_data = (output_multem.atomic_vib.coh_contrib)?2:1;
 		mwSize dims_data[2] = { 1, output_multem.thick.size() };
 
 		mex_field_data = mxCreateStructArray(2, dims_data, number_of_fields_data, field_names_data);
 		mxSetField(mex_output_multem, 0, "data", mex_field_data);
 
-		mxArray *mex_field_detector_tot;
-		mxArray *mex_field_detector_coh;
+		mxArray* mex_field_detector_tot;
+		mxArray* mex_field_detector_coh;
 		const char *field_names_detector[] = { "image" };
 		dt_int32 number_of_fields_detector = 1;
 		// mwSize dims_detector[2] = {1, output_multem.ndetector};
@@ -205,13 +205,13 @@ void set_struct_multem(TOutput_Multem &output_multem, mxArray*& mex_output_multe
 		dims_detector[0] = 1;
 		dims_detector[1] = output_multem.ndetector;
 
-		dt_int32 nx = (output_multem.scanning.is_line())?1:output_multem.nx;
+		dt_int32 nx = (output_multem.scanning.is_scan_pat_line())?1:output_multem.nx;
 		dt_int32 ny = output_multem.ny;
 		for(auto ithk = 0; ithk < output_multem.thick.size(); ithk++)
 		{
 			mex_field_detector_tot = mxCreateStructArray(2, dims_detector, number_of_fields_detector, field_names_detector);
 			mxSetField(mex_field_data, ithk, "image_tot", mex_field_detector_tot);
-			if (output_multem.phonon_par.coh_contrib)
+			if (output_multem.atomic_vib.coh_contrib)
 			{
 				mex_field_detector_coh = mxCreateStructArray(2, dims_detector, number_of_fields_detector, field_names_detector);
 				mxSetField(mex_field_data, ithk, "image_coh", mex_field_detector_coh);
@@ -220,7 +220,7 @@ void set_struct_multem(TOutput_Multem &output_multem, mxArray*& mex_output_multe
 			for(auto iDet = 0; iDet < output_multem.ndetector; iDet++)
 			{
 				mex_create_set_pVctr_field<pMLD>(mex_field_detector_tot, iDet, "image", ny, nx, output_multem.image_tot(ithk, iDet));
-				if (output_multem.phonon_par.coh_contrib)
+				if (output_multem.atomic_vib.coh_contrib)
 				{
 					mex_create_set_pVctr_field<pMLD>(mex_field_detector_coh, iDet, "image", ny, nx, output_multem.image_coh(ithk, iDet));
 				}
@@ -229,7 +229,7 @@ void set_struct_multem(TOutput_Multem &output_multem, mxArray*& mex_output_multe
 	}
 	else if (output_multem.is_EWFS_EWRS())
 	{
-		mxArray *mex_field_data;
+		mxArray* mex_field_data;
 		const char *field_names_data_full[] = { "m2psi_tot", "psi_coh" };
 		const char *field_names_data_partial[] = { "psi_coh" };
 		const char **field_names_data = (!output_multem.is_EWFS_EWRS_SC())?field_names_data_full:field_names_data_partial;
@@ -250,11 +250,11 @@ void set_struct_multem(TOutput_Multem &output_multem, mxArray*& mex_output_multe
 	}
 	else
 	{
-		mxArray *mex_field_data;
+		mxArray* mex_field_data;
 		const char *field_names_data_full[] = { "m2psi_tot", "m2psi_coh" };
 		const char *field_names_data_partial[] = { "m2psi_tot" };
-		const char **field_names_data = (output_multem.phonon_par.coh_contrib)?field_names_data_full:field_names_data_partial;
-		dt_int32 number_of_fields_data = (output_multem.phonon_par.coh_contrib)?2:1;
+		const char **field_names_data = (output_multem.atomic_vib.coh_contrib)?field_names_data_full:field_names_data_partial;
+		dt_int32 number_of_fields_data = (output_multem.atomic_vib.coh_contrib)?2:1;
 		mwSize dims_data[2] = { 1, output_multem.nthk() };
 
 		mex_field_data = mxCreateStructArray(2, dims_data, number_of_fields_data, field_names_data);
@@ -263,7 +263,7 @@ void set_struct_multem(TOutput_Multem &output_multem, mxArray*& mex_output_multe
 		for(auto ithk = 0; ithk < output_multem.nthk(); ithk++)
 		{
 			mex_create_set_pVctr_field<pMLD>(mex_field_data, ithk, "m2psi_tot", output_multem.ny, output_multem.nx, output_multem.m2psi_tot[ithk]);
-			if (output_multem.phonon_par.coh_contrib)
+			if (output_multem.atomic_vib.coh_contrib)
 			{
 				mex_create_set_pVctr_field<pMLD>(mex_field_data, ithk, "m2psi_coh", output_multem.ny, output_multem.nx, output_multem.m2psi_coh[ithk]);
 			}
@@ -272,7 +272,7 @@ void set_struct_multem(TOutput_Multem &output_multem, mxArray*& mex_output_multe
 }
 
 template <class T, mt::eDev Dev>
-void run_multem(mt::System_Config &system_config, const mxArray *mex_in_multem, mxArray*& mex_output_multem)
+void run_multem(mt::System_Config &system_config, const mxArray* mex_in_multem, mxArray*& mex_output_multem)
 {
 	mt::In_Multem<T> in_multem;
 	read_in_multem(mex_in_multem, in_multem);

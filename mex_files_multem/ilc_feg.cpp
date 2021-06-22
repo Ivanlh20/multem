@@ -27,7 +27,7 @@ void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* p
 {
 	using T = dt_float64;
 
-	auto pot_parm_typ = mex_get_num<mt::ePot_Parm_Typ>(prhs[0]);
+	auto atomic_pot_parm_typ = mex_get_num<mt::eAtomic_Pot_Parm_Typ>(prhs[0]);
 	auto Z = mex_get_num<dt_int32>(prhs[1]);
 	auto charge = mex_get_num<dt_int32>(prhs[2]);
 	auto g = mex_get_pvctr<T>(prhs[3]);
@@ -36,7 +36,7 @@ void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* p
 	auto feg = mex_create_pVctr<T>(g.shape(), plhs[0]);
 	auto dfeg = mex_create_pVctr<T>(g.shape(), plhs[1]);
 
-	mt::Atomic_Info_cpu<T> atomic_info = mt::Atomic_Data(Z, pot_parm_typ, charge);
+	mt::Atomic_Info_cpu<T> atomic_info = mt::Atomic_Data(Z, atomic_pot_parm_typ, charge);
 	mt::Atomic_Fcns<T> atomic_fcns_mt(atomic_info.coef[0]);
 
 	atomic_fcns_mt.feg_dfeg(g.ptr_32(), feg.ptr_32(), dfeg.ptr_32());

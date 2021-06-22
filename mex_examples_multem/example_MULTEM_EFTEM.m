@@ -23,22 +23,22 @@ system_conf.gpu_device = 0;
 %%%%%%%%%%%%%%%%%%%% Set simulation experiment %%%%%%%%%%%%%%%%%%%%%
 % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, eTEMST_EWFS=51, eTEMST_EWRS=52, 
 % eTEMST_EELS=61, eTEMST_EFTEM=62, eTEMST_ProbeFS=71, eTEMST_ProbeRS=72, eTEMST_PPFS=81, eTEMST_PPRS=82,eTEMST_TFFS=91, eTEMST_TFRS=92
-input_multislice.simulation_type = 62;
+input_multislice.em_sim_typ = 62;
 
 %%%%%%%%%%%%%% Electron-Specimen interaction model %%%%%%%%%%%%%%%%%
 input_multislice.interaction_model = 1;              % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
-input_multislice.potential_type = 6;                 % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
+input_multislice.atomic_pot_parm_typ = 6;                 % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
 
 %%%%%%%%%%%%%%%%%%%%%%% Potential slicing %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.potential_slicing = 1;              % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
+input_multislice.pot_slic_typ = 1;              % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 
-%%%%%%%%%%%%%%% Electron-Phonon interaction model %%%%%%%%%%%%%%%%%%
-input_multislice.pn_model = 3;                       % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
-input_multislice.pn_coh_contrib = 0;
-input_multislice.pn_single_conf = 0;                 % 1: true, 0:false (extract single configuration)
-input_multislice.pn_nconf = 5;                      % true: specific phonon configuration, false: number of frozen phonon configurations
-input_multislice.pn_dim = 110;                       % phonon dimensions (xyz)
-input_multislice.pn_seed = 300183;                   % Random seed(frozen phonon)
+%%%%%%%%%%%%%%% Atomic vibrations model %%%%%%%%%%%%%%%%%%
+input_multislice.atomic_vib_model = 3;                       % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+input_multislice.atomic_vib_coh_contrib = 0;
+input_multislice.atomic_vib_sgl_conf = 0;                 % 1: true, 0:false (extract single configuration)
+input_multislice.atomic_vib_nconf = 5;                      % true: specific phonon configuration, false: number of frozen phonon configurations
+input_multislice.atomic_vib_dim = [true, true, false];                       % phonon dimensions (xyz)
+input_multislice.atomic_vib_seed = 300183;                   % Random seed(frozen phonon)
 
 %%%%%%%%%%%%%%%%%%%%%%% Specimen information %%%%%%%%%%%%%%%%%%%%%%%
 na = 8; nb = 8; nc = 5; ncu = 2; rmsd_3d = 0.085;
@@ -48,7 +48,7 @@ na = 8; nb = 8; nc = 5; ncu = 2; rmsd_3d = 0.085;
 , a, b, c, input_multislice.spec_dz] = SrTiO3001Crystal(na, nb, nc, ncu, rmsd_3d);
 
 %%%%%%%%%%%%%%%%%%%%%% Specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multislice.thick_type = 1;                     % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
+input_multislice.thick_typ = 1;                     % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
 input_multislice.thick = 0;                          % Array of thickes (Å)
 
 %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -94,8 +94,8 @@ input_multislice.obj_lens_ssf_sigma = ssf_sigma;          % standard deviation: 
 input_multislice.obj_lens_ssf_npoints = 4;                % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%% zero defocus reference %%%%%%%%%%%%
-input_multislice.cond_lens_zero_defocus_type = 1;         % eZDT_First = 1, eZDT_User_Define = 2
-input_multislice.cond_lens_zero_defocus_plane = 0;
+input_multislice.cond_lens_zero_def_typ = 1;         % eZDT_First = 1, eZDT_User_Define = 2
+input_multislice.cond_lens_zero_def_plane = 0;
 
 %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multislice.obj_lens_m = 0;                    % Vortex momentum
@@ -110,8 +110,8 @@ input_multislice.obj_lens_inner_aper_ang = 0.0;     % Inner aperture (mrad)
 input_multislice.obj_lens_outer_aper_ang = 0.0;     % Outer aperture (mrad)
 input_multislice.obj_lens_ti_sigma = 32;                  % standard deviation (Å)
 input_multislice.obj_lens_ti_npts = 10;                 % # integration steps for the defocus Spread. It will be only used if illumination_model=4
-input_multislice.obj_lens_zero_defocus_type = 3;    % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
-input_multislice.obj_lens_zero_defocus_plane = 0;   % It will be only used if obj_lens_zero_defocus_type = eZDT_User_Define
+input_multislice.obj_lens_zero_def_typ = 3;    % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
+input_multislice.obj_lens_zero_def_plane = 0;   % It will be only used if obj_lens_zero_def_typ = eZDT_User_Define
 
 input_multislice.eftem_E_loss = 532;                % Energy loss (eV)
 input_multislice.eftem_m_selection = 3;             % selection rule

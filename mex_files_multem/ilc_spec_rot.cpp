@@ -24,6 +24,7 @@
 
 #include <mex.h>
 #include "matlab_mex.cuh"
+#include "matlab_multem_io.cuh"
 
 template <class T>
 void mex_run(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[])
@@ -31,20 +32,20 @@ void mex_run(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[
 	const auto patoms_i = mex_get_pvctr<T>(prhs[0]);
 	auto theta = mex_get_num<T>(prhs[1])*mt::c_deg_2_rad<T>;
 	auto u_0 = mex_get_r_3d<T>(prhs[2], mt::R_3d<T>(0, 0, 1));
-	auto rot_point_type = (nrhs>3)?mex_get_enum<mt::eRot_Point_Typ>(prhs[3]):mt::erpt_geometric_ctr;
-	auto p_0 = (nrhs>4)?mex_get_r_3d<T>(prhs[4]):mt::R_3d<T>(0, 0, 0);
+	auto ctr_type = (nrhs>3)?mex_get_enum<mt::eRot_Ctr_Typ>(prhs[3]):mt::erct_geometric_ctr;
+	auto ctr_p = (nrhs>4)?mex_get_r_3d<T>(prhs[4]):mt::R_3d<T>(0, 0, 0);
 
 	/***************************************************************************************/
 	mt::Ptc_Atom<T> atoms(patoms_i, {0, 0, 0}, false, true);
 
 	u_0.normalize();
 
-	if (mt::is_rot_pt_geometric_ctr(rot_point_type))
+	if (mt::is_rot_ctr_geometric_ctr(ctr_type))
 	{
-		p_0 = mt::R_3d<T>(atoms.r_mean.x, atoms.r_mean.y, atoms.r_mean.z);
+		ctr_p = mt::R_3d<T>(atoms.r_mean.x, atoms.r_mean.y, atoms.r_mean.z);
 	}
 
-	atoms.rotate(theta, u_0, p_0);
+	atoms.rotate(theta, u_0, ctr_p);
 
 	auto patoms_o = mex_create_pVctr<T>({atoms.size(), atoms.cols_used}, plhs[0]);
 	atoms.cpy_to_ptr(patoms_o.data(), atoms.size(), 0, atoms.cols_used);

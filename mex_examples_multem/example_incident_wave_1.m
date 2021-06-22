@@ -42,8 +42,8 @@ input_multem.cond_lens_tp_inc_sigma = 32; % standard deviation (Å)
 input_multem.cond_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illumination_model=4
 input_multem.cond_lens_spt_inc_sigma = 0.2; % standard deviation: For parallel ilumination(Å^-1);otherwise (Å)
 input_multem.cond_lens_spt_inc_rad_npts = 8; % # of integration points. It will be only used if illumination_model=4
-input_multem.cond_lens_zero_defocus_type = 1; % eZDT_First = 1, eZDT_User_Define = 2
-input_multem.cond_lens_zero_defocus_plane = 0;
+input_multem.cond_lens_zero_def_typ = 1; % eZDT_First = 1, eZDT_User_Define = 2
+input_multem.cond_lens_zero_def_plane = 0;
 
 % for x = (0.5:0.1:0.6)*input_multem.spec_bs_x
 %  for y = (0.6:0.1:0.8)*input_multem.spec_bs_y

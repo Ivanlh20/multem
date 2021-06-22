@@ -1601,6 +1601,11 @@
 				m_size = 0;
 			}
 
+			void clear_shrink_to_fit()
+			{
+				destroy();
+			}
+
 			size_type sub_2_ind(const size_type& ix_0) const 
 			{ 
 				return ix_0;
@@ -2660,6 +2665,11 @@
 			void clear()
 			{
 				m_size = 0;
+			}
+
+			void clear_shrink_to_fit()
+			{
+				destroy();
 			}
 
 			size_type sub_2_ind(const size_type& ix_0) const 

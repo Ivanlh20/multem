@@ -71,7 +71,7 @@
 						case eiwt_convergent_wave:
 						{
 							auto f_0 = in_multem->cond_lens.c_10;
-							auto f_s = f_0 - (in_multem->cond_lens.zero_defocus_plane-z_init);
+							auto f_s = f_0 - (in_multem->cond_lens.zero_def_plane-z_init);
 							in_multem->cond_lens.set_defocus(f_s);
 
 							mt::fill(*stream, psi, T_c(0));
@@ -90,7 +90,7 @@
 						case eiwt_user_def_Wave:
 						{
 							// we need to include defocus
-							auto f_s = -(in_multem->cond_lens.zero_defocus_plane-z_init);
+							auto f_s = -(in_multem->cond_lens.zero_def_plane-z_init);
 
 							auto R = in_multem->grid_2d.factor_2pi_rv_ctr(beam_pos_2d.p);
 

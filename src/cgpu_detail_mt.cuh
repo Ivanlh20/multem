@@ -418,7 +418,7 @@
 			/***************************************************************************************/
 		#ifdef __CUDACC__
 			#define pFCN_TEMPLATE_AF(cnam, TpFcn)															\
-			template<ePot_Parm_Typ pot_parm_typ, class T, eDev Dev>										\
+			template<eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T, eDev Dev>										\
 			class pFcn_##cnam																				\
 			{																								\
 			public:																							\
@@ -427,9 +427,9 @@
 				pFcn_##cnam()																				\
 				{																							\
 					if (Dev==edev_cpu)																		\
-						pfcn = fcn_##cnam<pot_parm_typ, T>;													\
+						pfcn = fcn_##cnam<atomic_pot_parm_typ, T>;													\
 					else																					\
-						cudaMemcpyFromSymbol(&pfcn, pgpu_fcn_##cnam<pot_parm_typ, T>, sizeof(pFcn));		\
+						cudaMemcpyFromSymbol(&pfcn, pgpu_fcn_##cnam<atomic_pot_parm_typ, T>, sizeof(pFcn));		\
 				}																							\
 																											\
 				operator pFcn() 																			\
@@ -464,7 +464,7 @@
 			}
 		#else
 			#define pFCN_TEMPLATE_AF(cnam, TpFcn)															\
-			template<ePot_Parm_Typ pot_parm_typ, class T, eDev Dev>										\
+			template<eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T, eDev Dev>										\
 			class pFcn_##cnam																				\
 			{																								\
 			public:																							\
@@ -472,7 +472,7 @@
 																											\
 				pFcn_##cnam()																				\
 				{																							\
-					pfcn = fcn_##cnam<pot_parm_typ, T>;														\
+					pfcn = fcn_##cnam<atomic_pot_parm_typ, T>;														\
 				}																							\
 																											\
 				operator pFcn() 																			\
@@ -507,74 +507,74 @@
 			/***************************************************************************************/
 			/*************************************** feg *******************************************/
 			/***************************************************************************************/
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_doyle_0_4<pot_parm_typ, T>
+			enable_if_eappt_doyle_0_4<atomic_pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 4, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_doyle_0_4<pot_parm_typ, void>
+			enable_if_eappt_doyle_0_4<atomic_pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 4, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_4<pot_parm_typ, T>
+			enable_if_eappt_peng_0_4<atomic_pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_4<pot_parm_typ, void>
+			enable_if_eappt_peng_0_4<atomic_pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_12<pot_parm_typ, T>
+			enable_if_eappt_peng_0_12<atomic_pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_12<pot_parm_typ, void>
+			enable_if_eappt_peng_0_12<atomic_pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_kirkland_0_12<pot_parm_typ, T>
+			enable_if_eappt_kirkland_0_12<atomic_pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_lorentzian_v(x, 0, 3, cl, cnl) + fcn_spt_gauss_v(x, 3, 6, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_kirkland_0_12<pot_parm_typ, void>
+			enable_if_eappt_kirkland_0_12<atomic_pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_lorentzian_vd(x, 0, 3, cl, cnl, y, dy);
 				fcn_spt_gauss_vd<T, false>(x, 3, 6, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, T>
+			enable_if_eappt_weickenmeier_0_12<atomic_pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				const T x2 = x*x;
@@ -601,9 +601,9 @@
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, void>
+			enable_if_eappt_weickenmeier_0_12<atomic_pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				const T x2 = x*x;
@@ -630,9 +630,9 @@
 				}
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_lobato_0_12<pot_parm_typ, T>
+			enable_if_eappt_lobato_0_12<atomic_pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				const T x2 = x*x;
@@ -648,9 +648,9 @@
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_lobato_0_12<pot_parm_typ, void>
+			enable_if_eappt_lobato_0_12<atomic_pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				const T x2 = x*x;
@@ -665,9 +665,9 @@
 				}
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_ion_0_4<pot_parm_typ, T>
+			enable_if_eappt_peng_ion_0_4<atomic_pot_parm_typ, T>
 			fcn_feg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				auto y = fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -676,9 +676,9 @@
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_ion_0_4<pot_parm_typ, void>
+			enable_if_eappt_peng_ion_0_4<atomic_pot_parm_typ, void>
 			fcn_feg_dfeg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -693,8 +693,8 @@
 			using pFcn_feg1 = pFcn_clnl_3_1<T>;
 
 		#ifdef __CUDACC__
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_feg1<T> pgpu_fcn_feg = fcn_feg<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_feg1<T> pgpu_fcn_feg = fcn_feg<atomic_pot_parm_typ, T>;
 		#endif
 
 			pFCN_TEMPLATE_AF(feg, pFcn_feg1);
@@ -703,117 +703,117 @@
 			template <class T>
 			using pFcn_feg2 = pFcn_clnl_3_2<T>;
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_feg2<T> pgpu_fcn_feg_dfeg = fcn_feg_dfeg<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_feg2<T> pgpu_fcn_feg_dfeg = fcn_feg_dfeg<atomic_pot_parm_typ, T>;
 
 			pFCN_TEMPLATE_AF(feg_dfeg , pFcn_feg2);
 
 			/***************************************************************************************/
 			/***************************************** fxg *****************************************/
 			/***************************************************************************************/
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_doyle_0_4<pot_parm_typ, T>
+			enable_if_eappt_doyle_0_4<atomic_pot_parm_typ, T>
 			fcn_fxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl)
 			{
-				auto y = fcn_feg<pot_parm_typ, T>(x, cl, cnl);
+				auto y = fcn_feg<atomic_pot_parm_typ, T>(x, cl, cnl);
 				y = Z - x*x*y;
 
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_doyle_0_4<pot_parm_typ, void>
+			enable_if_eappt_doyle_0_4<atomic_pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
-				fcn_feg_dfeg<pot_parm_typ, T>(x, cl, cnl, y, dy);
+				fcn_feg_dfeg<atomic_pot_parm_typ, T>(x, cl, cnl, y, dy);
 				dy = -x*(T(2)*y + x*dy);
 				y = Z - x*x*y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_4<pot_parm_typ, T>
+			enable_if_eappt_peng_0_4<atomic_pot_parm_typ, T>
 			fcn_fxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl)
 			{
-				auto y = fcn_feg<pot_parm_typ, T>(x, cl, cnl);
+				auto y = fcn_feg<atomic_pot_parm_typ, T>(x, cl, cnl);
 				y = Z - x*x*y;
 
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_4<pot_parm_typ, void>
+			enable_if_eappt_peng_0_4<atomic_pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
-				fcn_feg_dfeg<pot_parm_typ, T>(x, cl, cnl, y, dy);
+				fcn_feg_dfeg<atomic_pot_parm_typ, T>(x, cl, cnl, y, dy);
 				dy = -x*(T(2)*y + x*dy);
 				y = Z - x*x*y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_12<pot_parm_typ, T>
+			enable_if_eappt_peng_0_12<atomic_pot_parm_typ, T>
 			fcn_fxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl)
 			{
-				auto y = fcn_feg<pot_parm_typ, T>(x, cl, cnl);
+				auto y = fcn_feg<atomic_pot_parm_typ, T>(x, cl, cnl);
 				y = Z - x*x*y;
 
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_12<pot_parm_typ, void>
+			enable_if_eappt_peng_0_12<atomic_pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
-				fcn_feg_dfeg<pot_parm_typ, T>(x, cl, cnl, y, dy);
+				fcn_feg_dfeg<atomic_pot_parm_typ, T>(x, cl, cnl, y, dy);
 				dy = -x*(T(2)*y + x*dy);
 				y = Z - x*x*y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_kirkland_0_12<pot_parm_typ, T>
+			enable_if_eappt_kirkland_0_12<atomic_pot_parm_typ, T>
 			fcn_fxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl)
 			{
-				auto y = fcn_feg<pot_parm_typ, T>(x, cl, cnl);
+				auto y = fcn_feg<atomic_pot_parm_typ, T>(x, cl, cnl);
 				y = Z - x*x*y;
 
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_kirkland_0_12<pot_parm_typ, void>
+			enable_if_eappt_kirkland_0_12<atomic_pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
-				fcn_feg_dfeg<pot_parm_typ, T>(x, cl, cnl, y, dy);
+				fcn_feg_dfeg<atomic_pot_parm_typ, T>(x, cl, cnl, y, dy);
 				dy = -x*(T(2)*y + x*dy);
 				y = Z - x*x*y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, T>
+			enable_if_eappt_weickenmeier_0_12<atomic_pot_parm_typ, T>
 			fcn_fxg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 6, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, void>
+			enable_if_eappt_weickenmeier_0_12<atomic_pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 6, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_lobato_0_12<pot_parm_typ, T>
+			enable_if_eappt_lobato_0_12<atomic_pot_parm_typ, T>
 			fcn_fxg(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				const T x2 = x*x;
@@ -829,9 +829,9 @@
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_lobato_0_12<pot_parm_typ, void>
+			enable_if_eappt_lobato_0_12<atomic_pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				const T x2 = x*x;
@@ -848,23 +848,23 @@
 				dy = T(-4)*x*dy;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_ion_0_4<pot_parm_typ, T>
+			enable_if_eappt_peng_ion_0_4<atomic_pot_parm_typ, T>
 			fcn_fxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl)
 			{
-				auto y = fcn_feg<pot_parm_typ, T>(x, cl, cnl);
+				auto y = fcn_feg<atomic_pot_parm_typ, T>(x, cl, cnl);
 				y = Z - x*x*y;
 
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_ion_0_4<pot_parm_typ, void>
+			enable_if_eappt_peng_ion_0_4<atomic_pot_parm_typ, void>
 			fcn_fxg_dfxg(const T& x, const T& Z, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
-				fcn_feg_dfeg<pot_parm_typ, T>(x, cl, cnl, y, dy);
+				fcn_feg_dfeg<atomic_pot_parm_typ, T>(x, cl, cnl, y, dy);
 				dy = -x*(T(2)*y + x*dy);
 				y = Z - x*x*y;
 			}
@@ -873,145 +873,145 @@
 			template <class T>
 			using pFcn_fxg1 = pFcn_clnl_4_1<T>;
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_fxg1<T> pgpu_fcn_fxg = fcn_fxg<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_fxg1<T> pgpu_fcn_fxg = fcn_fxg<atomic_pot_parm_typ, T>;
 
 			pFCN_TEMPLATE_AF(fxg, pFcn_fxg1);
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_clnl_3_1<T> pgpu_fcn_fxg_spec = fcn_fxg<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_clnl_3_1<T> pgpu_fcn_fxg_spec = fcn_fxg<atomic_pot_parm_typ, T>;
 
-			pFCN_TEMPLATE_AF_SPEC(fxg, pFcn_clnl_3_1, eppt_weickenmeier_0_12);
+			pFCN_TEMPLATE_AF_SPEC(fxg, pFcn_clnl_3_1, eappt_weickenmeier_0_12);
 
-			pFCN_TEMPLATE_AF_SPEC(fxg, pFcn_clnl_3_1, eppt_lobato_0_12);
+			pFCN_TEMPLATE_AF_SPEC(fxg, pFcn_clnl_3_1, eappt_lobato_0_12);
 
 			/***************************************************************************************/
 			template <class T>
 			using pFcn_fxg2 = pFcn_clnl_4_2<T>;
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_fxg2<T> pgpu_fcn_fxg_dfxg = fcn_fxg_dfxg<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_fxg2<T> pgpu_fcn_fxg_dfxg = fcn_fxg_dfxg<atomic_pot_parm_typ, T>;
 
 			pFCN_TEMPLATE_AF(fxg_dfxg, pFcn_fxg2);
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_clnl_3_2<T> pgpu_fcn_fxg_dfxg_spec = fcn_fxg_dfxg<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_clnl_3_2<T> pgpu_fcn_fxg_dfxg_spec = fcn_fxg_dfxg<atomic_pot_parm_typ, T>;
 
-			pFCN_TEMPLATE_AF_SPEC(fxg_dfxg, pFcn_clnl_3_2, eppt_weickenmeier_0_12);
+			pFCN_TEMPLATE_AF_SPEC(fxg_dfxg, pFcn_clnl_3_2, eappt_weickenmeier_0_12);
 
-			pFCN_TEMPLATE_AF_SPEC(fxg_dfxg, pFcn_clnl_3_2, eppt_lobato_0_12);
+			pFCN_TEMPLATE_AF_SPEC(fxg_dfxg, pFcn_clnl_3_2, eappt_lobato_0_12);
 
 			/***************************************************************************************/
 			/****************************************** pr *****************************************/
 			/***************************************************************************************/
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_doyle_0_4<pot_parm_typ, T>
+			enable_if_eappt_doyle_0_4<atomic_pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_pr_gauss_feg_v(x, 0, 4, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_doyle_0_4<pot_parm_typ, void>
+			enable_if_eappt_doyle_0_4<atomic_pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_pr_gauss_feg_vd(x, 0, 4, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_4<pot_parm_typ, T>
+			enable_if_eappt_peng_0_4<atomic_pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_pr_gauss_feg_v(x, 0, 5, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_4<pot_parm_typ, void>
+			enable_if_eappt_peng_0_4<atomic_pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_pr_gauss_feg_vd(x, 0, 5, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_12<pot_parm_typ, T>
+			enable_if_eappt_peng_0_12<atomic_pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_12<pot_parm_typ, void>
+			enable_if_eappt_peng_0_12<atomic_pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_pr_gauss_feg_vd(x, 0, 5, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_kirkland_0_12<pot_parm_typ, T>
+			enable_if_eappt_kirkland_0_12<atomic_pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_yukawa_v(x, 0, 3, cl, cnl) + fcn_spt_pr_gauss_feg_v(x, 3, 6, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_kirkland_0_12<pot_parm_typ, void>
+			enable_if_eappt_kirkland_0_12<atomic_pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_yukawa_vd(x, 0, 3, cl, cnl, y, dy);
 				fcn_spt_pr_gauss_feg_vd<T, false>(x, 3, 6, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, T>
+			enable_if_eappt_weickenmeier_0_12<atomic_pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 6, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, void>
+			enable_if_eappt_weickenmeier_0_12<atomic_pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 6, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_lobato_0_12<pot_parm_typ, T>
+			enable_if_eappt_lobato_0_12<atomic_pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_exp_v(x, 0, 5, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_lobato_0_12<pot_parm_typ, void>
+			enable_if_eappt_lobato_0_12<atomic_pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_exp_vd(x, 0, 5, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_ion_0_4<pot_parm_typ, T>
+			enable_if_eappt_peng_ion_0_4<atomic_pot_parm_typ, T>
 			fcn_pr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_pr_gauss_feg_v(x, 0, 5, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_ion_0_4<pot_parm_typ, void>
+			enable_if_eappt_peng_ion_0_4<atomic_pot_parm_typ, void>
 			fcn_pr_dpr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_pr_gauss_feg_vd(x, 0, 5, cl, cnl, y, dy);
@@ -1021,8 +1021,8 @@
 			template <class T>
 			using pFcn_pr1 = pFcn_clnl_3_1<T>;
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_pr1<T> pgpu_fcn_pr = fcn_pr<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_pr1<T> pgpu_fcn_pr = fcn_pr<atomic_pot_parm_typ, T>;
 
 			pFCN_TEMPLATE_AF(pr, pFcn_pr1);
 
@@ -1030,82 +1030,82 @@
 			template <class T>
 			using pFcn_pr2 = pFcn_clnl_3_2<T>;
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_pr2<T> pgpu_fcn_pr_dpr = fcn_pr_dpr<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_pr2<T> pgpu_fcn_pr_dpr = fcn_pr_dpr<atomic_pot_parm_typ, T>;
 
 			pFCN_TEMPLATE_AF(pr_dpr , pFcn_pr2);
 
 			/***************************************************************************************/
 			/***************************************** vr ******************************************/
 			/***************************************************************************************/
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_doyle_0_4<pot_parm_typ, T>
+			enable_if_eappt_doyle_0_4<atomic_pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 4, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_doyle_0_4<pot_parm_typ, void>
+			enable_if_eappt_doyle_0_4<atomic_pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 4, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_4<pot_parm_typ, T>
+			enable_if_eappt_peng_0_4<atomic_pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_4<pot_parm_typ, void>
+			enable_if_eappt_peng_0_4<atomic_pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_12<pot_parm_typ, T>
+			enable_if_eappt_peng_0_12<atomic_pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_12<pot_parm_typ, void>
+			enable_if_eappt_peng_0_12<atomic_pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_kirkland_0_12<pot_parm_typ, T>
+			enable_if_eappt_kirkland_0_12<atomic_pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_yukawa_v(x, 0, 3, cl, cnl) + fcn_spt_gauss_v(x, 3, 6, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_kirkland_0_12<pot_parm_typ, void>
+			enable_if_eappt_kirkland_0_12<atomic_pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_yukawa_vd(x, 0, 3, cl, cnl, y, dy);
 				fcn_spt_gauss_vd<T, false>(x, 3, 6, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, T>
+			enable_if_eappt_weickenmeier_0_12<atomic_pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				const T ix = T(1)/x;
@@ -1120,9 +1120,9 @@
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, void>
+			enable_if_eappt_weickenmeier_0_12<atomic_pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				const T c_pii2 = 1.772453850905516027298;
@@ -1139,9 +1139,9 @@
 				}
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_lobato_0_12<pot_parm_typ, T>
+			enable_if_eappt_lobato_0_12<atomic_pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				const T ix = T(1)/x;
@@ -1156,9 +1156,9 @@
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_lobato_0_12<pot_parm_typ, void>
+			enable_if_eappt_lobato_0_12<atomic_pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				const T ix = T(1)/x;
@@ -1174,9 +1174,9 @@
 				}
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_ion_0_4<pot_parm_typ, T>
+			enable_if_eappt_peng_ion_0_4<atomic_pot_parm_typ, T>
 			fcn_vr(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				auto y = fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -1185,9 +1185,9 @@
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_ion_0_4<pot_parm_typ, void>
+			enable_if_eappt_peng_ion_0_4<atomic_pot_parm_typ, void>
 			fcn_vr_dvr(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -1201,8 +1201,8 @@
 			template <class T>
 			using pFcn_vr1 = pFcn_clnl_3_1<T>;
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_vr1<T> pgpu_fcn_vr = fcn_vr<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_vr1<T> pgpu_fcn_vr = fcn_vr<atomic_pot_parm_typ, T>;
 
 			pFCN_TEMPLATE_AF(vr, pFcn_vr1);
 
@@ -1210,34 +1210,34 @@
 			template <class T>
 			using pFcn_vr2 = pFcn_clnl_3_2<T>;
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_vr2<T> pgpu_fcn_vr_dvr = fcn_vr_dvr<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_vr2<T> pgpu_fcn_vr_dvr = fcn_vr_dvr<atomic_pot_parm_typ, T>;
 
 			pFCN_TEMPLATE_AF(vr_dvr , pFcn_vr2);
 
 			/***************************************************************************************/
 			/***************************************** vz ******************************************/
 			/***************************************************************************************/
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL
 			T fcn_vz(const T& x, const T& z_0, const T& z_e, Ctpr<T> cl, Ctpr<T> cnl, const dt_int32& n_q, Ctpr<T> qx, Ctpr<T> qw)
 			{
-				return fcn_int_vz_z0_ze(x, z_0, z_e, cl, cnl, n_q, qx, qw, fcn_vr<pot_parm_typ, T>);
+				return fcn_int_vz_z0_ze(x, z_0, z_e, cl, cnl, n_q, qx, qw, fcn_vr<atomic_pot_parm_typ, T>);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL
 			void fcn_vz_dvz(const T& x, const T& z_0, const T& z_e, Ctpr<T> cl, Ctpr<T> cnl, const dt_int32& n_q, Ctpr<T> qx, Ctpr<T> qw, T& y, T& dy)
 			{
-				fcn_int_vz_dvz_z0_ze(x, z_0, z_e, cl, cnl, n_q, qx, qw, y, dy, fcn_vr_dvr<pot_parm_typ, T>);
+				fcn_int_vz_dvz_z0_ze(x, z_0, z_e, cl, cnl, n_q, qx, qw, y, dy, fcn_vr_dvr<atomic_pot_parm_typ, T>);
 			}
 
 			 /***************************************************************************************/
 			template <class T>
 			using pFcn_vz1 = pFcn_clnl_8_1<T>;
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_vz1<T> pgpu_fcn_vz = fcn_vz<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_vz1<T> pgpu_fcn_vz = fcn_vz<atomic_pot_parm_typ, T>;
 
 			pFCN_TEMPLATE_AF(vz, pFcn_vz1);
 
@@ -1245,65 +1245,65 @@
 			template <class T>
 			using pFcn_vz2 = pFcn_clnl_8_2<T>;
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_vz2<T> pgpu_fcn_vz_dvz = fcn_vz_dvz<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_vz2<T> pgpu_fcn_vz_dvz = fcn_vz_dvz<atomic_pot_parm_typ, T>;
 
 			pFCN_TEMPLATE_AF(vz_dvz , pFcn_vz2);
 
 			 /***************************************************************************************/
 			/****************************************** vzp *****************************************/
 			 /***************************************************************************************/
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_doyle_0_4<pot_parm_typ, T>
+			enable_if_eappt_doyle_0_4<atomic_pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 4, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_doyle_0_4<pot_parm_typ, void>
+			enable_if_eappt_doyle_0_4<atomic_pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 4, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_4<pot_parm_typ, T>
+			enable_if_eappt_peng_0_4<atomic_pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_4<pot_parm_typ, void>
+			enable_if_eappt_peng_0_4<atomic_pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_12<pot_parm_typ, T>
+			enable_if_eappt_peng_0_12<atomic_pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				 return fcn_spt_gauss_v(x, 0, 5, cl, cnl);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_0_12<pot_parm_typ, void>
+			enable_if_eappt_peng_0_12<atomic_pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_kirkland_0_12<pot_parm_typ, T>
+			enable_if_eappt_kirkland_0_12<atomic_pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				T y = 0;
@@ -1318,9 +1318,9 @@
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_kirkland_0_12<pot_parm_typ, void>
+			enable_if_eappt_kirkland_0_12<atomic_pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				y = dy = 0;
@@ -1334,25 +1334,25 @@
 				fcn_spt_gauss_vd<T, false>(x, 3, 6, cl, cnl, y, dy);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, T>
+			enable_if_eappt_weickenmeier_0_12<atomic_pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, const dt_int32& n_q, Ctpr<T> qx, Ctpr<T> qw)
 			{
-				return fcn_int_vz_ninfty_pinfty(x, cl, cnl, n_q, qx, qw, fcn_vr<pot_parm_typ, T>);
+				return fcn_int_vz_ninfty_pinfty(x, cl, cnl, n_q, qx, qw, fcn_vr<atomic_pot_parm_typ, T>);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_weickenmeier_0_12<pot_parm_typ, void>
+			enable_if_eappt_weickenmeier_0_12<atomic_pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, const dt_int32& n_q, Ctpr<T> qx, Ctpr<T> qw, T& y, T& dy)
 			{
-				fcn_int_vz_dvz_ninfty_pinfty(x, cl, cnl, n_q, qx, qw, y, dy, fcn_vr_dvr<pot_parm_typ, T>);
+				fcn_int_vz_dvz_ninfty_pinfty(x, cl, cnl, n_q, qx, qw, y, dy, fcn_vr_dvr<atomic_pot_parm_typ, T>);
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_lobato_0_12<pot_parm_typ, T>
+			enable_if_eappt_lobato_0_12<atomic_pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				T y = 0;
@@ -1365,9 +1365,9 @@
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_lobato_0_12<pot_parm_typ, void>
+			enable_if_eappt_lobato_0_12<atomic_pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				y = dy = 0;
@@ -1381,9 +1381,9 @@
 				}
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_ion_0_4<pot_parm_typ, T>
+			enable_if_eappt_peng_ion_0_4<atomic_pot_parm_typ, T>
 			fcn_vzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl)
 			{
 				auto y = fcn_spt_gauss_v(x, 0, 5, cl, cnl);
@@ -1392,9 +1392,9 @@
 				return y;
 			}
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
 			CGPU_EXEC_INL 
-			enable_if_eppt_peng_ion_0_4<pot_parm_typ, void>
+			enable_if_eappt_peng_ion_0_4<atomic_pot_parm_typ, void>
 			fcn_vzp_dvzp(const T& x, Ctpr<T> cl, Ctpr<T> cnl, T& y, T& dy)
 			{
 				fcn_spt_gauss_vd(x, 0, 5, cl, cnl, y, dy);
@@ -1406,29 +1406,29 @@
 			template <class T>
 			using pFcn_vzp1 = pFcn_clnl_3_1<T>;
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_vzp1<T> pgpu_fcn_vzp = fcn_vzp<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_vzp1<T> pgpu_fcn_vzp = fcn_vzp<atomic_pot_parm_typ, T>;
 
 			pFCN_TEMPLATE_AF(vzp, pFcn_vzp1);
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_clnl_6_1<T> pgpu_fcn_vzp_spec = fcn_vzp<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_clnl_6_1<T> pgpu_fcn_vzp_spec = fcn_vzp<atomic_pot_parm_typ, T>;
 
-			pFCN_TEMPLATE_AF_SPEC(vzp, pFcn_clnl_6_1, eppt_weickenmeier_0_12);
+			pFCN_TEMPLATE_AF_SPEC(vzp, pFcn_clnl_6_1, eappt_weickenmeier_0_12);
 
 			/***************************************************************************************/
 			template <class T>
 			using pFcn_vzp2 = pFcn_clnl_3_2<T>;
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_vzp2<T> pgpu_fcn_vzp_dvzp = fcn_vzp_dvzp<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_vzp2<T> pgpu_fcn_vzp_dvzp = fcn_vzp_dvzp<atomic_pot_parm_typ, T>;
 
 			pFCN_TEMPLATE_AF(vzp_dvzp, pFcn_vzp2);
 
-			template <ePot_Parm_Typ pot_parm_typ, class T>
-			GPU_EXEC pFcn_clnl_6_2<T> pgpu_fcn_vzp_dvzp_spec = fcn_vzp_dvzp<pot_parm_typ, T>;
+			template <eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, class T>
+			GPU_EXEC pFcn_clnl_6_2<T> pgpu_fcn_vzp_dvzp_spec = fcn_vzp_dvzp<atomic_pot_parm_typ, T>;
 
-			pFCN_TEMPLATE_AF_SPEC(vzp_dvzp, pFcn_clnl_6_2, eppt_weickenmeier_0_12);
+			pFCN_TEMPLATE_AF_SPEC(vzp_dvzp, pFcn_clnl_6_2, eappt_weickenmeier_0_12);
 		}
 	}
 

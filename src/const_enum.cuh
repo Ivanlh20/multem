@@ -374,7 +374,7 @@
 			edev_cpu = 1, edev_gpu = 2, edev_cpu_gpu = 3
 		};
 
-		/* functions Type */
+		/* functions type */
 		enum eFcn_typ
 		{
 			efcn_cos_tap = 1, efcn_gauss = 2, efcn_exp = 3, efcn_fermi = 5, efcn_butwth = 6, efcn_hann = 7
@@ -392,7 +392,7 @@
 			eprc_float32 = 1, eprc_float64 = 2
 		};
 
-		/* Show Data Type */
+		/* Show Data type */
 		enum eShow_CData
 		{
 			escd_creal = 1, escs_cimag = 2, escd_cmod = 3, escd_cphase = 4
@@ -404,9 +404,9 @@
 			eOM_Normal = 1, eOM_Advanced = 2
 		};
 
-		enum eRot_Point_Typ
+		enum eRot_Ctr_Typ
 		{
-			erpt_none = 0, erpt_geometric_ctr = 1, erpt_user_def = 2
+			erct_none = 0, erct_geometric_ctr = 1, erct_user_def = 2
 		};
 
 		/* Real or Fourier space */
@@ -498,25 +498,25 @@
 		};
 	}
 	
-	/* constant -  enumeration comparison */
+	/* constant - enumeration comparison */
 	namespace mt
 	{
 		inline
-		dt_bool is_rot_pt_none(const eRot_Point_Typ &type)
+		dt_bool is_rot_ctr_none(const eRot_Ctr_Typ &type)
 		{
-			return type == mt::erpt_none;
+			return type == mt::erct_none;
 		}
 
 		inline
-		dt_bool is_rot_pt_geometric_ctr(const eRot_Point_Typ &type)
+		dt_bool is_rot_ctr_geometric_ctr(const eRot_Ctr_Typ &type)
 		{
-			return type == mt::erpt_geometric_ctr;
+			return type == mt::erct_geometric_ctr;
 		}		
 		
 		inline
-		dt_bool is_rot_pt_user_def(const eRot_Point_Typ &type)
+		dt_bool is_rot_ctr_user_def(const eRot_Ctr_Typ &type)
 		{
-			return type == mt::erpt_user_def;
+			return type == mt::erct_user_def;
 		}
 	}
 

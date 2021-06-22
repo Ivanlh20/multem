@@ -428,6 +428,7 @@
 	{
 		return mex_get_data_type_from_field(mxA, 0, field_name);
 	}
+	
 	/***************************************************************************************/
 	/********************** Vector: template for reading matlab data ***********************/
 	/***************************************************************************************/
@@ -553,6 +554,73 @@
 
 		return mt::Vctr_cpu<T>();
 	}
+	
+	template <class T>
+	mt::Vctr_r_3d_cpu<T> mex_get_vctr_r_3d(const mxArray* mxA) 
+	{
+		auto data_type = mex_get_data_type(mxA);
+
+		switch (data_type) 
+		{
+			case edt_bool:
+			{
+				auto ptr = mex_get_pvctr<dt_bool>(mxA);
+				return {ptr.data(), ptr.s0()};
+			}
+			case edt_int8:
+			{
+				auto ptr = mex_get_pvctr<dt_int8>(mxA);
+				return {ptr.data(), ptr.s0()};
+			}
+			case edt_uint8:		
+			{
+				auto ptr = mex_get_pvctr<dt_uint8>(mxA);
+				return {ptr.data(), ptr.s0()};
+			}
+			case edt_int16:
+			{
+				auto ptr = mex_get_pvctr<dt_int16>(mxA);
+				return {ptr.data(), ptr.s0()};
+			}
+			case edt_uint16:
+			{
+				auto ptr = mex_get_pvctr<dt_uint16>(mxA);
+				return {ptr.data(), ptr.s0()};
+			}
+			case edt_int32:
+			{
+				auto ptr = mex_get_pvctr<dt_int32>(mxA);
+				return {ptr.data(), ptr.s0()};
+			}
+			case edt_uint32:
+			{
+				auto ptr = mex_get_pvctr<dt_uint32>(mxA);
+				return {ptr.data(), ptr.s0()};
+			}
+			case edt_int64:
+			{
+				auto ptr = mex_get_pvctr<dt_int64>(mxA);
+				return {ptr.data(), ptr.s0()};
+			}
+			case edt_uint64:
+			{
+				auto ptr = mex_get_pvctr<dt_uint64>(mxA);
+				return {ptr.data(), ptr.s0()};
+			}
+			case edt_float32:
+			{
+				auto ptr = mex_get_pvctr<dt_float32>(mxA);
+				return {ptr.data(), ptr.s0()};
+			} 
+			case edt_float64:
+			{
+				auto ptr = mex_get_pvctr<dt_float64>(mxA);
+				return {ptr.data(), ptr.s0()};
+			}
+		}
+
+		return mt::Vctr_cpu<T>();
+	}
 
 	/***************************************************************************************/
 	/********************************** get dimensions *************************************/
@@ -580,83 +648,50 @@
 	}
 
 	/***************************************************************************************/
-	/************************************ get r center *************************************/
+	/************************************* get bool ****************************************/
 	/***************************************************************************************/
-	template <class T>
-	mt::R_3d<T> mex_get_r_3d_r_c(const mxArray* mxA, mt::R_3d<T> r_c_0 = mt::R_3d<T>(0, 0, 0)) 
-	{
-		const auto vctr = mex_get_vctr<T>(mxA);
-		const dt_int32 n_vctr = vctr.size_32();
-		mt::R_3d<T> r = r_c_0;
-
-		if (n_vctr<2)
-			r = mt::R_3d<T>(vctr[0], vctr[0], vctr[0]);
-		else if (n_vctr<3)
-			r = mt::R_3d<T>(vctr[0], vctr[1], vctr[1]);
-		else if (n_vctr<3)
-			r = mt::R_3d<T>(vctr[0], vctr[1], vctr[2]);
-
-		return r;
-	}
-
-	/***************************************************************************************/
-	/*********************************** get pixel size ************************************/
-	/***************************************************************************************/
-	template <class T>
-	mt::R_3d<T> mex_get_r_3d_pxs(const mxArray* mxA) 
-	{
-		const auto vctr = mex_get_vctr<T>(mxA);
-		const dt_int32 n_vctr = vctr.size_32();
-		mt::R_3d<T> r(T(1), T(1), T(1));
-
-		if (n_vctr<1)
-			r = mt::R_3d<T>(T(1), T(1), T(1));
-		else if (n_vctr<2)
-			r = mt::R_3d<T>(vctr[0], vctr[0], vctr[0]);
-		else if (n_vctr<3)
-			r = mt::R_3d<T>(vctr[0], vctr[1], vctr[1]);
-		else if (n_vctr<3)
-			r = mt::R_3d<T>(vctr[0], vctr[1], vctr[2]);
-
-		return r;
-	}
-
-	/***************************************************************************************/
-	/*********************************** get box size **************************************/
-	/***************************************************************************************/
-	template <class T>
-	mt::R_3d<T> mex_get_r_3d_bs(const mxArray* mxA, mt::R_3d<T> f) 
-	{
-		return mex_get_r_3d_pxs<T>(mxA)*f;
-	}	
-	
-	template <class T, class U>
-	mt::R_3d<T> mex_get_r_3d_bs(const mxArray* mxA, mt::Vctr_cpu<U>& f) 
-	{
-		return mex_get_r_3d_bs<T>(mxA, mt::R_3d<T>(f.m_data, f.size_32()));
-	}	
-
-	template <class T, class ST>
-	mt::R_3d<T> mex_get_r_3d_bs(const mxArray* mxA, const dt_shape_st<ST>& shape) 
-	{
-		return mex_get_r_3d_bs<T>(mxA, mt::R_3d<T>(shape[1], shape[0], shape[2]));
-	}
-
-	/***************************************************************************************/
-	/************************************ get number ***************************************/
-	/***************************************************************************************/
-	template <class T>
 	dt_bool mex_get_bool(const mxArray* mxA)
 	{
 		auto data = static_cast<dt_int32>(std::round(mxGetScalar(mxA)));
 		return data > 0;
 	}
 
+	/***************************************************************************************/
+	/*********************************** get enumeration ***********************************/
+	/***************************************************************************************/
 	template <class T>
 	T mex_get_enum(const mxArray* mxA)
 	{
 		auto data = static_cast<dt_int32>(std::round(mxGetScalar(mxA)));
 		return static_cast<T>(data);
+	}
+
+	/***************************************************************************************/
+	/************************************ get number ***************************************/
+	/***************************************************************************************/
+	template <class T>
+	T mex_get_num(const mxArray* mxA)
+	{
+		auto data = static_cast<dt_int32>(std::round(mxGetScalar(mxA)));
+		return static_cast<T>(data);
+	}
+
+	template <>
+	dt_int32 mex_get_num<dt_int32>(const mxArray* mxA)
+	{
+		return static_cast<dt_int32>(std::round(mxGetScalar(mxA)));
+	}
+
+	template <>
+	dt_float32 mex_get_num<dt_float32>(const mxArray* mxA)
+	{
+		return static_cast<dt_float32>(mxGetScalar(mxA));
+	}
+
+	template <>
+	dt_float64 mex_get_num<dt_float64>(const mxArray* mxA)
+	{
+		return mxGetScalar(mxA);
 	}
 
 	dt_cfloat64 mex_get_cmplx_num(const mxArray* mxA)
@@ -724,31 +759,6 @@
 		return {dt_float64(0), dt_float64(0)};
 	}
 
-	template <class T>
-	T mex_get_num(const mxArray* mxA)
-	{
-		auto data = static_cast<dt_int32>(std::round(mxGetScalar(mxA)));
-		return static_cast<T>(data);
-	}
-
-	template <>
-	dt_int32 mex_get_num<dt_int32>(const mxArray* mxA)
-	{
-		return static_cast<dt_int32>(std::round(mxGetScalar(mxA)));
-	}
-
-	template <>
-	dt_float32 mex_get_num<dt_float32>(const mxArray* mxA)
-	{
-		return static_cast<dt_float32>(mxGetScalar(mxA));
-	}
-
-	template <>
-	dt_float64 mex_get_num<dt_float64>(const mxArray* mxA)
-	{
-		return mxGetScalar(mxA);
-	}
-
 	template <>
 	dt_cfloat32 mex_get_num<dt_cfloat32>(const mxArray* mxA)
 	{
@@ -764,7 +774,6 @@
 
 		return {num.real(), num.imag()};
 	}
-
 
 	/***************************************************************************************/
 	/******************************** get r_2d/r_3d data ***********************************/
@@ -798,6 +807,80 @@
 	}
 
 	/***************************************************************************************/
+	/******************************** get repeat r_2d/r_3d  ********************************/
+	/***************************************************************************************/
+	template <class T>
+	mt::R_2d<T> mex_get_r_2d_rep(const mxArray* mxA) 
+	{
+		const auto vctr = mex_get_vctr<T>(mxA);
+		const auto n_vctr = vctr.size_32();
+
+		if (n_vctr<1)
+			return {1, 1};
+		else if (n_vctr<2)
+			return {vctr[0], vctr[0]};
+		else
+			return {vctr[0], vctr[1]};
+	}
+	
+	template <class T>
+	mt::R_3d<T> mex_get_r_3d_rep(const mxArray* mxA) 
+	{
+		const auto vctr = mex_get_vctr<T>(mxA);
+		const auto n_vctr = vctr.size_32();
+
+		if (n_vctr<1)
+			return {1, 1};
+		else if (n_vctr<2)
+			return {vctr[0], vctr[0], vctr[0]};		
+		else if (n_vctr<3)
+			return {vctr[0], vctr[1], vctr[1]};
+		else
+			return {vctr[0], vctr[1], vctr[2]};
+	}
+
+	/***************************************************************************************/
+	/*********************************** get box size **************************************/
+	/***************************************************************************************/
+	template <class T>
+	mt::R_3d<T> mex_get_r_3d_bs(const mxArray* mxA, mt::R_3d<T> f) 
+	{
+		return mex_get_r_3d_rep<T>(mxA)*f;
+	}	
+	
+	template <class T, class U>
+	mt::R_3d<T> mex_get_r_3d_bs(const mxArray* mxA, mt::Vctr_cpu<U>& f) 
+	{
+		return mex_get_r_3d_bs<T>(mxA, mt::R_3d<T>(f.m_data, f.size_32()));
+	}	
+
+	template <class T, class ST>
+	mt::R_3d<T> mex_get_r_3d_bs(const mxArray* mxA, const dt_shape_st<ST>& shape) 
+	{
+		return mex_get_r_3d_bs<T>(mxA, mt::R_3d<T>(shape[1], shape[0], shape[2]));
+	}
+
+	/***************************************************************************************/
+	/************************************ get r center *************************************/
+	/***************************************************************************************/
+	template <class T>
+	mt::R_3d<T> mex_get_r_3d_r_c(const mxArray* mxA, mt::R_3d<T> r_c_0 = mt::R_3d<T>(0, 0, 0)) 
+	{
+		const auto vctr = mex_get_vctr<T>(mxA);
+		const dt_int32 n_vctr = vctr.size_32();
+		mt::R_3d<T> r = r_c_0;
+
+		if (n_vctr<2)
+			r = mt::R_3d<T>(vctr[0], vctr[0], vctr[0]);
+		else if (n_vctr<3)
+			r = mt::R_3d<T>(vctr[0], vctr[1], vctr[1]);
+		else if (n_vctr<3)
+			r = mt::R_3d<T>(vctr[0], vctr[1], vctr[2]);
+
+		return r;
+	}
+
+	/***************************************************************************************/
 	/********************************** get data by field **********************************/
 	/***************************************************************************************/
 	template <class T>
@@ -819,7 +902,109 @@
 	{
 		return mex_get_pvctr_from_field<T>(mxA, 0, field_name);
 	}
+	
+	/***************************************************************************************/
+	template <class T>
+	mt::Vctr_cpu<T> mex_get_vctr_from_field(const mxArray* mxA, const dt_int32& idx, const char *field_name)
+	{
+		if (mex_field_exist(mxA, field_name))
+		{
+			return mex_get_vctr<T>(mxGetField(mxA, idx, field_name));
+		}
+		else
+		{
+			mexPrintf("Field name '%s' do not exist\n", field_name);
+			return mex_get_vctr<T>(nullptr);
+		}
+	}
 
+	template <class T>
+	mt::Vctr_cpu<T> mex_get_vctr_from_field(const mxArray* mxA, const char *field_name)
+	{
+		return mex_get_pvctr_from_field<T>(mxA, 0, field_name);
+	}
+		
+	/***************************************************************************************/
+	template <class T>
+	mt::Vctr_r_2d_cpu<T> mex_get_vctr_r_2d_from_field(const mxArray* mxA, const dt_int32& idx, const char *field_name)
+	{
+		if (mex_field_exist(mxA, field_name))
+		{
+			return mex_get_vctr_r_2d<T>(mxGetField(mxA, idx, field_name));
+		}
+		else
+		{
+			mexPrintf("Field name '%s' do not exist\n", field_name);
+			return mex_get_vctr_r_2d<T>(nullptr);
+		}
+	}
+
+	template <class T>
+	mt::Vctr_r_2d_cpu<T> mex_get_vctr_r_2d_from_field(const mxArray* mxA, const char *field_name)
+	{
+		return mex_get_vctr_r_2d_from_field<T>(mxA, 0, field_name);
+	}
+			
+	/***************************************************************************************/
+	template <class T>
+	mt::Vctr_r_3d_cpu<T> mex_get_vctr_r_3d_from_field(const mxArray* mxA, const dt_int32& idx, const char *field_name)
+	{
+		if (mex_field_exist(mxA, field_name))
+		{
+			return mex_get_vctr_r_3d<T>(mxGetField(mxA, idx, field_name));
+		}
+		else
+		{
+			mexPrintf("Field name '%s' do not exist\n", field_name);
+			return mex_get_vctr_r_3d<T>(nullptr);
+		}
+	}
+
+	template <class T>
+	mt::Vctr_r_3d_cpu<T> mex_get_vctr_r_3d_from_field(const mxArray* mxA, const char *field_name)
+	{
+		return mex_get_vctr_r_3d_from_field<T>(mxA, 0, field_name);
+	}
+	
+	/***************************************************************************************/
+	dt_bool mex_get_bool_from_field(const mxArray* mxA, const dt_int32& idx, const char *field_name)
+	{
+		if (mex_field_exist(mxA, idx, field_name))
+		{
+			return mex_get_bool(mxGetField(mxA, idx, field_name));
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	dt_bool mex_get_bool_from_field(const mxArray* mxA, const char *field_name)
+	{
+		return mex_get_bool_from_field(mxA, 0, field_name);
+	}
+	
+	/***************************************************************************************/
+	template <class T>
+	T mex_get_enum_from_field(const mxArray* mxA, const dt_int32& idx, const char *field_name)
+	{
+		if (mex_field_exist(mxA, idx, field_name))
+		{
+			return mex_get_enum<T>(mxGetField(mxA, idx, field_name));
+		}
+		else
+		{
+			return T(0);
+		}
+	}
+
+	template <class T>
+	T mex_get_enum_from_field(const mxArray* mxA, const char *field_name)
+	{
+		return mex_get_enum_from_field<T>(mxA, 0, field_name);
+	}
+	
+	/***************************************************************************************/	
 	template <class T>
 	T mex_get_num_from_field(const mxArray* mxA, const dt_int32& idx, const char *field_name)
 	{
@@ -839,6 +1024,7 @@
 		return mex_get_num_from_field<T>(mxA, 0, field_name);
 	}
 
+	/***************************************************************************************/	
 	template <class T>
 	mt::R_2d<T> mex_get_r_2d_from_field(const mxArray* mxA, const dt_int32& idx, const char *field_name, mt::R_2d<T> r_d = mt::R_2d<T>(0, 0))
 	{
@@ -858,7 +1044,8 @@
 	{
 		return mex_get_r_2d_from_field<T>(mxA, 0, field_name, r_d);
 	}
-
+	
+	/***************************************************************************************/
 	template <class T>
 	mt::R_3d<T> mex_get_r_3d_from_field(const mxArray* mxA, const dt_int32& idx, const char *field_name, mt::R_3d<T> r_d = mt::R_3d<T>(0, 0, 0))
 	{
@@ -878,9 +1065,51 @@
 	{
 		return mex_get_r_3d_from_field<T>(mxA, 0, field_name, r_d);
 	}
-
+	
 	/***************************************************************************************/
-	/*********************** template for creation of matlab data **************************/
+	template <class T>
+	mt::R_2d<T> mex_get_r_2d_rep_from_field(const mxArray* mxA, const dt_int32& idx, const char *field_name)
+	{
+		if (mex_field_exist(mxA, field_name))
+		{
+			return mex_get_r_2d_rep<T>(mxGetField(mxA, idx, field_name));
+		}
+		else
+		{
+			mexPrintf("Field name '%s' do not exist\n", field_name);
+			return mex_get_r_2d_rep<T>(nullptr);
+		}
+	}
+
+	template <class T>
+	mt::R_2d<T> mex_get_r_2d_rep_from_field(const mxArray* mxA, const char *field_name)
+	{
+		return mex_get_r_2d_rep_from_field<T>(mxA, 0, field_name);
+	}
+	
+	/***************************************************************************************/
+	template <class T>
+	mt::R_3d<T> mex_get_r_3d_rep_from_field(const mxArray* mxA, const dt_int32& idx, const char *field_name)
+	{
+		if (mex_field_exist(mxA, field_name))
+		{
+			return mex_get_r_3d_rep<T>(mxGetField(mxA, idx, field_name));
+		}
+		else
+		{
+			mexPrintf("Field name '%s' do not exist\n", field_name);
+			return mex_get_r_3d_rep<T>(nullptr);
+		}
+	}
+
+	template <class T>
+	mt::R_3d<T> mex_get_r_3d_rep_from_field(const mxArray* mxA, const char *field_name)
+	{
+		return mex_get_r_3d_rep_from_field<T>(mxA, 0, field_name);
+	}
+	
+	/***************************************************************************************/
+	/************************ template for creation of matlab data *************************/
 	/***************************************************************************************/
 	template <class T>
 	mt::pVctr_cpu_64<T> mex_create_pVctr(dt_shape_64 shape, mxArray*& mex_data)
@@ -1384,7 +1613,7 @@
 			// system_config.gpu_n_stream = mex_get_num_from_field<dt_int32>(mex_in, "gpu_n_stream");
 			system_config.idx_0 = 1;
 
-			system_config.validate_parameters();
+			system_config.set_dep_var();
 		}
 		else
 		{

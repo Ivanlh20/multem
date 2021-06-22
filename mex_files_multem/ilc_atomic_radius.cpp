@@ -28,7 +28,7 @@ void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* p
 {
 	using T = dt_float64;
 
-	auto pot_parm_typ = mex_get_enum<mt::ePot_Parm_Typ>(prhs[0]);
+	auto atomic_pot_parm_typ = mex_get_enum<mt::eAtomic_Pot_Parm_Typ>(prhs[0]);
 	auto dim = mex_get_num<dt_int32>(prhs[1]);
 	auto vr_lim = mex_get_num<dt_float64>(prhs[2]);
 
@@ -41,7 +41,7 @@ void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* p
 	for(auto ik = 0; ik< pradius.s0(); ik++)
 	{
 		auto Z = ik+1;
-		auto atomic_info = atomic_data(Z, pot_parm_typ);
+		auto atomic_info = atomic_data(Z, atomic_pot_parm_typ);
 		atomic_fcns.set_atomic_coef(atomic_info.coef[0]);
 
 		pradius(ik, 0) = atomic_fcns.atomic_radius_rms(dim);

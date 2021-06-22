@@ -12,16 +12,16 @@ system_conf.gpu_device = 0;
 
 % eST_STEM=11, eST_ISTEM=12, eST_CBED=21, eST_CBEI=22, eST_ED=31, eST_HRTEM=32, eST_PED=41, eST_HCI=42, eST_EWFS=51, eST_EWRS=52, 
 % eST_EELS=61, eST_EFTEM=62, eST_ProbeFS=71, eST_ProbeRS=72, eST_PPFS=81, eST_PPRS=82, eST_TFFS=91, eST_TFRS=92
-input_multem.simulation_type = 61;
-input_multem.pn_model = 1; % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+input_multem.em_sim_typ = 61;
+input_multem.atomic_vib_model = 1; % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multem.interaction_model = 1; % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
-input_multem.potential_slicing = 1; % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
-input_multem.potential_type = 6; % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
+input_multem.pot_slic_typ = 1; % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
+input_multem.atomic_pot_parm_typ = 6; % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
 
-input_multem.pn_dim = 110; % phonon dimensions (xyz)
-input_multem.pn_seed = 300183; % Random seed(frozen phonon)
-input_multem.pn_single_conf = 0; % 1: true, 0:false (extract single configuration)
-input_multem.pn_nconf = 5; % true: phonon configuration, false: number of frozen phonon configurations
+input_multem.atomic_vib_dim = [true, true, false]; % phonon dimensions (xyz)
+input_multem.atomic_vib_seed = 300183; % Random seed(frozen phonon)
+input_multem.atomic_vib_sgl_conf = 0; % 1: true, 0:false (extract single configuration)
+input_multem.atomic_vib_nconf = 5; % true: phonon configuration, false: number of frozen phonon configurations
 
 input_multem.bwl = 0; % Band-width limit, 1: true, 0:false
 
@@ -62,11 +62,11 @@ input_multem.cond_lens_spt_inc_sigma = 0.2; % standard deviation: For parallel i
 input_multem.cond_lens_spt_inc_rad_npts = 8; % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.scanning_type = 1; % eST_Line = 1, eST_Area = 2
-input_multem.scanning_periodic = 1; % 1: true, 0:false (periodic boundary conditions)
-input_multem.scanning_ns = 10; % number of sampling points
-input_multem.scanning_R_0 = [2*a;2.5*b]; % starting point (Å)
-input_multem.scanning_R_e = [3*a;2.5*b]; % final point (Å)
+input_multem.scan_pat_typ = 1; % eST_Line = 1, eST_Area = 2
+input_multem.scan_pat_pbc = 1; % 1: true, 0:false (periodic boundary conditions)
+input_multem.scan_pat_nsp = 10; % number of sampling points
+input_multem.scan_pat_r_0 = [2*a;2.5*b]; % starting point (Å)
+input_multem.scan_pat_r_e = [3*a;2.5*b]; % final point (Å)
 
 input_multem.eels_E_loss = 532; % Energy loss (eV)
 input_multem.eels_m_selection = 3; % selection rule

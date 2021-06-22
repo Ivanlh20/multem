@@ -117,11 +117,11 @@ function tfm_check_stem_setup(input_multislice, n_detector)
         if gmax_abs<ro_detector
             fprintf(2,'Reciprocal space does not cover the detector! \n')
         end
-        if tfm_pn_fact(nx,1)~=nx && tfm_pn_fact(nx,2)~=nx && tfm_pn_fact(nx,3)~=nx
-           fprintf(2,['Using ' num2str(nx) ' pixels in x is computationally unefficient. Consider using ' num2str(tfm_pn_fact(nx,1)) ' or ' num2str(tfm_pn_fact(nx,3)) ' instead.'  '\n'])
+        if tfm_atomic_vib_fact(nx,1)~=nx && tfm_atomic_vib_fact(nx,2)~=nx && tfm_atomic_vib_fact(nx,3)~=nx
+           fprintf(2,['Using ' num2str(nx) ' pixels in x is computationally unefficient. Consider using ' num2str(tfm_atomic_vib_fact(nx,1)) ' or ' num2str(tfm_atomic_vib_fact(nx,3)) ' instead.'  '\n'])
         end
-        if tfm_pn_fact(ny,1)~=nx && tfm_pn_fact(ny,2)~=ny && tfm_pn_fact(ny,3)~=ny
-           fprintf(2,['Using ' num2str(ny) ' pixels in y is computationally unefficient. Consider using ' num2str(tfm_pn_fact(ny,1)) ' or ' num2str(tfm_pn_fact(ny,3)) ' instead.'  '\n'])
+        if tfm_atomic_vib_fact(ny,1)~=nx && tfm_atomic_vib_fact(ny,2)~=ny && tfm_atomic_vib_fact(ny,3)~=ny
+           fprintf(2,['Using ' num2str(ny) ' pixels in y is computationally unefficient. Consider using ' num2str(tfm_atomic_vib_fact(ny,1)) ' or ' num2str(tfm_atomic_vib_fact(ny,3)) ' instead.'  '\n'])
         end
     end
 end

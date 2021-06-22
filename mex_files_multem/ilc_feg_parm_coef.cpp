@@ -28,12 +28,12 @@ void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* p
 {
 	using T = dt_float64;
 
-	auto pot_parm_typ = mex_get_num<mt::ePot_Parm_Typ>(prhs[0]);
+	auto atomic_pot_parm_typ = mex_get_num<mt::eAtomic_Pot_Parm_Typ>(prhs[0]);
 	auto Z = mex_get_num<dt_int32>(prhs[1]);
 	auto charge = mex_get_num<dt_int32>(prhs[2]);
 
 	/***************************************************************************************/
-	mt::Atomic_Info_cpu<T> atomic_info = mt::Atomic_Data(Z, pot_parm_typ, charge);
+	mt::Atomic_Info_cpu<T> atomic_info = mt::Atomic_Data(Z, atomic_pot_parm_typ, charge);
 	mex_create_set_pVctr<T>(plhs[0], atomic_info.coef[0].feg.cl.ptr_64());
 	mex_create_set_pVctr<T>(plhs[1], atomic_info.coef[0].feg.cnl.ptr_64());
 }

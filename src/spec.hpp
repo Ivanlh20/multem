@@ -27,7 +27,7 @@
 #include "in_classes.cuh"
 #include "cgpu_fcns.cuh"
 #include "cpu_fcns.hpp"
-#include "slicing.hpp"
+#include "spec_slic.hpp"
 
 namespace mt
 {
@@ -45,7 +45,7 @@ namespace mt
 				in_multem = in_multem_i;
 
 				 /***************************************************************************************/
-				Atomic_Data atomic_data_mt(in_multem->pot_parm_typ);
+				Atomic_Data atomic_data_mt(in_multem->atomic_pot_parm_typ);
 
 				atom_type.resize(c_n_atom_typ);
 				for(auto i = 0; i < atom_type.size(); i++)
@@ -66,12 +66,12 @@ namespace mt
 					in_multem->grid_2d.sli_thk = atoms_u.s_z_int;
 					in_multem->interaction_model = eesim_phase_object;
 					in_multem->islice = 0;
-					in_multem->phonon_par.dim_z = false;
-					if (in_multem->is_through_slices())
+					in_multem->atomic_vib.dim_z = false;
+					if (in_multem->is_sim_through_slices())
 					{
-						in_multem->thick_type = ett_through_thick;
+						in_multem->thick_type = estt_through_thick;
 					}
-					in_multem->slice_storage = in_multem->slice_storage || !in_multem->is_whole_spec();
+					in_multem->slice_storage = in_multem->slice_storage || !in_multem->is_sim_whole_spec();
 					atoms_u.sli_thk = in_multem->grid_2d.sli_thk;
 				}
 
@@ -83,11 +83,11 @@ namespace mt
 			/* Move atoms (random distribution will be included in the future) */
 			void move_atoms(const dt_int32& fp_iconf)
 			{
-				// set phonon_par configuration
-				if (in_multem->is_frozen_phonon())
+				// set atomic_vib configuration
+				if (in_multem->is_avm_frozen_phonon())
 				{
-					rand.seed(in_multem->phonon_par.seed, fp_iconf);
-					rand.set_act_dim(in_multem->phonon_par.dim_x, in_multem->phonon_par.dim_y, in_multem->phonon_par.dim_z);
+					rand.seed(in_multem->atomic_vib.seed, fp_iconf);
+					rand.set_act_dim(in_multem->atomic_vib.dim_x, in_multem->atomic_vib.dim_y, in_multem->atomic_vib.dim_z);
 				}
 
 				// move atoms
@@ -96,7 +96,7 @@ namespace mt
 					atoms.Z[iatoms] = atoms_u.Z[iatoms];
 					auto r = atoms_u.get_pos(iatoms);
 
-					if (in_multem->is_frozen_phonon())
+					if (in_multem->is_avm_frozen_phonon())
 					{
 						auto sigma_x = atoms_u.sigma[iatoms];
 						auto sigma_y = atoms_u.sigma[iatoms];
@@ -113,7 +113,7 @@ namespace mt
 					atoms.charge[iatoms] = atoms_u.charge[iatoms];
 				}
 
-				if (in_multem->phonon_par.dim_z)
+				if (in_multem->atomic_vib.dim_z)
 				{
 					atoms.sort_by_z();
 				}

@@ -422,13 +422,13 @@
 			CGPU_EXEC
 			T eval_r(const T& r, const T& beta) const
 			{ 
-				return  a_1*exp(-r/beta);
+				return a_1*exp(-r/beta);
 			}
 
 			CGPU_EXEC
 			T eval_r(const T& r) const
 			{ 
-				return  a_1*exp(-b_1*r);
+				return a_1*exp(-b_1*r);
 			}
 
 			CGPU_EXEC
@@ -836,13 +836,13 @@
 			CGPU_EXEC
 			T eval_r(const T& r, const T& l) const
 			{ 
-				return  a_1*::square(cos(c_pi<T>*r/l)); // r<=l/2, otherwise 0
+				return a_1*::square(cos(c_pi<T>*r/l)); // r<=l/2, otherwise 0
 			}
 
 			CGPU_EXEC
 			T eval_r(const T& r) const
 			{ 
-				return  a_1*::square(cos(b_1*r)); // r<=l/2, otherwise 0
+				return a_1*::square(cos(b_1*r)); // r<=l/2, otherwise 0
 			}
 
 			CGPU_EXEC

@@ -39,141 +39,141 @@
 
 	namespace mt
 	{
-		#define SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(pot_parm_typ, pfcn, ...)													\
-		switch(pot_parm_typ)																								\
+		#define SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(atomic_pot_parm_typ, pfcn, ...)													\
+		switch(atomic_pot_parm_typ)																								\
 		{																													\
-			case eppt_doyle_0_4:																							\
+			case eappt_doyle_0_4:																							\
 			{																												\
-				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eppt_doyle_0_4, T, Dev>());						\
+				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eappt_doyle_0_4, T, Dev>());						\
 			}																												\
 			break;																											\
-			case eppt_peng_0_4:																								\
+			case eappt_peng_0_4:																								\
 			{																												\
-				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eppt_peng_0_4, T, Dev>());						\
+				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eappt_peng_0_4, T, Dev>());						\
 			}																												\
 			break;																											\
-			case eppt_peng_0_12:																							\
+			case eappt_peng_0_12:																							\
 			{																												\
-				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eppt_peng_0_12, T, Dev>());						\
+				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eappt_peng_0_12, T, Dev>());						\
 			}																												\
 			break;																											\
-			case eppt_kirkland_0_12:																						\
+			case eappt_kirkland_0_12:																						\
 			{																												\
-				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eppt_kirkland_0_12, T, Dev>());					\
+				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eappt_kirkland_0_12, T, Dev>());					\
 			}																												\
 			break;																											\
-			case eppt_weickenmeier_0_12:																					\
+			case eappt_weickenmeier_0_12:																					\
 			{																												\
-				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eppt_weickenmeier_0_12, T, Dev>());				\
+				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eappt_weickenmeier_0_12, T, Dev>());				\
 			}																												\
 			break;																											\
-			case eppt_lobato_0_12:																							\
+			case eappt_lobato_0_12:																							\
 			{																												\
-				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eppt_lobato_0_12, T, Dev>());					\
+				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eappt_lobato_0_12, T, Dev>());					\
 			}																												\
 			break;																											\
-			case eppt_peng_ion_0_4:																							\
+			case eappt_peng_ion_0_4:																							\
 			{																												\
-				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eppt_peng_ion_0_4, T, Dev>());					\
+				fcn_eval_fcn_coef_lnl<T>(__VA_ARGS__, cgpu_detail_mt::pfcn<eappt_peng_ion_0_4, T, Dev>());					\
 			}																												\
 			break;																											\
 		}
 
 		/************************************** feg ********************************************/
 		template <class T, eDev Dev>
-		void fcn_feg(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& g, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y)
+		void fcn_feg(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& g, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y)
 		{
-			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(pot_parm_typ, pFcn_feg, g, coef, y);
+			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(atomic_pot_parm_typ, pFcn_feg, g, coef, y);
 		}
 
 		template <class T, eDev Dev>
-		void fcn_feg_dfeg(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& g, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy)
+		void fcn_feg_dfeg(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& g, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy)
 		{
-			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(pot_parm_typ, pFcn_feg_dfeg, g, coef, y, dy);
+			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(atomic_pot_parm_typ, pFcn_feg_dfeg, g, coef, y, dy);
 		}
 
 		/*************************************** fxg *******************************************/
 		template <class T, eDev Dev>
-		void fcn_fxg(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& g, const T& Z, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y)
+		void fcn_fxg(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& g, const T& Z, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y)
 		{
-			switch(pot_parm_typ)																					
+			switch(atomic_pot_parm_typ)																					
 			{																										
-				case eppt_doyle_0_4:																				
+				case eappt_doyle_0_4:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, cgpu_detail_mt::pFcn_fxg<eppt_doyle_0_4, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, cgpu_detail_mt::pFcn_fxg<eappt_doyle_0_4, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_peng_0_4:																					
+				case eappt_peng_0_4:																					
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, cgpu_detail_mt::pFcn_fxg<eppt_peng_0_4, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, cgpu_detail_mt::pFcn_fxg<eappt_peng_0_4, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_peng_0_12:																				
+				case eappt_peng_0_12:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, cgpu_detail_mt::pFcn_fxg<eppt_peng_0_12, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, cgpu_detail_mt::pFcn_fxg<eappt_peng_0_12, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_kirkland_0_12:																			
+				case eappt_kirkland_0_12:																			
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, cgpu_detail_mt::pFcn_fxg<eppt_kirkland_0_12, T, Dev>());	
+					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, cgpu_detail_mt::pFcn_fxg<eappt_kirkland_0_12, T, Dev>());	
 				}																																																		
 				break;	
-				case eppt_weickenmeier_0_12:																				
+				case eappt_weickenmeier_0_12:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, coef, y, cgpu_detail_mt::pFcn_fxg<eppt_weickenmeier_0_12, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(g, coef, y, cgpu_detail_mt::pFcn_fxg<eappt_weickenmeier_0_12, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_lobato_0_12:																					
+				case eappt_lobato_0_12:																					
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, coef, y, cgpu_detail_mt::pFcn_fxg<eppt_lobato_0_12, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(g, coef, y, cgpu_detail_mt::pFcn_fxg<eappt_lobato_0_12, T, Dev>());		
 				}																									
 				break;	
-				case eppt_peng_ion_0_4:																				
+				case eappt_peng_ion_0_4:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, cgpu_detail_mt::pFcn_fxg<eppt_peng_ion_0_4, T, Dev>());	
+					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, cgpu_detail_mt::pFcn_fxg<eappt_peng_ion_0_4, T, Dev>());	
 				}																									
 				break;																								
 			}
 		}
 
 		template <class T, eDev Dev>
-		void fcn_fxg_dfxg(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& g, const T& Z, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy)
+		void fcn_fxg_dfxg(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& g, const T& Z, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy)
 		{
-			switch(pot_parm_typ)																					
+			switch(atomic_pot_parm_typ)																					
 			{																										
-				case eppt_doyle_0_4:																				
+				case eappt_doyle_0_4:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eppt_doyle_0_4, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eappt_doyle_0_4, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_peng_0_4:																					
+				case eappt_peng_0_4:																					
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eppt_peng_0_4, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eappt_peng_0_4, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_peng_0_12:																				
+				case eappt_peng_0_12:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eppt_peng_0_12, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eappt_peng_0_12, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_kirkland_0_12:																			
+				case eappt_kirkland_0_12:																			
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eppt_kirkland_0_12, T, Dev>());	
+					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eappt_kirkland_0_12, T, Dev>());	
 				}																																																		
 				break;	
-				case eppt_weickenmeier_0_12:																				
+				case eappt_weickenmeier_0_12:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eppt_weickenmeier_0_12, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(g, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eappt_weickenmeier_0_12, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_lobato_0_12:																					
+				case eappt_lobato_0_12:																					
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eppt_lobato_0_12, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(g, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eappt_lobato_0_12, T, Dev>());		
 				}
 				break;	
-				case eppt_peng_ion_0_4:																				
+				case eappt_peng_ion_0_4:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eppt_peng_ion_0_4, T, Dev>());	
+					fcn_eval_fcn_coef_lnl<T>(g, Z, coef, y, dy, cgpu_detail_mt::pFcn_fxg_dfxg<eappt_peng_ion_0_4, T, Dev>());	
 				}																									
 				break;																								
 			}
@@ -181,125 +181,125 @@
 
 		/*************************************** pr ********************************************/
 		template <class T, eDev Dev>
-		void fcn_pr(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y)
+		void fcn_pr(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y)
 		{
-			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(pot_parm_typ, pFcn_pr, r, coef, y);
+			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(atomic_pot_parm_typ, pFcn_pr, r, coef, y);
 		}
 
 		template <class T, eDev Dev>
-		void fcn_pr_dpr(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy)
+		void fcn_pr_dpr(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy)
 		{
-			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(pot_parm_typ, pFcn_pr_dpr, r, coef, y, dy);
+			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(atomic_pot_parm_typ, pFcn_pr_dpr, r, coef, y, dy);
 		}
 
 		/**************************************** vr *******************************************/
 		template <class T, eDev Dev>
-		void fcn_vr(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y)
+		void fcn_vr(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y)
 		{
-			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(pot_parm_typ, pFcn_vr, r, coef, y);
+			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(atomic_pot_parm_typ, pFcn_vr, r, coef, y);
 		}
 
 		template <class T, eDev Dev>
-		void fcn_vr_dvr(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy)
+		void fcn_vr_dvr(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy)
 		{
-			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(pot_parm_typ, pFcn_vr_dvr, r, coef, y, dy);
+			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(atomic_pot_parm_typ, pFcn_vr_dvr, r, coef, y, dy);
 		}
 
 		/************************************** vz *********************************************/
 		template <class T, eDev Dev>
-		void fcn_vz(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& r, const T& z_0, const T& z_e, const pLNL_Coef<T, Dev>& coef, const pQuad_Coef_1d<T, Dev>& quad, pVctr_32<T, Dev>& y)
+		void fcn_vz(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& r, const T& z_0, const T& z_e, const pLNL_Coef<T, Dev>& coef, const pQuad_Coef_1d<T, Dev>& quad, pVctr_32<T, Dev>& y)
 		{
-			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(pot_parm_typ, pFcn_vz, r, z_0, z_e, coef, quad, y);
+			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(atomic_pot_parm_typ, pFcn_vz, r, z_0, z_e, coef, quad, y);
 		}
 
 		template <class T, eDev Dev>
-		void fcn_vz_dvz(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& r, const T& z_0, const T& z_e, const pLNL_Coef<T, Dev>& coef, const pQuad_Coef_1d<T, Dev>& quad, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy)
+		void fcn_vz_dvz(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& r, const T& z_0, const T& z_e, const pLNL_Coef<T, Dev>& coef, const pQuad_Coef_1d<T, Dev>& quad, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy)
 		{
-			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(pot_parm_typ, pFcn_vz_dvz, r, z_0, z_e, coef, quad, y, dy);
+			SWITCH_FCN_EVAL_FCN_COEF_LNL_VCTR(atomic_pot_parm_typ, pFcn_vz_dvz, r, z_0, z_e, coef, quad, y, dy);
 		}
 
 		/************************************* vzp *********************************************/
 		template <class T, eDev Dev>
-		void fcn_vzp(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pQuad_Coef_1d<T, Dev>* pquad = nullptr)
+		void fcn_vzp(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pQuad_Coef_1d<T, Dev>* pquad = nullptr)
 		{
-			switch(pot_parm_typ)																					
+			switch(atomic_pot_parm_typ)																					
 			{																										
-				case eppt_doyle_0_4:																				
+				case eappt_doyle_0_4:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eppt_doyle_0_4, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eappt_doyle_0_4, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_peng_0_4:																					
+				case eappt_peng_0_4:																					
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eppt_peng_0_4, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eappt_peng_0_4, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_peng_0_12:																				
+				case eappt_peng_0_12:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eppt_peng_0_12, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eappt_peng_0_12, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_kirkland_0_12:																			
+				case eappt_kirkland_0_12:																			
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eppt_kirkland_0_12, T, Dev>());	
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eappt_kirkland_0_12, T, Dev>());	
 				}																																																		
 				break;	
-				case eppt_weickenmeier_0_12:																				
+				case eappt_weickenmeier_0_12:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, *pquad, y, cgpu_detail_mt::pFcn_vzp<eppt_weickenmeier_0_12, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(r, coef, *pquad, y, cgpu_detail_mt::pFcn_vzp<eappt_weickenmeier_0_12, T, Dev>());		
 				}																									
 				break;																								
-				case eppt_lobato_0_12:																					
+				case eappt_lobato_0_12:																					
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eppt_lobato_0_12, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eappt_lobato_0_12, T, Dev>());		
 				}																									
 				break;	
-				case eppt_peng_ion_0_4:																				
+				case eappt_peng_ion_0_4:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eppt_peng_ion_0_4, T, Dev>());	
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, cgpu_detail_mt::pFcn_vzp<eappt_peng_ion_0_4, T, Dev>());	
 				}																									
 				break;																								
 			}
 		}
 
 		template <class T, eDev Dev>
-		void fcn_vzp_dvzp(const ePot_Parm_Typ& pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy, pQuad_Coef_1d<T, Dev>* pquad = nullptr)
+		void fcn_vzp_dvzp(const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, const pVctr_32<T, Dev>& r, const pLNL_Coef<T, Dev>& coef, pVctr_32<T, Dev>& y, pVctr_32<T, Dev>& dy, pQuad_Coef_1d<T, Dev>* pquad = nullptr)
 		{
-			switch(pot_parm_typ)																					
+			switch(atomic_pot_parm_typ)																					
 			{																										
-				case eppt_doyle_0_4:																				
+				case eappt_doyle_0_4:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eppt_doyle_0_4, T, Dev>());
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eappt_doyle_0_4, T, Dev>());
 				}																									
 				break;																								
-				case eppt_peng_0_4:																					
+				case eappt_peng_0_4:																					
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eppt_peng_0_4, T, Dev>());	
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eappt_peng_0_4, T, Dev>());	
 				}																									
 				break;																								
-				case eppt_peng_0_12:																				
+				case eappt_peng_0_12:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eppt_peng_0_12, T, Dev>());
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eappt_peng_0_12, T, Dev>());
 				}																									
 				break;																								
-				case eppt_kirkland_0_12:																			
+				case eappt_kirkland_0_12:																			
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eppt_kirkland_0_12, T, Dev>());
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eappt_kirkland_0_12, T, Dev>());
 				}
 				break;		
-				case eppt_weickenmeier_0_12:																				
+				case eappt_weickenmeier_0_12:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, *pquad, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eppt_weickenmeier_0_12, T, Dev>());
+					fcn_eval_fcn_coef_lnl<T>(r, coef, *pquad, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eappt_weickenmeier_0_12, T, Dev>());
 				}																									
 				break;																								
-				case eppt_lobato_0_12:																					
+				case eappt_lobato_0_12:																					
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eppt_lobato_0_12, T, Dev>());		
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eappt_lobato_0_12, T, Dev>());		
 				}																									
 				break;	
-				case eppt_peng_ion_0_4:																				
+				case eappt_peng_ion_0_4:																				
 				{																									
-					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eppt_peng_ion_0_4, T, Dev>());	
+					fcn_eval_fcn_coef_lnl<T>(r, coef, y, dy, cgpu_detail_mt::pFcn_vzp_dvzp<eappt_peng_ion_0_4, T, Dev>());	
 				}																									
 				break;																								
 			}
@@ -337,127 +337,127 @@
 			/***************************************************************************************/
 			T feg(const T& g)
 			{
-				return fcn_feg<T>(pcoef->pot_parm_typ, g, pcoef->feg);
+				return fcn_feg<T>(pcoef->atomic_pot_parm_typ, g, pcoef->feg);
 			}
 
 			void feg_dfeg(const T& g, T& y, T& dy)
 			{
-				fcn_feg_dfeg<T>(pcoef->pot_parm_typ, g, pcoef->feg, y, dy);
+				fcn_feg_dfeg<T>(pcoef->atomic_pot_parm_typ, g, pcoef->feg, y, dy);
 			}
 
 			void feg(const pVctr_cpu_32<T>&& g, pVctr_cpu_32<T>&& y)
 			{
-				fcn_feg<T, edev_cpu>(pcoef->pot_parm_typ, g, pcoef->feg, y);
+				fcn_feg<T, edev_cpu>(pcoef->atomic_pot_parm_typ, g, pcoef->feg, y);
 			}
 
 			void feg_dfeg(const pVctr_cpu_32<T>&& g, pVctr_cpu_32<T>&& y, pVctr_cpu_32<T>&& dy)
 			{
-				fcn_feg_dfeg<T, edev_cpu>(pcoef->pot_parm_typ, g, pcoef->feg, y, dy);
+				fcn_feg_dfeg<T, edev_cpu>(pcoef->atomic_pot_parm_typ, g, pcoef->feg, y, dy);
 			}
 
 			/***************************************************************************************/
 			T fxg(const T& g)
 			{
-				return fcn_fxg<T>(pcoef->pot_parm_typ, g, pcoef->Z_diff(), pcoef->fxg);
+				return fcn_fxg<T>(pcoef->atomic_pot_parm_typ, g, pcoef->Z_diff(), pcoef->fxg);
 			}
 
 			void fxg_dfxg(const T& g, T& y, T& dy)
 			{
-				fcn_fxg_dfxg<T>(pcoef->pot_parm_typ, g, pcoef->Z_diff(), pcoef->fxg, y, dy);
+				fcn_fxg_dfxg<T>(pcoef->atomic_pot_parm_typ, g, pcoef->Z_diff(), pcoef->fxg, y, dy);
 			}
 
 			void fxg(const pVctr_cpu_32<T>&& g, pVctr_cpu_32<T>&& y)
 			{
-				fcn_fxg<T, edev_cpu>(pcoef->pot_parm_typ, g, pcoef->Z_diff(), pcoef->fxg, y);
+				fcn_fxg<T, edev_cpu>(pcoef->atomic_pot_parm_typ, g, pcoef->Z_diff(), pcoef->fxg, y);
 			}
 
 			void fxg_dfxg(const pVctr_cpu_32<T>&& g, pVctr_cpu_32<T>&& y, pVctr_cpu_32<T>&& dy)
 			{
-				fcn_fxg_dfxg<T, edev_cpu>(pcoef->pot_parm_typ, g, pcoef->Z_diff(), pcoef->fxg, y, dy);
+				fcn_fxg_dfxg<T, edev_cpu>(pcoef->atomic_pot_parm_typ, g, pcoef->Z_diff(), pcoef->fxg, y, dy);
 			}
 
 			/***************************************************************************************/
 			T pr(const T& r)
 			{
-				return fcn_pr<T>(pcoef->pot_parm_typ, r, pcoef->pr);
+				return fcn_pr<T>(pcoef->atomic_pot_parm_typ, r, pcoef->pr);
 			}
 
 			void pr_dpr(const T& r, T& y, T& dy)
 			{
-				fcn_pr_dpr<T>(pcoef->pot_parm_typ, r, pcoef->pr, y, dy);
+				fcn_pr_dpr<T>(pcoef->atomic_pot_parm_typ, r, pcoef->pr, y, dy);
 			}
 
 			void pr(const pVctr_cpu_32<T>&& r, pVctr_cpu_32<T>&& y)
 			{
-				fcn_pr<T, edev_cpu>(pcoef->pot_parm_typ, r, pcoef->pr, y);
+				fcn_pr<T, edev_cpu>(pcoef->atomic_pot_parm_typ, r, pcoef->pr, y);
 			}
 
 			void pr_dpr(const pVctr_cpu_32<T>&& r, pVctr_cpu_32<T>&& y, pVctr_cpu_32<T>&& dy)
 			{
-				fcn_pr_dpr<T, edev_cpu>(pcoef->pot_parm_typ, r, pcoef->pr, y, dy);
+				fcn_pr_dpr<T, edev_cpu>(pcoef->atomic_pot_parm_typ, r, pcoef->pr, y, dy);
 			}
 			
 			/***************************************************************************************/
 			T vr(const T& r)
 			{
-				return fcn_vr<T>(pcoef->pot_parm_typ, r, pcoef->vr);
+				return fcn_vr<T>(pcoef->atomic_pot_parm_typ, r, pcoef->vr);
 			}
 
 			void vr_dvr(const T& r, T& y, T& dy)
 			{
-				fcn_vr_dvr<T>(pcoef->pot_parm_typ, r, pcoef->vr, y, dy);
+				fcn_vr_dvr<T>(pcoef->atomic_pot_parm_typ, r, pcoef->vr, y, dy);
 			}
 
 			void vr(const pVctr_cpu_32<T>&& r, pVctr_cpu_32<T>&& y)
 			{
-				fcn_vr<T, edev_cpu>(pcoef->pot_parm_typ, r, pcoef->vr, y);
+				fcn_vr<T, edev_cpu>(pcoef->atomic_pot_parm_typ, r, pcoef->vr, y);
 			}
 
 			void vr_dvr(const pVctr_cpu_32<T>&& r, pVctr_cpu_32<T>&& y, pVctr_cpu_32<T>&& dy)
 			{
-				fcn_vr_dvr<T, edev_cpu>(pcoef->pot_parm_typ, r, pcoef->vr, y, dy);
+				fcn_vr_dvr<T, edev_cpu>(pcoef->atomic_pot_parm_typ, r, pcoef->vr, y, dy);
 			}
 
 			/***************************************************************************************/
 			T vz(const T& z_0, const T& z_e, const T& r)
 			{
-				return fcn_vz<T>(pcoef->pot_parm_typ, r, z_0, z_e, pcoef->vr, pquad_a_b);
+				return fcn_vz<T>(pcoef->atomic_pot_parm_typ, r, z_0, z_e, pcoef->vr, pquad_a_b);
 			}
 
 			void vz_dvz(const T& z_0, const T& z_e, const T& r, T& y, T& dy)
 			{
-				fcn_vz_dvz<T>(pcoef->pot_parm_typ, r, z_0, z_e, pcoef->vr, pquad_a_b, y, dy);
+				fcn_vz_dvz<T>(pcoef->atomic_pot_parm_typ, r, z_0, z_e, pcoef->vr, pquad_a_b, y, dy);
 			}
 
 			void vz(const T& z_0, const T& z_e, const pVctr_cpu_32<T>&& r, pVctr_cpu_32<T>&& y)
 			{
-				fcn_vz<T, edev_cpu>(pcoef->pot_parm_typ, r, z_0, z_e, pcoef->vr, pquad_a_b, y);
+				fcn_vz<T, edev_cpu>(pcoef->atomic_pot_parm_typ, r, z_0, z_e, pcoef->vr, pquad_a_b, y);
 			}
 
 			void vz_dvz(const T& z_0, const T& z_e, const pVctr_cpu_32<T>&& r, pVctr_cpu_32<T>&& y, pVctr_cpu_32<T>&& dy)
 			{
-				fcn_vz_dvz<T, edev_cpu>(pcoef->pot_parm_typ, r, z_0, z_e, pcoef->vr, pquad_a_b, y, dy);
+				fcn_vz_dvz<T, edev_cpu>(pcoef->atomic_pot_parm_typ, r, z_0, z_e, pcoef->vr, pquad_a_b, y, dy);
 			}
 
 			/***************************************************************************************/
 			T vzp(const T& r)
 			{
-				return fcn_vzp<T>(pcoef->pot_parm_typ, r, pcoef->vzp, &pquad_0_infty);
+				return fcn_vzp<T>(pcoef->atomic_pot_parm_typ, r, pcoef->vzp, &pquad_0_infty);
 			}
 
 			void vzp_dvzp(const T& r, T& y, T& dy)
 			{
-				fcn_vzp_dvzp<T>(pcoef->pot_parm_typ, r, pcoef->vzp, y, dy, &pquad_0_infty);
+				fcn_vzp_dvzp<T>(pcoef->atomic_pot_parm_typ, r, pcoef->vzp, y, dy, &pquad_0_infty);
 			}
 
 			void vzp(const pVctr_cpu_32<T>&& r, pVctr_cpu_32<T>&& y)
 			{
-				fcn_vzp<T, edev_cpu>(pcoef->pot_parm_typ, r, pcoef->vzp, y, &pquad_0_infty);
+				fcn_vzp<T, edev_cpu>(pcoef->atomic_pot_parm_typ, r, pcoef->vzp, y, &pquad_0_infty);
 			}
 
 			void vzp_dvzp(const pVctr_cpu_32<T>&& r, pVctr_cpu_32<T>&& y, pVctr_cpu_32<T>&& dy)
 			{
-				fcn_vzp_dvzp<T, edev_cpu>(pcoef->pot_parm_typ, r, pcoef->vzp, y, dy, &pquad_0_infty);
+				fcn_vzp_dvzp<T, edev_cpu>(pcoef->atomic_pot_parm_typ, r, pcoef->vzp, y, dy, &pquad_0_infty);
 			}
 
 			/***************************************************************************************/

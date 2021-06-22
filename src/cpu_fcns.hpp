@@ -1698,7 +1698,7 @@
 	/* radial distribution */
 	namespace mt
 	{
-		 // radial distribution:  typ = 0; % 0: sum(v)/n, 1: sum(v), 2: cumsum(sum(v)/n), 3: cumsum(sum(v))
+		 // radial distribution: typ = 0; % 0: sum(v)/n, 1: sum(v), 2: cumsum(sum(v)/n), 3: cumsum(sum(v))
 		 template <class TVctr, class TFcn>
 		 enable_if_vctr_cpu<TVctr, void>
 		 fcn_rad_dist(TVctr& r_i, TVctr& fr_i, Value_type<TVctr> r_0, Value_type<TVctr> r_e, 
@@ -1743,7 +1743,7 @@
 		 	}
 		 }
 
-		 // radial distribution by division:  typ = 0; % 0: sum(v)/n, 1: sum(v), 2: cumsum(sum(v)/n), 3: cumsum(sum(v))
+		 // radial distribution by division: typ = 0; % 0: sum(v)/n, 1: sum(v), 2: cumsum(sum(v)/n), 3: cumsum(sum(v))
 		 template <class TVctr>
 		 enable_if_vctr_cpu<TVctr, void>
 		 fcn_rad_dist_by_div(TVctr& r_i, TVctr& fr_i, Value_type<TVctr> r_0, Value_type<TVctr> r_e, 
@@ -1757,7 +1757,7 @@
 			fcn_rad_dist(r_i, fr_i, r_0, r_e, n_r, rl_o, frl_o, cfrl_o, typ, fcn);
 		 }		 
 		 
-		 // radial distribution by search:  typ = 0; % 0: sum(v)/n, 1: sum(v), 2: cumsum(sum(v)/n), 3: cumsum(sum(v))
+		 // radial distribution by search: typ = 0; % 0: sum(v)/n, 1: sum(v), 2: cumsum(sum(v)/n), 3: cumsum(sum(v))
 		 template <class TVctr>
 		 enable_if_vctr_cpu<TVctr, void>
 		 fcn_rad_dist_by_srch(TVctr& r_i, TVctr& fr_i, Value_type<TVctr> r_0, Value_type<TVctr> r_e, 
@@ -3051,7 +3051,7 @@
 		// // Linear projected potential: V and zV
 		// template <class TQ1, class TVAtom>
 		// enable_if_host<TQ1, void>
-		// 	linear_Vz(Stream_cpu& stream, ePot_Parm_Typ pot_parm_typ, TQ1 &qz, TVAtom &vatom)
+		// 	linear_Vz(Stream_cpu& stream, eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, TQ1 &qz, TVAtom &vatom)
 		// {
 		// 	using TAtom = Value_type<TVAtom>;
 
@@ -3060,53 +3060,53 @@
 		// 		return;
 		// 	}
 
-		// 	auto thr_linear_Vz = [](const ePot_Parm_Typ& pot_parm_typ, TQ1 &qz, TAtom &atom)
+		// 	auto thr_linear_Vz = [](const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, TQ1 &qz, TAtom &atom)
 		// 	{
 		// 		if (atom.charge == 0)
 		// 		{
-		// 			switch (pot_parm_typ)
+		// 			switch (atomic_pot_parm_typ)
 		// 			{
-		// 			case eppt_doyle_0_4:
-		// 				cpu_detail::linear_Vz<eppt_doyle_0_4, 0, TAtom>(qz, atom);
+		// 			case eappt_doyle_0_4:
+		// 				cpu_detail::linear_Vz<eappt_doyle_0_4, 0, TAtom>(qz, atom);
 		// 				break;
-		// 			case eppt_peng_0_4:
-		// 				cpu_detail::linear_Vz<eppt_peng_0_4, 0, TAtom>(qz, atom);
+		// 			case eappt_peng_0_4:
+		// 				cpu_detail::linear_Vz<eappt_peng_0_4, 0, TAtom>(qz, atom);
 		// 				break;
-		// 			case eppt_peng_0_12:
-		// 				cpu_detail::linear_Vz<eppt_peng_0_12, 0, TAtom>(qz, atom);
+		// 			case eappt_peng_0_12:
+		// 				cpu_detail::linear_Vz<eappt_peng_0_12, 0, TAtom>(qz, atom);
 		// 				break;
-		// 			case eppt_kirkland_0_12:
-		// 				cpu_detail::linear_Vz<eppt_kirkland_0_12, 0, TAtom>(qz, atom);
+		// 			case eappt_kirkland_0_12:
+		// 				cpu_detail::linear_Vz<eappt_kirkland_0_12, 0, TAtom>(qz, atom);
 		// 				break;
-		// 			case eppt_weickenmeier_0_12:
-		// 				cpu_detail::linear_Vz<eppt_weickenmeier_0_12, 0, TAtom>(qz, atom);
+		// 			case eappt_weickenmeier_0_12:
+		// 				cpu_detail::linear_Vz<eappt_weickenmeier_0_12, 0, TAtom>(qz, atom);
 		// 				break;
-		// 			case eppt_lobato_0_12:
-		// 				cpu_detail::linear_Vz<eppt_lobato_0_12, 0, TAtom>(qz, atom);
+		// 			case eappt_lobato_0_12:
+		// 				cpu_detail::linear_Vz<eappt_lobato_0_12, 0, TAtom>(qz, atom);
 		// 				break;
 		// 			}
 		// 		}
 		// 		else
 		// 		{
-		// 			switch (pot_parm_typ)
+		// 			switch (atomic_pot_parm_typ)
 		// 			{
-		// 			case eppt_doyle_0_4:
-		// 				cpu_detail::linear_Vz<eppt_doyle_0_4, 1, TAtom>(qz, atom);
+		// 			case eappt_doyle_0_4:
+		// 				cpu_detail::linear_Vz<eappt_doyle_0_4, 1, TAtom>(qz, atom);
 		// 				break;
-		// 			case eppt_peng_0_4:
-		// 				cpu_detail::linear_Vz<eppt_peng_0_4, 1, TAtom>(qz, atom);
+		// 			case eappt_peng_0_4:
+		// 				cpu_detail::linear_Vz<eappt_peng_0_4, 1, TAtom>(qz, atom);
 		// 				break;
-		// 			case eppt_peng_0_12:
-		// 				cpu_detail::linear_Vz<eppt_peng_0_12, 1, TAtom>(qz, atom);
+		// 			case eappt_peng_0_12:
+		// 				cpu_detail::linear_Vz<eappt_peng_0_12, 1, TAtom>(qz, atom);
 		// 				break;
-		// 			case eppt_kirkland_0_12:
-		// 				cpu_detail::linear_Vz<eppt_kirkland_0_12, 1, TAtom>(qz, atom);
+		// 			case eappt_kirkland_0_12:
+		// 				cpu_detail::linear_Vz<eappt_kirkland_0_12, 1, TAtom>(qz, atom);
 		// 				break;
-		// 			case eppt_weickenmeier_0_12:
-		// 				cpu_detail::linear_Vz<eppt_weickenmeier_0_12, 1, TAtom>(qz, atom);
+		// 			case eappt_weickenmeier_0_12:
+		// 				cpu_detail::linear_Vz<eappt_weickenmeier_0_12, 1, TAtom>(qz, atom);
 		// 				break;
-		// 			case eppt_lobato_0_12:
-		// 				cpu_detail::linear_Vz<eppt_lobato_0_12, 1, TAtom>(qz, atom);
+		// 			case eappt_lobato_0_12:
+		// 				cpu_detail::linear_Vz<eappt_lobato_0_12, 1, TAtom>(qz, atom);
 		// 				break;
 		// 			}
 		// 		}
@@ -3114,10 +3114,10 @@
 
 		// 	for(auto istm = 0; istm < stream.n_stream_act - 1; istm++)
 		// 	{
-		// 		stream[istm] = std::thread(std::bind(thr_linear_Vz, pot_parm_typ, std::ref(qz), std::ref(vatom[istm])));
+		// 		stream[istm] = std::thread(std::bind(thr_linear_Vz, atomic_pot_parm_typ, std::ref(qz), std::ref(vatom[istm])));
 		// 	}
 
-		// 	thr_linear_Vz(pot_parm_typ, qz, vatom[stream.n_stream_act - 1]);
+		// 	thr_linear_Vz(atomic_pot_parm_typ, qz, vatom[stream.n_stream_act - 1]);
 
 		// 	stream.synchronize();
 		// }

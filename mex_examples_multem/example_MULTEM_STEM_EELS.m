@@ -23,22 +23,22 @@ system_conf.gpu_device = 0;
 %%%%%%%%%%%%%%%%%%%% Set simulation experiment %%%%%%%%%%%%%%%%%%%%%
 % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, eTEMST_EWFS=51, eTEMST_EWRS=52, 
 % eTEMST_STEM_EELS=61, eTEMST_ISTEM_EELS=62, eTEMST_EFTEMFS=71, eTEMST_EFTEMRS=72, eTEMST_ProbeFS=81, eTEMST_ProbeRS=82, eTEMST_PPFS=91, eTEMST_PPRS=92, eTEMST_TFFS=101, eTEMST_TFRS=102
-input_multem.simulation_type = 61;
+input_multem.em_sim_typ = 61;
 
 %%%%%%%%%%%%%% Electron-Specimen interaction model %%%%%%%%%%%%%%%%%
 input_multem.interaction_model = 1; % eESIM_Multislice = 1, eESIM_Phase_Object = 2, eESIM_Weak_Phase_Object = 3
-input_multem.potential_type = 6; % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
+input_multem.atomic_pot_parm_typ = 6; % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
 
 %%%%%%%%%%%%%%%%%%%%%%% Potential slicing %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.potential_slicing = 1; % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
+input_multem.pot_slic_typ = 1; % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 
-%%%%%%%%%%%%%%% Electron-Phonon interaction model %%%%%%%%%%%%%%%%%%
-input_multem.pn_model = 3; % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
-input_multem.pn_coh_contrib = 0;
-input_multem.pn_single_conf = 0; % 1: true, 0:false (extract single configuration)
-input_multem.pn_nconf = 5; % true: specific phonon configuration, false: number of frozen phonon configurations
-input_multem.pn_dim = 110; % phonon dimensions (xyz)
-input_multem.pn_seed = 300183; % Random seed(frozen phonon)
+%%%%%%%%%%%%%%% Atomic vibrations model %%%%%%%%%%%%%%%%%%
+input_multem.atomic_vib_model = 3; % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+input_multem.atomic_vib_coh_contrib = 0;
+input_multem.atomic_vib_sgl_conf = 0; % 1: true, 0:false (extract single configuration)
+input_multem.atomic_vib_nconf = 5; % true: specific phonon configuration, false: number of frozen phonon configurations
+input_multem.atomic_vib_dim = [true, true, false]; % phonon dimensions (xyz)
+input_multem.atomic_vib_seed = 300183; % Random seed(frozen phonon)
 
 %%%%%%%%%%%%%%%%%%%%%%% Specimen information %%%%%%%%%%%%%%%%%%%%%%%
 na = 8;nb = 8;nc = 5;ncu = 2;rmsd_3d = 0.085;
@@ -48,7 +48,7 @@ na = 8;nb = 8;nc = 5;ncu = 2;rmsd_3d = 0.085;
 , a, b, c, input_multem.spec_dz] = SrTiO3001_xtl(na, nb, nc, ncu, rmsd_3d);
 
 %%%%%%%%%%%%%%%%%%%%%% Specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.thick_type = 1; % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
+input_multem.thick_typ = 1; % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
 input_multem.thick = 0; % Array of thickes (Å)
 
 %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -95,15 +95,15 @@ input_multem.obj_lens_ssf_sigma = ssf_sigma; % standard deviation: For parallel 
 input_multem.obj_lens_ssf_npoints = 4; % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%% zero defocus reference %%%%%%%%%%%%
-input_multem.cond_lens_zero_defocus_type = 1; % eZDT_First = 1, eZDT_User_Define = 2
-input_multem.cond_lens_zero_defocus_plane = 0;
+input_multem.cond_lens_zero_def_typ = 1; % eZDT_First = 1, eZDT_User_Define = 2
+input_multem.cond_lens_zero_def_plane = 0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% scanning area %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.scanning_type = 1; % eST_Line = 1, eST_Area = 2
-input_multem.scanning_periodic = 1; % 1: true, 0:false (periodic boundary conditions)
-input_multem.scanning_ns = 10; % number of sampling points
-input_multem.scanning_R_0 = [2*a;2.5*b]; % starting point (Å)
-input_multem.scanning_R_e = [3*a;2.5*b]; % final point (Å)
+input_multem.scan_pat_typ = 1; % eST_Line = 1, eST_Area = 2
+input_multem.scan_pat_pbc = 1; % 1: true, 0:false (periodic boundary conditions)
+input_multem.scan_pat_nsp = 10; % number of sampling points
+input_multem.scan_pat_r_0 = [2*a;2.5*b]; % starting point (Å)
+input_multem.scan_pat_r_e = [3*a;2.5*b]; % final point (Å)
 
 input_multem.eels_E_loss = 532; % Energy loss (eV)
 input_multem.eels_m_selection = 3; % selection rule

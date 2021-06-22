@@ -196,7 +196,7 @@
 		}
 	}
 
-	/*  check bounds */
+	/* check bounds */
 	namespace mt
 	{
 		template <class T>
@@ -229,7 +229,7 @@
 		}
 	}
 
-	/*  set bounds */
+	/* set bounds */
 	namespace mt
 	{
 		template <class T>

@@ -845,7 +845,7 @@
 			}
 		}
 		
-		template <eDim Dim,  class TFcn, class... TArgs>
+		template <eDim Dim, class TFcn, class... TArgs>
 		enable_if_edim_3<Dim, void>
 		fcn_stream_exec_xd_fcn(Stream_cpu* pstream, const dt_int32& nx, const dt_int32& ny, const dt_int32& nz, TFcn& fcn, TArgs&& ...arg)
 		{

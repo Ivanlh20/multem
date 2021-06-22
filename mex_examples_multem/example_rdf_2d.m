@@ -1,6 +1,6 @@
 % Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
 clear;clc;
-addpath([ fileparts(pwd), filesep, 'mex_bin'])
+addpath(['..', filesep, 'mex_bin'])
 
 [x, y] = meshgrid(0:2:50);
 r_2d = [x(:), y(:)];

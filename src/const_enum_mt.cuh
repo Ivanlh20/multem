@@ -26,9 +26,106 @@
 	#include "macros.cuh"
 	#include "const_enum.cuh"
 	
-	/* constant -  enumeration definitions */
+	/*********************************************************************/
+	/* enumeration definitions */
+	/*********************************************************************/
 	namespace mt
 	{
+		/*********************** specimen layer position *********************/
+		enum eSpec_Lay_Pos
+		{
+			eslp_none = 0, eslp_top = 1, eslp_bottom = 2, eslp_middle = 3, eslp_user_def = 4
+		};
+
+		/**************** electron microscopy simulation type *****************/
+		enum eEM_Sim_Typ
+		{
+			eemst_stem = 11, eemst_istem = 12, 
+			eemst_cbed = 21, eemst_cbei = 22, 
+			eemst_ed = 31, eemst_hrtem = 32, 
+			eemst_ped = 41, eemst_hctem = 42, 
+			eemst_ewfs = 51, eemst_ewrs = 52, 
+			eemst_stem_eels = 61, eemst_istem_eels = 62, 
+			eemst_eftemfs = 71, eemst_eftemrs = 72, 
+			eemst_iwfs = 81, eemst_iwrs = 82, 
+			eemst_ppfs = 91, eemst_pprs = 92, 			// projected potential
+			eemst_tffs = 101, eemst_tfrs = 102, 		// transmission function
+			eemst_propfs = 111, eemst_proprs = 112		// fcn_propagate
+		};
+
+		/*************** electron specimen interaction model ******************/
+		enum eElec_Spec_Int_Model
+		{
+			eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
+		};
+
+		/************************** atomic vibration **************************/
+		enum eAtomic_Vib_Mod
+		{
+			eavm_still_atom = 1, eavm_absorptive_pot = 2, eavm_frozen_phonon = 3, eavm_user_def = 4
+		};
+
+		/********************* simulation thickness type **********************/
+		enum eSim_Thick_Typ
+		{
+			estt_whole_spec = 1, estt_through_thick = 2, estt_through_slices = 3
+		};
+
+		/******************** potential slicing type *************************/
+		enum ePot_Slic_Typ
+		{
+			epst_planes = 1, epst_dz_Proj = 2, epst_dz_Sub = 3, epst_auto = 4
+		};
+
+		/********************** feg parameterization *************************/
+		// 1: doyle and Turner parameterization - 4 Gaussians - [0, 4
+		// 2: Peng et al. parameterization - 5 Gaussians - [0, 4]
+		// 3: Peng et al. parameterization - 5 Gaussians - [0, 12]
+		// 4: Kirkland parameterization - 3 lorentzian + 3 Gaussians - [0, 12]
+		// 5: Weickenmeier and H.Kohl - a*(1-exp(-bg^2)/g^2 - [0, 12]
+		// 6: Lobato parameterization - 5 Hydrogen feg - [0, 12]
+		// 10: Peng et al. parameterization ion - 5 Gaussians - [0, 4]
+
+		enum eAtomic_Pot_Parm_Typ
+		{
+			eappt_none = 0, eappt_doyle_0_4 = 1, eappt_peng_0_4 = 2, eappt_peng_0_12 = 3, 
+			eappt_kirkland_0_12 = 4, eappt_weickenmeier_0_12 = 5, eappt_lobato_0_12 = 6, 
+			eappt_peng_ion_0_4 = 10
+		};
+
+		/*********************** incident wave type **************************/
+		enum eIncident_Wave_Typ
+		{
+			eiwt_plane_wave = 1, eiwt_convergent_wave = 2, eiwt_user_def_Wave = 3, eiwt_auto = 4
+		};
+
+		/************************** zero defocus type *************************/
+		enum eZero_Def_Typ
+		{
+			ezdt_first = 1, ezdt_middle = 2, ezdt_last = 3, ezdt_user_def = 4
+		};
+
+		/************************** scan pattern type **************************/
+		enum eScan_Pat_Typ
+		{
+			espt_line = 1, espt_area = 2, espt_user_def = 3
+		};
+
+		/************************* detector type *****************************/
+		enum eDetector_Typ
+		{
+			edt_circular = 1, edt_radial = 2, edt_matrix = 3
+		};
+
+		/************************ channelling type **************************/
+		// 1: single channelling
+		// 2: mixed channelling
+		// 3: double channelling
+		enum eChan_Typ
+		{
+			ect_single_chan = 1, ect_mixed_chan = 2, eCT_double_chan = 3
+		};
+
 		/**************************** in atoms ****************************/
 		enum eIn_Atoms
 		{
@@ -61,20 +158,10 @@
 			eLVT_inner_aper_ang = 9, eLVT_outer_aper_ang = 10
 		};
 
-		/************************* simulation type ***************************/
-		enum eEM_Sim_Typ
+		/************************ phonon model output ************************/
+		enum eAtomic_Vib_Mod_Output
 		{
-			eemst_stem = 11, eemst_istem = 12, 
-			eemst_cbed = 21, eemst_cbei = 22, 
-			eemst_ed = 31, eemst_hrtem = 32, 
-			eemst_ped = 41, eemst_hctem = 42, 
-			eemst_ewfs = 51, eemst_ewrs = 52, 
-			eemst_stem_eels = 61, eemst_istem_eels = 62, 
-			eemst_eftemfs = 71, eemst_eftemrs = 72, 
-			eemst_iwfs = 81, eemst_iwrs = 82, 
-			eemst_ppfs = 91, eemst_pprs = 92, 			// projected potential
-			eemst_tffs = 101, eemst_tfrs = 102, 			// transmission function
-			eemst_propfs = 111, eemst_proprs = 112		// fcn_propagate
+			epmo_total = 1, epmo_coherent = 2, epmo_total_coherent = 3
 		};
 
 		/********************* simulation data output ************************/
@@ -85,230 +172,45 @@
 			eemot_m2psi_tot_psi_coh = 5, eemot_psi_coh = 6, 
 			eemot_psi_0 = 7, eemot_V = 8, eemot_trans = 9
 		};
-
-		/************** electron specimen interaction model ******************/
-		enum eElec_Spec_Int_Model
-		{
-			eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
-		};
-
-		/*************************** phonon model ****************************/
-		enum ePhonon_Model
-		{
-			epm_still_atom = 1, epm_absorptive_model = 2, epm_frozen_phonon = 3, epm_user_def = 4
-		};
-
-		/************************ phonon model output ************************/
-		enum ePhonon_Model_Output
-		{
-			epmo_total = 1, epmo_coherent = 2, epmo_total_coherent = 3
-		};
-
-		/******************** potential slicing Type *************************/
-		enum ePot_Sli_Typ
-		{
-			epst_planes = 1, epst_dz_Proj = 2, epst_dz_Sub = 3, epst_auto = 4
-		};
-
-		/********************** feg parameterization *************************/
-		// 1: doyle and Turner parameterization - 4 Gaussians - [0, 4
-		// 2: Peng et al. parameterization - 5 Gaussians - [0, 4]
-		// 3: Peng et al. parameterization - 5 Gaussians - [0, 12]
-		// 4: Kirkland parameterization - 3 lorentzian + 3 Gaussians - [0, 12]
-		// 5: Weickenmeier and H.Kohl - a*(1-exp(-bg^2)/g^2 - [0, 12]
-		// 6: Lobato parameterization - 5 Hydrogen feg - [0, 12]
-		// 10: Peng et al. parameterization ion - 5 Gaussians - [0, 4]
-
-		enum ePot_Parm_Typ
-		{
-			eppt_none = 0, eppt_doyle_0_4 = 1, eppt_peng_0_4 = 2, eppt_peng_0_12 = 3, 
-			eppt_kirkland_0_12 = 4, eppt_weickenmeier_0_12 = 5, eppt_lobato_0_12 = 6, 
-			eppt_peng_ion_0_4 = 10
-		};
-
-		/*********************** incident wave type **************************/
-		enum eIncident_Wave_Typ
-		{
-			eiwt_plane_wave = 1, eiwt_convergent_wave = 2, eiwt_user_def_Wave = 3, eiwt_auto = 4
-		};
-
-		/************************ amorphous layer type ***********************/
-		enum eSpec_Lay_Typ
-		{
-			eslt_none = 0, eslt_top = 1, eslt_bottom = 2, eslt_middle = 3, eslt_user_def = 4
-		};
-
-		/************************* defocus plane type ************************/
-		enum eZero_Defocus_Typ
-		{
-			ezdt_first = 1, ezdt_middle = 2, ezdt_last = 3, ezdt_user_def = 4
-		};
-
-		/************************** thickness Type ***************************/
-		enum eThick_Typ
-		{
-			ett_whole_spec = 1, ett_through_thick = 2, ett_through_slices = 3
-		};
-
-		/**************************** scan type ******************************/
-		enum eScan_Typ
-		{
-			est_line = 1, est_area = 2, eST_user_def = 3
-		};
-
-		/************************* detector type *****************************/
-		enum eDetector_Typ
-		{
-			edt_circular = 1, edt_radial = 2, edt_matrix = 3
-		};
-
-		/************************ channelling type **************************/
-		// 1: single channelling
-		// 2: mixed channelling
-		// 3: double channelling
-		enum eChan_Typ
-		{
-			ect_single_chan = 1, ect_mixed_chan = 2, eCT_double_chan = 3
-		};
-
+	/*********************************************************************/
+	/*********************************************************************/
 	}
 	
-	/* constant -  enumeration comparison */
+	/*********************************************************************/
+	/* enumeration comparison */
+	/*********************************************************************/
+	
+	/* specimen layer position */
 	namespace mt
 	{
-		/***************************************************************************************/
 		inline
-		dt_bool is_spec_lay_top(const eSpec_Lay_Typ &type)
+		dt_bool is_spec_lay_top(const eSpec_Lay_Pos &type)
 		{
-			return type == mt::eslt_top;
+			return type == mt::eslp_top;
 		}		
 		
 		inline
-		dt_bool is_spec_lay_bottom(const eSpec_Lay_Typ &type)
+		dt_bool is_spec_lay_bottom(const eSpec_Lay_Pos &type)
 		{
-			return type == mt::eslt_bottom;
+			return type == mt::eslp_bottom;
 		}
 		
 		inline
-		dt_bool is_spec_lay_middle(const eSpec_Lay_Typ &type)
+		dt_bool is_spec_lay_middle(const eSpec_Lay_Pos &type)
 		{
-			return type == mt::eslt_middle;
+			return type == mt::eslp_middle;
 		}
 		
 		inline
-		dt_bool is_spec_lay_user_def(const eSpec_Lay_Typ &type)
+		dt_bool is_spec_lay_user_def(const eSpec_Lay_Pos &type)
 		{
-			return type == mt::eslt_user_def;
+			return type == mt::eslp_user_def;
 		}
+	}
 
-		/***************************************************************************************/
-		inline
-		dt_bool is_multislice(const eElec_Spec_Int_Model &int_model)
-		{
-			return int_model == mt::eesim_multislice;
-		}
-
-		inline
-		dt_bool is_phase_object(const eElec_Spec_Int_Model &int_model)
-		{
-			return int_model == mt::eesim_phase_object;
-		}
-
-		inline
-		dt_bool is_weak_phase_object(const eElec_Spec_Int_Model &int_model)
-		{
-			return int_model == mt::eesim_weak_phase_object;
-		}
-
-		/***************************************************************************************/
-		inline
-		dt_bool is_still_atom(const ePhonon_Model &pn_model)
-		{
-			return pn_model == epm_still_atom;
-		}
-
-		inline
-		dt_bool is_absorptive_model(const ePhonon_Model &pn_model)
-		{
-			return pn_model == epm_absorptive_model;
-		}
-
-		inline
-		dt_bool is_frozen_phonon(const ePhonon_Model &pn_model)
-		{
-			return pn_model == epm_frozen_phonon;
-		}
-
-		inline
-		dt_bool is_frozen_phonon_float32_conf(const ePhonon_Model &pn_model, const dt_bool &pn_float32_conf)
-		{
-			return is_frozen_phonon(pn_model) && pn_float32_conf;
-		}
-
-		/***************************************************************************************/
-		inline
-		dt_bool is_whole_spec(const eThick_Typ &thick_type)
-		{
-			return thick_type == ett_whole_spec;
-		}
-
-		inline
-		dt_bool is_through_slices(const eThick_Typ &thick_type)
-		{
-			return thick_type == ett_through_slices;
-		}
-
-		inline
-		dt_bool is_through_thick(const eThick_Typ &thick_type)
-		{
-			return thick_type == ett_through_thick;
-		}
-
-		/***************************************************************************************/
-		inline
-		dt_bool is_slicing_by_planes(const eElec_Spec_Int_Model &int_model, const ePot_Sli_Typ &pot_slic)
-		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::epst_planes);
-		}
-
-		inline
-		dt_bool is_slicing_by_dz(const eElec_Spec_Int_Model &int_model, const ePot_Sli_Typ &pot_slic)
-		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::epst_dz_Proj);
-		}
-
-		inline
-		dt_bool is_subslicing(const eElec_Spec_Int_Model &int_model, const ePot_Sli_Typ &pot_slic)
-		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::epst_dz_Sub);
-		}
-
-		inline
-		dt_bool is_subslicing_whole_spec(const eElec_Spec_Int_Model &int_model, const ePot_Sli_Typ &pot_slic, const eThick_Typ &thick_type)
-		{
-			return mt::is_subslicing(int_model, pot_slic) && is_whole_spec(thick_type);
-		}
-
-		/***************************************************************************************/
-		inline
-		dt_bool is_plane_wave(eIncident_Wave_Typ iw_type)
-		{
-			return iw_type == eiwt_plane_wave;
-		}
-
-		inline
-		dt_bool is_convergent_wave(eIncident_Wave_Typ iw_type)
-		{
-			return iw_type == eiwt_convergent_wave;
-		}
-
-		inline
-		dt_bool is_user_define_wave(eIncident_Wave_Typ iw_type)
-		{
-			return iw_type == eiwt_user_def_Wave;
-		}
-
-		/***************************************************************************************/
+	/* electron microscopy simulation type */
+	namespace mt
+	{
 		inline
 		dt_bool is_STEM(const eEM_Sim_Typ &sim_type)
 		{
@@ -367,18 +269,6 @@
 		dt_bool is_EWRS(const eEM_Sim_Typ &sim_type)
 		{
 			return sim_type == mt::eemst_ewrs;
-		}
-
-		inline
-		dt_bool is_EWFS_SC(const eEM_Sim_Typ &sim_type, const ePhonon_Model &pn_model, const dt_bool &pn_float32_conf)
-		{
-			return is_EWFS(sim_type) && (!is_frozen_phonon(pn_model) || is_frozen_phonon_float32_conf(pn_model, pn_float32_conf));
-		}
-
-		inline
-		dt_bool is_EWRS_SC(const eEM_Sim_Typ &sim_type, const ePhonon_Model &pn_model, const dt_bool &pn_float32_conf)
-		{
-			return is_EWRS(sim_type) && (!is_frozen_phonon(pn_model) || is_frozen_phonon_float32_conf(pn_model, pn_float32_conf));
 		}
 
 		inline
@@ -496,30 +386,6 @@
 		}
 
 		inline
-		dt_bool is_EWFS_EWRS_SC(const eEM_Sim_Typ &sim_type, const ePhonon_Model &pn_model, const dt_bool &pn_float32_conf)
-		{
-			return is_EWFS_SC(sim_type, pn_model, pn_float32_conf) || is_EWRS_SC(sim_type, pn_model, pn_float32_conf);
-		}
-
-		inline
-		dt_bool is_EWFS_convergent_wave(const eEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
-		{
-			return is_EWFS(sim_type) && is_convergent_wave(iw_type);
-		}
-
-		inline
-		dt_bool is_EWRS_convergent_wave(const eEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
-		{
-			return is_EWRS(sim_type) && is_convergent_wave(iw_type);
-		}
-
-		inline
-		dt_bool is_EW_convergent_wave(const eEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
-		{
-			return is_EWFS_EWRS(sim_type) && is_convergent_wave(iw_type);
-		}
-
-		inline
 		dt_bool is_EELS_EFTEM(const eEM_Sim_Typ &sim_type)
 		{
 			return is_STEM_ISTEM_EELS(sim_type) || is_EFTEM(sim_type);
@@ -619,6 +485,237 @@
 		{
 			return is_STEM_ISTEM(sim_type) || is_STEM_ISTEM_EELS(sim_type);
 		}
+	}
+
+	/* electron specimen interaction model */
+	namespace mt
+	{
+		inline
+		dt_bool is_multislice(const eElec_Spec_Int_Model& int_model)
+		{
+			return int_model == mt::eesim_multislice;
+		}
+
+		inline
+		dt_bool is_phase_object(const eElec_Spec_Int_Model& int_model)
+		{
+			return int_model == mt::eesim_phase_object;
+		}
+
+		inline
+		dt_bool is_weak_phase_object(const eElec_Spec_Int_Model& int_model)
+		{
+			return int_model == mt::eesim_weak_phase_object;
+		}
+	}
+
+	/* atomic vibration */
+	namespace mt
+	{
+		inline
+		dt_bool is_avm_still_atom(const eAtomic_Vib_Mod& av_model)
+		{
+			return av_model == eavm_still_atom;
+		}
+
+		inline
+		dt_bool is_avm_absorptive_pot(const eAtomic_Vib_Mod& av_model)
+		{
+			return av_model == eavm_absorptive_pot;
+		}
+
+		inline
+		dt_bool is_avm_frozen_phonon(const eAtomic_Vib_Mod& av_model)
+		{
+			return av_model == eavm_frozen_phonon;
+		}
+
+		inline
+		dt_bool is_avm_frozen_phonon_sgl_conf(const eAtomic_Vib_Mod& av_model, const dt_bool& av_sgl_conf)
+		{
+			return is_avm_frozen_phonon(av_model) && av_sgl_conf;
+		}
+	}
+
+	/* simulation thickness type */
+	namespace mt
+	{
+		inline
+		dt_bool is_sim_whole_spec(const eSim_Thick_Typ& thick_type)
+		{
+			return thick_type == estt_whole_spec;
+		}
+
+		inline
+		dt_bool is_sim_through_thick(const eSim_Thick_Typ& thick_type)
+		{
+			return thick_type == estt_through_thick;
+		}
+
+		inline
+		dt_bool is_sim_through_slices(const eSim_Thick_Typ& thick_type)
+		{
+			return thick_type == estt_through_slices;
+		}
+	}
+
+	/* potential slicing type */
+	namespace mt
+	{
+		inline
+		dt_bool is_slicing_by_planes(const eElec_Spec_Int_Model& int_model, const ePot_Slic_Typ& pot_slic)
+		{
+			return mt::is_multislice(int_model) && (pot_slic == mt::epst_planes);
+		}
+
+		inline
+		dt_bool is_slicing_by_dz(const eElec_Spec_Int_Model& int_model, const ePot_Slic_Typ& pot_slic)
+		{
+			return mt::is_multislice(int_model) && (pot_slic == mt::epst_dz_Proj);
+		}
+
+		inline
+		dt_bool is_subslicing(const eElec_Spec_Int_Model& int_model, const ePot_Slic_Typ& pot_slic)
+		{
+			return mt::is_multislice(int_model) && (pot_slic == mt::epst_dz_Sub);
+		}
+
+		inline
+		dt_bool is_subslicing_whole_spec(const eElec_Spec_Int_Model& int_model, const ePot_Slic_Typ& pot_slic, const eSim_Thick_Typ& thick_type)
+		{
+			return mt::is_subslicing(int_model, pot_slic) && is_sim_whole_spec(thick_type);
+		}
+	}
+
+	/* incident wave type */
+	namespace mt
+	{
+		inline
+		dt_bool is_plane_wave(const eIncident_Wave_Typ& iw_type)
+		{
+			return iw_type == eiwt_plane_wave;
+		}
+
+		inline
+		dt_bool is_convergent_wave(const eIncident_Wave_Typ& iw_type)
+		{
+			return iw_type == eiwt_convergent_wave;
+		}
+
+		inline
+		dt_bool is_user_define_wave(const eIncident_Wave_Typ& iw_type)
+		{
+			return iw_type == eiwt_user_def_Wave;
+		}
+	}
+
+	/* zero defocus type */
+	namespace mt
+	{
+		inline
+		dt_bool is_zdt_first(const eZero_Def_Typ& zero_def_typ)
+		{
+			return zero_def_typ == ezdt_first;
+		}
+
+		inline
+		dt_bool is_zdt_middle(const eZero_Def_Typ& zero_def_typ)
+		{
+			return zero_def_typ == ezdt_middle;
+		}
+
+		inline
+		dt_bool is_zdt_last(const eZero_Def_Typ& zero_def_typ)
+		{
+			return zero_def_typ == ezdt_last;
+		}
+
+		inline
+		dt_bool is_zdt_user_def(const eZero_Def_Typ& zero_def_typ) 
+		{
+			return zero_def_typ == ezdt_user_def;
+		}
+	}
+
+	/* detector type */
+	namespace mt
+	{
+		inline
+		dt_bool is_detector_circular(const eDetector_Typ& det_type)
+		{
+			return det_type == edt_circular;
+		}
+
+		inline
+		dt_bool is_detector_radial(const eDetector_Typ& det_type)
+		{
+			return det_type == edt_radial;
+		}
+
+		inline
+		dt_bool is_detector_matrix(const eDetector_Typ& det_type)
+		{
+			return det_type == edt_matrix;
+		}
+	}
+
+	/* scan pattern type */
+	namespace mt
+	{
+		dt_bool is_scan_pat_line(const eScan_Pat_Typ& scan_pat_type)
+		{
+			return scan_pat_type == espt_line;
+		}
+
+		dt_bool is_scan_pat_area(const eScan_Pat_Typ& scan_pat_type)
+		{
+			return scan_pat_type == espt_area;
+		}
+
+ 		dt_bool is_scan_pat_user_def(const eScan_Pat_Typ& scan_pat_type)
+		{
+			return scan_pat_type == espt_user_def;
+		}
+	}
+
+	/* mixture */
+	namespace mt
+	{
+		inline
+		dt_bool is_EWFS_SC(const eEM_Sim_Typ &sim_type, const eAtomic_Vib_Mod& av_model, const dt_bool& pn_sgl_conf)
+		{
+			return is_EWFS(sim_type) && (!is_avm_frozen_phonon(av_model) || is_avm_frozen_phonon_sgl_conf(av_model, pn_sgl_conf));
+		}
+
+		inline
+		dt_bool is_EWRS_SC(const eEM_Sim_Typ &sim_type, const eAtomic_Vib_Mod& av_model, const dt_bool& pn_sgl_conf)
+		{
+			return is_EWRS(sim_type) && (!is_avm_frozen_phonon(av_model) || is_avm_frozen_phonon_sgl_conf(av_model, pn_sgl_conf));
+		}
+
+		inline
+		dt_bool is_EWFS_EWRS_SC(const eEM_Sim_Typ &sim_type, const eAtomic_Vib_Mod& av_model, const dt_bool& pn_sgl_conf)
+		{
+			return is_EWFS_SC(sim_type, av_model, pn_sgl_conf) || is_EWRS_SC(sim_type, av_model, pn_sgl_conf);
+		}
+
+		inline
+		dt_bool is_EWFS_convergent_wave(const eEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
+		{
+			return is_EWFS(sim_type) && is_convergent_wave(iw_type);
+		}
+
+		inline
+		dt_bool is_EWRS_convergent_wave(const eEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
+		{
+			return is_EWRS(sim_type) && is_convergent_wave(iw_type);
+		}
+
+		inline
+		dt_bool is_EW_convergent_wave(const eEM_Sim_Typ &sim_type, const eIncident_Wave_Typ &iw_type)
+		{
+			return is_EWFS_EWRS(sim_type) && is_convergent_wave(iw_type);
+		}
 
 		inline
 		eIncident_Wave_Typ validate_incident_wave_type(const eEM_Sim_Typ &sim_type, eIncident_Wave_Typ iw_type)
@@ -632,6 +729,6 @@
 
 			return iw_type;
 		}
-
 	}
+
 #endif

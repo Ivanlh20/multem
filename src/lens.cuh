@@ -25,7 +25,6 @@
 
 	#include "const_enum_mt.cuh"
 	#include "math.cuh"
-	#include "type_traits_gen.cuh"
 	#include "cgpu_fcns_gen.cuh"
 	#include "grid.cuh"
 
@@ -89,8 +88,8 @@
 			T spt_inc_iehwgd;				// e^-1 half-width value of the Gaussian distribution
 			T spt_inc_theta_c;				// divergence semi-angle (rad)
 
-			eZero_Defocus_Typ zdt;			// Defocus type: ezdt_first = 1, ezdt_middle = 2, ezdt_last = 3, ezdt_user_def = 4
-			T zdp;							// plane
+			eZero_Def_Typ zero_def_typ;// Defocus type: ezdt_first = 1, ezdt_middle = 2, ezdt_last = 3, ezdt_user_def = 4
+			T zero_def_plane;				// plane
 
 			T lambda;						// wavelength(Angstrom)
 
@@ -129,7 +128,7 @@
 				c_50(0), c_52(0), phi_52(0), c_54(0), phi_54(0), c_56(0), phi_56(0), 
 				inner_aper_ang(0), outer_aper_ang(0), tp_inc_a(1.0), tp_inc_sigma(0), tp_inc_beta(0), tp_inc_npts(0), tp_inc_iehwgd(0), 
 				spt_inc_a(1.0), spt_inc_sigma(0), spt_inc_beta(0), spt_inc_rad_npts(0), spt_inc_azm_npts(0), spt_inc_iehwgd(0), spt_inc_theta_c(0), 
-				zdt(ezdt_last), zdp(0), lambda(0), g2_inner(0), g2_outer(0), ngxs(0), ngys(0), dgxs(0), dgys(0), g2_maxs(0), 
+				zero_def_typ(ezdt_last), zero_def_plane(0), lambda(0), g2_inner(0), g2_outer(0), ngxs(0), ngys(0), dgxs(0), dgys(0), g2_maxs(0), 
 				c_c_10(0), c_c_12(0), c_c_21(0), c_c_23(0), c_c_30(0), c_c_32(0), c_c_34(0), c_c_41(0), 
 				c_c_43(0), c_c_45(0), c_c_50(0), c_c_52(0), c_c_54(0), c_c_56(0) {}
 
@@ -205,8 +204,8 @@
 					spt_inc_iehwgd = lens.spt_inc_iehwgd;
 					spt_inc_theta_c = lens.spt_inc_theta_c;
 
-					zdt = lens.zdt;
-					zdp = lens.zdp;
+					zero_def_typ = lens.zero_def_typ;
+					zero_def_plane = lens.zero_def_plane;
 
 					lambda = lens.lambda;
 
@@ -298,8 +297,8 @@
 				spt_inc_iehwgd = T(lens.spt_inc_iehwgd);
 				spt_inc_theta_c = T(lens.spt_inc_theta_c);
 
-				zdt = lens.zdt;
-				zdp = T(lens.zdp);
+				zero_def_typ = lens.zero_def_typ;
+				zero_def_plane = T(lens.zero_def_plane);
 
 				lambda = T(lens.lambda);
 
@@ -417,9 +416,9 @@
 				c_c_10 = (fcn_is_zero(c_10))?T(0):-c_pi<T>*c_10*lambda;
 			}
 
-			T get_zero_defocus_plane(const T& z_min, const T& z_max) const 
+			T get_zero_def_plane(const T& z_min, const T& z_max) const 
 			{
-				switch(zdt)
+				switch(zero_def_typ)
 				{
 					case ezdt_first:
 					{
@@ -435,29 +434,29 @@
 					}
 					default:
 					{
-						return zdp;
+						return zero_def_plane;
 					}
 				}
 			};
 
-			dt_bool is_zdt_First() const 
+			dt_bool is_zdt_first() const 
 			{
-				return zdt == ezdt_first;
+				return mt::is_zdt_first(zero_def_typ);
 			}
 
-			dt_bool is_zdt_Middle() const 
+			dt_bool is_zdt_middle() const 
 			{
-				return zdt == ezdt_middle;
+				return mt::is_zdt_first(zero_def_typ);
 			}
 
-			dt_bool is_zdt_Last() const 
+			dt_bool is_zdt_last() const 
 			{
-				return zdt == ezdt_last;
+				return mt::is_zdt_first(zero_def_typ);
 			}
 
 			dt_bool is_zdt_user_def() const 
 			{
-				return zdt == ezdt_user_def;
+				return mt::is_zdt_first(zero_def_typ);
 			}
 
 			T gxs(const dt_int32& ix) const 

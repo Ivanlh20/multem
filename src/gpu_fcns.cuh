@@ -1142,7 +1142,7 @@
 	// 	// Linear projected potential: V and zV
 	// 	template <class TQ1, class TVAtom>
 	// 	enable_if_device<TQ1, void>
-	// 	linear_Vz(ePot_Parm_Typ pot_parm_typ, TQ1 &qz, TVAtom &vatom)
+	// 	linear_Vz(eAtomic_Pot_Parm_Typ atomic_pot_parm_typ, TQ1 &qz, TVAtom &vatom)
 	// 	{	
 	// 		using TAtom = Value_type<TVAtom>;
 
@@ -1151,53 +1151,53 @@
 	// 			return;
 	// 		}
 
-	// 		auto str_linear_Vz = [](cudaStream_t &stream, const ePot_Parm_Typ& pot_parm_typ, TQ1 &qz, TAtom &atom)
+	// 		auto str_linear_Vz = [](cudaStream_t &stream, const eAtomic_Pot_Parm_Typ& atomic_pot_parm_typ, TQ1 &qz, TAtom &atom)
 	// 		{
 	// 			if (atom.charge == 0)
 	// 			{
-	// 				switch(pot_parm_typ)
+	// 				switch(atomic_pot_parm_typ)
 	// 				{
-	// 					case eppt_doyle_0_4:
-	// 						gpu_detail::linear_Vz<eppt_doyle_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_doyle_0_4:
+	// 						gpu_detail::linear_Vz<eappt_doyle_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case eppt_peng_0_4:
-	// 						gpu_detail::linear_Vz<eppt_peng_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_peng_0_4:
+	// 						gpu_detail::linear_Vz<eappt_peng_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case eppt_peng_0_12:
-	// 						gpu_detail::linear_Vz<eppt_peng_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_peng_0_12:
+	// 						gpu_detail::linear_Vz<eappt_peng_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case eppt_kirkland_0_12:
-	// 						gpu_detail::linear_Vz<eppt_kirkland_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_kirkland_0_12:
+	// 						gpu_detail::linear_Vz<eappt_kirkland_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case eppt_weickenmeier_0_12:
-	// 						gpu_detail::linear_Vz<eppt_weickenmeier_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_weickenmeier_0_12:
+	// 						gpu_detail::linear_Vz<eappt_weickenmeier_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case eppt_lobato_0_12:
-	// 						gpu_detail::linear_Vz<eppt_lobato_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_lobato_0_12:
+	// 						gpu_detail::linear_Vz<eappt_lobato_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
 	// 				}
 	// 			}
 	// 			else
 	// 			{
-	// 				switch(pot_parm_typ)
+	// 				switch(atomic_pot_parm_typ)
 	// 				{
-	// 					case eppt_doyle_0_4:
-	// 						gpu_detail::linear_Vz<eppt_doyle_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_doyle_0_4:
+	// 						gpu_detail::linear_Vz<eappt_doyle_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case eppt_peng_0_4:
-	// 						gpu_detail::linear_Vz<eppt_peng_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_peng_0_4:
+	// 						gpu_detail::linear_Vz<eappt_peng_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case eppt_peng_0_12:
-	// 						gpu_detail::linear_Vz<eppt_peng_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_peng_0_12:
+	// 						gpu_detail::linear_Vz<eappt_peng_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case eppt_kirkland_0_12:
-	// 						gpu_detail::linear_Vz<eppt_kirkland_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_kirkland_0_12:
+	// 						gpu_detail::linear_Vz<eappt_kirkland_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case eppt_weickenmeier_0_12:
-	// 						gpu_detail::linear_Vz<eppt_weickenmeier_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_weickenmeier_0_12:
+	// 						gpu_detail::linear_Vz<eappt_weickenmeier_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
-	// 					case eppt_lobato_0_12:
-	// 						gpu_detail::linear_Vz<eppt_lobato_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+	// 					case eappt_lobato_0_12:
+	// 						gpu_detail::linear_Vz<eappt_lobato_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 	// 						break;
 	// 				}		
 	// 			}
@@ -1205,7 +1205,7 @@
 
 	// 		for(auto istm = 0; istm < stream.n_stream_act; istm++)
 	// 		{
-	// 			str_linear_Vz(stream[istm], pot_parm_typ, qz, vatom[istm]);
+	// 			str_linear_Vz(stream[istm], atomic_pot_parm_typ, qz, vatom[istm]);
 	// 		}
 	// 	}
 
