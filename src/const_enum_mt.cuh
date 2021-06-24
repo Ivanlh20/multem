@@ -54,7 +54,7 @@
 		};
 
 		/*************** electron specimen interaction model ******************/
-		enum eElec_Spec_Int_Mod
+		enum eElec_Spec_Interact_Mod
 		{
 			eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
 		};
@@ -491,19 +491,19 @@
 	namespace mt
 	{
 		inline
-		dt_bool is_multislice(const eElec_Spec_Int_Mod& int_model)
+		dt_bool is_multislice(const eElec_Spec_Interact_Mod& int_model)
 		{
 			return int_model == mt::eesim_multislice;
 		}
 
 		inline
-		dt_bool is_phase_object(const eElec_Spec_Int_Mod& int_model)
+		dt_bool is_phase_object(const eElec_Spec_Interact_Mod& int_model)
 		{
 			return int_model == mt::eesim_phase_object;
 		}
 
 		inline
-		dt_bool is_weak_phase_object(const eElec_Spec_Int_Mod& int_model)
+		dt_bool is_weak_phase_object(const eElec_Spec_Interact_Mod& int_model)
 		{
 			return int_model == mt::eesim_weak_phase_object;
 		}
@@ -563,25 +563,25 @@
 	namespace mt
 	{
 		inline
-		dt_bool is_spec_slic_by_planes_proj(const eElec_Spec_Int_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
+		dt_bool is_spec_slic_by_planes_proj(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
 		{
 			return mt::is_multislice(int_model) && (pot_slic == mt::esst_planes_proj);
 		}
 
 		inline
-		dt_bool is_spec_slic_by_dz_proj(const eElec_Spec_Int_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
+		dt_bool is_spec_slic_by_dz_proj(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
 		{
 			return mt::is_multislice(int_model) && (pot_slic == mt::esst_dz_proj);
 		}
 
 		inline
-		dt_bool is_spec_slic_dz_sub(const eElec_Spec_Int_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
+		dt_bool is_spec_slic_dz_sub(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
 		{
 			return mt::is_multislice(int_model) && (pot_slic == mt::esst_dz_sub);
 		}
 
 		inline
-		dt_bool is_spec_slic_dz_sub_whole_spec(const eElec_Spec_Int_Mod& int_model, const eSpec_Slic_Typ& pot_slic, const eSim_Thick_Typ& thick_type)
+		dt_bool is_spec_slic_dz_sub_whole_spec(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& pot_slic, const eSim_Thick_Typ& thick_type)
 		{
 			return mt::is_spec_slic_dz_sub(int_model, pot_slic) && is_sim_whole_spec(thick_type);
 		}

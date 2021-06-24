@@ -13,12 +13,12 @@ system_conf.gpu_device = 0;
 
 % eTEMST_EWFS=51, eTEMST_EWRS=52
 input_multem.em_sim_typ = 52;
-input_multem.interaction_model = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
+input_multem.elec_spec_interac_mod = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
 input_multem.spec_slic(1).typ = 1; % esst_planes = 1, esst_dz_proj = 2, esst_planes_sub = 3, esst_dz_sub = 4, esst_auto = 5
 
 input_multem.atomic_pot_parm_typ = 6; % eappt_doyle_0_4 = 1, eappt_peng_0_4 = 2, eappt_peng_0_12 = 3, eappt_kirkland_0_12 = 4, eappt_weickenmeier_0_12 = 5, eappt_lobato_0_12 = 6
 
-input_multem.atomic_vib_model = 1; % eavm_still_atom = 1, eavm_absorptive_pot = 2, eavm_frozen_phonon = 3, eavm_user_def = 4
+input_multem.atomic_vib_mod = 1; % eavm_still_atom = 1, eavm_absorptive_pot = 2, eavm_frozen_phonon = 3, eavm_user_def = 4
 input_multem.atomic_vib_dim = [true, true, false]; % phonon dimensions
 input_multem.atomic_vib_seed = 300183; % Random seed(frozen phonon)
 input_multem.atomic_vib_sgl_conf = 0; % 1: true, 0:false (extract single configuration)
@@ -46,8 +46,8 @@ input_multem.nx = 2048;
 input_multem.ny = 2048;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.iw_type = 1; % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
-input_multem.iw_psi = read_psi_0_multem(input_multem.nx, input_multem.ny); % user define incident wave
+input_multem.incdt_wav_typ = 1; % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
+input_multem.incdt_wav_psi = read_psi_0_multem(input_multem.nx, input_multem.ny); % user define incident wave
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% beam position %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.beam_pos = [input_multem.spec_bs_x/2;input_multem.spec_bs_y/2];

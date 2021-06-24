@@ -22,8 +22,8 @@ input_multem.nx = 1024;
 input_multem.ny = 1024;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.iw_type = 2;   % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
-input_multem.iw_psi = 0;    % user define incident wave
+input_multem.incdt_wav_typ = 2;   % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
+input_multem.incdt_wav_psi = 0;    % user define incident wave
 input_multem.iw_x = 0.0;    % x position 
 input_multem.iw_y = 0.0;    % y position
 

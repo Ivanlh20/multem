@@ -50,7 +50,7 @@
 
 			System_Config system_config;					// System information
 
-			eElec_Spec_Int_Mod interaction_model;			// eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
+			eElec_Spec_Interact_Mod interaction_model;			// eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
 			eAtomic_Pot_Parm_Typ atomic_pot_parm_typ;		// potential type: 1: doyle(0-4), 2: Peng(0-4), 3: peng(0-12), 4: Kirkland(0-12), 5:Weickenmeier(0-12) adn 6: Lobato(0-12)
 
 			Atomic_Vib atomic_vib;							// phonon parameters

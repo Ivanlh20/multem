@@ -1,6 +1,6 @@
 function [input_multem] = ilm_dflt_input_multem()
     %%%%%%%%%%%%%% Electron-Specimen interaction model %%%%%%%%%%%%%%%%%
-    input_multem.interaction_model = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
+    input_multem.elec_spec_interac_mod = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
     input_multem.atomic_pot_parm_typ = 6; % eappt_doyle_0_4 = 1, eappt_peng_0_4 = 2, eappt_peng_0_12 = 3, eappt_kirkland_0_12 = 4, eappt_weickenmeier_0_12 = 5, eappt_lobato_0_12 = 6
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9,7 +9,7 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.reverse_multislice = 0; % 1: true, 0:false
 
     %%%%%%%%%%%%%%%%%%%% atomic vibrations model %%%%%%%%%%%%%%%%%%%%%%
-    input_multem.atomic_vib_model = 1; % eavm_still_atom = 1, eavm_absorptive_pot = 2, eavm_frozen_phonon = 3, eavm_user_def = 4
+    input_multem.atomic_vib_mod = 1; % eavm_still_atom = 1, eavm_absorptive_pot = 2, eavm_frozen_phonon = 3, eavm_user_def = 4
     input_multem.atomic_vib_coh_contrib = 0; % 1: true, 0: false
     input_multem.atomic_vib_sgl_conf = 0; % 1: true, 0:false (extract single configuration)
     input_multem.atomic_vib_nconf = 1; % true: specific phonon configuration, false: number of frozen phonon configurations
@@ -191,8 +191,8 @@ function [input_multem] = ilm_dflt_input_multem()
     % must be define in input_multem.beam_pos
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
-    input_multem.iw_type = 4; % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
-    input_multem.iw_psi = 0; % User define incident wave. It will be only used if User_Define=3
+    input_multem.incdt_wav_typ = 4; % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
+    input_multem.incdt_wav_psi = 0; % User define incident wave. It will be only used if User_Define=3
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%% beam positions %%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.beam_pos = [0.0; 0.0]; % x-y positions

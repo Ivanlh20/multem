@@ -2,4 +2,4 @@
 clc; clear;
 addpath(['..', filesep, 'matlab_functions'])
 
-ilm_mex('release', 'ilc_atomic_vib_fact.cpp', '../src');
+ilm_mex('release', 'ilc_pn_fact.cpp', '../src');

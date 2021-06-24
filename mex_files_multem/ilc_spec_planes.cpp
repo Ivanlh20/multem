@@ -31,7 +31,7 @@
 template <class T_r>
 void read_in_multem(const mxArray* mex_in_multem, mt::In_Multem<T_r> &in_multem)
 {
-	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Mod>(mex_in_multem, "interaction_model");
+	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Interact_Mod>(mex_in_multem, "interaction_model");
 	in_multem.atomic_pot_parm_typ = mt::eappt_lobato_0_12;
 
 	/************** Electron-Atomic_Vib interaction model **************/

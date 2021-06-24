@@ -46,7 +46,7 @@ void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_
 	in_multem.simulation_type = mex_get_num_from_field<mt::eEM_Sim_Typ>(mex_in_multem, "simulation_type");
 	in_multem.simulation_type = (in_multem.is_EWRS())?mt::eemst_ewrs:mt::eemst_ewfs;
 
-	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Int_Mod>(mex_in_multem, "interaction_model");
+	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Interact_Mod>(mex_in_multem, "interaction_model");
 	in_multem.atomic_pot_parm_typ = mex_get_num_from_field<mt::eAtomic_Pot_Parm_Typ>(mex_in_multem, "atomic_pot_parm_typ");
 
 	/************** Electron-Atomic_Vib interaction model **************/

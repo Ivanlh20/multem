@@ -261,7 +261,7 @@
 	{
 		template <class T, class TVctr_1, class TVctr_2>
 		enable_if_vctr_gpu_and_vctr_gpu<TVctr_1, TVctr_2, void>
-		transmission_fcn(eElec_Spec_Int_Mod esim, TVctr_1& vzp_i, T w, TVctr_2& tfcn_o, Stream_gpu* pstream = nullptr)
+		transmission_fcn(eElec_Spec_Interact_Mod esim, TVctr_1& vzp_i, T w, TVctr_2& tfcn_o, Stream_gpu* pstream = nullptr)
 		{	
 			using U = Value_type<TVctr_2>;
 

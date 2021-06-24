@@ -263,7 +263,7 @@
 		/* transmission function */
 		namespace gpu_detail_mt
 		{
-			template <eElec_Spec_Int_Mod esim, class T, class U>
+			template <eElec_Spec_Interact_Mod esim, class T, class U>
 			__global__ void fcn_trans_fcn(iGrid_1d igrid, pVctr_gpu_32<T> vzp_i, const T& w, pVctr_gpu_32<U> tfcn_o)
 			{
 				FOR_LOOP_1DC(igrid.nx, cgpu_detail_mt::fcn_trans_fcn<esim>(ix, igrid, vzp_i.m_data, w, tfcn_o.m_data));

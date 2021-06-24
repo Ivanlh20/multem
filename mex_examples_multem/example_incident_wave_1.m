@@ -21,8 +21,8 @@ input_multem.nx = 1024;
 input_multem.ny = 1024;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.iw_type = 2; % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
-input_multem.iw_psi = read_psi_0_multem(input_multem.nx, input_multem.ny); % user define incident wave
+input_multem.incdt_wav_typ = 2; % 1: Plane_Wave, 2: Convergent_wave, 3:User_Define, 4: auto
+input_multem.incdt_wav_psi = read_psi_0_multem(input_multem.nx, input_multem.ny); % user define incident wave
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% beam position %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.beam_pos = [input_multem.spec_bs_x/2;input_multem.spec_bs_y/2];
