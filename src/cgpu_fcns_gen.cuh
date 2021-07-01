@@ -942,9 +942,10 @@
 
 		// trim from both ends
 		static inline
-		std::string fcn_str_trim(std::string &s) 
+		std::string fcn_str_trim(std::string s) 
 		{
 			fcn_str_trim_ip_ip(s);
+			return s;
 		}
 
 		// Compare string

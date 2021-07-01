@@ -16,15 +16,15 @@ function [atoms, lx, ly, lz, a, b, c] = graphene(n, da, rms)
     xtl_parm.asym_uc = [];
 
     occ = 1;
-    region = 0;
+    tag = 0;
     charge = 0;
     
     % C = 6
-    % Z x y z rmsd_3d occupancy region charge
-    xtl_parm.base = [6, 0.0, 0.0, 0.0, rms, occ, region, charge;...
-                        6, 1/3, 0.0, 0.0, rms, occ, region, charge;...
-                        6, 1/2, 1/2, 0.0, rms, occ, region, charge;...
-                        6, 5/6, 1/2, 0.0, rms, occ, region, charge];
+    % Z x y z rmsd_3d occupancy tag charge
+    xtl_parm.base = [6, 0.0, 0.0, 0.0, rms, occ, tag, charge;...
+                        6, 1/3, 0.0, 0.0, rms, occ, tag, charge;...
+                        6, 1/2, 1/2, 0.0, rms, occ, tag, charge;...
+                        6, 5/6, 1/2, 0.0, rms, occ, tag, charge];
 
     atoms = ilc_xtl_build(xtl_parm);
     lx = xtl_parm.a*xtl_parm.na;

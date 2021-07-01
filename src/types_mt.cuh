@@ -166,14 +166,14 @@
 			public:
 				R_3d<T> bs;				// box size
 				R_3d<T> r_0;			// initial position
-				dt_int32 region;		// region
+				dt_int32 tag;			// tag
 				eSpec_Lay_Pos type;		// specimen layer type
-				T sli_thk;				// Slice thickness
+				T sli_thick;			// slice thickness
 
-				Spec_Lay_Info(): bs(), r_0(), region(c_dflt_region), type(eslp_none), sli_thk(2) {};
+				Spec_Lay_Info(): bs(), r_0(), tag(c_dflt_tag), type(eslp_none), sli_thick(2) {};
 
-				Spec_Lay_Info(const R_3d<T>& bs, R_3d<T> r_0 = R_3d<T>(), dt_int32 region = c_dflt_region, 
-				eSpec_Lay_Pos type = eslp_none, T sli_thk = 2.0): bs(bs), r_0(r_0), region(region), type(type), sli_thk(sli_thk) {};
+				Spec_Lay_Info(const R_3d<T>& bs, R_3d<T> r_0 = R_3d<T>(), dt_int32 tag = c_dflt_tag, 
+				eSpec_Lay_Pos type = eslp_none, T sli_thick = 2.0): bs(bs), r_0(r_0), tag(tag), type(type), sli_thick(sli_thick) {};
 
 				Spec_Lay_Info<T>& operator=(Spec_Lay_Info<T> &spec_lay_info)
 				{
@@ -181,8 +181,8 @@
 					{
 						bs = spec_lay_info.bs;
 						r_0 = spec_lay_info.r_0;
-						sli_thk = spec_lay_info.sli_thk;
-						region = spec_lay_info.region;
+						sli_thick = spec_lay_info.sli_thick;
+						tag = spec_lay_info.tag;
 						type = spec_lay_info.type;
 					}
 
@@ -205,8 +205,8 @@
 						bs = spec_lay_info.bs;
 						r_0 = spec_lay_info.r_0;
 						r_e = spec_lay_info.r_e;
-						sli_thk = T(spec_lay_info.sli_thk);
-						region = spec_lay_info.region;
+						sli_thick = T(spec_lay_info.sli_thick);
+						tag = spec_lay_info.tag;
 						type = spec_lay_info.type;
 					}
 				}
@@ -245,7 +245,7 @@
 				{
 					if (bs.z<1e-4)
 					{
-						region = 0;
+						tag = 0;
 						return;
 					}
 
@@ -258,12 +258,12 @@
 						auto z = atoms.z[iatoms];
 						if ((z_0<z) && (z<z_e))
 						{
-							f_region += atoms.region[iatoms];
+							f_region += atoms.tag[iatoms];
 							c_region++;
 						}
 					}
 					c_region = max(1, c_region);
-					region = static_cast<dt_int32>(::round(T(f_region)/T(c_region)));
+					tag = static_cast<dt_int32>(::round(T(f_region)/T(c_region)));
 				}															
 		};
 		
@@ -278,224 +278,13 @@
 			Thick(): z(0), z_zero_def_plane(0), z_back_prop(0), 
 			islice(0), iatom_e(0) {}
 
-			T z;		// z
+			T z;					// z
 			T z_zero_def_plane;		// z: Zero defocus
-			T z_back_prop;		// z: Back propagation
+			T z_back_prop;			// z: Back propagation
 
 			dt_int32 islice;		// slice position
 			dt_int32 iatom_e;		// Last atom index
 		};
-
-		/*************************** identify planes *************************/
-		template <class T>
-		struct Identify_Planes
-		{
-			using TVctr = Vctr<T, edev_cpu>;
-			using TVctr_I = Vctr<dt_int32, edev_cpu>;
-
-			public:
-				Identify_Planes(): dv(0.1) {}
-
-				// Identify planes: Require v to be sorted
-				TVctr operator()(TVctr& v)
-				{
-					TVctr v_plane;
-
-					if (v.size()==0)
-					{
-						return v_plane;
-					}
-
-					// min and max element
-					T v_min = v.front();
-					T v_max = v.back();
-
-					// calculate hist and correct it
-					auto v_hist = fcn_hist(v, dv, v_min, v_max);
-
-					if (v_hist.size()==1)
-					{
-						v_plane.push_back(thrust::reduce(v.begin(), v.end())/T(v.size()));
-						return v_plane;
-					}
-
-					// calculate layer limits
-					TVctr v_lim;
-					v_lim.reserve(v_hist.size());
-
-					for(auto iz = 0; iz < v_hist.size()-1; iz++)
-					{
-						if ((v_hist[iz]>0) && (v_hist[iz+1]==0))
-						{
-							v_lim.push_back(v.front()+(iz+1)*dv);
-						}
-					}
-					v_lim.push_back(v.back()+dv);
-
-					// calculate planes
-					v_plane.reserve(v_lim.size());
-
-					T v_m = v.front();
-					T v_m_ee = 0;
-					dt_int32 v_c = 1;
-					dt_int32 izl = 0;
-					for(auto iz = 0; iz < v.size(); iz++)
-					{
-						auto v_v = v[iz];
-
-						if (v_v<v_lim[izl])
-						{
-							fcn_kh_sum(v_m, v_v, v_m_ee);
-							v_c++;
-						}
-						else
-						{
-							v_plane.push_back(v_m/v_c);
-							v_m = v_v;
-							v_m_ee = 0;
-							v_c = 1;
-							izl++;
-						}
-					} 
-
-					v_plane.push_back(v_m/v_c);
-					v_plane.shrink_to_fit();
-
-					return v_plane;
-				}
-
-				// calculate planes
-				TVctr operator()(T v_min, T v_max, T dv, eMatch_Border mb=emb_minmax)
-				{
-					const T v_eps = 1e-4;
-
-					TVctr v_plane;
-
-					if (fabs(v_max-v_min)<v_eps)
-					{
-						v_plane.resize(1);
-						v_plane[0] = 0.5*(v_min+v_max);
-						return v_plane;
-					}
-
-					if (v_max<v_min)
-					{
-						return v_plane;
-					}
-
-					auto quot = [v_eps](const T& a, const T& b)->dt_int32
-					{
-						return static_cast<dt_int32>(::floor(a/b+v_eps));
-					};
-
-					T s_v = v_max-v_min;
-					const dt_int32 nv = max(1, quot(s_v, dv))+1;
-
-					switch (mb)
-					{
-						case emb_min:
-						{
-							v_plane.resize(nv);
-							for(auto iv=0; iv<nv; iv++)
-							{
-								v_plane[iv] = v_min + iv*dv;
-							}
-						}
-						break;
-						case emb_max:
-						{
-							v_plane.resize(nv);
-							for(auto iv=0; iv<nv; iv++)
-							{
-								v_plane[nv-1-iv] = v_max - iv*dv;
-							}
-						}
-						break;
-						case emb_minmax:
-						{
-							const auto dv_b = dv + 0.5*(s_v-(nv-1)*dv);
-
-							v_plane.resize(nv);
-							v_plane[0] = v_min;
-							for(auto iv=1; iv<nv; iv++)
-							{
-								const auto dv_t = ((iv==1)||(iv==nv-1))?dv_b:dv;
-								v_plane[iv] = v_plane[iv-1] + dv_t;
-							}
-						}
-						break;
-					}
-				
-
-					return v_plane;
-				}
-
-			private:
-				// calculate corrected histogram
-				TVctr_I fcn_hist(TVctr& v, dt_float64 dv, dt_float64 v_min, dt_float64 v_max)
-				{
-					const auto v_l = ::fmax(v_max-v_min, dv);
-					const dt_int32 n_bins = static_cast<dt_int32>(::ceil(v_l/dv));
-
-					TVctr_I v_hist(n_bins, 0);
-					for(auto iv = 0; iv< v.size(); iv++)
-					{
-						 auto v_id = dt_float64(v[iv]);
-						 auto ih = static_cast<dt_int32>(::floor((v_id-v_min)/dv));
-						 auto v_imin = v_min + (ih-1)*dv;
-						 auto v_imax = v_imin + dv;
-
-						 if (v_id<v_imin)
-						 {
-							 for(auto ik = ih; ik >= 0; ik--)
-							 {
-								 v_imin = v_min + (ik-1)*dv;
-								 v_imax = v_imin + dv;
-								 if ((v_imin<=v_id) && (v_id<v_imax))
-								 {
-									ih = ik-1;
-									break;
-								 }
-							 }
-							}
-						 else if (v_id>v_imax)
-						 {
-							 for(auto ik = ih; ik < n_bins; ik++)
-							 {
-								 v_imin = v_min + ik*dv;
-								 v_imax = v_imin + dv;
-								 if ((v_imin<=v_id) && (v_id<v_imax))
-								 {
-									ih = ik;
-									break;
-								 }
-							 }
-						 }
-						 ih = max(0, min(n_bins-1, ih));
-						 v_hist[ih]++;
-					}
-
-					while (v_hist.back()==0)
-					{
-						v_hist.pop_back();
-					}
-
-					for(auto ih = 1; ih < v_hist.size()-1; ih++)
-					{
-						dt_bool bn = (ih<v_hist.size()-2)?(0<v_hist[ih+2]):false;
-						bn = (0<v_hist[ih-1]) && ((0<v_hist[ih+1])||bn);
-						if ((v_hist[ih]==0) && bn)
-						{
-							v_hist[ih] = 1;
-						}
-					}
-
-					return v_hist;
-				}
-
-				dt_float64 dv;
-		};
-
 
 		/************************** stem fetector ****************************/
 		template <class T, eDev Dev>

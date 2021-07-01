@@ -6,7 +6,7 @@ addpath(['..', filesep, 'mex_bin'])
 
 Z = 79;
 occ = 1;
-region = 0;
+tag = 0;
 charge = 0;
 
 rmin = 1e-02;rmax = 5.0;nr = 512;

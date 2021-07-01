@@ -2711,18 +2711,18 @@
 			dt_int32 Z;
 			dt_float32 sigma;
 			dt_float32 occ;
-			dt_int32 region;
+			dt_int32 tag;
 			dt_int32 charge;
 
-			Ptc_s_Atom():Z(0), Ptc_s_3d_0<T>(), sigma(0), occ(0), region(0), charge(0) {};
+			Ptc_s_Atom():Z(0), Ptc_s_3d_0<T>(), sigma(0), occ(0), tag(0), charge(0) {};
 
 			Ptc_s_Atom(const dt_int32& Z, const T& x, const T& y, const T& z, 
-			dt_float32 sigma=c_dflt_rms3d, dt_float32 occ=c_dflt_occ, dt_int32 region=c_dflt_region, dt_int32 charge=c_dflt_charge):
-			Z(Z), Ptc_s_3d_0<T>(x, y, z), sigma(sigma), occ(occ), region(region), charge(charge) {};
+			dt_float32 sigma=c_dflt_rms3d, dt_float32 occ=c_dflt_occ, dt_int32 tag=c_dflt_tag, dt_int32 charge=c_dflt_charge):
+			Z(Z), Ptc_s_3d_0<T>(x, y, z), sigma(sigma), occ(occ), tag(tag), charge(charge) {};
 			
 			Ptc_s_Atom(const dt_int32& Z, const R_3d<T>& r, 
-			dt_float32 sigma=c_dflt_rms3d, dt_float32 occ=c_dflt_occ, dt_int32 region=c_dflt_region, dt_int32 charge=c_dflt_charge):
-			Z(Z), Ptc_s_3d_0<T>(r.x, r.y, r.z), sigma(sigma), occ(occ), region(region), charge(charge) {};
+			dt_float32 sigma=c_dflt_rms3d, dt_float32 occ=c_dflt_occ, dt_int32 tag=c_dflt_tag, dt_int32 charge=c_dflt_charge):
+			Z(Z), Ptc_s_3d_0<T>(r.x, r.y, r.z), sigma(sigma), occ(occ), tag(tag), charge(charge) {};
 
 			/* constructor by pointer */
 			template <class U>
@@ -2737,7 +2737,7 @@
 
 				sigma = (n_c>4)?dt_float32(v[ip + 4*n_r]):c_dflt_rms3d;		// standard deviation
 				occ = (n_c>5)?dt_float32(v[ip + 5*n_r]):c_dflt_occ;			// occupancy
-				region = (n_c>6)?dt_int32(v[ip + 6*n_r]):c_dflt_region;		// region
+				tag = (n_c>6)?dt_int32(v[ip + 6*n_r]):c_dflt_tag;		// tag
 				charge = (n_c>7)?dt_int32(v[ip + 7*n_r]):c_dflt_charge;		// charge
 			}
 
@@ -2766,7 +2766,7 @@
 					this->z = ptc_s.z;
 					sigma = ptc_s.sigma;
 					occ = ptc_s.occ;
-					region = ptc_s.region;
+					tag = ptc_s.tag;
 					charge = ptc_s.charge;
 				}
 			
@@ -2793,7 +2793,7 @@
 					this->z = T(ptc_s.z);
 					sigma = ptc_s.sigma;
 					occ = ptc_s.occ;
-					region = ptc_s.region;
+					tag = ptc_s.tag;
 					charge = ptc_s.charge;
 				}
 			}
@@ -2811,7 +2811,7 @@
 				mutable Vctr_cpu<dt_int32> Z;			// atomic number
 				mutable Vctr_cpu<dt_float32> sigma;		// 3d root fcn_mean squared displacement (rmsd)
 				mutable Vctr_cpu<dt_float32> occ;		// occupancy
-				mutable Vctr_cpu<dt_int32> region;		// region
+				mutable Vctr_cpu<dt_int32> tag;		// tag
 				mutable Vctr_cpu<dt_int32> charge;		// charge
 
 				dt_int32 cols_used;						// number of used columns
@@ -2819,11 +2819,11 @@
 				R_2d<dt_int32> Z_lim;
 				R_2d<dt_float32> sigma_lim;
 				R_2d<dt_float32> occ_lim;
-				R_2d<dt_int32> region_lim;
+				R_2d<dt_int32> tag_lim;
 				R_2d<dt_int32> charge_lim;
 
 				/************************************* constructors ************************************/
-				Ptc_Atom(): Ptc_3d_0<T>(), cols_used(4), Z_lim(), sigma_lim(), occ_lim(), region_lim(), charge_lim() {}
+				Ptc_Atom(): Ptc_3d_0<T>(), cols_used(4), Z_lim(), sigma_lim(), occ_lim(), tag_lim(), charge_lim() {}
 
 				template <class U>
 				Ptc_Atom(const pVctr_cpu_64<U>& ptc, const R_3d<U>& bs, dt_bool pbc_xy = false, dt_bool b_statistic = true)
@@ -2865,7 +2865,6 @@
 				template <class U>
 				void assign(const Ptc_Atom<U>& ptc)
 				{
-					
 					if ((void*)this != (void*)&ptc)
 					{
 						cols_used = ptc.cols_used;
@@ -2876,13 +2875,13 @@
 
 						sigma = ptc.sigma;
 						occ = ptc.occ;
-						region = ptc.region;
+						tag = ptc.tag;
 						charge = ptc.charge;
 
 						Z_lim = ptc.Z_lim;
 						sigma_lim = ptc.sigma_lim;
 						occ_lim = ptc.occ_lim;
-						region_lim = ptc.region_lim;
+						tag_lim = ptc.tag_lim;
 						charge_lim = ptc.charge_lim;
 					}
 				}
@@ -2903,13 +2902,13 @@
 
 					sigma.clear();
 					occ.clear();
-					region.clear();
+					tag.clear();
 					charge.clear();
 
 					Z_lim = 0;
 					sigma_lim = 0;
 					occ_lim = 0;
-					region_lim = 0;
+					tag_lim = 0;
 					charge_lim = 0;
 				}
 
@@ -2928,7 +2927,7 @@
 						occ.resize(new_size);
 
 					if (cols_used>6)
-						region.resize(new_size);
+						tag.resize(new_size);
 
 					if (cols_used>7)
 						charge.resize(new_size);
@@ -2949,7 +2948,7 @@
 						occ.reserve(new_size);
 
 					if (cols_used>6)
-						region.reserve(new_size);
+						tag.reserve(new_size);
 
 					if (cols_used>7)
 						charge.reserve(new_size);
@@ -2963,7 +2962,7 @@
 
 					sigma.shrink_to_fit();
 					occ.shrink_to_fit();
-					region.shrink_to_fit();
+					tag.shrink_to_fit();
 					charge.shrink_to_fit();
 				}
 
@@ -2980,20 +2979,35 @@
 						occ.push_back(ptc_s.occ);					// occupancy
 
 					if (cols_used>6)
-						region.push_back(abs(ptc_s.region));		// Region
+						tag.push_back(abs(ptc_s.tag));				// tag
 
 					if (cols_used>7)
 						charge.push_back(ptc_s.charge);				// charge
 				}
 
+				dt_float32 get_sigma(const size_type& ia) const
+				{
+					return (cols_used>4)?sigma[ia]:c_dflt_rms3d;		// standard deviation
+				}
+
+				dt_float32 get_occ(const size_type& ia) const
+				{
+					return (cols_used>5)?occ[ia]:c_dflt_occ;			// occupancy
+				}
+
+				dt_int32 get_tag(const size_type& ia) const
+				{
+					return (cols_used>6)?tag[ia]:c_dflt_tag;			// tag
+				}
+
+				dt_int32 get_charge(const size_type& ia) const
+				{
+					return (cols_used>7)?charge[ia]:c_dflt_charge;		// charge
+				}
+
 				Ptc_s get(const size_type& ia) const
 				{
-					dt_float32 sigma_ia = (cols_used>4)?sigma[ia]:c_dflt_rms3d;			// standard deviation
-					dt_float32 occ_ia = (cols_used>5)?occ[ia]:c_dflt_occ;				// occupancy
-					dt_int32 region_ia = (cols_used>6)?region[ia]:c_dflt_region;		// region
-					dt_int32 charge_ia = (cols_used>7)?charge[ia]:c_dflt_charge;		// charge
-
-					return {Z[ia], this->x[ia], this->y[ia], this->z[ia], sigma_ia, occ_ia, region_ia, charge_ia};
+					return {Z[ia], this->x[ia], this->y[ia], this->z[ia], get_sigma(ia), get_occ(ia), get_tag(ia), get_charge(ia)};
 				}
 
 				void set(const size_type& ia, const Ptc_s& ptc_s)
@@ -3008,8 +3022,8 @@
 					if (cols_used>5)					// occupancy
 						occ[ia] = ptc_s.occ;
 
-					if (cols_used>6)					// Region
-						region[ia] = ptc_s.region;
+					if (cols_used>6)					// tag
+						tag[ia] = ptc_s.tag;
 
 					if (cols_used>7)					// charge
 						charge[ia] = ptc_s.charge;
@@ -3068,7 +3082,7 @@
 						memcpy_cpu_cpu(&(ptc[(is++)*n_ptc]), occ.data(), n_data);			// occupancy
 
 					if (fcn_chk_bound(6, is_0, is_e))
-						memcpy_cpu_cpu(&(ptc[(is++)*n_ptc]), region.data(), n_data);		// region
+						memcpy_cpu_cpu(&(ptc[(is++)*n_ptc]), tag.data(), n_data);		// tag
 
 					if (fcn_chk_bound(7, is_0, is_e))
 						memcpy_cpu_cpu(&(ptc[(is++)*n_ptc]), charge.data(), n_data);		// charge
@@ -3129,8 +3143,8 @@
 					}
 					else if (cols_used==7)
 					{
-						auto first = fcn_mkzipiter_begin(Z, this->x, this->y, this->z, sigma, occ, region);
-						auto last = fcn_mkzipiter_end(Z, this->x, this->y, this->z, sigma, occ, region);
+						auto first = fcn_mkzipiter_begin(Z, this->x, this->y, this->z, sigma, occ, tag);
+						auto last = fcn_mkzipiter_end(Z, this->x, this->y, this->z, sigma, occ, tag);
 
 						switch(idx)	
 						{
@@ -3139,8 +3153,8 @@
 					}
 					else if (cols_used==8)
 					{
-						auto first = fcn_mkzipiter_begin(Z, this->x, this->y, this->z, sigma, occ, region, charge);
-						auto last = fcn_mkzipiter_end(Z, this->x, this->y, this->z, sigma, occ, region, charge);
+						auto first = fcn_mkzipiter_begin(Z, this->x, this->y, this->z, sigma, occ, tag, charge);
+						auto last = fcn_mkzipiter_end(Z, this->x, this->y, this->z, sigma, occ, tag, charge);
 
 						switch(idx)	
 						{
@@ -3172,27 +3186,27 @@
 					if (cols_used>5)
 						mt::fcn_minmax_element(occ, occ_lim.x, occ_lim.y);
 
-					region_lim.x = c_dflt_region;
-					region_lim.y = c_dflt_region;
+					tag_lim.x = c_dflt_tag;
+					tag_lim.y = c_dflt_tag;
 					if (cols_used>6)
-						mt::fcn_minmax_element(region, region_lim.x, region_lim.y);
+						mt::fcn_minmax_element(tag, tag_lim.x, tag_lim.y);
 
 					charge_lim.x = c_dflt_charge;
 					charge_lim.y = c_dflt_charge;
 					if (cols_used>7)
-						mt::fcn_minmax_element(region, charge_lim.x, charge_lim.y);
+						mt::fcn_minmax_element(tag, charge_lim.x, charge_lim.y);
 
 					this->bs.z = ::fmax(this->sz.z, this->bs.z);
 				}
 
-				// max z value within a region
-				void minmax_z_by_region(const T& region_v, T& z_min, T& z_max)
+				// max z value within a tag
+				void minmax_z_by_region(const T& tag_v, T& z_min, T& z_max)
 				{
 					z_min = 1e20;
 					z_max = -1e20;
 					for(auto iz = 0; iz < this->size(); iz++)
 					{
-						if (region[iz]==region_v)
+						if (tag[iz]==tag_v)
 						{
 							z_max = ::fmax(z_max, this->z[iz]);
 							z_min = ::fmin(z_min, this->z[iz]);
@@ -3226,7 +3240,7 @@
 						ptc.occ[ia_z] = ptc.occ[ia];
 
 					if (ptc.cols_used>6)
-						ptc.region[ia_z] = ptc.region[ia];
+						ptc.tag[ia_z] = ptc.tag[ia];
 
 					if (ptc.cols_used>7)
 						ptc.charge[ia_z] = ptc.charge[ia];

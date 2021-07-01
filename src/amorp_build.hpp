@@ -50,7 +50,7 @@
 					// set random input data
 					randu_3d.set_in_data(seed, spec_lay_info.bs, spec_lay_info.r_0); 
 
-					const dt_int32 region = spec_lay_info.region;
+					const dt_int32 tag = spec_lay_info.tag;
 
 					dt_int32 iatom_c = 0;
 					for(dt_int32 iatom = 0; iatom < n_atoms_amorp; iatom++)
@@ -58,7 +58,7 @@
 						R_3d<T> r;
 						if (rnd_point(atoms, r))
 						{
-							const Ptc_s_Atom<T> atom_ik(Z, r, rms_3d, occ, region, c_dflt_charge);
+							const Ptc_s_Atom<T> atom_ik(Z, r, rms_3d, occ, tag, c_dflt_charge);
 
 							atoms.push_back(atom_ik);
 
@@ -111,7 +111,7 @@
 					// set random input data
 					randu_3d.set_in_data(seed, spec_lay_info.bs, spec_lay_info.r_0); 
 
-					const dt_int32 region = spec_lay_info.region;
+					const dt_int32 tag = spec_lay_info.tag;
 
 					dt_int32 iatom_c = iatom_0;
 					for(dt_int32 iatom = iatom_0; iatom < n_atoms; iatom++)
@@ -119,7 +119,7 @@
 						R_3d<T> r;
 						if (rnd_point(m_atoms, r))
 						{
-							const Ptc_s_Atom<T> atom_ik(Z, r, rms_3d, occ, region, c_dflt_charge);
+							const Ptc_s_Atom<T> atom_ik(Z, r, rms_3d, occ, tag, c_dflt_charge);
 
 							m_atoms.push_back(atom_ik);
 							atoms.push_back(atom_ik);

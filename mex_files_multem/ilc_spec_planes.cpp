@@ -43,7 +43,7 @@ void read_in_multem(const mxArray* mex_in_multem, mt::In_Multem<T_r> &in_multem)
 	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
 	auto bs_y = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_y");
 	auto bs_z = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_z");
-	auto sli_thk = mex_get_num_from_field<T_r>(mex_in_multem, "spec_dz");
+	auto sli_thick = mex_get_num_from_field<T_r>(mex_in_multem, "spec_dz");
 	dt_bool pbc_xy = false;
 	dt_bool b_statistic = true;
 
@@ -54,14 +54,14 @@ void read_in_multem(const mxArray* mex_in_multem, mt::In_Multem<T_r> &in_multem)
 	mex_read_rot_parm<T_r>(mex_in_multem, in_multem.rot_par);
 
 	/************************ Potential slicing ************************/
-	in_multem.pot_slic_typ = mex_get_enum_from_field<mt::eSpec_Slic_Typ>(mex_in_multem, "pot_slic_typ");
+	in_multem.spec_slic_typ = mex_get_enum_from_field<mt::eSpec_Slic_Typ>(mex_in_multem, "spec_slic_typ");
 
 	/************************** xy sampling ****************************/
 	auto nx = 1024;
 	auto ny = 1024;
 	dt_bool bwl = false;
 
-	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thk, bwl, pbc_xy);
+	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
 
 	in_multem.set_dep_var();
  }

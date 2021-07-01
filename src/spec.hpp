@@ -61,9 +61,9 @@ namespace mt
 				slicing.set_in_data(in_multem, &atoms_u, &atoms);
 
 				 /***************************************************************************************/
-				if ((atoms_u.s_z_int < 2.0*in_multem->grid_2d.sli_thk) || ((slicing.z_plane.size() == 1) && in_multem->is_spec_slic_by_planes_proj()))
+				if ((atoms_u.s_z_int < 2.0*in_multem->grid_2d.sli_thick) || ((slicing.z_plane.size() == 1) && in_multem->is_spec_slic_by_plns_proj()))
 				{
-					in_multem->grid_2d.sli_thk = atoms_u.s_z_int;
+					in_multem->grid_2d.sli_thick = atoms_u.s_z_int;
 					in_multem->interaction_model = eesim_phase_object;
 					in_multem->islice = 0;
 					in_multem->atomic_vib.dim_z = false;
@@ -72,7 +72,7 @@ namespace mt
 						in_multem->thick_type = estt_through_thick;
 					}
 					in_multem->slice_storage = in_multem->slice_storage || !in_multem->is_sim_whole_spec();
-					atoms_u.sli_thk = in_multem->grid_2d.sli_thk;
+					atoms_u.sli_thick = in_multem->grid_2d.sli_thick;
 				}
 
 				atoms.set_ptc(atoms_u, false, &atom_type);
@@ -109,7 +109,7 @@ namespace mt
 					atoms.z[iatoms] = r.z;
 					atoms.sigma[iatoms] = atoms_u.sigma[iatoms];
 					atoms.occ[iatoms] = atoms_u.occ[iatoms];
-					atoms.region[iatoms] = atoms_u.region[iatoms];
+					atoms.tag[iatoms] = atoms_u.tag[iatoms];
 					atoms.charge[iatoms] = atoms_u.charge[iatoms];
 				}
 
@@ -125,9 +125,9 @@ namespace mt
 				slicing.calculate();
 			}
 
-			T sli_thk(const dt_int32& islice)
+			T sli_thick(const dt_int32& islice)
 			{
-				return slicing.sli_thk(islice)/cos(in_multem->theta);
+				return slicing.sli_thick(islice)/cos(in_multem->theta);
 			}
 
 			T dz_m(const dt_int32& islice_0, const dt_int32& islice_e)

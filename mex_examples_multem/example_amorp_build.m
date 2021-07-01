@@ -9,13 +9,13 @@ bs = [50, 50, 50];
 Z = 6;
 rms_3d = 0.09;
 occ = 1.0;
-region = 0;
+tag = 0;
 d_min = 1.4;
 rho = 2.2;
 seed = 1983;
 
 tic;
-atoms = ilc_amorp_build(Z, rms_3d, occ, region, bs, d_min, rho, seed);
+atoms = ilc_amorp_build(Z, rms_3d, occ, tag, bs, d_min, rho, seed);
 toc;
 
 disp(size(atoms))

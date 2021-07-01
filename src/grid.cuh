@@ -92,7 +92,7 @@
 
 			dt_bool bwl;		// band-width limit
 
-			T sli_thk;			// slice thicknes
+			T sli_thick;			// slice thicknes
 
 			T drx;				// x-sampling in real space
 
@@ -101,7 +101,7 @@
 			/************************************* constructors ************************************/
 			CGPU_EXEC
 			Grid_sxd(): iGrid_sxd<ST, edim_1>(), bs_x(0), rx_0(0), pbc_x(true), 
-				bwl(false), sli_thk(0), drx(0), dgx(0) {}
+				bwl(false), sli_thick(0), drx(0), dgx(0) {}
 
 			Grid_sxd(const ST& nx)
 			{
@@ -116,9 +116,9 @@
 
 			template <class U, class SU>
 			Grid_sxd(const U& bs_x, const SU& nx, const U& rx_0, 
-			dt_bool pbc_x = true, dt_bool bwl = false, U sli_thk = 0.5)
+			dt_bool pbc_x = true, dt_bool bwl = false, U sli_thick = 0.5)
 			{
-				set_in_data(bs_x, nx, rx_0, pbc_x, bwl, sli_thk);
+				set_in_data(bs_x, nx, rx_0, pbc_x, bwl, sli_thick);
 			}
 
 			/* copy constructor */
@@ -149,7 +149,7 @@
 					rx_0 = grid.rx_0;
 					pbc_x = grid.pbc_x;
 					bwl = grid.bwl;
-					sli_thk = grid.sli_thk;
+					sli_thick = grid.sli_thick;
 
 					drx = grid.drx;
 					dgx = grid.dgx;
@@ -169,7 +169,7 @@
 				rx_0 = T(grid.rx_0);
 				pbc_x = grid.pbc_x;
 				bwl = grid.bwl;
-				sli_thk = T(grid.sli_thk);
+				sli_thick = T(grid.sli_thick);
 
 				drx = T(grid.drx);
 				dgx = T(grid.dgx);
@@ -204,7 +204,7 @@
 
 			template <class U, class SU>
 			void set_in_data(const U& bs_x, const SU& nx, 
-			const U& rx_0, dt_bool pbc_x = true, dt_bool bwl = false, U sli_thk = 0.5)
+			const U& rx_0, dt_bool pbc_x = true, dt_bool bwl = false, U sli_thick = 0.5)
 			{
 				this->set_size(nx);
 
@@ -212,7 +212,7 @@
 				this->rx_0 = T(rx_0);
 				this->pbc_x = pbc_x;
 				this->bwl = bwl;
-				this->sli_thk = T(sli_thk);
+				this->sli_thick = T(sli_thick);
 
 				set_dep_var();
 			}
@@ -711,7 +711,7 @@
 
 			dt_bool bwl;		// band-width limit
 
-			T sli_thk;			// slice thicknes
+			T sli_thick;			// slice thicknes
 
 			T drx;				// x-sampling in real space
 			T dry;				// y-sampling in real space
@@ -721,7 +721,7 @@
 
 			/************************************* constructors ************************************/
 			Grid_sxd(): iGrid_sxd<ST, edim_2>(), bs_x(0), bs_y(0), 
-				rx_0(0), ry_0(0), pbc_x(true), pbc_y(true), bwl(false), sli_thk(0), 
+				rx_0(0), ry_0(0), pbc_x(true), pbc_y(true), bwl(false), sli_thick(0), 
 				drx(0), dry(0), dgx(0), dgy(0) {}
 
 			Grid_sxd(const ST& nx, const ST& ny)
@@ -737,9 +737,9 @@
 
 			template <class U, class SU>
 			Grid_sxd(const U& bs_x, const U& bs_y, const SU& nx, const SU& ny, const U& rx_0, const U& ry_0, 
-			dt_bool pbc_x = true, dt_bool pbc_y = true, dt_bool bwl = false, U sli_thk = 0.5)
+			dt_bool pbc_x = true, dt_bool pbc_y = true, dt_bool bwl = false, U sli_thick = 0.5)
 			{
-				set_in_data(bs_x, bs_y, nx, ny, rx_0, ry_0, pbc_x, pbc_y, bwl, sli_thk);
+				set_in_data(bs_x, bs_y, nx, ny, rx_0, ry_0, pbc_x, pbc_y, bwl, sli_thick);
 			}
 
 			/* copy constructor */
@@ -773,7 +773,7 @@
 					pbc_x = grid.pbc_x;
 					pbc_y = grid.pbc_y;
 					bwl = grid.bwl;
-					sli_thk = grid.sli_thk;
+					sli_thick = grid.sli_thick;
 
 					drx = grid.drx;
 					dry = grid.dry;
@@ -798,7 +798,7 @@
 				pbc_x = grid.pbc_x;
 				pbc_y = grid.pbc_y;
 				bwl = grid.bwl;
-				sli_thk = T(grid.sli_thk);
+				sli_thick = T(grid.sli_thick);
 
 				drx = T(grid.drx);
 				dry = T(grid.dry);
@@ -835,7 +835,7 @@
 
 			template <class U, class SU>
 			void set_in_data(const U& bs_x, const U& bs_y, const SU& nx, const SU& ny, 
-			const U& rx_0, const U& ry_0, dt_bool pbc_x = true, dt_bool pbc_y = true, dt_bool bwl = false, U sli_thk = 0.5)
+			const U& rx_0, const U& ry_0, dt_bool pbc_x = true, dt_bool pbc_y = true, dt_bool bwl = false, U sli_thick = 0.5)
 			{
 				this->set_size(nx, ny);
 
@@ -846,7 +846,7 @@
 				this->pbc_x = pbc_x;
 				this->pbc_y = pbc_y;
 				this->bwl = bwl;
-				this->sli_thk = T(sli_thk);
+				this->sli_thick = T(sli_thick);
 
 				set_dep_var();
 			}
@@ -1880,7 +1880,7 @@
 
 			dt_bool bwl;		// band-width limit
 
-			T sli_thk;			// slice thicknes
+			T sli_thick;			// slice thicknes
 
 			T drx;				// x-sampling in real space
 			T dry;				// y-sampling in real space
@@ -1892,7 +1892,7 @@
 
 			/************************************* constructors ************************************/
 			Grid_sxd(): iGrid_sxd<ST, edim_3>(), bs_x(0), bs_y(0), bs_z(0), 
-				rx_0(0), ry_0(0), rz_0(0), pbc_x(true), pbc_y(true), pbc_z(true), bwl(false), sli_thk(0), 
+				rx_0(0), ry_0(0), rz_0(0), pbc_x(true), pbc_y(true), pbc_z(true), bwl(false), sli_thick(0), 
 				drx(0), dry(0), drz(0), dgx(0), dgy(0), dgz(0){}
 
 			Grid_sxd(const ST& nx, const ST& ny, const ST& nz)
@@ -1908,9 +1908,9 @@
 
 			template <class U, class SU>
 			Grid_sxd(const U& bs_x, const U& bs_y, const U& bs_z, const SU& nx, const SU& ny, const SU& nz, 
-			const U& rx_0, const U& ry_0, const U& rz_0, dt_bool pbc_x = true, dt_bool pbc_y = true, dt_bool pbc_z = true, dt_bool bwl = false, U sli_thk = 0.5)
+			const U& rx_0, const U& ry_0, const U& rz_0, dt_bool pbc_x = true, dt_bool pbc_y = true, dt_bool pbc_z = true, dt_bool bwl = false, U sli_thick = 0.5)
 			{
-				set_in_data(bs_x, bs_y, bs_z, nx, ny, nz, rx_0, ry_0, rz_0, pbc_x, pbc_y, pbc_z, bwl, sli_thk);
+				set_in_data(bs_x, bs_y, bs_z, nx, ny, nz, rx_0, ry_0, rz_0, pbc_x, pbc_y, pbc_z, bwl, sli_thick);
 			}
 
 			/* copy constructor */
@@ -1947,7 +1947,7 @@
 					pbc_y = grid.pbc_y;
 					pbc_z = grid.pbc_z;
 					bwl = grid.bwl;
-					sli_thk = grid.sli_thk;
+					sli_thick = grid.sli_thick;
 
 					drx = grid.drx;
 					dry = grid.dry;
@@ -1977,7 +1977,7 @@
 				pbc_y = grid.pbc_y;
 				pbc_z = grid.pbc_z;
 				bwl = grid.bwl;
-				sli_thk = T(grid.sli_thk);
+				sli_thick = T(grid.sli_thick);
 
 				drx = T(grid.drx);
 				dry = T(grid.dry);
@@ -2016,7 +2016,7 @@
 
 			template <class U, class SU>
 			void set_in_data(const U& bs_x, const U& bs_y, const U& bs_z, const SU& nx, const SU& ny, const SU& nz, 
-			const U& rx_0, const U& ry_0, const U& rz_0, dt_bool pbc_x = true, dt_bool pbc_y = true, dt_bool pbc_z = true, dt_bool bwl = false, U sli_thk = 0.5)
+			const U& rx_0, const U& ry_0, const U& rz_0, dt_bool pbc_x = true, dt_bool pbc_y = true, dt_bool pbc_z = true, dt_bool bwl = false, U sli_thick = 0.5)
 			{
 				this->set_size(nx, ny, nz);
 
@@ -2030,7 +2030,7 @@
 				this->pbc_y = pbc_y;
 				this->pbc_z = pbc_z;
 				this->bwl = bwl;
-				this->sli_thk = T(sli_thk);
+				this->sli_thick = T(sli_thick);
 
 				set_dep_var();
 			}

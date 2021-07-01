@@ -20,18 +20,18 @@ xtl_parm.sgn = 1;
 xtl_parm.pbc = false;
 
 occ = 1;
-region = 0;
+tag = 0;
 charge = 0;
 % Au = 79
-%Z x y z sigma occupancy region charge
+%Z x y z sigma occupancy tag charge
 rmsd_3d = 0.085;
 
 xtl_parm.asym_uc = [];
     
-xtl_parm.base = [79, 0.0, 0.0, 0.0, rmsd_3d, occ, region, charge;...
-                    79, 0.5, 0.5, 0.0, rmsd_3d, occ, region, charge;...
-                    79, 0.0, 0.5, 0.5, rmsd_3d, occ, region, charge;...
-                    79, 0.5, 0.0, 0.5, rmsd_3d, occ, region, charge];
+xtl_parm.base = [79, 0.0, 0.0, 0.0, rmsd_3d, occ, tag, charge;...
+                    79, 0.5, 0.5, 0.0, rmsd_3d, occ, tag, charge;...
+                    79, 0.0, 0.5, 0.5, rmsd_3d, occ, tag, charge;...
+                    79, 0.5, 0.0, 0.5, rmsd_3d, occ, tag, charge];
 
 tic;
 if 1

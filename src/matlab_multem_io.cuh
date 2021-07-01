@@ -29,7 +29,7 @@
 	#include "r_3d.cuh"
 	#include "rot_parm.cpp"
 	#include "atomic_vib.cpp"
-	#include "scan_pat.cpp"
+	#include "scan_pat.hpp"
 	#include "lens.cuh"
 	#include "particles.cuh"
 
@@ -75,7 +75,7 @@
 	/**********************  atomic vibration model ************************/
 	void mex_read_atomic_vib(const mxArray* mex_array, mt::Atomic_Vib& atomic_vib)
 	{
-		atomic_vib.model = mex_get_enum_from_field<mt::eAtomic_Vib_Mod>(mex_array, "atomic_vib_model");
+		atomic_vib.model = mex_get_enum_from_field<mt::eAtomic_Vib_Mod>(mex_array, "atomic_vib_mod");
 		atomic_vib.coh_contrib = mex_get_bool_from_field(mex_array, "atomic_vib_coh_contrib");
 		atomic_vib.sgl_conf = mex_get_bool_from_field(mex_array, "atomic_vib_sgl_conf");
 		atomic_vib.nconf = mex_get_num_from_field<dt_int32>(mex_array, "atomic_vib_nconf");
@@ -95,7 +95,7 @@
 	}
 
 	//template <class T>
-	//void mex_read_atoms(const mxArray* mex_array, T bs_x, T bs_y, T bs_z, T sli_thk, mt::Ptc_Atom<T>& atoms)
+	//void mex_read_atoms(const mxArray* mex_array, T bs_x, T bs_y, T bs_z, T sli_thick, mt::Ptc_Atom<T>& atoms)
 	//{
 	//	auto patoms = mex_get_pvctr_from_field<T>(mex_array, "spec_atoms");
 	//
@@ -114,12 +114,12 @@
 	//	{
 	//		spec_lay_info[ik].z_0 = mex_get_num_from_field<T>(mex_spec_amorp, ik, "z_0");
 	//		spec_lay_info[ik].z_e = mex_get_num_from_field<T>(mex_spec_amorp, ik, "z_e");
-	//		spec_lay_info[ik].sli_thk = mex_get_num_from_field<T>(mex_spec_amorp, ik, "sli_thk");
+	//		spec_lay_info[ik].sli_thick = mex_get_num_from_field<T>(mex_spec_amorp, ik, "sli_thick");
 	//	}
 	//
 	//	atoms.set_xtl_parameters(ct_na, ct_nb, ct_nc, ct_a, ct_b, ct_c, ct_x0, ct_y0);
 	//	atoms.set_amorphous_parameters(spec_lay_info);
-	//	atoms.set_ptc(patoms, bs, sli_thk);
+	//	atoms.set_ptc(patoms, bs, sli_thick);
 	//}
 
 	/*********************** read rotation parameters *********************/
@@ -128,7 +128,7 @@
 	{
 		rot_par.theta = mex_get_num_from_field<T>(mex_array, "spec_rot_theta")*mt::c_deg_2_rad<T>;
 		rot_par.u_0 = mex_get_r_3d_from_field<T>(mex_array, "spec_rot_u_0", mt::R_3d<T>(0, 0, 1));
-		rot_par.ctr_type = mex_get_enum_from_field<mt::eRot_Ctr_Typ>(mex_array, "spec_rot_ctr_type");
+		rot_par.ctr_type = mex_get_enum_from_field<mt::eRot_Ctr_Typ>(mex_array, "spec_rot_ctr_typ");
 		rot_par.ctr_p = mex_get_r_3d_from_field<T>(mex_array, "spec_rot_ctr_p", mt::R_3d<T>(0, 0, 0));
 
 		rot_par.set_dep_var();

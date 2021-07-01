@@ -71,13 +71,19 @@
 			estt_whole_spec = 1, estt_through_thick = 2, estt_through_slices = 3
 		};
 
-		/******************** specimen slicing type *************************/
+		/************************ specimen slicing type ***********************/
 		enum eSpec_Slic_Typ
 		{
-			esst_planes_proj = 1, esst_dz_proj = 2, esst_planes_sub = 3, esst_dz_sub = 4, esst_auto = 5
+			 esst_plns_proj = 1, esst_dz_proj = 2,  esst_plns_sub = 3, esst_dz_sub = 4, esst_user_def = 5, esst_auto = 6
+		};
+		
+		/****************** specimen slicing selection type *******************/
+		enum eSpec_Slic_Sel_Typ
+		{
+			essso_tag = 1, essso_z = 2
 		};
 
-		/********************** feg parameterization *************************/
+		/*********************** feg parameterization *************************/
 		// 1: doyle and Turner parameterization - 4 Gaussians - [0, 4
 		// 2: Peng et al. parameterization - 5 Gaussians - [0, 4]
 		// 3: Peng et al. parameterization - 5 Gaussians - [0, 12]
@@ -563,28 +569,100 @@
 	namespace mt
 	{
 		inline
-		dt_bool is_spec_slic_by_planes_proj(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
+		dt_bool is_spec_slic_by_plns_proj(const eSpec_Slic_Typ& spec_slic_typ)
 		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::esst_planes_proj);
+			return spec_slic_typ == mt:: esst_plns_proj;
+		}
+
+
+		inline
+		dt_bool is_spec_slic_by_dz_proj(const eSpec_Slic_Typ& spec_slic_typ)
+		{
+			return spec_slic_typ == mt::esst_dz_proj;
+		}		
+
+		dt_bool is_spec_slic_by_plns_sub(const eSpec_Slic_Typ& spec_slic_typ)
+		{
+			return spec_slic_typ == mt:: esst_plns_sub;
 		}
 
 		inline
-		dt_bool is_spec_slic_by_dz_proj(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
+		dt_bool is_spec_slic_by_dz_sub(const eSpec_Slic_Typ& spec_slic_typ)
 		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::esst_dz_proj);
+			return spec_slic_typ == mt::esst_dz_sub;
 		}
 
 		inline
-		dt_bool is_spec_slic_dz_sub(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& pot_slic)
+		dt_bool is_spec_slic_by_user_def(const eSpec_Slic_Typ& spec_slic_typ)
 		{
-			return mt::is_multislice(int_model) && (pot_slic == mt::esst_dz_sub);
+			return spec_slic_typ == mt::esst_user_def;
 		}
 
 		inline
-		dt_bool is_spec_slic_dz_sub_whole_spec(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& pot_slic, const eSim_Thick_Typ& thick_type)
+		dt_bool is_spec_slic_by_auto(const eSpec_Slic_Typ& spec_slic_typ)
 		{
-			return mt::is_spec_slic_dz_sub(int_model, pot_slic) && is_sim_whole_spec(thick_type);
+			return spec_slic_typ == mt::esst_auto;
 		}
+
+		inline
+		dt_bool is_spec_slic_by_planes(const eSpec_Slic_Typ& spec_slic_typ)
+		{
+			return is_spec_slic_by_plns_proj(spec_slic_typ) || is_spec_slic_by_plns_sub(spec_slic_typ);
+		}
+
+		inline
+		dt_bool is_spec_slic_by_plns_proj(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& spec_slic_typ)
+		{
+			return mt::is_multislice(int_model) && is_spec_slic_by_plns_proj(spec_slic_typ);
+		}
+
+		inline
+		dt_bool is_spec_slic_by_dz_proj(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& spec_slic_typ)
+		{
+			return mt::is_multislice(int_model) && is_spec_slic_by_dz_proj(spec_slic_typ);
+		}
+
+		inline
+		dt_bool is_spec_slic_by_plns_sub(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& spec_slic_typ)
+		{
+			return mt::is_multislice(int_model) && is_spec_slic_by_plns_sub(spec_slic_typ);
+		}
+
+		inline
+		dt_bool is_spec_slic_by_dz_sub(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& spec_slic_typ)
+		{
+			return mt::is_multislice(int_model) && is_spec_slic_by_dz_sub(spec_slic_typ);
+		}
+
+
+		inline
+		dt_bool is_spec_slic_planes_sub_whole_spec(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& spec_slic_typ, const eSim_Thick_Typ& thick_type)
+		{
+			return mt::is_spec_slic_by_plns_sub(int_model, spec_slic_typ) && is_sim_whole_spec(thick_type);
+		}
+
+		inline
+		dt_bool is_spec_slic_by_dz_sub_whole_spec(const eElec_Spec_Interact_Mod& int_model, const eSpec_Slic_Typ& spec_slic_typ, const eSim_Thick_Typ& thick_type)
+		{
+			return mt::is_spec_slic_by_dz_sub(int_model, spec_slic_typ) && is_sim_whole_spec(thick_type);
+		}
+	}
+
+	/* specimen slicing selection type */
+	namespace mt
+	{
+		inline
+		dt_bool is_spec_slic_sel_typ_by_tag(const eSpec_Slic_Sel_Typ& spec_slic_sel_typ)
+		{
+			return spec_slic_sel_typ == essso_tag;
+		}
+
+		inline
+		dt_bool is_spec_slic_sel_typ_by_z(const eSpec_Slic_Sel_Typ& spec_slic_sel_typ)
+		{
+			return spec_slic_sel_typ == essso_z;
+		}
+
 	}
 
 	/* incident wave type */

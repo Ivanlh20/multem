@@ -58,7 +58,7 @@ void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_
 	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
 	auto bs_y = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_y");
 	auto bs_z = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_z");
-	auto sli_thk = mex_get_num_from_field<T_r>(mex_in_multem, "spec_dz");
+	auto sli_thick = mex_get_num_from_field<T_r>(mex_in_multem, "spec_dz");
 	dt_bool pbc_xy = true;
 
 	if (in_multem.is_specimen_required())
@@ -66,7 +66,7 @@ void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_
 		if (full)
 		{
 			/************************* atomic positions ************************/
-			mex_read_atoms<T_r>(mex_in_multem, bs_x, bs_y, bs_z, sli_thk, in_multem.atoms);
+			mex_read_atoms<T_r>(mex_in_multem, bs_x, bs_y, bs_z, sli_thick, in_multem.atoms);
 		}
 
 		/************************ Specimen rotation ************************/
@@ -80,7 +80,7 @@ void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_
 		}
 
 		/************************ Potential slicing ************************/
-		in_multem.pot_slic_typ = mex_get_num_from_field<mt::eSpec_Slic_Typ>(mex_in_multem, "pot_slic_typ");
+		in_multem.spec_slic_typ = mex_get_num_from_field<mt::eSpec_Slic_Typ>(mex_in_multem, "spec_slic_typ");
 	}
 
 	/************************** xy sampling ****************************/
@@ -88,7 +88,7 @@ void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_
 	auto ny = mex_get_num_from_field<dt_int32>(mex_in_multem, "ny");
 	dt_bool bwl = mex_get_bool_from_field(mex_in_multem, "bwl");
 
-	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thk, bwl, pbc_xy);
+	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
 
 	/************************ Incident wave ****************************/
 	auto iw_type = mex_get_num_from_field<mt::eIncident_Wave_Typ>(mex_in_multem, "iw_type");

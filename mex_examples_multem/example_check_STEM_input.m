@@ -26,7 +26,7 @@ input_multem.elec_spec_interac_mod = 1;              % eesim_multislice = 1, ees
 input_multem.atomic_pot_parm_typ = 6;                 % eappt_doyle_0_4 = 1, eappt_peng_0_4 = 2, eappt_peng_0_12 = 3, eappt_kirkland_0_12 = 4, eappt_weickenmeier_0_12 = 5, eappt_lobato_0_12 = 6
 
 %%%%%%%%%%%%%%%%%%%%%%% specimen slicing %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.spec_slic(1).typ = 1;              % esst_planes = 1, esst_dz_proj = 2, esst_planes_sub = 3, esst_dz_sub = 4, esst_auto = 5
+input_multem.spec_slic(1).typ = 1;              % esst_plns_proj = 1, esst_dz_proj = 2, esst_plns_sub = 3, esst_dz_sub = 4, esst_user_def = 5, esst_auto = 6
 
 %%%%%%%%%%%%%%% atomic vibrations model %%%%%%%%%%%%%%%%%%
 input_multem.atomic_vib_mod = 3;                       % eavm_still_atom = 1, eavm_absorptive_pot = 2, eavm_frozen_phonon = 3, eavm_user_def = 4
@@ -104,7 +104,7 @@ input_multem.scanning_xe = (lx+scan_field)/2;
 input_multem.scanning_ye = (ly+scan_field)/2;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Detector %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.detector.type = 1;  % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
+input_multem.detector.typ = 1;  % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
 input_multem.detector.cir(1).inner_ang = 60;  % Inner angle(mrad) 
 input_multem.detector.cir(1).outer_ang = 190; % Outer angle(mrad)
 

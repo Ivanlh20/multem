@@ -32,7 +32,7 @@ void mex_run(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[
 	const auto Z = mex_get_num<dt_int32>(prhs[1]);
 	const auto rms_3d = mex_get_num<T>(prhs[2]);
 	const auto occ = mex_get_num<T>(prhs[3]);
-	const auto region = mex_get_num<dt_int32>(prhs[4]);
+	const auto tag = mex_get_num<dt_int32>(prhs[4]);
 	const auto bs = mex_get_r_3d<T>(prhs[5]);
 	const auto d_min = mex_get_num<T>(prhs[6]);
 	const auto rho = mex_get_num<T>(prhs[7]);
@@ -43,7 +43,7 @@ void mex_run(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[
 	mt::Ptc_Atom<T> atoms(patoms_i, {0, 0, 0}, false, true);
 
 	mt::R_3d<T> r_0 = (mt::is_spec_lay_top(spec_lay_typ))?mt::R_3d<T>(0, 0, atoms.z_lim.x-bs.z):mt::R_3d<T>(0, 0, atoms.z_lim.y);
-	mt::Spec_Lay_Info<T> spec_lay_info(bs, r_0, region, spec_lay_typ);
+	mt::Spec_Lay_Info<T> spec_lay_info(bs, r_0, tag, spec_lay_typ);
 
 	mt::Amorp_Build<T> amorp_build;
 	amorp_build(atoms, Z, rms_3d, occ, d_min, rho, seed, spec_lay_info);

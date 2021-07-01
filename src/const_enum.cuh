@@ -238,9 +238,9 @@
 		const dt_float64 c_dflt_pos_ee = 1e-04;						// position error
 
 		const dt_float32 c_dflt_rms3d = 0.085f;						// default 3d root mean squared displacement
-		const dt_float32 c_dflt_occ = 1.0f;							// default 3d root mean squared displacement
-		const dt_int32 c_dflt_region = 0;							// default 3d root mean squared displacement
-		const dt_int32 c_dflt_charge = 0;							// default 3d root mean squared displacement
+		const dt_float32 c_dflt_occ = 1.0f;							// default occupancy
+		const dt_int32 c_dflt_tag = 0;								// default tag
+		const dt_int32 c_dflt_charge = 0;							// default charge
 
 		const dt_int32 cSizeofI = sizeof(dt_int32);
 		const dt_int32 cSizeofRD = sizeof(dt_float64);
@@ -398,7 +398,7 @@
 			escd_creal = 1, escs_cimag = 2, escd_cmod = 3, escd_cphase = 4
 		};
 
-		/** Operation mode */
+		/** operation mode */
 		enum eOperation_Mode
 		{
 			eOM_Normal = 1, eOM_Advanced = 2
@@ -409,31 +409,31 @@
 			erct_none = 0, erct_geometric_ctr = 1, erct_user_def = 2
 		};
 
-		/* Real or Fourier space */
+		/* real or fourier space */
 		enum eSpace
 		{
 			esp_real = 1, esp_fourier = 2
 		};
 
 		/* match boder */
-		enum eMatch_Border
+		enum eMatch_Bdr
 		{
-			emb_min = 1, emb_max = 2, emb_minmax = 3
+			emb_none = 0, emb_min = 1, emb_max = 2, emb_minmax = 3
 		};
 
-		/*** Output type */
+		/*** output type */
 		enum eOutput_Typ
 		{
 			eot_matlab = 1, eot_vector = 2
 		};
 
-		/* Data sel type */
+		/* data sel type */
 		enum eDat_Sel_Typ
 		{
 			edst_closest = 1, edst_less_than = 2, edst_greater_than = 3, edst_eless_than = 4, edst_egreater_than = 5
 		};
 
-		/* Fill sel type */
+		/* fill sel type */
 		enum eFil_Sel_Typ
 		{
 			efst_min = 1, efst_max = 2, efst_mean = 3, efst_min_mean = 4, efst_max_mean = 5, efst_user_def = 6, efst_same_in = 7
@@ -538,7 +538,7 @@
 		template <class T>
 		dt_bool fcn_is_null_ptr(T* ptr) 
 		{ 
-			return atoms==nullptr; 
+			return ptr==nullptr; 
 		};
 	}
 

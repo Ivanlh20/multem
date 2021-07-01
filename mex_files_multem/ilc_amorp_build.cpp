@@ -32,7 +32,7 @@ void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* p
 	const auto Z = mex_get_num<dt_int32>(prhs[0]);
 	const auto rms_3d = mex_get_num<T>(prhs[1]);
 	const auto occ = mex_get_num<T>(prhs[2]);
-	const auto region = mex_get_num<dt_int32>(prhs[3]);
+	const auto tag = mex_get_num<dt_int32>(prhs[3]);
 	const auto bs = mex_get_r_3d<T>(prhs[4]);
 	const auto d_min = mex_get_num<T>(prhs[5]);
 	const auto rho = mex_get_num<T>(prhs[6]);
@@ -40,7 +40,7 @@ void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* p
 
 	/***************************************************************************************/
 	mt::R_3d<T> r_0(0, 0, 0);
-	mt::Spec_Lay_Info<T> spec_lay_info(bs, r_0, region);
+	mt::Spec_Lay_Info<T> spec_lay_info(bs, r_0, tag);
 
 	mt::Amorp_Build<T> amorp_build;
 	auto atoms = amorp_build(Z, rms_3d, occ, d_min, rho, seed, spec_lay_info);

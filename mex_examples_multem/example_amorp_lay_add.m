@@ -5,7 +5,7 @@ addpath(['..', filesep, 'mex_bin'])
 
 na = 10; nb = 10; nc = 20; ncu = 2;rmsd_3d = 0.085;
 
-[atoms, lx, ly, lz, a, b, c, input_multem.spec_slic(1).dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
+[atoms, lx, ly, lz, a, b, c, input_multem.spec_slic(1).sli_thick] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
 % ilm_show_xtl(1, atoms)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -14,14 +14,14 @@ bs = [lx, ly, 30];
 Z = 6;
 rms_3d = 0.09;
 occ = 1.0;
-region = 0;
+tag = 0;
 d_min = 1.4;
 rho = 2.2;
 lay_pos = 21; %1: top, 2: bottom
 seed = 1983;
 
 tic;
-atoms = ilc_amorp_lay_add(atoms(:, 1:5), Z, rms_3d, occ, region, bs, d_min, rho, lay_pos, seed);
+atoms = ilc_amorp_lay_add(atoms(:, 1:5), Z, rms_3d, occ, tag, bs, d_min, rho, lay_pos, seed);
 toc;
 
 ilm_show_xtl(1, atoms)

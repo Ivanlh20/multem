@@ -1381,7 +1381,8 @@
 				}
 			}
 
-			void push_back(const T& val)
+			template<class U>
+			void push_back(const U& val)
 			{
 				if (m_size >= m_capacity)
 				{
@@ -1392,24 +1393,60 @@
 						if (m_s2 == 1)
 						{
 							if (m_s1 == 1)
-								shape[0] = max(size_type(2), 2*shape[0]);
+								shape[0] = max(size_type(1), 2*m_size);
 							else
-								shape[1] *= 2;
+								shape[1] *= size_type(2);
 						}
 						else
 						{
-							shape[2] *= 2;
+							shape[2] *= size_type(2);
 						}
 					}
 					else
 					{
-						shape[3] *= 2;
+						shape[3] *= size_type(2);
 					}
 
 					this->allocate(shape, true);
 				}
 
-				m_data[m_size++] = val;
+				m_data[m_size++] = T(val);
+			}
+
+			template<class U>
+			void push_back(const Vctr<U, edev_cpu>& vctr)
+			{
+				const size_type size_new = m_size + vctr.size();
+
+				if (size_new >= m_capacity)
+				{
+					dt_shape_st<size_type> shape{m_s0, m_s1, m_s2, m_s3};
+
+					if (m_s3 == 1)
+					{
+						if (m_s2 == 1)
+						{
+							if (m_s1 == 1)
+								shape[0] = max(size_new, 2*shape[0]);
+							else
+								shape[1] = max(size_new/shape[0], 2*shape[1]);
+						}
+						else
+						{
+							shape[2] = max(size_new/(shape[0]*shape[1]), 2*shape[2]);
+						}
+					}
+					else
+					{
+						shape[3] = max(size_new/(shape[0]*shape[1]*shape[2]), 2*shape[3]);
+					}
+
+					this->allocate(shape, true);
+				}
+
+				memcpy_cpu_cpu(m_data + m_size, vctr.data(), vctr.size());
+
+				m_size = size_new;
 			}
 
 			void pop_back()
@@ -2021,7 +2058,7 @@
 				{
 					destroy();
 				}
-				else (this != &vctr)
+				else if (this != &vctr)
 				{
 					fcn_cuda_free(m_data);
 
@@ -2446,7 +2483,8 @@
 				}
 			}
 
-			void push_back(const T& val)
+			template<class U>
+			void push_back(const U& val)
 			{
 				if (m_size >= m_capacity)
 				{
@@ -2457,25 +2495,62 @@
 						if (m_s2 == 1)
 						{
 							if (m_s1 == 1)
-								shape[0] = max(size_type(2), 2*shape[0]);
+								shape[0] = max(size_type(1), 2*m_size);
 							else
-								shape[1] *= 2;
+								shape[1] *= size_type(2);
 						}
 						else
 						{
-							shape[2] *= 2;
+							shape[2] *= size_type(2);
 						}
 					}
 					else
 					{
-						shape[3] *= 2;
+						shape[3] *= size_type(2);
 					}
 
 					this->allocate(shape, true);
 				}
 
-				thrust::fill(this->end(), this->end()+1, val);
+				memcpy_cpu_gpu(m_data + m_size, &val, 1);
+
 				m_size++;
+			}
+
+			template<class U>
+			void push_back(const Vctr<U, edev_cpu>& vctr)
+			{
+				const size_type size_new = m_size + vctr.size();
+
+				if (size_new >= m_capacity)
+				{
+					dt_shape_st<size_type> shape{m_s0, m_s1, m_s2, m_s3};
+
+					if (m_s3 == 1)
+					{
+						if (m_s2 == 1)
+						{
+							if (m_s1 == 1)
+								shape[0] = max(size_new, 2*shape[0]);
+							else
+								shape[1] = max(size_new/shape[0], 2*shape[1]);
+						}
+						else
+						{
+							shape[2] = max(size_new/(shape[0]*shape[1]), 2*shape[2]);
+						}
+					}
+					else
+					{
+						shape[3] = max(size_new/(shape[0]*shape[1]*shape[2]), 2*shape[3]);
+					}
+
+					this->allocate(shape, true);
+				}
+
+				memcpy_cpu_gpu(m_data + m_size, vctr.data(), vctr.size());
+
+				m_size = size_new;
 			}
 
 			void pop_back()

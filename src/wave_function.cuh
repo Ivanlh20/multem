@@ -285,7 +285,7 @@ namespace mt
 				if (this->in_multem->is_multislice())
 				{
 					// time.tic();
-					propagator(esp_real, gxu, gyu, this->sli_thk(islice), psi_z);
+					propagator(esp_real, gxu, gyu, this->sli_thick(islice), psi_z);
 					// time.toc();
 					// mexPrintf("time = %7.5f\n", time.elapsed_ms());
 				}
@@ -316,15 +316,15 @@ namespace mt
 
 					if (this->in_multem->eels_fr.is_Single_Chan())
 					{
-						T_r sli_thk = this->dz_m(islice_0, islice_e);
-						propagator(esp_real, gx_0, gy_0, sli_thk, psi_z);
+						T_r sli_thick = this->dz_m(islice_0, islice_e);
+						propagator(esp_real, gx_0, gy_0, sli_thick, psi_z);
 					}
 					else if (this->in_multem->eels_fr.is_Mixed_Chan())
 					{
-						T_r sli_thk = 0.5*this->dz_m(islice_0, islice_e);
-						propagator(esp_real, gx_0, gy_0, sli_thk, psi_z);
+						T_r sli_thick = 0.5*this->dz_m(islice_0, islice_e);
+						propagator(esp_real, gx_0, gy_0, sli_thick, psi_z);
 						mt::ew_mult(*(this->stream), trans, psi_z);
-						propagator(esp_real, gx_0, gy_0, sli_thk, psi_z);
+						propagator(esp_real, gx_0, gy_0, sli_thick, psi_z);
 					}
 					else if (this->in_multem->eels_fr.is_Double_Chan())
 					{

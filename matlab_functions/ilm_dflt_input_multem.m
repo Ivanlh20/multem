@@ -39,11 +39,13 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.spec_rot_ctr_p = [0 0 0]; % rotation point
 
     %%%%%%%%%%%%%%%%%%%%%%%%% specimen slicing %%%%%%%%%%%%%%%%%%%%%%%%%
-    input_multem.spec_slic(1).typ = 1; % esst_planes = 1, esst_dz_proj = 2, esst_planes_sub = 3, esst_dz_sub = 4, esst_auto = 5
-    input_multem.spec_slic(1).dz = 2.0; % slice thickness
-    input_multem.spec_slic(1).opt = 1; % 1: by region, 2 by z position 
-    input_multem.spec_slic(1).region = 0; % region
-    input_multem.spec_slic(1).z_lim = [0, 0]; % [z_0, z_e]
+    input_multem.spec_slic(1).typ = 1; % esst_plns_proj = 1, esst_dz_proj = 2, esst_plns_sub = 3, esst_dz_sub = 4, esst_user_def = 5, esst_auto = 6
+    input_multem.spec_slic(1).sli_thick = 2.0; % slice thickness
+    input_multem.spec_slic(1).sel_typ = 1; % 1: by tag, 2: by z position 
+    input_multem.spec_slic(1).sel_tag = 0; % tag
+    input_multem.spec_slic(1).sel_Z = 0; % 0: all atomic numbers
+    input_multem.spec_slic(1).sel_z_lim = [0, 0]; % [z_0, z_e]
+    input_multem.spec_slic(1).z_plns = []; % vector
     
     %%%%%%%%%%%%%%%%%%%%%%%% specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.thick_typ = 1; % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
@@ -177,7 +179,7 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.obj_lens_zero_def_plane = 0; % It will be only used if obj_lens_zero_def_typ = eZDT_User_Define
    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%% Scan region for ISTEM/STEM/EELS %%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%% Scan tag for ISTEM/STEM/EELS %%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.scan_pat_typ = 1; % espt_line = 1, espt_area = 2, espt_user_def = 3
     input_multem.scan_pat_pbc = 1; % periodic boundary conditions: 1: true, 0:false
@@ -198,7 +200,7 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.beam_pos = [0.0; 0.0]; % x-y positions
     
     %%%%%%%%%%%%%%%%%%%%%%%%%% STEM Detector %%%%%%%%%%%%%%%%%%%%%%%%%%
-    input_multem.detector.type = 1; % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
+    input_multem.detector.typ = 1; % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
 
     input_multem.detector.cir(1).inner_ang = 60; % Inner angle(mrad) 
     input_multem.detector.cir(1).outer_ang = 180; % Outer angle(mrad)
@@ -231,7 +233,7 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.eftem_m_selection = 3; % selection rule
     input_multem.eftem_channelling_type = 1; % eCT_Single_Channelling = 1, eCT_Mixed_Channelling = 2, eCT_Double_Channelling = 3 
 
-    %%%%%%%%%%%%%%%%%%%%%%% OUTPUT REGION %%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%% OUTPUT tag %%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%% This option is not used for eTEMST_STEM and eTEMST_STEM_EELS %%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.output_area_ip_0 = [1;1]; % Starting position in pixels

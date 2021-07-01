@@ -42,7 +42,7 @@ void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_
 	/**************************** Specimen *****************************/
 	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
 	auto bs_y = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_y");
-	T_r sli_thk = 0.25;
+	T_r sli_thick = 0.25;
 	dt_bool pbc_xy = true;
 
 	/************************** xy sampling ****************************/
@@ -50,7 +50,7 @@ void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_
 	auto ny = mex_get_num_from_field<dt_int32>(mex_in_multem, "ny");
 	dt_bool bwl = false;
 
-	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thk, bwl, pbc_xy);
+	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
 
 	/************************ Incident wave ****************************/
 	auto iw_type = mex_get_num_from_field<mt::eIncident_Wave_Typ>(mex_in_multem, "iw_type");

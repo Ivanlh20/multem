@@ -8,7 +8,7 @@ input_multem = ilm_dflt_input_multem(); % Load default values;
 
 input_multem.atomic_vib_mod = 1; % eavm_still_atom = 1, eavm_absorptive_pot = 2, eavm_frozen_phonon = 3, eavm_user_def = 4
 input_multem.elec_spec_interac_mod = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
-input_multem.spec_slic(1).typ = 1; % esst_planes = 1, esst_dz_proj = 2, esst_planes_sub = 3, esst_dz_sub = 4, esst_auto = 5
+input_multem.spec_slic(1).typ = 1; % esst_plns_proj = 1, esst_dz_proj = 2, esst_plns_sub = 3, esst_dz_sub = 4, esst_user_def = 5, esst_auto = 6
 input_multem.atomic_vib_dim = [true, true, false];
 input_multem.atomic_vib_seed = 300183;
 input_multem.atomic_vib_nconf = 1;
@@ -23,9 +23,9 @@ na = 6; nb = 6;nc = 10; ncu = 2; rmsd_3d = 0.15;
 
 [input_multem.spec_atoms, input_multem.spec_bs_x...
 , input_multem.spec_bs_y, input_multem.spec_bs_z...
-, a, b, c, input_multem.spec_slic(1).dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
+, a, b, c, input_multem.spec_slic(1).sli_thick] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
 
-input_multem.spec_slic(1).dz = 2;
+input_multem.spec_slic(1).sli_thick = 2;
 
 disp([min(input_multem.spec_atoms(:, 4)), max(input_multem.spec_atoms(:, 4))])
 
@@ -34,7 +34,7 @@ lz = 20;
 Z = 6;
 rms_3d = 0.09;
 occ = 1;
-region = 1;
+tag = 1;
 bs = [input_multem.spec_bs_x, input_multem.spec_bs_y, lz];
 d_min = 1.4;
 rho = 2.2;
@@ -45,7 +45,7 @@ z_min = min(input_multem.spec_atoms(:, 4));
 z_max = max(input_multem.spec_atoms(:, 4));
 tic;
 
-input_multem.spec_atoms = ilc_amorp_lay_add(input_multem.spec_atoms, Z, rms_3d, occ, region, bs, d_min, rho, lay_pos, seed);
+input_multem.spec_atoms = ilc_amorp_lay_add(input_multem.spec_atoms, Z, rms_3d, occ, tag, bs, d_min, rho, lay_pos, seed);
 toc;
 
 if(lay_pos==1)
@@ -55,14 +55,14 @@ else
     input_multem.spec_slic(1).z_0 = z_max; % Starting z position of the amorphous layer (Å)
     input_multem.spec_slic(1).z_e = z_max+lz; % Ending z position of the amorphous layer (Å)
 end
-input_multem.spec_slic(1).dz = 2.0; % slice thick of the amorphous layer (Å)
+input_multem.spec_slic(1).sli_thick = 2.0; % slice thick of the amorphous layer (Å)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 lz = 10;
 Z = 6;
 rms_3d = 0.09;
 occ = 1;
-region = 1;
+tag = 1;
 bs = [input_multem.spec_bs_x, input_multem.spec_bs_y, lz];
 d_min = 1.4;
 rho = 2.2;
@@ -73,7 +73,7 @@ z_min = min(input_multem.spec_atoms(:, 4));
 z_max = max(input_multem.spec_atoms(:, 4));
 
 tic;
-input_multem.spec_atoms = ilc_amorp_lay_add(input_multem.spec_atoms, Z, rms_3d, occ, region, bs, d_min, rho, lay_pos, seed);
+input_multem.spec_atoms = ilc_amorp_lay_add(input_multem.spec_atoms, Z, rms_3d, occ, tag, bs, d_min, rho, lay_pos, seed);
 toc;
 
 if(lay_pos==1)

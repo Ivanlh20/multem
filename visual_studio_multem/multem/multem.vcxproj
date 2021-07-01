@@ -92,7 +92,7 @@
     <ClInclude Include="..\..\src\r_3d.cuh" />
     <ClInclude Include="..\..\src\range.cuh" />
     <ClInclude Include="..\..\src\region.cuh" />
-    <ClInclude Include="..\..\src\scan_pat.cpp" />
+    <ClInclude Include="..\..\src\scan_pat.hpp" />
     <ClInclude Include="..\..\src\shape_t.hpp" />
     <ClInclude Include="..\..\src\spec_slic.hpp" />
     <ClInclude Include="..\..\src\space_group.hpp" />
@@ -294,6 +294,7 @@
     <CudaCompile Include="..\..\mex_files_test\ilc_test_wd_fcns.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\mex_files_test\ilc_test_ident_pla.cpp" />
     <ClCompile Include="..\..\src\atomic_vib.cpp" />
     <ClCompile Include="..\..\src\rot_parm.cpp" />
   </ItemGroup>

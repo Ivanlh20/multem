@@ -4,7 +4,7 @@ addpath([ fileparts(pwd), filesep, 'mex_bin'])
 
 Z = 79;
 occ = 1;
-region = 0;
+tag = 0;
 charge = 0;
 
 gmin = 0;gmax = 20;ng = 512;

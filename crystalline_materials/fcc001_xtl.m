@@ -16,14 +16,14 @@ function [atoms, lx, ly, lz, a, b, c, dz] = fcc001_xtl(Z, l_c, na, nb, nc, ncu, 
     xtl_parm.asym_uc = [];
     
     occ = 1;
-    region = 0;
+    tag = 0;
     charge = 0;
     
-    % Z x y z rmsd_3d occupancy region charge
-    xtl_parm.base = [Z, 0.0, 0.0, 0.0, rmsd_3d, occ, region, charge;...
-                        Z, 0.5, 0.5, 0.0, rmsd_3d, occ, region, charge;...
-                        Z, 0.0, 0.5, 0.5, rmsd_3d, occ, region, charge;...
-                        Z, 0.5, 0.0, 0.5, rmsd_3d, occ, region, charge];
+    % Z x y z rmsd_3d occupancy tag charge
+    xtl_parm.base = [Z, 0.0, 0.0, 0.0, rmsd_3d, occ, tag, charge;...
+                        Z, 0.5, 0.5, 0.0, rmsd_3d, occ, tag, charge;...
+                        Z, 0.0, 0.5, 0.5, rmsd_3d, occ, tag, charge;...
+                        Z, 0.5, 0.0, 0.5, rmsd_3d, occ, tag, charge];
                     
     atoms = ilc_xtl_build(xtl_parm);
 
