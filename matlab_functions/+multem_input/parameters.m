@@ -264,6 +264,11 @@ classdef parameters
            clear ilc_microscope_aberrations;
            out_mt = ilc_microscope_aberrations(prms.system_conf, prms);
        end
+       function out_mt = ilc_apply_ctf(obj)
+           prms = obj.toStruct;
+           clear ilc_propagate;
+           out_mt = ilc_apply_ctf(prms.system_conf, prms);
+       end
        function out_mt = ilc_transmission_function(obj)
            prms = obj.toStruct;
            clear ilc_transmission_function;

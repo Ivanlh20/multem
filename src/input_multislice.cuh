@@ -721,6 +721,12 @@ namespace mt
 				spec_rot_theta = 0;
 			}
 
+			// temporal fix for phase object
+			if (!is_multislice() && is_whole_spec())
+			{
+				potential_slicing = ePS_dz_Proj;
+			}
+
 			// match slicing with the require thickness
 			Slicing<T> slicing;
 			slicing.match_thickness(potential_slicing, atoms, thick_type, thick);

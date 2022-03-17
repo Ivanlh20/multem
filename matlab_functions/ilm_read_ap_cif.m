@@ -1,5 +1,5 @@
 % Read atomic positions from cif file
-% Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
 function [atoms, lx, ly, lz] = ilm_read_ap_cif(path, rmsd_3d_0, pbc, na, nb, nc)
     if(nargin<6)
         nc = 1;

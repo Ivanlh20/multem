@@ -35,9 +35,9 @@ The precompiled mexfiles are only available for Windows operating system and Ubu
 
 ### Building MULTEM for Matlab
 
-The following steps work using Matlab R2018a and CUDA 10.0. It assumes that Visual studio 2017 community, g++7.5 or Clang(Xcode 10.x) compiler is installed in your operating system. Additionally, Multem also requires fftw3, blas and lapack libraries.
+The following steps work using Matlab 2020b and CUDA 10.0. It assumes that Visual studio 2017 community, g++7.5 or Clang(Xcode 10.x) compiler is installed in your operating system. Additionally, Multem also requires fftw3, blas and lapack libraries.
 
-- Firstly, a C++ compiler must be set for Matlab by executing the following comand: `mex -setup cpp`. Be aware that Matlab 2018a only supports the above compilers.
+- Firstly, a C++ compiler must be set for Matlab by executing the following comand: `mex -setup cpp`. Be aware that Matlab 2020b only supports the above compilers.
 - Then add the following folders to the Matlab path: crystalline_materials, matlab_functions and mex_bin.
 - Run the `compile_mex_multem.m` script. This will create the required executable files to run the examples.
 - Run the examples located in `mex_examples_multem`.

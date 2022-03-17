@@ -534,7 +534,7 @@ namespace mt
 				data_table[99].edges[0] = 0.00;	data_table[99].edges[1] = 0.00;	data_table[99].edges[2] = 0.00;	data_table[99].edges[3] = 0.00;	data_table[99].edges[4] = 0.00;	data_table[99].edges[5] = 0.00;	data_table[99].edges[6] = 0.00;	data_table[99].edges[7] = 0.00;	data_table[99].edges[8] = 0.00;	data_table[99].edges[9] = 0.00;	data_table[99].edges[10] = 0.00;	data_table[99].edges[11] = 0.00;
 				data_table[100].edges[0] = 0.00;	data_table[100].edges[1] = 0.00;	data_table[100].edges[2] = 0.00;	data_table[100].edges[3] = 0.00;	data_table[100].edges[4] = 0.00;	data_table[100].edges[5] = 0.00;	data_table[100].edges[6] = 0.00;	data_table[100].edges[7] = 0.00;	data_table[100].edges[8] = 0.00;	data_table[100].edges[9] = 0.00;	data_table[100].edges[10] = 0.00;	data_table[100].edges[11] = 0.00;
 				data_table[101].edges[0] = 0.00;	data_table[101].edges[1] = 0.00;	data_table[101].edges[2] = 0.00;	data_table[101].edges[3] = 0.00;	data_table[101].edges[4] = 0.00;	data_table[101].edges[5] = 0.00;	data_table[101].edges[6] = 0.00;	data_table[101].edges[7] = 0.00;	data_table[101].edges[8] = 0.00;	data_table[101].edges[9] = 0.00;	data_table[101].edges[10] = 0.00;	data_table[101].edges[11] = 0.00;
-data_table[102].edges[0] = 0.00;	data_table[102].edges[1] = 0.00;	data_table[102].edges[2] = 0.00;	data_table[102].edges[3] = 0.00;	data_table[102].edges[4] = 0.00;	data_table[102].edges[5] = 0.00;	data_table[102].edges[6] = 0.00;	data_table[102].edges[7] = 0.00;	data_table[102].edges[8] = 0.00;	data_table[102].edges[9] = 0.00;	data_table[102].edges[10] = 0.00;	data_table[102].edges[11] = 0.00;
+				data_table[102].edges[0] = 0.00;	data_table[102].edges[1] = 0.00;	data_table[102].edges[2] = 0.00;	data_table[102].edges[3] = 0.00;	data_table[102].edges[4] = 0.00;	data_table[102].edges[5] = 0.00;	data_table[102].edges[6] = 0.00;	data_table[102].edges[7] = 0.00;	data_table[102].edges[8] = 0.00;	data_table[102].edges[9] = 0.00;	data_table[102].edges[10] = 0.00;	data_table[102].edges[11] = 0.00;
 			}
 
 			// 1: Doyle and Turner parameterization - 4 Gaussians - [0, 4]
@@ -1610,12 +1610,15 @@ data_table[102].edges[0] = 0.00;	data_table[102].edges[1] = 0.00;	data_table[102
 						coef.R_min = R_min;
 						c_atom_cal.Set_Atom_Type(potential_type, coef.charge, &atom_type);
 						coef.R_max = (coef.charge == 0)?c_atom_cal.AtomicRadius_Cutoff(3, Vrl):atom_type.coef[0].R_max;
+						coef.R_max = ::fmax(coef.R_max, T(2)*R_min);
+
 						if(isZero(coef.R_max))
 						{
 							coef.R_max = 1.75*atom_type.ra_e;
 						}
 
-						coef.R_tap = 0.85*coef.R_max;
+						//coef.R_tap = 0.85*coef.R_max;
+						coef.R_tap = coef.R_min + 0.85*(coef.R_max - coef.R_min);
 						coef.tap_cf = c_i2Pi/(coef.R2_max()-coef.R2_tap());
 
 						// R and R2

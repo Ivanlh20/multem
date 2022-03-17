@@ -37,7 +37,11 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 {
 	using T_r = mt::Value_type<TInput_Multislice>;
 
+	/************************ simulation type **************************/
 	input_multislice.simulation_type = mt::eTEMST_PropRS;
+
+	/************** Electron-Phonon interaction model ******************/
+	input_multislice.pn_model = mt::ePM_Still_Atom; 
 
 	/**************************** Specimen *****************************/
 	auto lx = mx_get_scalar_field<T_r>(mx_input_multislice, "spec_lx");
@@ -77,7 +81,7 @@ void read_input_multislice(const mxArray *mx_input_multislice, TInput_Multislice
 	input_multislice.phi = mx_get_scalar_field<T_r>(mx_input_multislice, "phi")*mt::c_deg_2_rad;
 
 	/************************ Objective lens **************************/
-	input_multislice.obj_lens.c_10 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_f"); 	// defocus(Angstrom)
+	input_multislice.obj_lens.c_10 = mx_get_scalar_field<T_r>(mx_input_multislice, "obj_lens_c_10"); 	// defocus(Angstrom)
 	input_multislice.obj_lens.set_input_data(input_multislice.E_0, input_multislice.grid_2d);
 	
 	/********************* select output region *************************/
@@ -124,11 +128,11 @@ void run_propagate(mt::System_Configuration &system_conf, const mxArray *mx_inpu
 	mt::Output_Multislice<T> output_multislice;
 	output_multislice.set_input_data(&input_multislice);
 
-	propagator(mt::eS_Real, input_multislice.gx_0(), input_multislice.gy_0(), input_multislice.obj_lens.c_10 , output_multislice);
+	propagator(mt::eS_Real, input_multislice.gx_0(), input_multislice.gy_0(), input_multislice.obj_lens.c_10, output_multislice);
 
 	stream.synchronize();
 
-	output_multislice.gather();
+	//output_multislice.gather();
 	output_multislice.clean_temporal();
 	fft_2d.cleanup();
 
