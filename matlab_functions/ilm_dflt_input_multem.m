@@ -17,35 +17,35 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.pn_seed = 300183;                              % Random seed(frozen phonon)
 
     %%%%%%%%%%%%%%%%%%%%%%% Specimen information %%%%%%%%%%%%%%%%%%%%%%%
-    input_multem.spec_atoms = [];                               % simulation box length in x direction (Å)
-    input_multem.spec_dz = 0.25;                                % slice thick (Å)
+    input_multem.spec_atoms = [];                               % simulation box length in x direction (ï¿½)
+    input_multem.spec_dz = 0.25;                                % slice thick (ï¿½)
 
-    input_multem.spec_lx = 10;                                  % simulation box length in x direction (Å)
-    input_multem.spec_ly = 10;                                  % simulation box length in y direction (Å)
-    input_multem.spec_lz = 10;                                  % simulation box length gpuDEin z direction (Å)
+    input_multem.spec_lx = 10;                                  % simulation box length in x direction (ï¿½)
+    input_multem.spec_ly = 10;                                  % simulation box length in y direction (ï¿½)
+    input_multem.spec_lz = 10;                                  % simulation box length gpuDEin z direction (ï¿½)
 
     input_multem.spec_cryst_na = 1;                             % number of unit cell along a
     input_multem.spec_cryst_nb = 1;                             % number of unit cell along b
     input_multem.spec_cryst_nc = 1;                             % number of unit cell along c
-    input_multem.spec_cryst_a = 0;                              % length along a (Å)
-    input_multem.spec_cryst_b = 0;                              % length along b (Å)
-    input_multem.spec_cryst_c = 0;                              % length along c (Å)
-    input_multem.spec_cryst_x0 = 0;                             % reference position along x direction (Å)
-    input_multem.spec_cryst_y0 = 0;                             % reference position along y direction (Å)
+    input_multem.spec_cryst_a = 0;                              % length along a (ï¿½)
+    input_multem.spec_cryst_b = 0;                              % length along b (ï¿½)
+    input_multem.spec_cryst_c = 0;                              % length along c (ï¿½)
+    input_multem.spec_cryst_x0 = 0;                             % reference position along x direction (ï¿½)
+    input_multem.spec_cryst_y0 = 0;                             % reference position along y direction (ï¿½)
 
-    input_multem.spec_amorp(1).z_0 = 0;                         % Starting z position of the amorphous layer (Å)
-    input_multem.spec_amorp(1).z_e = 0;                         % Ending z position of the amorphous layer (Å)
-    input_multem.spec_amorp(1).dz = 2.0;                        % slice thick of the amorphous layer (Å)
+    input_multem.spec_amorp(1).z_0 = 0;                         % Starting z position of the amorphous layer (ï¿½)
+    input_multem.spec_amorp(1).z_e = 0;                         % Ending z position of the amorphous layer (ï¿½)
+    input_multem.spec_amorp(1).dz = 2.0;                        % slice thick of the amorphous layer (ï¿½)
 
     %%%%%%%%%%%%%%%%%%%%%%%%% Specimen Rotation %%%%%%%%%%%%%%%%%%%%%%%%
-    input_multem.spec_rot_theta = 0;                            % angle (º)
+    input_multem.spec_rot_theta = 0;                            % angle (ï¿½)
     input_multem.spec_rot_u0 = [0 0 1];                          % unitary vector			
     input_multem.spec_rot_center_type = 1;                       % 1: geometric center, 2: User define		
     input_multem.spec_rot_center_p = [0 0 0];                    % rotation point
 
     %%%%%%%%%%%%%%%%%%%%%% Specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.thick_type = 1;                                % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
-    input_multem.thick = 0;                                     % Array of thickness (Å)
+    input_multem.thick = 0;                                     % Array of thickness (ï¿½)
 
     %%%%%%%%%%%%%%%%%%%%%%% Potential slicing %%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.potential_slicing = 1;                         % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
@@ -71,8 +71,8 @@ function [input_multem] = ilm_dflt_input_multem()
 
     %%%%%%%%%%%%%%%%%%%% Microscope parameters %%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.E_0 = 300;                                     % Acceleration Voltage (keV)
-    input_multem.theta = 0.0;                                   % Polar angle (º)
-    input_multem.phi = 0.0;                                     % Azimuthal angle (º)
+    input_multem.theta = 0.0;                                   % Polar angle (ï¿½)
+    input_multem.phi = 0.0;                                     % Azimuthal angle (ï¿½)
 
     %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.illumination_model = 2;                        % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
@@ -87,35 +87,35 @@ function [input_multem] = ilm_dflt_input_multem()
     %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.cond_lens_m = 0;                               % Vortex momentum
 
-    input_multem.cond_lens_c_10 = 14.0312;                      % [C1]      Defocus (Å)
-    input_multem.cond_lens_c_12 = 0.00;                         % [A1]      2-fold astigmatism (Å)
-    input_multem.cond_lens_phi_12 = 0.00;                       % [phi_A1]	Azimuthal angle of 2-fold astigmatism (º)
+    input_multem.cond_lens_c_10 = 14.0312;                      % [C1]      Defocus (ï¿½)
+    input_multem.cond_lens_c_12 = 0.00;                         % [A1]      2-fold astigmatism (ï¿½)
+    input_multem.cond_lens_phi_12 = 0.00;                       % [phi_A1]	Azimuthal angle of 2-fold astigmatism (ï¿½)
 
-    input_multem.cond_lens_c_21 = 0.00;                         % [B2]      Axial coma (Å)
-    input_multem.cond_lens_phi_21 = 0.00;                       % [phi_B2]	Azimuthal angle of axial coma (º)
-    input_multem.cond_lens_c_23 = 0.00;                         % [A2]      3-fold astigmatism (Å)
-    input_multem.cond_lens_phi_23 = 0.00;                       % [phi_A2]	Azimuthal angle of 3-fold astigmatism (º)
+    input_multem.cond_lens_c_21 = 0.00;                         % [B2]      Axial coma (ï¿½)
+    input_multem.cond_lens_phi_21 = 0.00;                       % [phi_B2]	Azimuthal angle of axial coma (ï¿½)
+    input_multem.cond_lens_c_23 = 0.00;                         % [A2]      3-fold astigmatism (ï¿½)
+    input_multem.cond_lens_phi_23 = 0.00;                       % [phi_A2]	Azimuthal angle of 3-fold astigmatism (ï¿½)
 
     input_multem.cond_lens_c_30 = 1e-03;                        % [C3] 		3rd order spherical aberration (mm)
-    input_multem.cond_lens_c_32 = 0.00;                         % [S3]      Axial star aberration (Å)
-    input_multem.cond_lens_phi_32 = 0.00;                       % [phi_S3]	Azimuthal angle of axial star aberration (º)
-    input_multem.cond_lens_c_34 = 0.00;                         % [A3]      4-fold astigmatism (Å)
-    input_multem.cond_lens_phi_34 = 0.0;                        % [phi_A3]	Azimuthal angle of 4-fold astigmatism (º)
+    input_multem.cond_lens_c_32 = 0.00;                         % [S3]      Axial star aberration (ï¿½)
+    input_multem.cond_lens_phi_32 = 0.00;                       % [phi_S3]	Azimuthal angle of axial star aberration (ï¿½)
+    input_multem.cond_lens_c_34 = 0.00;                         % [A3]      4-fold astigmatism (ï¿½)
+    input_multem.cond_lens_phi_34 = 0.0;                        % [phi_A3]	Azimuthal angle of 4-fold astigmatism (ï¿½)
 
-    input_multem.cond_lens_c_41 = 0.00;                         % [B4]      4th order axial coma (Å)
-    input_multem.cond_lens_phi_41 = 0.00;                       % [phi_B4]	Azimuthal angle of 4th order axial coma (º)
-    input_multem.cond_lens_c_43 = 0.00;                         % [D4]      3-lobe aberration (Å)
-    input_multem.cond_lens_phi_43 = 0.00;                       % [phi_D4]	Azimuthal angle of 3-lobe aberration (º)
-    input_multem.cond_lens_c_45 = 0.00;                         % [A4]      5-fold astigmatism (Å)
-    input_multem.cond_lens_phi_45 = 0.00;                       % [phi_A4]	Azimuthal angle of 5-fold astigmatism (º)
+    input_multem.cond_lens_c_41 = 0.00;                         % [B4]      4th order axial coma (ï¿½)
+    input_multem.cond_lens_phi_41 = 0.00;                       % [phi_B4]	Azimuthal angle of 4th order axial coma (ï¿½)
+    input_multem.cond_lens_c_43 = 0.00;                         % [D4]      3-lobe aberration (ï¿½)
+    input_multem.cond_lens_phi_43 = 0.00;                       % [phi_D4]	Azimuthal angle of 3-lobe aberration (ï¿½)
+    input_multem.cond_lens_c_45 = 0.00;                         % [A4]      5-fold astigmatism (ï¿½)
+    input_multem.cond_lens_phi_45 = 0.00;                       % [phi_A4]	Azimuthal angle of 5-fold astigmatism (ï¿½)
 
     input_multem.cond_lens_c_50 = 0.00;                         % [C5]      5th order spherical aberration (mm)
-    input_multem.cond_lens_c_52 = 0.00;                         % [S5]      5th order axial star aberration (Å)
-    input_multem.cond_lens_phi_52 = 0.00;                       % [phi_S5]	Azimuthal angle of 5th order axial star aberration (º)
-    input_multem.cond_lens_c_54 = 0.00;                         % [R5]      5th order rosette aberration (Å)
-    input_multem.cond_lens_phi_54 = 0.00;                       % [phi_R5]	Azimuthal angle of 5th order rosette aberration (º)
-    input_multem.cond_lens_c_56 = 0.00;                         % [A5]      6-fold astigmatism (Å)
-    input_multem.cond_lens_phi_56 = 0.00;                       % [phi_A5]	Azimuthal angle of 6-fold astigmatism (º)
+    input_multem.cond_lens_c_52 = 0.00;                         % [S5]      5th order axial star aberration (ï¿½)
+    input_multem.cond_lens_phi_52 = 0.00;                       % [phi_S5]	Azimuthal angle of 5th order axial star aberration (ï¿½)
+    input_multem.cond_lens_c_54 = 0.00;                         % [R5]      5th order rosette aberration (ï¿½)
+    input_multem.cond_lens_phi_54 = 0.00;                       % [phi_R5]	Azimuthal angle of 5th order rosette aberration (ï¿½)
+    input_multem.cond_lens_c_56 = 0.00;                         % [A5]      6-fold astigmatism (ï¿½)
+    input_multem.cond_lens_phi_56 = 0.00;                       % [phi_A5]	Azimuthal angle of 6-fold astigmatism (ï¿½)
 
     input_multem.cond_lens_inner_aper_ang = 0.0;                % Inner aperture (mrad) 
     input_multem.cond_lens_outer_aper_ang = 21.0;   			% Outer aperture (mrad)
@@ -130,7 +130,7 @@ function [input_multem] = ilm_dflt_input_multem()
     %%%%%%%%%% source spread function %%%%%%%%%%%%
     ssf_sigma = ilc_hwhm_2_sigma(0.45);                         % half width at half maximum to standard deviation
     input_multem.cond_lens_si_a = 1.0;
-    input_multem.cond_lens_si_sigma = ssf_sigma;                % standard deviation: For parallel ilumination(Å^-1); otherwise
+    input_multem.cond_lens_si_sigma = ssf_sigma;                % standard deviation: For parallel ilumination(ï¿½^-1); otherwise
     input_multem.cond_lens_si_beta = 1.0;
     input_multem.cond_lens_si_rad_npts = 8;                     % # of integration points. It will be only used if illumination_model=4
     input_multem.cond_lens_si_azm_npts = 12;                    % # of integration points. It will be only used if illumination_model=4
@@ -141,54 +141,65 @@ function [input_multem] = ilm_dflt_input_multem()
 
     %%%%%%%%%%%%%%%%%%% condenser lens variable %%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%% it will be active in the future %%%%%%%%%%%%%%%%%
-    % 1: Vortex momentum, 2: Defocus (Å), 2: Third order spherical aberration (mm)
+    % 1: Vortex momentum, 2: Defocus (ï¿½), 2: Third order spherical aberration (mm)
     % 3: Third order spherical aberration (mm),  4: Fifth order spherical aberration (mm)
-    % 5: Twofold astigmatism (Å), 2: Defocus (Å), 6: Azimuthal angle of the twofold astigmatism (º)
-    % 7: Threefold astigmatism (Å),  8: Azimuthal angle of the threefold astigmatism (º)
-    % 9: Inner aperture (mrad), 2: Defocus (Å), 10: Outer aperture (mrad)
+    % 5: Twofold astigmatism (ï¿½), 2: Defocus (ï¿½), 6: Azimuthal angle of the twofold astigmatism (ï¿½)
+    % 7: Threefold astigmatism (ï¿½),  8: Azimuthal angle of the threefold astigmatism (ï¿½)
+    % 9: Inner aperture (mrad), 2: Defocus (ï¿½), 10: Outer aperture (mrad)
     % input_multem.cdl_var_type = 0;                  			% 0:off 1: m, 2: f, 3 Cs3, 4:Cs5, 5:mfa2, 6:afa2, 7:mfa3, 8:afa3, 9:inner_aper_ang , 10:outer_aper_ang
     % input_multem.cdl_var = [-2 -1 0 1 2];           			% variable array
 
     %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.obj_lens_m = 0;                                % Vortex momentum
 
-    input_multem.obj_lens_c_10 = 14.0312;                       % [C1]      Defocus (Å)
-    input_multem.obj_lens_c_12 = 0.00;                          % [A1]      2-fold astigmatism (Å)
-    input_multem.obj_lens_phi_12 = 0.00;                        % [phi_A1]	Azimuthal angle of 2-fold astigmatism (º)
+    input_multem.obj_lens_c_10 = 14.0312;                       % [C1]      Defocus (ï¿½)
+    input_multem.obj_lens_c_12 = 0.00;                          % [A1]      2-fold astigmatism (ï¿½)
+    input_multem.obj_lens_phi_12 = 0.00;                        % [phi_A1]	Azimuthal angle of 2-fold astigmatism (ï¿½)
 
-    input_multem.obj_lens_c_21 = 0.00;                          % [B2]      Axial coma (Å)
-    input_multem.obj_lens_phi_21 = 0.00;                        % [phi_B2]	Azimuthal angle of axial coma (º)
-    input_multem.obj_lens_c_23 = 0.00;                          % [A2]      3-fold astigmatism (Å)
-    input_multem.obj_lens_phi_23 = 0.00;                        % [phi_A2]	Azimuthal angle of 3-fold astigmatism (º)
+    input_multem.obj_lens_c_21 = 0.00;                          % [B2]      Axial coma (ï¿½)
+    input_multem.obj_lens_phi_21 = 0.00;                        % [phi_B2]	Azimuthal angle of axial coma (ï¿½)
+    input_multem.obj_lens_c_23 = 0.00;                          % [A2]      3-fold astigmatism (ï¿½)
+    input_multem.obj_lens_phi_23 = 0.00;                        % [phi_A2]	Azimuthal angle of 3-fold astigmatism (ï¿½)
 
     input_multem.obj_lens_c_30 = 1e-03;                         % [C3] 		3rd order spherical aberration (mm)
-    input_multem.obj_lens_c_32 = 0.00;                          % [S3]      Axial star aberration (Å)
-    input_multem.obj_lens_phi_32 = 0.00;                        % [phi_S3]	Azimuthal angle of axial star aberration (º)
-    input_multem.obj_lens_c_34 = 0.00;                          % [A3]      4-fold astigmatism (Å)
-    input_multem.obj_lens_phi_34 = 0.0;                         % [phi_A3]	Azimuthal angle of 4-fold astigmatism (º)
+    input_multem.obj_lens_c_32 = 0.00;                          % [S3]      Axial star aberration (ï¿½)
+    input_multem.obj_lens_phi_32 = 0.00;                        % [phi_S3]	Azimuthal angle of axial star aberration (ï¿½)
+    input_multem.obj_lens_c_34 = 0.00;                          % [A3]      4-fold astigmatism (ï¿½)
+    input_multem.obj_lens_phi_34 = 0.0;                         % [phi_A3]	Azimuthal angle of 4-fold astigmatism (ï¿½)
 
-    input_multem.obj_lens_c_41 = 0.00;                          % [B4]      4th order axial coma (Å)
-    input_multem.obj_lens_phi_41 = 0.00;                        % [phi_B4]	Azimuthal angle of 4th order axial coma (º)
-    input_multem.obj_lens_c_43 = 0.00;                          % [D4]      3-lobe aberration (Å)
-    input_multem.obj_lens_phi_43 = 0.00;                        % [phi_D4]	Azimuthal angle of 3-lobe aberration (º)
-    input_multem.obj_lens_c_45 = 0.00;                          % [A4]      5-fold astigmatism (Å)
-    input_multem.obj_lens_phi_45 = 0.00;                        % [phi_A4]	Azimuthal angle of 5-fold astigmatism (º)
+    input_multem.obj_lens_c_41 = 0.00;                          % [B4]      4th order axial coma (ï¿½)
+    input_multem.obj_lens_phi_41 = 0.00;                        % [phi_B4]	Azimuthal angle of 4th order axial coma (ï¿½)
+    input_multem.obj_lens_c_43 = 0.00;                          % [D4]      3-lobe aberration (ï¿½)
+    input_multem.obj_lens_phi_43 = 0.00;                        % [phi_D4]	Azimuthal angle of 3-lobe aberration (ï¿½)
+    input_multem.obj_lens_c_45 = 0.00;                          % [A4]      5-fold astigmatism (ï¿½)
+    input_multem.obj_lens_phi_45 = 0.00;                        % [phi_A4]	Azimuthal angle of 5-fold astigmatism (ï¿½)
 
     input_multem.obj_lens_c_50 = 0.00;                          % [C5]      5th order spherical aberration (mm)
-    input_multem.obj_lens_c_52 = 0.00;                          % [S5]      5th order axial star aberration (Å)
-    input_multem.obj_lens_phi_52 = 0.00;                        % [phi_S5]	Azimuthal angle of 5th order axial star aberration (º)
-    input_multem.obj_lens_c_54 = 0.00;                          % [R5]      5th order rosette aberration (Å)
-    input_multem.obj_lens_phi_54 = 0.00;                        % [phi_R5]	Azimuthal angle of 5th order rosette aberration (º)
-    input_multem.obj_lens_c_56 = 0.00;                          % [A5]      6-fold astigmatism (Å)
-    input_multem.obj_lens_phi_56 = 0.00;                        % [phi_A5]	Azimuthal angle of 6-fold astigmatism (º)
+    input_multem.obj_lens_c_52 = 0.00;                          % [S5]      5th order axial star aberration (ï¿½)
+    input_multem.obj_lens_phi_52 = 0.00;                        % [phi_S5]	Azimuthal angle of 5th order axial star aberration (ï¿½)
+    input_multem.obj_lens_c_54 = 0.00;                          % [R5]      5th order rosette aberration (ï¿½)
+    input_multem.obj_lens_phi_54 = 0.00;                        % [phi_R5]	Azimuthal angle of 5th order rosette aberration (ï¿½)
+    input_multem.obj_lens_c_56 = 0.00;                          % [A5]      6-fold astigmatism (ï¿½)
+    input_multem.obj_lens_phi_56 = 0.00;                        % [phi_A5]	Azimuthal angle of 6-fold astigmatism (ï¿½)
 
     input_multem.obj_lens_inner_aper_ang = 0.0;     			% Inner aperture (mrad) 
     input_multem.obj_lens_outer_aper_ang = 24.0;    			% Outer aperture (mrad)
 
     %%%%%%%%% defocus spread function %%%%%%%%%%%%
-    input_multem.obj_lens_dsf_sigma = 32;                 		% standard deviation (Å)
-    input_multem.obj_lens_dsf_npoints  = 10;                	% # of integration points. It will be only used if illumination_model=4
+    dsf_sigma = ilc_iehwgd_2_sigma(32);                         % from defocus spread to standard deviation
+    input_multem.obj_lens_ti_a = 1.0;
+    input_multem.obj_lens_ti_sigma = dsf_sigma;                % standard deviation
+    input_multem.obj_lens_ti_beta = 1;
+    input_multem.obj_lens_ti_npts = 5;                         % # of integration points. It will be only used if illumination_model=4
 
+    %%%%%%%%%% source spread function %%%%%%%%%%%%
+    ssf_sigma = ilc_hwhm_2_sigma(0.45);                         % half width at half maximum to standard deviation
+    input_multem.obj_lens_si_a = 1.0;
+    input_multem.obj_lens_si_sigma = ssf_sigma;                % standard deviation: For parallel ilumination(ï¿½^-1); otherwise
+    input_multem.obj_lens_si_beta = 1.0;
+    input_multem.obj_lens_si_rad_npts = 8;                     % # of integration points. It will be only used if illumination_model=4
+    input_multem.obj_lens_si_azm_npts = 12;                    % # of integration points. It will be only used if illumination_model=4
+    
     %%%%%%%%% zero defocus reference %%%%%%%%%%%%
     input_multem.obj_lens_zero_defocus_type = 3;    			% eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
     input_multem.obj_lens_zero_defocus_plane = 0;   			% It will be only used if obj_lens_zero_defocus_type = eZDT_User_Define
@@ -212,10 +223,10 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.scanning_periodic = 1;             			% 1: true, 0:false (periodic boundary conditions)
     input_multem.scanning_square_pxs = 1;             			% 0: false, 1: true
     input_multem.scanning_ns = 10;                  			% number of sampling points
-    input_multem.scanning_x0 = 0.0;                 			% x-starting point (Å)
-    input_multem.scanning_y0 = 0.0;                 			% y-starting point (Å)
-    input_multem.scanning_xe = 4.078;               			% x-final point (Å)
-    input_multem.scanning_ye = 4.078;               			% y-final point (Å)
+    input_multem.scanning_x0 = 0.0;                 			% x-starting point (ï¿½)
+    input_multem.scanning_y0 = 0.0;                 			% y-starting point (ï¿½)
+    input_multem.scanning_xe = 4.078;               			% x-final point (ï¿½)
+    input_multem.scanning_ye = 4.078;               			% y-final point (ï¿½)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%PED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.ped_nrot = 360;                    			% Number of orientations
