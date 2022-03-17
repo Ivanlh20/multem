@@ -80,11 +80,12 @@ function [] = ilm_mex(option, m_file, src, varargin)
     CARD_50="-gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot;";
     CARD_60="-gencode=arch=compute_60,code=&#92;&quot;sm_60,compute_60&#92;&quot;";
     CARD_70="-gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot;";
-    CARD_MULT = join([CARD_30, CARD_35, CARD_50, CARD_60, CARD_70], ' ');
+    CARD_75="-gencode=arch=compute_75,code=&#92;&quot;sm_75,compute_75&#92;&quot;";
+    CARD_MULT = join([CARD_30, CARD_35, CARD_50, CARD_60, CARD_70, CARD_75], ' ');
 
     if 1
         gpu = gpuDevice();
-        gpu_card = round(str2double(gpu.ComputeCapability));
+        gpu_card = floor(str2double(gpu.ComputeCapability));
 
         switch gpu_card
             case 3
@@ -95,6 +96,8 @@ function [] = ilm_mex(option, m_file, src, varargin)
                 ARCH_FLAGS = CARD_60;
             case 7
                 ARCH_FLAGS = CARD_70;
+            case 8
+                ARCH_FLAGS = CARD_75;
             otherwise
                 ARCH_FLAGS = CARD_30;
         end
