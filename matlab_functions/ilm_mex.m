@@ -71,35 +71,39 @@ function [] = ilm_mex(option, m_file, src, varargin)
     setenv('CUDA_NVVM_PATH', [CUDA_PATH, filesep, 'nvvm']);
     setenv('MW_NVCC_PATH', CUDA_BIN_PATH);
     
-    %%%%%%%%%%%%%%%%%%% set card architecture %%%%%%%%%%%%%%%%%%%
+     %%%%%%%%%%%%%%%%%%% set card architecture %%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%% https://developer.nvidia.com/cuda-gpus %%%%%%%%%%
+    % https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    CUDA_VERSION_D = str2double(CUDA_VERSION);
     CARD_30="-gencode=arch=compute_30,code=sm_30";
     CARD_35="-gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot;";
     CARD_50="-gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot;";
     CARD_60="-gencode=arch=compute_60,code=&#92;&quot;sm_60,compute_60&#92;&quot;";
     CARD_70="-gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot;";
     CARD_75="-gencode=arch=compute_75,code=&#92;&quot;sm_75,compute_75&#92;&quot;";
+    CARD_86="-gencode=arch=compute_86,code=&#92;&quot;sm_86,compute_86&#92;&quot;";
+    CARD_87="-gencode=arch=compute_87,code=&#92;&quot;sm_87,compute_87&#92;&quot;";
     CARD_MULT = join([CARD_30, CARD_35, CARD_50, CARD_60, CARD_70, CARD_75], ' ');
-
+    
+    if CUDA_VERSION_D >= 11.0
+        CARD_MULT = join([CARD_MULT CARD_86, CARD_87], ' ');
+    end
+    
     if 1
-        gpu = gpuDevice();
-        gpu_card = floor(str2double(gpu.ComputeCapability));
-
-        switch gpu_card
-            case 3
-                ARCH_FLAGS = CARD_30;
-            case 5
-                ARCH_FLAGS = CARD_50;
-            case 6
-                ARCH_FLAGS = CARD_60;
-            case 7
-                ARCH_FLAGS = CARD_70;
-            case 8
-                ARCH_FLAGS = CARD_75;
-            otherwise
-                ARCH_FLAGS = CARD_30;
+        ARCH_FLAGS = "";
+        for i_dev = 1:gpuDeviceCount
+            gpu_comp_cap = replace(gpuDevice(i_dev).ComputeCapability,'.','');
+            if str2double(gpu_comp_cap) < 35
+                ARCH_FLAGS =  join([ARCH_FLAGS, ['-gencode=arch=compute_' gpu_comp_cap ',code=sm_' gpu_comp_cap]]);
+            else
+              if str2double(gpu_comp_cap) > 75 && CUDA_VERSION_D
+                  warning([gpuDevice(i_dev).Name ' has compute capability ' gpuDevice(i_dev).ComputeCapability ' but the Cuda version ' CUDA_VERSION ' does not support it. Attempting to compile for compute capability 7.5.']);
+                  gpu_comp_cap = '75';
+              end
+                ARCH_FLAGS = join([ARCH_FLAGS, ['-gencode=arch=compute_' gpu_comp_cap ',code=&#92;&quot;sm_' gpu_comp_cap ',compute_' gpu_comp_cap '&#92;&quot;']]);
+            end
         end
     else
         ARCH_FLAGS = CARD_MULT;
