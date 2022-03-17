@@ -98,7 +98,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
             if str2double(gpu_comp_cap) < 35
                 ARCH_FLAGS =  join([ARCH_FLAGS, ['-gencode=arch=compute_' gpu_comp_cap ',code=sm_' gpu_comp_cap]]);
             else
-              if str2double(gpu_comp_cap) > 75 && CUDA_VERSION_D
+              if str2double(gpu_comp_cap) > 75 && CUDA_VERSION_D < 11.0
                   warning([gpuDevice(i_dev).Name ' has compute capability ' gpuDevice(i_dev).ComputeCapability ' but the Cuda version ' CUDA_VERSION ' does not support it. Attempting to compile for compute capability 7.5.']);
                   gpu_comp_cap = '75';
               end
