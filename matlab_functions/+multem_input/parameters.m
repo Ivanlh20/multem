@@ -237,62 +237,69 @@ classdef parameters
       output_area_iy_0(1,1) double = 0.0; 					% y-starting in pixel
       output_area_ix_e(1,1) double = 0.0; 					% x-final in pixel
       output_area_iy_e(1,1) double = 0.0; 					% y-final in pixel
-   end
+    end
     methods
-       function out_mt = ilc_incident_wave(obj)
-           prms = obj.toStruct;
-           clear ilc_incident_wave;
-           out_mt = ilc_incident_wave(prms.system_conf, prms);
-       end
-       function out_mt = ilc_multem(obj)
-           prms = obj.toStruct;
-           clear ilc_multem;
-           out_mt = ilc_multem(prms.system_conf, prms);
-       end
-       function out_mt = ilc_projected_potential(obj)
-           prms = obj.toStruct;
-           clear ilc_projected_potential;
-           out_mt = ilc_projected_potential(prms.system_conf, prms);
-       end
-       function out_mt = ilc_propagate(obj)
-           prms = obj.toStruct;
-           clear ilc_propagate;
-           out_mt = ilc_propagate(prms.system_conf, prms);
-       end
-       function out_mt = ilc_microscope_aberrations(obj)
-           prms = obj.toStruct;
-           clear ilc_microscope_aberrations;
-           out_mt = ilc_microscope_aberrations(prms.system_conf, prms);
-       end
-       function out_mt = ilc_apply_ctf(obj)
-           prms = obj.toStruct;
-           clear ilc_propagate;
-           out_mt = ilc_apply_ctf(prms.system_conf, prms);
-       end
-       function out_mt = ilc_transmission_function(obj)
-           prms = obj.toStruct;
-           clear ilc_transmission_function;
-           out_mt = ilc_transmission_function(prms.system_conf, prms);
-       end
-       function out_mt = ilc_wave_function(obj)
-           prms = obj.toStruct;
-           clear ilc_wave_function;
-           out_mt = ilc_wave_function(prms.system_conf, prms);
-       end
-       function s = toStruct(class)
+        function out_mt = ilc_incident_wave(obj)
+            prms = obj.toStruct;
+            clear ilc_incident_wave;
+            out_mt = ilc_incident_wave(prms.system_conf, prms);
+        end
+        function out_mt = ilc_multem(obj)
+            prms = obj.toStruct;
+            clear ilc_multem;
+            out_mt = ilc_multem(prms.system_conf, prms);
+        end
+        function out_mt = ilc_projected_potential(obj)
+            prms = obj.toStruct;
+            clear ilc_projected_potential;
+            out_mt = ilc_projected_potential(prms.system_conf, prms);
+        end
+        function out_mt = ilc_propagate(obj)
+            prms = obj.toStruct;
+            clear ilc_propagate;
+            out_mt = ilc_propagate(prms.system_conf, prms);
+        end
+        function out_mt = ilc_microscope_aberrations(obj)
+            prms = obj.toStruct;
+            clear ilc_microscope_aberrations;
+            out_mt = ilc_microscope_aberrations(prms.system_conf, prms);
+        end
+        function out_mt = ilc_apply_ctf(obj)
+            prms = obj.toStruct;
+            clear ilc_propagate;
+            out_mt = ilc_apply_ctf(prms.system_conf, prms);
+        end
+        function out_mt = ilc_transmission_function(obj)
+            prms = obj.toStruct;
+            clear ilc_transmission_function;
+            out_mt = ilc_transmission_function(prms.system_conf, prms);
+        end
+        function out_mt = ilc_wave_function(obj)
+            prms = obj.toStruct;
+            clear ilc_wave_function;
+            out_mt = ilc_wave_function(prms.system_conf, prms);
+        end
+        function s = toStruct(class)
             public_props = properties(class);
             s = struct();
             for fi = 1:numel(public_props)
                 if isobject(class.(public_props{fi}))
                    sub_props = properties(class.(public_props{fi}));
                    for fi_s = 1:numel(sub_props)
-                        s.(public_props{fi}).(sub_props{fi_s}) = class.(public_props{fi}).(sub_props{fi_s});
+                       val = class.(public_props{fi}).(sub_props{fi_s});
+                       if isnumeric(val)
+                           val = double(val);
+                       end
+                        s.(public_props{fi}).(sub_props{fi_s}) = val;   
                    end
                 else
-                    s.(public_props{fi}) = class.(public_props{fi}); 
+                    val = class.(public_props{fi});
+                    if isnumeric(val)
+                        val = double(val);
+                    end
+                    s.(public_props{fi}) = val; 
                 end            
             end                  
         end 
     end
-
 end
