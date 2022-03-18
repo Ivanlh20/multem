@@ -71,7 +71,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
     setenv('CUDA_NVVM_PATH', [CUDA_PATH, filesep, 'nvvm']);
     setenv('MW_NVCC_PATH', CUDA_BIN_PATH);
     
-     %%%%%%%%%%%%%%%%%%% set card architecture %%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%% set card architecture %%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%% https://developer.nvidia.com/cuda-gpus %%%%%%%%%%
     % https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/
@@ -92,17 +92,26 @@ function [] = ilm_mex(option, m_file, src, varargin)
     end
     
     if 1
+        % Get compute capabilities of all available devices
+        gpu_comp_cap = zeros(1,gpuDeviceCount);
         ARCH_FLAGS = "";
         for i_dev = 1:gpuDeviceCount
-            gpu_comp_cap = replace(gpuDevice(i_dev).ComputeCapability,'.','');
-            if str2double(gpu_comp_cap) < 35
-                ARCH_FLAGS =  join([ARCH_FLAGS, ['-gencode=arch=compute_' gpu_comp_cap ',code=sm_' gpu_comp_cap]]);
+            gpu_comp_cap(i_dev) = str2double(replace(gpuDevice(i_dev).ComputeCapability,'.',''));
+        end
+        % avoid duplicate compiler settings
+        [~, id] = unique(gpu_comp_cap,'stable');
+        
+        % Add architecture flags for all necessary compute capabilities
+        for i_dev = 1:numel(id)
+            gpu_comp_cap_str = num2str(gpu_comp_cap(id(i_dev)));
+            if gpu_comp_cap(id(i_dev)) < 35
+                ARCH_FLAGS =  join([ARCH_FLAGS, ['-gencode=arch=compute_' gpu_comp_cap_str ',code=sm_' gpu_comp_cap_str]]);
             else
-              if str2double(gpu_comp_cap) > 75 && CUDA_VERSION_D < 11.0
-                  warning([gpuDevice(i_dev).Name ' has compute capability ' gpuDevice(i_dev).ComputeCapability ' but the Cuda version ' CUDA_VERSION ' does not support it. Attempting to compile for compute capability 7.5.']);
-                  gpu_comp_cap = '75';
+              if gpu_comp_cap(id(i_dev)) > 75 && CUDA_VERSION_D < 11.0
+                  warning([gpuDevice(id(i_dev)).Name ' has compute capability ' gpuDevice(id(i_dev)).ComputeCapability ' but the Cuda version ' CUDA_VERSION ' does not support it. Attempting to compile for compute capability 7.5.']);
+                  gpu_comp_cap_str = '75';
               end
-                ARCH_FLAGS = join([ARCH_FLAGS, ['-gencode=arch=compute_' gpu_comp_cap ',code=&#92;&quot;sm_' gpu_comp_cap ',compute_' gpu_comp_cap '&#92;&quot;']]);
+                ARCH_FLAGS = join([ARCH_FLAGS, ['-gencode=arch=compute_' gpu_comp_cap_str ',code=&#92;&quot;sm_' gpu_comp_cap_str ',compute_' gpu_comp_cap_str '&#92;&quot;']]);
             end
         end
     else
