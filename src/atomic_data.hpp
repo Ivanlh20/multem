@@ -1610,12 +1610,15 @@ namespace mt
 						coef.R_min = R_min;
 						c_atom_cal.Set_Atom_Type(potential_type, coef.charge, &atom_type);
 						coef.R_max = (coef.charge == 0)?c_atom_cal.AtomicRadius_Cutoff(3, Vrl):atom_type.coef[0].R_max;
+						coef.R_max = ::fmax(coef.R_max, T(2)*R_min);
+
 						if(isZero(coef.R_max))
 						{
 							coef.R_max = 1.75*atom_type.ra_e;
 						}
 
-						coef.R_tap = 0.85*coef.R_max;
+						//coef.R_tap = 0.85*coef.R_max;
+						coef.R_tap = coef.R_min + 0.85*(coef.R_max - coef.R_min);
 						coef.tap_cf = c_i2Pi/(coef.R2_max()-coef.R2_tap());
 
 						// R and R2

@@ -1,7 +1,7 @@
 % output_multislice = input_multem.ilc_multem perform TEM simulation
 % Scanning transmission electron microscopy (STEM) simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
-% Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear; clc;
 addpath([fileparts(pwd) filesep 'mex_bin'])

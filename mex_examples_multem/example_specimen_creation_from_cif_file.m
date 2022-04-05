@@ -1,5 +1,5 @@
 % Specimen creation
-% Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear all;clc;
 
