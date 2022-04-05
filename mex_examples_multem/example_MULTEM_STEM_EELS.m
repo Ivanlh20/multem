@@ -88,7 +88,7 @@ input_multem.cond_lens_ti_npts = 5;         % # of integration points. It will b
 %%%%%%%%%% source spread function %%%%%%%%%%%%
 ssf_sigma = ilc_hwhm_2_sigma(0.45);                        % half width at half maximum to standard deviation
 input_multem.obj_lens_si_sigma = ssf_sigma;          % standard deviation: For parallel ilumination(�^-1); otherwise (�)
-input_multem.obj_lens_si_npoints = 4;                % # of integration points. It will be only used if illumination_model=4
+input_multem.obj_lens_si_rad_npts = 4;                % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%% zero defocus reference %%%%%%%%%%%%
 input_multem.cond_lens_zero_defocus_type = 1;         % eZDT_First = 1, eZDT_User_Define = 4

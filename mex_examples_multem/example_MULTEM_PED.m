@@ -65,14 +65,13 @@ input_multem.phi = 0.0;                          % Till ilumination (�)
 input_multem.illumination_model = 1;             % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
 input_multem.temporal_spatial_incoh = 1;         % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 
-%%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
-        %%%%%%%%%% source spread function %%%%%%%%%%%%
-ssf_sigma = ilc_mrad_2_sigma(input_multem.E_0, 0.02);  % mrad to standard deviation
-input_multem.obj_lens_ssf_sigma = ssf_sigma;          % standard deviation: For parallel ilumination(�^-1); otherwise (�)
-input_multem.obj_lens_ssf_npoints = 4;                % # of integration points. It will be only used if illumination_model=4
-
 %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
-        %%%%%%%%%%%% aperture radius %%%%%%%%%%%%%%%%%
+%%%%%%%%%% source spread function %%%%%%%%%%%%
+ssf_sigma = ilc_mrad_2_sigma(input_multem.E_0, 0.02);   % mrad to standard deviation
+input_multem.obj_lens_si_sigma = ssf_sigma;             % standard deviation: For parallel ilumination(�^-1); otherwise (�)
+input_multem.obj_lens_si_rad_npts = 4;                  % # of integration points. It will be only used if illumination_model=4
+
+%%%%%%%%%%%% aperture radius %%%%%%%%%%%%%%%%%
 input_multem.obj_lens_inner_aper_ang = 0.0;    % Inner aperture (mrad) 
 input_multem.obj_lens_outer_aper_ang = 0.0;   % Outer aperture (mrad)
 
