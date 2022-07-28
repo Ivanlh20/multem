@@ -141,7 +141,7 @@ void set_struct_incident_wave(TOutput_Multislice &output_multislice, mxArray *&m
 }
 
 template <class T, mt::eDevice dev>
-void run_incident_wave(mt::System_Configuration &system_conf, const mxArray *mx_input_multislice, mxArray *&mx_output_multislice)
+void run_incident_wave(mt::System_Configuration &system_conf, const mxArray *mx_input_multislice, mxArray *&mx_output_multislice, enum mt::eSpace space)
 {
 	mt::Input_Multislice<T> input_multislice;
 	read_input_multislice(mx_input_multislice, input_multislice);
@@ -157,7 +157,7 @@ void run_incident_wave(mt::System_Configuration &system_conf, const mxArray *mx_
 	mt::Output_Multislice<T> output_multislice;
 	output_multislice.set_input_data(&input_multislice);
 
-	incident_wave(mt::eS_Real, output_multislice);
+	incident_wave(space, output_multislice);
 
 	stream.synchronize();
 
@@ -172,21 +172,30 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	auto system_conf = mt::read_system_conf(prhs[0]);
 	int idx_0 = (system_conf.active)?1:0;
+	auto space = mt::eS_Real;
+
+	std::cout << "nrhs = " << nrhs << std::endl;
+	std::cout << "idx_0 = " << idx_0 << std::endl;
+	
+	if (nrhs > idx_0+1)
+	{
+		space = (mt::eSpace)(int)mxGetScalar(prhs[idx_0+1]);
+	}
 
 	if(system_conf.is_float_host())
 	{
-		run_incident_wave<float, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
+		run_incident_wave<float, mt::e_host>(system_conf, prhs[idx_0], plhs[0], space);
 	}
 	else if(system_conf.is_double_host())
 	{
-		run_incident_wave<double, mt::e_host>(system_conf, prhs[idx_0], plhs[0]);
+		run_incident_wave<double, mt::e_host>(system_conf, prhs[idx_0], plhs[0], space);
 	}
 	else if(system_conf.is_float_device())
 	{
-		run_incident_wave<float, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
+		run_incident_wave<float, mt::e_device>(system_conf, prhs[idx_0], plhs[0], space);
 	}
 	else if(system_conf.is_double_device())
 	{
-		run_incident_wave<double, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
+		run_incident_wave<double, mt::e_device>(system_conf, prhs[idx_0], plhs[0], space);
 	}
 }

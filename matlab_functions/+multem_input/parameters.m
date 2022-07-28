@@ -239,10 +239,13 @@ classdef parameters
       output_area_iy_e(1,1) double = 0.0; 					% y-final in pixel
     end
     methods
-        function out_mt = ilc_incident_wave(obj)
+        function out_mt = ilc_incident_wave(obj, space)
+            if nargin < 2
+                space = 2;
+            end
             prms = obj.toStruct;
             clear ilc_incident_wave;
-            out_mt = ilc_incident_wave(prms.system_conf, prms);
+            out_mt = ilc_incident_wave(prms.system_conf, prms, space);
         end
         function out_mt = ilc_multem(obj)
             prms = obj.toStruct;
