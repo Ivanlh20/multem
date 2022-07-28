@@ -174,9 +174,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	int idx_0 = (system_conf.active)?1:0;
 	auto space = mt::eS_Real;
 
-	std::cout << "nrhs = " << nrhs << std::endl;
-	std::cout << "idx_0 = " << idx_0 << std::endl;
-	
 	if (nrhs > idx_0+1)
 	{
 		space = (mt::eSpace)(int)mxGetScalar(prhs[idx_0+1]);
