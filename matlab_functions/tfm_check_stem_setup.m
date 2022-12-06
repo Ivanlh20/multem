@@ -40,51 +40,56 @@ function tfm_check_stem_setup(input_multem, n_detector)
     end
 
     function fcn_check_slicing(input_multem)
-
-        % Slicing
-        [atoms, Slice] = ilc_spec_slicing(input_multem.toStruct);   
-        [nslice, ~] = size(Slice);
-
-        figure(2); clf;
-        subplot(1,2,1);
-        plot(atoms(:, 3), atoms(:, 4), 'ok');   
-        hold on;
-        for i = 1:nslice
-            plot([min(atoms(:, 3)) max(atoms(:, 3))], [Slice(i, 1) Slice(i, 1)], '-b', [min(atoms(:, 3)) max(atoms(:, 3))], [Slice(i, 2) Slice(i, 2)], '-b');    
-        end
-        hold off;
-        title('Slice positions');
-        ylabel('z');
-        xlabel('x');
-        axis([min(atoms(:, 3)) max(atoms(:, 3)) -5 input_multem.spec_lz + 5]);
-        axis equal;
-        legend({'Atom positions','Slice boundaries'},'Location','southoutside')
-        set(gca,'YDir','reverse')
         
-        subplot(1,2,2);
-        plot3(input_multem.spec_atoms(:,2), input_multem.spec_atoms(:,3), input_multem.spec_atoms(:,4),'or');
-        hold on;
-        if input_multem.simulation_type <= 12 
-            plot3([input_multem.scanning_x0; input_multem.scanning_xe; input_multem.scanning_xe; input_multem.scanning_x0;input_multem.scanning_x0],...
-                  [input_multem.scanning_y0; input_multem.scanning_y0; input_multem.scanning_ye; input_multem.scanning_ye;input_multem.scanning_y0],...
-                  [0; 0; 0; 0; 0],'-k');
-            legend({'Atom positions','STEM Scan Field'},'Location','southoutside')
-        else
-            z0 = get_defocus_ref(input_multem);
-            [xp, yp, zp] = cylinder([0 2], 64);
-            surf(input_multem.iw_x+xp, input_multem.iw_y+yp, z0+(10*zp),'FaceAlpha',0.5,'EdgeColor','none','FaceColor','g')
-            surf(input_multem.iw_x+xp, input_multem.iw_y+yp, z0+(-10*zp),'FaceAlpha',0.5, 'EdgeColor','none','FaceColor','g')
-            plot3(input_multem.iw_x, input_multem.iw_y, z0,'xk');
-            legend({'Atom positions','Probe'},'Location','southoutside')
-        end
+        if ~isempty(input_multem.spec_atoms)
+            % Slicing
+            [~, Slice] = ilc_spec_slicing(input_multem.toStruct);   
+            [nslice, ~] = size(Slice);
 
-        hold off;
-        axis equal;
-        title('Atom positions and Scan Field')
-        zlabel('z');
-        xlabel('x');
-        ylabel('y');
-        set(gca,'ZDir','reverse')
+            figure(2); clf;
+            subplot(1,2,1);
+            plot(input_multem.spec_atoms(:, 2), input_multem.spec_atoms(:, 4), 'ok');   
+            hold on;
+            for i = 1:nslice
+                plot([min(input_multem.spec_atoms(:, 2)) max(input_multem.spec_atoms(:, 2))], [Slice(i, 1) Slice(i, 1)], '-b', [min(input_multem.spec_atoms(:, 2)) max(input_multem.spec_atoms(:, 2))], [Slice(i, 2) Slice(i, 2)], '-b');    
+            end
+            hold off;
+            title('Slice positions');
+            ylabel('z');
+            xlabel('x');
+            axis equal;
+            axis([min(input_multem.spec_atoms(:, 2))-3 max(input_multem.spec_atoms(:, 2))+3 Slice(1, 1)-3 Slice(end, 1)+3]);
+
+            legend({'Atom positions','Slice boundaries'},'Location','southoutside')
+            set(gca,'YDir','reverse')
+
+            subplot(1,2,2);
+            plot3(input_multem.spec_atoms(:,2), input_multem.spec_atoms(:,3), input_multem.spec_atoms(:,4),'or');
+            hold on;
+            if input_multem.simulation_type <= 12 
+                plot3([input_multem.scanning_x0; input_multem.scanning_xe; input_multem.scanning_xe; input_multem.scanning_x0;input_multem.scanning_x0],...
+                      [input_multem.scanning_y0; input_multem.scanning_y0; input_multem.scanning_ye; input_multem.scanning_ye;input_multem.scanning_y0],...
+                      [0; 0; 0; 0; 0],'-k');
+                legend({'Atom positions','STEM Scan Field'},'Location','southoutside')
+            else
+                z0 = get_defocus_ref(input_multem);
+                [xp, yp, zp] = cylinder([0 2], 64);
+                surf(input_multem.iw_x+xp, input_multem.iw_y+yp, z0+(10*zp),'FaceAlpha',0.5,'EdgeColor','none','FaceColor','g')
+                surf(input_multem.iw_x+xp, input_multem.iw_y+yp, z0+(-10*zp),'FaceAlpha',0.5, 'EdgeColor','none','FaceColor','g')
+                plot3(input_multem.iw_x, input_multem.iw_y, z0,'xk');
+                legend({'Atom positions','Probe'},'Location','southoutside')
+            end
+
+            hold off;
+            axis equal;
+            title('Atom positions and Scan Field')
+            zlabel('z');
+            xlabel('x');
+            ylabel('y');
+            set(gca,'ZDir','reverse')
+        else
+            fprintf(2,['No atoms are specified. Check your input structure! \n']);
+        end
 
     end
 
@@ -97,8 +102,7 @@ function tfm_check_stem_setup(input_multem, n_detector)
         ly = input_multem.spec_ly;
         ri_detector = input_multem.detector.cir(detector).inner_ang;
         ro_detector = input_multem.detector.cir(detector).outer_ang;
-
-        clc;    
+    
         gmax(1)=nx/(2*lx); gmax(2) = ny/(2*ly);
         gmax_abs=min(gmax(:));
         ri_detector = ilm_mrad_2_rAng(E_0,ri_detector);
@@ -110,7 +114,6 @@ function tfm_check_stem_setup(input_multem, n_detector)
         yo = ro_detector*sin(t);
         bwx = 2/3*(gmax_abs*cos(t));
         bwy = 2/3*(gmax_abs*sin(t));
-
 
         gspace=polyshape([-gmax(1) gmax(1) gmax(1) -gmax(1)],[-gmax(2) -gmax(2) gmax(2) gmax(2)]);
         d=polyshape({xi,xo},{yi,yo},'Simplify',false);
@@ -131,7 +134,7 @@ function tfm_check_stem_setup(input_multem, n_detector)
         if tfm_pn_fact(nx,1)~=nx && tfm_pn_fact(nx,2)~=nx && tfm_pn_fact(nx,3)~=nx
            fprintf(2,['Using ' num2str(nx) ' pixels in x is computationally unefficient. Consider using ' num2str(tfm_pn_fact(nx,1)) ' or ' num2str(tfm_pn_fact(nx,3)) ' instead.'  '\n'])
         end
-        if tfm_pn_fact(ny,1)~=nx && tfm_pn_fact(ny,2)~=ny && tfm_pn_fact(ny,3)~=ny
+        if tfm_pn_fact(ny,1)~=ny && tfm_pn_fact(ny,2)~=ny && tfm_pn_fact(ny,3)~=ny
            fprintf(2,['Using ' num2str(ny) ' pixels in y is computationally unefficient. Consider using ' num2str(tfm_pn_fact(ny,1)) ' or ' num2str(tfm_pn_fact(ny,3)) ' instead.'  '\n'])
         end
     end
