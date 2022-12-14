@@ -240,8 +240,10 @@ classdef parameters
     end
     methods
         function out_mt = ilc_incident_wave(obj, space)
+            % Optional parameter space:
+            % 1: real space (default), 2: reciprocal space
             if nargin < 2
-                space = 2;
+                space = 1;
             end
             prms = obj.toStruct;
             clear ilc_incident_wave;
