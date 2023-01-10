@@ -2019,10 +2019,10 @@ namespace mt
 			{			
 				T_r chi = g2*(lens.c_c_30*g2+lens.c_c_10);
 				T_r c = c_Pi*lens.si_theta_c*lens.ti_iehwgd;
-				T_r u = 1.0 + 2*c*c*g2;
+				T_r u = 1.0 + c*c*g2;
 
 				c = c_Pi*lens.ti_iehwgd*lens.lambda*g2;
-				T_r temp_inc = 0.5*c*c;
+				T_r temp_inc = 0.25*c*c;
 
 				c = c_Pi*lens.si_theta_c*(lens.c_30*lens.lambda2*g2-lens.c_10);
 				T_r spa_inc = c*c*g2;

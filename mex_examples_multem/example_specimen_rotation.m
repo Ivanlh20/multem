@@ -4,7 +4,7 @@
 % 
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % 
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear; clc;
 addpath([fileparts(pwd) filesep 'mex_bin'])
