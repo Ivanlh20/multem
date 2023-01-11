@@ -20,7 +20,6 @@ MULTEM_binary.zip
 compile_mex_general.m
 mex_examples_general
 mex_files_general
-visual_studio_multem
 src_temporal
 mex_test
 bugs
