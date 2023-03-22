@@ -19,7 +19,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     CUDA_PATH = getenv('CUDA_PATH');
     
-    CUDA_PATH = '';
+%     CUDA_PATH = '';
     
     if(isempty(CUDA_PATH))
         if(ispc)

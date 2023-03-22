@@ -3128,11 +3128,19 @@ namespace mt
 		};
 
 		template <class T>
+		DEVICE_CALLABLE
+		T norm(const thrust::device_reference< thrust::complex<T> >&x) 
+		{
+		thrust::complex<T> xx = (thrust::complex<T>)x;
+			return norm(xx);    
+		}
+
+		template <class T>
 		struct square
 		{
 			template <class U>
 			DEVICE_CALLABLE
-			T operator()(const U &x) const { return ::norm(x); }
+			T operator()(const U &x) const { return norm(x); }
 		};
 
 		template <class T>
