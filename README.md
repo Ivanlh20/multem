@@ -1,7 +1,7 @@
 # MULTEM
 
 ## Introduction
-**MULTEM** is a powerful and advanced software package designed to provide researchers with a versatile tool for simulating a wide range of electron microscopy experiments. Developed by Ivan Lobato, MULTEM is built on a collection of C++ routines with CUDA support, enabling it to perform efficient and accurate multislice simulations for various TEM experiments.
+**MULTEM** is a powerful and advanced software package designed to provide researchers with a versatile tool for simulating a wide range of electron microscopy experiments. Developed by Ivan Lobato (Ivanlh20@gmail.com), MULTEM is built on a collection of C++ routines with CUDA support, enabling it to perform efficient and accurate multislice simulations for various TEM experiments.
 
 MULTEM uses the widely adopted multislice method to simulate electron scattering and wave propagation in a crystal. This method involves dividing the crystal into thin slices and calculating the electron scattering and wave propagation in each slice. This allows for accurate and efficient simulations of various electron microscopy experiments such as high-resolution TEM (HRTEM), scanning TEM (STEM), imaging STEM (ISTEM), electron diffraction (ED), precession electron diffraction (PED), convergent beam electron diffraction (CBED), annular dark field-TEM (ADF-TEM), annular bright field Hollow Cone (ABF-HC), energy filtered TEM (EFTEM), and electron energy loss spectroscopy (EELS).
 
