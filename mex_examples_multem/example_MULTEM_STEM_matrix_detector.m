@@ -142,7 +142,7 @@ toc;
 
 figure(2); clf;
 for i=1:length(output_radial_detector.data)
-    suptitle(['Thickness = ' num2str(i)])
+    sgtitle(['Thickness = ' num2str(i)])
     subplot(1, 3, 1);
     imagesc(output_radial_detector.data(i).image_tot(1).image);
     title('Radial Detector');
