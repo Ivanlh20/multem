@@ -4,12 +4,12 @@
 <config
     Name="NVIDIA CUDA Compiler"
     ShortName="nvcc"
-    HostCompiler="MSVCPP150"
+    HostCompiler="MSVCPP160"
     Manufacturer="NVIDIA"
     Version="XXX_CUDA_VER"
     Language="CUDA"
     Priority="A"
-    Location="$NVCC" >
+    Location="$CUDA_ROOT\bin\nvcc.exe" >
     <Details
         CompilerExecutable="$COMPILER"
         CompilerDefines="$COMPDEFINES"
@@ -41,7 +41,7 @@
         INCLUDE="-I&quot;$MATLABROOT\extern\include&quot; -I&quot;$MATLABROOT\simulink\include&quot;"
 
         ARCH_FLAGS="XXX_ARCH_FLAGS"
-        NVCC_FLAGS="--std=c++14 --default-stream per-thread --expt-extended-lambda --expt-relaxed-constexpr $ARCH_FLAGS"
+        NVCC_FLAGS="--default-stream per-thread --expt-extended-lambda --expt-relaxed-constexpr $ARCH_FLAGS"
           
         COMPILER="nvcc"
         COMPFLAGS="--compiler-options=/Zp8,/GR,/bigobj,/W3,/EHs,/nologo,/MD,/arch:AVX2 $NVCC_FLAGS"          
@@ -72,15 +72,26 @@
     />
     <locationFinder>
         <VCROOT>
-            <and>
-                <or>
-                    <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                </or>
-                <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%" />
-            </and>
+            <or>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Enterprise -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Professional -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Community -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%" />
+                </and>
+            </or>	
         </VCROOT>
         <SDKROOT>
             <or>
@@ -92,34 +103,69 @@
         </SDKROOT>
         <VSINSTALLDIR>
             <or>
-                <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-            </or>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Enterprise -property installationPath -format value" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Professional -property installationPath -format value" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Community -property installationPath -format value" />
+                </and>
+            </or>	
         </VSINSTALLDIR>
         <VCINSTALLDIR>
-          <and>
             <or>
-              <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-              <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-              <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-              <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-            </or>
-            <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%\VC\Tools\MSVC\%a" />
-          </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Enterprise -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%\VC\Tools\MSVC\%a" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Professional -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%\VC\Tools\MSVC\%a" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Community -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%\VC\Tools\MSVC\%a" />
+                </and>
+            </or>	
         </VCINSTALLDIR>
         <VCVARSALLDIR>
-           <and>
-                <or>
-                    <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                </or>
-                <fileExists name="$$\VC\Auxiliary\Build\vcvarsall.bat" />
-                <dirExists name="$$"/>
-            </and>
+            <or>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Enterprise -property installationPath -format value" />
+                    <fileExists name="$$\VC\Auxiliary\Build\vcvarsall.bat" />
+                    <dirExists name="$$"/>
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Professional -property installationPath -format value" />
+                    <fileExists name="$$\VC\Auxiliary\Build\vcvarsall.bat" />
+                    <dirExists name="$$"/>
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Community -property installationPath -format value" />
+                    <fileExists name="$$\VC\Auxiliary\Build\vcvarsall.bat" />
+                    <dirExists name="$$"/>
+                </and>
+            </or>	
         </VCVARSALLDIR>
         <KITSROOT>
             <or>
@@ -143,6 +189,8 @@
                 <cmdReturns name="echo off&amp;set &quot;sdkversion=&quot;&amp;(for /f %a IN ('dir &quot;$$\include\&quot; /b /ad-h /on') do ( @if exist &quot;$$\include\%a\ucrt\&quot; set &quot;sdkversion=%a&quot; ))&amp;call echo %sdkversion%" />
             </and>
         </SDKVERSION>
+        <!-- g2024064: We need to check the version of the cudart that is going to be used. Otherwise, if the shipping toolkit is going to be used it is possible that CUDA_LIB_PATH will point to a different -->
+        <!-- toolkit than the one of the NVCC. -->
         <CUDA_LIB_PATH>
             <or>
                 <and>

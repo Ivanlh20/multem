@@ -3,7 +3,7 @@
 clear;clc;
 
 E_0 = [60, 80, 100, 120, 200, 300];
-sigma = ilc_e_interact_parm_kva(E_0); % radians/(kV - Angs)
+sigma = ilc_elec_interact_parm_kva(E_0); % radians/(kV - Angs)
 tf_exp_factor = ilc_transf_exp_factor(E_0); % radians/(V - Angs)
 
 f = 1e-3

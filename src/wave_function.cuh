@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,13 @@
 #ifndef WAVE_FUNCTION_H
 #define WAVE_FUNCTION_H
 
-#include "math.cuh"
+#include "math_mt.h"
 #include "types.cuh"
 #include "cgpu_fft.cuh"
 #include "in_classes.cuh"
-#include "cpu_fcns.hpp"
-#include "gpu_fcns.cuh"
-#include "cgpu_fcns.cuh"
+#include "fcns_cpu.h"
+#include "fcns_gpu.h"
+#include "fcns_gpu.h"
 #include "transmission_fcn.cuh"
 #include "incident_wave.cuh"
 #include "propagator.cuh"
@@ -49,38 +49,38 @@ namespace mt
 
 			Wave_Function(): Transmission_Fcn<T, Dev>() {}
 
-			void set_in_data(In_Multem<T_r> *in_multem_i, Stream<Dev> *stream_i, FFT<T_r, Dev> *fft2_i)
+			void set_in_data(Multem_In_Parm<T_r> *multem_in_parm_i, Stream<Dev> *stream_i, FFT<T_r, Dev> *fft2_i)
 			{
-				psi_z.resize(in_multem_i->grid_2d.size());
-				m2psi_z.resize(in_multem_i->grid_2d.size());
+				psi_z.resize(multem_in_parm_i->grid_2d.size());
+				m2psi_z.resize(multem_in_parm_i->grid_2d.size());
 
-				if (in_multem_i->is_STEM())
+				if (multem_in_parm_i->is_STEM())
 				{
-					detector.assign(in_multem_i->detector);
-					if (in_multem_i->is_detector_matrix())
+					detector.assign(multem_in_parm_i->detector);
+					if (multem_in_parm_i->is_detector_matrix())
 					{
 						for(auto i = 0; i<detector.size(); i++)
 						{
-							mt::fcn_fftsft_2d(*stream_i, in_multem_i->grid_2d, detector.fR[i]);
+							mt::fcn_fftsft_2d(*stream_i, multem_in_parm_i->grid_2d, detector.fR[i]);
 						}
 					}
 				}
 
-				incident_wave.set_in_data(in_multem_i, stream_i, fft2_i);
+				incident_wave.set_in_data(multem_in_parm_i, stream_i, fft2_i);
 
-				propagator.set_in_data(in_multem_i, stream_i, fft2_i);
+				propagator.set_in_data(multem_in_parm_i, stream_i, fft2_i);
 
-				if (in_multem_i->is_ISTEM_CBEI_HRTEM_HCTEM_EFTEMRS())
+				if (multem_in_parm_i->is_ISTEM_CBEI_HRTEM_HCTEM_EFTEMRS())
 				{
-					microscope_effects.set_in_data(in_multem_i, stream_i, fft2_i);
+					microscope_effects.set_in_data(multem_in_parm_i, stream_i, fft2_i);
 				} 
 
-				Transmission_Fcn<T, Dev>::set_in_data(in_multem_i, stream_i, fft2_i);
+				Transmission_Fcn<T, Dev>::set_in_data(multem_in_parm_i, stream_i, fft2_i);
 			}
 
 			void phase_multiplication(const T_r &gxu, const T_r &gyu, TVctr_c& psi_i, TVctr_c& psi_o)
 			{
-				if (this->in_multem->dp_Shift || fcn_is_zero(gxu, gyu))
+				if (this->multem_in_parm->dp_Shift || fcn_is_zero(gxu, gyu))
 				{
 					if (psi_i.data() != psi_o.data())
 					{
@@ -89,7 +89,7 @@ namespace mt
 					return;
 				}
 
-				mt::fcn_rs_exp_factor_2d(*(this->stream), this->in_multem->grid_2d, c_2pi<T>*gxu, c_2pi<T>*gyu, psi_i, psi_o);
+				mt::fcn_rs_exp_factor_2d(*(this->stream), this->multem_in_parm->grid_2d, c_2pi<T>*gxu, c_2pi<T>*gyu, psi_i, psi_o);
 			}
 
 			void phase_multiplication(const T_r &gxu, const T_r &gyu, TVctr_c& psi_io)
@@ -117,7 +117,7 @@ namespace mt
 						auto g_inner = detector.g_inner[iDet];
 						auto g_outer = detector.g_outer[iDet];
 							
-						int_val = w_i*mt::fcn_int_det_ring_norm_2(*(this->stream), this->in_multem->grid_2d, g_inner, g_outer, psi_z);
+						int_val = w_i*mt::fcn_int_det_ring_norm_2(*(this->stream), this->multem_in_parm->grid_2d, g_inner, g_outer, psi_z);
 					}
 					break;
 					case mt::edt_radial:
@@ -127,7 +127,7 @@ namespace mt
 					break;
 					case mt::edt_matrix:
 					{
-						int_val = w_i*mt::fcn_int_det_ring_norm_2(*(this->stream), this->in_multem->grid_2d, detector.fR[iDet], psi_z);
+						int_val = w_i*mt::fcn_int_det_ring_norm_2(*(this->stream), this->multem_in_parm->grid_2d, detector.fR[iDet], psi_z);
 					}
 					break;
 				}
@@ -142,59 +142,59 @@ namespace mt
 				dt_int32 ithk = this->slicing.slice[islice].ithk;
 				if (0 <= ithk)
 				{
-					auto *psi_z_o = get_psi(this->in_multem->get_simulation_space(), gxu, gyu, this->slicing.thick[ithk].z_back_prop, psi_z_i);
+					auto *psi_z_o = get_psi(this->multem_in_parm->get_simulation_space(), gxu, gyu, this->slicing.thick[ithk].z_back_prop, psi_z_i);
 
-					if (this->in_multem->is_STEM())
+					if (this->multem_in_parm->is_STEM())
 					{
 						for(auto iDet = 0; iDet<detector.size(); iDet++)
 						{
-							dt_int32 ibeam = this->in_multem->ibeam[0];
+							dt_int32 ibeam = this->multem_in_parm->ibeam[0];
 							output_multem.image_tot(ithk, iDet, ibeam) += integrated_intensity_over_det(w_i, iDet, *psi_z_o);
 						}
 
-						if (this->in_multem->atomic_vib.coh_contrib)
+						if (this->multem_in_parm->atomic_vib.coh_contrib)
 						{
 							output_multem.add_sc_psi_coh(ithk, 0, w_i, *psi_z_o);
 						}
 					}
-					else if (this->in_multem->is_EWFS_EWRS_SC())
+					else if (this->multem_in_parm->is_EWFS_EWRS_SC())
 					{
 						output_multem.set_crop_sft_psi_coh(ithk, *psi_z_o);
 					}
-					else if (this->in_multem->is_EWFS_EWRS())
+					else if (this->multem_in_parm->is_EWFS_EWRS())
 					{
 						output_multem.add_sc_crop_sft_m2psi_tot_from_psi(ithk, w_i, *psi_z_o);
 						output_multem.add_sc_crop_sft_psi_coh(ithk, w_i, *psi_z_o);
 					}
-					else if (this->in_multem->is_CBED())
+					else if (this->multem_in_parm->is_CBED())
 					{
-						dt_int32 ithk_beam = (this->in_multem->thick.size()==1)?this->in_multem->ibeam[0]:ithk;
+						dt_int32 ithk_beam = (this->multem_in_parm->thick.size()==1)?this->multem_in_parm->ibeam[0]:ithk;
 
 						output_multem.add_sc_crop_sft_m2psi_tot_from_psi(ithk_beam, w_i, *psi_z_o);
 
- 						if (this->in_multem->atomic_vib.coh_contrib)
+ 						if (this->multem_in_parm->atomic_vib.coh_contrib)
 						{
 							output_multem.add_sc_psi_coh(ithk_beam, w_i, *psi_z_o);
 						}
 					}
-					else if (this->in_multem->is_CBEI())
+					else if (this->multem_in_parm->is_CBEI())
 					{
-						dt_int32 ithk_beam = (this->in_multem->thick.size()==1)?this->in_multem->ibeam[0]:ithk;
+						dt_int32 ithk_beam = (this->multem_in_parm->thick.size()==1)?this->multem_in_parm->ibeam[0]:ithk;
 
 						microscope_effects(*psi_z_o, m2psi_z);
 						output_multem.add_sc_crop_sft_m2psi_tot_from_m2psi(ithk_beam, w_i, m2psi_z);
 
- 						if (this->in_multem->atomic_vib.coh_contrib)
+ 						if (this->multem_in_parm->atomic_vib.coh_contrib)
 						{
 							output_multem.add_sc_psi_coh(ithk_beam, w_i, *psi_z_o);
 						}
 					}
-					else if (this->in_multem->is_ISTEM_CBEI_HRTEM_HCTEM_EFTEMRS())
+					else if (this->multem_in_parm->is_ISTEM_CBEI_HRTEM_HCTEM_EFTEMRS())
 					{
 						microscope_effects(*psi_z_o, m2psi_z);
 						output_multem.add_sc_crop_sft_m2psi_tot_from_m2psi(ithk, w_i, m2psi_z);
 
-						if (this->in_multem->atomic_vib.coh_contrib)
+						if (this->multem_in_parm->atomic_vib.coh_contrib)
 						{
 							output_multem.add_sc_psi_coh(ithk, w_i, *psi_z_o);
 						}
@@ -203,7 +203,7 @@ namespace mt
 					{
 						output_multem.add_sc_crop_sft_m2psi_tot_from_psi(ithk, w_i, *psi_z_o);
 
-						if (this->in_multem->atomic_vib.coh_contrib)
+						if (this->multem_in_parm->atomic_vib.coh_contrib)
 						{
 							output_multem.add_sc_psi_coh(ithk, w_i, *psi_z_o);
 						}
@@ -216,28 +216,28 @@ namespace mt
 			template <class TOutput_multislice>
 			void set_m2psi_coh(TOutput_multislice &output_multem)
 			{
-				if (!this->in_multem->atomic_vib.coh_contrib || this->in_multem->is_EWFS_EWRS())
+				if (!this->multem_in_parm->atomic_vib.coh_contrib || this->multem_in_parm->is_EWFS_EWRS())
 				{
 					return;
 				}
 
-				dt_int32 n_thk = this->in_multem->thick.size();
+				dt_int32 n_thk = this->multem_in_parm->thick.size();
 
-				if (this->in_multem->is_STEM())
+				if (this->multem_in_parm->is_STEM())
 				{
 					for(auto ithk = 0; ithk < n_thk; ithk++)
 					{
 						output_multem.from_psi_coh_2_phi(ithk, psi_z);
 						for(auto iDet = 0; iDet<detector.size(); iDet++)
 						{
-							dt_int32 ibeam = this->in_multem->ibeam[0];
+							dt_int32 ibeam = this->multem_in_parm->ibeam[0];
 							output_multem.image_coh(ithk, iDet, ibeam) = integrated_intensity_over_det(1, iDet, psi_z);
 						}
 					}
 				}
-				else if (this->in_multem->is_CBED())
+				else if (this->multem_in_parm->is_CBED())
 				{
-					n_thk = (n_thk==1)?this->in_multem->number_of_beams():n_thk;
+					n_thk = (n_thk==1)?this->multem_in_parm->number_of_beams():n_thk;
 
 					for(auto ithk = 0; ithk < n_thk; ithk++)
 					{
@@ -245,9 +245,9 @@ namespace mt
 						output_multem.add_sc_crop_sft_m2psi_coh_from_psi(ithk, 1.0, psi_z);
 					}
 				}
- 				else if (this->in_multem->is_CBEI())
+ 				else if (this->multem_in_parm->is_CBEI())
 				{
-					n_thk = (n_thk==1)?this->in_multem->number_of_beams():n_thk;
+					n_thk = (n_thk==1)?this->multem_in_parm->number_of_beams():n_thk;
 
 					for(auto ithk = 0; ithk < n_thk; ithk++)
 					{
@@ -256,7 +256,7 @@ namespace mt
 						output_multem.set_crop_sft_m2psi_coh(ithk, m2psi_z);
 					}
 				}
-				else if (this->in_multem->is_ISTEM_CBEI_HRTEM_HCTEM_EFTEMRS())
+				else if (this->multem_in_parm->is_ISTEM_CBEI_HRTEM_HCTEM_EFTEMRS())
 				{
 					for(auto ithk = 0; ithk < n_thk; ithk++)
 					{
@@ -282,7 +282,7 @@ namespace mt
 			{
 				this->transmit(islice, psi_z);
 
-				if (this->in_multem->is_multislice())
+				if (this->multem_in_parm->is_multislice())
 				{
 					// time.tic();
 					propagator(esp_real, gxu, gyu, this->sli_thick(islice), psi_z);
@@ -294,8 +294,8 @@ namespace mt
 			template <class TOutput_multislice>
 			void psi(T_r w_i, TVctr_c& psi_z, TOutput_multislice &output_multem)
 			{
-				T_r gx_0 = this->in_multem->gx_0();
-				T_r gy_0 = this->in_multem->gy_0();
+				T_r gx_0 = this->multem_in_parm->gx_0();
+				T_r gy_0 = this->multem_in_parm->gy_0();
 
 				for(auto islice = 0; islice<this->slicing.slice.size(); islice++)
 				{
@@ -311,22 +311,22 @@ namespace mt
 				dt_int32 ithk = this->slicing.slice[islice_e].ithk;
 				if (0 <= ithk)
 				{
-					T_r gx_0 = this->in_multem->gx_0();
-					T_r gy_0 = this->in_multem->gy_0();
+					T_r gx_0 = this->multem_in_parm->gx_0();
+					T_r gy_0 = this->multem_in_parm->gy_0();
 
-					if (this->in_multem->eels_fr.is_Single_Chan())
+					if (this->multem_in_parm->eels_fr.is_Single_Chan())
 					{
 						T_r sli_thick = this->dz_m(islice_0, islice_e);
 						propagator(esp_real, gx_0, gy_0, sli_thick, psi_z);
 					}
-					else if (this->in_multem->eels_fr.is_Mixed_Chan())
+					else if (this->multem_in_parm->eels_fr.is_Mixed_Chan())
 					{
 						T_r sli_thick = 0.5*this->dz_m(islice_0, islice_e);
 						propagator(esp_real, gx_0, gy_0, sli_thick, psi_z);
 						mt::ew_mult(*(this->stream), trans, psi_z);
 						propagator(esp_real, gx_0, gy_0, sli_thick, psi_z);
 					}
-					else if (this->in_multem->eels_fr.is_Double_Chan())
+					else if (this->multem_in_parm->eels_fr.is_Double_Chan())
 					{
 						for(auto islice = islice_0; islice<= islice_e; islice++)
 						{
@@ -337,12 +337,12 @@ namespace mt
 					phase_multiplication(gx_0, gy_0, psi_z);
 					propagator(esp_fourier, gx_0, gy_0, this->slicing.thick[ithk].z_back_prop, psi_z);
 
-					if (this->in_multem->is_STEM_ISTEM_EELS())
+					if (this->multem_in_parm->is_STEM_ISTEM_EELS())
 					{
-						dt_int32 ibeam = this->in_multem->ibeam[0];
-						output_multem.image_tot(ithk, 0, ibeam) += w_i*mt::fcn_int_det_ring_norm_2(*(this->stream), this->in_multem->grid_2d, 0, this->in_multem->eels_fr.g_coll, psi_z);
+						dt_int32 ibeam = this->multem_in_parm->ibeam[0];
+						output_multem.image_tot(ithk, 0, ibeam) += w_i*mt::fcn_int_det_ring_norm_2(*(this->stream), this->multem_in_parm->grid_2d, 0, this->multem_in_parm->eels_fr.g_coll, psi_z);
 					}
-					if (this->in_multem->is_EFTEMRS())
+					if (this->multem_in_parm->is_EFTEMRS())
 					{
 						microscope_effects(psi_z, m2psi_z);
 						output_multem.add_sc_crop_sft_m2psi_tot_from_m2psi(ithk, w_i, m2psi_z);
@@ -365,7 +365,7 @@ namespace mt
 
 			void set_incident_wave(TVctr_c& psi)
 			{
-				auto &beam_pos = this->in_multem->beam_pos;
+				auto &beam_pos = this->multem_in_parm->beam_pos;
 
 				set_incident_wave(psi, beam_pos);
 			}

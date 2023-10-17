@@ -19,15 +19,18 @@ function [] = ilm_mex(option, m_file, src, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     CUDA_PATH = getenv('CUDA_PATH');
     
+%     CUDA_PATH = '';
+    
     if(isempty(CUDA_PATH))
         if(ispc)
-            CUDA_PATH = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1';
+            CUDA_PATH = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0';
         elseif(ismac)
-            CUDA_PATH = '/Developer/NVIDIA/CUDA-10.1';
+            CUDA_PATH = '/Developer/NVIDIA/CUDA-10.0';
         else
-            CUDA_PATH = '/usr/local/cuda-10.1';
+            CUDA_PATH = '/usr/local/cuda-10.0';
         end
     end
+
     CUDA_PATH = ilm_replace_filesep(CUDA_PATH);
     
     %%%%%%%%%%%%%%%%%%%% get cuda version  %%%%%%%%%%%%%%%%%%%%%%%
@@ -71,31 +74,50 @@ function [] = ilm_mex(option, m_file, src, varargin)
     %%%%%%%%%%%%%%%%%%% set card architecture %%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%% https://developer.nvidia.com/cuda-gpus %%%%%%%%%%
+    % https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    CUDA_VERSION_D = str2double(CUDA_VERSION);
     CARD_30="-gencode=arch=compute_30,code=sm_30";
     CARD_35="-gencode=arch=compute_35,code=&#92;&quot;sm_35,compute_35&#92;&quot;";
     CARD_50="-gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot;";
     CARD_60="-gencode=arch=compute_60,code=&#92;&quot;sm_60,compute_60&#92;&quot;";
     CARD_70="-gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot;";
-    CARD_MULT = join([CARD_30, CARD_35, CARD_50, CARD_60, CARD_70], ' ');
-
-%     gpu = gpuDevice();
-%     gpu_card = round(str2double(gpu.ComputeCapability));
-    gpu_card = 6;
+    CARD_75="-gencode=arch=compute_75,code=&#92;&quot;sm_75,compute_75&#92;&quot;";
+    CARD_86="-gencode=arch=compute_86,code=&#92;&quot;sm_86,compute_86&#92;&quot;";
+    CARD_87="-gencode=arch=compute_87,code=&#92;&quot;sm_87,compute_87&#92;&quot;";
+    CARD_MULT = join([CARD_30, CARD_35, CARD_50, CARD_60, CARD_70, CARD_75], ' ');
     
-    switch gpu_card
-        case 3
-            ARCH_FLAGS = CARD_30;
-        case 5
-            ARCH_FLAGS = CARD_50;
-        case 6
-            ARCH_FLAGS = CARD_60;
-        case 7
-            ARCH_FLAGS = CARD_70;
-        otherwise
-            ARCH_FLAGS = CARD_30;
+    if CUDA_VERSION_D >= 11.0
+        CARD_MULT = join([CARD_MULT CARD_86, CARD_87], ' ');
     end
-
+    
+    if 1
+        % Get compute capabilities of all available devices
+        gpu_comp_cap = zeros(1,gpuDeviceCount);
+        ARCH_FLAGS = "";
+        for i_dev = 1:gpuDeviceCount
+            gpu_comp_cap(i_dev) = str2double(replace(gpuDevice(i_dev).ComputeCapability,'.',''));
+        end
+        % avoid duplicate compiler settings
+        [~, id] = unique(gpu_comp_cap,'stable');
+        
+        % Add architecture flags for all necessary compute capabilities
+        for i_dev = 1:numel(id)
+            gpu_comp_cap_str = num2str(gpu_comp_cap(id(i_dev)));
+            if gpu_comp_cap(id(i_dev)) < 35
+                ARCH_FLAGS =  join([ARCH_FLAGS, ['-gencode=arch=compute_' gpu_comp_cap_str ',code=sm_' gpu_comp_cap_str]]);
+            else
+              if gpu_comp_cap(id(i_dev)) > 75 && CUDA_VERSION_D < 11.0
+                  warning([gpuDevice(id(i_dev)).Name ' has compute capability ' gpuDevice(id(i_dev)).ComputeCapability ' but the Cuda version ' CUDA_VERSION ' does not support it. Attempting to compile for compute capability 7.5.']);
+                  gpu_comp_cap_str = '75';
+              end
+                ARCH_FLAGS = join([ARCH_FLAGS, ['-gencode=arch=compute_' gpu_comp_cap_str ',code=&#92;&quot;sm_' gpu_comp_cap_str ',compute_' gpu_comp_cap_str '&#92;&quot;']]);
+            end
+        end
+    else
+        ARCH_FLAGS = CARD_MULT;
+    end
+    
     %%%%%%%%%%%%%%% read template mex_cuda file %%%%%%%%%%%%%%%%%
     if(ispc)
         mex_cuda_filename = 'mex_CUDA_win64.xml';

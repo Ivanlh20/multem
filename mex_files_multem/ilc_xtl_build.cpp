@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,48 +18,48 @@
 
 #define MATLAB_BLAS_LAPACK
 
-#include "const_enum.cuh"
+#include "const_enum.h"
 #include "particles.cuh"
-#include "in_xtl_build.hpp"
+#include "xtl_build_in_parm.hpp"
 #include "xtl_build.hpp"
 
 #include <mex.h>
-#include "matlab_mex.cuh"
+#include "matlab_mex.h"
 
 template <class T>
-void read_xtl_build(const mxArray* mex_in_xtl_build, mt::In_Xtl_Build<T>& in_xtl_build)
+void read_xtl_build_in_parm(const mxArray* mex_xtl_build_in_parm, mt::Xtl_Build_In_Parm<T>& xtl_build_in_parm)
 {
-	in_xtl_build.a = mex_get_num_from_field<T>(mex_in_xtl_build, "a");
-	in_xtl_build.b = mex_get_num_from_field<T>(mex_in_xtl_build, "b");
-	in_xtl_build.c = mex_get_num_from_field<T>(mex_in_xtl_build, "c");
+	xtl_build_in_parm.a = mex_get_num_from_field<T>(mex_xtl_build_in_parm, "a");
+	xtl_build_in_parm.b = mex_get_num_from_field<T>(mex_xtl_build_in_parm, "b");
+	xtl_build_in_parm.c = mex_get_num_from_field<T>(mex_xtl_build_in_parm, "c");
 
-	in_xtl_build.alpha = mex_get_num_from_field<T>(mex_in_xtl_build, "alpha")*mt::c_deg_2_rad<T>;
-	in_xtl_build.beta = mex_get_num_from_field<T>(mex_in_xtl_build, "beta")*mt::c_deg_2_rad<T>;
-	in_xtl_build.gamma = mex_get_num_from_field<T>(mex_in_xtl_build, "gamma")*mt::c_deg_2_rad<T>;
+	xtl_build_in_parm.alpha = mex_get_num_from_field<T>(mex_xtl_build_in_parm, "alpha")*mt::c_deg_2_rad<T>;
+	xtl_build_in_parm.beta = mex_get_num_from_field<T>(mex_xtl_build_in_parm, "beta")*mt::c_deg_2_rad<T>;
+	xtl_build_in_parm.gamma = mex_get_num_from_field<T>(mex_xtl_build_in_parm, "gamma")*mt::c_deg_2_rad<T>;
 
-	in_xtl_build.n_a = mex_get_num_from_field<dt_int32>(mex_in_xtl_build, "na");
-	in_xtl_build.n_b = mex_get_num_from_field<dt_int32>(mex_in_xtl_build, "nb");
-	in_xtl_build.n_c = mex_get_num_from_field<dt_int32>(mex_in_xtl_build, "nc");
+	xtl_build_in_parm.n_a = mex_get_num_from_field<dt_int32>(mex_xtl_build_in_parm, "na");
+	xtl_build_in_parm.n_b = mex_get_num_from_field<dt_int32>(mex_xtl_build_in_parm, "nb");
+	xtl_build_in_parm.n_c = mex_get_num_from_field<dt_int32>(mex_xtl_build_in_parm, "nc");
 
-	in_xtl_build.sgn = mex_get_num_from_field<dt_int32>(mex_in_xtl_build, "sgn");
+	xtl_build_in_parm.sgn = mex_get_num_from_field<dt_int32>(mex_xtl_build_in_parm, "sgn");
 
-	in_xtl_build.pbc = mex_get_bool_from_field(mex_in_xtl_build, "pbc");
+	xtl_build_in_parm.pbc = mex_get_bool_from_field(mex_xtl_build_in_parm, "pbc");
 
-	auto pasym_uc = mex_get_pvctr_from_field<T>(mex_in_xtl_build, "asym_uc");
-	in_xtl_build.asym_uc.set_ptc(pasym_uc, {0, 0, 0}, false);
+	auto pasym_uc = mex_get_pvctr_from_field<T>(mex_xtl_build_in_parm, "asym_uc");
+	xtl_build_in_parm.asym_uc.set_ptc(pasym_uc, {0, 0, 0}, false);
 
-	auto pbase = mex_get_pvctr_from_field<T>(mex_in_xtl_build, "base");
-	in_xtl_build.base.set_ptc(pbase, {0, 0, 0}, false);
+	auto pbase = mex_get_pvctr_from_field<T>(mex_xtl_build_in_parm, "base");
+	xtl_build_in_parm.base.set_ptc(pbase, {0, 0, 0}, false);
  }
 
 void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[])
 {
 	using T = dt_float64;
 
-	mt::In_Xtl_Build<T> in_xtl_build;
-	read_xtl_build(prhs[0], in_xtl_build);
+	mt::Xtl_Build_In_Parm<T> xtl_build_in_parm;
+	read_xtl_build_in_parm(prhs[0], xtl_build_in_parm);
 
-	mt::Xtl_Build<T> xtl_build(in_xtl_build);
+	mt::Xtl_Build<T> xtl_build(xtl_build_in_parm);
 	auto atoms = xtl_build();
 
 	auto patoms = mex_create_pVctr<T>({atoms.size(), atoms.cols_used}, plhs[0]);

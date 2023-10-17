@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@
 #ifndef BOX_OCC_H
 	#define BOX_OCC_H
 
-	#include "cgpu_fcns_gen.cuh"
-	#include "math.cuh"
-	#include "r_3d.cuh"
+	#include "fcns_cgpu_gen.h"
+	#include "math_mt.h"
+	#include "r_3d.h"
 	#include "types.cuh"
 	#include "particles.cuh"
 	#include "cgpu_stream.cuh"

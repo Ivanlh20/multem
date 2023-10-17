@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 
 	#include "types.cuh"
 	#include "particles.cuh"
-	#include "in_xtl_build.hpp"
+	#include "xtl_build_in_parm.hpp"
 	#include "space_group.hpp"
 
 	namespace mt
@@ -146,32 +146,32 @@
 			public:
 				Xtl_Build(): n_a(0), n_b(0), n_c(0), a(0), b(0), c(0) {};
 
-				Xtl_Build(const In_Xtl_Build<T>& in_xtl_build)
+				Xtl_Build(const Xtl_Build_In_Parm<T>& xtl_build_in_parm)
 				{
-					set_in_data(in_xtl_build);
+					set_in_data(xtl_build_in_parm);
 				}
 
-				void set_in_data(const In_Xtl_Build<T>& in_xtl_build)
+				void set_in_data(const Xtl_Build_In_Parm<T>& xtl_build_in_parm)
 				{
-					a = in_xtl_build.a;
-					b = in_xtl_build.b;
-					c = in_xtl_build.c;
+					a = xtl_build_in_parm.a;
+					b = xtl_build_in_parm.b;
+					c = xtl_build_in_parm.c;
 
-					alpha = in_xtl_build.alpha;
-					beta = in_xtl_build.beta;
-					gamma = in_xtl_build.gamma;
+					alpha = xtl_build_in_parm.alpha;
+					beta = xtl_build_in_parm.beta;
+					gamma = xtl_build_in_parm.gamma;
 
-					n_a = in_xtl_build.n_a;
-					n_b = in_xtl_build.n_b;
-					n_c = in_xtl_build.n_c;
+					n_a = xtl_build_in_parm.n_a;
+					n_b = xtl_build_in_parm.n_b;
+					n_c = xtl_build_in_parm.n_c;
 
-					sgn = in_xtl_build.sgn;
-					pbc = in_xtl_build.pbc;
+					sgn = xtl_build_in_parm.sgn;
+					pbc = xtl_build_in_parm.pbc;
 
-					asym_uc = in_xtl_build.asym_uc;
-					base = in_xtl_build.base;
+					asym_uc = xtl_build_in_parm.asym_uc;
+					base = xtl_build_in_parm.base;
 
-					if (in_xtl_build.base.size()==0)
+					if (xtl_build_in_parm.base.size()==0)
 					{
 						base = space_group(asym_uc, sgn);
 					}

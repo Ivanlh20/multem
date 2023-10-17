@@ -6,14 +6,14 @@ addpath(['..', filesep, 'mex_bin'])
 
 input_multem = ilm_dflt_input_multem(); % Load default values;
 
-system_conf.precision = 1; % eP_Float = 1, eP_double = 2
-system_conf.device = 2; % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_n_thread = 4;
-system_conf.gpu_device = 0;
+system_config.precision = 1; % eP_Float = 1, eP_double = 2
+system_config.device = 2; % eD_CPU = 1, eD_GPU = 2
+system_config.cpu_n_thread = 4;
+system_config.gpu_device = 0;
 
 % eTEMST_EWFS=51, eTEMST_EWRS=52
 input_multem.em_sim_typ = 52;
-input_multem.elec_spec_interac_mod = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
+input_multem.elec_spec_interact_mod = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
 input_multem.spec_slic(1).typ = 1; % esst_plns_proj = 1, esst_dz_proj = 2, esst_plns_sub = 3, esst_dz_sub = 4, esst_user_def = 5, esst_auto = 6
 
 input_multem.atomic_pot_parm_typ = 6; % eappt_doyle_0_4 = 1, eappt_peng_0_4 = 2, eappt_peng_0_12 = 3, eappt_kirkland_0_12 = 4, eappt_weickenmeier_0_12 = 5, eappt_lobato_0_12 = 6
@@ -64,9 +64,9 @@ input_multem.cond_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmat
 input_multem.cond_lens_inner_aper_ang = 0.0; % Inner aperture (mrad) 
 input_multem.cond_lens_outer_aper_ang = 7.50; % Outer aperture (mrad)
 input_multem.cond_lens_tp_inc_sigma = 32; % standard deviation (Å)
-input_multem.cond_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illumination_model=4
+input_multem.cond_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illum_mod=4
 input_multem.cond_lens_spt_inc_sigma = 0.2; % standard deviation: For parallel ilumination(Å^-1);otherwise (Å)
-input_multem.cond_lens_spt_inc_rad_npts = 8; % # of integration points. It will be only used if illumination_model=4
+input_multem.cond_lens_spt_inc_rad_npts = 8; % # of integration points. It will be only used if illum_mod=4
 input_multem.cond_lens_zero_def_typ = 1; % eZDT_First = 1, eZDT_User_Define = 2
 input_multem.cond_lens_zero_def_plane = 0;
 
@@ -82,7 +82,7 @@ input_multem.obj_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmati
 input_multem.obj_lens_inner_aper_ang = 0.0; % Inner aperture (mrad) 
 input_multem.obj_lens_outer_aper_ang = 24.0; % Outer aperture (mrad)
 input_multem.obj_lens_tp_inc_sigma = 32; % standard deviation (Å)
-input_multem.obj_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illumination_model=4
+input_multem.obj_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illum_mod=4
 input_multem.obj_lens_zero_def_typ = 3; % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 input_multem.obj_lens_zero_def_plane = 0;
 
@@ -91,7 +91,7 @@ input_multem.output_area_ip_e = [1;1]; % End position in pixels
 
 clear ilc_wave_function;
 tic;
-output_multislice = ilc_wave_function(system_conf, input_multem);
+output_multislice = ilc_wave_function(system_config, input_multem);
 toc;
 
 figure(1);

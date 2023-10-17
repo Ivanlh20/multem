@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,65 +19,64 @@
 #define MATLAB_BLAS_LAPACK
 
 #include "types.cuh"
-#include "type_traits_gen.cuh"
+#include "type_traits_gen.h"
 #include "particles.cuh"
 #include "spec.hpp"
 #include "in_classes.cuh"
 
 #include <mex.h>
-#include "matlab_mex.cuh"
-#include "matlab_multem_io.cuh"
+#include "matlab_mex.h"
+#include "matlab_multem_io.h"
 
-using mt::pMLD;
 
 template <class TIn_Multislice>
-void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem)
+void read_multem_in_parm(const mxArray* mex_multem_in_parm, TIn_Multislice& multem_in_parm)
 {
 	using T_r = mt::Value_type<TIn_Multislice>;
 
-	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Interact_Mod>(mex_in_multem, "interaction_model");
-	in_multem.atomic_pot_parm_typ = mt::eappt_lobato_0_12;
+	multem_in_parm.elec_spec_interact_mod = mex_get_num_from_field<mt::eElec_Spec_Interact_Mod>(mex_multem_in_parm, "elec_spec_interact_mod");
+	multem_in_parm.atomic_pot_parm_typ = mt::eappt_lobato_0_12;
 
 	/************** Electron-Atomic_Vib interaction model **************/
-	mex_read_atomic_vib(mex_in_multem, in_multem.atomic_vib);
-	in_multem.atomic_vib.coh_contrib = true;
-	in_multem.atomic_vib.sgl_conf = true;
+	mex_read_atomic_vib(mex_multem_in_parm, multem_in_parm.atomic_vib);
+	multem_in_parm.atomic_vib.coh_contrib = true;
+	multem_in_parm.atomic_vib.sgl_conf = true;
 
 	/**************************** Specimen *****************************/
-	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
-	auto bs_y = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_y");
-	auto bs_z = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_z");
-	auto sli_thick = mex_get_num_from_field<T_r>(mex_in_multem, "spec_dz");
+	auto bs_x = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_x");
+	auto bs_y = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_y");
+	auto bs_z = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_z");
+	auto sli_thick = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_dz");
 	dt_bool pbc_xy = false;
 
 	/************************* atomic positions ************************/
-	mex_read_atoms<T_r>(mex_in_multem, bs_x, bs_y, bs_z, sli_thick, in_multem.atoms);
+	mex_read_atoms<T_r>(mex_multem_in_parm, bs_x, bs_y, bs_z, sli_thick, multem_in_parm.atoms);
 
 	/************************ Specimen rotation ************************/
-	mex_read_rot_parm<T_r>(mex_in_multem, in_multem.rot_par);
+	mex_read_rot_in_parm<T_r>(mex_multem_in_parm, multem_in_parm.rot_in_parm);
 
 	/************************ Potential slicing ************************/
-	in_multem.spec_slic_typ = mex_get_num_from_field<mt::eSpec_Slic_Typ>(mex_in_multem, "spec_slic_typ");
+	mex_read_spec_sli_in_parm(mex_multem_in_parm, multem_in_parm.rot_in_parm);
 
 	/************************** xy sampling ****************************/
 	auto nx = 1024;
 	auto ny = 1024;
 	dt_bool bwl = false;
 
-	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
+	multem_in_parm.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
 
-	in_multem.set_dep_var();
+	multem_in_parm.set_dep_var();
  }
 
 void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[])
 {	
 	/*************************Input data**************************/
-	mt::In_Multem<dt_float64> in_multem;
-	read_in_multem(prhs[0], in_multem);
+	mt::Multem_In_Parm<dt_float64> multem_in_parm;
+	read_multem_in_parm(prhs[0], multem_in_parm);
 
 	mt::Spec<dt_float64> spec;
-	spec.set_in_data(&in_multem);
-	spec.move_atoms(in_multem.atomic_vib.nconf);
+	spec.set_in_data(&multem_in_parm);
+	spec.move_atoms(multem_in_parm.atomic_vib.nconf);
 
 	// /************************Output data**************************/
 	auto atomsM = mex_create_pVctr<pMLD>(spec.atoms.size(), 8, plhs[0]);

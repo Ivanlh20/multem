@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,14 +19,14 @@
 #ifndef SPEC_H
 #define SPEC_H
 
-#include "math.cuh"
+#include "math_mt.h"
 #include "types.cuh"
 #include "cgpu_rand.cuh"
 #include "atomic_data_mt.cuh"
 #include "particles.cuh"
 #include "in_classes.cuh"
-#include "cgpu_fcns.cuh"
-#include "cpu_fcns.hpp"
+#include "fcns_gpu.h"
+#include "fcns_cpu.h"
 #include "spec_slic.hpp"
 
 namespace mt
@@ -38,41 +38,41 @@ namespace mt
 			using T_r = T;
 			using size_type = dt_uint64;
 
-			Spec(): in_multem(nullptr) {}
+			Spec(): multem_in_parm(nullptr) {}
 
-			void set_in_data(In_Multem<T> *in_multem_i)
+			void set_in_data(Multem_In_Parm<T> *multem_in_parm_i)
 			{
-				in_multem = in_multem_i;
+				multem_in_parm = multem_in_parm_i;
 
 				 /***************************************************************************************/
-				Atomic_Data atomic_data_mt(in_multem->atomic_pot_parm_typ);
+				Atomic_Data atomic_data_mt(multem_in_parm->atomic_pot_parm_typ);
 
 				atom_type.resize(c_n_atom_typ);
 				for(auto i = 0; i < atom_type.size(); i++)
 				{
-					atomic_data_mt.To_atom_type_CPU(i+1, in_multem->Vrl, in_multem->nR, in_multem->grid_2d.dR_min(), atom_type[i]);
+					atomic_data_mt.To_atom_type_CPU(i+1, multem_in_parm->Vrl, multem_in_parm->nR, multem_in_parm->grid_2d.dR_min(), atom_type[i]);
 				}
 
 				 /***************************************************************************************/
-				atoms_u.set_ptc(in_multem->atoms, in_multem->grid_2d.pbc_xy, &atom_type);
+				atoms_u.set_ptc(multem_in_parm->atoms, multem_in_parm->grid_2d.pbc_xy, &atom_type);
 				atoms_u.sort_by_z();
 
 				 /***************************************************************************************/
-				slicing.set_in_data(in_multem, &atoms_u, &atoms);
+				slicing.set_in_data(multem_in_parm, &atoms_u, &atoms);
 
 				 /***************************************************************************************/
-				if ((atoms_u.s_z_int < 2.0*in_multem->grid_2d.sli_thick) || ((slicing.z_plane.size() == 1) && in_multem->is_spec_slic_by_plns_proj()))
+				if ((atoms_u.s_z_int < 2.0*multem_in_parm->grid_2d.sli_thick) || ((slicing.z_plane.size() == 1) && multem_in_parm->is_spec_slic_by_plns_proj()))
 				{
-					in_multem->grid_2d.sli_thick = atoms_u.s_z_int;
-					in_multem->interaction_model = eesim_phase_object;
-					in_multem->islice = 0;
-					in_multem->atomic_vib.dim_z = false;
-					if (in_multem->is_sim_through_slices())
+					multem_in_parm->grid_2d.sli_thick = atoms_u.s_z_int;
+					multem_in_parm->elec_spec_interact_mod = eesim_phase_object;
+					multem_in_parm->islice = 0;
+					multem_in_parm->atomic_vib.dim_z = false;
+					if (multem_in_parm->is_sim_through_slices())
 					{
-						in_multem->thick_type = estt_through_thick;
+						multem_in_parm->thick_type = estt_through_thick;
 					}
-					in_multem->slice_storage = in_multem->slice_storage || !in_multem->is_sim_whole_spec();
-					atoms_u.sli_thick = in_multem->grid_2d.sli_thick;
+					multem_in_parm->slice_storage = multem_in_parm->slice_storage || !multem_in_parm->is_sim_whole_spec();
+					atoms_u.sli_thick = multem_in_parm->grid_2d.sli_thick;
 				}
 
 				atoms.set_ptc(atoms_u, false, &atom_type);
@@ -84,10 +84,10 @@ namespace mt
 			void move_atoms(const dt_int32& fp_iconf)
 			{
 				// set atomic_vib configuration
-				if (in_multem->is_avm_frozen_phonon())
+				if (multem_in_parm->is_avm_frozen_phonon())
 				{
-					rand.seed(in_multem->atomic_vib.seed, fp_iconf);
-					rand.set_act_dim(in_multem->atomic_vib.dim_x, in_multem->atomic_vib.dim_y, in_multem->atomic_vib.dim_z);
+					rand.seed(multem_in_parm->atomic_vib.seed, fp_iconf);
+					rand.set_act_dim(multem_in_parm->atomic_vib.dim_x, multem_in_parm->atomic_vib.dim_y, multem_in_parm->atomic_vib.dim_z);
 				}
 
 				// move atoms
@@ -96,7 +96,7 @@ namespace mt
 					atoms.Z[iatoms] = atoms_u.Z[iatoms];
 					auto r = atoms_u.get_pos(iatoms);
 
-					if (in_multem->is_avm_frozen_phonon())
+					if (multem_in_parm->is_avm_frozen_phonon())
 					{
 						auto sigma_x = atoms_u.sigma[iatoms];
 						auto sigma_y = atoms_u.sigma[iatoms];
@@ -113,7 +113,7 @@ namespace mt
 					atoms.charge[iatoms] = atoms_u.charge[iatoms];
 				}
 
-				if (in_multem->atomic_vib.dim_z)
+				if (multem_in_parm->atomic_vib.dim_z)
 				{
 					atoms.sort_by_z();
 				}
@@ -127,21 +127,21 @@ namespace mt
 
 			T sli_thick(const dt_int32& islice)
 			{
-				return slicing.sli_thick(islice)/cos(in_multem->theta);
+				return slicing.sli_thick(islice)/cos(multem_in_parm->theta);
 			}
 
 			T dz_m(const dt_int32& islice_0, const dt_int32& islice_e)
 			{
-				return slicing.dz_m(islice_0, islice_e)/cos(in_multem->theta);
+				return slicing.dz_m(islice_0, islice_e)/cos(multem_in_parm->theta);
 			}
 
-			In_Multem<T> *in_multem;
+			Multem_In_Parm<T> *multem_in_parm;
 
 			Ptc_Atom<T> atoms;		// displaced atoms
 			Spec_Slic<T> slicing;		// slicing procedure
 			Vctr<Atom_Typ_cpu<T>, edev_cpu> atom_type;		// Atom types
 		private:
-			Randn_3d<T, edev_cpu> rand;
+			Rndn_3d<T, edev_cpu> rand;
 			Ptc_Atom<T> atoms_u;
 	};
 

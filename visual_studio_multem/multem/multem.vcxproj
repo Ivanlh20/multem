@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,6 +19,66 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\src\detail\border_1d.inl" />
+    <None Include="..\..\src\detail\border_2d.inl" />
+    <None Include="..\..\src\detail\border_3d.inl" />
+    <None Include="..\..\src\detail\fcn_butwth.inl" />
+    <None Include="..\..\src\detail\fcn_cos_tap.inl" />
+    <None Include="..\..\src\detail\ptc_atom.inl" />
+    <None Include="..\..\src\detail\ptc_butwth.inl" />
+    <None Include="..\..\src\detail\ptc_exp.inl" />
+    <None Include="..\..\src\detail\ptc_fermi.inl" />
+    <None Include="..\..\src\detail\ptc_gauss.inl" />
+    <None Include="..\..\src\detail\ptc_hann.inl" />
+    <None Include="..\..\src\detail\ptc_r_1d.inl" />
+    <None Include="..\..\src\detail\ptc_r_2d.inl" />
+    <None Include="..\..\src\detail\ptc_r_3d.inl" />
+    <None Include="..\..\src\detail\quad_coef_1d.inl" />
+    <None Include="..\..\src\detail\quad_coef_2d.inl" />
+    <None Include="..\..\src\detail\quad_data.inl" />
+    <None Include="..\..\src\detail\rnd_1d_cpu.inl" />
+    <None Include="..\..\src\detail\rnd_2d_cpu.inl" />
+    <None Include="..\..\src\detail\rnd_3d_cpu.inl" />
+    <None Include="..\..\src\detail\rnd_cpu.inl" />
+    <None Include="..\..\src\detail\shape_t.inl" />
+    <None Include="..\..\src\detail\wd_butwth.inl" />
+    <None Include="..\..\src\detail\wd_exp.inl" />
+    <None Include="..\..\src\detail\wd_fcn.inl" />
+    <None Include="..\..\src\detail\wd_fermi.inl" />
+    <None Include="..\..\src\detail\wd_gauss.inl" />
+    <None Include="..\..\src\detail\fcn_exp.inl" />
+    <None Include="..\..\src\detail\fcn_fermi.inl" />
+    <None Include="..\..\src\detail\fcn_gauss.inl" />
+    <None Include="..\..\src\detail\fcn_hann.inl" />
+    <None Include="..\..\src\detail\fft_cpu.inl" />
+    <None Include="..\..\src\detail\fft_gpu.inl" />
+    <None Include="..\..\src\detail\info_cpu.inl" />
+    <None Include="..\..\src\detail\ithread_rect_1d.inl" />
+    <None Include="..\..\src\detail\ithread_rect_2d.inl" />
+    <None Include="..\..\src\detail\ithread_rect_3d.inl" />
+    <None Include="..\..\src\detail\range_1d.inl" />
+    <None Include="..\..\src\detail\range_2d.inl" />
+    <None Include="..\..\src\detail\range_3d.inl" />
+    <None Include="..\..\src\detail\stream_cpu.inl" />
+    <None Include="..\..\src\detail\stream_gpu.inl" />
+    <None Include="..\..\src\detail\vctr_cpu.inl" />
+    <None Include="..\..\src\detail\info_gpu.inl" />
+    <None Include="..\..\src\detail\vctr_gpu.inl" />
+    <None Include="..\..\src\detail\grid_1d.inl" />
+    <None Include="..\..\src\detail\grid_2d.inl" />
+    <None Include="..\..\src\detail\grid_3d.inl" />
+    <None Include="..\..\src\detail\igrid_1d.inl" />
+    <None Include="..\..\src\detail\igrid_2d.inl" />
+    <None Include="..\..\src\detail\igrid_3d.inl" />
+    <None Include="..\..\src\detail\kahan_sum.inl" />
+    <None Include="..\..\src\detail\mx_2x2.inl" />
+    <None Include="..\..\src\detail\mx_3x3.inl" />
+    <None Include="..\..\src\detail\pvctr.inl" />
+    <None Include="..\..\src\detail\r_2d.inl" />
+    <None Include="..\..\src\detail\r_3d.inl" />
+    <None Include="..\..\src\detail\system_config.inl" />
+    <None Include="..\..\src\detail\wd_hann.inl" />
+    <None Include="..\..\src\particles.inl" />
     <None Include="main.cu" />
   </ItemGroup>
   <ItemGroup>
@@ -29,26 +89,61 @@
     <ClInclude Include="..\..\src\amorp_build.hpp" />
     <ClInclude Include="..\..\src\atomic_data_mt.cuh" />
     <ClInclude Include="..\..\src\atomic_fcns_mt.cuh" />
+    <ClInclude Include="..\..\src\beam_pos_2d.hpp" />
     <ClInclude Include="..\..\src\blas.cuh" />
-    <ClInclude Include="..\..\src\border.cuh" />
+    <ClInclude Include="..\..\src\border_1d.h" />
+    <ClInclude Include="..\..\src\border_2d.h" />
+    <ClInclude Include="..\..\src\border_3d.h" />
     <ClInclude Include="..\..\src\box_occ.hpp" />
     <ClInclude Include="..\..\src\cb_spl_intrpl.hpp" />
     <ClInclude Include="..\..\src\cgpu_classes.cuh" />
     <ClInclude Include="..\..\src\cgpu_detail.cuh" />
     <ClInclude Include="..\..\src\cgpu_detail_mt.cuh" />
     <ClInclude Include="..\..\src\cgpu_fcns.cuh" />
-    <ClInclude Include="..\..\src\cgpu_fcns_gen.cuh" />
-    <ClInclude Include="..\..\src\cgpu_fft.cuh" />
-    <ClInclude Include="..\..\src\cgpu_info.cuh" />
-    <ClInclude Include="..\..\src\cgpu_rand.cuh" />
+    <ClInclude Include="..\..\src\fcns_cgpu_gen.h" />
+    <ClInclude Include="..\..\src\fcn_butwth.h" />
+    <ClInclude Include="..\..\src\fcn_exp.h" />
+    <ClInclude Include="..\..\src\fcn_fermi.h" />
+    <ClInclude Include="..\..\src\fcn_gauss.h" />
+    <ClInclude Include="..\..\src\fcn_hann.h" />
+    <ClInclude Include="..\..\src\fft_cpu.h" />
+    <ClInclude Include="..\..\src\fft_gpu.h" />
+    <ClInclude Include="..\..\src\info_cpu.h" />
+    <ClInclude Include="..\..\src\particles.h" />
+    <ClInclude Include="..\..\src\ptc_atom.h" />
+    <ClInclude Include="..\..\src\ptc_butwth.h" />
+    <ClInclude Include="..\..\src\ptc_exp.h" />
+    <ClInclude Include="..\..\src\ptc_fermi.h" />
+    <ClInclude Include="..\..\src\ptc_gauss.h" />
+    <ClInclude Include="..\..\src\ptc_hann.h" />
+    <ClInclude Include="..\..\src\ptc_r_1d.h" />
+    <ClInclude Include="..\..\src\ptc_r_2d.h" />
+    <ClInclude Include="..\..\src\ptc_r_3d.h" />
+    <ClInclude Include="..\..\src\quad_coef_1d.h" />
+    <ClInclude Include="..\..\src\quad_coef_2d.h" />
+    <ClInclude Include="..\..\src\rnd_1d_cpu.h" />
+    <ClInclude Include="..\..\src\rnd_2d_cpu.h" />
+    <ClInclude Include="..\..\src\rnd_3d_cpu.h" />
+    <ClInclude Include="..\..\src\rnd_cpu.h" />
     <ClInclude Include="..\..\src\cgpu_spt_ptc.cuh" />
-    <ClInclude Include="..\..\src\cgpu_stream.cuh" />
-    <ClInclude Include="..\..\src\cgpu_vctr.cuh" />
+    <ClInclude Include="..\..\src\ithread_rect_2d.h" />
+    <ClInclude Include="..\..\src\ithread_rect_3d.h" />
+    <ClInclude Include="..\..\src\range_2d.h" />
+    <ClInclude Include="..\..\src\range_3d.h" />
+    <ClInclude Include="..\..\src\stream_cpu.h" />
+    <ClInclude Include="..\..\src\stream_gpu.h" />
+    <ClInclude Include="..\..\src\vctr_cpu.h" />
+    <ClInclude Include="..\..\src\info_gpu.h" />
+    <ClInclude Include="..\..\src\vctr_gpu.h" />
+    <ClInclude Include="..\..\src\grid_2d.h" />
+    <ClInclude Include="..\..\src\grid_3d.h" />
+    <ClInclude Include="..\..\src\igrid_2d.h" />
+    <ClInclude Include="..\..\src\igrid_3d.h" />
     <ClInclude Include="..\..\src\intrpl_coef.cuh" />
-    <ClInclude Include="..\..\src\const_enum.cuh" />
+    <ClInclude Include="..\..\src\const_enum.h" />
     <ClInclude Include="..\..\src\const_enum_mt.cuh" />
     <ClInclude Include="..\..\src\cpu_detail.hpp" />
-    <ClInclude Include="..\..\src\cpu_fcns.hpp" />
+    <ClInclude Include="..\..\src\fcns_cpu.h" />
     <ClInclude Include="..\..\src\cpu_fcns_image.hpp" />
     <ClInclude Include="..\..\src\cpu_fcns_mt.hpp" />
     <ClInclude Include="..\..\src\energy_loss.cuh" />
@@ -56,52 +151,59 @@
     <ClInclude Include="..\..\src\eval_fit_atomic_columns_c.hpp" />
     <ClInclude Include="..\..\src\eval_fit_atomic_columns_c_old.hpp" />
     <ClInclude Include="..\..\src\eval_fit_gaussians.hpp" />
-    <ClInclude Include="..\..\src\fcns_elem.cuh" />
-    <ClInclude Include="..\..\src\fcns_wd.cuh" />
+    <ClInclude Include="..\..\src\fcn_cos_tap.h" />
+    <ClInclude Include="..\..\src\wd_butwth.h" />
+    <ClInclude Include="..\..\src\wd_exp.h" />
+    <ClInclude Include="..\..\src\wd_fcn.h" />
+    <ClInclude Include="..\..\src\wd_fermi.h" />
+    <ClInclude Include="..\..\src\wd_gauss.h" />
     <ClInclude Include="..\..\src\fxeg_data.hpp" />
     <ClInclude Include="..\..\src\gpu_detail.cuh" />
     <ClInclude Include="..\..\src\gpu_detail_mt.cuh" />
-    <ClInclude Include="..\..\src\gpu_fcns.cuh" />
+    <ClInclude Include="..\..\src\fcns_gpu.h" />
     <ClInclude Include="..\..\src\gpu_fcns_mt.cuh" />
-    <ClInclude Include="..\..\src\grid.cuh" />
-    <ClInclude Include="..\..\src\igrid.cuh" />
+    <ClInclude Include="..\..\src\grid_1d.h" />
+    <ClInclude Include="..\..\src\igrid_1d.h" />
     <ClInclude Include="..\..\src\in_classes.cuh" />
-    <ClInclude Include="..\..\src\in_multem.cuh" />
+    <ClInclude Include="..\..\src\multem_in_parm.cuh" />
     <ClInclude Include="..\..\src\incident_wave.cuh" />
-    <ClInclude Include="..\..\src\in_xtl_build.hpp" />
-    <ClInclude Include="..\..\src\kahan_sum.cuh" />
+    <ClInclude Include="..\..\src\pvctr.h" />
+    <ClInclude Include="..\..\src\spec_slic_in_parm.hpp" />
+    <ClInclude Include="..\..\src\system_config.h" />
+    <ClInclude Include="..\..\src\wd_hann.h" />
+    <ClInclude Include="..\..\src\xtl_build_in_parm.hpp" />
+    <ClInclude Include="..\..\src\kahan_sum.h" />
     <ClInclude Include="..\..\src\lapack.hpp" />
     <ClInclude Include="..\..\src\lens.cuh" />
-    <ClInclude Include="..\..\src\macros.cuh" />
-    <ClInclude Include="..\..\src\math.cuh" />
-    <ClInclude Include="..\..\src\matlab_mex.cuh" />
+    <ClInclude Include="..\..\src\macros.h" />
+    <ClInclude Include="..\..\src\math_mt.h" />
+    <ClInclude Include="..\..\src\matlab_mex.h" />
     <ClInclude Include="..\..\src\matlab_multem_io.cuh" />
     <ClInclude Include="..\..\src\memcpy.cuh" />
     <ClInclude Include="..\..\src\microscope_effects.cuh" />
-    <ClInclude Include="..\..\src\mx_2x2.cuh" />
-    <ClInclude Include="..\..\src\mx_3x3.cuh" />
+    <ClInclude Include="..\..\src\mx_2x2.h" />
+    <ClInclude Include="..\..\src\mx_3x3.h" />
     <ClInclude Include="..\..\src\output_multem.hpp" />
     <ClInclude Include="..\..\src\particle_fcns.hpp" />
-    <ClInclude Include="..\..\src\particles.cuh" />
     <ClInclude Include="..\..\src\peak_finding.cuh" />
     <ClInclude Include="..\..\src\pn_fact.hpp" />
     <ClInclude Include="..\..\src\projected_potential.cuh" />
     <ClInclude Include="..\..\src\propagator.cuh" />
-    <ClInclude Include="..\..\src\quad_data.cuh" />
-    <ClInclude Include="..\..\src\r_2d.cuh" />
-    <ClInclude Include="..\..\src\r_3d.cuh" />
-    <ClInclude Include="..\..\src\range.cuh" />
+    <ClInclude Include="..\..\src\quad_data.h" />
+    <ClInclude Include="..\..\src\r_2d.h" />
+    <ClInclude Include="..\..\src\r_3d.h" />
+    <ClInclude Include="..\..\src\range_1d.h" />
     <ClInclude Include="..\..\src\region.cuh" />
     <ClInclude Include="..\..\src\scan_pat.hpp" />
-    <ClInclude Include="..\..\src\shape_t.hpp" />
+    <ClInclude Include="..\..\src\shape_t.h" />
     <ClInclude Include="..\..\src\spec_slic.hpp" />
     <ClInclude Include="..\..\src\space_group.hpp" />
     <ClInclude Include="..\..\src\spec.hpp" />
     <ClInclude Include="..\..\src\tem_simulation.cuh" />
-    <ClInclude Include="..\..\src\ithread_rect.cuh" />
+    <ClInclude Include="..\..\src\ithread_rect_1d.h" />
     <ClInclude Include="..\..\src\timing.cuh" />
     <ClInclude Include="..\..\src\transmission_fcn.cuh" />
-    <ClInclude Include="..\..\src\type_traits_gen.cuh" />
+    <ClInclude Include="..\..\src\type_traits_gen.h" />
     <ClInclude Include="..\..\src\type_traits_mt.cuh" />
     <ClInclude Include="..\..\src\types.cuh" />
     <ClInclude Include="..\..\src\types_mt.cuh" />
@@ -218,7 +320,7 @@
     <CudaCompile Include="..\..\mex_files_multem\ilc_atomic_info.cpp" />
     <CudaCompile Include="..\..\mex_files_multem\ilc_atomic_radius.cpp" />
     <CudaCompile Include="..\..\mex_files_multem\ilc_det_min_spl.cpp" />
-    <CudaCompile Include="..\..\mex_files_multem\ilc_e_interact_parm_kva.cpp" />
+    <CudaCompile Include="..\..\mex_files_multem\ilc_elec_interact_parm_kva.cpp" />
     <CudaCompile Include="..\..\mex_files_multem\ilc_feg.cpp" />
     <CudaCompile Include="..\..\mex_files_multem\ilc_feg_parm_coef.cpp" />
     <CudaCompile Include="..\..\mex_files_multem\ilc_fwhm_2_sigma.cpp" />
@@ -261,8 +363,8 @@
     <CudaCompile Include="..\..\mex_files_test\ilc_eiger_min.cpp" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_atomic_data.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_atomic_fcns.cu" />
-    <CudaCompile Include="..\..\mex_files_test\ilc_test_cgpu_rand.cu" />
-    <CudaCompile Include="..\..\mex_files_test\ilc_test_cgpu_vctr.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_rnd.cu" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_vctr.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_cos_tapering.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_crop_shift.cpp" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_detector_int.cu" />
@@ -276,7 +378,8 @@
     <CudaCompile Include="..\..\mex_files_test\ilc_test_grid_1d.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_grid_2d.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_grid_3d.cu" />
-    <CudaCompile Include="..\..\mex_files_test\ilc_test_igrid.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_igrid_3d.cpp" />
+    <CudaCompile Include="..\..\mex_files_test\ilc_test_kahan_sum.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_lens.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_matlab_types.cu" />
     <CudaCompile Include="..\..\mex_files_test\ilc_test_mx_2x2.cu" />
@@ -295,46 +398,48 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\mex_files_test\ilc_test_ident_pla.cpp" />
-    <ClCompile Include="..\..\src\atomic_vib.cpp" />
-    <ClCompile Include="..\..\src\rot_parm.cpp" />
+    <ClCompile Include="..\..\mex_files_test\ilc_test_igrid_1d.cpp" />
+    <ClCompile Include="..\..\mex_files_test\ilc_test_igrid_2d.cpp" />
+    <ClCompile Include="..\..\src\atomic_vib.hpp" />
+    <ClCompile Include="..\..\src\rot_in_parm.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{7AF61FF5-2F37-48B5-A7B5-0DB32777F186}</ProjectGuid>
     <RootNamespace>multem</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <CudaToolkitCustomDir>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2</CudaToolkitCustomDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.2.props" />
+    <Import Project="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\extras\visual_studio_integration\MSBuildExtensions\CUDA 11.2.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -355,6 +460,12 @@
     <IncludePath>D:\multem\src;C:\Program Files\MATLAB\R2018a\extern\include;D:\research\Other_codes\lapacke\include;$(IncludePath)</IncludePath>
     <ReferencePath>D:\multem\src;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include;</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include;</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -371,8 +482,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\MATLAB\R2020b\extern\include;D:\multem\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\MATLAB\R2021a\extern\include;D:\multem\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <CudaCompile>
+      <Include>
+      </Include>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -396,14 +511,19 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Program Files\MATLAB\R2021a\extern\include;D:\multem\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <CudaCompile>
+      <Include>
+      </Include>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.2.targets" />
+    <Import Project="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\extras\visual_studio_integration\MSBuildExtensions\CUDA 11.2.targets" />
   </ImportGroup>
 </Project>

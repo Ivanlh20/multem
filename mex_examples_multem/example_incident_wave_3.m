@@ -5,10 +5,10 @@ addpath(['..', filesep, 'mex_bin'])
 
 input_multem = ilm_dflt_input_multem(); % Load default values;
 
-system_conf.precision = 1; % eP_Float = 1, eP_double = 2
-system_conf.device = 1; % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_n_thread = 1;
-system_conf.gpu_device = 0;
+system_config.precision = 1; % eP_Float = 1, eP_double = 2
+system_config.device = 1; % eD_CPU = 1, eD_GPU = 2
+system_config.cpu_n_thread = 1;
+system_config.gpu_device = 0;
 
 input_multem.E_0 = 300; % Acceleration Voltage (keV)
 input_multem.theta = 0.00;
@@ -40,9 +40,9 @@ input_multem.cond_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmat
 input_multem.cond_lens_inner_aper_ang = 0.0; % Inner aperture (mrad) 
 input_multem.cond_lens_outer_aper_ang = 21.0; % Outer aperture (mrad)
 input_multem.cond_lens_tp_inc_sigma = 32; % standard deviation (Å)
-input_multem.cond_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illumination_model=4
+input_multem.cond_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illum_mod=4
 input_multem.cond_lens_spt_inc_sigma = 0.2; % standard deviation: For parallel ilumination(Å^-1);otherwise (Å)
-input_multem.cond_lens_spt_inc_rad_npts = 8; % # of integration points. It will be only used if illumination_model=4
+input_multem.cond_lens_spt_inc_rad_npts = 8; % # of integration points. It will be only used if illum_mod=4
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% beam position %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -55,7 +55,7 @@ for df = 20
     input_multem.cond_lens_c_10 = df; %Angs
 
     tic;
-    output_incident_wave = ilc_incident_wave(system_conf, input_multem);
+    output_incident_wave = ilc_incident_wave(system_config, input_multem);
     toc;
     psi_0 = output_incident_wave.psi_0;
     sum(abs(psi_0(:)).^2)

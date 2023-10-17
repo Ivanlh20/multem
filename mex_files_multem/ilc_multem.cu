@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 #include <algorithm>
 
 #include "types.cuh"
-#include "type_traits_gen.cuh"
-#include "cgpu_fcns.cuh"
+#include "type_traits_gen.h"
+#include "fcns_gpu.h"
 #include "in_classes.cuh"
 #include "output_multem.hpp"
 #include "particles.cuh"
@@ -30,143 +30,143 @@
 #include "timing.cuh"
 
 #include <mex.h>
-#include "matlab_mex.cuh"
+#include "matlab_mex.h"
 
 using mt::pMLD;
 using mt::pMx_c;
 
 template <class TIn_Multislice>
-void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
+void read_multem_in_parm(const mxArray* mex_multem_in_parm, TIn_Multislice &multem_in_parm, dt_bool full = true)
 {
 	using T_r = mt::Value_type<TIn_Multislice>;
 
 	/************************ simulation type **************************/
-	in_multem.simulation_type = mex_get_num_from_field<mt::eEM_Sim_Typ>(mex_in_multem, "simulation_type");
+	multem_in_parm.em_sim_typ = mex_get_num_from_field<mt::eEM_Sim_Typ>(mex_multem_in_parm, "em_sim_typ");
 
 	/***************************************************************************************/
-	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Interact_Mod>(mex_in_multem, "interaction_model");
-	in_multem.atomic_pot_parm_typ = mex_get_num_from_field<mt::eAtomic_Pot_Parm_Typ>(mex_in_multem, "atomic_pot_parm_typ");
+	multem_in_parm.elec_spec_interact_mod = mex_get_num_from_field<mt::eElec_Spec_Interact_Mod>(mex_multem_in_parm, "elec_spec_interact_mod");
+	multem_in_parm.atomic_pot_parm_typ = mex_get_num_from_field<mt::eAtomic_Pot_Parm_Typ>(mex_multem_in_parm, "atomic_pot_parm_typ");
 
 	/***************************************************************************************/
-	in_multem.operation_mode = mex_get_num_from_field<mt::eOperation_Mode>(mex_in_multem, "operation_mode");
-	in_multem.reverse_multislice = mex_get_bool_from_field(mex_in_multem, "reverse_multislice");
+	multem_in_parm.operation_mode = mex_get_num_from_field<mt::eOperation_Mode>(mex_multem_in_parm, "operation_mode");
+	multem_in_parm.reverse_multislice = mex_get_bool_from_field(mex_multem_in_parm, "reverse_multislice");
 
 	/************** Electron-Atomic_Vib interaction model **************/
-	mex_read_atomic_vib(mex_in_multem, in_multem.atomic_vib);
+	mex_read_atomic_vib(mex_multem_in_parm, multem_in_parm.atomic_vib);
 
 	/**************************** Specimen *****************************/
-	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
-	auto bs_y = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_y");
-	auto bs_z = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_z");
-	auto sli_thick = mex_get_num_from_field<T_r>(mex_in_multem, "spec_dz");
+	auto bs_x = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_x");
+	auto bs_y = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_y");
+	auto bs_z = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_z");
+	auto sli_thick = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_dz");
 	dt_bool pbc_xy = true;
 
-	if (in_multem.is_specimen_required())
+	if (multem_in_parm.is_specimen_required())
 	{
 		if (full)
 		{
 			/************************* atomic positions ************************/
-			mex_read_atoms<T_r>(mex_in_multem, bs_x, bs_y, bs_z, sli_thick, in_multem.atoms);
+			mex_read_atoms<T_r>(mex_multem_in_parm, bs_x, bs_y, bs_z, sli_thick, multem_in_parm.atoms);
 		}
 
 		/************************ Specimen rotation ************************/
-		mex_read_rot_parm<T_r>(mex_in_multem, in_multem.rot_par);
+		mex_read_rot_in_parm<T_r>(mex_multem_in_parm, multem_in_parm.rot_in_parm);
 
 		/************************ Specimen thickness ***********************/
-		in_multem.thick_type = mex_get_num_from_field<mt::eSim_Thick_Typ>(mex_in_multem, "thick_type");
-		if (!in_multem.is_sim_whole_spec() && full)
+		multem_in_parm.thick_type = mex_get_num_from_field<mt::eSim_Thick_Typ>(mex_multem_in_parm, "thick_type");
+		if (!multem_in_parm.is_sim_whole_spec() && full)
 		{
-			mex_read_spec_thick<T_r>(mex_in_multem, in_multem.thick);
+			mex_read_spec_thick<T_r>(mex_multem_in_parm, multem_in_parm.thick);
 		}
 
 		/************************ Potential slicing ************************/
-		in_multem.spec_slic_typ = mex_get_num_from_field<mt::eSpec_Slic_Typ>(mex_in_multem, "spec_slic_typ");
+		multem_in_parm.spec_slic_typ = mex_get_num_from_field<mt::eSpec_Slic_Typ>(mex_multem_in_parm, "spec_slic_typ");
 	}
 
 	/************************** xy sampling ****************************/
-	auto nx = mex_get_num_from_field<dt_int32>(mex_in_multem, "nx");
-	auto ny = mex_get_num_from_field<dt_int32>(mex_in_multem, "ny");
-	dt_bool bwl = mex_get_bool_from_field(mex_in_multem, "bwl");
+	auto nx = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "nx");
+	auto ny = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "ny");
+	dt_bool bwl = mex_get_bool_from_field(mex_multem_in_parm, "bwl");
 
-	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
+	multem_in_parm.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
 
 	/************************ Incident wave ****************************/
-	auto iw_type = mex_get_num_from_field<mt::eIncident_Wave_Typ>(mex_in_multem, "iw_type");
-	in_multem.set_incident_wave_type(iw_type);
+	auto iw_type = mex_get_num_from_field<mt::eIncident_Wave_Typ>(mex_multem_in_parm, "iw_type");
+	multem_in_parm.set_incident_wave_type(iw_type);
 
-	if (in_multem.is_user_define_wave() && full)
+	if (multem_in_parm.is_user_define_wave() && full)
 	{
-		mex_read_user_define_wave<T_r>(mex_in_multem, in_multem.iw_psi);
+		mex_read_user_define_wave<T_r>(mex_multem_in_parm, multem_in_parm.iw_psi);
 	}
 
 	/********************* read beam positions *************************/
-	mex_read_beam_pos<T_r>(mex_in_multem, in_multem.beam_pos_i);
+	mex_read_beam_pos<T_r>(mex_multem_in_parm, multem_in_parm.beam_pos_2d);
 
 	/********************* Microscope parameter ***********************/
-	in_multem.E_0 = mex_get_num_from_field<T_r>(mex_in_multem, "E_0");
-	in_multem.theta = mex_get_num_from_field<T_r>(mex_in_multem, "theta")*mt::c_deg_2_rad;
-	in_multem.phi = mex_get_num_from_field<T_r>(mex_in_multem, "phi")*mt::c_deg_2_rad;
+	multem_in_parm.E_0 = mex_get_num_from_field<T_r>(mex_multem_in_parm, "E_0");
+	multem_in_parm.theta = mex_get_num_from_field<T_r>(mex_multem_in_parm, "theta")*mt::c_deg_2_rad;
+	multem_in_parm.phi = mex_get_num_from_field<T_r>(mex_multem_in_parm, "phi")*mt::c_deg_2_rad;
 
 	/********************* Illumination model *************************/
-	in_multem.illumination_model = mex_get_num_from_field<mt::eIllumination_Model>(mex_in_multem, "illumination_model");
-	in_multem.temporal_spatial_incoh = mex_get_num_from_field<mt::eTemporal_Spatial_Incoh>(mex_in_multem, "temporal_spatial_incoh");
+	multem_in_parm.illum_mod = mex_get_num_from_field<mt::eIllum_Mod>(mex_multem_in_parm, "illum_mod");
+	multem_in_parm.illum_inc = mex_get_num_from_field<mt::eIllum_Inc>(mex_multem_in_parm, "illum_inc");
 
 	/*********************** Condenser lens ***************************/
-	mex_read_cond_lens<T_r>(mex_in_multem, in_multem.cond_lens);
-	in_multem.cond_lens.set_in_data(in_multem.E_0, in_multem.grid_2d);
+	mex_read_cond_lens<T_r>(mex_multem_in_parm, multem_in_parm.cond_lens);
+	multem_in_parm.cond_lens.set_in_data(multem_in_parm.E_0, multem_in_parm.grid_2d);
 
 	/*********************** Objective lens ***************************/
-	mex_read_obj_lens<T_r>(mex_in_multem, in_multem.obj_lens);
-	in_multem.obj_lens.set_in_data(in_multem.E_0, in_multem.grid_2d);
+	mex_read_obj_lens<T_r>(mex_multem_in_parm, multem_in_parm.obj_lens);
+	multem_in_parm.obj_lens.set_in_data(multem_in_parm.E_0, multem_in_parm.grid_2d);
 
 	/************************** ISTEM/STEM ***************************/
-	if (in_multem.is_scanning())
+	if (multem_in_parm.is_scanning())
 	{
-		mex_read_scan<T_r>(mex_in_multem, in_multem.scanning);
+		mex_read_scan<T_r>(mex_multem_in_parm, multem_in_parm.scanning);
 	}
 
-	if (in_multem.is_STEM())
+	if (multem_in_parm.is_STEM())
 	{
-		mex_read_detector<T_r>(mex_in_multem, in_multem.E_0, in_multem.detector);
+		mex_read_detector<T_r>(mex_multem_in_parm, multem_in_parm.E_0, multem_in_parm.detector);
 	}
-	else if (in_multem.is_PED())
+	else if (multem_in_parm.is_PED())
 	{
-		in_multem.theta = mex_get_num_from_field<T_r>(mex_in_multem, "ped_theta")*mt::c_deg_2_rad;
-		in_multem.nrot = mex_get_num_from_field<T_r>(mex_in_multem, "ped_nrot");
+		multem_in_parm.theta = mex_get_num_from_field<T_r>(mex_multem_in_parm, "ped_theta")*mt::c_deg_2_rad;
+		multem_in_parm.nrot = mex_get_num_from_field<T_r>(mex_multem_in_parm, "ped_nrot");
 	}
-	else if (in_multem.is_HCTEM())
+	else if (multem_in_parm.is_HCTEM())
 	{
-		in_multem.theta = mex_get_num_from_field<T_r>(mex_in_multem, "hci_theta")*mt::c_deg_2_rad;
-		in_multem.nrot = mex_get_num_from_field<T_r>(mex_in_multem, "hci_nrot");
+		multem_in_parm.theta = mex_get_num_from_field<T_r>(mex_multem_in_parm, "hci_theta")*mt::c_deg_2_rad;
+		multem_in_parm.nrot = mex_get_num_from_field<T_r>(mex_multem_in_parm, "hci_nrot");
 	}
-	else if (in_multem.is_STEM_ISTEM_EELS())
+	else if (multem_in_parm.is_STEM_ISTEM_EELS())
 	{
-		auto Z = mex_get_num_from_field<dt_int32>(mex_in_multem, "eels_Z");
-		auto E_loss = mex_get_num_from_field<T_r>(mex_in_multem, "eels_E_loss")*mt::c_eV_2_keV;
-		auto coll_angle = mex_get_num_from_field<dt_float64>(mex_in_multem, "eels_coll_angle")*mt::c_mrad_2_rad<dt_float64>;
-		auto m_sel = mex_get_num_from_field<dt_int32>(mex_in_multem, "eels_m_sel");
-		auto chan_type = mex_get_num_from_field<mt::eChan_Typ>(mex_in_multem, "eels_chan_type");
+		auto Z = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "eels_Z");
+		auto E_loss = mex_get_num_from_field<T_r>(mex_multem_in_parm, "eels_E_loss")*mt::c_eV_2_keV;
+		auto coll_angle = mex_get_num_from_field<dt_float64>(mex_multem_in_parm, "eels_coll_angle")*mt::c_mrad_2_rad<dt_float64>;
+		auto m_sel = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "eels_m_sel");
+		auto chan_type = mex_get_num_from_field<mt::eChan_Typ>(mex_multem_in_parm, "eels_chan_type");
 
  		mt::eSpace space = mt::esp_fourier;
-		in_multem.eels_fr.set_in_data(space, in_multem.E_0, E_loss, m_sel, coll_angle, chan_type, Z);
+		multem_in_parm.eels_fr.set_in_data(space, multem_in_parm.E_0, E_loss, m_sel, coll_angle, chan_type, Z);
 	}
-	else if (in_multem.is_EFTEM())
+	else if (multem_in_parm.is_EFTEM())
 	{
-		auto Z = mex_get_num_from_field<dt_int32>(mex_in_multem, "eftem_Z");
-		auto E_loss = mex_get_num_from_field<T_r>(mex_in_multem, "eftem_E_loss")*mt::c_eV_2_keV;
-		auto coll_angle = mex_get_num_from_field<dt_float64>(mex_in_multem, "eftem_coll_angle")*mt::c_mrad_2_rad<dt_float64>;
-		auto m_sel = mex_get_num_from_field<dt_int32>(mex_in_multem, "eftem_m_sel");
-		auto chan_type = mex_get_num_from_field<mt::eChan_Typ>(mex_in_multem, "eftem_chan_type");
+		auto Z = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "eftem_Z");
+		auto E_loss = mex_get_num_from_field<T_r>(mex_multem_in_parm, "eftem_E_loss")*mt::c_eV_2_keV;
+		auto coll_angle = mex_get_num_from_field<dt_float64>(mex_multem_in_parm, "eftem_coll_angle")*mt::c_mrad_2_rad<dt_float64>;
+		auto m_sel = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "eftem_m_sel");
+		auto chan_type = mex_get_num_from_field<mt::eChan_Typ>(mex_multem_in_parm, "eftem_chan_type");
 
-		mt::eSpace space = (in_multem.is_EFTEMRS())?mt::esp_real:mt::esp_fourier;
-		in_multem.eels_fr.set_in_data(space, in_multem.E_0, E_loss, m_sel, coll_angle, chan_type, Z);
+		mt::eSpace space = (multem_in_parm.is_EFTEMRS())?mt::esp_real:mt::esp_fourier;
+		multem_in_parm.eels_fr.set_in_data(space, multem_in_parm.E_0, E_loss, m_sel, coll_angle, chan_type, Z);
 	}
 
 	/******************** select output region ************************/
-	mex_read_output_area(mex_in_multem, in_multem.output_area);
+	mex_read_output_area(mex_multem_in_parm, multem_in_parm.output_area);
 
 	/********************* validate parameters *************************/
-	in_multem.set_dep_var();
+	multem_in_parm.set_dep_var();
 }
 
 template <class TOutput_Multem>
@@ -272,15 +272,15 @@ void set_struct_multem(TOutput_Multem &output_multem, mxArray*& mex_output_multe
 }
 
 template <class T, mt::eDev Dev>
-void run_multem(mt::System_Config &system_config, const mxArray* mex_in_multem, mxArray*& mex_output_multem)
+void run_multem(mt::System_Config &system_config, const mxArray* mex_multem_in_parm, mxArray*& mex_output_multem)
 {
-	mt::In_Multem<T> in_multem;
-	read_in_multem(mex_in_multem, in_multem);
-	in_multem.system_config = system_config;
+	mt::Multem_In_Parm<T> multem_in_parm;
+	read_multem_in_parm(mex_multem_in_parm, multem_in_parm);
+	multem_in_parm.system_config = system_config;
 
 	// multem has to be created first due to memory allocations
-	mt::Multem<T, Dev> multem(&in_multem);
-	mt::Output_Multem<T> output_multem(&in_multem, true);
+	mt::Multem<T, Dev> multem(&multem_in_parm);
+	mt::Output_Multem<T> output_multem(&multem_in_parm, true);
 
 	multem(output_multem);
 

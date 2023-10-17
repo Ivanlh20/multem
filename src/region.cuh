@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,11 @@
 		#pragma once
 	#endif
 
-	#include "math.cuh"
-	#include "const_enum.cuh"
-	#include "cgpu_fcns_gen.cuh"
-	#include "r_2d.cuh"
-	#include "r_3d.cuh"
+	#include "math_mt.h"
+	#include "const_enum.h"
+	#include "fcns_cgpu_gen.h"
+	#include "r_2d.h"
+	#include "r_3d.h"
 
 	/***************************************************************************************/
 	/********************** iRegion_Rect template forward declaration **********************/
@@ -40,7 +40,7 @@
 		using iRegion_Rect_xd = Region_Rect_xd<dt_int32, Dim>;
 
 		/* 1d */
-		template<class T>
+		template <class T>
 		using Region_Rect_1d = Region_Rect_xd<T, edim_1>;
 
 		using iRegion_Rect_1d = Region_Rect_xd<dt_int32, edim_1>;
@@ -48,7 +48,7 @@
 		using iRegion_Rect_1d_64 = Region_Rect_xd<dt_int64, edim_1>;
 
 		/* 2d */
-		template<class T>
+		template <class T>
 		using Region_Rect_2d = Region_Rect_xd<T, edim_2>;
 
 		using iRegion_Rect_2d = Region_Rect_xd<dt_int32, edim_2>;
@@ -56,7 +56,7 @@
 		using iRegion_Rect_2d_64 = Region_Rect_xd<dt_int64, edim_2>;
 
 		/* 3d */
-		template<class T>
+		template <class T>
 		using Region_Rect_3d = Region_Rect_xd<T, edim_3>;
 
 		using iRegion_Rect_3d = Region_Rect_xd<dt_int32, edim_3>;
@@ -249,7 +249,7 @@
 				return chk_bound_x_eps(r);
 			}
 
-			template <class U=T, typename = enable_if_int<U>>
+			template <class U=T, class = enable_if_int<U>>
  			CGPU_EXEC
 			T sub_2_ind(const T& ix) const 
 			{ 
@@ -467,7 +467,7 @@
 				return this->chk_bound_x_eps(rx) && chk_bound_y_eps(ry);
 			}
 
-			template <class U=T, typename = enable_if_int<U>>
+			template <class U=T, class = enable_if_int<U>>
  			CGPU_EXEC
 			T sub_2_ind(const T& ix, const T& iy) const 
 			{ 
@@ -685,7 +685,7 @@
 				return this->chk_bound_x_eps(rx) && this->chk_bound_y_eps(ry) && chk_bound_z_eps(rz);
 			}
 
-			template <class U=T, typename = enable_if_int<U>>
+			template <class U=T, class = enable_if_int<U>>
  			CGPU_EXEC
 			T sub_2_ind(const T& ix, const T& iy, const T& iz) const 
 			{ 

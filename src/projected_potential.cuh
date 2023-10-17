@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,16 +19,16 @@
 #ifndef PROJECTED_POTENTIAL_H
 #define PROJECTED_POTENTIAL_H
 
-#include "math.cuh"
+#include "math_mt.h"
 #include "types.cuh"
-#include "type_traits_gen.cuh"
+#include "type_traits_gen.h"
 #include "cgpu_stream.cuh"
 #include "quad_data.cuh"
 #include "in_classes.cuh"
 #include "output_multem.hpp"
-#include "cpu_fcns.hpp"
-#include "gpu_fcns.cuh"
-#include "cgpu_fcns.cuh"
+#include "fcns_cpu.h"
+#include "fcns_gpu.h"
+#include "fcns_gpu.h"
 #include "spec.hpp"
 
 namespace mt
@@ -42,9 +42,9 @@ namespace mt
 
 			Projected_Potential(): stream(nullptr), n_atoms_s(512) {}
 
-			void set_in_data(In_Multem<T> *in_multem_i, Stream<Dev> *stream_i)
+			void set_in_data(Multem_In_Parm<T> *multem_in_parm_i, Stream<Dev> *stream_i)
 			{	
-				Spec<T>::set_in_data(in_multem_i);
+				Spec<T>::set_in_data(multem_in_parm_i);
 				stream = stream_i;
 
 				Quad_Data quad_data;
@@ -58,7 +58,7 @@ namespace mt
 
 				n_atoms_s = (device==edev_cpu)?(stream->size()):256;
 
-				dt_int32 nv = max(this->in_multem->grid_2d.rx_2_irx_cd(this->atoms.bs_x_int), this->in_multem->grid_2d.ry_2_iry_cd(this->atoms.bs_y_int));
+				dt_int32 nv = max(this->multem_in_parm->grid_2d.rx_2_irx_cd(this->atoms.bs_x_int), this->multem_in_parm->grid_2d.ry_2_iry_cd(this->atoms.bs_y_int));
 
 				stream_data.resize(n_atoms_s);
 
@@ -70,7 +70,7 @@ namespace mt
 						stream_data.v[i].resize(nv);
 					}
 
-					if (this->in_multem->is_spec_slic_by_dz_sub())
+					if (this->multem_in_parm->is_spec_slic_by_dz_sub())
 					{
 						stream_data.c0[i].resize(c_nR);
 						stream_data.c1[i].resize(c_nR);
@@ -82,7 +82,7 @@ namespace mt
 				atom_Vp_h.resize(n_atoms_s);
 				atom_Vp.resize(n_atoms_s);
 
-				V_0.resize(this->in_multem->grid_2d.size());
+				V_0.resize(this->multem_in_parm->grid_2d.size());
 			}
 
 			/***************************************** cpu *****************************************/
@@ -116,7 +116,7 @@ namespace mt
 					stream->set_n_stream_act(iatom_e-iatoms+1);
 					set_atom_Vp(z_0, z_e, iatoms, stream->n_stream_act, atom_Vp);
 					// get_cubic_poly_coef_Vz(*stream, atom_Vp);
-					fcn_eval_poly3(*stream, this->in_multem->grid_2d, atom_Vp, V);
+					fcn_eval_poly3(*stream, this->multem_in_parm->grid_2d, atom_Vp, V);
 					iatoms += stream->n_stream_act;
 				}
 
@@ -148,7 +148,7 @@ namespace mt
 					// get_cubic_poly_coef_Vz(*stream, atom_Vp_h);
 
 					auto d_grid_blk = get_eval_cubic_poly_gridBT(n_atoms);
-					gpu_detail::fcn_eval_poly3<T><<<d_grid_blk.grid, d_grid_blk.blk>>>(this->in_multem->grid_2d, atom_Vp, V);
+					gpu_detail::fcn_eval_poly3<T><<<d_grid_blk.grid, d_grid_blk.blk>>>(this->multem_in_parm->grid_2d, atom_Vp, V);
 
 					iatoms += n_atoms;
 				}
@@ -239,8 +239,8 @@ namespace mt
 					atom_Vp_h[istm].R2_min = coef.R2_min();
 					atom_Vp_h[istm].R2_max = coef.R2_max();
 					atom_Vp_h[istm].R2 = raw_pointer_cast(coef.R2.data());
-					atom_Vp_h[istm].set_ix0_ixn(this->in_multem->grid_2d, coef.R_max);
-					atom_Vp_h[istm].set_iy0_iyn(this->in_multem->grid_2d, coef.R_max);
+					atom_Vp_h[istm].set_ix0_ixn(this->multem_in_parm->grid_2d, coef.R_max);
+					atom_Vp_h[istm].set_iy0_iyn(this->multem_in_parm->grid_2d, coef.R_max);
 					atom_Vp_h[istm].R2_tap = coef.R2_tap();
 					atom_Vp_h[istm].coef_tap = coef.coef_tap;
 
@@ -250,7 +250,7 @@ namespace mt
 						atom_Vp_h[istm].v = raw_pointer_cast(stream_data.v[istm].data());
 					}
 
-					if (this->in_multem->is_spec_slic_by_dz_sub())
+					if (this->multem_in_parm->is_spec_slic_by_dz_sub())
 					{
 						atom_Vp_h[istm].z0h = 0.5*(z_0 - this->atoms.z[iatoms]);
 						atom_Vp_h[istm].zeh = 0.5*(z_e - this->atoms.z[iatoms]);
@@ -276,9 +276,9 @@ namespace mt
 			
 			void get_cubic_poly_coef_Vz(Stream<Dev>& stream, Vctr<Ptc_pVp<T>, edev_cpu>& atom_Vp)
 			{
-				if (this->in_multem->is_spec_slic_by_dz_sub())
+				if (this->multem_in_parm->is_spec_slic_by_dz_sub())
 				{
-					mt::linear_Vz(stream, this->in_multem->atomic_pot_parm_typ, qz, atom_Vp);
+					mt::linear_Vz(stream, this->multem_in_parm->atomic_pot_parm_typ, qz, atom_Vp);
 					mt::fcn_vd_2_coef_poly3(stream, atom_Vp);
 				}
 			}

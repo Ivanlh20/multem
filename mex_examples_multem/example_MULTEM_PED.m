@@ -1,4 +1,4 @@
-% output_multem = ilc_multem(system_conf, input_multem) perform TEM simulation
+% output_multem = ilc_multem(system_config, input_multem) perform TEM simulation
 % 
 % Precession electron diffraction (PED) simulation
 % 
@@ -15,10 +15,10 @@ addpath(['..', filesep, 'mex_bin'])
 input_multem = ilm_dflt_input_multem(); % Load default values;
 
 %%%%%%%%%%%%%%%%%%%%% Set system configuration %%%%%%%%%%%%%%%%%%%%%
-system_conf.precision = 1; % eP_Float = 1, eP_double = 2
-system_conf.device = 2; % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_n_thread = 1;
-system_conf.gpu_device = 0;
+system_config.precision = 1; % eP_Float = 1, eP_double = 2
+system_config.device = 2; % eD_CPU = 1, eD_GPU = 2
+system_config.cpu_n_thread = 1;
+system_config.gpu_device = 0;
 
 %%%%%%%%%%%%%%%%%%%% Set simulation experiment %%%%%%%%%%%%%%%%%%%%%
 % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, eTEMST_ED=31, eTEMST_HRTEM=32, eTEMST_PED=41, eTEMST_HCTEM=42, eTEMST_EWFS=51, eTEMST_EWRS=52, 
@@ -26,7 +26,7 @@ system_conf.gpu_device = 0;
 input_multem.em_sim_typ = 41;
 
 %%%%%%%%%%%%%% Electron-Specimen interaction model %%%%%%%%%%%%%%%%%
-input_multem.elec_spec_interac_mod = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
+input_multem.elec_spec_interact_mod = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
 input_multem.atomic_pot_parm_typ = 6; % eappt_doyle_0_4 = 1, eappt_peng_0_4 = 2, eappt_peng_0_12 = 3, eappt_kirkland_0_12 = 4, eappt_weickenmeier_0_12 = 5, eappt_lobato_0_12 = 6
 
 %%%%%%%%%%%%%%%%%%%%%%% specimen slicing %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -62,14 +62,14 @@ input_multem.theta = 0.0; % Till ilumination (º)
 input_multem.phi = 0.0; % Till ilumination (º)
 
 %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.illumination_model = 1; % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
-input_multem.temporal_spatial_incoh = 1; % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
+input_multem.illum_mod = 1; % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
+input_multem.illum_inc = 1; % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%% source spread function %%%%%%%%%%%%
 ssf_sigma = ilc_mrad_2_sigma(input_multem.E_0, 0.02); % mrad to standard deviation
 input_multem.obj_lens_ssf_sigma = ssf_sigma; % standard deviation: For parallel ilumination(Å^-1);otherwise (Å)
-input_multem.obj_lens_ssf_npoints = 4; % # of integration points. It will be only used if illumination_model=4
+input_multem.obj_lens_ssf_npoints = 4; % # of integration points. It will be only used if illum_mod=4
 
 %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%%%% aperture radius %%%%%%%%%%%%%%%%%
@@ -82,7 +82,7 @@ input_multem.ped_theta = 3.0; % Precession angle (degrees)
 
 clear ilc_multem;
 tic;
-output_multem = ilc_multem(system_conf, input_multem);
+output_multem = ilc_multem(system_config, input_multem);
 toc;
 
 c = 1e7;

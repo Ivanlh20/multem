@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,108 +19,108 @@
 #define MATLAB_BLAS_LAPACK
 
 #include "types.cuh"
-#include "type_traits_gen.cuh"
+#include "type_traits_gen.h"
 #include "cgpu_stream.cuh"
 #include "cgpu_fft.cuh"
 #include "particles.cuh"
 #include "spec_slic.hpp"
 #include "in_classes.cuh"
 #include "output_multem.hpp"
-#include "cpu_fcns.hpp"
-#include "gpu_fcns.cuh"
-#include "cgpu_fcns.cuh"
+#include "fcns_cpu.h"
+#include "fcns_gpu.h"
+#include "fcns_gpu.h"
 #include "wave_function.cuh"
 
 #include <mex.h>
-#include "matlab_mex.cuh"
+#include "matlab_mex.h"
 
 using mt::pMLD;
 using mt::pMx_c;
 
 template <class TIn_Multislice>
-void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
+void read_multem_in_parm(const mxArray* mex_multem_in_parm, TIn_Multislice &multem_in_parm, dt_bool full = true)
 {
 	using T_r = mt::Value_type<TIn_Multislice>;
 
 	/************************ simulation type **************************/
-	in_multem.simulation_type = mex_get_num_from_field<mt::eEM_Sim_Typ>(mex_in_multem, "simulation_type");
-	in_multem.simulation_type = (in_multem.is_EWRS())?mt::eemst_ewrs:mt::eemst_ewfs;
+	multem_in_parm.em_sim_typ = mex_get_num_from_field<mt::eEM_Sim_Typ>(mex_multem_in_parm, "em_sim_typ");
+	multem_in_parm.em_sim_typ = (multem_in_parm.is_EWRS())?mt::eemst_ewrs:mt::eemst_ewfs;
 
-	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Interact_Mod>(mex_in_multem, "interaction_model");
-	in_multem.atomic_pot_parm_typ = mex_get_num_from_field<mt::eAtomic_Pot_Parm_Typ>(mex_in_multem, "atomic_pot_parm_typ");
+	multem_in_parm.elec_spec_interact_mod = mex_get_num_from_field<mt::eElec_Spec_Interact_Mod>(mex_multem_in_parm, "elec_spec_interact_mod");
+	multem_in_parm.atomic_pot_parm_typ = mex_get_num_from_field<mt::eAtomic_Pot_Parm_Typ>(mex_multem_in_parm, "atomic_pot_parm_typ");
 
 	/************** Electron-Atomic_Vib interaction model **************/
-	mex_read_atomic_vib(mex_in_multem, in_multem.atomic_vib);
-	in_multem.atomic_vib.coh_contrib = true;
-	in_multem.atomic_vib.sgl_conf = true;
+	mex_read_atomic_vib(mex_multem_in_parm, multem_in_parm.atomic_vib);
+	multem_in_parm.atomic_vib.coh_contrib = true;
+	multem_in_parm.atomic_vib.sgl_conf = true;
 
 	/**************************** Specimen *****************************/
-	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
-	auto bs_y = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_y");
-	auto bs_z = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_z");
-	auto sli_thick = mex_get_num_from_field<T_r>(mex_in_multem, "spec_dz");
+	auto bs_x = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_x");
+	auto bs_y = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_y");
+	auto bs_z = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_z");
+	auto sli_thick = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_dz");
 	dt_bool pbc_xy = true;
 
 	if (full)
 	{
 		/************************* atomic positions ************************/
-		mex_read_atoms<T_r>(mex_in_multem, bs_x, bs_y, bs_z, sli_thick, in_multem.atoms);
+		mex_read_atoms<T_r>(mex_multem_in_parm, bs_x, bs_y, bs_z, sli_thick, multem_in_parm.atoms);
 	}
 
 	/************************ Specimen rotation ************************/
-	mex_read_rot_parm<T_r>(mex_in_multem, in_multem.rot_par);
+	mex_read_rot_in_parm<T_r>(mex_multem_in_parm, multem_in_parm.rot_in_parm);
 
 	/************************ Specimen thickness ***********************/
-	in_multem.thick_type = mex_get_num_from_field<mt::eSim_Thick_Typ>(mex_in_multem, "thick_type");
-	if (!in_multem.is_sim_whole_spec() && full)
+	multem_in_parm.thick_type = mex_get_num_from_field<mt::eSim_Thick_Typ>(mex_multem_in_parm, "thick_type");
+	if (!multem_in_parm.is_sim_whole_spec() && full)
 	{
-		mex_read_spec_thick<T_r>(mex_in_multem, in_multem.thick);
+		mex_read_spec_thick<T_r>(mex_multem_in_parm, multem_in_parm.thick);
 	}
 
 	/************************ Potential slicing ************************/
-	in_multem.spec_slic_typ = mex_get_num_from_field<mt::eSpec_Slic_Typ>(mex_in_multem, "spec_slic_typ");
+	multem_in_parm.spec_slic_typ = mex_get_num_from_field<mt::eSpec_Slic_Typ>(mex_multem_in_parm, "spec_slic_typ");
 
 	/************************** xy sampling ****************************/
-	auto nx = mex_get_num_from_field<dt_int32>(mex_in_multem, "nx");
-	auto ny = mex_get_num_from_field<dt_int32>(mex_in_multem, "ny");
-	dt_bool bwl = mex_get_bool_from_field(mex_in_multem, "bwl");
+	auto nx = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "nx");
+	auto ny = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "ny");
+	dt_bool bwl = mex_get_bool_from_field(mex_multem_in_parm, "bwl");
 
-	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
+	multem_in_parm.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
 
 	/************************** Incident wave **************************/
-	auto iw_type = mex_get_num_from_field<mt::eIncident_Wave_Typ>(mex_in_multem, "iw_type");
-	in_multem.set_incident_wave_type(iw_type);
+	auto iw_type = mex_get_num_from_field<mt::eIncident_Wave_Typ>(mex_multem_in_parm, "iw_type");
+	multem_in_parm.set_incident_wave_type(iw_type);
 
-	if (in_multem.is_user_define_wave() && full)
+	if (multem_in_parm.is_user_define_wave() && full)
 	{
-		mex_read_user_define_wave<T_r>(mex_in_multem, in_multem.iw_psi);
+		mex_read_user_define_wave<T_r>(mex_multem_in_parm, multem_in_parm.iw_psi);
 	}
 
 	/********************* read beam positions *************************/
-	mex_read_beam_pos<T_r>(mex_in_multem, in_multem.beam_pos_i);
+	mex_read_beam_pos<T_r>(mex_multem_in_parm, multem_in_parm.beam_pos_2d);
 
 	/********************* Microscope parameter ***********************/
-	in_multem.E_0 = mex_get_num_from_field<T_r>(mex_in_multem, "E_0");
-	in_multem.theta = mex_get_num_from_field<T_r>(mex_in_multem, "theta")*mt::c_deg_2_rad;
-	in_multem.phi = mex_get_num_from_field<T_r>(mex_in_multem, "phi")*mt::c_deg_2_rad;
+	multem_in_parm.E_0 = mex_get_num_from_field<T_r>(mex_multem_in_parm, "E_0");
+	multem_in_parm.theta = mex_get_num_from_field<T_r>(mex_multem_in_parm, "theta")*mt::c_deg_2_rad;
+	multem_in_parm.phi = mex_get_num_from_field<T_r>(mex_multem_in_parm, "phi")*mt::c_deg_2_rad;
 
 	/********************* Illumination model *************************/
-	in_multem.illumination_model = mt::eim_coherent;
-	in_multem.temporal_spatial_incoh = mt::etsi_temporal_spatial;
+	multem_in_parm.illum_mod = mt::eim_coherent;
+	multem_in_parm.illum_inc = mt::eii_temporal_spatial;
 
 	/*********************** Condenser lens ***************************/
-	mex_read_cond_lens<T_r>(mex_in_multem, in_multem.cond_lens);
-	in_multem.cond_lens.set_in_data(in_multem.E_0, in_multem.grid_2d);
+	mex_read_cond_lens<T_r>(mex_multem_in_parm, multem_in_parm.cond_lens);
+	multem_in_parm.cond_lens.set_in_data(multem_in_parm.E_0, multem_in_parm.grid_2d);
 
 	/*********************** Objective lens ***************************/
-	mex_read_obj_lens<T_r>(mex_in_multem, in_multem.obj_lens);
-	in_multem.obj_lens.set_in_data(in_multem.E_0, in_multem.grid_2d);
+	mex_read_obj_lens<T_r>(mex_multem_in_parm, multem_in_parm.obj_lens);
+	multem_in_parm.obj_lens.set_in_data(multem_in_parm.E_0, multem_in_parm.grid_2d);
 
 	/******************** select output region ************************/
-	mex_read_output_area(mex_in_multem, in_multem.output_area);
+	mex_read_output_area(mex_multem_in_parm, multem_in_parm.output_area);
 
 	/********************* validate parameters *************************/
-	in_multem.set_dep_var();
+	multem_in_parm.set_dep_var();
 }
 
 template <class TOutput_Multem>
@@ -153,23 +153,23 @@ void set_struct_wave_function(TOutput_Multem &output_multem, mxArray*& mex_outpu
 }
 
 template <class T, mt::eDev Dev>
-void run_wave_function(mt::System_Config &system_config, const mxArray* mex_in_multem, mxArray*& mex_output_multem)
+void run_wave_function(mt::System_Config &system_config, const mxArray* mex_multem_in_parm, mxArray*& mex_output_multem)
 {
-	mt::In_Multem<T> in_multem;
-	read_in_multem(mex_in_multem, in_multem);
-	in_multem.system_config = system_config;
+	mt::Multem_In_Parm<T> multem_in_parm;
+	read_multem_in_parm(mex_multem_in_parm, multem_in_parm);
+	multem_in_parm.system_config = system_config;
 
 	mt::Stream<Dev> stream(system_config.n_stream);
 	mt::FFT<T, Dev> fft_2d;
-	fft_2d.create_plan_2d(in_multem.grid_2d.ny, in_multem.grid_2d.nx, system_config.n_stream);
+	fft_2d.create_plan_2d(multem_in_parm.grid_2d.ny, multem_in_parm.grid_2d.nx, system_config.n_stream);
 
 	mt::Wave_Function<T, Dev> wave_function;
-	wave_function.set_in_data(&in_multem, &stream, &fft_2d);
+	wave_function.set_in_data(&multem_in_parm, &stream, &fft_2d);
 
 	mt::Output_Multem<T> output_multem;
-	output_multem.set_in_data(&in_multem);
+	output_multem.set_in_data(&multem_in_parm);
 
-	wave_function.move_atoms(in_multem.atomic_vib.nconf);
+	wave_function.move_atoms(multem_in_parm.atomic_vib.nconf);
 	wave_function.set_incident_wave(wave_function.psi_z);
 	wave_function.psi(1.0, wave_function.psi_z, output_multem);
 

@@ -114,9 +114,13 @@ function [atoms, lx, ly, lz] = ilm_read_ap_cif(path, rmsd_3d_0, pbc, na, nb, nc)
     end
 
     xtl_parm.asym_uc = asym_uc;
-    xtl_parm.base = [];
     
+%     xtl_parm.base = ilm_xtl_build_base(xtl_parm);
+%     atoms = ilc_xtl_build(xtl_parm);  
+    
+    xtl_parm.base = [];
     atoms = ilc_xtl_build(xtl_parm);
+%     ilc_xtl_build
     
     xyz = atoms(:, 2:4);
     xyz = xyz - min(xyz);
@@ -126,7 +130,7 @@ function [atoms, lx, ly, lz] = ilm_read_ap_cif(path, rmsd_3d_0, pbc, na, nb, nc)
     [lx, ly, lz] = ilm_vect_assign([max(lx, xtl_parm.a), max(ly, xtl_parm.b), max(lz, xtl_parm.c)]);
 end
 
-function[bb] =fn_break(str_ss)
+function[bb] = fn_break(str_ss)
     if(size(str_ss, 1)>0)
         str_ss = str_ss{1};
         bb = ilm_Z(str_ss(isletter(str_ss)))<1;

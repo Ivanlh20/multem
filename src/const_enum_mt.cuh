@@ -1,6 +1,6 @@
 ﻿/*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 		#pragma once
 	#endif 
 
-	#include "macros.cuh"
-	#include "const_enum.cuh"
+	#include "macros.h"
+	#include "const_enum.h"
 	
 	/*********************************************************************/
 	/* enumeration definitions */
@@ -144,16 +144,16 @@
 			esmt_none = 0, esmt_transmission = 1, esmt_potential = 2
 		};
 
-		/************************ microscope effects *************************/
-		enum eIllumination_Model
+		/************************ illumination model  *************************/
+		enum eIllum_Mod
 		{
 			eim_none = 0, eim_coherent = 1, eim_partial_coherent = 2, eim_trans_cross_coef = 3, eim_full_integration = 4
 		};
 
-		/************************ spatial and temporal ***********************/
-		enum eTemporal_Spatial_Incoh
+		/*********************** illumination incoherence **********************/
+		enum eIllum_Inc
 		{
-			etsi_none = 0, etsi_temporal_spatial = 1, etsi_temporal = 2, etst_spatial = 3
+			eii_none = 0, eii_temporal_spatial = 1, eii_temporal = 2, etst_spatial = 3
 		};
 
 		/************************** lens variable type ***********************/

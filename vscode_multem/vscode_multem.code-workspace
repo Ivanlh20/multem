@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../src"
+		},
+		{
+			"path": "../mex_files_general"
+		},
+		{
+			"path": "../mex_files_multem"
+		},
+		{
+			"path": "../mex_files_test"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}

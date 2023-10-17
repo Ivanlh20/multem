@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,15 @@
 	#define SPEC_SLIC_H
 
 	#include "const_enum_mt.cuh"
-	#include "math.cuh"
-	#include "kahan_sum.cuh"
-	#include "r_2d.cuh"
+	#include "math_mt.h"
+	#include "kahan_sum.h"
+	#include "r_2d.h"
 	#include "types_mt.cuh"
-	#include "cgpu_fcns_gen.cuh"
+	#include "fcns_cgpu_gen.h"
 	#include "particles.cuh"
-	#include "cpu_fcns.hpp"
+	#include "fcns_cpu.h"
 	#include "cgpu_vctr.cuh"
+	#include "spec_slic_in_parm.hpp"
 
 	namespace mt
 	{
@@ -41,7 +42,7 @@
 				Ident_Pla(): dv(0.1) {}
 
 				// identify planes: require v to be sorted
-				template<class U>
+				template <class U>
 				Vctr_cpu<U> operator()(pVctr_cpu_32<U>& v, T v_min=0, T v_max=0)
 				{
 					if (v.size()==0)
@@ -116,7 +117,7 @@
 				}
 				
 				// calculate planes
-				template<class U>
+				template <class U>
 				Vctr_cpu<U> operator()(U v_min, U v_max, U dv, eMatch_Bdr match_bdr=emb_minmax)
 				{
 					if (fcn_is_equal(v_min, v_max))
@@ -176,7 +177,7 @@
 				T dv;
 
 				// calculate corrected histogram
-				template<class U>
+				template <class U>
 				Vctr_cpu<dt_int32> hist(pVctr_cpu_32<U>& v, const T& dv, const T& v_min, const T& v_max)
 				{
 					const auto v_l = ::fmax(v_max-v_min, dv);
@@ -235,67 +236,6 @@
 
 		/************************* slice thickness ***************************/
 		template <class T>
-		class In_Slic
-		{
-			public:
-				In_Slic(): typ( esst_plns_proj), sli_thick(0), sel_typ(0), 
-				sel_tag(0), sel_Z(0), sel_z_lim{0, 0} {}
-
-				eSpec_Slic_Typ typ;				// esst_plns_proj = 1, esst_dz_proj = 2,  esst_plns_sub = 3, esst_dz_sub = 4, esst_user_def = 5, esst_auto = 6
-				T sli_thick;					// slice thickness
-				eSpec_Slic_Sel_Typ sel_typ;		// essso_tag = 1, essso_z = 2
-				dt_int32 sel_tag;				// tag
-				dt_int32 sel_Z;					// atomic number
-				R_2d<T> sel_z_lim;				// [z_0, z_e]
-				Vctr_cpu<T> z_plns;				// z planes positions
-
-				dt_bool is_spec_slic_by_plns_proj()
-				{
-					return mt::is_spec_slic_by_plns_proj(typ);
-				}
-
-				dt_bool is_spec_slic_by_dz_proj()
-				{
-					return  mt::is_spec_slic_by_dz_proj(typ);
-				}		
-
-				dt_bool is_spec_slic_by_plns_sub()
-				{
-					return  mt::is_spec_slic_by_plns_sub(typ);
-				}
-
-				dt_bool is_spec_slic_by_dz_sub()
-				{
-					return  mt::is_spec_slic_by_dz_sub(typ);
-				}
-
-				dt_bool is_spec_slic_by_user_def()
-				{
-					return  mt::is_spec_slic_by_user_def(typ);
-				}
-
-				dt_bool is_spec_slic_by_auto()
-				{
-					return  mt::is_spec_slic_by_auto(typ);
-				}
-
-				dt_bool is_spec_slic_by_planes()
-				{
-					return  mt::is_spec_slic_by_planes(typ);
-				}
-
-				dt_bool is_spec_slic_sel_typ_by_tag()
-				{
-					return mt::is_spec_slic_sel_typ_by_tag(sel_typ);
-				}
-
-				dt_bool is_spec_slic_sel_typ_by_z()
-				{
-					return mt::is_spec_slic_sel_typ_by_z(sel_typ);
-				}
-		};
-
-		template <class T>
 		class Out_Slic
 		{
 			public:
@@ -324,7 +264,7 @@
 
 				Spec_Slic(): patoms_r(nullptr), patoms(nullptr), z_eps(1e-3) {}
 
-				void set_in_data(const Vctr_cpu<In_Slic>& in_slic, Ptc_Atom<T>* patoms_r=nullptr, Ptc_Atom<T>* patoms=nullptr)
+				void set_in_data(const Vctr_cpu<Spec_Slic_In_Parm>& in_slic, Ptc_Atom<T>* patoms_r=nullptr, Ptc_Atom<T>* patoms=nullptr)
 				{
 					patoms_r = patoms_r;
 					if (fcn_is_null_ptr(patoms))
@@ -335,7 +275,7 @@
 					z_plns = get_z_plns(in_slic, patoms_r);
 				}
 
-				Vctr_cpu<T> get_z_plns(const Vctr_cpu<In_Slic>& in_slic, Ptc_Atom<T>* patoms)
+				Vctr_cpu<T> get_z_plns(const Vctr_cpu<Spec_Slic_In_Parm>& in_slic, Ptc_Atom<T>* patoms)
 				{
 					// get planes
 					Vctr_cpu<Vctr_cpu<T>> z_pln_s(in_slic.size());
@@ -398,11 +338,11 @@
 
 				//void calculate()
 				//{
-				//	m_z_slice = get_z_slice(m_in_multem->spec_slic_typ, z_plns, *patoms);
+				//	m_z_slice = get_z_slice(m_multem_in_parm->spec_slic_typ, z_plns, *patoms);
 
-				//	thick = get_thick(m_in_multem, m_z_slice, *patoms_r);
+				//	thick = get_thick(m_multem_in_parm, m_z_slice, *patoms_r);
 
-				//	slice = get_slicing(m_in_multem, m_z_slice, thick, *patoms);
+				//	slice = get_slicing(m_multem_in_parm, m_z_slice, thick, *patoms);
 				//}
 
 			private:
@@ -467,7 +407,7 @@
 				}
 
 				// identify planes: atoms have to be sorted along z
-				Vctr_cpu<T> get_z_plns(const In_Slic& in_slic, Ptc_Atom<T>* patoms)
+				Vctr_cpu<T> get_z_plns(const Spec_Slic_In_Parm& in_slic, Ptc_Atom<T>* patoms)
 				{
 					if (patoms->size() == 0)
 					{
@@ -576,10 +516,10 @@
 				//}
 
 				//// get thick
-				//Vctr<Thick<T>, edev_cpu> get_thick(In_Multem<T> *in_multem, 
+				//Vctr<Thick<T>, edev_cpu> get_thick(Multem_In_Parm<T> *multem_in_parm, 
 				//Vctr_cpu<T> &z_slice, Ptc_Atom<T>& patoms)
 				//{
-				//	const auto thick_type = in_multem->thick_type;
+				//	const auto thick_type = multem_in_parm->thick_type;
 
 				//	auto get_islice = [thick_type](Vctr_cpu<T> &z_slice, const T& z)->dt_int32
 				//	{
@@ -607,20 +547,20 @@
 				//		}
 				//	};
 
-				//	auto b_sws = in_multem->is_spec_slic_by_dz_sub_whole_spec();
+				//	auto b_sws = multem_in_parm->is_spec_slic_by_dz_sub_whole_spec();
 
-				//	Vctr<Thick<T>, edev_cpu> thick(in_multem->thick.size());
+				//	Vctr<Thick<T>, edev_cpu> thick(multem_in_parm->thick.size());
 				//	for(auto ik = 0; ik<thick.size(); ik++)
 				//	{
-				//		thick[ik].z = in_multem->thick[ik];
+				//		thick[ik].z = multem_in_parm->thick[ik];
 				//		auto islice = (b_sws)?(z_slice.size()-2):get_islice(z_slice, thick[ik].z);
 				//		thick[ik].islice = islice;
 
 				//		auto iatom_e = fd_by_z(patoms->z, z_slice[islice+1], false);
 				//		thick[ik].iatom_e = iatom_e;
 
-				//		thick[ik].z_zero_def_plane = in_multem->obj_lens.get_zero_def_plane(patoms->z[0], patoms->z[iatom_e]);
-				//		if (in_multem->is_sim_through_slices())
+				//		thick[ik].z_zero_def_plane = multem_in_parm->obj_lens.get_zero_def_plane(patoms->z[0], patoms->z[iatom_e]);
+				//		if (multem_in_parm->is_sim_through_slices())
 				//		{
 				//			thick[ik].z_back_prop = 0;
 				//		}
@@ -635,7 +575,7 @@
 				//		}
 				//	}
 
-				//	if (!in_multem->is_multislice())
+				//	if (!multem_in_parm->is_multislice())
 				//	{
 				//		for(auto ithick = 0; ithick<thick.size(); ithick++)
 				//		{
@@ -648,10 +588,10 @@
 				//}
 
 				//// slicing
-				//Vctr<Out_Slic<T>, edev_cpu> get_slicing(In_Multem<T> *in_multem, 
+				//Vctr<Out_Slic<T>, edev_cpu> get_slicing(Multem_In_Parm<T> *multem_in_parm, 
 				//Vctr_cpu<T> &z_slice, Vctr<Thick<T>, edev_cpu>& thick, Ptc_Atom<T>& patoms)
 				//{	
-				//	if (!in_multem->is_multislice())
+				//	if (!multem_in_parm->is_multislice())
 				//	{
 				//		Vctr<Out_Slic<T>, edev_cpu> slice(thick.size());
 				//		for(auto islice = 0; islice<slice.size(); islice++)
@@ -673,7 +613,7 @@
 				//		dt_bool Inc_Borders = false;
 				//		slice[islice].z_0 = z_slice[islice];
 				//		slice[islice].z_e = z_slice[islice + 1];
-				//		switch(in_multem->spec_slic_typ)
+				//		switch(multem_in_parm->spec_slic_typ)
 				//		{
 				//			case  esst_plns_proj:
 				//			{

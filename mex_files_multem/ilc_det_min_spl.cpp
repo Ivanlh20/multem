@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,11 @@
 
 #define MATLAB_BLAS_LAPACK
 
-#include "cgpu_fcns_gen.cuh"
+#include "fcns_cgpu_gen.h"
 #include "pn_fact.hpp"
 
 #include <mex.h>
-#include "matlab_mex.cuh"
+#include "matlab_mex.h"
 
 void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[])
 {

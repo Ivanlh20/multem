@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,15 +24,15 @@
 	#endif 
 
 	#include "const_enum_mt.cuh"
-	#include "math.cuh"
-	#include "type_traits_gen.cuh"
+	#include "math_mt.h"
+	#include "type_traits_gen.h"
 	#include "cgpu_stream.cuh"
 	#include "cgpu_fft.cuh"
-	#include "cgpu_fcns_gen.cuh"
+	#include "fcns_cgpu_gen.h"
 	// #include "in_classes.cuh"
-	// #include "cpu_fcns.hpp"
-	// #include "gpu_fcns.cuh"
-	// #include "cgpu_fcns.cuh"
+	// #include "fcns_cpu.h"
+	// #include "fcns_gpu.h"
+	// #include "fcns_gpu.h"
 
 	namespace mt
 	{
@@ -214,13 +214,13 @@
 			using T_r = T;
 			using T_c = complex<T>;
 
-			void set_in_data(In_Multem<T_r> *in_multem, Stream<Dev> *stream, FFT<T_r, Dev> *fft2)
+			void set_in_data(Multem_In_Parm<T_r> *multem_in_parm, Stream<Dev> *stream, FFT<T_r, Dev> *fft2)
 			{
-				this->in_multem = in_multem;
+				this->multem_in_parm = multem_in_parm;
 				this->stream = stream;
 				this->fft_2d = fft2;
 
-				if (in_multem->eels_fr.m_sel>2)
+				if (multem_in_parm->eels_fr.m_sel>2)
 				{
 					kernel.resize(3);
 				}
@@ -231,7 +231,7 @@
 
 				for(auto ikn = 0; ikn<kernel.size(); ikn++)
 				{
-					kernel[ikn].resize(in_multem->grid_2d.size());
+					kernel[ikn].resize(multem_in_parm->grid_2d.size());
 				}
 
 			}
@@ -240,33 +240,33 @@
 			{
 				if (eels.m_sel>2)
 				{
-					mt::fcn_eels_w_xyz(*stream, in_multem->grid_2d, eels, *fft_2d, kernel[0], kernel[1], kernel[2]);
+					mt::fcn_eels_w_xyz(*stream, multem_in_parm->grid_2d, eels, *fft_2d, kernel[0], kernel[1], kernel[2]);
 				}
 				else if (eels.m_sel == -2)
 				{
-					mt::fcn_eels_w_x(*stream, in_multem->grid_2d, eels, *fft_2d, kernel[0]);
+					mt::fcn_eels_w_x(*stream, multem_in_parm->grid_2d, eels, *fft_2d, kernel[0]);
 				}
 				else if (eels.m_sel == -1)
 				{
-					mt::fcn_eels_w_mn1(*stream, in_multem->grid_2d, eels, *fft_2d, kernel[0]);
+					mt::fcn_eels_w_mn1(*stream, multem_in_parm->grid_2d, eels, *fft_2d, kernel[0]);
 				}
 				else if (eels.m_sel == 0)
 				{
-					mt::fcn_eels_w_z(*stream, in_multem->grid_2d, eels, *fft_2d, kernel[0]);
+					mt::fcn_eels_w_z(*stream, multem_in_parm->grid_2d, eels, *fft_2d, kernel[0]);
 				}
 				else if (eels.m_sel == 1)
 				{
-					mt::fcn_eels_w_mp1(*stream, in_multem->grid_2d, eels, *fft_2d, kernel[0]);
+					mt::fcn_eels_w_mp1(*stream, multem_in_parm->grid_2d, eels, *fft_2d, kernel[0]);
 				}
 				else if (eels.m_sel == 2)
 				{
-					mt::fcn_eels_w_y(*stream, in_multem->grid_2d, eels, *fft_2d, kernel[0]);
+					mt::fcn_eels_w_y(*stream, multem_in_parm->grid_2d, eels, *fft_2d, kernel[0]);
 				}
 			}
 
 			Vctr<Vctr<T_c, Dev>, edev_cpu> kernel;
 		private:
-			In_Multem<T_r> *in_multem;
+			Multem_In_Parm<T_r> *multem_in_parm;
 			Stream<Dev> *stream;
 			FFT<T_r, Dev> *fft_2d;
 		};

@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,12 +21,12 @@
 
 	#include <algorithm>
 
-	#include "math.cuh"
+	#include "math_mt.h"
 	#include "types.cuh"
 	#include "particles.cuh"
-	#include "cgpu_info.cuh"
+	#include "system_config.h"
 	#include "cgpu_vctr.cuh"
-	#include "grid.cuh"
+	#include "grid.h"
 
 	/***************************************************************************************/
 	/***************************** Input particle superposition ****************************/

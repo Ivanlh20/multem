@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,15 @@
 #ifndef INCIDENT_WAVE_H
 	#define INCIDENT_WAVE_H
 
-	#include "math.cuh"
+	#include "math_mt.h"
 	#include "types.cuh"
-	#include "type_traits_gen.cuh"
+	#include "type_traits_gen.h"
 	#include "cgpu_stream.cuh"
 	#include "cgpu_fft.cuh"
 	#include "in_classes.cuh"
 	#include "output_multem.hpp"
-	#include "cpu_fcns.hpp"
-	#include "gpu_fcns.cuh"
+	#include "fcns_cpu.h"
+	#include "fcns_gpu.h"
 
 	namespace mt
 	{
@@ -39,29 +39,29 @@
 
 				static const eDev device = Dev;
 
-				Incident_Wave(): in_multem(nullptr), stream(nullptr), fft_2d(nullptr) {}
+				Incident_Wave(): multem_in_parm(nullptr), stream(nullptr), fft_2d(nullptr) {}
 
-				void set_in_data(In_Multem<T_r> *in_multem_i, Stream<Dev> *stream_i, FFT<T_r, Dev> *fft2_i)
+				void set_in_data(Multem_In_Parm<T_r> *multem_in_parm_i, Stream<Dev> *stream_i, FFT<T_r, Dev> *fft2_i)
 				{
-					in_multem = in_multem_i;
+					multem_in_parm = multem_in_parm_i;
 					stream = stream_i;
 					fft_2d = fft2_i;
 
-					if (in_multem->is_user_define_wave())
+					if (multem_in_parm->is_user_define_wave())
 					{
-						fpsi_0.assign(in_multem->iw_psi.begin(), in_multem->iw_psi.end());
-						mt::fcn_fftsft_2d(*stream, in_multem->grid_2d, fpsi_0);
+						fpsi_0.assign(multem_in_parm->iw_psi.begin(), multem_in_parm->iw_psi.end());
+						mt::fcn_fftsft_2d(*stream, multem_in_parm->grid_2d, fpsi_0);
 						fft_2d->forward(fpsi_0);
 					}
-					else if (in_multem->is_convergent_wave())
+					else if (multem_in_parm->is_convergent_wave())
 					{
-						fpsi_0.resize(in_multem->grid_2d.size());
+						fpsi_0.resize(multem_in_parm->grid_2d.size());
 					}
 				}
 
 				void operator()(Vctr<T_c, Dev>& psi, R_2d<T_r> gu, Beam_Pos_2d<T_r>& beam_pos_2d, T_r z_init=0)
 				{
-					switch(in_multem->iw_type)
+					switch(multem_in_parm->iw_type)
 					{
 						case eiwt_plane_wave:
 						{
@@ -70,31 +70,31 @@
 						break;
 						case eiwt_convergent_wave:
 						{
-							auto f_0 = in_multem->cond_lens.c_10;
-							auto f_s = f_0 - (in_multem->cond_lens.zero_def_plane-z_init);
-							in_multem->cond_lens.set_defocus(f_s);
+							auto f_0 = multem_in_parm->cond_lens.c_10;
+							auto f_s = f_0 - (multem_in_parm->cond_lens.zero_def_plane-z_init);
+							multem_in_parm->cond_lens.set_defocus(f_s);
 
 							mt::fill(*stream, psi, T_c(0));
-							auto R = in_multem->grid_2d.factor_2pi_rv_ctr(beam_pos_2d.p);
+							auto R = multem_in_parm->grid_2d.factor_2pi_rv_ctr(beam_pos_2d.p);
 
 							for(auto ib=0; ib<R.size(); ib++)
 							{
-								mt::fcn_fs_probe(*stream, in_multem->grid_2d, in_multem->cond_lens, R[ib], gu, fpsi_0);
+								mt::fcn_fs_probe(*stream, multem_in_parm->grid_2d, multem_in_parm->cond_lens, R[ib], gu, fpsi_0);
 								mt::add(*stream, fpsi_0, psi);
 							}
 							fft_2d->inverse(psi);
 
-							in_multem->cond_lens.set_defocus(f_0);
+							multem_in_parm->cond_lens.set_defocus(f_0);
 						}
 						break;
 						case eiwt_user_def_Wave:
 						{
 							// we need to include defocus
-							auto f_s = -(in_multem->cond_lens.zero_def_plane-z_init);
+							auto f_s = -(multem_in_parm->cond_lens.zero_def_plane-z_init);
 
-							auto R = in_multem->grid_2d.factor_2pi_rv_ctr(beam_pos_2d.p);
+							auto R = multem_in_parm->grid_2d.factor_2pi_rv_ctr(beam_pos_2d.p);
 
-							mt::fcn_mul_exp_g_factor_2d(*stream, in_multem->grid_2d, R, fpsi_0, psi);
+							mt::fcn_mul_exp_g_factor_2d(*stream, multem_in_parm->grid_2d, R, fpsi_0, psi);
 
 							fft_2d->inverse(psi);
 						}
@@ -105,20 +105,20 @@
 				template <class TOutput_multislice>
 				void operator()(const eSpace &space, TOutput_multislice &output_multem)
 				{
-					Vctr<T_c, Dev> psi(in_multem->grid_2d.size());
-					this->operator()(psi, in_multem->gu_0(), in_multem->beam_pos_i);
+					Vctr<T_c, Dev> psi(multem_in_parm->grid_2d.size());
+					this->operator()(psi, multem_in_parm->gu_0(), multem_in_parm->beam_pos_2d);
 
 					if (space == esp_fourier)
 					{
 						fft_2d->forward(psi);
-						mt::fcn_scale(*stream, in_multem->grid_2d.isize_r(), psi);
+						mt::fcn_scale(*stream, multem_in_parm->grid_2d.isize_r(), psi);
 					}
 
-					mt::fcn_assign_crop_fftsft_2d(in_multem->grid_2d, psi, in_multem->output_area, output_multem.psi_0(0, 0));
+					mt::fcn_assign_crop_fftsft_2d(multem_in_parm->grid_2d, psi, multem_in_parm->output_area, output_multem.psi_0(0, 0));
 				}
 
 			private:
-				In_Multem<T_r> *in_multem;
+				Multem_In_Parm<T_r> *multem_in_parm;
 				Stream<Dev> *stream;
 				FFT<T_r, Dev> *fft_2d;
 

@@ -1,6 +1,6 @@
 /**
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #define MATLAB_BLAS_LAPACK
 
 #include "types.cuh"
-#include "type_traits_gen.cuh"
+#include "type_traits_gen.h"
 #include "cgpu_stream.cuh"
 #include "cgpu_fft.cuh"
 #include "in_classes.cuh"
@@ -28,58 +28,58 @@
 #include "propagator.cuh"
 
 #include <mex.h>
-#include "matlab_mex.cuh"
+#include "matlab_mex.h"
 
 using mt::pMLD;
 using mt::pMx_c;
 
 template <class TIn_Multislice>
-void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
+void read_multem_in_parm(const mxArray* mex_multem_in_parm, TIn_Multislice &multem_in_parm, dt_bool full = true)
 {
 	using T_r = mt::Value_type<TIn_Multislice>;
 
-	in_multem.simulation_type = mt::eemst_proprs;
+	multem_in_parm.em_sim_typ = mt::eemst_proprs;
 
 	/**************************** Specimen *****************************/
-	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
-	auto bs_y = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_y");
+	auto bs_x = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_x");
+	auto bs_y = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_y");
 	T_r bs_z = 0;
 	T_r sli_thick = 0.25;
 	dt_bool pbc_xy = true;
 
 	/************************** xy sampling ****************************/
-	auto nx = mex_get_num_from_field<dt_int32>(mex_in_multem, "nx");
-	auto ny = mex_get_num_from_field<dt_int32>(mex_in_multem, "ny");
+	auto nx = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "nx");
+	auto ny = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "ny");
 	dt_bool bwl = false;
 
-	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
+	multem_in_parm.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
 
 	/************************ Incident wave ****************************/
-	auto iw_type = mex_get_num_from_field<mt::eIncident_Wave_Typ>(mex_in_multem, "iw_type");
-	in_multem.set_incident_wave_type(iw_type);
+	auto iw_type = mex_get_num_from_field<mt::eIncident_Wave_Typ>(mex_multem_in_parm, "iw_type");
+	multem_in_parm.set_incident_wave_type(iw_type);
 
-	if (in_multem.is_user_define_wave() && full)
+	if (multem_in_parm.is_user_define_wave() && full)
 	{
-		mex_read_user_define_wave<T_r>(mex_in_multem, in_multem.iw_psi);
+		mex_read_user_define_wave<T_r>(mex_multem_in_parm, multem_in_parm.iw_psi);
 	}
 
 	/********************* read beam positions ************************/
-	mex_read_beam_pos<T_r>(mex_in_multem, in_multem.beam_pos_i);
+	mex_read_beam_pos<T_r>(mex_multem_in_parm, multem_in_parm.beam_pos_2d);
 
 	/********************* Microscope parameter ***********************/
-	in_multem.E_0 = mex_get_num_from_field<T_r>(mex_in_multem, "E_0");
-	in_multem.theta = mex_get_num_from_field<T_r>(mex_in_multem, "theta")*mt::c_deg_2_rad;
-	in_multem.phi = mex_get_num_from_field<T_r>(mex_in_multem, "phi")*mt::c_deg_2_rad;
+	multem_in_parm.E_0 = mex_get_num_from_field<T_r>(mex_multem_in_parm, "E_0");
+	multem_in_parm.theta = mex_get_num_from_field<T_r>(mex_multem_in_parm, "theta")*mt::c_deg_2_rad;
+	multem_in_parm.phi = mex_get_num_from_field<T_r>(mex_multem_in_parm, "phi")*mt::c_deg_2_rad;
 
 	/************************ Objective lens **************************/
-	in_multem.obj_lens.c_10 = mex_get_num_from_field<T_r>(mex_in_multem, "obj_lens_f");		// defocus(Angstrom)
-	in_multem.obj_lens.set_in_data(in_multem.E_0, in_multem.grid_2d);
+	multem_in_parm.obj_lens.c_10 = mex_get_num_from_field<T_r>(mex_multem_in_parm, "obj_lens_f");		// defocus(Angstrom)
+	multem_in_parm.obj_lens.set_in_data(multem_in_parm.E_0, multem_in_parm.grid_2d);
 	
 	/******************** select output region ************************/
-	mex_read_output_area(mex_in_multem, in_multem.output_area);
+	mex_read_output_area(mex_multem_in_parm, multem_in_parm.output_area);
 
 	/********************* validate parameters ************************/
-	in_multem.set_dep_var();
+	multem_in_parm.set_dep_var();
  }
 
 template <class TOutput_Multem>
@@ -100,23 +100,23 @@ void set_struct_propagate(TOutput_Multem &output_multem, mxArray*& mex_output_mu
 }
 
 template <class T, mt::eDev Dev>
-void run_propagate(mt::System_Config &system_config, const mxArray* mex_in_multem, mxArray*& mex_output_multem)
+void run_propagate(mt::System_Config &system_config, const mxArray* mex_multem_in_parm, mxArray*& mex_output_multem)
 {
-	mt::In_Multem<T> in_multem;
-	read_in_multem(mex_in_multem, in_multem);
-	in_multem.system_config = system_config;
+	mt::Multem_In_Parm<T> multem_in_parm;
+	read_multem_in_parm(mex_multem_in_parm, multem_in_parm);
+	multem_in_parm.system_config = system_config;
 
 	mt::Stream<Dev> stream(system_config.n_stream);
 	mt::FFT<T, Dev> fft_2d;
-	fft_2d.create_plan_2d(in_multem.grid_2d.ny, in_multem.grid_2d.nx, system_config.n_stream);
+	fft_2d.create_plan_2d(multem_in_parm.grid_2d.ny, multem_in_parm.grid_2d.nx, system_config.n_stream);
 
 	mt::Propagator<T, Dev> propagator;
-	propagator.set_in_data(&in_multem, &stream, &fft_2d);
+	propagator.set_in_data(&multem_in_parm, &stream, &fft_2d);
 
 	mt::Output_Multem<T> output_multem;
-	output_multem.set_in_data(&in_multem);
+	output_multem.set_in_data(&multem_in_parm);
 
-	propagator(mt::esp_real, in_multem.gx_0(), in_multem.gy_0(), in_multem.obj_lens.c_10 , output_multem);
+	propagator(mt::esp_real, multem_in_parm.gx_0(), multem_in_parm.gy_0(), multem_in_parm.obj_lens.c_10 , output_multem);
 
 	stream.synchronize();
 

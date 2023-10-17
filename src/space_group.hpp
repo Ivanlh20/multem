@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,10 +25,10 @@
 
 	#include <cstdlib>
 
-	#include "r_2d.cuh"
-	#include "r_3d.cuh"
-	#include "mx_2x2.cuh"
-	#include "mx_3x3.cuh"
+	#include "r_2d.h"
+	#include "r_3d.h"
+	#include "mx_2x2.h"
+	#include "mx_3x3.h"
 	#include "cgpu_vctr.cuh"	
 	#include "types.cuh"
 	#include "particles.cuh"

@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,14 +31,14 @@
 	#include <utility>
 	#include <functional> 
 
-	#include "const_enum.cuh"
-	#include "type_traits_gen.cuh"
-	#include "math.cuh"
-	#include "r_2d.cuh"
-	#include "r_3d.cuh"
-	#include "cgpu_fcns_gen.cuh"
+	#include "const_enum.h"
+	#include "type_traits_gen.h"
+	#include "math_mt.h"
+	#include "r_2d.h"
+	#include "r_3d.h"
+	#include "fcns_cgpu_gen.h"
 	#include "cgpu_vctr.cuh"	
-	#include "grid.cuh"	
+	#include "grid.h"	
 
 	/***************************************************************************************/
 	/************************* linear and non-linear coefficients **************************/
@@ -73,7 +73,7 @@
 				*this = pcoef_lnl;
 			}
 
-			// ! constructor from LNL_Coef
+			/* constructor from LNL_Coef */
 			explicit pLNL_Coef(const LNL_Coef<T, Dev>& coef_lnl)
 			{
 				*this = coef_lnl;
@@ -94,7 +94,7 @@
 				return *this;
 			}
 
-			// ! Assignment operator: LNL_Coef -> pLNL_Coef
+			/* Assignment operator: LNL_Coef -> pLNL_Coef */
 			CPU_EXEC
 			pLNL_Coef<T, Dev>& operator=(const LNL_Coef<T, Dev>& coef_lnl)
 			{
@@ -192,7 +192,7 @@
 				return pLNL_Coef<T, Dev>(*this);
 			}
 
-			// ! user define conversion for pointer
+			/* user define conversion for pointer */
 			operator pLNL_Coef<T, Dev>() const
 			{
 				return pLNL_Coef<T, Dev>(*this);
@@ -280,7 +280,7 @@
 				*this = pcoef_poly1;
 			}
 
-			// ! constructor from Poly_Coef_1d
+			/* constructor from Poly_Coef_1d */
 			explicit pPoly_Coef_1d(const Poly_Coef_1d<T, Dev>& coef_poly1)
 			{
 				*this = coef_poly1;
@@ -301,7 +301,7 @@
 				return *this;
 			}
 
-			// ! Assignment operator: Poly_Coef_1d -> pPoly_Coef_1d
+			/* Assignment operator: Poly_Coef_1d -> pPoly_Coef_1d */
 			CPU_EXEC
 			pPoly_Coef_1d<T, Dev>& operator=(const Poly_Coef_1d<T, Dev>& coef_poly1)
 			{
@@ -399,7 +399,7 @@
 				return pPoly_Coef_1d<T, Dev>(*this);
 			}
 
-			// ! user define conversion for pointer Vctr
+			/* user define conversion for pointer Vctr */
 			operator pPoly_Coef_1d<T, Dev>() const
 			{
 				return pPoly_Coef_1d<T, Dev>(*this);
@@ -488,7 +488,7 @@
 				*this = pcoef_poly2;
 			}
 
-			// ! constructor from Poly_Coef_2d
+			/* constructor from Poly_Coef_2d */
 			explicit pPoly_Coef_2d(const Poly_Coef_2d<T, Dev>& coef_poly2)
 			{
 				*this = coef_poly2;
@@ -510,7 +510,7 @@
 				return *this;
 			}
 
-			// ! Assignment operator: Poly_Coef_2d -> pPoly_Coef_2d
+			/* Assignment operator: Poly_Coef_2d -> pPoly_Coef_2d */
 			CPU_EXEC
 			pPoly_Coef_2d<T, Dev>& operator=(const Poly_Coef_2d<T, Dev>& coef_poly2)
 			{
@@ -611,7 +611,7 @@
 				return pPoly_Coef_2d<T, Dev>(*this);
 			}
 
-			// ! user define conversion for pointer Vctr
+			/* user define conversion for pointer Vctr */
 			operator pPoly_Coef_2d<T, Dev>() const
 			{
 				return pPoly_Coef_2d<T, Dev>(*this);
@@ -707,7 +707,7 @@
 				*this = pcoef_poly3;
 			}
 
-			// ! constructor from Poly_Coef_3d
+			/* constructor from Poly_Coef_3d */
 			explicit pPoly_Coef_3d(const Poly_Coef_3d<T, Dev>& coef_poly3)
 			{
 				*this = coef_poly3;
@@ -730,7 +730,7 @@
 				return *this;
 			}
 
-			// ! Assignment operator: Poly_Coef_3d -> pPoly_Coef_3d
+			/* Assignment operator: Poly_Coef_3d -> pPoly_Coef_3d */
 			CPU_EXEC
 			pPoly_Coef_3d<T, Dev>& operator=(const Poly_Coef_3d<T, Dev>& coef_poly3)
 			{
@@ -834,7 +834,7 @@
 				return pPoly_Coef_3d<T, Dev>(*this);
 			}
 
-			// ! user define conversion for pointer Vctr
+			/* user define conversion for pointer Vctr */
 			operator pPoly_Coef_3d<T, Dev>() const
 			{
 				return pPoly_Coef_3d<T, Dev>(*this);

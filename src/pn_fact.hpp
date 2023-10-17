@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
 	#include <algorithm>
 	#include <vector>
 
-	#include "macros.cuh"
-	#include "const_enum.cuh"
+	#include "macros.h"
+	#include "const_enum.h"
 
 	namespace mt
 	{

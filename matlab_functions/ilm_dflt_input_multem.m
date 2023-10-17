@@ -1,6 +1,6 @@
 function [input_multem] = ilm_dflt_input_multem()
     %%%%%%%%%%%%%% Electron-Specimen interaction model %%%%%%%%%%%%%%%%%
-    input_multem.elec_spec_interac_mod = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
+    input_multem.elec_spec_interact_mod = 1; % eesim_multislice = 1, eesim_phase_object = 2, eesim_weak_phase_object = 3
     input_multem.atomic_pot_parm_typ = 6; % eappt_doyle_0_4 = 1, eappt_peng_0_4 = 2, eappt_peng_0_12 = 3, eappt_kirkland_0_12 = 4, eappt_weickenmeier_0_12 = 5, eappt_lobato_0_12 = 6
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -46,7 +46,6 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.spec_slic(1).sel_Z = 0; % 0: all atomic numbers
     input_multem.spec_slic(1).sel_z_lim = [0, 0]; % [z_0, z_e]
     input_multem.spec_slic(1).z_plns = []; % vector
-    
     %%%%%%%%%%%%%%%%%%%%%%%% specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.thick_typ = 1; % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
     input_multem.thick = 0; % Array of thickness (Å)
@@ -62,7 +61,7 @@ function [input_multem] = ilm_dflt_input_multem()
     % eTEMST_EWFS=51, eTEMST_EWRS=52, eTEMST_STEM_EELS=61, eTEMST_ISTEM_EELS=62, 
     % eTEMST_EFTEMFS=71, eTEMST_EFTEMRS=72, eTEMST_ProbeFS=71, eTEMST_ProbeRS=72,
     % eTEMST_PPFS=81, eTEMST_PPRS=82, eTEMST_TFFS=91, eTEMST_TFRS=92
-    input_multem.em_sim_typ = 52;
+    input_multem.em_sim_typ = 52; % electron microscopy simulation type
 
     %%%%%%%%%%%%%%%%%%%% microscope parameters %%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.E_0 = 300; % Acceleration Voltage (keV)
@@ -70,8 +69,8 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.phi = 0.0; % Azimuthal angle (º)
 
     %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
-    input_multem.illumination_model = 2; % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
-    input_multem.temporal_spatial_incoh = 1; % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
+    input_multem.illum_mod = 2; % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
+    input_multem.illum_inc = 1; % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % On the optimun probe in aberration corrected ADF-STEM
@@ -80,7 +79,7 @@ function [input_multem] = ilm_dflt_input_multem()
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
-    input_multem.cond_lens_m = 0;   % Vortex momentum
+    input_multem.cond_lens_m = 0;           % Vortex momentum
 
     input_multem.cond_lens_c_10 = 14.0312;  % [C1]      Defocus (Å)
     input_multem.cond_lens_c_12 = 0.00;     % [A1]      2-fold astigmatism (Å)
@@ -112,28 +111,28 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.cond_lens_c_56 = 0.00;     % [A5]      6-fold astigmatism (Å)
     input_multem.cond_lens_phi_56 = 0.00;   % [phi_A5]	Azimuthal angle of 6-fold astigmatism (º)
 
-    input_multem.cond_lens_inner_aper_ang = 0.0; % Inner aperture (mrad) 
-    input_multem.cond_lens_outer_aper_ang = 21.0; % Outer aperture (mrad)
+    input_multem.cond_lens_inner_aper_ang = 0.0;    % Inner aperture (mrad) 
+    input_multem.cond_lens_outer_aper_ang = 21.0;   % Outer aperture (mrad)
 
     %%%%%%%%% defocus spread function %%%%%%%%%%%%
     input_multem.cond_lens_tp_inc_a = 1.0;      % Height proportion of a normalized Gaussian [0, 1]
     input_multem.cond_lens_tp_inc_sigma = 0.5;  % Standard deviation of the source defocus spread for the Gaussian component (Å)
     input_multem.cond_lens_tp_inc_beta = 0.1;   % Standard deviation of the source defocus spread for the Exponential component (Å)
-    input_multem.cond_lens_tp_inc_npts = 10;    % Number of integration points. It will be only used if illumination_model=4
+    input_multem.cond_lens_tp_inc_npts = 10;    % Number of integration points. It will be only used if illum_mod=4
     
     %%%%%%%%%% source spread function %%%%%%%%%%%%
     input_multem.cond_lens_spt_inc_a = 1.0;        % Height proportion of a normalized Gaussian [0, 1]
     input_multem.cond_lens_spt_inc_sigma = 0.5;    % Standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Å^-1);otherwise (Å)
     input_multem.cond_lens_spt_inc_beta = 0.1;     % Standard deviation of the source spread function for the Exponential component: For parallel ilumination(Å^-1);otherwise (Å)
-    input_multem.cond_lens_spt_inc_rad_npts = 8;   % Number of radial integration points. It will be only used if illumination_model=4
-    input_multem.cond_lens_spt_inc_azm_npts = 8;   % Number of radial integration points. It will be only used if illumination_model=4
+    input_multem.cond_lens_spt_inc_rad_npts = 8;   % Number of radial integration points. It will be only used if illum_mod=4
+    input_multem.cond_lens_spt_inc_azm_npts = 8;   % Number of radial integration points. It will be only used if illum_mod=4
     
     %%%%%%%%% zero defocus reference %%%%%%%%%%%%
-    input_multem.cond_lens_zero_def_typ = 1; % eZDT_First = 1, eZDT_User_Define = 2
-    input_multem.cond_lens_zero_def_plane = 0; % It will be only used if cond_lens_zero_def_typ = eZDT_User_Define
+    input_multem.cond_lens_zero_def_typ = 1;    % eZDT_First = 1, eZDT_User_Define = 2
+    input_multem.cond_lens_zero_def_plane = 0;  % It will be only used if cond_lens_zero_def_typ = eZDT_User_Define
 
     %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
-    input_multem.obj_lens_m = 0; % Vortex momentum
+    input_multem.obj_lens_m = 0;            % Vortex momentum
 
     input_multem.obj_lens_c_10 = 14.0312;   % [C1]      Defocus (Å)
     input_multem.obj_lens_c_12 = 0.00;      % [A1]      2-fold astigmatism (Å)
@@ -165,29 +164,29 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.obj_lens_c_56 = 0.00;      % [A5]      6-fold astigmatism (Å)
     input_multem.obj_lens_phi_56 = 0.00;    % [phi_A5]	Azimuthal angle of 6-fold astigmatism (º)
 
-    input_multem.obj_lens_inner_aper_ang = 0.0; % Inner aperture (mrad) 
-    input_multem.obj_lens_outer_aper_ang = 24.0; % Outer aperture (mrad)
+    input_multem.obj_lens_inner_aper_ang = 0.0;     % Inner aperture (mrad) 
+    input_multem.obj_lens_outer_aper_ang = 24.0;	% Outer aperture (mrad)
 
     %%%%%%%%% defocus spread function %%%%%%%%%%%%
-    input_multem.obj_lens_tp_inc_a = 1.0; % Height proportion of a normalized Gaussian [0, 1]
-    input_multem.obj_lens_tp_inc_sigma = 0.5; % Standard deviation of the source defocus spread for the Gaussian component (Å)
-    input_multem.obj_lens_tp_inc_beta = 0.1; % Standard deviation of the source defocus spread for the Exponential component (Å)
-    input_multem.obj_lens_tp_inc_npts = 10; % Number of integration points. It will be only used if illumination_model=4
+    input_multem.obj_lens_tp_inc_a = 1.0;       % Height proportion of a normalized Gaussian [0, 1]
+    input_multem.obj_lens_tp_inc_sigma = 0.5;   % Standard deviation of the source defocus spread for the Gaussian component (Å)
+    input_multem.obj_lens_tp_inc_beta = 0.1;    % Standard deviation of the source defocus spread for the Exponential component (Å)
+    input_multem.obj_lens_tp_inc_npts = 10;     % Number of integration points. It will be only used if illum_mod=4
     
     %%%%%%%%% zero defocus reference %%%%%%%%%%%%
-    input_multem.obj_lens_zero_def_typ = 3; % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
-    input_multem.obj_lens_zero_def_plane = 0; % It will be only used if obj_lens_zero_def_typ = eZDT_User_Define
+    input_multem.obj_lens_zero_def_typ = 3;     % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
+    input_multem.obj_lens_zero_def_plane = 0;	% It will be only used if obj_lens_zero_def_typ = eZDT_User_Define
    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%% Scan tag for ISTEM/STEM/EELS %%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    input_multem.scan_pat_typ = 1; % espt_line = 1, espt_area = 2, espt_user_def = 3
-    input_multem.scan_pat_pbc = 1; % periodic boundary conditions: 1: true, 0:false
+    input_multem.scan_pat_typ = 1;	% espt_line = 1, espt_area = 2, espt_user_def = 3
+    input_multem.scan_pat_pbc = 1;	% periodic boundary conditions: 1: true, 0:false
     input_multem.scan_pat_spxs = 1; % square pixel size: 1: true, 0:false
     input_multem.scan_pat_nsp = 10; % number of sampling points
     input_multem.scan_pat_r_0 = [0.0; 0.0]; % starting point (Å)
     input_multem.scan_pat_r_e = [4.078; 4.078]; % final point (Å)
-    input_multem.scan_pat_r = []; % User define scanning pattern. It will be only used if User_Define=3
+    input_multem.scan_pat_r = []; % user define scanning pattern. It will be only used if User_Define=3
     
     % if input_multem.scan_pat_typ = eST_User_Define, then the beam positions
     % must be define in input_multem.beam_pos
@@ -221,23 +220,23 @@ function [input_multem] = ilm_dflt_input_multem()
 
     %%%%%%%%%%%%%%%%%%%%%%%%%% STEM-EELS %%%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.eels_Z = 79; % atomic type
-    input_multem.eels_E_loss = 80; % Energy loss (eV)
+    input_multem.eels_E_loss = 80; % energy loss (eV)
     input_multem.eels_collection_angle = 100; % Collection half angle (mrad)
     input_multem.eels_m_selection = 3; % selection rule
     input_multem.eels_channelling_type = 1; % eCT_Single_Channelling = 1, eCT_Mixed_Channelling = 2, eCT_Double_Channelling = 3 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%% EFTEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.eftem_Z = 79; % atomic type
-    input_multem.eftem_E_loss = 80; % Energy loss (eV)
+    input_multem.eftem_E_loss = 80; % energy loss (eV)
     input_multem.eftem_collection_angle = 100; % Collection half angle (mrad)
     input_multem.eftem_m_selection = 3; % selection rule
     input_multem.eftem_channelling_type = 1; % eCT_Single_Channelling = 1, eCT_Mixed_Channelling = 2, eCT_Double_Channelling = 3 
 
-    %%%%%%%%%%%%%%%%%%%%%%% OUTPUT tag %%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%% output tag %%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%% This option is not used for eTEMST_STEM and eTEMST_STEM_EELS %%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    input_multem.output_area_ip_0 = [1;1]; % Starting position in pixels
-    input_multem.output_area_ip_e = [1;1]; % End position in pixels
+    input_multem.output_area_ip_0 = [1; 1]; % Starting position in pixels
+    input_multem.output_area_ip_e = [1; 1]; % End position in pixels
     
     %%%%%%%%%%%%%%%%%%% condenser lens variable %%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%% it will be active in the future %%%%%%%%%%%%%%%%%

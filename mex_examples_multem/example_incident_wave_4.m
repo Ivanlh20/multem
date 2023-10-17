@@ -5,11 +5,11 @@ addpath(['..', filesep, 'mex_bin'])
 
 input_multem = ilm_dflt_input_multem(); % Load default values;
 
-system_conf.precision = 1; % eP_Float = 1, eP_double = 2
-system_conf.device = 2; % eD_CPU = 1, eD_GPU = 2
-system_conf.cpu_ncores = 1; % Number of Cores CPU (It will be used in the future)
-system_conf.cpu_n_thread = 4; % Number of CPU threads 
-system_conf.gpu_device = 0; % GPU device (i.e. 0, 1, 2, ... )
+system_config.precision = 1; % eP_Float = 1, eP_double = 2
+system_config.device = 2; % eD_CPU = 1, eD_GPU = 2
+system_config.cpu_ncores = 1; % Number of Cores CPU (It will be used in the future)
+system_config.cpu_n_thread = 4; % Number of CPU threads 
+system_config.gpu_device = 0; % GPU device (i.e. 0, 1, 2, ... )
 
 input_multem.E_0 = 300; % Acceleration Voltage (keV)
 input_multem.theta = 0.0;
@@ -40,9 +40,9 @@ input_multem.cond_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmat
 input_multem.cond_lens_inner_aper_ang = 0; % Inner aperture (mrad) 
 input_multem.cond_lens_outer_aper_ang = 21.0; % Outer aperture (mrad)
 input_multem.cond_lens_tp_inc_sigma = 32; % standard deviation (Å)
-input_multem.cond_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illumination_model=4
+input_multem.cond_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illum_mod=4
 input_multem.cond_lens_spt_inc_sigma = 0.2; % standard deviation: For parallel ilumination(Å^-1);otherwise (Å)
-input_multem.cond_lens_spt_inc_rad_npts = 8; % # of integration points. It will be only used if illumination_model=4
+input_multem.cond_lens_spt_inc_rad_npts = 8; % # of integration points. It will be only used if illum_mod=4
 input_multem.cond_lens_zero_def_typ = 1; % eZDT_First = 1, eZDT_User_Define = 2
 input_multem.cond_lens_zero_def_plane = 0;
 input_multem.cond_lens_c_10 = ilc_scherzer_defocus(input_multem.E_0, input_multem.cond_lens_c_30);
@@ -50,7 +50,7 @@ input_multem.cond_lens_c_10 = ilc_scherzer_defocus(input_multem.E_0, input_multe
 input_multem.cond_lens_c_10 = input_multem.cond_lens_c_10;
 
 tic;
-output_incident_wave = ilc_incident_wave(system_conf, input_multem);
+output_incident_wave = ilc_incident_wave(system_config, input_multem);
 toc;
 
 psi_0 = flipud(output_incident_wave.psi_0);

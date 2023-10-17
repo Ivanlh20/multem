@@ -19,7 +19,7 @@
 #define MATLAB_BLAS_LAPACK
 
 #include "types.cuh"
-#include "type_traits_gen.cuh"
+#include "type_traits_gen.h"
 #include "cgpu_stream.cuh"
 #include "particles.cuh"
 #include "in_classes.cuh"
@@ -28,61 +28,61 @@
 #include "projected_potential.cuh"
 
 #include <mex.h>
-#include "matlab_mex.cuh"
+#include "matlab_mex.h"
 
 using mt::pMLD;
 
 template <class TIn_Multislice>
-void read_in_multem(const mxArray* mex_in_multem, TIn_Multislice &in_multem, dt_bool full = true)
+void read_multem_in_parm(const mxArray* mex_multem_in_parm, TIn_Multislice &multem_in_parm, dt_bool full = true)
 {
 	using T_r = mt::Value_type<TIn_Multislice>;
 
 	/************************ simulation type **************************/
-	in_multem.simulation_type = mt::eemst_pprs;
+	multem_in_parm.em_sim_typ = mt::eemst_pprs;
 	
 	/***************************************************************************************/
-	in_multem.interaction_model = mex_get_num_from_field<mt::eElec_Spec_Interact_Mod>(mex_in_multem, "interaction_model");
-	in_multem.atomic_pot_parm_typ = mex_get_num_from_field<mt::eAtomic_Pot_Parm_Typ>(mex_in_multem, "atomic_pot_parm_typ");
+	multem_in_parm.elec_spec_interact_mod = mex_get_num_from_field<mt::eElec_Spec_Interact_Mod>(mex_multem_in_parm, "elec_spec_interact_mod");
+	multem_in_parm.atomic_pot_parm_typ = mex_get_num_from_field<mt::eAtomic_Pot_Parm_Typ>(mex_multem_in_parm, "atomic_pot_parm_typ");
 
 	/************** Electron-Atomic_Vib interaction model **************/
-	mex_read_atomic_vib(mex_in_multem, in_multem.atomic_vib);
-	in_multem.atomic_vib.coh_contrib = true;
-	in_multem.atomic_vib.sgl_conf = true;
+	mex_read_atomic_vib(mex_multem_in_parm, multem_in_parm.atomic_vib);
+	multem_in_parm.atomic_vib.coh_contrib = true;
+	multem_in_parm.atomic_vib.sgl_conf = true;
 
 	/**************************** Specimen *****************************/
-	auto bs_x = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_x");
-	auto bs_y = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_y");
-	auto bs_z = mex_get_num_from_field<T_r>(mex_in_multem, "spec_bs_z");
-	auto sli_thick = mex_get_num_from_field<T_r>(mex_in_multem, "spec_dz");
+	auto bs_x = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_x");
+	auto bs_y = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_y");
+	auto bs_z = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_bs_z");
+	auto sli_thick = mex_get_num_from_field<T_r>(mex_multem_in_parm, "spec_dz");
 	dt_bool pbc_xy = true;
 
 	if (full)
 	{
 		/************************* atomic positions ************************/
-		mex_read_atoms<T_r>(mex_in_multem, bs_x, bs_y, bs_z, sli_thick, in_multem.atoms);
+		mex_read_atoms<T_r>(mex_multem_in_parm, bs_x, bs_y, bs_z, sli_thick, multem_in_parm.atoms);
 	}
 
 	/************************ Specimen rotation ************************/
-	mex_read_rot_parm<T_r>(mex_in_multem, in_multem.rot_par);
+	mex_read_rot_in_parm<T_r>(mex_multem_in_parm, multem_in_parm.rot_in_parm);
 
 	/************************ Potential slicing ************************/
-	in_multem.spec_slic_typ = mex_get_num_from_field<mt::eSpec_Slic_Typ>(mex_in_multem, "spec_slic_typ");
+	multem_in_parm.spec_slic_typ = mex_get_num_from_field<mt::eSpec_Slic_Typ>(mex_multem_in_parm, "spec_slic_typ");
 
 	/************************** xy sampling ****************************/
-	auto nx = mex_get_num_from_field<dt_int32>(mex_in_multem, "nx");
-	auto ny = mex_get_num_from_field<dt_int32>(mex_in_multem, "ny");
-	dt_bool bwl = mex_get_bool_from_field(mex_in_multem, "bwl");
+	auto nx = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "nx");
+	auto ny = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "ny");
+	dt_bool bwl = mex_get_bool_from_field(mex_multem_in_parm, "bwl");
 
-	in_multem.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
+	multem_in_parm.grid_2d.set_in_data(nx, ny, bs_x, bs_y, sli_thick, bwl, pbc_xy);
 
 	/************************ simulation type **************************/
-	in_multem.islice = mex_get_num_from_field<dt_int32>(mex_in_multem, "islice")-1;
+	multem_in_parm.islice = mex_get_num_from_field<dt_int32>(mex_multem_in_parm, "islice")-1;
 
 	/******************** select output region ************************/
-	mex_read_output_area(mex_in_multem, in_multem.output_area);
+	mex_read_output_area(mex_multem_in_parm, multem_in_parm.output_area);
 
 	/********************* validate parameters *************************/
-	in_multem.set_dep_var();
+	multem_in_parm.set_dep_var();
  }
 
 template <class TOutput_Multem>
@@ -103,21 +103,21 @@ void set_struct_projected_potential(TOutput_Multem &output_multem, mxArray*& mex
 }
 
 template <class T, mt::eDev Dev>
-void run_projected_potential(mt::System_Config &system_config, const mxArray* mex_in_multem, mxArray*& mex_output_multem)
+void run_projected_potential(mt::System_Config &system_config, const mxArray* mex_multem_in_parm, mxArray*& mex_output_multem)
 {
-	mt::In_Multem<T> in_multem;
-	read_in_multem(mex_in_multem, in_multem);
-	in_multem.system_config = system_config;
+	mt::Multem_In_Parm<T> multem_in_parm;
+	read_multem_in_parm(mex_multem_in_parm, multem_in_parm);
+	multem_in_parm.system_config = system_config;
 
 	mt::Stream<Dev> stream(system_config.n_stream);
 	mt::Projected_Potential<T, Dev> projected_potential;
-	projected_potential.set_in_data(&in_multem, &stream);
+	projected_potential.set_in_data(&multem_in_parm, &stream);
 
 	mt::Output_Multem<T> output_multem;
-	output_multem.set_in_data(&in_multem);
+	output_multem.set_in_data(&multem_in_parm);
 
-	projected_potential.move_atoms(in_multem.atomic_vib.nconf);
-	projected_potential(in_multem.islice, output_multem);
+	projected_potential.move_atoms(multem_in_parm.atomic_vib.nconf);
+	projected_potential(multem_in_parm.islice, output_multem);
 
 	stream.synchronize();
 

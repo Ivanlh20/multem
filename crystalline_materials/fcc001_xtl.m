@@ -26,7 +26,7 @@ function [atoms, lx, ly, lz, a, b, c, dz] = fcc001_xtl(Z, l_c, na, nb, nc, ncu, 
                         Z, 0.5, 0.0, 0.5, rmsd_3d, occ, tag, charge];
                     
     atoms = ilc_xtl_build(xtl_parm);
-
+    
     dz = xtl_parm.c/ncu;
     
     lx = na*xtl_parm.a;

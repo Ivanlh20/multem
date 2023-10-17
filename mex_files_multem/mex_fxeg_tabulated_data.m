@@ -2,4 +2,4 @@
 clc; clear;
 addpath(['..', filesep, 'matlab_functions'])
 
-ilm_mex('debug', 'ilc_fxeg_tabulated_data.cpp', '../src');
+ilm_mex('release', 'ilc_fxeg_tabulated_data.cpp', '../src');

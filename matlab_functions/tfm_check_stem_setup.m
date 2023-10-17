@@ -5,16 +5,16 @@ function tfm_check_stem_setup(input_multem, n_detector)
     fcn_check_detector_coverage(input_multem, n_detector);
 
     function fcn_check_probe(input_multem)
-        system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
-        system_conf.device = 1;                              % eD_CPU = 1, eD_GPU = 2
-        system_conf.cpu_nthread = 1; 
-        system_conf.gpu_device = 0;
+        system_config.precision = 1;                           % eP_Float = 1, eP_double = 2
+        system_config.device = 1;                              % eD_CPU = 1, eD_GPU = 2
+        system_config.cpu_nthread = 1; 
+        system_config.gpu_device = 0;
         
         input_multem.incdt_wav_typ = 2;                       % 2 = convergent beam
         input_multem.iw_x = 0.5*input_multem.spec_lx;
         input_multem.iw_y = 0.5*input_multem.spec_ly;
 
-        output_incident_wave = ilc_incident_wave(system_conf, input_multem); 
+        output_incident_wave = ilc_incident_wave(system_config, input_multem); 
 
         psi_0 = output_incident_wave.psi_0;
         figure(1); clf

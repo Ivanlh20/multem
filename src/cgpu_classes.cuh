@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@
 #ifndef CGPU_CLASSES_H
 	#define CGPU_CLASSES_H
 
-	#include "math.cuh"
+	#include "math_mt.h"
 	#include "types.cuh"
-	#include "type_traits_gen.cuh"
+	#include "type_traits_gen.h"
 	#include "cgpu_stream.cuh"
 	#include "cgpu_fft.cuh"
 	//#include "eval_fit_gaussians.hpp"
@@ -34,12 +34,12 @@
 	#endif
 
 	#include "in_classes.cuh"
-	#include "cgpu_fcns.cuh"
-	#include "cpu_fcns.hpp"
+	#include "fcns_gpu.h"
+	#include "fcns_cpu.h"
 	#include "particles.cuh"
 
 	#ifdef __CUDACC__
-		#include "gpu_fcns.cuh"
+		#include "fcns_gpu.h"
 	#endif
 
 	namespace mt
@@ -641,7 +641,7 @@
 					}
 
 					gen.seed(seed);
-					rand_n.reset();
+					rnd_n.reset();
 
  					dx_o = generate_ds(ds_x, phi_x);
 					dy_o = generate_ds(ds_y, phi_y);
@@ -680,7 +680,7 @@
 
 			protected:
 				std::mt19937_64 gen;
-				std::normal_distribution<T> rand_n;
+				std::normal_distribution<T> rnd_n;
 
 				Grid_2d<T> grid_2d;
 				Stream<Dev> *stream;
@@ -692,11 +692,11 @@
 					Vctr<T, edev_cpu> ds_v;
 					ds_v.reserve(grid_2d.ny);
 
-					T a = ds*rand_n(gen);
+					T a = ds*rnd_n(gen);
 					ds_v.push_back(a/::sqrt(1.0-phi*phi));
 					for(auto iy = 1; iy < grid_2d.ny; iy++)
 					{
-			 T a = ds*rand_n(gen);
+			 T a = ds*rnd_n(gen);
 			 ds_v.push_back(phi*ds_v.back() + a);
 					}
 					return ds_v;

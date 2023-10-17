@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 	#endif
 
 	#include "const_enum_mt.cuh"
-	#include "math.cuh"
+	#include "math_mt.h"
 	#include "type_traits_mt.cuh"
 	#include "intrpl_coef.cuh"
 	#include "quad_data.cuh"

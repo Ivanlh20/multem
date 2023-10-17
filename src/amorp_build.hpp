@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef AMORPHOUS_BUILD_H
 	#define AMORPHOUS_BUILD_H
 
-	#include "math.cuh"
+	#include "math_mt.h"
 	#include "types.cuh"
 	#include "types_mt.cuh"
 	#include "particles.cuh"
@@ -138,7 +138,7 @@
 			private:
 				const dt_int32 n_trial;
 
-				Randu_3d_cpu<T> randu_3d;
+				Rndu_3d_cpu<T> randu_3d;
 
 				Box_Occ_3d<dt_float64> box_occ;
 				
