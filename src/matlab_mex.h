@@ -1472,7 +1472,7 @@ mt::pVctr_cpu_64<T> mex_create_set_num_field(mxArray*& mex_data, const char *fie
 }
 
 #define MEX_RUN_FCN_FLOAT(FCN, idx)											\
-{																			\
+{																			\0
 	if (mxIsNumeric(prhs[idx]))												\
 	{																		\
 		auto category = mxGetClassID(prhs[idx]);							\
