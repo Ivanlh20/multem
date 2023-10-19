@@ -22,6 +22,7 @@ multem.zip
 multem_stable.zip
 mex_example_test
 multem_binary
+replace.py
 multem_binary.rar
 multem_binary.zip
 compile_mex_general.m
@@ -45,7 +46,7 @@ mex_files_multem/mex_CUDA_maci64.xml
 mex_files_multem/mex_CUDA_win64.xml
 src/atomic_cross_section.cuh
 src/cb_spl_intrpl.hpp
-src/cpu_fcns_image.hpp
+src/cpu_fcns_image.h
 src/cgpu_spt_ptc.cuh
 src/crystal_spec.hpp
 src/eval_fit_atomic_columns.hpp

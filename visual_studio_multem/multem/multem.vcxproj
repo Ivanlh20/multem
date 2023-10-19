@@ -144,7 +144,7 @@
     <ClInclude Include="..\..\src\const_enum_mt.cuh" />
     <ClInclude Include="..\..\src\cpu_detail.hpp" />
     <ClInclude Include="..\..\src\fcns_cpu.h" />
-    <ClInclude Include="..\..\src\cpu_fcns_image.hpp" />
+    <ClInclude Include="..\..\src\cpu_fcns_image.h" />
     <ClInclude Include="..\..\src\cpu_fcns_mt.hpp" />
     <ClInclude Include="..\..\src\energy_loss.cuh" />
     <ClInclude Include="..\..\src\eval_fit_atomic_columns.hpp" />

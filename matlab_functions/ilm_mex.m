@@ -1,17 +1,18 @@
-function [] = ilm_mex(option, m_file, src, varargin)
+function [] = ilm_mex(option, m_file, path_src, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%% Format input data %%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if(strcmp('../', src(1:3)))
+    if(strcmp('../', path_src(1:3)))
         [pathstr, ~, ~] = fileparts(pwd);
-        src = [pathstr, filesep, src(4:end)];
+        path_src = [pathstr, filesep, path_src(4:end)];
+        path_include = [pathstr, filesep, 'include'];
     else
-        [pathstr, ~, ~] = fileparts(src);
+        [pathstr, ~, ~] = fileparts(path_src);
     end
     
     nVarargs = length(varargin);
     for k = 1:nVarargs
-        varargin{k} = strcat(src, filesep, char(varargin{k}));
+        varargin{k} = strcat(path_src, filesep, char(varargin{k}));
     end
    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -23,11 +24,11 @@ function [] = ilm_mex(option, m_file, src, varargin)
     
     if(isempty(CUDA_PATH))
         if(ispc)
-            CUDA_PATH = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0';
+            CUDA_PATH = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.4';
         elseif(ismac)
-            CUDA_PATH = '/Developer/NVIDIA/CUDA-10.0';
+            CUDA_PATH = '/Developer/NVIDIA/CUDA-11.4';
         else
-            CUDA_PATH = '/usr/local/cuda-10.0';
+            CUDA_PATH = '/usr/local/cuda-11.4';
         end
     end
 
@@ -146,13 +147,13 @@ function [] = ilm_mex(option, m_file, src, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if(ispc)
         % OS = Windows 10
-        FFTW_LIB_PATH = src;
+        FFTW_LIB_PATH = path_src;
         FFTW_LIBS = '-lfftw3f-3 -lfftw3-3';
         
-        BLAS_LIB_PATH = src;
+        BLAS_LIB_PATH = path_src;
         BLAS_LIBS = '-lblas';
         
-        LAPACK_LIB_PATH = src;
+        LAPACK_LIB_PATH = path_src;
         LAPACK_LIBS = '-llapack';
         
     elseif(ismac)
@@ -204,7 +205,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
 %         mex_cuda_filename = 'nvcc_g++.xml';
 %     end 
     
-    INCLUDE = ['-I"', CUDA_INC_PATH, '" -I"', src, '"'];
+    INCLUDE = ['-I"', CUDA_INC_PATH, '" -I"', path_include, '" -I"', path_src, '"'];
     LIBRARY = ['-L"', CUDA_LIB_PATH, '" ', CUDA_LIBS, ' -L"', FFTW_LIB_PATH, '" ', FFTW_LIBS, ' -L"', BLAS_LIB_PATH, '" ', BLAS_LIBS, ' -L"', LAPACK_LIB_PATH, '" ', LAPACK_LIBS];    
     mex_comand = ['mex -R2018a -f ', mex_cuda_filename, ' -v'];
     if (strcmpi(option, 'debug'))
