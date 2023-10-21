@@ -27,7 +27,9 @@ multem_binary.rar
 multem_binary.zip
 compile_mex_general.m
 compile_mex_test.m
-mex_files_general
+mex_files_general/*
+!mex_files_general/ilc_morp_op_dilate.cpp
+!mex_files_general/mex_morf_op_dilate.m
 mex_files_test
 matlab_functions_nn
 mex_examples_general
