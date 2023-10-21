@@ -37,7 +37,7 @@
           NVCC_FLAGS="--std=c++17 --default-stream per-thread --expt-extended-lambda --expt-relaxed-constexpr $ARCH_FLAGS"
           
           CXX="$NVCC"
-          CFLAGS="--compiler-options=-fexceptions,-fPIC,-fno-omit-frame-pointer,-pthread,-fwrapv,-march=native"
+          CFLAGS="--compiler-options=-fexceptions,-fpermissive,-fPIC,-fno-omit-frame-pointer,-pthread,-fwrapv,-march=native"
           CXXFLAGS="$CFLAGS"
           DEFINES="--compiler-options=-D_GNU_SOURCE,$MATLABMEX"
           CXXOPTIMFLAGS="-O2 -DNDEBUG"

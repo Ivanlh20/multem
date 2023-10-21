@@ -41,6 +41,7 @@
 #include "border_2d.h"
 #include "region.cuh"
 #include "types.cuh"
+#include "cgpu_functors.h"
 #include "wd_gauss.h"
 #include "wd_exp.h"
 #include "wd_fermi.h"

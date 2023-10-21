@@ -176,7 +176,7 @@ namespace mt
 		CGPU_EXEC
 		pVctr<T, Dev, ST>& operator=(const pVctr<T, Dev, ST>& pvctr);
 
-			/* Move assignment operator */
+		/* Move assignment operator */
 		CGPU_EXEC
 		pVctr<T, Dev, ST>& operator=(pVctr<T, Dev, ST>&& pvctr);
 
@@ -185,7 +185,7 @@ namespace mt
 		CPU_EXEC
 		pVctr<T, Dev, ST>& operator=(const pVctr<T, Dev, STU>& pvctr);
 
-			/* Assignment operator: Vctr -> pVctr */
+		/* Assignment operator: Vctr -> pVctr */
 		CPU_EXEC
 		pVctr<T, Dev, ST>& operator=(const Vctr<T, Dev>& vctr);
 
