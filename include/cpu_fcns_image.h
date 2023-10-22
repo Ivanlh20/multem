@@ -569,11 +569,11 @@ namespace mt
 				{
 					for(auto iy = ithread.iy_0; iy < ithread.iy_e; iy++)
 					{
-						const dt_int32 ix_0 = max(ix+n_k0, 0);
-						const dt_int32 ix_e = min(ix+n_ke, nx_i);
+						const dt_int32 ix_0 = fcn_max(ix+n_k0, 0);
+						const dt_int32 ix_e = fcn_min(ix+n_ke, nx_i);
 
-						const dt_int32 iy_0 = max(iy+n_k0, 0);
-						const dt_int32 iy_e = min(iy+n_ke, ny_i);
+						const dt_int32 iy_0 = fcn_max(iy+n_k0, 0);
+						const dt_int32 iy_e = fcn_min(iy+n_ke, ny_i);
 
 						T mv = T(0);
 						dt_int32 ic = 0;
@@ -750,7 +750,7 @@ namespace mt
 		/* 1d */
 		template <class TVctr, class TVctr_idx>
 		enable_if_vctr_cpu_and_vctr_cpu<TVctr, TVctr_idx, void>
-		fltr_median_1d_pos(TVctr& mx_i, dt_int32 n_kr, TVctr_idx& vctr_idx, TVctr& mx_o, Stream_cpu* pstream= nullptr)
+		fltr_median_1d_pos(TVctr& mx_i, dt_int32 n_kr, TVctr_idx&& vctr_idx, TVctr& mx_o, Stream_cpu* pstream = nullptr)
 		{
 			using T = Value_type<TVctr>;
 			memcpy_cpu_cpu(mx_o.m_data, mx_i.m_data, mx_i.size_64());
@@ -793,7 +793,7 @@ namespace mt
 		// 2d for specific points
 		template <class TVctr, class TVctr_idx>
 		enable_if_vctr_cpu_r_2d_and_vctr_cpu<TVctr_idx, TVctr, void>
-		fltr_median_2d_pos(TVctr& mx_i, dt_int32 n_kr, TVctr_idx& vctr_idx, TVctr& mx_o, Stream_cpu* pstream)
+		fltr_median_2d_pos(TVctr& mx_i, dt_int32 n_kr, TVctr_idx&& vctr_idx, TVctr& mx_o, Stream_cpu* pstream = nullptr)
 		{
 			using T = Value_type<TVctr>;
 			memcpy_cpu_cpu(mx_o.m_data, mx_i.m_data, mx_i.size_64());

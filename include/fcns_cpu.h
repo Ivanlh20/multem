@@ -1872,7 +1872,7 @@ namespace mt
 		/* 1d */
 		template <class TVctr>
 		enable_if_vctr_cpu<TVctr, void>
-		fltr_mean_1d(TVctr& mx_i, dt_int32 n_kr, TVctr& mx_o, Stream_cpu* pstream);
+		fltr_mean_1d(TVctr& mx_i, dt_int32 n_kr, TVctr& mx_o, Stream_cpu* pstream= nullptr);
 	}
 
 	template <class TGrid, class TVctr>
