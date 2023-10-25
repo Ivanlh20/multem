@@ -66,9 +66,9 @@ namespace mt
 	template <class T>
 	T Rnd_Dist<T, edist_p, edev_cpu>::operator()(const T& x)
 	{
-		rnd.param(Dist_type<edist_p, T>::param_type(x));
+		rnd.param(typename Dist_type<edist_p, T>::param_type(x));
 
-		return T(rnd(gen));
+		return static_cast<T>(rnd(gen));
 	}
 
 	template <class T>

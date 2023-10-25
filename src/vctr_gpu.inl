@@ -1226,13 +1226,11 @@ namespace mt
 
 		init();
 	}
-#endif
 }
 
 /* derived class */
 namespace mt
 {
-#ifdef __CUDACC__
 	template <class T>
 	struct is_vctr_gpu_r_2d: std::integral_constant<dt_bool, is_vctr_gpu<T>::value && is_r_2d<typename T::value_type>::value> {};
 

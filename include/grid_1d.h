@@ -24,7 +24,7 @@
 #include "fcns_cgpu_gen.h"
 #include "const_enum.h"
 #include "igrid_1d.h"
-#include "region.cuh"
+#include "region_1d.h"
 #include "vctr_cpu.h"
 #include "vctr_gpu.h"
 

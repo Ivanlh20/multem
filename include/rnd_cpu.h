@@ -32,14 +32,25 @@ namespace mt
 	template <class T, eDist Dist, eDev Dev> class Rnd_Dist;
 }
 
-/* derived class */
+/* Template function for determining distribution type
+Dist_type is conditionally defined based on the value of eDist (Dist) */
 namespace mt
 {
-	template <eDist Dist, class T>
-	using Dist_type = typename std::conditional<Dist==edist_u, std::uniform_real_distribution<T>, 
-	typename std::conditional<Dist==edist_n, std::normal_distribution<T>, \
-	typename std::conditional<Dist==edist_p, std::poisson_distribution<dt_int32>, T>::type>::type>::type;
-}	
+    template <eDist Dist, class T>
+    using Dist_type = typename std::conditional<
+        Dist == edist_u, 
+        std::uniform_real_distribution<T>, 
+        typename std::conditional<
+            Dist == edist_n, 
+            std::normal_distribution<T>, 
+            typename std::conditional<
+                Dist == edist_p, 
+                std::poisson_distribution<dt_int32>, 
+                T
+            >::type
+        >::type
+    >::type;
+}
 
 /* class template random distribution */
 namespace mt

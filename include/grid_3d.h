@@ -20,6 +20,7 @@
 
 #include "grid_2d.h"
 #include "igrid_3d.h"
+#include "region_3d.h"
 
 /* derived class */
 namespace mt

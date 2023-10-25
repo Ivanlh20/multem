@@ -39,7 +39,7 @@
 #include "cgpu_detail.cuh"
 #include "cpu_detail.hpp"
 #include "border_2d.h"
-#include "region.cuh"
+#include "region_2d.h"
 #include "types.cuh"
 #include "cgpu_functors.h"
 #include "wd_gauss.h"
@@ -1839,8 +1839,8 @@ namespace mt
 		// radial distribution 2d by division
 		template <class TVctr>
 		enable_if_vctr_cpu<TVctr, void>
-		fcn_rad_dist_2d_by_div(Grid_2d<Value_type<TVctr>>& grid, TVctr& mx_i, R_2d<Value_type<TVctr>> p_c, 
-		Value_type<TVctr> radius_i, TVctr& rl_o, TVctr& frl_o, TVctr& cfrl_o, dt_int32 typ)
+		fcn_rad_dist_2d_by_div(Grid_2d<Value_type<TVctr>>& grid, TVctr&& mx_i, R_2d<Value_type<TVctr>> p_c, 
+		Value_type<TVctr> radius_i, TVctr&& rl_o, TVctr&& frl_o, TVctr&& cfrl_o, dt_int32 typ)
 		{
 		using T = Value_type<TVctr>;
 
@@ -1852,8 +1852,8 @@ namespace mt
 		// radial distribution 2d by search
 		template <class TVctr>
 		enable_if_vctr_cpu<TVctr, void>
-		fcn_rad_dist_2d_by_srch(Grid_2d<Value_type<TVctr>>& grid, TVctr& mx_i, R_2d<Value_type<TVctr>> p_c, 
-		Value_type<TVctr> radius_i, TVctr& rl_o, TVctr& frl_o, TVctr& cfrl_o, dt_int32 typ)
+		fcn_rad_dist_2d_by_srch(Grid_2d<Value_type<TVctr>>& grid, TVctr&& mx_i, R_2d<Value_type<TVctr>> p_c, 
+		Value_type<TVctr> radius_i, TVctr&& rl_o, TVctr&& frl_o, TVctr&& cfrl_o, dt_int32 typ)
 		{
 		using T = Value_type<TVctr>;
 

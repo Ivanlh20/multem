@@ -46,16 +46,6 @@ namespace mt
 /***************************************************************************************/
 /******************************** rectangular border ***********************************/
 /***************************************************************************************/
-namespace mt
-{
-	template <class T>
-	using Border_Rect_1d = Border_Rect_xd<T, edim_1>;
-
-	using iBorder_Rect_1d = Border_Rect_xd<dt_int32, edim_1>;
-
-	using iBorder_Rect_1d_64 = Border_Rect_xd<dt_int64, edim_1>;
-}
-
 /* template specialization 1d */
 namespace mt
 {
