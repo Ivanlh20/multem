@@ -195,14 +195,14 @@ void mex_read_cond_lens(const mxArray* mex_array, mt::Lens<T>& cond_lens)
 
 	/********************* defocus spread function ********************/
 	cond_lens.tp_inc_a = mex_get_num_from_field<T>(mex_array, "cond_lens_tp_inc_a");				// Height proportion of a normalized Gaussian [0, 1]
-	cond_lens.tp_inc_sigma = mex_get_num_from_field<T>(mex_array, "cond_lens_tp_inc_sigma");		// standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Å^-1);otherwise (Å)
-	cond_lens.tp_inc_beta = mex_get_num_from_field<T>(mex_array, "cond_lens_tp_inc_beta");			// standard deviation of the source spread function for the exponential component: For parallel ilumination(Å^-1);otherwise (Å)
+	cond_lens.tp_inc_sigma = mex_get_num_from_field<T>(mex_array, "cond_lens_tp_inc_sigma");		// standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Ã…^-1);otherwise (Ã…)
+	cond_lens.tp_inc_beta = mex_get_num_from_field<T>(mex_array, "cond_lens_tp_inc_beta");			// standard deviation of the source spread function for the exponential component: For parallel ilumination(Ã…^-1);otherwise (Ã…)
 	cond_lens.tp_inc_npts = mex_get_num_from_field<dt_int32>(mex_array, "cond_lens_tp_inc_npts");	// number of integration points
 
 	/***************** source size broadening function *****************/
 	cond_lens.spt_inc_a = mex_get_num_from_field<T>(mex_array, "cond_lens_spt_inc_a");							// Height proportion of a normalized Gaussian [0, 1]
-	cond_lens.spt_inc_sigma = mex_get_num_from_field<T>(mex_array, "cond_lens_spt_inc_sigma");					// standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Å^-1);otherwise (Å)
-	cond_lens.spt_inc_beta = mex_get_num_from_field<T>(mex_array, "cond_lens_spt_inc_beta");					// standard deviation of the source spread function for the exponential component: For parallel ilumination(Å^-1);otherwise (Å)
+	cond_lens.spt_inc_sigma = mex_get_num_from_field<T>(mex_array, "cond_lens_spt_inc_sigma");					// standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Ã…^-1);otherwise (Ã…)
+	cond_lens.spt_inc_beta = mex_get_num_from_field<T>(mex_array, "cond_lens_spt_inc_beta");					// standard deviation of the source spread function for the exponential component: For parallel ilumination(Ã…^-1);otherwise (Ã…)
 	cond_lens.spt_inc_rad_npts = mex_get_num_from_field<dt_int32>(mex_array, "cond_lens_spt_inc_rad_npts");		// number of radial integration points
 	cond_lens.spt_inc_azm_npts = mex_get_num_from_field<dt_int32>(mex_array, "cond_lens_spt_inc_azm_npts");		// number of azimuth integration points
 
@@ -251,14 +251,14 @@ void mex_read_obj_lens(const mxArray* mex_array, mt::Lens<T>& obj_lens)
 
 	/********************* defocus spread function ********************/
 	obj_lens.tp_inc_a = mex_get_num_from_field<T>(mex_array, "obj_lens_tp_inc_a");					// Height proportion of a normalized Gaussian [0, 1] 
-	obj_lens.tp_inc_sigma = mex_get_num_from_field<T>(mex_array, "obj_lens_tp_inc_sigma");			// standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Å^-1);otherwise (Å)
-	obj_lens.tp_inc_beta = mex_get_num_from_field<T>(mex_array, "obj_lens_tp_inc_beta");			// standard deviation of the source spread function for the exponential component: For parallel ilumination(Å^-1);otherwise (Å)
+	obj_lens.tp_inc_sigma = mex_get_num_from_field<T>(mex_array, "obj_lens_tp_inc_sigma");			// standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Ã…^-1);otherwise (Ã…)
+	obj_lens.tp_inc_beta = mex_get_num_from_field<T>(mex_array, "obj_lens_tp_inc_beta");			// standard deviation of the source spread function for the exponential component: For parallel ilumination(Ã…^-1);otherwise (Ã…)
 	obj_lens.tp_inc_npts = mex_get_num_from_field<dt_int32>(mex_array, "obj_lens_tp_inc_npts");		// number of integration points
 
 	/********************* source spread function *********************/
 	obj_lens.spt_inc_a = mex_get_num_from_field<T>(mex_array, "cond_lens_spt_inc_a");							// Height proportion of a normalized Gaussian [0, 1] 
-	obj_lens.spt_inc_sigma = mex_get_num_from_field<T>(mex_array, "cond_lens_spt_inc_sigma");					// standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Å^-1);otherwise (Å)
-	obj_lens.spt_inc_beta = mex_get_num_from_field<T>(mex_array, "cond_lens_spt_inc_beta");						// standard deviation of the source spread function for the exponential component: For parallel ilumination(Å^-1);otherwise (Å)
+	obj_lens.spt_inc_sigma = mex_get_num_from_field<T>(mex_array, "cond_lens_spt_inc_sigma");					// standard deviation of the source spread function for the Gaussian component: For parallel ilumination(Ã…^-1);otherwise (Ã…)
+	obj_lens.spt_inc_beta = mex_get_num_from_field<T>(mex_array, "cond_lens_spt_inc_beta");						// standard deviation of the source spread function for the exponential component: For parallel ilumination(Ã…^-1);otherwise (Ã…)
 	obj_lens.spt_inc_rad_npts = mex_get_num_from_field<dt_int32>(mex_array, "cond_lens_spt_inc_rad_npts");		// number of radial integration points
 	obj_lens.spt_inc_azm_npts = mex_get_num_from_field<dt_int32>(mex_array, "cond_lens_spt_inc_azm_npts");		// number of azimuth integration points
 

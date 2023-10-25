@@ -654,21 +654,21 @@ namespace mt
 				return sqrt(norm(iatoms, x_i, y_i, z_i));
 			}
 
-			T l_x; 												// box length along x direction (Å)
-			T l_y; 												// box length along y direction (Å)
-			T l_z; 												// box length along z direction (Å)
-			T dz;												// slice thickness (Å)
+			T l_x; 												// box length along x direction (Ã…)
+			T l_y; 												// box length along y direction (Ã…)
+			T l_z; 												// box length along z direction (Ã…)
+			T dz;												// slice thickness (Ã…)
 
 			int ct_na;											// number of unit cell along a
 			int ct_nb;											// number of unit cell along b
 			int ct_nc;											// number of unit cell along c
 
-			T ct_a;												// length along a (Å)
-			T ct_b;												// length along b (Å)
-			T ct_c;												// length along c (Å)
+			T ct_a;												// length along a (Ã…)
+			T ct_b;												// length along b (Ã…)
+			T ct_c;												// length along c (Ã…)
 
-			T ct_x0;											// reference position along x direction (Å)
-			T ct_y0;											// reference position along y direction (Å)
+			T ct_x0;											// reference position along x direction (Ã…)
+			T ct_y0;											// reference position along y direction (Ã…)
 
 			Vector<Amorp_Lay_Info<T>, e_host> amorp_lay_info;	// amorphous layer information
 

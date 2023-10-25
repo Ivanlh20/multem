@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of Multem.
  * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
  *

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Copyright 2017-2019 The MathWorks, Inc. -->
+<!-- CUDA MEX options for MSVC 2017 -->
+<config
+    Name="NVIDIA CUDA Compiler"
+    ShortName="nvcc"
+    HostCompiler="MSVCPP150"
+    Manufacturer="NVIDIA"
+    Version="10.1"
+    Language="CUDA"
+    Priority="A"
+    Location="$NVCC" >
+    <Details
+        CompilerExecutable="$COMPILER"
+        CompilerDefines="$COMPDEFINES"
+        CompilerFlags="$COMPFLAGS"
+        OptimizationFlags="$OPTIMFLAGS"
+        DebugFlags="$DEBUGFLAGS"
+        IncludeFlags="$INCLUDE"
+        LinkerExecutable="$LINKER"
+        LinkerFlags="$LINKFLAGS $LINKTYPE"
+        LinkerLibraries="$LINKLIBS"
+        LinkerDebugFlags="$LINKDEBUGFLAGS"
+        LinkerOptimizationFlags="$LINKOPTIMFLAGS"
+        CommandLineShell="$VCVARSALLDIR\VCVARSALL.BAT "
+        CommandLineShellArg="amd64"
+        CompilerDefineFormatter="--compiler-options=/D%s"
+        LinkerLibrarySwitchFormatter="lib%s.lib;%s.lib"
+        LinkerPathFormatter="/LIBPATH:%s"
+        LibrarySearchPath="$$LIB;$$LIBPATH;$$PATH;$$INCLUDE;$MATLABROOT\extern\lib\$ARCH\microsoft"
+    />
+    <!-- Switch guide: http://msdn.microsoft.com/en-us/library/fwkeyyhe(v=vs.71).aspx -->
+    <!-- Note: "&& echo XXXX > NUL" on CMDLINE is ignored by OS and is present to help MEX identify compile and link stages -->
+    <vars
+        CMDLINE100="$COMPILER -c $COMPFLAGS $OPTIM $COMPDEFINES $INCLUDE $SRC -o $OBJ && echo /Fo > NUL"
+        CMDLINE200="$LINKER $LINKFLAGS $LINKTYPE $LINKOPTIM $LINKEXPORTVER $OBJS $LINKLIBS /out:$EXE"
+        CMDLINE250="mt -outputresource:$EXE;2 -manifest $MANIFEST"
+        CMDLINE300="del $EXP $LIB $MANIFEST $ILK"
+
+        COMPILER="nvcc"
+        COMPFLAGS="--compiler-options=/Zp8,/GR,/W3,/EHs,/nologo,/MD $ARCHFLAGS"
+        ARCHFLAGS="-gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_50,code=sm_50 -gencode=arch=compute_60,code=sm_60 -gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot; $NVCC_FLAGS $NVVMIR_LIBRARY"
+        COMPDEFINES="--compiler-options=/D_CRT_SECURE_NO_DEPRECATE,/D_SCL_SECURE_NO_DEPRECATE,/D_SECURE_SCL=0,$MATLABMEX"
+        MATLABMEX="/DMATLAB_MEX_FILE"
+        OPTIMFLAGS="--compiler-options=/O2,/Oy-,/DNDEBUG"
+        INCLUDE="-I&quot;$MATLABROOT\extern\include&quot; -I&quot;$MATLABROOT\simulink\include&quot;"
+        DEBUGFLAGS="--compiler-options=/Z7"
+
+        LINKER="link"
+        LINKFLAGS="/nologo /manifest "
+        LINKTYPE="/DLL"
+        LINKEXPORT="/EXPORT:mexFunction"
+        LINKEXPORTVER="/EXPORT:mexFunction /EXPORT:mexfilerequiredapiversion"
+        LINKLIBS="/LIBPATH:&quot;$MATLABROOT\extern\lib\$ARCH\microsoft&quot; libmx.lib libmex.lib libmat.lib gpu.lib cudart.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libMatlabDataArray.lib libMatlabEngine.lib"
+        NVVMIR_LIBRARY="--dont-use-profile -ldir &quot;$MATLABROOT\bin\$ARCH&quot; -I&quot;$MATLABROOT\sys\cuda\$ARCH\cuda\include&quot;"
+
+        LINKDEBUGFLAGS="/debug /PDB:&quot;$TEMPNAME$LDEXT.pdb&quot;"
+        LINKOPTIMFLAGS=""
+
+        OBJEXT=".obj"
+        LDEXT=".mexw64"
+        SETENV="set COMPILER=$COMPILER
+                set COMPFLAGS=/c $COMPFLAGS $COMPDEFINES $MATLABMEX
+                set OPTIMFLAGS=$OPTIMFLAGS
+                set DEBUGFLAGS=$DEBUGFLAGS
+                set LINKER=$LINKER
+                set LINKFLAGS=$LINKFLAGS /export:%ENTRYPOINT% $LINKTYPE $LINKLIBS $LINKEXPORT
+                set LINKDEBUGFLAGS=/debug /PDB:&quot;%OUTDIR%%MEX_NAME%$LDEXT.pdb&quot;
+                set NAME_OUTPUT=/out:&quot;%OUTDIR%%MEX_NAME%%MEX_EXT%&quot;"
+    />
+    <locationFinder>
+        <VCROOT>
+            <and>
+                <or>
+                    <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+                    <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+                    <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+                    <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+                </or>
+                <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%" />
+            </and>
+        </VCROOT>
+        <SDKROOT>
+            <or>
+                <hklmExists path="SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0" name="InstallationFolder" />
+                <hkcuExists path="SOFTWARE\Microsoft\Microsoft SDKs\Windows\v10.0" name="InstallationFolder" />
+                <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0" name="InstallationFolder" />
+                <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0" name="InstallationFolder" />
+            </or>
+        </SDKROOT>
+        <VSINSTALLDIR>
+            <or>
+                <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+                <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+                <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+                <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+            </or>
+        </VSINSTALLDIR>
+        <VCINSTALLDIR>
+          <and>
+            <or>
+              <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+              <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+              <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+              <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+            </or>
+            <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%\VC\Tools\MSVC\%a" />
+          </and>
+        </VCINSTALLDIR>
+        <VCVARSALLDIR>
+           <and>
+                <or>
+                    <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+                    <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+                    <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+                    <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
+                </or>
+                <fileExists name="$$\VC\Auxiliary\Build\vcvarsall.bat" />
+                <dirExists name="$$"/>
+            </and>
+        </VCVARSALLDIR>
+        <KITSROOT>
+            <or>
+                <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots" name="KitsRoot10" />
+                <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots" name="KitsRoot10" />
+                <hklmExists path="SOFTWARE\Microsoft\Windows Kits\Installed Roots" name="KitsRoot10" />
+                <hkcuExists path="SOFTWARE\Microsoft\Windows Kits\Installed Roots" name="KitsRoot10" />
+                
+            </or>
+        </KITSROOT>
+        <SDKVERSION>
+            <and>
+                <or>
+                    <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots" name="KitsRoot10" />
+                    <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots" name="KitsRoot10" />
+                    <hklmExists path="SOFTWARE\Microsoft\Windows Kits\Installed Roots" name="KitsRoot10" />
+                    <hkcuExists path="SOFTWARE\Microsoft\Windows Kits\Installed Roots" name="KitsRoot10" />
+                    
+                </or>
+                <!-- For each folder inside '<KITSROOT>\include' check for 'ucrt' and if exists return that folder name -->
+                <cmdReturns name="echo off&amp;set &quot;sdkversion=&quot;&amp;(for /f %a IN ('dir &quot;$$\include\&quot; /b /ad-h /on') do ( @if exist &quot;$$\include\%a\ucrt\&quot; set &quot;sdkversion=%a&quot; ))&amp;call echo %sdkversion%" />
+            </and>
+        </SDKVERSION>
+        <CUDA_LIB_PATH>
+            <or>
+                <and>
+                    <or>
+                        <and>
+                            <envVarExists name="MW_NVCC_PATH"/>
+                            <fileExists name="$$\..\lib\x64\cudart.lib" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_LIB_PATH"/>
+                            <fileExists name="$$\cudart.lib" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_PATH"/>
+                            <fileExists name="$$\lib\x64\cudart.lib" />
+                        </and>
+                        <and>
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\lib\x64\cudart.lib" />
+                        </and>
+                    </or>
+                    <dirExists name="$$" />
+                </and>
+                <fileExists name="$MATLABROOT\sys\cuda\win64\cuda\lib\x64\cudart.lib"/>
+			</or>
+        </CUDA_LIB_PATH>
+        <CUDA_BIN_PATH>
+            <or>
+                <!-- This section is for UNC paths. We can only execute nvcc --version with no quotes around a UNC path -->
+                <and>
+                    <or>
+                        <and>
+                            <envVarExists name="MW_NVCC_PATH"/>
+                            <fileExists name="$$\nvcc.exe" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_BIN_PATH"/>
+                            <fileExists name="$$\nvcc.exe" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_PATH"/>
+                            <fileExists name="$$\bin\nvcc.exe" />
+                        </and>
+                        <and>
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\bin\nvcc.exe" />
+                        </and>
+                    </or>
+                    <!-- cmdReturns will replace all backslashes with a single backslash unless they are the very first characters -->
+                    <cmdReturns name="$$\nvcc --version | findstr /c:&quot;release 10.1&quot; > NUL && echo $$" />
+                </and>
+                <!-- For local paths, duplicate the same syntax in order to execute nvcc --version with quotes around the path, to handle spaces -->
+                <and>
+                    <or>
+                        <and>
+                            <envVarExists name="MW_NVCC_PATH"/>
+                            <fileExists name="$$\nvcc.exe" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_BIN_PATH"/>
+                            <fileExists name="$$\nvcc.exe" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_PATH"/>
+                            <fileExists name="$$\bin\nvcc.exe" />
+                        </and>
+                        <and>
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\bin\nvcc.exe" />
+                        </and>
+                    </or>
+                    <cmdReturns name="&quot;$$\nvcc&quot; --version | findstr /c:&quot;release 10.1&quot; > NUL && echo $$" />
+                </and>
+                <fileExists name="$MATLABROOT\sys\cuda\win64\cuda\bin\nvcc.exe"/> <!-- No user-installed nvcc was found. Use the shipped -->
+            </or>
+        </CUDA_BIN_PATH>
+    </locationFinder>
+    <!-- To use the shipping CUDA toolkit we need to adjust the PATH -->
+    <env
+        PATH="$MATLABROOT\sys\cuda\$ARCH\cuda\nvvm\bin;$MATLABROOT\sys\cuda\$ARCH\cuda\bin;$MATLABROOT\bin\$ARCH;\$CUDA_BIN_PATH;$CUDA_BIN_PATH;$VCINSTALLDIR\bin\HostX64\x64\;$VCROOT\Common7\IDE\VC\vcpackages;$VCROOT\Common7\IDE;$VCROOT\Common7\Tools;$SDKROOT\Bin\$SDKVERSION\x64;$SDKROOT\Bin\$SDKVERSION\x86;$SDKROOT\Bin\x64;$SDKROOT\Bin\x86;"
+        INCLUDE="$VCINSTALLDIR\include;$VCINSTALLDIR\atlmfc\include;$KITSROOT\include\$SDKVERSION\ucrt;$KITSROOT\include\$SDKVERSION\shared;$KITSROOT\include\$SDKVERSION\um;$KITSROOT\include\$SDKVERSION\winrt;$MATLABROOT\extern\include;$MATLABROOT\toolbox\parallel\gpu\extern\include"
+        LIB="$MATLABROOT\sys\cuda\$ARCH\cuda\lib\x64;$VCINSTALLDIR\lib\x64;$VCINSTALLDIR\atlmfc\lib\x64;$KITSROOT\Lib\$SDKVERSION\ucrt\x64;$KITSROOT\lib\$SDKVERSION\um\x64;$MATLABROOT\lib\$ARCH;$CUDA_LIB_PATH"
+        LIBPATH="$VCINSTALLDIR\lib\x64;$VCINSTALLDIR\atlmfc\lib\x64"
+    />
+</config>

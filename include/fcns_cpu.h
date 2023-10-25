@@ -41,7 +41,7 @@
 #include "border_2d.h"
 #include "region_2d.h"
 #include "types.cuh"
-#include "cgpu_functors.h"
+#include "functors_cgpu.h"
 #include "wd_gauss.h"
 #include "wd_exp.h"
 #include "wd_fermi.h"
@@ -1866,12 +1866,12 @@ namespace mt
 namespace mt
 {	
 	/* filter mean */
-	namespace cpu_fcn_image
+	namespace fcns_image_cpu
 	{
 		/* 1d */
 		template <class TVctr>
 		enable_if_vctr_cpu<TVctr, void>
-		fltr_mean_1d(TVctr& mx_i, dt_int32 n_kr, TVctr& mx_o, Stream_cpu* pstream= nullptr);
+		fltr_mean_1d(TVctr& mx_i, dt_int32 n_kr, TVctr& mx_o, Stream_cpu* pstream=nullptr);
 	}
 
 	template <class TGrid, class TVctr>
@@ -1903,7 +1903,7 @@ namespace mt
 
 		// fcn_smooth_mean_1d data
 		const dt_int32 nkr = max<dt_int32>(5, fr.size()/100);
-		cpu_fcn_image::fltr_mean_1d(fr, nkr, cfr);
+		fcns_image_cpu::fltr_mean_1d(fr, nkr, cfr);
 		fr = cfr;
 
 		// get maximum curvature point

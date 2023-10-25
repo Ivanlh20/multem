@@ -20,7 +20,7 @@
 
 #include "math_mt.h"
 #include "vctr_cpu.h"
-#include "cpu_fcns_image.h"
+#include "fcns_image_cpu.h"
 
 #include <mex.h>
 #include "matlab_mex.h"
@@ -32,7 +32,7 @@ void mex_run(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[
 	auto nkr = (nrhs>1)?mex_get_num<dt_int32>(prhs[1]):1;
 
 	/***************************************************************************************/
-	auto mx_o = mt::cpu_fcn_image::fcn_morp_op_dilate(pmx_i, nkr);
+	auto mx_o = mt::fcns_image_cpu::fcn_morp_op_dilate(pmx_i, nkr);
 
 	mex_create_set_pVctr<T>(plhs[0], mx_o.ptr_64());
 }

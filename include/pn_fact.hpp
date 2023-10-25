@@ -29,7 +29,7 @@
 	{
 		/***************************************************************************************/
 		/******************** factorization of a number in small prime number ******************/
-		// factorization: 2^a × 3^b × 5^c × 7^d, where a>1 
+		// factorization: 2^a Ã— 3^b Ã— 5^c Ã— 7^d, where a>1 
 		// https:// docs.nvidia.com/cuda/cufft/index.html
 
 		struct PN_Fact

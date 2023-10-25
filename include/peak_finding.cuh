@@ -31,7 +31,7 @@
 	#include "lapack.hpp"
 	#include "box_occ.hpp"
 	#include "cgpu_classes.cuh"
-	#include "cpu_fcns_image.h"
+	#include "fcns_image_cpu.h"
 
 	namespace mt
 	{

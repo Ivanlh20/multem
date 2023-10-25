@@ -31,7 +31,7 @@
 	#include "cgpu_vctr.cuh"
 	#include "atomic_data_mt.cuh"
 	#include "cgpu_detail_mt.cuh"
-	#include "cpu_fcns_mt.hpp"
+	#include "fcns_mt_cpu.hpp"
 
 	#ifdef __CUDACC__
 		#include "gpu_fcns_mt.cuh"

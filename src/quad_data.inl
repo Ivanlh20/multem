@@ -278,7 +278,7 @@ namespace mt
 			pw[ix] = h*c_i2pi<T>*cosh(t_ix)*cosh(tt_ix);
 		}
 	}
-	//1. Ooura, T. & Mori, M. A robust double exponential formula for Fourier-type integrals. J. Comput. Appl. Math. 112, 229�241 (1999).
+	//1. Ooura, T. & Mori, M. A robust double exponential formula for Fourier-type integrals. J. Comput. Appl. Math. 112, 229â€“241 (1999).
 	// 5: int_0^infty f(x)sin(wx) dx
 	template <class T>
 	void Quad_Data_T<T>::nw_fourier_sin_int_0_pinfty(const dt_int32& nx, const T& ta, T* px, T* pw)

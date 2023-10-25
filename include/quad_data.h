@@ -63,7 +63,7 @@ namespace mt
 		// 4: int_-infty^infty f(x) dx
 		void nw_sinh_sinh_int_ninfty_pinfty(const dt_int32& nx, const T& x_min, const T& x_max, T* px, T* pw);
 
-		//1. Ooura, T. & Mori, M. A robust double exponential formula for Fourier-type integrals. J. Comput. Appl. Math. 112, 229�241 (1999).
+		//1. Ooura, T. & Mori, M. A robust double exponential formula for Fourier-type integrals. J. Comput. Appl. Math. 112, 229ï¿½241 (1999).
 		// 5: int_0^infty f(x)sin(wx) dx
 		void nw_fourier_sin_int_0_pinfty(const dt_int32& nx, const T& ta, T* px, T* pw);
 

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Copyright 2015-2019 The MathWorks, Inc. -->
+<config
+    Name="nvcc"
+    ShortName="nvcc"
+    HostCompiler="g++"
+    Manufacturer="NVIDIA"
+    Version="10.1"
+    Language="CUDA"
+    Priority="A"
+    Location="$NVCC" >
+    <Details
+        CompilerExecutable="$CXX"
+        CompilerDefines="$DEFINES"
+        CompilerFlags="$CXXFLAGS"
+        OptimizationFlags="$CXXOPTIMFLAGS"
+        DebugFlags="$CXXDEBUGFLAGS"
+        IncludeFlags="$INCLUDE"
+        LinkerExecutable="$LDXX"
+        LinkerFlags="$LDFLAGS $LDTYPE"
+        LinkerLibraries="$LINKLIBS"
+        LinkerOptimizationFlags="$LDOPTIMFLAGS"
+        LinkerDebugFlags="$LDDEBUGFLAGS"
+
+        CompilerDefineFormatter="-D%s"
+        LinkerLibrarySwitchFormatter="-l%s"
+        LinkerPathFormatter="-L%s"
+    />
+    <vars
+        CMDLINE1="$CXX -c $DEFINES $INCLUDE $NVCCFLAGS $CXXFLAGS $OPTIM $SRC -o $OBJ"
+        CMDLINE2="$LDXX $LDFLAGS $LDTYPE $LINKOPTIM $LINKEXPORTVER $OBJS $CXXLIBS $LINKLIBS -o $EXE"
+        CMDLINE3="rm -f $OBJ"
+ 
+        CXX="$NVCC"
+        DEFINES="--compiler-options=-D_GNU_SOURCE,$MATLABMEX"
+        MATLABMEX="-DMATLAB_MEX_FILE"
+        NVCCFLAGS="-gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_50,code=sm_50 -gencode=arch=compute_60,code=sm_60 -gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot; -std=c++14 $NVCC_FLAGS $NVVMIR_LIBRARY"
+        CFLAGS="--compiler-options=-fexceptions,-fPIC,-fno-omit-frame-pointer,-pthread,-fwrapv"
+        CXXFLAGS="$CFLAGS"
+        INCLUDE="-I&quot;$MATLABROOT/extern/include&quot; -I&quot;$MATLABROOT/simulink/include&quot; -I&quot;$MATLABROOT/toolbox/parallel/gpu/extern/include/&quot;" 
+        CXXOPTIMFLAGS="-O2 -DNDEBUG"
+        CXXDEBUGFLAGS="-g"
+
+        LDXX="$GCC"
+        LDFLAGS="-pthread -Wl,--no-undefined "
+        LDTYPE="-shared"
+        LINKEXPORT="-Wl,--version-script,&quot;$MATLABROOT/extern/lib/$ARCH/mexFunction.map&quot;"
+        LINKEXPORTVER="-Wl,--version-script,&quot;$MATLABROOT/extern/lib/$ARCH/c_exportsmexfileversion.map&quot;"
+        LINKLIBS="-Wl,--as-needed -Wl,-rpath-link,$MATLABROOT/bin/$ARCH -L&quot;$MATLABROOT/bin/$ARCH&quot; -Wl,-rpath-link,$MATLABROOT/extern/bin/$ARCH -L&quot;$MATLABROOT/extern/bin/$ARCH&quot; -lMatlabDataArray -lmx -lmex -lmat -lm -lc -lstdc++ -lmwgpu $MATLABROOT/bin/$ARCH/libcudart.so.10.1 "
+        NVVMIR_LIBRARY="--dont-use-profile -ldir $MATLABROOT/bin/$ARCH -I&quot;$MATLABROOT/sys/cuda/$ARCH/cuda/include&quot;"
+
+        LDOPTIMFLAGS="-O"
+        LDDEBUGFLAGS="-g"
+        MWCPPLIB="&quot;$MATLABROOT/sys/os/$ARCH/libstdc++.so.6&quot;"
+
+        OBJEXT=".o"
+        LDEXT=".mexa64"
+
+        SETENV="CC=&quot;gcc&quot;
+                CXX=&quot;$CXX&quot;
+                CFLAGS=&quot;$CFLAGS $DEFINES&quot;
+                CXXFLAGS=&quot;$CXXFLAGS $DEFINES&quot;
+                COPTIMFLAGS=&quot;$CXXOPTIMFLAGS&quot;
+                CXXOPTIMFLAGS=&quot;$CXXOPTIMFLAGS&quot;
+                CDEBUGFLAGS=&quot;$CXXDEBUGFLAGS&quot;
+                CXXDEBUGFLAGS=&quot;$CXXDEBUGFLAGS&quot;
+                LD=&quot;gcc&quot;
+                LDXX=&quot;$LDXX&quot;
+                LDFLAGS=&quot;$LDFLAGS $LDTYPE $LINKLIBS $LINKEXPORT&quot;
+                LDDEBUGFLAGS=&quot;$LDDEBUGFLAGS&quot;">
+    </vars>
+    <locationFinder>
+        <NVCC>
+            <or> <!-- Look for user-installed nvcc, otherwise use the shipped one -->
+                <and>
+                    <or>
+                        <and> <!-- Search for nvcc in standard locations, favoring user variable MW_NVCC_PATH, but reject if it isn't the supported version -->
+                            <or>
+                                <and>
+                                    <envVarExists name="MW_NVCC_PATH" />
+                                    <fileExists name="$$/nvcc" />
+                                </and>
+                                <and>
+                                    <envVarExists name="CUDA_BIN_PATH" />
+                                    <fileExists name="$$/nvcc" />
+                                </and>
+                                <and>
+                                    <envVarExists name="CUDA_PATH" />
+                                    <fileExists name="$$/bin/nvcc" />
+                                </and>
+                                <cmdReturns name="which nvcc" />
+                                <fileExists name="/usr/local/cuda/bin/nvcc" />
+                            </or>
+                            <cmdReturns name="$$/nvcc --version | egrep -E 'release 10.1' > /dev/null && echo $$/nvcc" />
+                        </and>
+                        <fileExists name="/usr/local/cuda-10.1/bin/nvcc" /> <!-- Search the default install location -->
+                    </or>
+                    <cmdReturns name="$$/nvcc --version | egrep -E 'release 10.1' > /dev/null && echo $$/nvcc" />
+                </and>
+                <fileExists name="$MATLABROOT/sys/cuda/glnxa64/cuda/bin/nvcc"/> <!-- No user-installed nvcc was found. Use the shipped -->
+            </or>
+        </NVCC>
+        <GCC>
+            <cmdReturns name="which g++" />
+        </GCC>
+        <CPPLIB_DIR>
+            <cmdReturns name="g++ -print-file-name=libstdc++.so"
+                        diagnostic="GCC appears to be installed, but supporting C++ libraries were not found.  You must first install the gcc-c++ package, or similiar, to complete this action."/>
+        </CPPLIB_DIR>
+        <VER>
+            <cmdReturns name="g++ -dumpversion"/>
+        </VER>
+        <GCCDIR>
+            <cmdReturns name="which g++" />
+            <dirExists name="$$/../" />
+        </GCCDIR>
+        <GCC_TARGET>
+            <cmdReturns name="g++ -dumpmachine" />
+        </GCC_TARGET>
+    </locationFinder>
+    <!-- PATH: To use our shipped compiler + headers we need to fix the path in compilation time -->
+    <env
+        PATH=":$MATLABROOT/sys/cuda/$ARCH/cuda/nvvm/bin:$MATLABROOT/sys/cuda/$ARCH/cuda/bin:$MATLABROOT/bin/$ARCH"
+        INCLUDE=":$GCCDIR/lib/gcc/$GCC_TARGET/$VER/include;$GCCDIR/include/c++/$VER;$GCCDIR/include/c++/$VER/$GCC_TARGET;$GCCDIR/include/c++/$VER/backward"
+    />
+</config>
