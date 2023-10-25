@@ -18,6 +18,7 @@
 
 #include "cpu_fcns_image.h"
 #include "cgpu_functors.h"
+#include "fcns_cpu.h"
 
 namespace mt
 {

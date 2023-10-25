@@ -1631,13 +1631,13 @@ namespace mt
 		}
 
 		return mx_o;
-		}
+	}
 
 		/* add pbc border */
 	template <class TVctr>
 	enable_if_vctr_cpu<TVctr, Vctr_cpu<Value_type<TVctr>>>
 	fcn_add_pbdr(TVctr& mx_i, iBorder_Rect_2d& iborder)
-		{
+	{
 		using T = Value_type<TVctr>;
 
 		auto igrid = mx_i.igrid_2d();
@@ -1698,7 +1698,7 @@ namespace mt
 		}
 
 		return mx_o;
-		}
+	}
 }
 
 /* radial distribution */
@@ -1710,43 +1710,43 @@ namespace mt
 		fcn_rad_dist(TVctr& r_i, TVctr& fr_i, Value_type<TVctr> r_0, Value_type<TVctr> r_e, 
 		dt_int32 n_r, TVctr& rl_o, TVctr& frl_o, TVctr& cfrl_o, dt_int32 typ, const TFcn& fcn)
 		{
-		using T = Value_type<TVctr>;
+			using T = Value_type<TVctr>;
 
-		const T dr = (r_e-r_0)/T(n_r);
+			const T dr = (r_e-r_0)/T(n_r);
 
-		for(auto ir = 0; ir < n_r; ir++)
-		{
-		 	rl_o[ir] = r_0 + T(ir)*dr;
-		 	frl_o[ir] = T(0);
-		 	cfrl_o[ir] = T(0);
-		}
+			for(auto ir = 0; ir < n_r; ir++)
+			{
+				rl_o[ir] = r_0 + T(ir)*dr;
+				frl_o[ir] = T(0);
+				cfrl_o[ir] = T(0);
+			}
 
-		for(auto ir = 0; ir < r_i.size(); ir++)
-		{
-			const auto r = r_i[ir];
-		 	if (fcn_chk_bound(r, r_0, r_e))
-		 	{
-				const auto ik = fcn(r);
-		 		frl_o[ik] += fr_i[ir];
-		 		cfrl_o[ik] += T(1);
-		 	}
-		}
+			for(auto ir = 0; ir < r_i.size(); ir++)
+			{
+				const auto r = r_i[ir];
+				if (fcn_chk_bound(r, r_0, r_e))
+				{
+					const auto ik = fcn(r);
+					frl_o[ik] += fr_i[ir];
+					cfrl_o[ik] += T(1);
+				}
+			}
 
-		if ((typ == 0) || (typ == 2))
-		{
-		 	for(auto ir = 0; ir < n_r; ir++)
-		 	{
-		 		frl_o[ir] /= fcn_max(T(1), cfrl_o[ir]);
-		 	}
-		}
+			if ((typ == 0) || (typ == 2))
+			{
+				for(auto ir = 0; ir < n_r; ir++)
+				{
+					frl_o[ir] /= fcn_max(T(1), cfrl_o[ir]);
+				}
+			}
 
-		if (typ > 1)
-		{
-		 	for(auto ir = 1; ir < n_r; ir++)
-		 	{
-				frl_o[ir] += frl_o[ir - 1];
-		 	}
-		}
+			if (typ > 1)
+			{
+				for(auto ir = 1; ir < n_r; ir++)
+				{
+					frl_o[ir] += frl_o[ir - 1];
+				}
+			}
 		}
 
 		// radial distribution by division: typ = 0; % 0: sum(v)/n, 1: sum(v), 2: cumsum(sum(v)/n), 3: cumsum(sum(v))
@@ -1755,12 +1755,12 @@ namespace mt
 		fcn_rad_dist_by_div(TVctr& r_i, TVctr& fr_i, Value_type<TVctr> r_0, Value_type<TVctr> r_e, 
 		dt_int32 n_r, TVctr& rl_o, TVctr& frl_o, TVctr& cfrl_o, dt_int32 typ)
 		{
-		using T = Value_type<TVctr>;
-		const T dr = (r_e-r_0)/T(n_r);
+			using T = Value_type<TVctr>;
+			const T dr = (r_e-r_0)/T(n_r);
 
-		cgpu_fctr::rad_dist_ind_by_div<T> fcn(r_0, dr, 0, n_r-1);
+			cgpu_fctr::rad_dist_ind_by_div<T> fcn(r_0, dr, 0, n_r-1);
 
-		fcn_rad_dist(r_i, fr_i, r_0, r_e, n_r, rl_o, frl_o, cfrl_o, typ, fcn);
+			fcn_rad_dist(r_i, fr_i, r_0, r_e, n_r, rl_o, frl_o, cfrl_o, typ, fcn);
 		}		 
 		 
 		// radial distribution by search: typ = 0; % 0: sum(v)/n, 1: sum(v), 2: cumsum(sum(v)/n), 3: cumsum(sum(v))
@@ -1769,23 +1769,23 @@ namespace mt
 		fcn_rad_dist_by_srch(TVctr& r_i, TVctr& fr_i, Value_type<TVctr> r_0, Value_type<TVctr> r_e, 
 		dt_int32 n_r, TVctr& rl_o, TVctr& frl_o, TVctr& cfrl_o, dt_int32 typ)
 		{
-		using T = Value_type<TVctr>;
+			using T = Value_type<TVctr>;
 
-		cgpu_fctr::rad_dist_ind_by_srch<T> fcn(rl_o.data(), 0, n_r-1);
+			cgpu_fctr::rad_dist_ind_by_srch<T> fcn(rl_o.data(), 0, n_r-1);
 
-		fcn_rad_dist(r_i, fr_i, r_0, r_e, n_r, rl_o, frl_o, cfrl_o, typ, fcn);
+			fcn_rad_dist(r_i, fr_i, r_0, r_e, n_r, rl_o, frl_o, cfrl_o, typ, fcn);
 		}	
 }
 
 /* radial distribution 2d */
 namespace mt
 {		 
-		// radial distribution 2d: typ = 0; % 0: sum(v)/n, 1: sum(v), 2: cumsum(sum(v)/n), 3: cumsum(sum(v))
-		template <class TVctr, class TFcn>
-		enable_if_vctr_cpu<TVctr, void>
-		fcn_rad_dist_2d(Grid_2d<Value_type<TVctr>>& grid, TVctr& mx_i, R_2d<Value_type<TVctr>> p_c, 
-		Value_type<TVctr> radius_i, TVctr& rl_o, TVctr& frl_o, TVctr& cfrl_o, dt_int32 typ, const TFcn& fcn)
-		{
+	// radial distribution 2d: typ = 0; % 0: sum(v)/n, 1: sum(v), 2: cumsum(sum(v)/n), 3: cumsum(sum(v))
+	template <class TVctr, class TFcn>
+	enable_if_vctr_cpu<TVctr, void>
+	fcn_rad_dist_2d(Grid_2d<Value_type<TVctr>>& grid, TVctr& mx_i, R_2d<Value_type<TVctr>> p_c, 
+	Value_type<TVctr> radius_i, TVctr& rl_o, TVctr& frl_o, TVctr& cfrl_o, dt_int32 typ, const TFcn& fcn)
+	{
 		using T = Value_type<TVctr>;
 
 		dt_int32 ix_0, ix_e;
@@ -1799,68 +1799,67 @@ namespace mt
 
 		for(auto ir = 0; ir < rl_o.size(); ir++)
 		{
-		 	rl_o[ir] = grid.rx(ir);
-		 	frl_o[ir] = T(0);
-		 	cfrl_o[ir] = T(0);
+			rl_o[ir] = grid.rx(ir);
+			frl_o[ir] = T(0);
+			cfrl_o[ir] = T(0);
 		}
 
 		for(auto ix = ix_0; ix < ix_e; ix++)
 		{
-		 	for(auto iy = iy_0; iy < iy_e; iy++)
-		 	{
-		 		const auto r2 = grid.r2(ix, iy, p_c);
-		 		if (r2 < r2_max)
-		 		{
-		 			const auto ir = fcn(::sqrt(r2));
-		 			frl_o[ir] += mx_i[grid.sub_2_ind(ix, iy)];
-		 			cfrl_o[ir] += T(1);
-		 		}
-		 	}
+			for(auto iy = iy_0; iy < iy_e; iy++)
+			{
+				const auto r2 = grid.r2(ix, iy, p_c);
+				if (r2 < r2_max)
+				{
+					const auto ir = fcn(::sqrt(r2));
+					frl_o[ir] += mx_i[grid.sub_2_ind(ix, iy)];
+					cfrl_o[ir] += T(1);
+				}
+			}
 		}
 
 		if ((typ == 0) || (typ == 2))
 		{
-		 	for(auto ir = 0; ir < rl_o.size(); ir++)
-		 	{
-		 		frl_o[ir] /= fcn_max(T(1), cfrl_o[ir]);
-		 	}
+			for(auto ir = 0; ir < rl_o.size(); ir++)
+			{
+				frl_o[ir] /= fcn_max(T(1), cfrl_o[ir]);
+			}
 		}
 
 		if (typ > 1)
 		{
-		 	for(auto ir = 1; ir < rl_o.size(); ir++)
-		 	{
+			for(auto ir = 1; ir < rl_o.size(); ir++)
+			{
 				frl_o[ir] += frl_o[ir - 1];
-		 	}
+			}
 		}
-		}
+	}
 
-
-		// radial distribution 2d by division
-		template <class TVctr>
-		enable_if_vctr_cpu<TVctr, void>
-		fcn_rad_dist_2d_by_div(Grid_2d<Value_type<TVctr>>& grid, TVctr&& mx_i, R_2d<Value_type<TVctr>> p_c, 
-		Value_type<TVctr> radius_i, TVctr&& rl_o, TVctr&& frl_o, TVctr&& cfrl_o, dt_int32 typ)
-		{
+	// radial distribution 2d by division
+	template <class TVctr>
+	enable_if_vctr_cpu<TVctr, void>
+	fcn_rad_dist_2d_by_div(Grid_2d<Value_type<TVctr>>& grid, TVctr& mx_i, R_2d<Value_type<TVctr>> p_c, 
+	Value_type<TVctr> radius_i, TVctr& rl_o, TVctr& frl_o, TVctr& cfrl_o, dt_int32 typ)
+	{
 		using T = Value_type<TVctr>;
 
 		cgpu_fctr::rad_dist_ind_by_div<T> fcn(0, grid.drx, 0, rl_o.size()-1);
 
 		fcn_rad_dist_2d(grid, mx_i, p_c, radius_i, rl_o, frl_o, cfrl_o, typ, fcn);
-		}		 
-		 
-		// radial distribution 2d by search
-		template <class TVctr>
-		enable_if_vctr_cpu<TVctr, void>
-		fcn_rad_dist_2d_by_srch(Grid_2d<Value_type<TVctr>>& grid, TVctr&& mx_i, R_2d<Value_type<TVctr>> p_c, 
-		Value_type<TVctr> radius_i, TVctr&& rl_o, TVctr&& frl_o, TVctr&& cfrl_o, dt_int32 typ)
-		{
+	}		 
+	
+	// radial distribution 2d by search
+	template <class TVctr>
+	enable_if_vctr_cpu<TVctr, void>
+	fcn_rad_dist_2d_by_srch(Grid_2d<Value_type<TVctr>>& grid, TVctr& mx_i, R_2d<Value_type<TVctr>> p_c, 
+	Value_type<TVctr> radius_i, TVctr& rl_o, TVctr& frl_o, TVctr& cfrl_o, dt_int32 typ)
+	{
 		using T = Value_type<TVctr>;
 
 		cgpu_fctr::rad_dist_ind_by_srch<T> fcn(rl_o.data(), 0, rl_o.size()-1);
 
 		fcn_rad_dist_2d(grid, mx_i, p_c, radius_i, rl_o, frl_o, cfrl_o, typ, fcn);
-		}	
+	}	
 }
 
 /* information limit for regular grid */
@@ -1889,7 +1888,7 @@ namespace mt
 		Vctr_cpu<T> cfr(n_r);
 
 		// cumulative radial integration
-		fcn_rad_dist_2d_by_div(grid, mx_i.ptr_64(), r_c, grid.bs_h_min(), r.ptr_64(), fr.ptr_64(), cfr.ptr_64(), 2);
+		fcn_rad_dist_2d_by_div(grid, mx_i, r_c, grid.bs_h_min(), r, fr, cfr, 2);
 
 		// shift and normalize
 		const T r_0 = r.front();	 	

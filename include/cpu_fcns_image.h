@@ -26,9 +26,7 @@
 #include "vctr_cpu.h"
 #include "stream_cpu.h"
 #include "r_2d.h"
-#include "fcns_cpu.h"
 #include "cgpu_functors.h"
-#include "fcns_cpu.h"
 
 namespace mt
 {
