@@ -1,0 +1,11 @@
+[Parameters]
+nkr = 10
+operation = "tophat"
+
+[Input]
+file = "input.h5"
+dataset = "image"
+
+[Output]
+file = "output.h5"
+dataset = "image"
