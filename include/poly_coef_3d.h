@@ -20,84 +20,85 @@
 
 #include "const_enum.h"
 #include "vctr_cpu.h"
+#include "vctr_gpu.h"
 
 /* template definition */
 namespace mt
 {
-#ifndef LNL_COEF_DEC
-	#define LNL_COEF_DEC
-	template <class ST, eDev Dev> class LNL_Coef;
-	
-	template <class ST, eDev Dev> class pLNL_Coef;
+#ifndef POLY_COEF_3D_DEC
+	#define POLY_COEF_3D_DEC
+	template <class ST, eDev Dev> class Poly_Coef_3d;
+
+	template <class ST, eDev Dev> class pPoly_Coef_3d;
 #endif
 }
 
-// class linear and non-linear coefficients
+/* class cubic polynomial coefficients */
 namespace mt
 {
-	namespace mt
-	{
-		template <class T>
-		using LNL_Coef_cpu = LNL_Coef<T, edev_cpu>;
+	template <class T>
+	using Poly_Coef_3d_cpu = Poly_Coef_3d<T, edev_cpu>;
 
-		template <class T>
-		using LNL_Coef_gpu = LNL_Coef<T, edev_gpu>;
-	}
+	template <class T>
+	using Poly_Coef_3d_gpu = Poly_Coef_3d<T, edev_gpu>;
 }
 
 namespace mt
 {
 	template <class T, eDev Dev>
-	class LNL_Coef
+	class Poly_Coef_3d
 	{
 	public:
 		using value_type = T;
 		using size_type = dt_int32;
 		static const eDev device = Dev;
 
-		mutable Vctr<T, Dev> cl;
-		mutable Vctr<T, Dev> cnl;
+		mutable Vctr<T, Dev> c0;
+		mutable Vctr<T, Dev> c1;
+		mutable Vctr<T, Dev> c2;
+		mutable Vctr<T, Dev> c3;
 
 		/************************************* constructors ************************************/
-		LNL_Coef() {}
+		Poly_Coef_3d();
 
-		LNL_Coef(const Vctr_cpu<T>& cl, const Vctr_cpu<T>& cnl);
+		Poly_Coef_3d(const Vctr_cpu<T>& c0, const Vctr_cpu<T>& c1, const Vctr_cpu<T>& c2, const Vctr_cpu<T>& c3);
 
-		LNL_Coef(const dt_init_list_f64& cl, const dt_init_list_f64& cnl);
+		Poly_Coef_3d(const dt_init_list_f64& c0, const dt_init_list_f64& c1, const dt_init_list_f64& c2, const dt_init_list_f64& c3);
 
-		LNL_Coef(const size_type& new_size);
+		Poly_Coef_3d(const size_type& new_size);
 
-		LNL_Coef(const size_type& new_size, const T& value);
+		Poly_Coef_3d(const size_type& new_size, const T& value);
 
 		/* copy constructor */
-		LNL_Coef(const LNL_Coef<T, Dev>& coef_lnl);
+		Poly_Coef_3d(const Poly_Coef_3d<T, Dev>& coef_poly3);
 
 		/* converting constructor */
 		template <class U, eDev Dev_u> 
-		LNL_Coef(const LNL_Coef<U, Dev_u>& coef_lnl);
+		Poly_Coef_3d(const Poly_Coef_3d<U, Dev_u>& coef_poly3);
 
 		/******************************** assignment operators *********************************/
 		/* copy assignment operator */
-		LNL_Coef<T, Dev>& operator=(const LNL_Coef<T, Dev>& coef_lnl);
+		Poly_Coef_3d<T, Dev>& operator=(const Poly_Coef_3d<T, Dev>& coef_poly3);
 
 		/* converting assignment operator */
 		template <class U, eDev Dev_u> 
-		LNL_Coef<T, Dev>& operator=(const LNL_Coef<U, Dev_u>& coef_lnl);
+		Poly_Coef_3d<T, Dev>& operator=(const Poly_Coef_3d<U, Dev_u>& coef_poly3);
 
 		template <class U, eDev Dev_u> 
-		void assign(const LNL_Coef<U, Dev_u>& coef_lnl);
+		void assign(const Poly_Coef_3d<U, Dev_u>& coef_poly3);
 
 		/**************** user define conversion operators *******************/
-		pLNL_Coef<T, Dev> ptr() const;
+		pPoly_Coef_3d<T, Dev> ptr() const;
 
-		/* user define conversion for pointer */
-		operator pLNL_Coef<T, Dev>() const;
+		/* user define conversion for pointer Vctr */
+		operator pPoly_Coef_3d<T, Dev>() const;
 
-		void fill(const T& val_l, const T& val_nl);
+		void fill(const T& val_c0, const T& val_c1, const T& val_c2, const T& val_c3);
 
 		size_type size() const;
 
 		void clear();
+
 		void reserve(const size_type& new_size);
 
 		void resize(const size_type& new_size);
@@ -108,55 +109,57 @@ namespace mt
 	};
 }
 
-// pointer class linear and non-linear coefficients
+/* pointer class cubic polynomial coefficients */
 namespace mt
 {
 	template <class T>
-	using pLNL_Coef_cpu = pLNL_Coef<T, edev_cpu>;
+	using pPoly_Coef_3d_cpu = pPoly_Coef_3d<T, edev_cpu>;
 
 	template <class T>
-	using pLNL_Coef_gpu = pLNL_Coef<T, edev_gpu>;
+	using pPoly_Coef_3d_gpu = pPoly_Coef_3d<T, edev_gpu>;
 }
 
 namespace mt
 {
 	template <class T, eDev Dev>
-	class pLNL_Coef
+	class pPoly_Coef_3d
 	{
 	public:
 		using value_type = T;
 		using size_type = dt_int32;
 		static const eDev device = Dev;
 
-		T* __restrict__ cl;		// linear coefficient
-		T* __restrict__ cnl;	// non-linear coefficient
+		T* __restrict__ c0;
+		T* __restrict__ c1;
+		T* __restrict__ c2;
+		T* __restrict__ c3;
 		size_type m_size;
 
 		/************************************* constructors ************************************/
 		CGPU_EXEC
-		pLNL_Coef();
+		pPoly_Coef_3d();
 
 		CGPU_EXEC
-		pLNL_Coef(T* cl, T* cnl, const size_type& size);
+		pPoly_Coef_3d(T* c0, T* c1, T* c2, T* c3, const size_type& size);
 
 		/* copy constructor */
 		CGPU_EXEC
-		pLNL_Coef(const pLNL_Coef<T, Dev>& pcoef_lnl);
+		pPoly_Coef_3d(const pPoly_Coef_3d<T, Dev>& pcoef_poly3);
 
-		/* constructor from LNL_Coef */
-		explicit pLNL_Coef(const LNL_Coef<T, Dev>& coef_lnl);
+		/* constructor from Poly_Coef_3d */
+		explicit pPoly_Coef_3d(const Poly_Coef_3d<T, Dev>& coef_poly3);
 
 		/******************************** assignment operators *********************************/
 		/* copy assignment operator */
 		CGPU_EXEC
-		pLNL_Coef<T, Dev>& operator=(const pLNL_Coef<T, Dev>& pcoef_lnl);
+		pPoly_Coef_3d<T, Dev>& operator=(const pPoly_Coef_3d<T, Dev>& pcoef_poly3);
 
-		/* Assignment operator: LNL_Coef -> pLNL_Coef */
+		/* Assignment operator: Poly_Coef_3d -> pPoly_Coef_3d */
 		CPU_EXEC
-		pLNL_Coef<T, Dev>& operator=(const LNL_Coef<T, Dev>& coef_lnl);
+		pPoly_Coef_3d<T, Dev>& operator=(const Poly_Coef_3d<T, Dev>& coef_poly3);
 
 		size_type size() const;
 	};
 }
 
-#include "../src/lnl_coef.inl"
+#include "../src/poly_coef_3d.inl"

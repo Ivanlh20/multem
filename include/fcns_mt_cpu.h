@@ -31,7 +31,7 @@
 	#include "cgpu_fft.cuh"
 	#include "cgpu_stream.cuh"
 	#include "quad_data.cuh"
-	#include "cgpu_detail_mt.cuh"
+	#include "detail_cgpu_mt.cuh"
 	#include "fcns_cpu.h"
 
 	/* atomic functions */
@@ -121,31 +121,31 @@
 		{																						\
 			case eappt_doyle_0_4:																\
 			{																					\
-				return cgpu_detail_mt::fcn<eappt_doyle_0_4, T>(__VA_ARGS__);						\
+				return detail_cgpu_mt::fcn<eappt_doyle_0_4, T>(__VA_ARGS__);						\
 			}																					\
 			case eappt_peng_0_4:																	\
 			{																					\
-				return cgpu_detail_mt::fcn<eappt_peng_0_4, T>(__VA_ARGS__);						\
+				return detail_cgpu_mt::fcn<eappt_peng_0_4, T>(__VA_ARGS__);						\
 			}																					\
 			case eappt_peng_0_12:																\
 			{																					\
-				return cgpu_detail_mt::fcn<eappt_peng_0_12, T>(__VA_ARGS__);						\
+				return detail_cgpu_mt::fcn<eappt_peng_0_12, T>(__VA_ARGS__);						\
 			}																					\
 			case eappt_kirkland_0_12:															\
 			{																					\
-				return cgpu_detail_mt::fcn<eappt_kirkland_0_12, T>(__VA_ARGS__);					\
+				return detail_cgpu_mt::fcn<eappt_kirkland_0_12, T>(__VA_ARGS__);					\
 			}																					\
 			case eappt_weickenmeier_0_12:														\
 			{																					\
-				return cgpu_detail_mt::fcn<eappt_weickenmeier_0_12, T>(__VA_ARGS__);				\
+				return detail_cgpu_mt::fcn<eappt_weickenmeier_0_12, T>(__VA_ARGS__);				\
 			}																					\
 			case eappt_lobato_0_12:																\
 			{																					\
-				return cgpu_detail_mt::fcn<eappt_lobato_0_12, T>(__VA_ARGS__);					\
+				return detail_cgpu_mt::fcn<eappt_lobato_0_12, T>(__VA_ARGS__);					\
 			}																					\
 			case eappt_peng_ion_0_4:																\
 			{																					\
-				return cgpu_detail_mt::fcn<eappt_peng_ion_0_4, T>(__VA_ARGS__);					\
+				return detail_cgpu_mt::fcn<eappt_peng_ion_0_4, T>(__VA_ARGS__);					\
 			}																					\
 			default:																			\
 			{																					\
@@ -158,37 +158,37 @@
 		{																						\
 			case eappt_doyle_0_4:																\
 			{																					\
-				cgpu_detail_mt::fcn<eappt_doyle_0_4, T>(__VA_ARGS__);							\
+				detail_cgpu_mt::fcn<eappt_doyle_0_4, T>(__VA_ARGS__);							\
 			}																					\
 			break;																				\
 			case eappt_peng_0_4:																	\
 			{																					\
-				cgpu_detail_mt::fcn<eappt_peng_0_4, T>(__VA_ARGS__);								\
+				detail_cgpu_mt::fcn<eappt_peng_0_4, T>(__VA_ARGS__);								\
 			}																					\
 			break;																				\
 			case eappt_peng_0_12:																\
 			{																					\
-				cgpu_detail_mt::fcn<eappt_peng_0_12, T>(__VA_ARGS__);							\
+				detail_cgpu_mt::fcn<eappt_peng_0_12, T>(__VA_ARGS__);							\
 			}																					\
 			break;																				\
 			case eappt_kirkland_0_12:															\
 			{																					\
-				cgpu_detail_mt::fcn<eappt_kirkland_0_12, T>(__VA_ARGS__);						\
+				detail_cgpu_mt::fcn<eappt_kirkland_0_12, T>(__VA_ARGS__);						\
 			}																					\
 			break;																				\
 			case eappt_weickenmeier_0_12:														\
 			{																					\
-				cgpu_detail_mt::fcn<eappt_weickenmeier_0_12, T>(__VA_ARGS__);					\
+				detail_cgpu_mt::fcn<eappt_weickenmeier_0_12, T>(__VA_ARGS__);					\
 			}																					\
 			break;																				\
 			case eappt_lobato_0_12:																\
 			{																					\
-				cgpu_detail_mt::fcn<eappt_lobato_0_12, T>(__VA_ARGS__);							\
+				detail_cgpu_mt::fcn<eappt_lobato_0_12, T>(__VA_ARGS__);							\
 			}																					\
 			break;																				\
 			case eappt_peng_ion_0_4:																\
 			{																					\
-				cgpu_detail_mt::fcn<eappt_peng_ion_0_4, T>(__VA_ARGS__);							\
+				detail_cgpu_mt::fcn<eappt_peng_ion_0_4, T>(__VA_ARGS__);							\
 			}																					\
 			break;																				\
 		}
@@ -217,31 +217,31 @@
 			{																				
 				case eappt_doyle_0_4:														
 				{																			
-					return cgpu_detail_mt::fcn_fxg<eappt_doyle_0_4, T>(g, Z, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_fxg<eappt_doyle_0_4, T>(g, Z, coef.cl, coef.cnl);
 				}																			
 				case eappt_peng_0_4:															
 				{																			
-					return cgpu_detail_mt::fcn_fxg<eappt_peng_0_4, T>(g, Z, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_fxg<eappt_peng_0_4, T>(g, Z, coef.cl, coef.cnl);
 				}																			
 				case eappt_peng_0_12:														
 				{																			
-					return cgpu_detail_mt::fcn_fxg<eappt_peng_0_12, T>(g, Z, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_fxg<eappt_peng_0_12, T>(g, Z, coef.cl, coef.cnl);
 				}																			
 				case eappt_kirkland_0_12:													
 				{																			
-					return cgpu_detail_mt::fcn_fxg<eappt_kirkland_0_12, T>(g, Z, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_fxg<eappt_kirkland_0_12, T>(g, Z, coef.cl, coef.cnl);
 				}
 				case eappt_weickenmeier_0_12:														
 				{																			
-					return cgpu_detail_mt::fcn_fxg<eappt_weickenmeier_0_12, T>(g, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_fxg<eappt_weickenmeier_0_12, T>(g, coef.cl, coef.cnl);
 				}																			
 				case eappt_lobato_0_12:															
 				{																			
-					return cgpu_detail_mt::fcn_fxg<eappt_lobato_0_12, T>(g, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_fxg<eappt_lobato_0_12, T>(g, coef.cl, coef.cnl);
 				}	
 				case eappt_peng_ion_0_4:														
 				{																			
-					return cgpu_detail_mt::fcn_fxg<eappt_peng_ion_0_4, T>(g, Z, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_fxg<eappt_peng_ion_0_4, T>(g, Z, coef.cl, coef.cnl);
 				}																			
 				default:																	
 				{																			
@@ -258,37 +258,37 @@
 			{																					
 				case eappt_doyle_0_4:															
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<eappt_doyle_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_fxg_dfxg<eappt_doyle_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
 				case eappt_peng_0_4:																
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<eappt_peng_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_fxg_dfxg<eappt_peng_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
 				case eappt_peng_0_12:															
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<eappt_peng_0_12, T>(g, Z, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_fxg_dfxg<eappt_peng_0_12, T>(g, Z, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;													
 				case eappt_kirkland_0_12:														
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<eappt_kirkland_0_12, T>(g, Z, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_fxg_dfxg<eappt_kirkland_0_12, T>(g, Z, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;	
 				case eappt_weickenmeier_0_12:															
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<eappt_weickenmeier_0_12, T>(g, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_fxg_dfxg<eappt_weickenmeier_0_12, T>(g, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
 				case eappt_lobato_0_12:																
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<eappt_lobato_0_12, T>(g, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_fxg_dfxg<eappt_lobato_0_12, T>(g, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;
 				case eappt_peng_ion_0_4:															
 				{																				
-					cgpu_detail_mt::fcn_fxg_dfxg<eappt_peng_ion_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_fxg_dfxg<eappt_peng_ion_0_4, T>(g, Z, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
 			}
@@ -348,31 +348,31 @@
 			{																				
 				case eappt_doyle_0_4:														
 				{																			
-					return cgpu_detail_mt::fcn_vzp<eappt_doyle_0_4, T>(r, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_vzp<eappt_doyle_0_4, T>(r, coef.cl, coef.cnl);
 				}																			
 				case eappt_peng_0_4:															
 				{																			
-					return cgpu_detail_mt::fcn_vzp<eappt_peng_0_4, T>(r, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_vzp<eappt_peng_0_4, T>(r, coef.cl, coef.cnl);
 				}																			
 				case eappt_peng_0_12:														
 				{																			
-					return cgpu_detail_mt::fcn_vzp<eappt_peng_0_12, T>(r, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_vzp<eappt_peng_0_12, T>(r, coef.cl, coef.cnl);
 				}																			
 				case eappt_kirkland_0_12:													
 				{																			
-					return cgpu_detail_mt::fcn_vzp<eappt_kirkland_0_12, T>(r, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_vzp<eappt_kirkland_0_12, T>(r, coef.cl, coef.cnl);
 				}
 				case eappt_weickenmeier_0_12:														
 				{																			
-					return cgpu_detail_mt::fcn_vzp<eappt_weickenmeier_0_12, T>(r, coef.cl, coef.cnl, pquad->m_size, pquad->x, pquad->w);
+					return detail_cgpu_mt::fcn_vzp<eappt_weickenmeier_0_12, T>(r, coef.cl, coef.cnl, pquad->m_size, pquad->x, pquad->w);
 				}																			
 				case eappt_lobato_0_12:															
 				{																			
-					return cgpu_detail_mt::fcn_vzp<eappt_lobato_0_12, T>(r, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_vzp<eappt_lobato_0_12, T>(r, coef.cl, coef.cnl);
 				}
 				case eappt_peng_ion_0_4:														
 				{																			
-					return cgpu_detail_mt::fcn_vzp<eappt_peng_ion_0_4, T>(r, coef.cl, coef.cnl);
+					return detail_cgpu_mt::fcn_vzp<eappt_peng_ion_0_4, T>(r, coef.cl, coef.cnl);
 				}																			
 				default:																	
 				{																			
@@ -389,37 +389,37 @@
 			{																					
 				case eappt_doyle_0_4:															
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<eappt_doyle_0_4, T>(r, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_vzp_dvzp<eappt_doyle_0_4, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
 				case eappt_peng_0_4:																
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<eappt_peng_0_4, T>(r, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_vzp_dvzp<eappt_peng_0_4, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
 				case eappt_peng_0_12:															
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<eappt_peng_0_12, T>(r, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_vzp_dvzp<eappt_peng_0_12, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
 				case eappt_kirkland_0_12:														
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<eappt_kirkland_0_12, T>(r, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_vzp_dvzp<eappt_kirkland_0_12, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;	
 				case eappt_weickenmeier_0_12:															
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<eappt_weickenmeier_0_12, T>(r, coef.cl, coef.cnl, pquad->m_size, pquad->x, pquad->w, y, dy);
+					detail_cgpu_mt::fcn_vzp_dvzp<eappt_weickenmeier_0_12, T>(r, coef.cl, coef.cnl, pquad->m_size, pquad->x, pquad->w, y, dy);
 				}																				
 				break;																			
 				case eappt_lobato_0_12:																
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<eappt_lobato_0_12, T>(r, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_vzp_dvzp<eappt_lobato_0_12, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;	
 				case eappt_peng_ion_0_4:	
 				{																				
-					cgpu_detail_mt::fcn_vzp_dvzp<eappt_peng_ion_0_4, T>(r, coef.cl, coef.cnl, y, dy);
+					detail_cgpu_mt::fcn_vzp_dvzp<eappt_peng_ion_0_4, T>(r, coef.cl, coef.cnl, y, dy);
 				}																				
 				break;																			
 			}
@@ -438,7 +438,7 @@
 			T g2_min = ::square(g_min);
 			T g2_max = ::square(g_max);
 
-			return fcn_stream_exec_xd_krn_reduce<edim_2>(pstream, grid.nx, grid.ny, std::plus<KS<T>>(), T(0), cgpu_detail_mt::fcn_int_det_ring<T, U>, grid, g2_min, g2_max, mx_i.m_data);
+			return fcn_stream_exec_xd_krn_reduce<edim_2>(pstream, grid.nx, grid.ny, std::plus<KS<T>>(), T(0), detail_cgpu_mt::fcn_int_det_ring<T, U>, grid, g2_min, g2_max, mx_i.m_data);
 		}
 
 		template <class T, class TVctr>
@@ -451,7 +451,7 @@
 			T g2_min = ::square(g_min);
 			T g2_max = ::square(g_max);
 
-			return fcn_stream_exec_xd_krn_reduce<edim_2>(pstream, grid.nx, grid.ny, std::plus<KS<Ur>>(), Ur(0), cgpu_detail_mt::fcn_int_det_ring_norm_2<T, U>, grid, g2_min, g2_max, mx_i.m_data);
+			return fcn_stream_exec_xd_krn_reduce<edim_2>(pstream, grid.nx, grid.ny, std::plus<KS<Ur>>(), Ur(0), detail_cgpu_mt::fcn_int_det_ring_norm_2<T, U>, grid, g2_min, g2_max, mx_i.m_data);
 		}
 
 		template <class T, class TVctr>
@@ -462,7 +462,7 @@
 
 			KS<U> sum_total = U(0);
 
-			return fcn_stream_exec_xd_krn_reduce<edim_2>(pstream, grid.nx, grid.ny, std::plus<KS<U>>(), U(0), cgpu_detail_mt::fcn_int_det_sen<T, U>, grid, sen_i.m_data, mx_i.m_data);
+			return fcn_stream_exec_xd_krn_reduce<edim_2>(pstream, grid.nx, grid.ny, std::plus<KS<U>>(), U(0), detail_cgpu_mt::fcn_int_det_sen<T, U>, grid, sen_i.m_data, mx_i.m_data);
 		}
 
 		template <class T, class TVctr_1, class TVctr_2>
@@ -472,7 +472,7 @@
 			using U = Value_type<TVctr_2>;
 			using Ur = Value_type_r<TVctr_2>;
 
-			return fcn_stream_exec_xd_krn_reduce<edim_2>(pstream, grid.nx, grid.ny, std::plus<KS<Ur>>(), Ur(0), cgpu_detail_mt::fcn_int_det_sen_norm_2<T, U>, grid, sen_i.m_data, mx_i.m_data);
+			return fcn_stream_exec_xd_krn_reduce<edim_2>(pstream, grid.nx, grid.ny, std::plus<KS<Ur>>(), Ur(0), detail_cgpu_mt::fcn_int_det_sen_norm_2<T, U>, grid, sen_i.m_data, mx_i.m_data);
 		}
 	}
 
@@ -486,7 +486,7 @@
 		{
 			using U = Value_type<TVctr>;
 
-			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail_mt::fcn_fs_propagate<T, U>, grid, psi_i.m_data, g_0, w_g2, w, psi_o.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu_mt::fcn_fs_propagate<T, U>, grid, psi_i.m_data, g_0, w_g2, w, psi_o.m_data);
 		}
 
 		/* propagate and bandwith limit using a fermi aperture */
@@ -496,7 +496,7 @@
 		{
 			using U = Value_type<TVctr>;
 
-			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail_mt::fcn_fs_propagate_bw_f<T, U>, grid, psi_i.m_data, g_0, w_g2, g2_cut, alpha, w, psi_o.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu_mt::fcn_fs_propagate_bw_f<T, U>, grid, psi_i.m_data, g_0, w_g2, g2_cut, alpha, w, psi_o.m_data);
 		}
 
 		/* propagate and bandwith limit using a hard aperture */
@@ -506,7 +506,7 @@
 		{
 			using U = Value_type<TVctr>;
 
-			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail_mt::fcn_fs_propagate_bw_h<T, U>, grid, psi_i.m_data, g_0, w_g2, g2_cut, w, psi_o.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu_mt::fcn_fs_propagate_bw_h<T, U>, grid, psi_i.m_data, g_0, w_g2, g2_cut, w, psi_o.m_data);
 		}
 	}
 
@@ -589,11 +589,11 @@
 
 			if (esim==eesim_weak_phase_object)
 			{
-				fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, cgpu_detail_mt::fcn_trans_fcn<eesim_weak_phase_object, U>, igrid, vzp_i.m_data, w, tfcn_o.m_data);
+				fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, detail_cgpu_mt::fcn_trans_fcn<eesim_weak_phase_object, U>, igrid, vzp_i.m_data, w, tfcn_o.m_data);
 			}
 			else
 			{
-				fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, cgpu_detail_mt::fcn_trans_fcn<eesim_phase_object, U>, igrid, vzp_i.m_data, w, tfcn_o.m_data);
+				fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, detail_cgpu_mt::fcn_trans_fcn<eesim_phase_object, U>, igrid, vzp_i.m_data, w, tfcn_o.m_data);
 			}
 		}
 	}
@@ -604,7 +604,7 @@
 		template <class T>
 		T fcn_eels_lorentz_norm_factor_cpu(Grid_2d<T>& grid, EELS<T>& eels, Stream_cpu* pstream = nullptr)
 		{
-			auto sum_total = fcn_stream_exec_xd_krn_reduce<edim_2>(pstream, grid.nx, grid.ny, std::plus<KS<T>>(), T(0),cgpu_detail_mt::fcn_eels_lorentz_norm_factor<T>, grid, eels.gc2, eels.ge2);
+			auto sum_total = fcn_stream_exec_xd_krn_reduce<edim_2>(pstream, grid.nx, grid.ny, std::plus<KS<T>>(), T(0),detail_cgpu_mt::fcn_eels_lorentz_norm_factor<T>, grid, eels.gc2, eels.ge2);
 
 			return sqrt(eels.occ)/sum_total;
 		}
@@ -617,7 +617,7 @@
 
 			eels.factor = fcn_eels_lorentz_norm_factor_cpu(grid, eels, pstream);
 
-			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_xyz<T, U>, grid, eels, w_x.m_data, w_y.m_data, w_z.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_xyz<T, U>, grid, eels, w_x.m_data, w_y.m_data, w_z.m_data);
 
 			fft.inverse(w_x);
 			fft.inverse(w_y);
@@ -632,7 +632,7 @@
 
 			eels.factor = fcn_eels_lorentz_norm_factor_cpu(grid, eels, pstream);
 
-			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_x<T, U>, grid, eels, w_x.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_x<T, U>, grid, eels, w_x.m_data);
 
 			fft.inverse(w_x);
 		}
@@ -645,7 +645,7 @@
 
 			eels.factor = fcn_eels_lorentz_norm_factor_cpu(grid, eels, pstream);
 
-			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_y<T, U>, grid, eels, w_y.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_y<T, U>, grid, eels, w_y.m_data);
 
 			fft.inverse(w_y);
 		}
@@ -658,7 +658,7 @@
 
 			eels.factor = fcn_eels_lorentz_norm_factor_cpu(grid, eels, pstream);
 
-			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_z<T, U>, grid, eels, w_z.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_z<T, U>, grid, eels, w_z.m_data);
 
 			fft.inverse(w_z);
 		}
@@ -671,7 +671,7 @@
 
 			eels.factor = fcn_eels_lorentz_norm_factor_cpu(grid, eels, pstream);
 
-			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_mn1<T, U>, grid, eels, w_mn1.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_mn1<T, U>, grid, eels, w_mn1.m_data);
 
 			fft.inverse(w_mn1);
 		}
@@ -684,7 +684,7 @@
 
 			eels.factor = fcn_eels_lorentz_norm_factor_cpu(grid, eels, pstream);
 
-			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_mp1<T, U>, grid, eels, w_mp1.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_mp1<T, U>, grid, eels, w_mp1.m_data);
 
 			fft.inverse(w_mp1);
 		}

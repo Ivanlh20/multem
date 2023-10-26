@@ -22,11 +22,11 @@
 #include "vctr_cpu.h"
 #include "vctr_gpu.h"
 
-/* vector forward declaration */
+/* template definition */
 namespace mt
 {
-#ifndef LNL_POLY_COEF_DEC
-	#define LNL_POLY_COEF_DEC
+#ifndef POLY_COEF_1D_DEC
+	#define POLY_COEF_1D_DEC
 	template <class ST, eDev Dev> class Poly_Coef_1d;
 
 	template <class ST, eDev Dev> class pPoly_Coef_1d;
@@ -46,79 +46,78 @@ namespace mt
 	}
 }
 
-template <class T, eDev Dev>
-class Poly_Coef_1d
+namespace mt
 {
-public:
-	using value_type = T;
-	using size_type = dt_int32;
-	static const eDev device = Dev;
+	template <class T, eDev Dev>
+	class Poly_Coef_1d
+	{
+	public:
+		using value_type = T;
+		using size_type = dt_int32;
+		static const eDev device = Dev;
 
-	mutable Vctr<T, Dev> c0;
-	mutable Vctr<T, Dev> c1;
+		mutable Vctr<T, Dev> c0;
+		mutable Vctr<T, Dev> c1;
 
-	/************************************* constructors ************************************/
-	Poly_Coef_1d() {}
+		/************************************* constructors ************************************/
+		Poly_Coef_1d() {}
 
-	Poly_Coef_1d(const Vctr_cpu<T>& c0, const Vctr_cpu<T>& c1);
+		Poly_Coef_1d(const Vctr_cpu<T>& c0, const Vctr_cpu<T>& c1);
 
-	Poly_Coef_1d(const dt_init_list_f64& c0, const dt_init_list_f64& c1);
+		Poly_Coef_1d(const dt_init_list_f64& c0, const dt_init_list_f64& c1);
 
-	Poly_Coef_1d(const size_type& new_size);
+		Poly_Coef_1d(const size_type& new_size);
 
-	Poly_Coef_1d(const size_type& new_size, const T& value);
+		Poly_Coef_1d(const size_type& new_size, const T& value);
 
-	/* copy constructor */
-	Poly_Coef_1d(const Poly_Coef_1d<T, Dev>& coef_poly1);
+		/* copy constructor */
+		Poly_Coef_1d(const Poly_Coef_1d<T, Dev>& coef_poly1);
 
-	/* converting constructor */
-	template <class U, eDev Dev_u> 
-	Poly_Coef_1d(const Poly_Coef_1d<U, Dev_u>& coef_poly1);
+		/* converting constructor */
+		template <class U, eDev Dev_u> 
+		Poly_Coef_1d(const Poly_Coef_1d<U, Dev_u>& coef_poly1);
 
-	/******************************** assignment operators *********************************/
-	/* copy assignment operator */
-	Poly_Coef_1d<T, Dev>& operator=(const Poly_Coef_1d<T, Dev>& coef_poly1);
+		/******************************** assignment operators *********************************/
+		/* copy assignment operator */
+		Poly_Coef_1d<T, Dev>& operator=(const Poly_Coef_1d<T, Dev>& coef_poly1);
 
-	/* converting assignment operator */
-	template <class U, eDev Dev_u> 
-	Poly_Coef_1d<T, Dev>& operator=(const Poly_Coef_1d<U, Dev_u>& coef_poly1);
+		/* converting assignment operator */
+		template <class U, eDev Dev_u> 
+		Poly_Coef_1d<T, Dev>& operator=(const Poly_Coef_1d<U, Dev_u>& coef_poly1);
 
-	template <class U, eDev Dev_u> 
-	void assign(const Poly_Coef_1d<U, Dev_u>& coef_poly1);
+		template <class U, eDev Dev_u> 
+		void assign(const Poly_Coef_1d<U, Dev_u>& coef_poly1);
 
-	/**************** user define conversion operators *******************/
-	pPoly_Coef_1d<T, Dev> ptr() const;
+		/**************** user define conversion operators *******************/
+		pPoly_Coef_1d<T, Dev> ptr() const;
 
-	/* user define conversion for pointer Vctr */
-	operator pPoly_Coef_1d<T, Dev>() const;
+		/* user define conversion for pointer Vctr */
+		operator pPoly_Coef_1d<T, Dev>() const;
 
-	void fill(const T& val_c0, const T& val_c1);
+		void fill(const T& val_c0, const T& val_c1);
 
-	size_type size() const;
+		size_type size() const;
 
-	void clear();
+		void clear();
 
-	void reserve(const size_type& new_size);
+		void reserve(const size_type& new_size);
 
-	void resize(const size_type& new_size);
+		void resize(const size_type& new_size);
 
-	void resize(const size_type& new_size, const T& value);
+		void resize(const size_type& new_size, const T& value);
 
-	void shrink_to_fit();
+		void shrink_to_fit();
+	};
 }
-
 
 // pointer class linear polynomial coefficients
 namespace mt
 {
-	namespace mt
-	{
-		template <class T>
-		using pPoly_Coef_1d_cpu = pPoly_Coef_1d<T, edev_cpu>;
+	template <class T>
+	using pPoly_Coef_1d_cpu = pPoly_Coef_1d<T, edev_cpu>;
 
-		template <class T>
-		using pPoly_Coef_1d_gpu = pPoly_Coef_1d<T, edev_gpu>;
-	}
+	template <class T>
+	using pPoly_Coef_1d_gpu = pPoly_Coef_1d<T, edev_gpu>;
 }
 
 namespace mt
@@ -163,3 +162,5 @@ namespace mt
 		size_type size() const;
 	};
 }
+
+#include "../src/poly_coef_1d.inl"

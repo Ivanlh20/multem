@@ -65,7 +65,7 @@ namespace mt
 	}
 
 	/* unrolled binary search */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		template <class T> 
 		CGPU_EXEC_INL 
@@ -144,7 +144,7 @@ namespace mt
 	}
 
 	/* add - assign - crop - norm_2 - fftsft */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		/***************************************************************************************/
 		/**************** Shift zero-frequency component to center of spectrum *****************/
@@ -410,7 +410,7 @@ namespace mt
 	}
 
 	/* transpose - element wise matrix op vector */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		/* transpose */
 		template <class T>
@@ -473,7 +473,7 @@ namespace mt
 	}
 
 	/* aperture functions */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		template <class T, class U>
 		CGPU_EXEC_INL 
@@ -499,7 +499,7 @@ namespace mt
 	}
 
 	/* phase shifts real space*/
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		// phase factor 1d
 		template <class T>
@@ -552,7 +552,7 @@ namespace mt
 	}
 
 	/* phase shifts fourier space*/
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		template <class T>
 		CGPU_EXEC_INL 
@@ -601,7 +601,7 @@ namespace mt
 	}
 
 	/* gradient */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		template <class T>
 		CGPU_EXEC_INL 
@@ -690,7 +690,7 @@ namespace mt
 	}
 
 	/* function multiplication fourier space */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		#define FCN_MULT_FS_FCN_CGPU(POW, DIM)														\
 		template <class T, class U, class TFcn>														\
@@ -712,7 +712,7 @@ namespace mt
 	}
 
 	/* deconvolution */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		#define FCN_DCV_FS_FCN_CGPU(POW, DIM)													\
 		template <class T, class U, class TFcn>													\
@@ -734,7 +734,7 @@ namespace mt
 	}
 
 	/* window functions */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		//template <class T, class U, eFcn_typ Fcn_typ>
 		//CGPU_EXEC_INL
@@ -813,7 +813,7 @@ namespace mt
 	}
 
 	/* phase correlation */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		/****************** pcf data processing real space *******************/
 		#define FCN_RS_PCF_XD_DP(DIM)															\
@@ -849,7 +849,7 @@ namespace mt
 	}
 
 	/* optical flow */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		// https:// en.wikipedia.org/wiki/Optical_flow
 		template <class T>
@@ -881,7 +881,7 @@ namespace mt
 	}
 	
 	/* interpolation poly3 */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		// calculate interpolation coefficients from its value and derivative
 		template <class T>
@@ -908,7 +908,7 @@ namespace mt
 	}
 
 	/* bilinear interpolation */
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		/* regular grid bilinear interpolation */
 		// https:// en.wikipedia.org/wiki/Bilinear_interpolation
@@ -996,7 +996,7 @@ namespace mt
 		};
 	}
 
-	namespace cgpu_detail
+	namespace detail_cgpu
 	{
 		/* distort regular grid */
 		template <class T>
@@ -1187,5 +1187,5 @@ namespace mt
 		// 	}
 		// 	Im_o[ix_i*ny_i+iy_i] = 0;
 		// }
-	} // cgpu_detail
+	} // detail_cgpu
 }

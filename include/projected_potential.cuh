@@ -100,10 +100,10 @@ namespace mt
 
 					for(auto istm = 0; istm < stream.n_stream_act-1; istm++)
 					{
-						stream[istm] = std::thread(std::bind(cpu_detail::fcn_eval_poly3<T>, std::ref(stream), std::ref(grid_2d), std::ref(atom[istm]), std::ref(mx_o)));
+						stream[istm] = std::thread(std::bind(detail_cpu::fcn_eval_poly3<T>, std::ref(stream), std::ref(grid_2d), std::ref(atom[istm]), std::ref(mx_o)));
 					}
 
-					cpu_detail::fcn_eval_poly3<T>(stream, grid_2d, atom[stream.n_stream_act-1], mx_o);
+					detail_cpu::fcn_eval_poly3<T>(stream, grid_2d, atom[stream.n_stream_act-1], mx_o);
 
 					stream.synchronize();
 				};
@@ -148,7 +148,7 @@ namespace mt
 					// get_cubic_poly_coef_Vz(*stream, atom_Vp_h);
 
 					auto d_grid_blk = get_eval_cubic_poly_gridBT(n_atoms);
-					gpu_detail::fcn_eval_poly3<T><<<d_grid_blk.grid, d_grid_blk.blk>>>(this->multem_in_parm->grid_2d, atom_Vp, V);
+					detail_gpu::fcn_eval_poly3<T><<<d_grid_blk.grid, d_grid_blk.blk>>>(this->multem_in_parm->grid_2d, atom_Vp, V);
 
 					iatoms += n_atoms;
 				}

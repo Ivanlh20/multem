@@ -36,8 +36,8 @@
 #include "grid_1d.h"
 #include "grid_2d.h"
 #include "grid_3d.h"
-#include "cgpu_detail.cuh"
-#include "cpu_detail.hpp"
+#include "detail_cgpu.h"
+#include "detail_cpu.h"
 #include "border_2d.h"
 #include "region_2d.h"
 #include "types.cuh"
@@ -799,7 +799,7 @@ namespace mt
 
 		auto igrid = mx_io.igrid_1d();
 
-		fcn_stream_exec_xd_krn<edim_1>(pstream, igrid.nx_h, cgpu_detail::fcn_fftsft_1d<T>, igrid, mx_io.m_data);
+		fcn_stream_exec_xd_krn<edim_1>(pstream, igrid.nx_h, detail_cgpu::fcn_fftsft_1d<T>, igrid, mx_io.m_data);
 	}		
 		
 	/* shift matrix respect to ny_h */
@@ -811,7 +811,7 @@ namespace mt
 
 		auto igrid = mx_io.igrid_2d();
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny_h, cgpu_detail::fcn_fftsft_bc_2d<T>, igrid, mx_io.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny_h, detail_cgpu::fcn_fftsft_bc_2d<T>, igrid, mx_io.m_data);
 	}
 
 	/* shift matrix respect to (nx_h, ny_h) */
@@ -824,7 +824,7 @@ namespace mt
 		auto igrid = mx_io.igrid_2d();
 
 		// function fcn_fftsft_2d is overloading
- 		void (*pfcn_fftsft_2d)(const dt_int32&, const dt_int32&, const iGrid_2d&, T*) = &cgpu_detail::fcn_fftsft_2d<T>;
+ 		void (*pfcn_fftsft_2d)(const dt_int32&, const dt_int32&, const iGrid_2d&, T*) = &detail_cgpu::fcn_fftsft_2d<T>;
 
 		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h, pfcn_fftsft_2d, igrid, mx_io.m_data);
 	}
@@ -839,7 +839,7 @@ namespace mt
 		auto igrid = mx_i.igrid_2d();
 
 		// function fcn_fftsft_2d is overloading
- 		void (*pfcn_fftsft_2d)(const dt_int32&, const dt_int32&, const iGrid_2d&, T*, T*) = &cgpu_detail::fcn_fftsft_2d<T>;
+ 		void (*pfcn_fftsft_2d)(const dt_int32&, const dt_int32&, const iGrid_2d&, T*, T*) = &detail_cgpu::fcn_fftsft_2d<T>;
 
 		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h, pfcn_fftsft_2d, igrid, mx_i.m_data, mx_o.m_data);
 	}
@@ -854,7 +854,7 @@ namespace mt
 		auto igrid = mx_io.igrid_3d();
 
 		// function fcn_fftsft_3d is overloading
- 		void (*pfcn_fftsft_3d)(const dt_int32&, const dt_int32&, const iGrid_3d&, T*) = &cgpu_detail::fcn_fftsft_3d<T>;
+ 		void (*pfcn_fftsft_3d)(const dt_int32&, const dt_int32&, const iGrid_3d&, T*) = &detail_cgpu::fcn_fftsft_3d<T>;
 
 		fcn_stream_exec_xd_krn<edim_3>(pstream, igrid.nx_h, igrid.ny_h, igrid.nz_h, pfcn_fftsft_3d, igrid, mx_io.m_data);
 	}
@@ -869,7 +869,7 @@ namespace mt
 		auto igrid = mx_i.igrid_3d();
 
 		// function fcn_fftsft_3d is overloading
- 		void (*pfcn_fftsft_3d)(const dt_int32&, const dt_int32&, const iGrid_3d&, T*, T*) = &cgpu_detail::fcn_fftsft_3d<T>;
+ 		void (*pfcn_fftsft_3d)(const dt_int32&, const dt_int32&, const iGrid_3d&, T*, T*) = &detail_cgpu::fcn_fftsft_3d<T>;
 
 		fcn_stream_exec_xd_krn<edim_3>(pstream, igrid.nx_h, igrid.ny_h, igrid.nz_h, pfcn_fftsft_3d, igrid, mx_i.m_data, mx_o.m_data);
 	}
@@ -884,7 +884,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h, cgpu_detail::fcn_add_sc_fftsft_2d<T>, igrid, mx_i.m_data, w, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h, detail_cgpu::fcn_add_sc_fftsft_2d<T>, igrid, mx_i.m_data, w, mx_o.m_data);
 	}
  
 	/* add, scale, square and shift */
@@ -897,7 +897,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h, cgpu_detail::fcn_add_sc_norm_2_fftsft_2d<T>, igrid, mx_i.m_data, w, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h, detail_cgpu::fcn_add_sc_norm_2_fftsft_2d<T>, igrid, mx_i.m_data, w, mx_o.m_data);
 	}
 
 	/***************************************************************************************/
@@ -910,7 +910,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_assign_crop_2d<T>, igrid, mx_i.m_data, iregion, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_assign_crop_2d<T>, igrid, mx_i.m_data, iregion, mx_o.m_data);
 	}
 
 	/* assign, crop and shift */
@@ -922,7 +922,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h, cgpu_detail::fcn_assign_crop_fftsft_2d<T>, igrid, mx_i.m_data, iregion, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h, detail_cgpu::fcn_assign_crop_fftsft_2d<T>, igrid, mx_i.m_data, iregion, mx_o.m_data);
 	}
 
  	/* add, scale, crop and shift */
@@ -934,7 +934,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h,cgpu_detail::fcn_add_sc_crop_fftsft_2d<T>, igrid, mx_i.m_data, iregion, w, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h,detail_cgpu::fcn_add_sc_crop_fftsft_2d<T>, igrid, mx_i.m_data, iregion, w, mx_o.m_data);
 	}
 
 	/* add, scale, square, crop and shift */
@@ -947,7 +947,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h, cgpu_detail::fcn_add_sc_norm_2_crop_fftsft_2d<T, U>, igrid, mx_i.m_data, iregion, w, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx_h, igrid.ny_h, detail_cgpu::fcn_add_sc_norm_2_crop_fftsft_2d<T, U>, igrid, mx_i.m_data, iregion, w, mx_o.m_data);
 	}
 }
 
@@ -964,7 +964,7 @@ namespace mt
 		auto igrid = mx_i.igrid_2d();
 
 		Vctr_cpu<T> mx_t(mx_i.shape_2d_trs());
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_trs_2d<T>, igrid, mx_i.m_data, mx_t.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_trs_2d<T>, igrid, mx_i.m_data, mx_t.m_data);
 
 		return mx_t;
 	}
@@ -980,12 +980,12 @@ namespace mt
 
 		if (&mx_i != &mx_o)
 		{
-			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_trs_2d<T>, igrid, mx_i.m_data, mx_o.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_trs_2d<T>, igrid, mx_i.m_data, mx_o.m_data);
 		}
 		else
 		{
 			Vctr_cpu<T> mx_t(mx_i.shape_2d_trs());
-			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_trs_2d<T>, igrid, mx_i.m_data, mx_t.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_trs_2d<T>, igrid, mx_i.m_data, mx_t.m_data);
 			mx_t.cpy_to_cpu_ptr(mx_o.m_data, mx_o.size());
 		}
 			
@@ -1002,11 +1002,11 @@ namespace mt
 
 		if ((vctr.m_s0=mx_io.m_s0) && (vctr.m_s1==1))
 		{
-			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_ew_add_mx_vctr_col<T>, igrid, vctr.m_data, mx_io.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_ew_add_mx_vctr_col<T>, igrid, vctr.m_data, mx_io.m_data);
 		}
 		else if ((vctr.m_s0==1) && (vctr.m_s1==mx_io.m_s1) )
 		{
-			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_ew_add_mx_vctr_row<T>, igrid, vctr.m_data, mx_io.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_ew_add_mx_vctr_row<T>, igrid, vctr.m_data, mx_io.m_data);
 		}
 	}
 
@@ -1021,11 +1021,11 @@ namespace mt
 
 		if ((vctr.m_s0=mx_io.m_s0) && (vctr.m_s1==1))
 		{
-			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_ew_sub_mx_vctr_col<T>, igrid, vctr.m_data, mx_io.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_ew_sub_mx_vctr_col<T>, igrid, vctr.m_data, mx_io.m_data);
 		}
 		else if ((vctr.m_s0==1) && (vctr.m_s1==mx_io.m_s1) )
 		{
-			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_ew_sub_mx_vctr_row<T>, igrid, vctr.m_data, mx_io.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_ew_sub_mx_vctr_row<T>, igrid, vctr.m_data, mx_io.m_data);
 		}
 	}
 
@@ -1040,11 +1040,11 @@ namespace mt
 
 		if ((vctr.m_s0=mx_io.m_s0) && (vctr.m_s1==1))
 		{
-			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_ew_mult_mx_vctr_col<T>, igrid, vctr.m_data, mx_io.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_ew_mult_mx_vctr_col<T>, igrid, vctr.m_data, mx_io.m_data);
 		}
 		else if ((vctr.m_s0==1) && (vctr.m_s1==mx_io.m_s1) )
 		{
-			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_ew_mult_mx_vctr_row<T>, igrid, vctr.m_data, mx_io.m_data);
+			fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_ew_mult_mx_vctr_row<T>, igrid, vctr.m_data, mx_io.m_data);
 		}
 	}
 }
@@ -1058,7 +1058,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail::fcn_fermi_aperture<T, U>, grid, g2_cut, alpha, w, mx_io.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_fermi_aperture<T, U>, grid, g2_cut, alpha, w, mx_io.m_data);
 	}
 
 	template <class T, class TVctr>
@@ -1067,7 +1067,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail::fcn_hard_aperture<T, U>, grid, g2_cut, w, mx_io.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_hard_aperture<T, U>, grid, g2_cut, w, mx_io.m_data);
 	}
 }
 
@@ -1080,7 +1080,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		fcn_stream_exec_xd_krn<edim_1>(pstream, grid.nx, cgpu_detail::fcn_rs_exp_factor_1d<T, U>, grid, psi_i.m_data, gx, w, psi_o.m_data);
+		fcn_stream_exec_xd_krn<edim_1>(pstream, grid.nx, detail_cgpu::fcn_rs_exp_factor_1d<T, U>, grid, psi_i.m_data, gx, w, psi_o.m_data);
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1089,7 +1089,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail::fcn_rs_exp_factor_2d_bc<T, U>, grid, alpha, psi_i.m_data, gy.m_data, w, psi_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_rs_exp_factor_2d_bc<T, U>, grid, alpha, psi_i.m_data, gy.m_data, w, psi_o.m_data);
 	}
 
 	template <class T, class TVctr>
@@ -1098,7 +1098,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail::fcn_rs_exp_factor_2d<T, U>, grid, psi_i.m_data, g, w, psi_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_rs_exp_factor_2d<T, U>, grid, psi_i.m_data, g, w, psi_o.m_data);
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1107,7 +1107,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail::fcn_rs_mul_exp_factor_2d<T, U>, grid, psi_i.m_data, g.m_data, w, psi_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_rs_mul_exp_factor_2d<T, U>, grid, psi_i.m_data, g.m_data, w, psi_o.m_data);
 	}
 }
 
@@ -1120,7 +1120,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		fcn_stream_exec_xd_krn<edim_1>(pstream, grid.nx, cgpu_detail::fcn_fs_exp_factor_1d<T, U>, grid, psi_i.m_data, rx, w, psi_o.m_data);
+		fcn_stream_exec_xd_krn<edim_1>(pstream, grid.nx, detail_cgpu::fcn_fs_exp_factor_1d<T, U>, grid, psi_i.m_data, rx, w, psi_o.m_data);
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1129,7 +1129,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail::fcn_fs_exp_factor_2d_bc<T, U>, grid, alpha, psi_i.m_data, ry.m_data, w, psi_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_fs_exp_factor_2d_bc<T, U>, grid, alpha, psi_i.m_data, ry.m_data, w, psi_o.m_data);
 	}
 
 	template <class T, class TVctr>
@@ -1138,7 +1138,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail::fcn_fs_exp_factor_2d<T, U>, grid, psi_i.m_data, r, w, psi_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_fs_exp_factor_2d<T, U>, grid, psi_i.m_data, r, w, psi_o.m_data);
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1147,7 +1147,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail::fcn_fs_mul_exp_factor_2d<T, U>, grid, psi_i.m_data, r.m_data, w, psi_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_fs_mul_exp_factor_2d<T, U>, grid, psi_i.m_data, r.m_data, w, psi_o.m_data);
 	}
 }
 
@@ -1162,7 +1162,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_grad_x<T>, igrid, mx_i.m_data, dmx_x.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_grad_x<T>, igrid, mx_i.m_data, dmx_x.m_data);
 	}
 
 	template <class TVctr>
@@ -1173,7 +1173,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_grad_y<T>, igrid, mx_i.m_data, dmx_y.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_grad_y<T>, igrid, mx_i.m_data, dmx_y.m_data);
 	}
 
 	template <class TVctr>
@@ -1184,7 +1184,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_grad<T>, igrid, mx_i.m_data, dmx_x.m_data, dmx_y.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_grad<T>, igrid, mx_i.m_data, dmx_x.m_data, dmx_y.m_data);
 	}
 }
 
@@ -1198,7 +1198,7 @@ namespace mt
 	{																																								\
 		using U = Value_type<TVctr_c>;																																\
 																																									\
-		fcn_stream_exec_xd_krn<EDIM(DIM)>(pstream, F_SHAPE_ND(grid, DIM), cgpu_detail::fcn_mult_fs_fcn_g##POW##_##DIM##d<T, U, FCN<T>>, grid, fcn, w, mx_io.m_data);		\
+		fcn_stream_exec_xd_krn<EDIM(DIM)>(pstream, F_SHAPE_ND(grid, DIM), detail_cgpu::fcn_mult_fs_fcn_g##POW##_##DIM##d<T, U, FCN<T>>, grid, fcn, w, mx_io.m_data);		\
 	}
 
 	/* gaussian */
@@ -1242,7 +1242,7 @@ namespace mt
 																																									\
 		const T w = grid.isize_r();																																	\
 																																									\
-		fcn_stream_exec_xd_krn<EDIM(DIM)>(pstream, F_SHAPE_ND(grid, DIM), cgpu_detail::fcn_mult_fs_fcn_g##POW##_##DIM##d<T, U, FCN<T>>, grid, fcn, w, mx_io.m_data);		\
+		fcn_stream_exec_xd_krn<EDIM(DIM)>(pstream, F_SHAPE_ND(grid, DIM), detail_cgpu::fcn_mult_fs_fcn_g##POW##_##DIM##d<T, U, FCN<T>>, grid, fcn, w, mx_io.m_data);		\
 																																									\
 		fft.inverse(mx_io);																																			\
 		fcn_fftsft_##DIM##d(mx_io, pstream);																														\
@@ -1289,7 +1289,7 @@ namespace mt
 																																										\
 		const T w = grid.isize_r();																																		\
 																																										\
-		fcn_stream_exec_xd_krn<EDIM(DIM)>(pstream, F_SHAPE_ND(grid, DIM), cgpu_detail::fcn_dcv_fs_fcn_g##POW##_##DIM##d<T, U, FCN<T>>, grid, fcn, psnr, w, mx_io.m_data);	\
+		fcn_stream_exec_xd_krn<EDIM(DIM)>(pstream, F_SHAPE_ND(grid, DIM), detail_cgpu::fcn_dcv_fs_fcn_g##POW##_##DIM##d<T, U, FCN<T>>, grid, fcn, psnr, w, mx_io.m_data);	\
 																																										\
 		fft.inverse(mx_io);																																				\
 		fcn_fftsft_##DIM##d(mx_io, pstream);																															\
@@ -1332,11 +1332,11 @@ namespace mt
 	//	
 	//	if (sft)
 	//	{
-	//		fcn_stream_exec_xd_krn<Dim>(pstream, F_SHAPE_ND(grid, DIM), cgpu_detail::fcn_wd_fcn_r2_sft_xd<T, U, Fcn_typ>, grid, fcn, mx_o.m_data);
+	//		fcn_stream_exec_xd_krn<Dim>(pstream, F_SHAPE_ND(grid, DIM), detail_cgpu::fcn_wd_fcn_r2_sft_xd<T, U, Fcn_typ>, grid, fcn, mx_o.m_data);
 	//	}
 	//	else
 	//	{
-	//		fcn_stream_exec_xd_krn<Dim>(pstream, F_SHAPE_ND(grid, DIM), cgpu_detail::fcn_wd_fcn_r2_xd<T, U, Fcn_typ>, grid, fcn, mx_o.m_data)
+	//		fcn_stream_exec_xd_krn<Dim>(pstream, F_SHAPE_ND(grid, DIM), detail_cgpu::fcn_wd_fcn_r2_xd<T, U, Fcn_typ>, grid, fcn, mx_o.m_data)
 	//	}
 	//}
 
@@ -1369,11 +1369,11 @@ namespace mt
 																																									\
 		if (sft)																																					\
 		{																																							\
-			fcn_stream_exec_xd_krn<EDIM(DIM)>(pstream, F_SHAPE_ND(grid, DIM), cgpu_detail::fcn_wd_fcn_r2_sft_##DIM##d<T, U, FCN<T>>, grid, fcn, mx_o.m_data);					\
+			fcn_stream_exec_xd_krn<EDIM(DIM)>(pstream, F_SHAPE_ND(grid, DIM), detail_cgpu::fcn_wd_fcn_r2_sft_##DIM##d<T, U, FCN<T>>, grid, fcn, mx_o.m_data);					\
 		}																																							\
 		else																																						\
 		{																																							\
-			fcn_stream_exec_xd_krn<EDIM(DIM)>(pstream, F_SHAPE_ND(grid, DIM), cgpu_detail::fcn_wd_fcn_r2_##DIM##d<T, U, FCN<T>>, grid, fcn, mx_o.m_data);						\
+			fcn_stream_exec_xd_krn<EDIM(DIM)>(pstream, F_SHAPE_ND(grid, DIM), detail_cgpu::fcn_wd_fcn_r2_##DIM##d<T, U, FCN<T>>, grid, fcn, mx_o.m_data);						\
 		}																																							\
 	}
 
@@ -1408,7 +1408,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		fcn_stream_exec_xd_krn<edim_1>(pstream, grid.nx, cgpu_detail::fcn_rs_pcf_1d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_1>(pstream, grid.nx, detail_cgpu::fcn_rs_pcf_1d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1417,7 +1417,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail::fcn_rs_pcf_2d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_rs_pcf_2d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
 	}
 		
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1426,7 +1426,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		fcn_stream_exec_xd_krn<edim_3>(pstream, grid.nx, grid.ny, grid.nz, cgpu_detail::fcn_rs_pcf_3d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_3>(pstream, grid.nx, grid.ny, grid.nz, detail_cgpu::fcn_rs_pcf_3d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
 	}
 
 	/***************** pcf data processing fourier space *****************/
@@ -1436,7 +1436,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		fcn_stream_exec_xd_krn<edim_1>(pstream, grid.nx, cgpu_detail::fcn_fs_pcf_1d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_1>(pstream, grid.nx, detail_cgpu::fcn_fs_pcf_1d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1445,7 +1445,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail::fcn_fs_pcf_2d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_fs_pcf_2d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
 	}
 		
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1454,7 +1454,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		fcn_stream_exec_xd_krn<edim_3>(pstream, grid.nx, grid.ny, grid.nz, cgpu_detail::fcn_fs_pcf_3d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_3>(pstream, grid.nx, grid.ny, grid.nz, detail_cgpu::fcn_fs_pcf_3d_dp<T, U>, grid, mx_i.m_data, fcn, w, mx_o.m_data);
 	}
 }
 
@@ -1469,7 +1469,7 @@ namespace mt
 
 		auto igrid = mx_s.igrid_2d();
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, cgpu_detail::fcn_opt_flow<U>, igrid, mx_s.m_data, mx_m.m_data, alpha, dphi_x.m_data, dphi_y.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_opt_flow<U>, igrid, mx_s.m_data, mx_m.m_data, alpha, dphi_x.m_data, dphi_y.m_data);
 	}
 }
 
@@ -1482,7 +1482,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, cgpu_detail::fcn_intrpl_bl_rg_2d<U>, grid, mx_i.m_data, vx.m_data, vy.m_data, bg, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_intrpl_bl_rg_2d<U>, grid, mx_i.m_data, vx.m_data, vy.m_data, bg, mx_o.m_data);
 	}
 }
 
@@ -3034,7 +3034,7 @@ namespace mt
 	// enable_if_vctr_cpu<TVctr_r, Value_type<TVctr_r>>
 	// 	atom_cost_function(TGrid& grid_2d, const Atom_Sa<Value_type<TGrid>>& atom_Ip, TVctr_r& mx_i)
 	// {
-	// 	return cpu_detail::atom_cost_function<typename TVctr_r::value_type>(grid_2d, atom_Ip, mx_i);
+	// 	return detail_cpu::atom_cost_function<typename TVctr_r::value_type>(grid_2d, atom_Ip, mx_i);
 	// }
 
 	// template <class TGrid, class TVctr_r>
@@ -3048,7 +3048,7 @@ namespace mt
 
 	// 	for(auto istm = 0; istm < stream.n_stream_act; istm++)
 	// 	{
-	// 		stream[istm] = std::thread(std::bind(cpu_detail::subtract_atom<typename TVctr_r::value_type>, std::ref(stream), std::ref(grid_2d), std::ref(atom_Ip[istm]), std::ref(mx_i)));
+	// 		stream[istm] = std::thread(std::bind(detail_cpu::subtract_atom<typename TVctr_r::value_type>, std::ref(stream), std::ref(grid_2d), std::ref(atom_Ip[istm]), std::ref(mx_i)));
 	// 	}
 	// 	stream.synchronize();
 	// }
@@ -3072,22 +3072,22 @@ namespace mt
 	// 			switch (atomic_pot_parm_typ)
 	// 			{
 	// 			case eappt_doyle_0_4:
-	// 				cpu_detail::linear_Vz<eappt_doyle_0_4, 0, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_doyle_0_4, 0, TAtom>(qz, atom);
 	// 				break;
 	// 			case eappt_peng_0_4:
-	// 				cpu_detail::linear_Vz<eappt_peng_0_4, 0, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_peng_0_4, 0, TAtom>(qz, atom);
 	// 				break;
 	// 			case eappt_peng_0_12:
-	// 				cpu_detail::linear_Vz<eappt_peng_0_12, 0, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_peng_0_12, 0, TAtom>(qz, atom);
 	// 				break;
 	// 			case eappt_kirkland_0_12:
-	// 				cpu_detail::linear_Vz<eappt_kirkland_0_12, 0, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_kirkland_0_12, 0, TAtom>(qz, atom);
 	// 				break;
 	// 			case eappt_weickenmeier_0_12:
-	// 				cpu_detail::linear_Vz<eappt_weickenmeier_0_12, 0, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_weickenmeier_0_12, 0, TAtom>(qz, atom);
 	// 				break;
 	// 			case eappt_lobato_0_12:
-	// 				cpu_detail::linear_Vz<eappt_lobato_0_12, 0, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_lobato_0_12, 0, TAtom>(qz, atom);
 	// 				break;
 	// 			}
 	// 		}
@@ -3096,22 +3096,22 @@ namespace mt
 	// 			switch (atomic_pot_parm_typ)
 	// 			{
 	// 			case eappt_doyle_0_4:
-	// 				cpu_detail::linear_Vz<eappt_doyle_0_4, 1, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_doyle_0_4, 1, TAtom>(qz, atom);
 	// 				break;
 	// 			case eappt_peng_0_4:
-	// 				cpu_detail::linear_Vz<eappt_peng_0_4, 1, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_peng_0_4, 1, TAtom>(qz, atom);
 	// 				break;
 	// 			case eappt_peng_0_12:
-	// 				cpu_detail::linear_Vz<eappt_peng_0_12, 1, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_peng_0_12, 1, TAtom>(qz, atom);
 	// 				break;
 	// 			case eappt_kirkland_0_12:
-	// 				cpu_detail::linear_Vz<eappt_kirkland_0_12, 1, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_kirkland_0_12, 1, TAtom>(qz, atom);
 	// 				break;
 	// 			case eappt_weickenmeier_0_12:
-	// 				cpu_detail::linear_Vz<eappt_weickenmeier_0_12, 1, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_weickenmeier_0_12, 1, TAtom>(qz, atom);
 	// 				break;
 	// 			case eappt_lobato_0_12:
-	// 				cpu_detail::linear_Vz<eappt_lobato_0_12, 1, TAtom>(qz, atom);
+	// 				detail_cpu::linear_Vz<eappt_lobato_0_12, 1, TAtom>(qz, atom);
 	// 				break;
 	// 			}
 	// 		}
@@ -3141,10 +3141,10 @@ namespace mt
 
 	// 	for(auto istm = 0; istm < stream.n_stream_act - 1; istm++)
 	// 	{
-	// 		stream[istm] = std::thread(std::bind(cpu_detail::fcn_vd_2_coef_poly3<TAtom>, std::ref(vatom[istm])));
+	// 		stream[istm] = std::thread(std::bind(detail_cpu::fcn_vd_2_coef_poly3<TAtom>, std::ref(vatom[istm])));
 	// 	}
 
-	// 	cpu_detail::fcn_vd_2_coef_poly3<TAtom>(vatom[stream.n_stream_act - 1]);
+	// 	detail_cpu::fcn_vd_2_coef_poly3<TAtom>(vatom[stream.n_stream_act - 1]);
 
 	// 	stream.synchronize();
 	// }

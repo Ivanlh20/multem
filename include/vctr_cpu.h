@@ -34,7 +34,7 @@
 	#include <thrust/host_vector.h>
 #endif
 
-/* vector forward declaration */
+/* template definition */
 namespace mt
 {
 #ifndef VCTR_DEC

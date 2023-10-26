@@ -79,7 +79,7 @@ namespace mt
 	D_Grid_Blk d_grid_blk_h(const dim3 d_grid_max = dim3(64, 64, 64))
 }
 
-/* vector forward declaration */
+/* template definition */
 namespace mt
 {
 #ifndef VCTR_DEC

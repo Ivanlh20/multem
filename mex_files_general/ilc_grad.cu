@@ -19,8 +19,10 @@
 #define MATLAB_BLAS_LAPACK
 
 #include "math_mt.h"
-#include "cgpu_vctr.cuh"
-#include "cgpu_stream.cuh"
+#include "vctr_cpu.h"
+#include "vctr_gpu.h"
+#include "stream_cpu.h"
+#include "stream_gpu.h"
 #include "fcns_cpu.h"
 #include "fcns_gpu.h"
 

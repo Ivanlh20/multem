@@ -18,9 +18,8 @@
 
 #define MATLAB_BLAS_LAPACK
 
-#include <algorithm>
-#include "types.cuh"
-#include "quad_data.cuh"
+#include "const_enum.h"
+#include "quad_data.h"
 
 #include <mex.h>
 #include "matlab_mex.h"

@@ -27,7 +27,7 @@
 	#include "type_traits_mt.cuh"
 	#include "lens.cuh"
 	#include "energy_loss.cuh"
-	#include "cgpu_detail.cuh"
+	#include "detail_cgpu.h"
 
 	/* pointer to atomic functions */
 	namespace mt
@@ -63,7 +63,7 @@
 	/* atomic functions */
 	namespace mt
 	{
-		namespace cgpu_detail_mt
+		namespace detail_cgpu_mt
 		{
 			template <class T>
 			CGPU_EXEC_INL 
@@ -1435,7 +1435,7 @@
 	/* detector integration */
 	namespace mt
 	{
-		namespace cgpu_detail_mt
+		namespace detail_cgpu_mt
 		{
 			/* integration over a detector ring */
 			template <class T, class U>
@@ -1490,7 +1490,7 @@
 	/* wave propagation */
 	namespace mt
 	{
-		namespace cgpu_detail_mt
+		namespace detail_cgpu_mt
 		{
 			/* propagate */
 			template <class T>
@@ -1533,7 +1533,7 @@
 	/* probe - ctf - pctf */
 	namespace mt
 	{
-		namespace cgpu_detail_mt
+		namespace detail_cgpu_mt
 		{
 			/* create probe */
 			template <bool bb_phi, class T>
@@ -1634,7 +1634,7 @@
 	/* transmission function */
 	namespace mt
 	{
-		namespace cgpu_detail_mt
+		namespace detail_cgpu_mt
 		{
 			template <eElec_Spec_Interact_Mod esim, class T>
 			CGPU_EXEC_INL 
@@ -1657,7 +1657,7 @@
 	/* eels */
 	namespace mt
 	{
-		namespace cgpu_detail_mt
+		namespace detail_cgpu_mt
 		{
 			template <class T>
 			CGPU_EXEC_INL 

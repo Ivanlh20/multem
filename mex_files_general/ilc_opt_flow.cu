@@ -58,20 +58,56 @@ pMLD &rM_m, T alpha, T sigma, dt_int32 n_iter, pMLD &rv_x, pMLD &rv_y)
 	thrust::copy(v_y.begin(), v_y.end(), rv_y.begin());
 }
 
+template <class T, mt::eDev Dev>
+void mex_run(mt::System_Config& system_config, dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[]) 
+{
+	auto rM_s = mex_get_pvctr<pMLD>(prhs[system_config.idx_0+0]);
+	auto rM_m = mex_get_pvctr<pMLD>(prhs[system_config.idx_0+1]);
+	auto alpha = (nrhs>system_config.idx_0+2)?mex_get_num<dt_float64>(prhs[system_config.idx_0+2]):T(0.5);
+	auto sigma = (nrhs>system_config.idx_0+3)?mex_get_num<dt_float64>(prhs[system_config.idx_0+3]):T(2.0);
+	auto n_iter = (nrhs>system_config.idx_0+4)?mex_get_num<dt_int32>(prhs[system_config.idx_0+4]):1;
+	auto rv_xi = (nrhs>system_config.idx_0+5)?mex_get_pvctr<pMLD>(prhs[system_config.idx_0+5]):pMLD();
+	auto rv_yi = (nrhs>system_config.idx_0+6)?mex_get_pvctr<pMLD>(prhs[system_config.idx_0+6]):pMLD();
+
+	/***************************************************************************************/
+	auto rv_x = mex_create_pVctr<pMLD>(rM_s.rows, rM_s.cols, plhs[0]);
+	rv_x.assign(rv_xi.begin(), rv_xi.end());
+
+	auto rv_y = mex_create_pVctr<pMLD>(rM_s.rows, rM_s.cols, plhs[1]);
+	rv_y.assign(rv_yi.begin(), rv_yi.end());
+
+	if (system_config.is_float32_cpu())
+	{
+		run_opt_flow<dt_float32, mt::edev_cpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
+	}
+	else if (system_config.is_float64_cpu())
+	{
+		run_opt_flow<dt_float64, mt::edev_cpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
+	}
+	else if (system_config.is_float32_gpu())
+	{
+		run_opt_flow<dt_float32, mt::edev_gpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
+	}
+	else if (system_config.is_float64_gpu())
+	{
+		run_opt_flow<dt_float64, mt::edev_gpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
+	}
+}
+
 void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[]) 
 {
 	auto system_config = mex_read_system_config(prhs[0]);
 	system_config.set_gpu();
 
-	dt_int32 idx_0 = (system_config.active)?1:0;
+	dt_int32 system_config.idx_0 = (system_config.active)?1:0;
 
-	auto rM_s = mex_get_pvctr<pMLD>(prhs[idx_0+0]);
-	auto rM_m = mex_get_pvctr<pMLD>(prhs[idx_0+1]);
-	auto alpha = (nrhs>idx_0+2)?mex_get_num<dt_float64>(prhs[idx_0+2]):1.0;
-	auto sigma = (nrhs>idx_0+3)?mex_get_num<dt_float64>(prhs[idx_0+3]):0.0;
-	auto n_iter = (nrhs>idx_0+4)?mex_get_num<dt_int32>(prhs[idx_0+4]):1;
-	auto rv_xi = (nrhs>idx_0+5)?mex_get_pvctr<pMLD>(prhs[idx_0+5]):pMLD();
-	auto rv_yi = (nrhs>idx_0+6)?mex_get_pvctr<pMLD>(prhs[idx_0+6]):pMLD();
+	auto rM_s = mex_get_pvctr<pMLD>(prhs[system_config.idx_0+0]);
+	auto rM_m = mex_get_pvctr<pMLD>(prhs[system_config.idx_0+1]);
+	auto alpha = (nrhs>system_config.idx_0+2)?mex_get_num<dt_float64>(prhs[system_config.idx_0+2]):1.0;
+	auto sigma = (nrhs>system_config.idx_0+3)?mex_get_num<dt_float64>(prhs[system_config.idx_0+3]):0.0;
+	auto n_iter = (nrhs>system_config.idx_0+4)?mex_get_num<dt_int32>(prhs[system_config.idx_0+4]):1;
+	auto rv_xi = (nrhs>system_config.idx_0+5)?mex_get_pvctr<pMLD>(prhs[system_config.idx_0+5]):pMLD();
+	auto rv_yi = (nrhs>system_config.idx_0+6)?mex_get_pvctr<pMLD>(prhs[system_config.idx_0+6]):pMLD();
 
 	/***************************************************************************************/
 	auto rv_x = mex_create_pVctr<pMLD>(rM_s.rows, rM_s.cols, plhs[0]);

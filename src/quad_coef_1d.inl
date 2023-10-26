@@ -74,7 +74,7 @@ namespace mt
 	}
 
 	template <class T, eDev Dev>
-	pQuad_Coef_1d<T, Dev>::size_type pQuad_Coef_1d<T, Dev>::size() const
+	typename pQuad_Coef_1d<T, Dev>::size_type pQuad_Coef_1d<T, Dev>::size() const
 	{
 		return m_size;
 	}
@@ -167,7 +167,7 @@ namespace mt
 	}
 
 	template <class T, eDev Dev>
-	Quad_Coef_1d<T, Dev>::size_type Quad_Coef_1d<T, Dev>::size() const
+	typename Quad_Coef_1d<T, Dev>::size_type Quad_Coef_1d<T, Dev>::size() const
 	{
 		return size_type(x.size());
 	}

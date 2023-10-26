@@ -42,7 +42,7 @@
 	/* gpu detail */
 	namespace mt
 	{
-		namespace gpu_detail
+		namespace detail_gpu
 		{
 			template <class T, eDim Dim, eFcn_typ Fcn_typ>
 			__global__ void fcn_ptc_s_fcn_eval(Grid_2d<T> grid_2d, pVctr_gpu_32<Ptc_s_fcn_xd<T, Dim, Fcn_typ>> ptc, pVctr_gpu_32<T> mx_o)
@@ -77,7 +77,7 @@
 	/* cpu detail */
 	namespace mt
 	{
-		namespace cpu_detail
+		namespace detail_cpu
 		{
 			template <class T, eDim Dim, eFcn_typ Fcn_typ>
 			void fcn_ptc_s_fcn_eval(Stream<edev_cpu>& stream, Grid_2d<T>& grid_2d, Ptc_s_fcn_xd<T, Dim, Fcn_typ>& fcn_ptc, Vctr_cpu<T>& mx_o)
@@ -155,10 +155,10 @@
 
 						for(auto istm = 0; istm < stream.n_stream_act-1; istm++)
 						{
-							stream[istm] = std::thread(cpu_detail::fcn_ptc_s_fcn_eval<T, Dim, Fcn_typ>, std::ref(stream), std::ref(grid), std::ref(ptc_sp[istm]), std::ref(mx_o));
+							stream[istm] = std::thread(detail_cpu::fcn_ptc_s_fcn_eval<T, Dim, Fcn_typ>, std::ref(stream), std::ref(grid), std::ref(ptc_sp[istm]), std::ref(mx_o));
 						}
 
-						cpu_detail::fcn_ptc_s_fcn_eval<T, Dim, Fcn_typ>(stream, grid, ptc_sp[stream.n_stream_act-1], mx_o);
+						detail_cpu::fcn_ptc_s_fcn_eval<T, Dim, Fcn_typ>(stream, grid, ptc_sp[stream.n_stream_act-1], mx_o);
 
 						stream.synchronize();
 					};
@@ -246,7 +246,7 @@
 						dt_int32 n_ptc = min(n_ptc_blk, iptc_e-iptc+1);
 						set_ptc_s_fcn(iptc, n_ptc, ptc_sp);
 
-						gpu_detail::fcn_ptc_s_fcn_eval<T, Dim, Fcn_typ><<<n_ptc, fcn_cdb_2d()>>>(in_spt_ptc->grid, ptc_sp.ptr_32(), mx_io.ptr_32());
+						detail_gpu::fcn_ptc_s_fcn_eval<T, Dim, Fcn_typ><<<n_ptc, fcn_cdb_2d()>>>(in_spt_ptc->grid, ptc_sp.ptr_32(), mx_io.ptr_32());
 
 						iptc += n_ptc;
 					}

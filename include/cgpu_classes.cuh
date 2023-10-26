@@ -109,7 +109,7 @@
 
 					for(auto ix = 0; ix < grid_1d.nx; ix++)
 					{
-						cgpu_detail::gauss_cv_1d<Grid_1d<T>, TVctr_c>(ix, grid_1d, alpha, Im);
+						detail_cgpu::gauss_cv_1d<Grid_1d<T>, TVctr_c>(ix, grid_1d, alpha, Im);
 					}
 				}
 
@@ -122,7 +122,7 @@
 					auto alpha = 2*c_pi2*sigma_r*sigma_r;
 
 					auto d_grid_blk = grid_1d.d_grid_blk();
-					gpu_detail::gauss_cv_1d<Grid_1d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_1d, alpha, Im);
+					detail_gpu::gauss_cv_1d<Grid_1d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_1d, alpha, Im);
 				}
 			#endif
 
@@ -210,7 +210,7 @@
 
 					stream->set_n_stream_act(grid_2d.nx);
 					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::fcn_ew_mult_mx_vctr_col<Grid_2d<T>, TVctr_r, TVctr_c>, grid_2d, fg, M_g);
+					stream->exec_2d(detail_cgpu::fcn_ew_mult_mx_vctr_col<Grid_2d<T>, TVctr_r, TVctr_c>, grid_2d, fg, M_g);
 				}
 
 				/**********************Device**********************/
@@ -224,7 +224,7 @@
 					TVctr_r fg = fg_h;
 
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::fcn_ew_mult_mx_vctr_col<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, fg, M_g);
+					detail_gpu::fcn_ew_mult_mx_vctr_col<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, fg, M_g);
 				}
 			#endif
 
@@ -308,7 +308,7 @@
 
 					stream->set_n_stream_act(grid_2d.nx);
 					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::gauss_cv_2d<Grid_2d<T>, TVctr_c>, grid_2d, alpha, Im);
+					stream->exec_2d(detail_cgpu::gauss_cv_2d<Grid_2d<T>, TVctr_c>, grid_2d, alpha, Im);
 				}
 
 				/**********************Device**********************/
@@ -320,7 +320,7 @@
 					auto alpha = 2*c_pi2*sigma_r*sigma_r;
 
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::gauss_cv_2d<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, alpha, Im);
+					detail_gpu::gauss_cv_2d<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, alpha, Im);
 				}
 			#endif
 
@@ -396,7 +396,7 @@
 
 					for(auto ix = 0; ix < grid_1d.nx; ix++)
 					{
-						cgpu_detail::gauss_dcv_1d<Grid_1d<T>, TVctr_c>(ix, grid_1d, alpha, PSNR, Im);
+						detail_cgpu::gauss_dcv_1d<Grid_1d<T>, TVctr_c>(ix, grid_1d, alpha, PSNR, Im);
 					}
 				}
 
@@ -409,7 +409,7 @@
 					auto alpha = 2*c_pi2*sigma_r*sigma_r;
 
 					auto d_grid_blk = grid_1d.d_grid_blk();
-					gpu_detail::gauss_dcv_1d<Grid_1d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_1d, alpha, PSNR, Im);
+					detail_gpu::gauss_dcv_1d<Grid_1d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_1d, alpha, PSNR, Im);
 				}
 			#endif
 
@@ -497,7 +497,7 @@
 
 					stream->set_n_stream_act(grid_2d.nx);
 					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::fcn_ew_mult_mx_vctr_col<Grid_2d<T>, TVctr_r, TVctr_c>, grid_2d, fg, M_g);
+					stream->exec_2d(detail_cgpu::fcn_ew_mult_mx_vctr_col<Grid_2d<T>, TVctr_r, TVctr_c>, grid_2d, fg, M_g);
 				}
 
 				/**********************Device**********************/
@@ -511,7 +511,7 @@
 					TVctr_r fg = fg_h;
 
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::fcn_ew_mult_mx_vctr_col<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, fg, M_g);
+					detail_gpu::fcn_ew_mult_mx_vctr_col<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, fg, M_g);
 				}
 			#endif
 
@@ -585,7 +585,7 @@
 
 					stream->set_n_stream_act(grid_2d.nx);
 					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::gauss_dcv_2d<Grid_2d<T>, TVctr_c>, grid_2d, alpha, PSNR, Im);
+					stream->exec_2d(detail_cgpu::gauss_dcv_2d<Grid_2d<T>, TVctr_c>, grid_2d, alpha, PSNR, Im);
 				}
 
 				/**********************Device**********************/
@@ -597,7 +597,7 @@
 					auto alpha = 2*c_pi2*sigma_r*sigma_r;
 
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::gauss_dcv_2d<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, alpha, PSNR, Im);
+					detail_gpu::gauss_dcv_2d<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, alpha, PSNR, Im);
 				}
 			#endif
 
@@ -657,7 +657,7 @@
 
 					stream->set_n_stream_act(grid_2d.nx);
 					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::sd_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, dx, dy, bg, mx_o);
+					stream->exec_2d(detail_cgpu::sd_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, dx, dy, bg, mx_o);
 
 					return bg;
 				}
@@ -672,7 +672,7 @@
 					T bg = get_bg(mx_i);
 
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::sd_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, dx, dy, bg, mx_o);
+					detail_gpu::sd_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, dx, dy, bg, mx_o);
 
 					return bg;
 				}
@@ -765,7 +765,7 @@
 
 					stream->set_n_stream_act(grid_2d.nx);
 					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::sd_nr_2d<Grid_2d<T>, TVctr, SPar>, grid_2d, mx_i, parm, mx_o);
+					stream->exec_2d(detail_cgpu::sd_nr_2d<Grid_2d<T>, TVctr, SPar>, grid_2d, mx_i, parm, mx_o);
 
 					return parm.bg;
 				}
@@ -778,7 +778,7 @@
 				{
 					// preprocessing(ds_x_i, ds_y_i, parm);
 					// auto d_grid_blk = grid_2d.d_grid_blk();
-					// gpu_detail::sd_nr_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, ds_x_i, ds_y_i, mx_o);
+					// detail_gpu::sd_nr_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, ds_x_i, ds_y_i, mx_o);
 				
 					return parm.bg;
 				}
@@ -943,7 +943,7 @@
 
 					stream->set_n_stream_act(grid_2d_o.nx);
 					stream->set_grid(grid_2d_o.nx, grid_2d_o.ny);
-					stream->exec_2d(cgpu_detail::rot_sca_sft_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, theta, p0, sx, sy, ps, bg, grid_2d_o, mx_o);
+					stream->exec_2d(detail_cgpu::rot_sca_sft_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, theta, p0, sx, sy, ps, bg, grid_2d_o, mx_o);
 
 					normalized_data(mx_o, M_max);
 
@@ -962,99 +962,6 @@
 
 				Grid_2d<T> grid_2d;
 				Stream<Dev> *stream;
-		};
-
-		template <class T, eDev Dev>
-		class Interp_rn_2d
-		{
-			public:
-				using T_r = T;
-				using TVctr = Vctr<T, Dev>;
-
-				static const eDev device = Dev;
-
-				Interp_rn_2d(): stream(nullptr) {}
-
-				Interp_rn_2d(Stream<Dev> *stream_i, Grid_2d<T>& grid_2d_i, Grid_2d<T>& grid_2d_o, eFil_Sel_Typ bg_opt_i=efst_min, T bg_i=0)
-				{
-					set_in_data(stream_i, grid_2d_i, grid_2d_o, bg_opt_i, bg_i);
-				}
-
-				inline
-				void set_in_data(Stream<Dev> *stream_i, Grid_2d<T>& grid_2d_i, Grid_2d<T>& grid_2d_o, eFil_Sel_Typ bg_opt_i=efst_min, T bg_i=0)
-				{
-					stream = stream_i;
-					grid_2d = grid_2d_i;
-					grid_2d_mo = grid_2d_o;
-					bg_opt = bg_opt_i;
-					bg = bg_i;
-				}
-
-				/***************************************** cpu *****************************************/
-				template <eDev devn = Dev>
-				enable_if_edev_cpu<devn, T>
-				operator()(TVctr& mx_i, TVctr& Rx_i, TVctr& Ry_i, TVctr& mx_o)
-				{
-					// calculate background
-					T bg = get_bg(mx_i);
-
-					stream->set_n_stream_act(grid_2d_mo.nx);
-					stream->set_grid(grid_2d_mo.nx, grid_2d_mo.ny);
-					stream->exec_2d(cgpu_detail::intrpl_rg_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, Rx_i, Ry_i, grid_2d_mo, bg, mx_o);
-				
-					return bg;
-				}
-
-				/**********************Device**********************/
-			#ifdef __CUDACC__
-				template <eDev devn = Dev>
-				enable_if_edev_gpu<devn, T>
-				operator()(TVctr& mx_i, TVctr& Rx_i, TVctr& Ry_i, TVctr& mx_o)
-				{
-					// calculate background
-					T bg = get_bg(mx_i);
-
-					auto d_grid_blk = grid_2d_mo.d_grid_blk();
-					gpu_detail::intrpl_rg_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, Rx_i, Ry_i, grid_2d_mo, bg, mx_o);
-				
-					return bg;
-				}
-			#endif
-
-			protected:
-				Grid_2d<T> grid_2d;
-				Grid_2d<T> grid_2d_mo;
-				Stream<Dev> *stream;
-				eFil_Sel_Typ bg_opt;
-				T bg;
-
-				T get_bg(TVctr& M)
-				{
-					T bg_r = 0;
-					switch (bg_opt) 
-					{
-						case efst_min:
-							bg_r = fcn_min_element(M);
-						break;
-						case efst_max:
-							bg_r = fcn_max_element(M);
-						break;
-						case efst_mean:
-							bg_r = fcn_mean(M);
-						break;
-						case efst_min_mean:
-							bg_r = 0.5*(fcn_mean(M) + fcn_min_element(M));
-						break;
-						case efst_max_mean:
-							bg_r = 0.5*(fcn_mean(M) + fcn_max_element(M));
-						break;
-						case efst_user_def:
-							bg_r = bg;
-						break;
-					}
-
-					return bg_r;
-				}
 		};
 
 		template <class T, eDev Dev>
@@ -1097,7 +1004,7 @@
 
 					stream->set_n_stream_act(grid_2d_o.nx);
 					stream->set_grid(grid_2d_o.nx, grid_2d_o.ny);
-					stream->exec_2d(cgpu_detail::sc_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, sxy, grid_2d_o, mx_o);
+					stream->exec_2d(detail_cgpu::sc_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, sxy, grid_2d_o, mx_o);
 				}
 
 				/**********************Device**********************/
@@ -1117,7 +1024,7 @@
 					Grid_2d<T> grid_2d_o(nx_o, ny_o, nx_o*grid_2d.drx, ny_o*grid_2d.dry);
 
 					auto d_grid_blk = grid_2d_o.d_grid_blk();
-					gpu_detail::sc_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, sxy, grid_2d_o, mx_o);
+					detail_gpu::sc_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, sxy, grid_2d_o, mx_o);
 				}
 			#endif
 
@@ -1164,7 +1071,7 @@
 
 					stream->set_n_stream_act(grid_2d_o.nx);
 					stream->set_grid(grid_2d_o.nx, grid_2d_o.ny);
-					stream->exec_2d(cgpu_detail::rot_sca_sft_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, theta, p0, sx, sy, ps, bg, grid_2d_o, mx_o);
+					stream->exec_2d(detail_cgpu::rot_sca_sft_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, theta, p0, sx, sy, ps, bg, grid_2d_o, mx_o);
 				}
 
 				/**********************Device**********************/
@@ -1182,7 +1089,7 @@
 					Grid_2d<T> grid_2d_o(nx_o, ny_o, nx_o*grid_2d.drx, ny_o*grid_2d.dry);
 
 					auto d_grid_blk = grid_2d_o.d_grid_blk();
-					gpu_detail::rot_sca_sft_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, theta, p0, sx, sy, ps, bg, grid_2d_o, mx_o);
+					detail_gpu::rot_sca_sft_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, theta, p0, sx, sy, ps, bg, grid_2d_o, mx_o);
 				}
 			#endif
 
@@ -1222,7 +1129,7 @@
 				{
 					stream->set_n_stream_act(grid_2d.nx);
 					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::gradient<Grid_2d<T>, TVctr>, grid_2d, mx_i, dM_x, dM_y);
+					stream->exec_2d(detail_cgpu::gradient<Grid_2d<T>, TVctr>, grid_2d, mx_i, dM_x, dM_y);
 				}
 
 				/**********************Device**********************/
@@ -1232,7 +1139,7 @@
 				operator()(TVctr& mx_i, TVctr& dM_x, TVctr& dM_y)
 				{
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::gradient<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, dM_x, dM_y);
+					detail_gpu::gradient<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, dM_x, dM_y);
 				}
 			#endif
 
@@ -1285,7 +1192,7 @@
 
 					stream->set_n_stream_act(grid_2d.nx);
 					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::at_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, A, txy, bg, mx_o);
+					stream->exec_2d(detail_cgpu::at_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, A, txy, bg, mx_o);
 
 					return bg;
 				}
@@ -1308,7 +1215,7 @@
 					txy = T(-1)*A*txy;
 
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::at_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, A, txy, bg, mx_o);
+					detail_gpu::at_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, A, txy, bg, mx_o);
 
 					return bg;
 				}
@@ -1845,7 +1752,7 @@
 
 					for(auto ix = 0; ix < grid_1d.nx; ix++)
 					{
-						cgpu_detail::fcn_rs_pcf_1d_dp(ix, ix_s, grid_1d, bw_1d, mx_i, mx_o);
+						detail_cgpu::fcn_rs_pcf_1d_dp(ix, ix_s, grid_1d, bw_1d, mx_i, mx_o);
 					}
 				}
 
@@ -1857,7 +1764,7 @@
 
 					for(auto ix = 0; ix < grid_1d_e.nx; ix++)
 					{
-						cgpu_detail::fcn_fs_pcf_1d_dp(ix, grid_1d_e, gs_1d, M_r_c, M_s_c, pcf);
+						detail_cgpu::fcn_fs_pcf_1d_dp(ix, grid_1d_e, gs_1d, M_r_c, M_s_c, pcf);
 					}
 				}
 
@@ -1872,7 +1779,7 @@
 					Wd_Butwth_1d<T> bw_1d(bd, bd.radius_p(p), 32);
 
 					auto d_grid_blk = grid_1d.d_grid_blk();
-					gpu_detail::fcn_rs_pcf_1d_dp<Grid_1d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(ix_s, grid_1d, bw_1d, mx_i, mx_o);
+					detail_gpu::fcn_rs_pcf_1d_dp<Grid_1d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(ix_s, grid_1d, bw_1d, mx_i, mx_o);
 				}
 
 				template <eDev devn = Dev>
@@ -1882,7 +1789,7 @@
 					Wd_Gauss_1d<T> gs_1d(0, sigma_g);
 
 					auto d_grid_blk = grid_1d_e.d_grid_blk();
-					gpu_detail::fcn_fs_pcf_1d_dp<Grid_1d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_1d_e, gs_1d, M_r_c, M_s_c, pcf);
+					detail_gpu::fcn_fs_pcf_1d_dp<Grid_1d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_1d_e, gs_1d, M_r_c, M_s_c, pcf);
 				}
 			#endif
 
@@ -2004,7 +1911,7 @@
 
 					stream->set_n_stream_act(grid_2d.nx);
 					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::pcf_2d_bc_pp<Grid_2d<T>, TVctr_r, TVctr_c>, iy_s, grid_2d, grid_2d_e, mx_i, fh, mx_o);
+					stream->exec_2d(detail_cgpu::pcf_2d_bc_pp<Grid_2d<T>, TVctr_r, TVctr_c>, iy_s, grid_2d, grid_2d_e, mx_i, fh, mx_o);
 				}
 
 				template <eDev devn = Dev>
@@ -2015,7 +1922,7 @@
 
 					stream->set_n_stream_act(grid_2d_e.nx);
 					stream->set_grid(grid_2d_e.nx, grid_2d_e.ny);
-					stream->exec_2d(cgpu_detail::pcf_2d_bc_gaussian<Grid_2d<T>, TVctr_r, TVctr_c>, grid_2d_e, M_r_c, M_s_c, fg, pcf);
+					stream->exec_2d(detail_cgpu::pcf_2d_bc_gaussian<Grid_2d<T>, TVctr_r, TVctr_c>, grid_2d_e, M_r_c, M_s_c, fg, pcf);
 				}
 
 				template <eDev devn = Dev>
@@ -2046,7 +1953,7 @@
 					TVctr_r fh = fh_h;
 
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::pcf_2d_bc_pp<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(iy_s, grid_2d, grid_2d_e, mx_i, fh, mx_o);
+					detail_gpu::pcf_2d_bc_pp<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(iy_s, grid_2d, grid_2d_e, mx_i, fh, mx_o);
 				}
 
 				template <eDev devn = Dev>
@@ -2057,7 +1964,7 @@
 					TVctr_r fg = fg_h;
 
 					auto d_grid_blk = grid_2d_e.d_grid_blk();
-					gpu_detail::pcf_2d_bc_gaussian<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d_e, M_r_c, M_s_c, fg, pcf);
+					detail_gpu::pcf_2d_bc_gaussian<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d_e, M_r_c, M_s_c, fg, pcf);
 				}
 
 				template <eDev devn = Dev>
@@ -2065,7 +1972,7 @@
 				fcn_assign_real(TVctr_c& mx_i, dt_int32 iy_s, TVctr_r& mx_o, dt_bool b_pos = false)
 				{
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::pcf_2d_bc_assign_real<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(iy_s, grid_2d, grid_2d_e, mx_i, mx_o, b_pos);
+					detail_gpu::pcf_2d_bc_assign_real<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(iy_s, grid_2d, grid_2d_e, mx_i, mx_o, b_pos);
 				}
 			#endif
 
@@ -2225,7 +2132,7 @@
 
 					stream->set_n_stream_act(grid_2d.nx);
 					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::fcn_rs_pcf_2d_dp<Grid_2d<T>, TVctr_r, TVctr_c>, grid_2d, bw_2d, mx_i, mx_o);
+					stream->exec_2d(detail_cgpu::fcn_rs_pcf_2d_dp<Grid_2d<T>, TVctr_r, TVctr_c>, grid_2d, bw_2d, mx_i, mx_o);
 				}
 
 				template <eDev devn = Dev>
@@ -2236,7 +2143,7 @@
 
 					stream->set_n_stream_act(grid_2d.nx);
 					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::fcn_fs_pcf_2d_dp<Grid_2d<T>, TVctr_c>, grid_2d, gs_2d, M_r_c, M_s_c, pcf);
+					stream->exec_2d(detail_cgpu::fcn_fs_pcf_2d_dp<Grid_2d<T>, TVctr_c>, grid_2d, gs_2d, M_r_c, M_s_c, pcf);
 				}
 
 				/**********************Device**********************/
@@ -2248,7 +2155,7 @@
 					Wd_Butwth_2d<T> bw_2d(bd, bd.radius_p(p), 16);
 
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::fcn_rs_pcf_2d_dp<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, bw_2d, mx_i, mx_o);
+					detail_gpu::fcn_rs_pcf_2d_dp<Grid_2d<T>, typename TVctr_c::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, bw_2d, mx_i, mx_o);
 				}
 
 				template <eDev devn = Dev>
@@ -2258,7 +2165,7 @@
 					Wd_Gauss_2d<T> gs_2d(R_2d<T>(), sigma_g);
 
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::fcn_fs_pcf_2d_dp<Grid_2d<T>, typename TVctr_c::value_type><<< d_grid_blk.grid, d_grid_blk.blk >>>(grid_2d, gs_2d, M_r_c, M_s_c, pcf);
+					detail_gpu::fcn_fs_pcf_2d_dp<Grid_2d<T>, typename TVctr_c::value_type><<< d_grid_blk.grid, d_grid_blk.blk >>>(grid_2d, gs_2d, M_r_c, M_s_c, pcf);
 				}
 			#endif
 
@@ -2318,7 +2225,7 @@
 						Pcf_1d<T, Dev>::operator()(M_r, M, p, sigma_g, bd, true, pcf);
 
 						// get maximum position
-						T x_c = cgpu_detail::fd_max_peak_pos(this->grid_1d, pcf);
+						T x_c = detail_cgpu::fd_max_peak_pos(this->grid_1d, pcf);
 
 						if (it==nit_pcf-1)
 						{
@@ -3021,7 +2928,7 @@
 
 					stream->set_n_stream_act(grid_2d_o.nx);
 					stream->set_grid(grid_2d_o.nx, grid_2d_o.ny);
-					stream->exec_2d(cgpu_detail::shx_scy<Grid_2d<T>, TVctr>, grid_2d, mx_i, af.x, af.y, bg, grid_2d_o, *pM_o);
+					stream->exec_2d(detail_cgpu::shx_scy<Grid_2d<T>, TVctr>, grid_2d, mx_i, af.x, af.y, bg, grid_2d_o, *pM_o);
 				
 					if (mx_i.data() == mx_o.data())
 					{
@@ -3055,7 +2962,7 @@
 					Grid_2d<T> grid_2d_o = grid_2d;
 
 					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::shx_scy<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, af.x, af.y, bg, grid_2d_o, *pM_o);
+					detail_gpu::shx_scy<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, af.x, af.y, bg, grid_2d_o, *pM_o);
 				
 					if (mx_i.data() == mx_o.data())
 					{
@@ -3984,145 +3891,6 @@
 
 				return spx;
 			}
-		};
-
-		/********************************* calculate d_phi *************************************/
-		template <class T, eDev Dev>
-		class Opt_Flow
-		{
-			public:
-				using T_r = T;
-				using TVctr = Vctr<T, Dev>;
-
-				static const eDev device = Dev;
-
-				Opt_Flow(): stream(nullptr) {}
-
-				Opt_Flow(Stream<Dev> *stream_i, FFT<T, Dev> *fft_2d_i, Grid_2d<T>& grid_2d_i)
-				{
-					set_in_data(stream_i, fft_2d_i, grid_2d_i);
-				}
-
-				inline
-				void set_in_data(Stream<Dev> *stream_i, FFT<T, Dev> *fft_2d_i, Grid_2d<T>& grid_2d_i)
-				{
-					stream = stream_i;
-					grid_2d = grid_2d_i;
-
-					intrpl_rg_2d.set_in_data(stream, grid_2d, grid_2d);
-
-					gauss_cv_2d.set_in_data(stream, fft_2d_i, grid_2d);
-
-					v_x.resize(grid_2d.size());
-					v_y.resize(grid_2d.size());
-
-					Rx.resize(grid_2d.size());
-					Ry.resize(grid_2d.size());
-					M.resize(grid_2d.size());
-
-				}
-
-				void operator()(TVctr& M_s, TVctr& M_m, T alpha, T sigma, dt_int32 n_iter, TVctr& v_xt, TVctr& v_yt)
-				{
-					// create rectangular grid
-					set_regular_grid(Rx, Ry);
-
-					// set initial optical flow
-					v_x = v_xt;
-					v_y = v_yt;
-
-					for(auto iter = 0; iter < n_iter; iter++)
-					{
-						// create new grid
-						mt::add(*stream, v_x, Rx);
-						mt::add(*stream, v_y, Ry);
-
-						// resample distored image in a new grid
-						intrpl_rg_2d(M_m, Rx, Ry, M);
-
-						// calculate optical flow
-						fcn_opt_flow(M_s, M, alpha, v_x, v_y);
-
-						// regularization based on convolution
-						if (fcn_is_nzero(sigma))
-						{
-							gauss_cv_2d(sigma, v_x);
-							gauss_cv_2d(sigma, v_y);
-						}
-
-						// add optical flow
-						mt::add(*stream, v_x, v_xt);
-						mt::add(*stream, v_y, v_yt);
-
-					}
-				}
-
-				void set_fft_plan()
-				{
-					gauss_cv_2d.set_fft_plan();
-				}
-
-				void cleanup()
-				{
-					gauss_cv_2d.cleanup();
-				}
-
-			protected:
-
-				void set_regular_grid(TVctr& Rx, TVctr& Ry)
-				{
-					Vctr<T, edev_cpu> Rx_h;
-					Vctr<T, edev_cpu> Ry_h;
-
-					Rx_h.reserve(grid_2d.size());
-					Ry_h.reserve(grid_2d.size());
-
-					for(auto ix = 0; ix < grid_2d.nx; ix++)
-					{
-						for(auto iy = 0; iy < grid_2d.ny; iy++)
-						{
-							Rx_h.push_back(grid_2d.rx(ix));
-							Ry_h.push_back(grid_2d.ry(iy));
-						}
-					}
-
-					thrust::copy(Rx_h.begin(), Rx_h.end(), Rx.begin());
-					thrust::copy(Ry_h.begin(), Ry_h.end(), Ry.begin());
-				}
-
-				/***************************************** cpu *****************************************/
-				template <eDev devn = Dev>
-				enable_if_edev_cpu<devn, void>
-				fcn_opt_flow(TVctr& M_s, TVctr& M_m, T alpha, TVctr& v_x, TVctr& v_y)
-				{
-					stream->set_n_stream_act(grid_2d.nx);
-					stream->set_grid(grid_2d.nx, grid_2d.ny);
-					stream->exec_2d(cgpu_detail::fcn_opt_flow<Grid_2d<T>, TVctr>, grid_2d, M_s, M_m, alpha, v_x, v_y);
-				}
-
-				/**********************Device**********************/
-			#ifdef __CUDACC__
-				template <eDev devn = Dev>
-				enable_if_edev_gpu<devn, void>
-				fcn_opt_flow(TVctr& M_s, TVctr& M_m, T alpha, TVctr& v_x, TVctr& v_y)
-				{
-					auto d_grid_blk = grid_2d.d_grid_blk();
-					gpu_detail::fcn_opt_flow<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, M_s, M_m, alpha, v_x, v_y);
-				}
-			#endif
-
-				Stream<Dev> *stream;
-				Grid_2d<T> grid_2d;
-
-				Interp_rn_2d<T, Dev> intrpl_rg_2d;
-				Gauss_Cv_2d<T, Dev> gauss_cv_2d;
-
-				TVctr v_x;
-				TVctr v_y;
-
-				TVctr Rx;
-				TVctr Ry;
-				TVctr M;
 		};
 
 	}

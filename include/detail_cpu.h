@@ -36,7 +36,7 @@
 	namespace mt
 	{
 		/* for loops */
-		namespace cpu_detail
+		namespace detail_cpu
 		{
 			template <class TFcn, class... TArgs>
 			void for_loop(const iThread_Rect_1d& range, TFcn& fcn, TArgs& ...arg)

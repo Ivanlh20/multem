@@ -37,7 +37,7 @@
 	/* gpu data cast */
 	namespace mt
 	{
-		namespace gpu_detail
+		namespace detail_gpu
 		{
 		#ifdef __CUDACC__
 			template <class Td, class Ts>
@@ -134,7 +134,7 @@
 			auto grid = fcn_cdg_1d(n_size);
 			grid.x = min(128, grid.x);
 
-			gpu_detail::fcn_data_typ_cast<Td, Ts><<<grid, c_thr_1d>>>(pgpu_dst, pgpu_src, dt_int32(n_size));
+			detail_gpu::fcn_data_typ_cast<Td, Ts><<<grid, c_thr_1d>>>(pgpu_dst, pgpu_src, dt_int32(n_size));
 		}
 
 		/******************************* (dst, src): cpu -> gpu ********************************/
@@ -224,7 +224,7 @@
 			auto grid = fcn_cdg_1d(n_size);
 			grid.x = min(128, grid.x);
 
-			gpu_detail::fcn_real_gpu_gpu<<<grid, c_thr_1d>>>(pgpu_dst, pgpu_src, dt_int32(n_size));
+			detail_gpu::fcn_real_gpu_gpu<<<grid, c_thr_1d>>>(pgpu_dst, pgpu_src, dt_int32(n_size));
 		}
 
 		// (dst, src): cpu -> gpu
@@ -308,7 +308,7 @@
 			auto grid = fcn_cdg_1d(n_size);
 			grid.x = min(128, grid.x);
 
-			gpu_detail::fcn_imag_gpu_gpu<<<grid, c_thr_1d>>>(pgpu_dst, pgpu_src, dt_int32(n_size));
+			detail_gpu::fcn_imag_gpu_gpu<<<grid, c_thr_1d>>>(pgpu_dst, pgpu_src, dt_int32(n_size));
 		}
 
 		// (dst, src): cpu -> gpu

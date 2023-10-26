@@ -16,81 +16,14 @@
  * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
  */
 
-#include "intrpl_coef.h"	
+#include "poly_coef_3d.h"	
 
-/***************************************************************************************/
-/************************** cubic interpolation coefficients ***************************/
-/***************************************************************************************/
-namespace mt
-{
-	/************************************* constructors ************************************/
-	template <class T, eDev Dev> 
-	CGPU_EXEC
-	pPoly_Coef_3d<T, Dev>::pPoly_Coef_3d(): c0(nullptr), c1(nullptr), c2(nullptr), c3(nullptr), m_size(0) {}
-
-	template <class T, eDev Dev> 
-	CGPU_EXEC
-	pPoly_Coef_3d<T, Dev>::pPoly_Coef_3d(T* c0, T* c1, T* c2, T* c3, const size_type& size): c0(c0), c1(c1), c2(c2), c3(c3), m_size(size) {}
-
-	/* copy constructor */
-	template <class T, eDev Dev>
-	CGPU_EXEC
-	pPoly_Coef_3d<T, Dev>::pPoly_Coef_3d(const pPoly_Coef_3d<T, Dev>& pcoef_poly3)
-	{
-		*this = pcoef_poly3;
-	}
-
-	/* constructor from Poly_Coef_3d */
-	template <class T, eDev Dev>
-	explicit pPoly_Coef_3d<T, Dev>::pPoly_Coef_3d(const Poly_Coef_3d<T, Dev>& coef_poly3)
-	{
-		*this = coef_poly3;
-	}
-
-	/******************************** assignment operators *********************************/
-	/* copy assignment operator */
-	template <class T, eDev Dev>
-	CGPU_EXEC
-	pPoly_Coef_3d<T, Dev>& pPoly_Coef_3d<T, Dev>::operator=(const pPoly_Coef_3d<T, Dev>& pcoef_poly3)
-	{
-		if (this != &pcoef_poly3)
-		{
-			c0 = pcoef_poly3.c0;
-			c1 = pcoef_poly3.c1;
-			c2 = pcoef_poly3.c2;
-			c3 = pcoef_poly3.c3;
-			m_size = pcoef_poly3.m_size;
-		}
-
-		return *this;
-	}
-
-	/* Assignment operator: Poly_Coef_3d -> pPoly_Coef_3d */
-	template <class T, eDev Dev>
-	CPU_EXEC
-	pPoly_Coef_3d<T, Dev>& pPoly_Coef_3d<T, Dev>::operator=(const Poly_Coef_3d<T, Dev>& coef_poly3)
-	{
-		c0 = coef_poly3.c0.data();
-		c1 = coef_poly3.c1.data();
-		c2 = coef_poly3.c2.data();
-		c3 = coef_poly3.c3.data();
-		m_size = size_type(coef_poly3.size());
-
-		return *this;
-	}
-
-	template <class T, eDev Dev>
-	size_type pPoly_Coef_3d<T, Dev>::size() const
-	{
-		return m_size;
-	}
-}
-
+// class cubic polynomial coefficients
 namespace mt
 {
 	/************************************* constructors ************************************/
 	template <class T, eDev Dev>
-	Poly_Coef_3d<T, Dev>::Poly_Coef_3d() {}
+	Poly_Coef_3d<T, Dev>::Poly_Coef_3d(){}
 
 	template <class T, eDev Dev>
 	Poly_Coef_3d<T, Dev>::Poly_Coef_3d(const Vctr_cpu<T>& c0, const Vctr_cpu<T>& c1, const Vctr_cpu<T>& c2, const Vctr_cpu<T>& c3): 
@@ -181,7 +114,7 @@ namespace mt
 	}
 
 	template <class T, eDev Dev>
-	size_type Poly_Coef_3d<T, Dev>::size() const
+	typename Poly_Coef_3d<T, Dev>::size_type Poly_Coef_3d<T, Dev>::size() const
 	{
 		return c0.size();
 	}
@@ -229,5 +162,71 @@ namespace mt
 		c1.shrink_to_fit();
 		c2.shrink_to_fit();
 		c3.shrink_to_fit();
+	}
+}
+
+// pointer class linear polynomial coefficients
+namespace mt
+{
+	/************************************* constructors ************************************/
+	template <class T, eDev Dev> 
+	CGPU_EXEC
+	pPoly_Coef_3d<T, Dev>::pPoly_Coef_3d(): c0(nullptr), c1(nullptr), c2(nullptr), c3(nullptr), m_size(0) {}
+
+	template <class T, eDev Dev> 
+	CGPU_EXEC
+	pPoly_Coef_3d<T, Dev>::pPoly_Coef_3d(T* c0, T* c1, T* c2, T* c3, const size_type& size): c0(c0), c1(c1), c2(c2), c3(c3), m_size(size) {}
+
+	/* copy constructor */
+	template <class T, eDev Dev>
+	CGPU_EXEC
+	pPoly_Coef_3d<T, Dev>::pPoly_Coef_3d(const pPoly_Coef_3d<T, Dev>& pcoef_poly3)
+	{
+		*this = pcoef_poly3;
+	}
+
+	/* constructor from Poly_Coef_3d */
+	template <class T, eDev Dev>
+	pPoly_Coef_3d<T, Dev>::pPoly_Coef_3d(const Poly_Coef_3d<T, Dev>& coef_poly3)
+	{
+		*this = coef_poly3;
+	}
+
+	/******************************** assignment operators *********************************/
+	/* copy assignment operator */
+	template <class T, eDev Dev>
+	CGPU_EXEC
+	pPoly_Coef_3d<T, Dev>& pPoly_Coef_3d<T, Dev>::operator=(const pPoly_Coef_3d<T, Dev>& pcoef_poly3)
+	{
+		if (this != &pcoef_poly3)
+		{
+			c0 = pcoef_poly3.c0;
+			c1 = pcoef_poly3.c1;
+			c2 = pcoef_poly3.c2;
+			c3 = pcoef_poly3.c3;
+			m_size = pcoef_poly3.m_size;
+		}
+
+		return *this;
+	}
+
+	/* Assignment operator: Poly_Coef_3d -> pPoly_Coef_3d */
+	template <class T, eDev Dev>
+	CPU_EXEC
+	pPoly_Coef_3d<T, Dev>& pPoly_Coef_3d<T, Dev>::operator=(const Poly_Coef_3d<T, Dev>& coef_poly3)
+	{
+		c0 = coef_poly3.c0.data();
+		c1 = coef_poly3.c1.data();
+		c2 = coef_poly3.c2.data();
+		c3 = coef_poly3.c3.data();
+		m_size = size_type(coef_poly3.size());
+
+		return *this;
+	}
+
+	template <class T, eDev Dev>
+	typename pPoly_Coef_3d<T, Dev>::size_type pPoly_Coef_3d<T, Dev>::size() const
+	{
+		return m_size;
 	}
 }

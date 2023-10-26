@@ -984,7 +984,7 @@ namespace mt
 
 		//	auto thr_sc_image = [&](const iThread_Rect_2d& ithread)
 		//	{
-		//		cpu_detail::matrix_iter(ithread, krn_sc_image, Im_i, Im_o);
+		//		detail_cpu::matrix_iter(ithread, krn_sc_image, Im_i, Im_o);
 		//	};
 
 		//	stream.set_n_stream_act(nx_o);

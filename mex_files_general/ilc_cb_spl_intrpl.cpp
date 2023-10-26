@@ -20,7 +20,7 @@
 
 #include "math_mt.h"
 #include "vctr_cpu.h"
-#include "cb_spl_intrpl.hpp"
+#include "cb_spl_intrpl.h"
 
 #include <mex.h>
 #include "matlab_mex.h"

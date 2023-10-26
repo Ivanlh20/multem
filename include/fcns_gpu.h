@@ -30,7 +30,7 @@
 #include "grid_1d.h"
 #include "grid_2d.h"
 #include "grid_3d.h"
-#include "gpu_detail.cuh"
+#include "detail_gpu.h"
 
 /* vector functions */
 namespace mt
@@ -462,7 +462,7 @@ namespace mt
 
 		auto igrid = mx_io.igrid_1d();
 
-		gpu_detail::fcn_fftsft_1d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_io.ptr_32());
+		detail_gpu::fcn_fftsft_1d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_io.ptr_32());
 	}
 
 	/* shift matrix respect to ny_h */
@@ -474,7 +474,7 @@ namespace mt
 
 		auto igrid = mx_io.igrid_2d();
 
-		gpu_detail::fcn_fftsft_bc_2d<T><<<igrid.d_grid_d0_h(), igrid.d_blk()>>>(igrid, mx_io.ptr_32());
+		detail_gpu::fcn_fftsft_bc_2d<T><<<igrid.d_grid_d0_h(), igrid.d_blk()>>>(igrid, mx_io.ptr_32());
 	}
 
 	/* shift matrix respect to (nx_h, ny_h) */
@@ -486,7 +486,7 @@ namespace mt
 
 		auto igrid = mx_io.igrid_2d();
 
-		gpu_detail::fcn_fftsft_2d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_io.ptr_32());
+		detail_gpu::fcn_fftsft_2d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_io.ptr_32());
 	}
 
 	/* shift matrix respect to (nx_h, ny_h) */
@@ -498,7 +498,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		gpu_detail::fcn_fftsft_2d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), mx_o.ptr_32());
+		detail_gpu::fcn_fftsft_2d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), mx_o.ptr_32());
 	}
 
 	/* shift matrix respect to (nx_h, ny_h, nz_h) */
@@ -510,7 +510,7 @@ namespace mt
 
 		auto igrid = mx_io.igrid_3d();
 
-		gpu_detail::fcn_fftsft_3d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_io.ptr_32());
+		detail_gpu::fcn_fftsft_3d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_io.ptr_32());
 	}
 
 	/* shift matrix respect to (nx_h, ny_h, nz_h) */
@@ -522,7 +522,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_3d();
 
-		gpu_detail::fcn_fftsft_3d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), mx_o.ptr_32());
+		detail_gpu::fcn_fftsft_3d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), mx_o.ptr_32());
 	}
 
 	/***************************************************************************************/
@@ -535,7 +535,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		gpu_detail::fcn_add_sc_fftsft_2d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), w, mx_o.ptr_32());
+		detail_gpu::fcn_add_sc_fftsft_2d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), w, mx_o.ptr_32());
 	} 
 
 	/* add, scale, square and shift */
@@ -548,7 +548,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		gpu_detail::fcn_add_sc_norm_2_fftsft_2d<T, U><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), w, mx_o.ptr_32());
+		detail_gpu::fcn_add_sc_norm_2_fftsft_2d<T, U><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), w, mx_o.ptr_32());
 	}
 
 	/***************************************************************************************/
@@ -561,7 +561,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		gpu_detail::fcn_assign_crop_2d<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), iregion, mx_o.ptr_32());
+		detail_gpu::fcn_assign_crop_2d<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), iregion, mx_o.ptr_32());
 	}
 
 	/* assign, crop and shift */
@@ -573,7 +573,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		gpu_detail::fcn_assign_crop_fftsft_2d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), iregion, mx_o.ptr_32());
+		detail_gpu::fcn_assign_crop_fftsft_2d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), iregion, mx_o.ptr_32());
 	}
 
  	/* add, scale, crop and shift */
@@ -585,7 +585,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		gpu_detail::fcn_add_sc_crop_fftsft_2d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), iregion, w, mx_o.ptr_32());
+		detail_gpu::fcn_add_sc_crop_fftsft_2d<T><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), iregion, w, mx_o.ptr_32());
 	}
 
 	/* add, scale, square, crop and shift */
@@ -598,7 +598,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		gpu_detail::fcn_add_sc_norm_2_crop_fftsft_2d<T, U><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), iregion, w, mx_o.ptr_32());
+		detail_gpu::fcn_add_sc_norm_2_crop_fftsft_2d<T, U><<<igrid.d_grid_h(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), iregion, w, mx_o.ptr_32());
 	}
 }
 
@@ -615,7 +615,7 @@ namespace mt
 		auto igrid = mx_i.igrid_2d();
 
 		Vctr_gpu<T> mx_t(mx_i.shape_2d_trs());
-		gpu_detail::fcn_trs_2d<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), mx_t.ptr_32());
+		detail_gpu::fcn_trs_2d<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), mx_t.ptr_32());
 
 		return mx_t;
 	}
@@ -631,12 +631,12 @@ namespace mt
 
 		if (&mx_i != &mx_o)
 		{
-			gpu_detail::fcn_trs_2d<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), mx_o.ptr_32());
+			detail_gpu::fcn_trs_2d<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), mx_o.ptr_32());
 		}
 		else
 		{
 			Vctr_gpu<T> mx_t(mx_i.shape_2d_trs());
-			gpu_detail::fcn_trs_2d<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), mx_t.ptr_32());
+			detail_gpu::fcn_trs_2d<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), mx_t.ptr_32());
 			mx_t.cpy_to_gpu_ptr(mx_o.m_data, mx_o.size());
 		}
 	}
@@ -652,11 +652,11 @@ namespace mt
 
 		if ((vctr.m_s0=mx_io.m_s0) && (vctr.m_s1==1))
 		{
-			gpu_detail::fcn_ew_add_mx_vctr_col<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
+			detail_gpu::fcn_ew_add_mx_vctr_col<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
 		}
 		else if ((vctr.m_s0==1) && (vctr.m_s1==mx_io.m_s1) )
 		{
-			gpu_detail::fcn_ew_add_mx_vctr_row<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
+			detail_gpu::fcn_ew_add_mx_vctr_row<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
 		}
 	}
 
@@ -671,11 +671,11 @@ namespace mt
 
 		if ((vctr.m_s0=mx_io.m_s0) && (vctr.m_s1==1))
 		{
-			gpu_detail::fcn_ew_sub_mx_vctr_col<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
+			detail_gpu::fcn_ew_sub_mx_vctr_col<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
 		}
 		else if ((vctr.m_s0==1) && (vctr.m_s1==mx_io.m_s1) )
 		{
-			gpu_detail::fcn_ew_sub_mx_vctr_row<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
+			detail_gpu::fcn_ew_sub_mx_vctr_row<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
 		}
 	}
 
@@ -690,11 +690,11 @@ namespace mt
 
 		if ((vctr.m_s0=mx_io.m_s0) && (vctr.m_s1==1))
 		{
-			gpu_detail::fcn_ew_mult_mx_vctr_col<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
+			detail_gpu::fcn_ew_mult_mx_vctr_col<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
 		}
 		else if ((vctr.m_s0==1) && (vctr.m_s1==mx_io.m_s1) )
 		{
-			gpu_detail::fcn_ew_mult_mx_vctr_row<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
+			detail_gpu::fcn_ew_mult_mx_vctr_row<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, vctr, mx_io.ptr_32());
 		}
 	}
 }
@@ -708,7 +708,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		gpu_detail::fcn_fermi_aperture<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, g2_cut, alpha, w, mx_io.ptr_32());
+		detail_gpu::fcn_fermi_aperture<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, g2_cut, alpha, w, mx_io.ptr_32());
 	}
 
 	template <class T, class TVctr>
@@ -717,7 +717,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		gpu_detail::fcn_hard_aperture<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, g2_cut, w, mx_io.ptr_32());
+		detail_gpu::fcn_hard_aperture<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, g2_cut, w, mx_io.ptr_32());
 	}
 }
 
@@ -730,7 +730,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		gpu_detail::fcn_rs_exp_factor_1d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), gx, w, psi_o.ptr_32());
+		detail_gpu::fcn_rs_exp_factor_1d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), gx, w, psi_o.ptr_32());
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -739,7 +739,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		gpu_detail::fcn_rs_exp_factor_2d_bc<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, alpha, psi_i.ptr_32(), gy.ptr_32(), w, psi_o.ptr_32());
+		detail_gpu::fcn_rs_exp_factor_2d_bc<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, alpha, psi_i.ptr_32(), gy.ptr_32(), w, psi_o.ptr_32());
 	}
 
 	template <class T, class TVctr>
@@ -748,7 +748,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		gpu_detail::fcn_rs_exp_factor_2d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), g, w, psi_o.ptr_32());
+		detail_gpu::fcn_rs_exp_factor_2d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), g, w, psi_o.ptr_32());
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -757,7 +757,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		gpu_detail::fcn_rs_mul_exp_factor_2d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), g.ptr_32(), w, psi_o.ptr_32());
+		detail_gpu::fcn_rs_mul_exp_factor_2d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), g.ptr_32(), w, psi_o.ptr_32());
 	}
 }
 
@@ -770,7 +770,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		gpu_detail::fcn_fs_exp_factor_1d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), rx, w, psi_o.ptr_32());
+		detail_gpu::fcn_fs_exp_factor_1d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), rx, w, psi_o.ptr_32());
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -779,7 +779,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		gpu_detail::fcn_fs_exp_factor_2d_bc<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, alpha, psi_i.ptr_32(), ry.ptr_32(), w, psi_o.ptr_32());
+		detail_gpu::fcn_fs_exp_factor_2d_bc<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, alpha, psi_i.ptr_32(), ry.ptr_32(), w, psi_o.ptr_32());
 	}
 
 	template <class T, class TVctr>
@@ -788,7 +788,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		gpu_detail::fcn_fs_exp_factor_2d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), r, w, psi_o.ptr_32());
+		detail_gpu::fcn_fs_exp_factor_2d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), r, w, psi_o.ptr_32());
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -797,7 +797,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		gpu_detail::fcn_fs_mul_exp_factor_2d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), r.ptr_32(), w, psi_o.ptr_32());
+		detail_gpu::fcn_fs_mul_exp_factor_2d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, psi_i.ptr_32(), r.ptr_32(), w, psi_o.ptr_32());
 	}
 }
 
@@ -812,7 +812,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		gpu_detail::fcn_grad_x<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), dmx_x.ptr_32());
+		detail_gpu::fcn_grad_x<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), dmx_x.ptr_32());
 	}
 
 	template <class TVctr>
@@ -823,7 +823,7 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		gpu_detail::fcn_grad_y<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), dmx_y.ptr_32());
+		detail_gpu::fcn_grad_y<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), dmx_y.ptr_32());
 	}
 
 	template <class TVctr>
@@ -834,11 +834,10 @@ namespace mt
 
 		auto igrid = mx_i.igrid_2d();
 
-		gpu_detail::fcn_grad<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), dmx_x.ptr_32(), dmx_y.ptr_32());
+		detail_gpu::fcn_grad<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_i.ptr_32(), dmx_x.ptr_32(), dmx_y.ptr_32());
 	}
 }
 
-/* function multiplication fourier space */
 namespace mt
 {
 	#define FCN_MULT_FS_FCN_GPU(FN, FCN, DIM)																							\
@@ -848,7 +847,7 @@ namespace mt
 	{																																	\
 		using U = Value_type<TVctr_c>;																									\
 																																		\
-		gpu_detail::fcn_mult_fs_##FN##_##DIM##d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, fcn, w, mx_io.ptr_32());					\
+		detail_gpu::fcn_mult_fs_##FN##_##DIM##d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, fcn, w, mx_io.ptr_32());					\
 	}
 
 	/* gaussian */
@@ -939,7 +938,7 @@ namespace mt
 																																				\
 		const T w = grid.isize_r();																												\
 																																				\
-		gpu_detail::fcn_dcv_fs_##FN##_##DIM##d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, fcn, psnr, w, mx_io.ptr_32());						\
+		detail_gpu::fcn_dcv_fs_##FN##_##DIM##d<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, fcn, psnr, w, mx_io.ptr_32());						\
 																																				\
 		fft.inverse(mx_io);																														\
 		fcn_fftsft_##DIM##d(mx_io, pstream);																									\
@@ -983,11 +982,11 @@ namespace mt
 																																\
 		if (sft)																												\
 		{																														\
-			gpu_detail::fcn_wd_##FN##_##DIM##d<true, T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, fcn, mx_o.ptr_32());			\
+			detail_gpu::fcn_wd_##FN##_##DIM##d<true, T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, fcn, mx_o.ptr_32());			\
 		}																														\
 		else																													\
 		{																														\
-			gpu_detail::fcn_wd_##FN##_##DIM##d<false, T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, fcn, mx_o.ptr_32());			\
+			detail_gpu::fcn_wd_##FN##_##DIM##d<false, T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, fcn, mx_o.ptr_32());			\
 		}																														\
 	}
 
@@ -1022,7 +1021,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		gpu_detail::fcn_rs_pcf_1d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
+		detail_gpu::fcn_rs_pcf_1d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1031,7 +1030,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		gpu_detail::fcn_rs_pcf_2d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
+		detail_gpu::fcn_rs_pcf_2d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
 	}
 		
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1040,7 +1039,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		gpu_detail::fcn_rs_pcf_3d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
+		detail_gpu::fcn_rs_pcf_3d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
 	}
 
 	/***************** pcf data processing fourier space *****************/
@@ -1050,7 +1049,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		gpu_detail::fcn_fs_pcf_1d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
+		detail_gpu::fcn_fs_pcf_1d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
 	}
 
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1059,7 +1058,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		gpu_detail::fcn_fs_pcf_2d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
+		detail_gpu::fcn_fs_pcf_2d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
 	}
 		
 	template <class T, class TVctr_r, class TVctr_c>
@@ -1068,7 +1067,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr_c>;
 
-		gpu_detail::fcn_fs_pcf_3d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
+		detail_gpu::fcn_fs_pcf_3d_dp<T, U><<<grid.d_grid(), grid.d_blk()>>>(grid, mx_i.ptr_32(), fcn, w, mx_o.ptr_32());
 	}
 }
 
@@ -1083,7 +1082,7 @@ namespace mt
 
 		auto igrid = mx_s.igrid_2d();
 
-		gpu_detail::fcn_opt_flow<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_s.ptr_32(), mx_m.ptr_32(), alpha, dphi_x.ptr_32(), dphi_y.ptr_32());
+		detail_gpu::fcn_opt_flow<T><<<igrid.d_grid(), igrid.d_blk()>>>(igrid, mx_s.ptr_32(), mx_m.ptr_32(), alpha, dphi_x.ptr_32(), dphi_y.ptr_32());
 	}
 }
 
@@ -1096,7 +1095,7 @@ namespace mt
 	{
 		using U = Value_type<TVctr>;
 
-		gpu_detail::fcn_intrpl_bl_rg_2d<T><<<grid.d_grid_size(), grid.d_blk_size()>>>(grid, mx_i.ptr_32(), vx.ptr_32(), vy.ptr_32(), bg, mx_o.ptr_32());
+		detail_gpu::fcn_intrpl_bl_rg_2d<T><<<grid.d_grid_size(), grid.d_blk_size()>>>(grid, mx_i.ptr_32(), vx.ptr_32(), vy.ptr_32(), bg, mx_o.ptr_32());
 	}
 }
 
@@ -1113,7 +1112,7 @@ namespace mt
 // 		d_grid_blk.grid = dim3();
 // 		d_grid_blk.blk = dim3(c_thr_2d_x, c_thr_2d_y);
 
-// 		gpu_detail::atom_cost_function<typename TVctr_r::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, atom_Ip, mx_i.ptr_32(), sum_v);
+// 		detail_gpu::atom_cost_function<typename TVctr_r::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, atom_Ip, mx_i.ptr_32(), sum_v);
 // 		return sum_v[0];
 // 	}
 
@@ -1132,7 +1131,7 @@ namespace mt
 // 			d_grid_blk.grid = dim3();
 // 			d_grid_blk.blk = dim3(c_thr_2d_x, c_thr_2d_y);
 
-// 			gpu_detail::subtract_atom<typename TVctr_r::value_type><<<d_grid_blk.grid, d_grid_blk.blk, 0, stream[istm]>>>(grid_2d, atom_Ip[istm], mx_i);
+// 			detail_gpu::subtract_atom<typename TVctr_r::value_type><<<d_grid_blk.grid, d_grid_blk.blk, 0, stream[istm]>>>(grid_2d, atom_Ip[istm], mx_i);
 // 		}
 // 	}
 
@@ -1155,22 +1154,22 @@ namespace mt
 // 				switch(atomic_pot_parm_typ)
 // 				{
 // 					case eappt_doyle_0_4:
-// 						gpu_detail::linear_Vz<eappt_doyle_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_doyle_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 					case eappt_peng_0_4:
-// 						gpu_detail::linear_Vz<eappt_peng_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_peng_0_4, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 					case eappt_peng_0_12:
-// 						gpu_detail::linear_Vz<eappt_peng_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_peng_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 					case eappt_kirkland_0_12:
-// 						gpu_detail::linear_Vz<eappt_kirkland_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_kirkland_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 					case eappt_weickenmeier_0_12:
-// 						gpu_detail::linear_Vz<eappt_weickenmeier_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_weickenmeier_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 					case eappt_lobato_0_12:
-// 						gpu_detail::linear_Vz<eappt_lobato_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_lobato_0_12, 0, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 				}
 // 			}
@@ -1179,22 +1178,22 @@ namespace mt
 // 				switch(atomic_pot_parm_typ)
 // 				{
 // 					case eappt_doyle_0_4:
-// 						gpu_detail::linear_Vz<eappt_doyle_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_doyle_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 					case eappt_peng_0_4:
-// 						gpu_detail::linear_Vz<eappt_peng_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_peng_0_4, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 					case eappt_peng_0_12:
-// 						gpu_detail::linear_Vz<eappt_peng_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_peng_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 					case eappt_kirkland_0_12:
-// 						gpu_detail::linear_Vz<eappt_kirkland_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_kirkland_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 					case eappt_weickenmeier_0_12:
-// 						gpu_detail::linear_Vz<eappt_weickenmeier_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_weickenmeier_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 					case eappt_lobato_0_12:
-// 						gpu_detail::linear_Vz<eappt_lobato_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
+// 						detail_gpu::linear_Vz<eappt_lobato_0_12, 1, TAtom><<<dim3(c_nR), dim3(c_nqz), 0, stream>>>(qz, atom);
 // 						break;
 // 				}		
 // 			}
@@ -1220,7 +1219,7 @@ namespace mt
 
 // 		for(auto istm = 0; istm < stream.n_stream_act; istm++)
 // 		{
-// 			gpu_detail::fcn_vd_2_coef_poly3<TAtom><<<dim3(1), dim3(c_nR), 0, stream[istm]>>>(vatom[istm]);
+// 			detail_gpu::fcn_vd_2_coef_poly3<TAtom><<<dim3(1), dim3(c_nR), 0, stream[istm]>>>(vatom[istm]);
 // 		}
 // 	}
 // 

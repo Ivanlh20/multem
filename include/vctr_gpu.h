@@ -20,7 +20,7 @@
 
 #include "vctr_cpu.h"
 
-/* vector forward declaration */
+/* template definition */
 namespace mt
 {
 #ifndef VCTR_DEC

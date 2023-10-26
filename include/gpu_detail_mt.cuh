@@ -30,8 +30,8 @@
 	#include "cgpu_stream.cuh"
 	#include "cgpu_fft.cuh"
 	#include "quad_data.cuh"
-	#include "cgpu_detail_mt.cuh"
-	#include "gpu_detail.cuh"
+	#include "detail_cgpu_mt.cuh"
+	#include "detail_gpu.h"
 
 	#include <cuda.h>
 	#include <cuda_runtime.h>
@@ -43,7 +43,7 @@
 	namespace mt
 	{
 		/* atomic functions */
-		namespace gpu_detail_mt
+		namespace detail_gpu_mt
 		{
 			/************************** pFcn_clnl_3_x<T> ****************************/
 			// evaluate function
@@ -128,17 +128,17 @@
 					fcn(x[ix], z_0, z_e, coef.cl, coef.cnl, quad.m_size, quad.x, quad.w, fx1[ix], fx2[ix]);
 				}
 			}
-		} // gpu_detail
+		} // detail_gpu
 
 		/* detector integration */
-		namespace gpu_detail_mt
+		namespace detail_gpu_mt
 		{
 			/* integration over a detector ring */
 			template <class T, class U>
 			__global__ void fcn_int_det_ring(Grid_2d<T> grid, T g2_min, T g2_max, pVctr_gpu_32<U> mx_i, pVctr_gpu_32<U> mx_o)
 			{ 
 				gpu_cg::thread_block cta = gpu_cg::this_thread_block();
-				U *sdata = gpu_detail::SharedMemory<U>();
+				U *sdata = detail_gpu::SharedMemory<U>();
 
 				dt_uint32 tid = threadIdx.x + threadIdx.y*blockDim.x;
 				dt_uint32 bid = blockIdx.x + blockIdx.y*gridDim.x;
@@ -146,7 +146,7 @@
 
 				KS<U> sum = U(0);
 
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_int_det_ring(ix, iy, grid, g2_min, g2_max, mx_i.m_data, sum));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_int_det_ring(ix, iy, grid, g2_min, g2_max, mx_i.m_data, sum));
 
 				GPU_BLK_REDUCE(sum, tid, sdata, bid, mx_o);
 			}
@@ -157,7 +157,7 @@
 			{ 
 				using U_r = Value_type_r<U>;
 				gpu_cg::thread_block cta = gpu_cg::this_thread_block();
-				U_r *sdata = gpu_detail::SharedMemory<U_r>();
+				U_r *sdata = detail_gpu::SharedMemory<U_r>();
 
 				dt_uint32 tid = threadIdx.x + threadIdx.y*blockDim.x;
 				dt_uint32 bid = blockIdx.x + blockIdx.y*gridDim.x;
@@ -165,7 +165,7 @@
 
 				KS<U_r> sum = U_r(0);
 
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_int_det_ring_norm_2(ix, iy, grid, g2_min, g2_max, mx_i.m_data, sum));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_int_det_ring_norm_2(ix, iy, grid, g2_min, g2_max, mx_i.m_data, sum));
 
 				GPU_BLK_REDUCE(sum, tid, sdata, bid, mx_o);
 			}
@@ -175,7 +175,7 @@
 			__global__ void fcn_int_det_sen(Grid_2d<T> grid, pVctr_gpu_32<U> sen_i, pVctr_gpu_32<U> mx_i, pVctr_gpu_32<U> mx_o)
 			{ 
 				gpu_cg::thread_block cta = gpu_cg::this_thread_block();
-				U *sdata = gpu_detail::SharedMemory<U>();
+				U *sdata = detail_gpu::SharedMemory<U>();
 
 				dt_uint32 tid = threadIdx.x + threadIdx.y*blockDim.x;
 				dt_uint32 bid = blockIdx.x + blockIdx.y*gridDim.x;
@@ -183,7 +183,7 @@
 
 				KS<U> sum = U(0);
 
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_int_det_sen(ix, iy, grid, sen_i.m_data, mx_i.m_data, sum));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_int_det_sen(ix, iy, grid, sen_i.m_data, mx_i.m_data, sum));
 
 				GPU_BLK_REDUCE(sum, tid, sdata, bid, mx_o);
 			}
@@ -194,7 +194,7 @@
 			{ 
 				using U_r = Value_type_r<U>;
 				gpu_cg::thread_block cta = gpu_cg::this_thread_block();
-				U_r *sdata = gpu_detail::SharedMemory<U_r>();
+				U_r *sdata = detail_gpu::SharedMemory<U_r>();
 
 				dt_uint32 tid = threadIdx.x + threadIdx.y*blockDim.x;
 				dt_uint32 bid = blockIdx.x + blockIdx.y*gridDim.x;
@@ -202,52 +202,52 @@
 
 				KS<U_r> sum = U_r(0);
 
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_int_det_sen_norm_2(ix, iy, grid, sen_i.m_data, mx_i.m_data, sum));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_int_det_sen_norm_2(ix, iy, grid, sen_i.m_data, mx_i.m_data, sum));
 
 				GPU_BLK_REDUCE(sum, tid, sdata, bid, mx_o);
 			}
 		}
 
 		/* wave propagation */
-		namespace gpu_detail_mt
+		namespace detail_gpu_mt
 		{
 			/* propagate */
 			template <class T, class U>
 			__global__ void fcn_fs_propagate(Grid_2d<T> grid, pVctr_gpu_32<U> psi_i, R_2d<T> g_0, T w_g2, T w, pVctr_gpu_32<U> psi_o)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_fs_propagate(ix, iy, grid, psi_i.m_data, g_0, w_g2, w, psi_o.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_fs_propagate(ix, iy, grid, psi_i.m_data, g_0, w_g2, w, psi_o.m_data));
 			}
 
 			/* propagate and bandwith limit using a fermi aperture */
 			template <class T, class U>
 			__global__ void fcn_fs_propagate_bw_f(Grid_2d<T> grid, pVctr_gpu_32<U> psi_i, R_2d<T> g_0, T w_g2, T g2_cut, T alpha, T w, pVctr_gpu_32<U> psi_o)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_fs_propagate_bw_f(ix, iy, grid, psi_i.m_data, g_0, w_g2, g2_cut, alpha, w, psi_o.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_fs_propagate_bw_f(ix, iy, grid, psi_i.m_data, g_0, w_g2, g2_cut, alpha, w, psi_o.m_data));
 			}
 
 			/* propagate and bandwith limit using a hard aperture */
 			template <class T, class U>
 			__global__ void fcn_fs_propagate_bw_h(Grid_2d<T> grid, pVctr_gpu_32<U> psi_i, R_2d<T> g_0, T w_g2, T g2_cut, T w, pVctr_gpu_32<U> psi_o)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_fs_propagate_bw_h(ix, iy, grid, psi_i.m_data, g_0, w_g2, g2_cut, w, psi_o.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_fs_propagate_bw_h(ix, iy, grid, psi_i.m_data, g_0, w_g2, g2_cut, w, psi_o.m_data));
 			}
 		}
 
 		/* probe - ctf - pctf */
-		namespace gpu_detail_mt
+		namespace detail_gpu_mt
 		{
 			/* Convergent incident wave in Fourier space */
 			template <dt_bool bb_phi, class T, class U>
 			__global__ void fcn_fs_probe(Grid_2d<T> grid, Lens<T> lens, R_2d<T> r, R_2d<T> gu, pVctr_gpu_32<U> psi_o)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_fs_probe<bb_phi>(ix, iy, grid, lens, r, gu, psi_o.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_fs_probe<bb_phi>(ix, iy, grid, lens, r, gu, psi_o.m_data));
 			}
 
 			/* apply coherent transfer function */
 			template <dt_bool bb_phi, class T, class U>
 			__global__ void fcn_fs_apply_ctf(Grid_2d<T> grid, pVctr_gpu_32<U> psi_i, Lens<T> lens, R_2d<T> gu, pVctr_gpu_32<U> psi_o)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_fs_apply_ctf<bb_phi>(ix, iy, grid, psi_i.m_data, lens, gu, psi_o.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_fs_apply_ctf<bb_phi>(ix, iy, grid, psi_i.m_data, lens, gu, psi_o.m_data));
 			}
 
 			/* apply partial coherent transfer function */
@@ -256,28 +256,28 @@
 			template <dt_bool bb_phi, class T, class U>
 			__global__ void fcn_fs_apply_pctf(iGrid_2d grid, pVctr_gpu_32<U> psi_i, Lens<T> lens, pVctr_gpu_32<U> psi_o)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_fs_apply_pctf<bb_phi>(ix, iy, grid, psi_i.m_data, lens, psi_o.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_fs_apply_pctf<bb_phi>(ix, iy, grid, psi_i.m_data, lens, psi_o.m_data));
 			}
 		}
 
 		/* transmission function */
-		namespace gpu_detail_mt
+		namespace detail_gpu_mt
 		{
 			template <eElec_Spec_Interact_Mod esim, class T, class U>
 			__global__ void fcn_trans_fcn(iGrid_1d igrid, pVctr_gpu_32<T> vzp_i, const T& w, pVctr_gpu_32<U> tfcn_o)
 			{
-				FOR_LOOP_1DC(igrid.nx, cgpu_detail_mt::fcn_trans_fcn<esim>(ix, igrid, vzp_i.m_data, w, tfcn_o.m_data));
+				FOR_LOOP_1DC(igrid.nx, detail_cgpu_mt::fcn_trans_fcn<esim>(ix, igrid, vzp_i.m_data, w, tfcn_o.m_data));
 			}
 		}
 
 		/* eels */
-		namespace gpu_detail_mt
+		namespace detail_gpu_mt
 		{
 			template <class T>
 			__global__ void fcn_eels_lorentz_norm_factor(Grid_2d<T> grid, T gc2, T ge2, pVctr_gpu_32<T> mx_o)
 			{ 
 				gpu_cg::thread_block cta = gpu_cg::this_thread_block();
-				T *sdata = gpu_detail::SharedMemory<T>();
+				T *sdata = detail_gpu::SharedMemory<T>();
 
 				dt_uint32 tid = threadIdx.x + threadIdx.y*blockDim.x;
 				dt_uint32 bid = blockIdx.x + blockIdx.y*gridDim.x;
@@ -285,7 +285,7 @@
 
 				KS<T> sum = T(0);
 
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_lorentz_norm_factor(ix, iy, grid, gc2, ge2, sum));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_lorentz_norm_factor(ix, iy, grid, gc2, ge2, sum));
 
 				GPU_BLK_REDUCE(sum, tid, sdata, bid, mx_o);
 			}
@@ -294,37 +294,37 @@
 			__global__ void fcn_eels_w_xyz(Grid_2d<T> grid, EELS<T> eels, 
 				pVctr_gpu_32<U> w_x, pVctr_gpu_32<U> w_y, pVctr_gpu_32<U> w_z)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_xyz(ix, iy, grid, eels, w_x.m_data, w_y.m_data, w_z.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_xyz(ix, iy, grid, eels, w_x.m_data, w_y.m_data, w_z.m_data));
 			}
 
 			template <class T, class U>
 			__global__ void fcn_eels_w_x(Grid_2d<T> grid, EELS<T> eels, pVctr_gpu_32<U> w_x)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_x(ix, iy, grid, eels, w_x.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_x(ix, iy, grid, eels, w_x.m_data));
 			}
 
 			template <class T, class U>
 			__global__ void fcn_eels_w_y(Grid_2d<T> grid, EELS<T> eels, pVctr_gpu_32<U> w_y)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_y(ix, iy, grid, eels, w_y.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_y(ix, iy, grid, eels, w_y.m_data));
 			}
 
 			template <class T, class U>
 			__global__ void fcn_eels_w_z(Grid_2d<T> grid, EELS<T> eels, pVctr_gpu_32<U> w_z)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_z(ix, iy, grid, eels, w_z.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_z(ix, iy, grid, eels, w_z.m_data));
 			}
 
 			template <class T, class U>
 			__global__ void fcn_eels_w_mn1(Grid_2d<T> grid, EELS<T> eels, pVctr_gpu_32<U> w_mn1)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_mn1(ix, iy, grid, eels, w_mn1.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_mn1(ix, iy, grid, eels, w_mn1.m_data));
 			}
 
 			template <class T, class U>
 			__global__ void fcn_eels_w_mp1(Grid_2d<T> grid, EELS<T> eels, pVctr_gpu_32<U> w_mp1)
 			{
-				FOR_LOOP_2DC(grid.nx, grid.ny, cgpu_detail_mt::fcn_eels_w_mp1(ix, iy, grid, eels, w_mp1.m_data));
+				FOR_LOOP_2DC(grid.nx, grid.ny, detail_cgpu_mt::fcn_eels_w_mp1(ix, iy, grid, eels, w_mp1.m_data));
 			}
 		}
 	}

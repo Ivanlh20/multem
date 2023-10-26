@@ -26,22 +26,15 @@
 /* template definition */
 namespace mt
 {
-	template <class T, eDev Dev> class pQuad_Coef_2d;
-
+#ifndef QUAD_COEF_2D
+	#define QUAD_COEF_2D
 	template <class T, eDev Dev> class Quad_Coef_2d;
+	
+	template <class T, eDev Dev> class pQuad_Coef_2d;
+#endif
 }
 
-/* derived class pQuad_Coef_1d */
-namespace mt
-{
-	template <class T>
-	using pQuad_Coef_2d_cpu = pQuad_Coef_2d<T, edev_cpu>;
-
-	template <class T>
-	using pQuad_Coef_2d_gpu = pQuad_Coef_2d<T, edev_gpu>;
-}
-
-/* derived class Quad_Coef_1d */
+/* class two dimensional quadrature coefficients */
 namespace mt
 {
 	template <class T>
@@ -51,50 +44,6 @@ namespace mt
 	using Quad_Coef_2d_gpu = Quad_Coef_2d<T, edev_gpu>;
 }
 
-/* class pQuad_Coef_2d */
-namespace mt
-{
-	template <class T, eDev Dev>
-	class pQuad_Coef_2d
-	{
-	public:
-		using value_type = T;
-		using size_type = dt_int32;
-		static const eDev device = Dev;
-
-		T* __restrict__ x;
-		T* __restrict__ y;
-		T* __restrict__ w;
-		size_type m_size;
-
-		/************************************* constructors ************************************/
-		CGPU_EXEC
-		pQuad_Coef_2d();
-
-		CGPU_EXEC
-		pQuad_Coef_2d(T* x, T* y, T* w, const size_type& size);
-
-		/* copy constructor */
-		CGPU_EXEC
-		pQuad_Coef_2d(const pQuad_Coef_2d<T, Dev>& pcoef_quad_2d);
-
-		/* constructor from Quad_Coef_2d */
-		explicit pQuad_Coef_2d(const Quad_Coef_2d<T, Dev>& coef_quad_2d);
-
-		/******************************** assignment operators *********************************/
-		/* copy assignment operator */
-		CGPU_EXEC
-		pQuad_Coef_2d<T, Dev>& operator=(const pQuad_Coef_2d<T, Dev>& pcoef_quad_2d);
-
-		/* Assignment operator: Quad_Coef_2d -> pQuad_Coef_2d */
-		CPU_EXEC
-		pQuad_Coef_2d<T, Dev>& operator=(Quad_Coef_2d<T, Dev>& coef_quad_2d);
-
-		size_type size() const;
-	};
-}
-
-/* class Quad_Coef_2d */
 namespace mt
 {
 	template <class T, eDev Dev>
@@ -157,6 +106,58 @@ namespace mt
 		void resize(const size_type& new_size, const T& value);
 
 		void shrink_to_fit();
+	};
+}
+
+/* pointer class two dimensional quadrature coefficients */
+namespace mt
+{
+	template <class T>
+	using pQuad_Coef_2d_cpu = pQuad_Coef_2d<T, edev_cpu>;
+
+	template <class T>
+	using pQuad_Coef_2d_gpu = pQuad_Coef_2d<T, edev_gpu>;
+}
+
+namespace mt
+{
+	template <class T, eDev Dev>
+	class pQuad_Coef_2d
+	{
+	public:
+		using value_type = T;
+		using size_type = dt_int32;
+		static const eDev device = Dev;
+
+		T* __restrict__ x;
+		T* __restrict__ y;
+		T* __restrict__ w;
+		size_type m_size;
+
+		/************************************* constructors ************************************/
+		CGPU_EXEC
+		pQuad_Coef_2d();
+
+		CGPU_EXEC
+		pQuad_Coef_2d(T* x, T* y, T* w, const size_type& size);
+
+		/* copy constructor */
+		CGPU_EXEC
+		pQuad_Coef_2d(const pQuad_Coef_2d<T, Dev>& pcoef_quad_2d);
+
+		/* constructor from Quad_Coef_2d */
+		explicit pQuad_Coef_2d(const Quad_Coef_2d<T, Dev>& coef_quad_2d);
+
+		/******************************** assignment operators *********************************/
+		/* copy assignment operator */
+		CGPU_EXEC
+		pQuad_Coef_2d<T, Dev>& operator=(const pQuad_Coef_2d<T, Dev>& pcoef_quad_2d);
+
+		/* Assignment operator: Quad_Coef_2d -> pQuad_Coef_2d */
+		CPU_EXEC
+		pQuad_Coef_2d<T, Dev>& operator=(Quad_Coef_2d<T, Dev>& coef_quad_2d);
+
+		size_type size() const;
 	};
 }
 
