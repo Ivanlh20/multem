@@ -14,15 +14,16 @@
 *Copy*.cuh
 *Copy*.hpp
 *Copy*.cpp
+*tmp.m
 MULTEM_binary
 MULTEM_binary.rar
 MULTEM_binary.zip
 compile_mex_general.m
 mex_examples_general
 mex_files_general
-visual_studio_multem
 src_temporal
 mex_test
+.vs
 bugs
 design
 build-multem-Desktop_Qt_5_9_0_MSVC2015_64bit-Debug
