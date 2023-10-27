@@ -22,27 +22,31 @@
 #include "types.cuh"
 #include "type_traits_gen.h"
 #include "cgpu_stream.cuh"
-
 #include "cgpu_classes.cuh"
 
 #include <mex.h>
 #include "matlab_mex.h"
 
-using mt::pMLD;
-
 template <class T, mt::eDev Dev>
-void run_opt_flow(mt::System_Config &system_config, pMLD &rM_s, 
-pMLD &rM_m, T alpha, T sigma, dt_int32 n_iter, pMLD &rv_x, pMLD &rv_y)
+void mex_run(mt::System_Config& system_config, dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[]) 
 {
-	mt::Grid_2d<T> grid_2d(rM_s.cols, rM_s.rows);
+	auto pmx_s = mex_get_pvctr<pMLD>(prhs[system_config.idx_0+0]);
+	auto pmx_m = mex_get_pvctr<pMLD>(prhs[system_config.idx_0+1]);
+	auto alpha = (nrhs>system_config.idx_0+2)?mex_get_num<T>(prhs[system_config.idx_0+2]):T(0.5);
+	auto sigma = (nrhs>system_config.idx_0+3)?mex_get_num<T>(prhs[system_config.idx_0+3]):T(2.0);
+	auto n_iter = (nrhs>system_config.idx_0+4)?mex_get_num<dt_int32>(prhs[system_config.idx_0+4]):1;
+	auto prx_i = (nrhs>system_config.idx_0+5)?mex_get_pvctr<T>(prhs[system_config.idx_0+5]):pMLD();
+	auto pry_i = (nrhs>system_config.idx_0+6)?mex_get_pvctr<T>(prhs[system_config.idx_0+6]):pMLD();
+
+	/***************************************************************************************/
+	mt::Grid_2d<T> grid_2d(pmx_s.s1(), pmx_s.s0());
 	mt::Stream<Dev> stream(system_config.n_stream);
 	mt::FFT<T, Dev> fft_2d;
 
-	mt::Vctr<T, Dev> M_s(rM_s.begin(), rM_s.end());
-	mt::Vctr<T, Dev> M_m(rM_m.begin(), rM_m.end());
-
-	mt::Vctr<T, Dev> v_x(rv_x.begin(), rv_x.end());
-	mt::Vctr<T, Dev> v_y(rv_y.begin(), rv_y.end());
+	mt::Vctr<T, Dev> mx_s(pmx_s);
+	mt::Vctr<T, Dev> mx_m(pmx_m);
+	mt::Vctr<T, Dev> rx(prx_i);
+	mt::Vctr<T, Dev> ry(pry_i);
 
 	mt::Opt_Flow<T, Dev> fcn_opt_flow(&stream, &fft_2d, grid_2d);
 
@@ -51,85 +55,14 @@ pMLD &rM_m, T alpha, T sigma, dt_int32 n_iter, pMLD &rv_x, pMLD &rv_y)
 		fcn_opt_flow.set_fft_plan();
 	}
 
-	fcn_opt_flow(M_s, M_m, alpha, sigma, n_iter, v_x, v_y);
+	fcn_opt_flow(mx_s, mx_m, alpha, sigma, n_iter, rx, ry);
 	fcn_opt_flow.cleanup();
 
-	thrust::copy(v_x.begin(), v_x.end(), rv_x.begin());
-	thrust::copy(v_y.begin(), v_y.end(), rv_y.begin());
-}
-
-template <class T, mt::eDev Dev>
-void mex_run(mt::System_Config& system_config, dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[]) 
-{
-	auto rM_s = mex_get_pvctr<pMLD>(prhs[system_config.idx_0+0]);
-	auto rM_m = mex_get_pvctr<pMLD>(prhs[system_config.idx_0+1]);
-	auto alpha = (nrhs>system_config.idx_0+2)?mex_get_num<dt_float64>(prhs[system_config.idx_0+2]):T(0.5);
-	auto sigma = (nrhs>system_config.idx_0+3)?mex_get_num<dt_float64>(prhs[system_config.idx_0+3]):T(2.0);
-	auto n_iter = (nrhs>system_config.idx_0+4)?mex_get_num<dt_int32>(prhs[system_config.idx_0+4]):1;
-	auto rv_xi = (nrhs>system_config.idx_0+5)?mex_get_pvctr<pMLD>(prhs[system_config.idx_0+5]):pMLD();
-	auto rv_yi = (nrhs>system_config.idx_0+6)?mex_get_pvctr<pMLD>(prhs[system_config.idx_0+6]):pMLD();
-
-	/***************************************************************************************/
-	auto rv_x = mex_create_pVctr<pMLD>(rM_s.rows, rM_s.cols, plhs[0]);
-	rv_x.assign(rv_xi.begin(), rv_xi.end());
-
-	auto rv_y = mex_create_pVctr<pMLD>(rM_s.rows, rM_s.cols, plhs[1]);
-	rv_y.assign(rv_yi.begin(), rv_yi.end());
-
-	if (system_config.is_float32_cpu())
-	{
-		run_opt_flow<dt_float32, mt::edev_cpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
-	}
-	else if (system_config.is_float64_cpu())
-	{
-		run_opt_flow<dt_float64, mt::edev_cpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
-	}
-	else if (system_config.is_float32_gpu())
-	{
-		run_opt_flow<dt_float32, mt::edev_gpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
-	}
-	else if (system_config.is_float64_gpu())
-	{
-		run_opt_flow<dt_float64, mt::edev_gpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
-	}
+	mex_create_set_pVctr<T>(plhs[0], rx.ptr_64());
+	mex_create_set_pVctr<T>(plhs[1], ry.ptr_64());
 }
 
 void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[]) 
 {
-	auto system_config = mex_read_system_config(prhs[0]);
-	system_config.set_gpu();
-
-	dt_int32 system_config.idx_0 = (system_config.active)?1:0;
-
-	auto rM_s = mex_get_pvctr<pMLD>(prhs[system_config.idx_0+0]);
-	auto rM_m = mex_get_pvctr<pMLD>(prhs[system_config.idx_0+1]);
-	auto alpha = (nrhs>system_config.idx_0+2)?mex_get_num<dt_float64>(prhs[system_config.idx_0+2]):1.0;
-	auto sigma = (nrhs>system_config.idx_0+3)?mex_get_num<dt_float64>(prhs[system_config.idx_0+3]):0.0;
-	auto n_iter = (nrhs>system_config.idx_0+4)?mex_get_num<dt_int32>(prhs[system_config.idx_0+4]):1;
-	auto rv_xi = (nrhs>system_config.idx_0+5)?mex_get_pvctr<pMLD>(prhs[system_config.idx_0+5]):pMLD();
-	auto rv_yi = (nrhs>system_config.idx_0+6)?mex_get_pvctr<pMLD>(prhs[system_config.idx_0+6]):pMLD();
-
-	/***************************************************************************************/
-	auto rv_x = mex_create_pVctr<pMLD>(rM_s.rows, rM_s.cols, plhs[0]);
-	rv_x.assign(rv_xi.begin(), rv_xi.end());
-
-	auto rv_y = mex_create_pVctr<pMLD>(rM_s.rows, rM_s.cols, plhs[1]);
-	rv_y.assign(rv_yi.begin(), rv_yi.end());
-
-	if (system_config.is_float32_cpu())
-	{
-		run_opt_flow<dt_float32, mt::edev_cpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
-	}
-	else if (system_config.is_float64_cpu())
-	{
-		run_opt_flow<dt_float64, mt::edev_cpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
-	}
-	else if (system_config.is_float32_gpu())
-	{
-		run_opt_flow<dt_float32, mt::edev_gpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
-	}
-	else if (system_config.is_float64_gpu())
-	{
-		run_opt_flow<dt_float64, mt::edev_gpu>(system_config, rM_s, rM_m, alpha, sigma, n_iter, rv_x, rv_y);
-	}
+	MEX_RUN_FCN_FLOAT_SYS_CONF(mex_run, 0);
 }

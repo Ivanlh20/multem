@@ -34,7 +34,7 @@ void mex_run(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[
 	auto n_p = mex_get_num<dt_int32>(prhs[4]);
 
 	/*******************************************************************/
-	mt::Grid_2d<float> grid_2d(bs.x, bs.y, mx_i.s1_32(), mx_i.s0_32());
+	mt::Grid_2d<T> grid_2d(bs.x, bs.y, mx_i.s1_32(), mx_i.s0_32());
 
 	auto profile = mt::intrpl_prof(grid_2d, mx_i, p_1, p_2, n_p);
 

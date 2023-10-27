@@ -1990,7 +1990,7 @@ namespace mt
 {
 	template <class T, class TVctr>
 	enable_if_vctr_cpu<TVctr, TVctr>
-	intrpl_prof(Grid_2d<T>& grid_2d, TVctr& Im, const R_2d<Value_type<TVctr>>& p1, const R_2d<Value_type<TVctr>>& p2, dt_int32 nr)
+	intrpl_prof(Grid_2d<T>& grid_2d, TVctr& im, const R_2d<Value_type<TVctr>>& p1, const R_2d<Value_type<TVctr>>& p2, dt_int32 nr)
 	{
 		TVctr v;
 
@@ -2004,15 +2004,15 @@ namespace mt
 			return v;
 		}
 
-		auto fcn_intrpl_bl_rg_2d = [](const R_2d<T>& p, Grid_2d<T>& grid_2d, TVctr& Im)->T
+		auto fcn_intrpl_bl_rg_2d = [](const R_2d<T>& p, Grid_2d<T>& grid_2d, TVctr& im)->T
 		{
 			auto ix = grid_2d.rx_2_irx_bfds(p.x);
 			auto iy = grid_2d.ry_2_iry_bfds(p.y);
 
-			T f11 = Im[grid_2d.sub_2_ind(ix, iy)];
-			T f12 = Im[grid_2d.sub_2_ind(ix, iy + 1)];
-			T f21 = Im[grid_2d.sub_2_ind(ix + 1, iy)];
-			T f22 = Im[grid_2d.sub_2_ind(ix + 1, iy + 1)];
+			T f11 = im[grid_2d.sub_2_ind(ix, iy)];
+			T f12 = im[grid_2d.sub_2_ind(ix, iy + 1)];
+			T f21 = im[grid_2d.sub_2_ind(ix + 1, iy)];
+			T f22 = im[grid_2d.sub_2_ind(ix + 1, iy + 1)];
 
 			T x1 = grid_2d.rx(ix);
 			T x2 = grid_2d.rx(ix + 1);
@@ -2034,14 +2034,14 @@ namespace mt
 
 		nr = (nr <= 0)?static_cast<dt_int32>(::ceil(mp12/grid_2d.dr_min())):nr;
 		nr = max(nr, 2);
-		T dr = mp12/(nr - 1);
+		T dr = mp12/T(nr - 1);
 		R_2d<T> u = dr*normalize(p12);
 
 		v.reserve(nr);
 		for(auto ir = 0; ir < nr; ir++)
 		{
 			R_2d<T> p = p1 + T(ir)*u;
-			v.push_back(fcn_intrpl_bl_rg_2d(p, grid_2d, Im));
+			v.push_back(fcn_intrpl_bl_rg_2d(p, grid_2d, im));
 		}
 		return v;
 	}
