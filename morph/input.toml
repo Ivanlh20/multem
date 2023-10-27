@@ -1,0 +1,14 @@
+[Parameters]
+nkr = 10
+floatValue = 5.2
+operation = "tophat"
+complex = 100+200j
+
+[Input]
+file = "input.h5"
+dataset = "image"
+
+[Output]
+file = "output.h5"
+dataset = "image"
+
