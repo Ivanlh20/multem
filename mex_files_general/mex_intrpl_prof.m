@@ -2,4 +2,4 @@
 clc; clear;
 addpath(['..', filesep, 'matlab_functions'])
 
-ilm_mex('release', 'ilc_intrpl_profile.cpp', '../src');
+ilm_mex('release', 'ilc_intrpl_prof.cpp', '../src');

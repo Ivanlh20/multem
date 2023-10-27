@@ -385,7 +385,7 @@
 			{
 				const T R_max = radius;
 				const T R2_max = pow(R_max, 2);
-				const T Rl2_max = pow(2.5*grid_2d.dR_min(), 2);
+				const T Rl2_max = pow(2.5*grid_2d.dr_min(), 2);
 
 				auto range = grid_2d.region_ind(p, R_max);
 

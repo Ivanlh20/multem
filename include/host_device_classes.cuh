@@ -2277,7 +2277,7 @@ namespace mt
 			Border_2d<T> bd, int nit_pcf)
 			{
 				T sigma_r = 1.0/(c_2Pi*sigma_g);
-				T radius = ::fmax(3*this->grid_2d.dR_min(), 0.9*sigma_r);
+				T radius = ::fmax(3*this->grid_2d.dr_min(), 0.9*sigma_r);
 
 				TVector_r M = M_s;
 				TVector_r pcf(M.size());
@@ -2458,7 +2458,7 @@ namespace mt
 
 				// fitting
 				T sigma_r = 1.0/(c_2Pi*sigma_g);
-				T radius = ::fmax(3*this->grid_2d.dR_min(), 1.5*sigma_r);
+				T radius = ::fmax(3*this->grid_2d.dr_min(), 1.5*sigma_r);
 				Vector<T, e_host> pcf_h = pcf;
 				coef = fit_ellipt_gauss_2d(this->grid_2d, pcf_h, r_c, sigma_r, radius);
 				coef[0] = ds.x + this->grid_2d.lxh();

@@ -1458,34 +1458,6 @@ namespace mt
 	}
 }
 
-/* optical flow */
-namespace mt
-{
-	template <class T, class TVctr>
-	enable_if_vctr_cpu<TVctr, void>
-	fcn_opt_flow(TVctr& mx_s, TVctr& mx_m, T alpha, TVctr& dphi_x, TVctr& dphi_y, Stream_cpu* pstream = nullptr)
-	{
-		using U = Value_type<TVctr>;
-
-		auto igrid = mx_s.igrid_2d();
-
-		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_opt_flow<U>, igrid, mx_s.m_data, mx_m.m_data, alpha, dphi_x.m_data, dphi_y.m_data);
-	}
-}
-
-/* bilinear interpolation */
-namespace mt
-{
-	template <class T, class TVctr>
-	enable_if_vctr_cpu<TVctr, void>
-	fcn_intrpl_bl_rg_2d(Grid_2d<T>& grid, TVctr& mx_i, TVctr& rx, TVctr& ry, T bg, TVctr& mx_o, Stream_cpu* pstream = nullptr)
-	{
-		using U = Value_type<TVctr>;
-
-		fcn_stream_exec_xd_krn<edim_1>(pstream, mx_o.size(), detail_cgpu::fcn_intrpl_bl_rg_2d<U>, grid, mx_i.m_data, rx.m_data, ry.m_data, bg, mx_o.m_data);
-	}
-}
-
 /* histogram */
 namespace mt
 {
@@ -1914,7 +1886,7 @@ namespace mt
 	}
 }
 
-/* unique / match vector */
+/* unique match vector */
 namespace mt
 {
 	template <class TVctr>
@@ -1982,6 +1954,96 @@ namespace mt
 		}
 		vs = A_d;
 		vs.shrink_to_fit();
+	}
+}
+
+/* optical flow */
+namespace mt
+{
+	template <class T, class TVctr>
+	enable_if_vctr_cpu<TVctr, void>
+	fcn_opt_flow(TVctr& mx_s, TVctr& mx_m, T alpha, TVctr& dphi_x, TVctr& dphi_y, Stream_cpu* pstream = nullptr)
+	{
+		using U = Value_type<TVctr>;
+
+		auto igrid = mx_s.igrid_2d();
+
+		fcn_stream_exec_xd_krn<edim_2>(pstream, igrid.nx, igrid.ny, detail_cgpu::fcn_opt_flow<U>, igrid, mx_s.m_data, mx_m.m_data, alpha, dphi_x.m_data, dphi_y.m_data);
+	}
+}
+
+/* bilinear interpolation */
+namespace mt
+{
+	template <class T, class TVctr>
+	enable_if_vctr_cpu<TVctr, void>
+	fcn_intrpl_bl_rg_2d(Grid_2d<T>& grid, TVctr& mx_i, TVctr& rx, TVctr& ry, T bg, TVctr& mx_o, Stream_cpu* pstream = nullptr)
+	{
+		using U = Value_type<TVctr>;
+
+		fcn_stream_exec_xd_krn<edim_1>(pstream, mx_o.size(), detail_cgpu::fcn_intrpl_bl_rg_2d<U>, grid, mx_i.m_data, rx.m_data, ry.m_data, bg, mx_o.m_data);
+	}
+}
+
+/* bilinear profile interpolation */
+namespace mt
+{
+	template <class T, class TVctr>
+	enable_if_vctr_cpu<TVctr, TVctr>
+	intrpl_prof(Grid_2d<T>& grid_2d, TVctr& Im, const R_2d<Value_type<TVctr>>& p1, const R_2d<Value_type<TVctr>>& p2, dt_int32 nr)
+	{
+		TVctr v;
+
+		if (!(grid_2d.chk_bound_eps(p1) && grid_2d.chk_bound_eps(p2)))
+		{
+			return v;
+		}
+
+		if (norm(p1 - p2) < grid_2d.dr_min())
+		{
+			return v;
+		}
+
+		auto fcn_intrpl_bl_rg_2d = [](const R_2d<T>& p, Grid_2d<T>& grid_2d, TVctr& Im)->T
+		{
+			auto ix = grid_2d.rx_2_irx_bfds(p.x);
+			auto iy = grid_2d.ry_2_iry_bfds(p.y);
+
+			T f11 = Im[grid_2d.sub_2_ind(ix, iy)];
+			T f12 = Im[grid_2d.sub_2_ind(ix, iy + 1)];
+			T f21 = Im[grid_2d.sub_2_ind(ix + 1, iy)];
+			T f22 = Im[grid_2d.sub_2_ind(ix + 1, iy + 1)];
+
+			T x1 = grid_2d.rx(ix);
+			T x2 = grid_2d.rx(ix + 1);
+			T y1 = grid_2d.ry(iy);
+			T y2 = grid_2d.ry(iy + 1);
+
+			T dx1 = p.x - x1;
+			T dx2 = x2 - p.x;
+			T dy1 = p.y - y1;
+			T dy2 = y2 - p.y;
+
+			T f = (dx2*(f11*dy2 + f12*dy1) + dx1*(f21*dy2 + f22*dy1))/((x2 - x1)*(y2 - y1));
+			return f;
+
+		};
+
+		R_2d<T> p12 = p2 - p1;
+		T mp12 = p12.norm();
+
+		nr = (nr <= 0)?static_cast<dt_int32>(::ceil(mp12/grid_2d.dr_min())):nr;
+		nr = max(nr, 2);
+		T dr = mp12/(nr - 1);
+		R_2d<T> u = dr*normalize(p12);
+
+		v.reserve(nr);
+		for(auto ir = 0; ir < nr; ir++)
+		{
+			R_2d<T> p = p1 + T(ir)*u;
+			v.push_back(fcn_intrpl_bl_rg_2d(p, grid_2d, Im));
+		}
+		return v;
 	}
 }
 
@@ -2466,172 +2528,6 @@ namespace mt
 	// 	I_mean /= Ic;
 	// 	return I_mean;
 	// }
-
-	// /***************************************************************************************/
-	// template <class TGrid, class TVctr>
-	// TVctr intrplprofile(TGrid& grid_2d, TVctr& Im, const R_2d<Value_type<TVctr>>& p1, const R_2d<Value_type<TVctr>>& p2, dt_int32 nr)
-	// {
-	// 	TVctr v;
-
-	// 	if (!(grid_2d.chk_bound_eps(p1) && grid_2d.chk_bound_eps(p2)))
-	// 	{
-	// 		return v;
-	// 	}
-
-	// 	if (norm(p1 - p2) < grid_2d.dR_min())
-	// 	{
-	// 		return v;
-	// 	}
-
-	// 	using T = Value_type<TGrid>;
-
-	// 	auto fcn_intrpl_bl_rg_2d = [](const R_2d<T>& p, TGrid& grid_2d, TVctr& Im)->T
-	// 	{
-	// 		auto ix = grid_2d.rx_2_irx_bfds(p.x);
-	// 		auto iy = grid_2d.ry_2_iry_bfds(p.y);
-
-	// 		T f11 = Im[grid_2d.sub_2_ind(ix, iy)];
-	// 		T f12 = Im[grid_2d.sub_2_ind(ix, iy + 1)];
-	// 		T f21 = Im[grid_2d.sub_2_ind(ix + 1, iy)];
-	// 		T f22 = Im[grid_2d.sub_2_ind(ix + 1, iy + 1)];
-
-	// 		T x1 = grid_2d.rx(ix);
-	// 		T x2 = grid_2d.rx(ix + 1);
-	// 		T y1 = grid_2d.ry(iy);
-	// 		T y2 = grid_2d.ry(iy + 1);
-
-	// 		T dx1 = p.x - x1;
-	// 		T dx2 = x2 - p.x;
-	// 		T dy1 = p.y - y1;
-	// 		T dy2 = y2 - p.y;
-
-	// 		T f = (dx2*(f11*dy2 + f12*dy1) + dx1*(f21*dy2 + f22*dy1))/((x2 - x1)*(y2 - y1));
-	// 		return f;
-
-	// 	};
-
-	// 	R_2d<T> p12 = p2 - p1;
-	// 	T mp12 = p12.norm();
-
-	// 	nr = (nr <= 0)?static_cast<dt_int32>(::ceil(mp12/grid_2d.dR_min())):nr;
-	// 	nr = max(nr, 2);
-	// 	T dr = mp12/(nr - 1);
-	// 	R_2d<T> u = dr*normalize(p12);
-
-	// 	v.reserve(nr);
-	// 	for(auto ir = 0; ir < nr; ir++)
-	// 	{
-	// 		R_2d<T> p = p1 + T(ir)*u;
-	// 		v.push_back(fcn_intrpl_bl_rg_2d(p, grid_2d, Im));
-	// 	}
-	// 	return v;
-	// }
-
-	// template <class TGrid, class TVctr>
-	// void intrplprofile(Stream_cpu& stream, TGrid& grid_2d, TVctr& Im, Value_type<TVctr> bg, R_2d<Value_type<TVctr>> p1, R_2d<Value_type<TVctr>> p2, 
-	// 	TVctr& x, TVctr& y)
-	// {
-	// 	x.clear();
-	// 	y.clear();
-
-	// 	if (!(grid_2d.chk_bound_eps(p1) && grid_2d.chk_bound_eps(p2)))
-	// 	{
-	// 		return;
-	// 	}
-
-	// 	if (norm(p1 - p2) < grid_2d.dR_min())
-	// 	{
-	// 		return;
-	// 	}
-
-	// 	using T = Value_type<TGrid>;
-
-	// 	auto fcn_intrpl_bl_rg_2d = [](const R_2d<T>& p, TGrid& grid_2d, TVctr& Im)->T
-	// 	{
-	// 		auto ix = grid_2d.rx_2_irx_bfds(p.x);
-	// 		auto iy = grid_2d.ry_2_iry_bfds(p.y);
-
-	// 		T f11 = Im[grid_2d.sub_2_ind(ix, iy)];
-	// 		T f12 = Im[grid_2d.sub_2_ind(ix, iy + 1)];
-	// 		T f21 = Im[grid_2d.sub_2_ind(ix + 1, iy)];
-	// 		T f22 = Im[grid_2d.sub_2_ind(ix + 1, iy + 1)];
-
-	// 		T x1 = grid_2d.rx(ix);
-	// 		T x2 = grid_2d.rx(ix + 1);
-	// 		T y1 = grid_2d.ry(iy);
-	// 		T y2 = grid_2d.ry(iy + 1);
-
-	// 		T dx1 = p.x - x1;
-	// 		T dx2 = x2 - p.x;
-	// 		T dy1 = p.y - y1;
-	// 		T dy2 = y2 - p.y;
-
-	// 		T f = (dx2*(f11*dy2 + f12*dy1) + dx1*(f21*dy2 + f22*dy1))/((x2 - x1)*(y2 - y1));
-	// 		return f;
-
-	// 	};
-
-	// 	dt_int32 Ixy_1 = Im[grid_2d.rv_2_ir_bfds(p1.x, p1.y)];
-	// 	dt_int32 Ixy_2 = Im[grid_2d.rv_2_ir_bfds(p2.x, p2.y)];
-
-	// 	R_2d<T> p12 = p2 - p1;
-	// 	T mp12 = p12.norm();
-	// 	dt_int32 nr = grid_2d.r_2_ir_cds_dr_min(mp12);
-	// 	T dr = mp12/(nr - 1);
-	// 	R_2d<T> u = dr*normalize(p12);
-
-	// 	x.reserve(nr);
-	// 	y.reserve(nr);
-	// 	for(auto ir = 0; ir < nr; ir++)
-	// 	{
-	// 		x.push_back(ir*dr);
-	// 		R_2d<T> p = p1 + T(ir)*u;
-	// 		T v = fcn_intrpl_bl_rg_2d(p, grid_2d, Im);
-	// 		y.push_back(v - bg);
-	// 	}
-	// }
-
-	// // find one maximum in all areas above the thr
-	// template <class TVctr>
-	// TVctr fd_peaks_vector_typ_1(TVctr& x, TVctr& y, Value_type<TVctr> y_thr)
-	// {
-	// 	using T = Value_type<TVctr>;
-	// 	TVctr x_peak(y.size());
-
-	// 	T x_max = 0;
-	// 	T y_max = y_thr;
-	// 	dt_bool bb = y[0] > y_thr;
-	// 	dt_int32 ipeak = 0;
-	// 	for(auto ix = 0; ix < y.size(); ix++)
-	// 	{
-	// 		if (y[ix] > y_thr)
-	// 		{
-	// 			if (y_max < y[ix])
-	// 			{
-	// 				y_max = y[ix];
-	// 				x_max = x[ix];
-	// 			}
-	// 			bb = true;
-	// 		}
-	// 		else if (bb)
-	// 		{
-	// 			x_peak[ipeak++] = x_max;
-	// 			y_max = y_thr;
-	// 			bb = false;
-	// 		}
-	// 	}
-
-	// 	if (bb)
-	// 	{
-	// 		x_peak[ipeak++] = x_max;
-	// 	}
-
-	// 	x_peak.resize(ipeak);
-	// 	x_peak.shrink_to_fit();
-
-	// 	return x_peak;
-	// }
-
 	// // find all maximum in all areas above the thr
 	// template <class TVctr>
 	// TVctr fd_peaks_vector_typ_2(TVctr& x, TVctr& y, Value_type<TVctr> y_thr)
@@ -2714,6 +2610,46 @@ namespace mt
 	// 	return coef[0];
 	// }
 
+	// // find one maximum in all areas above the thr
+	// template <class TVctr>
+	// TVctr fd_peaks_vector_typ_1(TVctr& x, TVctr& y, Value_type<TVctr> y_thr)
+	// {
+	// 	using T = Value_type<TVctr>;
+	// 	TVctr x_peak(y.size());
+
+	// 	T x_max = 0;
+	// 	T y_max = y_thr;
+	// 	dt_bool bb = y[0] > y_thr;
+	// 	dt_int32 ipeak = 0;
+	// 	for(auto ix = 0; ix < y.size(); ix++)
+	// 	{
+	// 		if (y[ix] > y_thr)
+	// 		{
+	// 			if (y_max < y[ix])
+	// 			{
+	// 				y_max = y[ix];
+	// 				x_max = x[ix];
+	// 			}
+	// 			bb = true;
+	// 		}
+	// 		else if (bb)
+	// 		{
+	// 			x_peak[ipeak++] = x_max;
+	// 			y_max = y_thr;
+	// 			bb = false;
+	// 		}
+	// 	}
+
+	// 	if (bb)
+	// 	{
+	// 		x_peak[ipeak++] = x_max;
+	// 	}
+
+	// 	x_peak.resize(ipeak);
+	// 	x_peak.shrink_to_fit();
+
+	// 	return x_peak;
+	// }
 	// /***************************************************************************************/
 	// // get projective standard deviation
 	// template <class TGrid, class TVctr>

@@ -839,6 +839,25 @@ mt::R_3d<T> mex_get_r_3d_rep(const mxArray* mxA)
 /*********************************** get box size **************************************/
 /***************************************************************************************/
 template <class T>
+mt::R_2d<T> mex_get_r_2d_bs(const mxArray* mxA, mt::R_2d<T> f) 
+{
+	return mex_get_r_2d_rep<T>(mxA)*f;
+}	
+	
+template <class T, class U>
+mt::R_2d<T> mex_get_r_2d_bs(const mxArray* mxA, mt::Vctr_cpu<U>& f) 
+{
+	return mex_get_r_2d_bs<T>(mxA, mt::R_2d<T>(f.m_data, f.size_32()));
+}	
+
+template <class T, class ST>
+mt::R_2d<T> mex_get_r_2d_bs(const mxArray* mxA, const dt_shape_st<ST>& shape) 
+{
+	return mex_get_r_2d_bs<T>(mxA, mt::R_2d<T>(shape[1], shape[0]));
+}
+
+/***************************************************************************************/
+template <class T>
 mt::R_3d<T> mex_get_r_3d_bs(const mxArray* mxA, mt::R_3d<T> f) 
 {
 	return mex_get_r_3d_rep<T>(mxA)*f;

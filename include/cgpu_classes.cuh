@@ -2693,7 +2693,7 @@
 				Region _Rect_2d<T> bd, dt_int32 nit_pcf)
 				{
 					T sigma_r = 1.0/(c_2pi<T>*sigma_g);
-					T radius = ::fmax(3*this->grid_2d.dR_min(), 0.9*sigma_r);
+					T radius = ::fmax(3*this->grid_2d.dr_min(), 0.9*sigma_r);
 
 					TVctr_r M = M_s;
 					TVctr_r pcf(M.size());
@@ -2753,7 +2753,7 @@
 				T p, T sigma_g, T radius_f, Region _Rect_2d<T> bd, dt_int32 nit_pcf)
 				{
 					T sigma_r = fcn_sigma_r_2_sigma_g(sigma_g);
-					radius_f = fcn_set_bound(radius_f, 3*this->grid_2d.dR_min(), sigma_r);
+					radius_f = fcn_set_bound(radius_f, 3*this->grid_2d.dr_min(), sigma_r);
 
 					for(auto it=0; it<nit_pcf; it++)
 					{
@@ -3037,7 +3037,7 @@
 
 					// fitting
 					T sigma_r = mt::fcn_sigma_r_2_sigma_g(sigma_g);
-					T radius = ::fmax(3*this->grid_2d.dR_min(), 1.5*sigma_r);
+					T radius = ::fmax(3*this->grid_2d.dr_min(), 1.5*sigma_r);
 					coef = this->Fit_Ellipt_Gauss_2d.fit(pcf, r_c, sigma_r, radius);
 					coef[0] = ds.x + this->grid_2d.bs_x_h();
 					coef[1] = ds.y + this->grid_2d.bs_y_h();

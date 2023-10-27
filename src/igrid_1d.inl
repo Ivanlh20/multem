@@ -255,7 +255,7 @@ namespace mt
 	template <class ST>
  	dim3 iGrid_sxd<ST, edim_1>::d_grid_size(const dim3 d_grid_max)
 	{
-		auto grid = fcn_cdg_size(this->m_size);		
+		auto grid = fcn_cdg_size(this->size());		
 			
 		grid.x = (d_grid_max.x > 0)?min(d_grid_max.x, grid.x):grid.x;
 			

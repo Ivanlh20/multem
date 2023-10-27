@@ -478,7 +478,7 @@
 				template <class TGrid, class TVctr>
 				T radius_min(const dt_int32& idx, TGrid& grid_2d, TVctr& Im)
 				{
-					T r_min = 2.0*grid_2d.dR_min();
+					T r_min = 2.0*grid_2d.dr_min();
 					if (idx>=neigh.size())
 					{
 						return r_min;
@@ -518,7 +518,7 @@
 						auto u = normalize(p12);
 
 						T r = p12.norm();
-						T dr = 0.75*grid_2d.dR_min();
+						T dr = 0.75*grid_2d.dr_min();
 						dt_int32 nr = static_cast<dt_int32>(::ceil(r/dr+0.5));
 						dr = r/nr;
 

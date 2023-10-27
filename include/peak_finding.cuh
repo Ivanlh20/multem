@@ -95,7 +95,7 @@
 					thrust::for_each(image_dcon.begin(), image_dcon.end(), [&](T& v){ v = (v<0)?0:v; });
 
 					// get background
-					dt_int32 nkr = static_cast<dt_int32>(::round(5.0*sigma/grid_2d.dR_min()));
+					dt_int32 nkr = static_cast<dt_int32>(::round(5.0*sigma/grid_2d.dr_min()));
 					auto image_thr = fcn_morp_op_open(stream, grid_2d.ny, grid_2d.nx, image_dcon, nkr);
 
 					Gauss_Cv_2d<T, Dev> gauss_cv_2d(&stream, &fft_2d, grid_2d);
@@ -160,7 +160,7 @@
 				
 					for(auto ipk = 0; ipk < x.size(); ipk++)
 					{
-						S_min[ipk] = ::fmax(0.5*grid_2d.dR_min(), 0.25*S[ipk]);
+						S_min[ipk] = ::fmax(0.5*grid_2d.dr_min(), 0.25*S[ipk]);
 						S_max[ipk] = ::fmin(0.9*neigh.d_min(ipk), 1.5*S[ipk]);
 					}
 				
@@ -385,7 +385,7 @@
 						{
 							grid_2d = grid_i;
 							reg.resize(x.size());
-							T R_min = 3.1*grid_2d.dR_min();
+							T R_min = 3.1*grid_2d.dr_min();
 
 							auto sel_radius = [&neigh, R_min, ff](dt_int32 ipk, dt_int32 iradius)->T
 							{
@@ -607,7 +607,7 @@
 				void set_init_bg_values(Stream<edev_cpu>& stream, vector<dt_bool>& mask, TVctr_r &image, 
 				TVctr_r &x, TVctr_r &y, T& bg, T& bg_min, T& bg_max)
 				{
-					T R_max = 2.5*grid_2d.dR_min();
+					T R_max = 2.5*grid_2d.dr_min();
 					T peak_min = image[grid_2d.rv_2_ir_bfds(x[0], y[0])];
 
 					auto get_mean_peak = [](const R_2d<T>& p, const T& R_max, const Grid_2d<T>& grid_2d, const TVctr_r &image)->T
@@ -701,7 +701,7 @@
 						const TVctr_r &image, T& A, T& A_min, T& A_max)
 						{
 							T R2_max = pow(R_max, 2);
-							T R2_peak_max = pow(1.75*grid_2d.dR_min(), 2);
+							T R2_peak_max = pow(1.75*grid_2d.dr_min(), 2);
 
 							auto range = grid_2d.region_ind(p, R_max);
 
@@ -958,7 +958,7 @@
 					{
 						// T radius = neigh.radius_min(ipk, grid_2d, Im);
 						S[ipk] = sigma;
-						S_min[ipk] = ::fmax(0.5*grid_2d.dR_min(), 0.02*sigma);
+						S_min[ipk] = ::fmax(0.5*grid_2d.dr_min(), 0.02*sigma);
 						S_max[ipk] = ::fmin(0.9*neigh.d_min(ipk), 3*sigma);
 					}
 				}
@@ -1569,7 +1569,7 @@
 							T a_0 = a;
 							T b_0 = b;
 
-							T dxy = ::fmax(1.1*grid_2d.dR_min()/region[ipk].Rxy_sc, 0.25*b);
+							T dxy = ::fmax(1.1*grid_2d.dr_min()/region[ipk].Rxy_sc, 0.25*b);
 							R_2d<T> p(x_0, y_0);
 							R_2d<T> p_0 = p;
 							R_2d<T> p_min(p.x-dxy, p.y-dxy);
@@ -1661,7 +1661,7 @@
 							T b_min = S_min[ipk]/region[ipk].Rxy_sc;
 							T b_max = S_max[ipk]/region[ipk].Rxy_sc;
 
-							T dxy = ::fmax(1.1*grid_2d.dR_min()/region[ipk].Rxy_sc, 0.25*b);
+							T dxy = ::fmax(1.1*grid_2d.dr_min()/region[ipk].Rxy_sc, 0.25*b);
 							R_2d<T> p(x_0, y_0);
 							R_2d<T> p_0 = p;
 							R_2d<T> p_min(p.x-dxy, p.y-dxy);
@@ -1799,7 +1799,7 @@
 								beta_0[idx_p + 2] = An[ipn];
 								beta_0[idx_p + 3] = Sn[ipn];
 
-								T dxy = ::fmax(1.1*grid_2d.dR_min()/region[ipk].Rxy_sc, 0.25*Sn[ipn]);
+								T dxy = ::fmax(1.1*grid_2d.dr_min()/region[ipk].Rxy_sc, 0.25*Sn[ipn]);
 								R_2d<T> p(xn[ipn], yn[ipn]);
 
 								beta_min[idx_p + 0] = p.x-dxy;

@@ -179,6 +179,13 @@ namespace mt
 		void irv_sft(ST& ix, ST& iy, ST& iz) const;
 
 	#ifdef __CUDACC__
+ 		dim3 d_blk_size();
+			
+ 		dim3 d_grid_size(const dim3 d_grid_max = dim3(128, 1, 1));
+			
+ 		D_Grid_Blk d_grid_blk_size(const dim3 d_grid_max = dim3(128, 1, 1));
+			
+		/***************************************************************************************/
  		dim3 d_blk();
 	
 		/***************************************************************************************/

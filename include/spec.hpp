@@ -50,7 +50,7 @@ namespace mt
 				atom_type.resize(c_n_atom_typ);
 				for(auto i = 0; i < atom_type.size(); i++)
 				{
-					atomic_data_mt.To_atom_type_CPU(i+1, multem_in_parm->Vrl, multem_in_parm->nR, multem_in_parm->grid_2d.dR_min(), atom_type[i]);
+					atomic_data_mt.To_atom_type_CPU(i+1, multem_in_parm->Vrl, multem_in_parm->nR, multem_in_parm->grid_2d.dr_min(), atom_type[i]);
 				}
 
 				 /***************************************************************************************/

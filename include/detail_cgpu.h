@@ -907,7 +907,7 @@ namespace mt
 		}
 	}
 
-	/* bilinear interpolation */
+	/* regular grid bilinear interpolation */
 	namespace detail_cgpu
 	{
 		/* regular grid bilinear interpolation */
@@ -939,17 +939,18 @@ namespace mt
 
 		template <class T>
 		CGPU_EXEC_INL 
-		// void fcn_intrpl_bl_rg_2d(const dt_int32& ixy, Grid_2d<T>& grid_i, T* mx_i, 
-		// T* vrx, T* vry, const T& bg, T* mx_o)
 		void fcn_intrpl_bl_rg_2d(const dt_int32& ixy, const Grid_2d<T>& grid_i, Ctpr<T> mx_i, 
 		Ctpr<T> vrx, Ctpr<T> vry, const T& bg, Tpr<T> mx_o)
 		{
 			R_2d<T> p(vrx[ixy], vry[ixy]);
 			mx_o[ixy] = (grid_i.chk_bound_eps(p))?fcn_intrpl_bl_rg_2d_ixy(p, grid_i, mx_i):bg;
 		};
+	}
 
+	/* non regular grid bilinear interpolation */
+	namespace detail_cgpu
+	{
 		/***************************************************************************************/
-		/* non regular grid bilinear interpolation */
 		// https:// www.codesd.com/item/bilinear-interpolation-with-non-aligned-entry-points.html
  		template <class T>
 		CGPU_EXEC_INL 

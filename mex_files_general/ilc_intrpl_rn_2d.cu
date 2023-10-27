@@ -33,10 +33,10 @@ void mex_run(mt::System_Config& system_config, dt_int32 nlhs, mxArray* plhs[], d
 	auto pmx_i = mex_get_pvctr<T>(prhs[system_config.idx_0+0]);
 	auto prx_i = mex_get_pvctr<T>(prhs[system_config.idx_0+1]);
 	auto pry_i = mex_get_pvctr<T>(prhs[system_config.idx_0+2]);
-	auto bg_opt = (nrhs>system_config.idx_0+3)?mex_get_num<mt::eFil_Sel_Typ>(prhs[system_config.idx_0+3]):mt::efst_min;
+	auto bg_opt = (nrhs>system_config.idx_0+3)?mex_get_enum<mt::eFil_Sel_Typ>(prhs[system_config.idx_0+3]):mt::efst_min;
 	auto bg = (nrhs>system_config.idx_0+4)? mex_get_num<dt_float64>(prhs[system_config.idx_0+4]):0;
 
-	mt::Grid_2d<T> grid_2d(pmx_i.s0(), pmx_i.s1());
+	mt::Grid_2d<T> grid_2d(pmx_i.s1(), pmx_i.s0());
 	mt::Stream<Dev> stream(system_config.n_stream);
 	mt::Vctr<T, Dev> mx_i(pmx_i);
 	mt::Vctr<T, Dev> rx_i(prx_i);
@@ -52,13 +52,11 @@ void mex_run(mt::System_Config& system_config, dt_int32 nlhs, mxArray* plhs[], d
 
 	if (nlhs == 2)
 	{
-		mex_create_set_num<T>(plhs[0], bg);
+		mex_create_set_num<T>(plhs[1], bg);
 	}
 }
 
 void mexFunction(dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[]) 
 {
-	// auto system_config = mex_read_set_system_config(prhs[0]);
-	// mex_run<dt_float32, mt::edev_cpu>(system_config, nlhs, plhs, nrhs, prhs);
 	MEX_RUN_FCN_FLOAT_SYS_CONF(mex_run, 0);
 }

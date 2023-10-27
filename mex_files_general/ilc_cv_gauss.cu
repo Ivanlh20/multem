@@ -35,7 +35,7 @@ template <class T, mt::eDev Dev>
 void mex_run(mt::System_Config& system_config, dt_int32 nlhs, mxArray* plhs[], dt_int32 nrhs, const mxArray* prhs[]) 
 {
 	auto mx_i = mex_get_vctr<T>(prhs[system_config.idx_0+0]);
-	auto bs = mex_get_r_3d_bs<T>(prhs[system_config.idx_0+1], mx_i.shape());
+	auto bs = mex_get_r_2d_bs<T>(prhs[system_config.idx_0+1], mx_i.shape());
 	auto sigma_r = (nrhs>system_config.idx_0+2)?mex_get_num<T>(prhs[system_config.idx_0+2]):T(1);
 
 	/***************************************************************************************/

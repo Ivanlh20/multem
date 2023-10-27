@@ -316,7 +316,30 @@ namespace mt
 	}
 
 #ifdef __CUDACC__
-template <class ST>
+	template <class ST>
+ 	dim3 iGrid_sxd<ST, edim_2>::d_blk_size()
+	{
+		return fcn_cdb_size();
+	}
+			
+	template <class ST>
+ 	dim3 iGrid_sxd<ST, edim_2>::d_grid_size(const dim3 d_grid_max)
+	{
+		auto grid = fcn_cdg_size(size());		
+			
+		grid.x = (d_grid_max.x > 0)?min(d_grid_max.x, grid.x):grid.x;
+			
+		return grid;
+	}
+	
+	template <class ST>
+ 	D_Grid_Blk iGrid_sxd<ST, edim_2>::d_grid_blk_size(const dim3 d_grid_max)
+	{
+		return D_Grid_Blk(d_grid_size(d_grid_max), d_blk_size());
+	}
+			
+	/***************************************************************************************/
+	template <class ST>
  	dim3 iGrid_sxd<ST, edim_2>::d_blk()				
 	{		
 		return fcn_cdb_2d();	
