@@ -1,4 +1,5 @@
-#include "tomlplusplus/toml.hpp"
+// #include "tomlplusplus/toml.hpp"
+#include "toml.h"
 #include <iostream>
 #include <map>
 #include "math_mt.h"
@@ -100,13 +101,22 @@ void MorphOperation::run() {
 }
 
 MorphOperation::MorphOperation(const std::string &config_file) {
-    auto config = toml::parse_file(config_file);
-    input_file = config["Input"]["file"].as_string()->get();
-    input_dataset = config["Input"]["dataset"].as_string()->get();
-    output_file = config["Output"]["file"].as_string()->get();
-    output_dataset = config["Output"]["dataset"].as_string()->get();
-    nkr = config["Parameters"]["nkr"].as_integer()->get();
-    operation = config["Parameters"]["operation"].as_string()->get();
+    toml::TomlParser config(config_file);
+    config.parse();
+    input_file=config.get<std::string>("Input", "file");
+    input_dataset=config.get<std::string>("Input", "dataset");
+    output_file=config.get<std::string>("Output", "file");
+    output_dataset=config.get<std::string>("Output", "dataset");
+    nkr = config.get<int>("Parameters", "nkr");
+    operation=config.get<std::string>("Parameters", "operation");
+    
+    // auto config = toml::parse_file(config_file);
+    // input_file = config["Input"]["file"].as_string()->get();
+    // input_dataset = config["Input"]["dataset"].as_string()->get();
+    // output_file = config["Output"]["file"].as_string()->get();
+    // output_dataset = config["Output"]["dataset"].as_string()->get();
+    // nkr = config["Parameters"]["nkr"].as_integer()->get();
+    // operation = config["Parameters"]["operation"].as_string()->get();
     data_type = read_data_type();
 }
 
