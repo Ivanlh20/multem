@@ -1,8 +1,8 @@
 import pytest
-import numpy
+import numpy as np
 import pickle
 
-# from numpy.random import random
+# from np.random import random
 import multem
 
 test_data = ["float", "double"]
@@ -42,23 +42,23 @@ def test_output_multislice(dtype):
         assert output.y == pytest.approx([2, 3, 4])
         assert output.r == pytest.approx([3, 4, 5])
         assert output.image_tot[0].image == pytest.approx(
-            numpy.array([[2, 3, 4], [3, 4, 5]])
+            np.array([[2, 3, 4], [3, 4, 5]])
         )
         assert output.image_tot[1].image == pytest.approx(
-            numpy.array([[4, 5, 6], [8, 8, 9]])
+            np.array([[4, 5, 6], [8, 8, 9]])
         )
         assert output.image_coh[0].image == pytest.approx(
-            numpy.array([[1, 2, 3], [2, 3, 4]])
+            np.array([[1, 2, 3], [2, 3, 4]])
         )
         assert output.image_coh[1].image == pytest.approx(
-            numpy.array([[3, 4, 5], [6, 7, 8]])
+            np.array([[3, 4, 5], [6, 7, 8]])
         )
-        assert output.m2psi_tot == pytest.approx(numpy.array([[8, 9, 10]]))
-        assert output.m2psi_coh == pytest.approx(numpy.array([[7, 8, 9]]))
-        assert output.psi_coh == pytest.approx(numpy.array([[5 + 5j, 6 + 6j, 7 + 7j]]))
-        assert output.V == pytest.approx(numpy.array([[5, 6, 7]]))
-        assert output.trans == pytest.approx(numpy.array([[2 + 2j, 3 + 3j, 4 + 4j]]))
-        assert output.psi_0 == pytest.approx(numpy.array([[1 + 1j, 2 + 2j, 3 + 3j]]))
+        assert output.m2psi_tot == pytest.approx(np.array([[8, 9, 10]]))
+        assert output.m2psi_coh == pytest.approx(np.array([[7, 8, 9]]))
+        assert output.psi_coh == pytest.approx(np.array([[5 + 5j, 6 + 6j, 7 + 7j]]))
+        assert output.V == pytest.approx(np.array([[5, 6, 7]]))
+        assert output.trans == pytest.approx(np.array([[2 + 2j, 3 + 3j, 4 + 4j]]))
+        assert output.psi_0 == pytest.approx(np.array([[1 + 1j, 2 + 2j, 3 + 3j]]))
 
     check()
 

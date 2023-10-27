@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import time
 import multem
 import multem.crystalline_materials
@@ -104,11 +104,11 @@ def run():
     input_multem.eels_collection_angle = 100
     input_multem.eels_Z = 22
 
-    spec_atoms = numpy.array(input_multem.spec_atoms)
-    ii = numpy.arange(len(spec_atoms))[spec_atoms["Z"] == 22]
+    spec_atoms = np.array(input_multem.spec_atoms)
+    ii = np.arange(len(spec_atoms))[spec_atoms["Z"] == 22]
     n_ii = len(ii)
 
-    ii_s = numpy.random.choice(ii, round(0.1 * n_ii))
+    ii_s = np.random.choice(ii, round(0.1 * n_ii))
     spec_atoms["Z"][ii_s] = 1000 + spec_atoms[ii_s]["Z"]
     input_multem.spec_atoms = spec_atoms
 

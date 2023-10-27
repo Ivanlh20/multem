@@ -1,5 +1,5 @@
 import multem
-import numpy
+import numpy as np
 import time
 from multem.crystalline_materials import Cu001_xtl
 
@@ -58,7 +58,7 @@ def test_hrtem():
 
     # Specimen thickness
     input_multislice.thick_type = "Through_Thick"
-    input_multislice.thick = numpy.arange(c, 1000, c)
+    input_multislice.thick = np.arange(c, 1000, c)
 
     # x-y sampling
     input_multislice.nx = 1024

@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import time
 import multem
 import multem.crystalline_materials
@@ -32,8 +32,8 @@ def run():
     )
     input_multem.iw_x = [0.5 * input_multem.spec_lx]
     input_multem.iw_y = [0.5 * input_multem.spec_ly]
-    input_multem.iw_x = list(10 + numpy.array([0, 25, 0, 25]))
-    input_multem.iw_y = list(10 + numpy.array([5, 5, 25, 25]))
+    input_multem.iw_x = list(10 + np.array([0, 25, 0, 25]))
+    input_multem.iw_y = list(10 + np.array([5, 5, 25, 25]))
 
     input_multem.cond_lens_m = 0
     input_multem.cond_lens_c_10 = -14.0312

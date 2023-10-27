@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import os.path
 import scipy.io
 import scipy.interpolate
@@ -14,9 +14,9 @@ def read_m2psi_tot_0():
 def read_psi_0(nx, ny):
     psi_0 = read_m2psi_tot_0()
     ny0, nx0 = psi_0.shape
-    f = scipy.interpolate.interp2d(numpy.arange(nx0), numpy.arange(ny0), psi_0)
-    X = numpy.arange(nx) * (nx0 / nx)
-    Y = numpy.arange(ny) * (ny0 / ny)
+    f = scipy.interpolate.interp2d(np.arange(nx0), np.arange(ny0), psi_0)
+    X = np.arange(nx) * (nx0 / nx)
+    Y = np.arange(ny) * (ny0 / ny)
     A = f(X, Y)
-    P = numpy.exp(1j * 0.5 * pi * A)
+    P = np.exp(1j * 0.5 * pi * A)
     return A * P

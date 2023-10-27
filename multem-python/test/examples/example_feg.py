@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 
 import multem
 import multem.crystalline_materials
@@ -15,7 +15,7 @@ def run():
     gmax = 12
     ng = 512
     dg = (gmax - gmin) / (ng - 1)
-    g = numpy.arange(gmin, gmax, dg)
+    g = np.arange(gmin, gmax, dg)
 
     [f1, df1] = multem.feg(1, Z, charge, g)
     [f2, df2] = multem.feg(2, Z, charge, g)

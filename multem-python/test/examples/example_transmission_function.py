@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import time
 import multem
 import multem.crystalline_materials
@@ -71,8 +71,8 @@ def run():
         print("Time: %.4f seconds" % (time.perf_counter() - st))
         sum(
             abs(
-                numpy.array(ouput_multislice_1.trans)[:]
-                - numpy.array(ouput_multislice_2.trans)[:]
+                np.array(ouput_multislice_1.trans)[:]
+                - np.array(ouput_multislice_2.trans)[:]
             )
             / (input_multem.nx * input_multem.ny)
         )

@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import multem
 import multem.crystalline_materials
 
@@ -19,7 +19,7 @@ def run():
         na, nb, nc, ncu, rmsd_3d
     )
 
-    atoms = numpy.array(atoms)
+    atoms = np.array(atoms)
     xc = atoms["x"].max() - atoms["x"].min()
     yc = atoms["y"].max() - atoms["y"].min()
     zc = atoms["z"].max() - atoms["z"].min()

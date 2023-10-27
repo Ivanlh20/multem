@@ -1,6 +1,6 @@
 import pytest
 import multem
-import numpy
+import numpy as np
 import pickle
 
 test_data = ["float", "double"]
@@ -110,7 +110,7 @@ def test_input_multislice_standard(dtype):
 
         assert input.spec_rot_theta == 0
         assert input.spec_rot_u0 == pytest.approx(
-            numpy.array((1, 2, 3)) / numpy.linalg.norm((1, 2, 3))
+            np.array((1, 2, 3)) / np.linalg.norm((1, 2, 3))
         )
         assert input.spec_rot_center_type.name == "User_Define"
         assert input.spec_rot_center_p == pytest.approx((4, 5, 6))
@@ -320,7 +320,7 @@ def test_input_multislice_extended(dtype):
         assert input.spec_cryst_x0 == pytest.approx(150.1)
         assert input.spec_cryst_y0 == pytest.approx(160.1)
         assert input.spec_amorp == pytest.approx(
-            numpy.array([(0.1, 0.2, 0.3), (0.4, 0.5, 0.6)])
+            np.array([(0.1, 0.2, 0.3), (0.4, 0.5, 0.6)])
         )
 
         assert input.nx == 1

@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import multem
 import multem.crystalline_materials
 
@@ -16,7 +16,7 @@ def run():
     rmax = 0.1
     nr = 512
     dlnr = log(rmax / rmin) / (nr - 1)
-    r = rmin * numpy.exp(numpy.arange(0, (nr - 1), 1) * dlnr)
+    r = rmin * np.exp(np.arange(0, (nr - 1), 1) * dlnr)
 
     [f1, df1] = multem.pr(1, Z, charge, r)
     [f2, df2] = multem.pr(2, Z, charge, r)

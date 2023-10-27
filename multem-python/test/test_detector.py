@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 import multem
 import pickle
@@ -30,8 +30,8 @@ def test_detector():
         grid_2.nx = 11
         grid_2.ny = 21
         assert detector.type.name == "Matrix"
-        assert detector.fx == pytest.approx(numpy.array([[1, 2], [3, 4]]))
-        assert detector.fR == pytest.approx(numpy.array([[2, 3], [4, 5]]))
+        assert detector.fx == pytest.approx(np.array([[1, 2], [3, 4]]))
+        assert detector.fR == pytest.approx(np.array([[2, 3], [4, 5]]))
         assert len(detector.grid_1d) == 1
         assert len(detector.grid_2d) == 1
         assert detector.grid_1d[0].nx == grid_1.nx
@@ -39,8 +39,8 @@ def test_detector():
         assert detector.grid_2d[0].nx == grid_2.nx
         assert detector.grid_2d[0].ny == grid_2.ny
         assert detector.fn == ["Hello", "world"]
-        assert detector.inner_ang == pytest.approx(numpy.array([4, 5, 6, 7]))
-        assert detector.outer_ang == pytest.approx(numpy.array([5, 6, 7, 8]))
+        assert detector.inner_ang == pytest.approx(np.array([4, 5, 6, 7]))
+        assert detector.outer_ang == pytest.approx(np.array([5, 6, 7, 8]))
 
     check()
 

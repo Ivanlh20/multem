@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import multem
 import multem.crystalline_materials
 
@@ -50,7 +50,7 @@ def run():
     input_multem.spec_ly = 100
     input_multem.spec_lz = 100
 
-    atoms = numpy.array(input_multem.spec_atoms)
+    atoms = np.array(input_multem.spec_atoms)
     xc = atoms["x"].max() - atoms["x"].min()
     yc = atoms["y"].max() - atoms["y"].min()
     zc = atoms["z"].max() - atoms["z"].min()

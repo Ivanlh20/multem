@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import time
 
 import multem
@@ -47,7 +47,7 @@ def run():
     ] = multem.crystalline_materials.Au001_xtl(na, nb, nc, ncu, rmsd_3d)
 
     input_multem.thick_type = "Through_Thick"
-    input_multem.thick = c / numpy.arange(2, 1000, c)
+    input_multem.thick = c / np.arange(2, 1000, c)
 
     input_multem.nx = 512
     input_multem.ny = 512
@@ -103,19 +103,19 @@ def run():
     dgx = 1 / input_multem.spec_lx
     dgy = 1 / input_multem.spec_ly
 
-    detector = numpy.zeros(shape=(input_multem.ny, input_multem.nx))
-    [gx, gy] = numpy.meshgrid(
-        numpy.arange(-nxh, nxh, 1) * dgx, numpy.arange(-nyh, nyh, 1) * dgy
+    detector = np.zeros(shape=(input_multem.ny, input_multem.nx))
+    [gx, gy] = np.meshgrid(
+        np.arange(-nxh, nxh, 1) * dgx, np.arange(-nyh, nyh, 1) * dgy
     )
-    g = numpy.sqrt(gx ** 2 + gy ** 2)
+    g = np.sqrt(gx ** 2 + gy ** 2)
 
-    g_min = numpy.array(
+    g_min = np.array(
         [
             multem.mrad_2_rAng(input_multem.E_0, theta)
             for theta in input_multem.detector.inner_ang
         ]
     )
-    g_max = numpy.array(
+    g_max = np.array(
         [
             multem.mrad_2_rAng(input_multem.E_0, theta)
             for theta in input_multem.detector.outer_ang

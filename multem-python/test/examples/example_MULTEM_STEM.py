@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import time
 
 import multem
@@ -47,7 +47,7 @@ def run():
     ] = multem.crystalline_materials.Au110_xtl(na, nb, nc, ncu, rmsd_3d)
 
     input_multem.thick_type = "Through_Thick"
-    input_multem.thick = c / numpy.arange(2, 1000, c)
+    input_multem.thick = c / np.arange(2, 1000, c)
 
     input_multem.nx = 512
     input_multem.ny = 512

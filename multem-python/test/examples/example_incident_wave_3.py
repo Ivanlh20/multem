@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import time
 import multem
 import multem.crystalline_materials
@@ -30,7 +30,7 @@ def run():
     input_multem.iw_psi = list(
         test.data.read_psi_0(input_multem.nx, input_multem.ny).flatten()
     )
-    numpy.sum(numpy.abs(numpy.array(input_multem.iw_psi)) ** 2)
+    np.sum(np.abs(np.array(input_multem.iw_psi)) ** 2)
     input_multem.iw_x = [0.0]
     input_multem.iw_y = [0.0]
 

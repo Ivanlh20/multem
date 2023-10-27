@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import time
 import multem
 import multem.crystalline_materials
@@ -63,10 +63,10 @@ def run():
 
         ouput_multislice_2 = multem.projected_potential(input_multem)
         print("Time: %.4f seconds" % (time.perf_counter() - st))
-        numpy.mean(
-            numpy.abs(
-                numpy.array(ouput_multislice_1.V)[:]
-                - numpy.array(ouput_multislice_2.V)[:]
+        np.mean(
+            np.abs(
+                np.array(ouput_multislice_1.V)[:]
+                - np.array(ouput_multislice_2.V)[:]
             )
         )
 

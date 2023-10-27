@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import time
 import multem
 import multem.crystalline_materials
@@ -17,7 +17,7 @@ def run():
     rmax = 5.0
     nr = 512
     dlnr = log(rmax / rmin) / (nr - 1)
-    r = rmin * numpy.exp(numpy.arange(0, (nr - 1), 1) * dlnr)
+    r = rmin * np.exp(np.arange(0, (nr - 1), 1) * dlnr)
 
     st = time.perf_counter()
     [f1, df1] = multem.vr(1, Z, charge, r)

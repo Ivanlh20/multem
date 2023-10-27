@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import time
 import multem
 import multem.crystalline_materials
@@ -53,8 +53,8 @@ def run():
     rho = 2.2
     lay_pos = 2
 
-    z_min = min(numpy.array(input_multem.spec_atoms)["z"])
-    z_max = max(numpy.array(input_multem.spec_atoms)["z"])
+    z_min = min(np.array(input_multem.spec_atoms)["z"])
+    z_max = max(np.array(input_multem.spec_atoms)["z"])
     st = time.perf_counter()
     input_multem.spec_atoms = multem.add_amorp_lay(
         input_multem.spec_atoms,
