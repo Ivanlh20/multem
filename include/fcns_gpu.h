@@ -1,6 +1,6 @@
 /*
 * This file is part of Multem.
-* Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
+* Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 *
 * Multem is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -1091,11 +1091,13 @@ namespace mt
 {
 	template <class T, class TVctr>
 	enable_if_vctr_gpu<TVctr, void>
-	fcn_intrpl_bl_rg_2d(Grid_2d<T>& grid, TVctr& mx_i, TVctr& vx, TVctr& vy, T bg, TVctr& mx_o, Stream_gpu* pstream = nullptr)
+	fcn_intrpl_bl_rg_2d(Grid_2d<T>& grid, TVctr& mx_i, TVctr& rx, TVctr& ry, T bg, TVctr& mx_o, Stream_gpu* pstream = nullptr)
 	{
 		using U = Value_type<TVctr>;
 
-		detail_gpu::fcn_intrpl_bl_rg_2d<T><<<grid.d_grid_size(), grid.d_blk_size()>>>(grid, mx_i.ptr_32(), vx.ptr_32(), vy.ptr_32(), bg, mx_o.ptr_32());
+		auto igrid = mx_o.igrid_2d();
+
+		detail_gpu::fcn_intrpl_bl_rg_2d<T><<<igrid.d_grid_size(), igrid.d_blk_size()>>>(grid, mx_i.ptr_32(), rx.ptr_32(), ry.ptr_32(), bg, mx_o.ptr_32());
 	}
 }
 

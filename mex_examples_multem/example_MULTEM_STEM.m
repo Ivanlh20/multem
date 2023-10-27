@@ -4,7 +4,7 @@
 % 
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % 
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear;clc;
 addpath(['..', filesep, 'matlab_functions'])
@@ -49,7 +49,7 @@ na = 8;nb = 8;nc = 5;ncu = 2;rmsd_3d = 0.085;
 
 %%%%%%%%%%%%%%%%%%%%%% specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.thick_typ = 2; % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
-input_multem.thick = c/2:c:1000; % Array of thickes (ล)
+input_multem.thick = c/2:c:1000; % Array of thickes (ร…)
 
 %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.nx = 1024;
@@ -58,8 +58,8 @@ input_multem.bwl = 0; % Band-width limit, 1: true, 0:false
 
 %%%%%%%%%%%%%%%%%%%% microscope parameters %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.E_0 = 300; % Acceleration Voltage (keV)
-input_multem.theta = 0.0; % Till ilumination (บ)
-input_multem.phi = 0.0; % Till ilumination (บ)
+input_multem.theta = 0.0; % Till ilumination (ยบ)
+input_multem.phi = 0.0; % Till ilumination (ยบ)
 
 %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.illum_mod = 1; % 1: coherente mode, 4: Numerical integration
@@ -67,24 +67,24 @@ input_multem.illum_inc = 1; % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.cond_lens_m = 0; % Vortex momentum
-input_multem.cond_lens_c_10 = 14.0312; % Defocus (ล)
+input_multem.cond_lens_c_10 = 14.0312; % Defocus (ร…)
 input_multem.cond_lens_c_30 = 1e-03; % Third order spherical aberration (mm)
 input_multem.cond_lens_c_50 = 0.00; % Fifth order spherical aberration (mm)
-input_multem.cond_lens_c_12 = 0.0; % Twofold astigmatism (ล)
-input_multem.cond_lens_phi_12 = 0.0; % Azimuthal angle of the twofold astigmatism (บ)
-input_multem.cond_lens_c_23 = 0.0; % Threefold astigmatism (ล)
-input_multem.cond_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmatism (บ)
+input_multem.cond_lens_c_12 = 0.0; % Twofold astigmatism (ร…)
+input_multem.cond_lens_phi_12 = 0.0; % Azimuthal angle of the twofold astigmatism (ยบ)
+input_multem.cond_lens_c_23 = 0.0; % Threefold astigmatism (ร…)
+input_multem.cond_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmatism (ยบ)
 input_multem.cond_lens_inner_aper_ang = 0.0; % Inner aperture (mrad) 
 input_multem.cond_lens_outer_aper_ang = 21.0; % Outer aperture (mrad)
 
 %%%%%%%%% defocus spread function %%%%%%%%%%%%
 dsf_sigma = ilc_iehwgd_2_sigma(32); % from defocus spread to standard deviation
-input_multem.cond_lens_tp_inc_sigma = dsf_sigma; % standard deviation (ล)
+input_multem.cond_lens_tp_inc_sigma = dsf_sigma; % standard deviation (ร…)
 input_multem.cond_lens_tp_inc_npts = 5; % # of integration points. It will be only used if illum_mod=4
 
 %%%%%%%%%% source spread function %%%%%%%%%%%%
 ssf_sigma = ilc_hwhm_2_sigma(0.45); % half width at half maximum to standard deviation
-input_multem.cond_lens_spt_inc_sigma = ssf_sigma; % standard deviation: For parallel ilumination(ล^-1);otherwise (ล)
+input_multem.cond_lens_spt_inc_sigma = ssf_sigma; % standard deviation: For parallel ilumination(ร…^-1);otherwise (ร…)
 input_multem.cond_lens_spt_inc_rad_npts = 4; % # of integration points. It will be only used if illum_mod=4
 
 %%%%%%%%% zero defocus reference %%%%%%%%%%%%
@@ -95,8 +95,8 @@ input_multem.cond_lens_zero_def_plane = 0;
 input_multem.scan_pat_typ = 2; % eST_Line = 1, eST_Area = 2
 input_multem.scan_pat_pbc = 1; % 1: true, 0:false (periodic boundary conditions)
 input_multem.scan_pat_nsp = 20;
-input_multem.scan_pat_r_0 = [3*a;3*b]; % starting point (ล)
-input_multem.scan_pat_r_e = [4*a;4*b]; % final point (ล)
+input_multem.scan_pat_r_0 = [3*a;3*b]; % starting point (ร…)
+input_multem.scan_pat_r_e = [4*a;4*b]; % final point (ร…)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Detector %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.detector.typ = 1; % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3

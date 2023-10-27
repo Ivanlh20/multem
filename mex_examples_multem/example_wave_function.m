@@ -54,34 +54,34 @@ input_multem.beam_pos = [input_multem.spec_bs_x/2;input_multem.spec_bs_y/2];
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.cond_lens_m = 0; % Vortex momentum
-input_multem.cond_lens_c_10 = 1110; % Defocus (ล)
+input_multem.cond_lens_c_10 = 1110; % Defocus (ร…)
 input_multem.cond_lens_c_30 = 3.3; % Third order spherical aberration (mm)
 input_multem.cond_lens_c_50 = 0.00; % Fifth order spherical aberration (mm)
-input_multem.cond_lens_c_12 = 0.0; % Twofold astigmatism (ล)
-input_multem.cond_lens_phi_12 = 0.0; % Azimuthal angle of the twofold astigmatism (บ)
-input_multem.cond_lens_c_23 = 0.0; % Threefold astigmatism (ล)
-input_multem.cond_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmatism (บ)
+input_multem.cond_lens_c_12 = 0.0; % Twofold astigmatism (ร…)
+input_multem.cond_lens_phi_12 = 0.0; % Azimuthal angle of the twofold astigmatism (ยบ)
+input_multem.cond_lens_c_23 = 0.0; % Threefold astigmatism (ร…)
+input_multem.cond_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmatism (ยบ)
 input_multem.cond_lens_inner_aper_ang = 0.0; % Inner aperture (mrad) 
 input_multem.cond_lens_outer_aper_ang = 7.50; % Outer aperture (mrad)
-input_multem.cond_lens_tp_inc_sigma = 32; % standard deviation (ล)
+input_multem.cond_lens_tp_inc_sigma = 32; % standard deviation (ร…)
 input_multem.cond_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illum_mod=4
-input_multem.cond_lens_spt_inc_sigma = 0.2; % standard deviation: For parallel ilumination(ล^-1);otherwise (ล)
+input_multem.cond_lens_spt_inc_sigma = 0.2; % standard deviation: For parallel ilumination(ร…^-1);otherwise (ร…)
 input_multem.cond_lens_spt_inc_rad_npts = 8; % # of integration points. It will be only used if illum_mod=4
 input_multem.cond_lens_zero_def_typ = 1; % eZDT_First = 1, eZDT_User_Define = 2
 input_multem.cond_lens_zero_def_plane = 0;
 
 %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.obj_lens_m = 0; % Vortex momentum
-input_multem.obj_lens_c_10 = 15.836; % Defocus (ล)
+input_multem.obj_lens_c_10 = 15.836; % Defocus (ร…)
 input_multem.obj_lens_c_30 = 1e-03; % Third order spherical aberration (mm)
 input_multem.obj_lens_c_50 = 0.00; % Fifth order spherical aberration (mm)
-input_multem.obj_lens_c_12 = 0.0; % Twofold astigmatism (ล)
-input_multem.obj_lens_phi_12 = 0.0; % Azimuthal angle of the twofold astigmatism (บ)
-input_multem.obj_lens_c_23 = 0.0; % Threefold astigmatism (ล)
-input_multem.obj_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmatism (บ)
+input_multem.obj_lens_c_12 = 0.0; % Twofold astigmatism (ร…)
+input_multem.obj_lens_phi_12 = 0.0; % Azimuthal angle of the twofold astigmatism (ยบ)
+input_multem.obj_lens_c_23 = 0.0; % Threefold astigmatism (ร…)
+input_multem.obj_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmatism (ยบ)
 input_multem.obj_lens_inner_aper_ang = 0.0; % Inner aperture (mrad) 
 input_multem.obj_lens_outer_aper_ang = 24.0; % Outer aperture (mrad)
-input_multem.obj_lens_tp_inc_sigma = 32; % standard deviation (ล)
+input_multem.obj_lens_tp_inc_sigma = 32; % standard deviation (ร…)
 input_multem.obj_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illum_mod=4
 input_multem.obj_lens_zero_def_typ = 3; % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 input_multem.obj_lens_zero_def_plane = 0;

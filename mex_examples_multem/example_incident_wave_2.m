@@ -29,18 +29,18 @@ input_multem.beam_pos = [0; 0];
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.cond_lens_m = 0; % Vortex momentum
-input_multem.cond_lens_c_10 = -15.836; % Defocus (ล)
+input_multem.cond_lens_c_10 = -15.836; % Defocus (ร…)
 input_multem.cond_lens_c_30 = 1e-03; % Third order spherical aberration (mm)
 input_multem.cond_lens_c_50 = 0.00; % Fifth order spherical aberration (mm)
-input_multem.cond_lens_c_12 = 0.0; % Twofold astigmatism (ล)
-input_multem.cond_lens_phi_12 = 0.0; % Azimuthal angle of the twofold astigmatism (บ)
-input_multem.cond_lens_c_23 = 0.0; % Threefold astigmatism (ล)
-input_multem.cond_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmatism (บ)
+input_multem.cond_lens_c_12 = 0.0; % Twofold astigmatism (ร…)
+input_multem.cond_lens_phi_12 = 0.0; % Azimuthal angle of the twofold astigmatism (ยบ)
+input_multem.cond_lens_c_23 = 0.0; % Threefold astigmatism (ร…)
+input_multem.cond_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmatism (ยบ)
 input_multem.cond_lens_inner_aper_ang = 0.0; % Inner aperture (mrad) 
 input_multem.cond_lens_outer_aper_ang = 21.0; % Outer aperture (mrad)
-input_multem.cond_lens_tp_inc_sigma = 32; % standard deviation (ล)
+input_multem.cond_lens_tp_inc_sigma = 32; % standard deviation (ร…)
 input_multem.cond_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illum_mod=4
-input_multem.cond_lens_spt_inc_sigma = 0.2; % standard deviation: For parallel ilumination(ล^-1);otherwise (ล)
+input_multem.cond_lens_spt_inc_sigma = 0.2; % standard deviation: For parallel ilumination(ร…^-1);otherwise (ร…)
 input_multem.cond_lens_spt_inc_rad_npts = 8; % # of integration points. It will be only used if illum_mod=4
 
 for x = (0.4:0.025:0.6)*input_multem.spec_bs_x

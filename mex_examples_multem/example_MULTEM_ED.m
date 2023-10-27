@@ -4,7 +4,7 @@
 % 
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % 
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear;clc;
 addpath(['..', filesep, 'matlab_functions'])
@@ -49,7 +49,7 @@ na = 8;nb = 8;nc = 40;ncu = 2;rmsd_3d = 0.085;
 
 %%%%%%%%%%%%%%%%%%%%%% specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.thick_typ = 1; % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
-input_multem.thick = c:c:1000; % Array of thickes (�)
+input_multem.thick = c:c:1000; % Array of thickes (ร)
 
 %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.nx = 1024;
@@ -58,8 +58,8 @@ input_multem.bwl = 0; % Band-width limit, 1: true, 0:false
 
 %%%%%%%%%%%%%%%%%%%% microscope parameters %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.E_0 = 300; % Acceleration Voltage (keV)
-input_multem.theta = 0.0; % Till ilumination (�)
-input_multem.phi = 0.0; % Till ilumination (�)
+input_multem.theta = 0.0; % Till ilumination (ยบ)
+input_multem.phi = 0.0; % Till ilumination (ยบ)
 
 clear ilc_multem;
 tic;

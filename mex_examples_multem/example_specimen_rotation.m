@@ -1,4 +1,4 @@
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 clear;clc;
 addpath(['..', filesep, 'matlab_functions'])
 addpath(['..', filesep, 'crystalline_materials'])
@@ -16,7 +16,7 @@ atoms = atoms(:, 1:5);
 
 ilm_show_xtl(1, atoms);
 
-theta = 45; % angle (�)
+theta = 45; % angle (ยบ)
 u_0 = [1 0 0]; % unitary vector			
 rot_point_type = 1; % 1: geometric center, 2: User define		
 p_0 = [0 0 0]; % rotation point

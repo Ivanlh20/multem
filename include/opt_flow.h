@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ namespace mt
 		Stream<Dev> *stream;
 		Grid_2d<T> grid_2d;
 
-		Interp_rn_2d<T, Dev> intrpl_rg_2d;
+		Interp_rn_2d<T, Dev> intrpl_2d;
 		Gauss_Cv_2d<T, Dev> gauss_cv_2d;
 
 		TVctr v_x;

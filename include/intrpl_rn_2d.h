@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "vctr_gpu.h"
 #include "stream_cpu.h"
 #include "stream_gpu.h"
+#include "detail_cgpu.h"
 #include "fcns_cpu.h"
 #include "fcns_gpu.h"
 
@@ -40,27 +41,26 @@ namespace mt
 
 			Interp_rn_2d();
 
-			Interp_rn_2d(Stream<Dev> *stream_i, Grid_2d<T>& grid_2d_i, Grid_2d<T>& grid_2d_o, eFil_Sel_Typ bg_opt_i=efst_min, T bg_i=0);
+			Interp_rn_2d(Stream<Dev> *pstream_i, Grid_2d<T>& grid_2d_i, eFil_Sel_Typ bg_opt_i=efst_min, T bg_i=0);
 
 			inline
-			void set_in_data(Stream<Dev> *stream_i, Grid_2d<T>& grid_2d_i, Grid_2d<T>& grid_2d_o, eFil_Sel_Typ bg_opt_i=efst_min, T bg_i=0);
+			void set_in_data(Stream<Dev> *pstream_i, Grid_2d<T>& grid_2d_i, eFil_Sel_Typ bg_opt_i=efst_min, T bg_i=0);
 
 			/***************************************** cpu *****************************************/
 			template <eDev devn = Dev>
 			enable_if_edev_cpu<devn, T>
-			operator()(TVctr& mx_i, TVctr& Rx_i, TVctr& Ry_i, TVctr& mx_o);
+			operator()(TVctr& mx_i, TVctr& rx_i, TVctr& ry_i, TVctr& mx_o);
 
 			/**********************Device**********************/
 		#ifdef __CUDACC__
 			template <eDev devn = Dev>
 			enable_if_edev_gpu<devn, T>
-			operator()(TVctr& mx_i, TVctr& Rx_i, TVctr& Ry_i, TVctr& mx_o);
+			operator()(TVctr& mx_i, TVctr& rx_i, TVctr& ry_i, TVctr& mx_o);
 		#endif
 
 		protected:
 			Grid_2d<T> grid_2d;
-			Grid_2d<T> grid_2d_mo;
-			Stream<Dev> *stream;
+			Stream<Dev> *pstream;
 			eFil_Sel_Typ bg_opt;
 			T bg;
 
@@ -68,4 +68,4 @@ namespace mt
 	};
 }
 
-#include "../src/interp_rn_2d.inl"
+#include "../src/intrpl_rn_2d.inl"

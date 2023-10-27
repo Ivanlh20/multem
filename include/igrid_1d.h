@@ -1,6 +1,6 @@
 /*
 * This file is part of Multem.
-* Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
+* Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 *
 * Multem is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -87,11 +87,7 @@ namespace mt
 		void clear();
 
 		CGPU_EXEC
-		virtual ST size() const;
-
-		template <class SU>
-		CGPU_EXEC
-		SU nx_cast() const;
+		ST size() const;
 
 		template <class SU>
 		CGPU_EXEC
@@ -100,6 +96,10 @@ namespace mt
 		template <class SU>
 		CGPU_EXEC
 		SU isize_cast() const;
+
+		template <class SU>
+		CGPU_EXEC
+		SU nx_cast() const;
 
 		dt_shape_st<ST> shape() const;
 

@@ -1478,11 +1478,11 @@ namespace mt
 {
 	template <class T, class TVctr>
 	enable_if_vctr_cpu<TVctr, void>
-	fcn_intrpl_bl_rg_2d(Grid_2d<T>& grid, TVctr& mx_i, TVctr& vx, TVctr& vy, T bg, TVctr& mx_o, Stream_cpu* pstream = nullptr)
+	fcn_intrpl_bl_rg_2d(Grid_2d<T>& grid, TVctr& mx_i, TVctr& rx, TVctr& ry, T bg, TVctr& mx_o, Stream_cpu* pstream = nullptr)
 	{
 		using U = Value_type<TVctr>;
 
-		fcn_stream_exec_xd_krn<edim_2>(pstream, grid.nx, grid.ny, detail_cgpu::fcn_intrpl_bl_rg_2d<U>, grid, mx_i.m_data, vx.m_data, vy.m_data, bg, mx_o.m_data);
+		fcn_stream_exec_xd_krn<edim_1>(pstream, mx_o.size(), detail_cgpu::fcn_intrpl_bl_rg_2d<U>, grid, mx_i.m_data, rx.m_data, ry.m_data, bg, mx_o.m_data);
 	}
 }
 

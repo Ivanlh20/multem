@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,59 +16,59 @@
 * along with Multem. If not, see <http:// www.gnu.org/licenses/>.
 */
 
-#include "interp_rn_2d.h"
+#include "intrpl_rn_2d.h"
 
 namespace mt
 {
 	template <class T, eDev Dev>
-	Interp_rn_2d<T, Dev>::Interp_rn_2d(): stream(nullptr) {}
+	Interp_rn_2d<T, Dev>::Interp_rn_2d(): pstream(nullptr) {}
 
 	template <class T, eDev Dev>
-	Interp_rn_2d<T, Dev>::Interp_rn_2d(Stream<Dev> *stream_i, Grid_2d<T>& grid_2d_i, Grid_2d<T>& grid_2d_o, eFil_Sel_Typ bg_opt_i, T bg_i)
+	Interp_rn_2d<T, Dev>::Interp_rn_2d(Stream<Dev> *pstream_i, Grid_2d<T>& grid_2d_i, eFil_Sel_Typ bg_opt_i, T bg_i)
 	{
-		set_in_data(stream_i, grid_2d_i, grid_2d_o, bg_opt_i, bg_i);
+		set_in_data(pstream_i, grid_2d_i, bg_opt_i, bg_i);
 	}
 
 	template <class T, eDev Dev>
 	inline
-	void Interp_rn_2d<T, Dev>::set_in_data(Stream<Dev> *stream_i, Grid_2d<T>& grid_2d_i, Grid_2d<T>& grid_2d_o, eFil_Sel_Typ bg_opt_i, T bg_i)
+	void Interp_rn_2d<T, Dev>::set_in_data(Stream<Dev> *pstream_i, Grid_2d<T>& grid_2d_i, eFil_Sel_Typ bg_opt_i, T bg_i)
 	{
-		stream = stream_i;
+		pstream = pstream_i;
 		grid_2d = grid_2d_i;
-		grid_2d_mo = grid_2d_o;
 		bg_opt = bg_opt_i;
 		bg = bg_i;
 	}
 
 	/***************************************** cpu *****************************************/
 	template <class T, eDev Dev>
-	template <eDev devn = Dev>
+	template <eDev devn>
 	enable_if_edev_cpu<devn, T>
-	Interp_rn_2d<T, Dev>::operator()(TVctr& mx_i, TVctr& Rx_i, TVctr& Ry_i, TVctr& mx_o)
+	Interp_rn_2d<T, Dev>::operator()(TVctr& mx_i, TVctr& rx_i, TVctr& ry_i, TVctr& mx_o)
 	{
 		// calculate background
-		T bg = get_bg(mx_i);
+		const T bg = get_bg(mx_i);
 
-		stream->set_n_stream_act(grid_2d_mo.nx);
-		stream->set_grid(grid_2d_mo.nx, grid_2d_mo.ny);
-		stream->exec_2d(detail_cgpu::intrpl_rg_2d<Grid_2d<T>, TVctr>, grid_2d, mx_i, Rx_i, Ry_i, grid_2d_mo, bg, mx_o);
-	
+		auto igrid = mx_o.igrid_2d();
+
+		fcn_stream_exec_xd_krn<edim_1>(pstream, mx_o.size(), detail_cgpu::fcn_intrpl_bl_rg_2d<T>, grid_2d, mx_i.m_data, rx_i.m_data, ry_i.m_data, bg, mx_o.m_data);
+
 		return bg;
 	}
 
 	/**********************Device**********************/
 #ifdef __CUDACC__
 	template <class T, eDev Dev>
-	template <eDev devn = Dev>
+	template <eDev devn>
 	enable_if_edev_gpu<devn, T>
-	Interp_rn_2d<T, Dev>::operator()(TVctr& mx_i, TVctr& Rx_i, TVctr& Ry_i, TVctr& mx_o)
+	Interp_rn_2d<T, Dev>::operator()(TVctr& mx_i, TVctr& rx_i, TVctr& ry_i, TVctr& mx_o)
 	{
 		// calculate background
 		T bg = get_bg(mx_i);
 
-		auto d_grid_blk = grid_2d_mo.d_grid_blk();
-		detail_gpu::intrpl_rg_2d<Grid_2d<T>, typename TVctr::value_type><<<d_grid_blk.grid, d_grid_blk.blk>>>(grid_2d, mx_i, Rx_i, Ry_i, grid_2d_mo, bg, mx_o);
-	
+		auto igrid = mx_o.igrid_2d();
+
+		detail_gpu::fcn_intrpl_bl_rg_2d<T><<<igrid.d_grid_size(), igrid.d_blk_size()>>>(grid_2d, mx_i.ptr_32(), rx_i.ptr_32(), ry_i.ptr_32(), bg, mx_o.ptr_32());
+
 		return bg;
 	}
 #endif

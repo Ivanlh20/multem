@@ -1,4 +1,4 @@
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 clear;clc;
 addpath(['..', filesep, 'matlab_functions'])
 addpath(['..', filesep, 'crystalline_materials'])
@@ -30,7 +30,7 @@ addpath(['..', filesep, 'mex_bin'])
 % vr                % potential coefficients
 % vzp               % projected potential coefficients
 % 
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear;clc;
 pot_parm_typ = 6;

@@ -26,8 +26,8 @@ input_multem.atomic_vib_nconf = 5; % true: phonon configuration, false: number o
 input_multem.bwl = 0; % Band-width limit, 1: true, 0:false
 
 input_multem.E_0 = 300; % Acceleration Voltage (keV)
-input_multem.theta = 0.0; % Till ilumination (บ)
-input_multem.phi = 0.0; % Till ilumination (บ)
+input_multem.theta = 0.0; % Till ilumination (ยบ)
+input_multem.phi = 0.0; % Till ilumination (ยบ)
 
 na = 4;nb = 4;nc = 10;ncu = 2;rmsd_3d = 0.085;
 
@@ -47,26 +47,26 @@ input_multem.beam_pos = [input_multem.spec_bs_x/2;input_multem.spec_bs_y/2];
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.cond_lens_m = 0; % Vortex momentum
-input_multem.cond_lens_c_10 = 88.7414; % Defocus (ล)
+input_multem.cond_lens_c_10 = 88.7414; % Defocus (ร…)
 input_multem.cond_lens_c_30 = 0.04; % Third order spherical aberration (mm)
 input_multem.cond_lens_c_50 = 0.00; % Fifth order spherical aberration (mm)
-input_multem.cond_lens_c_12 = 0.0; % Twofold astigmatism (ล)
-input_multem.cond_lens_phi_12 = 0.0; % Azimuthal angle of the twofold astigmatism (บ)
-input_multem.cond_lens_c_23 = 0.0; % Threefold astigmatism (ล)
-input_multem.cond_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmatism (บ)
+input_multem.cond_lens_c_12 = 0.0; % Twofold astigmatism (ร…)
+input_multem.cond_lens_phi_12 = 0.0; % Azimuthal angle of the twofold astigmatism (ยบ)
+input_multem.cond_lens_c_23 = 0.0; % Threefold astigmatism (ร…)
+input_multem.cond_lens_phi_23 = 0.0; % Azimuthal angle of the threefold astigmatism (ยบ)
 input_multem.cond_lens_inner_aper_ang = 0.0; % Inner aperture (mrad) 
 input_multem.cond_lens_outer_aper_ang = 21.0; % Outer aperture (mrad)
-input_multem.cond_lens_tp_inc_sigma = 32; % standard deviation (ล)
+input_multem.cond_lens_tp_inc_sigma = 32; % standard deviation (ร…)
 input_multem.cond_lens_tp_inc_npts = 10; % # of integration points. It will be only used if illum_mod=4
-input_multem.cond_lens_spt_inc_sigma = 0.2; % standard deviation: For parallel ilumination(ล^-1);otherwise (ล)
+input_multem.cond_lens_spt_inc_sigma = 0.2; % standard deviation: For parallel ilumination(ร…^-1);otherwise (ร…)
 input_multem.cond_lens_spt_inc_rad_npts = 8; % # of integration points. It will be only used if illum_mod=4
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%STEM %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.scan_pat_typ = 1; % eST_Line = 1, eST_Area = 2
 input_multem.scan_pat_pbc = 1; % 1: true, 0:false (periodic boundary conditions)
 input_multem.scan_pat_nsp = 10; % number of sampling points
-input_multem.scan_pat_r_0 = [2*a;2.5*b]; % starting point (ล)
-input_multem.scan_pat_r_e = [3*a;2.5*b]; % final point (ล)
+input_multem.scan_pat_r_0 = [2*a;2.5*b]; % starting point (ร…)
+input_multem.scan_pat_r_e = [3*a;2.5*b]; % final point (ร…)
 
 input_multem.eels_E_loss = 532; % Energy loss (eV)
 input_multem.eels_m_selection = 3; % selection rule

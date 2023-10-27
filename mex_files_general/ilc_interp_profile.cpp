@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	mt::R_2d<float> p1(rp1[0], rp1[1]);
 	mt::R_2d<float> p2(rp2[0], rp2[1]);
 
-	auto profile = mt::interp_profile(grid_2d, Im, p1, p2, npro);
+	auto profile = mt::intrpl_profile(grid_2d, Im, p1, p2, npro);
 	auto rprofile = mex_create_mx<pMx_r>(profile.size(), 1, plhs[0]);
 	rprofile.assign(profile.begin(), profile.end());
 }

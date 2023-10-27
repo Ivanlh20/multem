@@ -4,7 +4,7 @@
 % 
 % All parameters of the input_multem structure are explained in multem_default_values()
 % 
-% Copyright 2020 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear; clc;
 addpath([fileparts(pwd) filesep 'mex_bin'])
@@ -49,7 +49,7 @@ na = 8; nb = 8; nc = 5; ncu = 2; rmsd_3d = 0.085;
 
 %%%%%%%%%%%%%%%%%%%%%% specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.thick_typ = 1;                     % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
-input_multem.thick = 0;                          % Array of thickes (ล)
+input_multem.thick = 0;                          % Array of thickes (ร…)
 
 %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.nx = 1024;
@@ -58,8 +58,8 @@ input_multem.bwl = 0;                            % Band-width limit, 1: true, 0:
 
 %%%%%%%%%%%%%%%%%%%% microscope parameters %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.E_0 = 300;                          % Acceleration Voltage (keV)
-input_multem.theta = 0.0;                        % Till ilumination (บ)
-input_multem.phi = 0.0;                          % Till ilumination (บ)
+input_multem.theta = 0.0;                        % Till ilumination (ยบ)
+input_multem.phi = 0.0;                          % Till ilumination (ยบ)
 
 %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.illum_mod = 1;             % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
@@ -73,24 +73,24 @@ input_multem.iw_y = input_multem.spec_ly/2;     % y position
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.cond_lens_m = 0;                   % Vortex momentum
-input_multem.cond_lens_c_10 = 88.7414;             % Defocus (ล)
+input_multem.cond_lens_c_10 = 88.7414;             % Defocus (ร…)
 input_multem.cond_lens_c_30 = 0.04;              % Third order spherical aberration (mm)
 input_multem.cond_lens_c_50 = 0.00;              % Fifth order spherical aberration (mm)
-input_multem.cond_lens_c_12 = 0.0;              % Twofold astigmatism (ล)
-input_multem.cond_lens_phi_12 = 0.0;              % Azimuthal angle of the twofold astigmatism (บ)
-input_multem.cond_lens_c_23 = 0.0;              % Threefold astigmatism (ล)
-input_multem.cond_lens_phi_23 = 0.0;              % Azimuthal angle of the threefold astigmatism (บ)
+input_multem.cond_lens_c_12 = 0.0;              % Twofold astigmatism (ร…)
+input_multem.cond_lens_phi_12 = 0.0;              % Azimuthal angle of the twofold astigmatism (ยบ)
+input_multem.cond_lens_c_23 = 0.0;              % Threefold astigmatism (ร…)
+input_multem.cond_lens_phi_23 = 0.0;              % Azimuthal angle of the threefold astigmatism (ยบ)
 input_multem.cond_lens_inner_aper_ang = 0.0;    % Inner aperture (mrad) 
 input_multem.cond_lens_outer_aper_ang = 21.0;   % Outer aperture (mrad)
 
 %%%%%%%%% defocus spread function %%%%%%%%%%%%
 dsf_sigma = ilc_iehwgd_2_sigma(32); % from defocus spread to standard deviation
-input_multem.cond_lens_ti_sigma = dsf_sigma;   % standard deviation (ล)
+input_multem.cond_lens_ti_sigma = dsf_sigma;   % standard deviation (ร…)
 input_multem.cond_lens_ti_npts = 5;         % # of integration points. It will be only used if illum_mod=4
 
 %%%%%%%%%% source spread function %%%%%%%%%%%%
 ssf_sigma = ilc_mrad_2_sigma(input_multem.E_0, 0.02);  % mrad to standard deviation
-input_multem.obj_lens_ssf_sigma = ssf_sigma;          % standard deviation: For parallel ilumination(ล^-1); otherwise (ล)
+input_multem.obj_lens_ssf_sigma = ssf_sigma;          % standard deviation: For parallel ilumination(ร…^-1); otherwise (ร…)
 input_multem.obj_lens_ssf_npoints = 4;                % # of integration points. It will be only used if illum_mod=4
 
 %%%%%%%%% zero defocus reference %%%%%%%%%%%%
@@ -99,16 +99,16 @@ input_multem.cond_lens_zero_def_plane = 0;
 
 %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.obj_lens_m = 0;                    % Vortex momentum
-input_multem.obj_lens_c_10 = 0;                    % Defocus (ล)
+input_multem.obj_lens_c_10 = 0;                    % Defocus (ร…)
 input_multem.obj_lens_c_30 = 0;                  % Third order spherical aberration (mm)
 input_multem.obj_lens_c_50 = 0.00;               % Fifth order spherical aberration (mm)
-input_multem.obj_lens_c_12 = 0.0;               % Twofold astigmatism (ล)
-input_multem.obj_lens_phi_12 = 0.0;               % Azimuthal angle of the twofold astigmatism (บ)
-input_multem.obj_lens_c_23 = 0.0;               % Threefold astigmatism (ล)
-input_multem.obj_lens_phi_23 = 0.0;               % Azimuthal angle of the threefold astigmatism (บ)
+input_multem.obj_lens_c_12 = 0.0;               % Twofold astigmatism (ร…)
+input_multem.obj_lens_phi_12 = 0.0;               % Azimuthal angle of the twofold astigmatism (ยบ)
+input_multem.obj_lens_c_23 = 0.0;               % Threefold astigmatism (ร…)
+input_multem.obj_lens_phi_23 = 0.0;               % Azimuthal angle of the threefold astigmatism (ยบ)
 input_multem.obj_lens_inner_aper_ang = 0.0;     % Inner aperture (mrad) 
 input_multem.obj_lens_outer_aper_ang = 0.0;     % Outer aperture (mrad)
-input_multem.obj_lens_ti_sigma = 32;                  % standard deviation (ล)
+input_multem.obj_lens_ti_sigma = 32;                  % standard deviation (ร…)
 input_multem.obj_lens_ti_npts = 10;                 % # integration steps for the defocus Spread. It will be only used if illum_mod=4
 input_multem.obj_lens_zero_def_typ = 3;    % eZDT_First = 1, eZDT_Middle = 2, eZDT_Last = 3, eZDT_User_Define = 4
 input_multem.obj_lens_zero_def_plane = 0;   % It will be only used if obj_lens_zero_def_typ = eZDT_User_Define

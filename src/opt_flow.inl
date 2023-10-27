@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ namespace mt
 		stream = stream_i;
 		grid_2d = grid_2d_i;
 
-		intrpl_rg_2d.set_in_data(stream, grid_2d, grid_2d);
+		intrpl_2d.set_in_data(stream, grid_2d, grid_2d);
 
 		gauss_cv_2d.set_in_data(stream, fft_2d_i, grid_2d);
 
@@ -66,7 +66,7 @@ namespace mt
 			mt::add(*stream, v_y, Ry);
 
 			// resample distored image in a new grid
-			intrpl_rg_2d(M_m, Rx, Ry, M);
+			intrpl_2d(M_m, Rx, Ry, M);
 
 			// calculate optical flow
 			fcn_opt_flow(M_s, M, alpha, v_x, v_y);

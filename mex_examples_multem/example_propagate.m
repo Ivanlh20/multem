@@ -1,4 +1,4 @@
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 clear;clc;
 addpath(['..', filesep, 'mex_bin'])
 
@@ -28,8 +28,8 @@ input_multem.illum_inc = 1; % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 input_multem.bwl = 0;
 
 input_multem.E_0 = 300; % Acceleration Voltage (keV)
-input_multem.theta = 0.0; % Till ilumination (º)
-input_multem.phi = 0.0; % Till ilumination (º)
+input_multem.theta = 0.0; % Till ilumination (ยบ)
+input_multem.phi = 0.0; % Till ilumination (ยบ)
 
 na = 4;nb = 4;nc = 10;ncu = 2;rmsd_3d = 0.085;
 

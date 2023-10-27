@@ -4,7 +4,7 @@
 % 
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
 % 
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear;clc;
 
@@ -28,7 +28,7 @@ input_multem.atomic_vib_seed = 300183; % Random seed(frozen phonon)
 input_multem.atomic_vib_sgl_conf = 0; % 1: true, 0:false (extract single configuration)
 input_multem.atomic_vib_nconf = 100; % true: phonon configuration, false: number of frozen phonon configurations
 
-input_multem.spec_rot_theta = 45; % angle (�)
+input_multem.spec_rot_theta = 45; % angle (ยบ)
 input_multem.spec_rot_u_0 = [1 0 0]; % unitary vector			
 input_multem.spec_rot_ctr_typ = 1; % 1: geometric center, 2: User define		
 input_multem.spec_rot_ctr_p = [0 0 0]; % rotation point

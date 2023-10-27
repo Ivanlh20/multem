@@ -1,6 +1,6 @@
 /*
 * This file is part of Multem.
-* Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
+* Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 *
 * Multem is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -914,7 +914,7 @@ namespace mt
 		// https:// en.wikipedia.org/wiki/Bilinear_interpolation
  		template <class T>
 		CGPU_EXEC_INL 
-		T fcn_intrpl_bl_rg_2d(const R_2d<T>& p, const Grid_2d<T>& grid_i, Tpr<T> mx_i)
+		T fcn_intrpl_bl_rg_2d_ixy(const R_2d<T>& p, const Grid_2d<T>& grid_i, Ctpr<T> mx_i)
 		{
 			const auto ix = fcn_set_bound(grid_i.rx_2_irx_fds(p.x), 0, grid_i.nx-2);
 			const auto iy = fcn_set_bound(grid_i.ry_2_iry_fds(p.y), 0, grid_i.ny-2);
@@ -939,11 +939,13 @@ namespace mt
 
 		template <class T>
 		CGPU_EXEC_INL 
+		// void fcn_intrpl_bl_rg_2d(const dt_int32& ixy, Grid_2d<T>& grid_i, T* mx_i, 
+		// T* vrx, T* vry, const T& bg, T* mx_o)
 		void fcn_intrpl_bl_rg_2d(const dt_int32& ixy, const Grid_2d<T>& grid_i, Ctpr<T> mx_i, 
 		Ctpr<T> vrx, Ctpr<T> vry, const T& bg, Tpr<T> mx_o)
 		{
 			R_2d<T> p(vrx[ixy], vry[ixy]);
-			mx_o[ixy] = (grid_i.chk_bound_eps(p))?fcn_intrpl_bl_rg_2d(p, grid_i, mx_i):bg;
+			mx_o[ixy] = (grid_i.chk_bound_eps(p))?fcn_intrpl_bl_rg_2d_ixy(p, grid_i, mx_i):bg;
 		};
 
 		/***************************************************************************************/
@@ -951,7 +953,7 @@ namespace mt
 		// https:// www.codesd.com/item/bilinear-interpolation-with-non-aligned-entry-points.html
  		template <class T>
 		CGPU_EXEC_INL 
-		T fcn_intrpl_bl_nrg_2d(const R_2d<T>& p, const R_3d<T>& p1, 
+		T fcn_intrpl_bl_nrg_2d_ixy(const R_2d<T>& p, const R_3d<T>& p1, 
 		const R_3d<T>& p2, const R_3d<T>& p3, const R_3d<T>& p4)
 		{
 			const auto a = -p1.x + p3.x;
@@ -982,7 +984,7 @@ namespace mt
 		template <class T>
 		CGPU_EXEC_INL 
 		void fcn_intrpl_bl_nrg_2d(const dt_int32& ixy, Ctpr<T> vrx_i, Ctpr<T> vry_i, Ctpr<T>mx_i, 
-		Ctpr<T> vrx, Ctpr<T> vry, const T& bg, Tpr<T> mx_o)
+		Ctpr<T> vrx, Ctpr<T> vry, const T& bg, T mx_o)
 		{
 			R_2d<T> p(vrx[ixy], vry[ixy]);
 			// neighboring search algorithm: check out tessellation or MD find neighbors

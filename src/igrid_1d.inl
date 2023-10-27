@@ -1,6 +1,6 @@
 /*
  * This file is part of Multem.
- * Copyright 2022 Ivan Lobato <Ivanlh20@gmail.com>
+ * Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
  *
  * Multem is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,14 +107,6 @@ namespace mt
 	template <class ST>
 	template <class SU>
 	CGPU_EXEC
-	SU iGrid_sxd<ST, edim_1>::nx_cast() const
-	{ 
-		return SU(nx);
-	}
-
-	template <class ST>
-	template <class SU>
-	CGPU_EXEC
 	SU iGrid_sxd<ST, edim_1>::size_cast() const 
 	{ 
 		return SU(size());
@@ -128,6 +120,14 @@ namespace mt
 		return SU(1)/size_cast<SU>();
 	}
 
+	template <class ST>
+	template <class SU>
+	CGPU_EXEC
+	SU iGrid_sxd<ST, edim_1>::nx_cast() const
+	{ 
+		return SU(nx);
+	}
+	
 	template <class ST>
 	dt_shape_st<ST> iGrid_sxd<ST, edim_1>::shape() const
 	{

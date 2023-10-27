@@ -1,4 +1,4 @@
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 clear;clc;
 addpath(['..', filesep, 'matlab_functions'])
 addpath(['..', filesep, 'crystalline_materials'])
@@ -23,7 +23,7 @@ addpath(['..', filesep, 'mex_bin'])
 % r(:, 2) are calculated by solving the equation V(r) = Vrl
 % r(:, 3) are the experimental values
 % 
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear; clc;
 dim = 3;

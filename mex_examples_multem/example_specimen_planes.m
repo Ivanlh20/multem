@@ -1,4 +1,4 @@
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 clear;clc;
 addpath(['..', filesep, 'matlab_functions'])
 addpath(['..', filesep, 'crystalline_materials'])
@@ -49,13 +49,13 @@ input_multem.spec_atoms = ilc_amorp_lay_add(input_multem.spec_atoms, Z, rms_3d, 
 toc;
 
 if(lay_pos==1)
-    input_multem.spec_slic(1).z_0 = z_min-lz; % Starting z position of the amorphous layer (Å)
-    input_multem.spec_slic(1).z_e = z_min; % Ending z position of the amorphous layer (Å)
+    input_multem.spec_slic(1).z_0 = z_min-lz; % Starting z position of the amorphous layer (Ã…)
+    input_multem.spec_slic(1).z_e = z_min; % Ending z position of the amorphous layer (Ã…)
 else
-    input_multem.spec_slic(1).z_0 = z_max; % Starting z position of the amorphous layer (Å)
-    input_multem.spec_slic(1).z_e = z_max+lz; % Ending z position of the amorphous layer (Å)
+    input_multem.spec_slic(1).z_0 = z_max; % Starting z position of the amorphous layer (Ã…)
+    input_multem.spec_slic(1).z_e = z_max+lz; % Ending z position of the amorphous layer (Ã…)
 end
-input_multem.spec_slic(1).sli_thick = 2.0; % slice thick of the amorphous layer (Å)
+input_multem.spec_slic(1).sli_thick = 2.0; % slice thick of the amorphous layer (Ã…)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 lz = 10;
@@ -77,13 +77,13 @@ input_multem.spec_atoms = ilc_amorp_lay_add(input_multem.spec_atoms, Z, rms_3d, 
 toc;
 
 if(lay_pos==1)
-    input_multem.spec_slic(2).z_0 = z_min-lz; % Starting z position of the amorphous layer (Å)
-    input_multem.spec_slic(2).z_e = z_min; % Ending z position of the amorphous layer (Å)
+    input_multem.spec_slic(2).z_0 = z_min-lz; % Starting z position of the amorphous layer (Ã…)
+    input_multem.spec_slic(2).z_e = z_min; % Ending z position of the amorphous layer (Ã…)
 else
-    input_multem.spec_slic(2).z_0 = z_max; % Starting z position of the amorphous layer (Å)
-    input_multem.spec_slic(2).z_e = z_max+lz; % Ending z position of the amorphous layer (Å)
+    input_multem.spec_slic(2).z_0 = z_max; % Starting z position of the amorphous layer (Ã…)
+    input_multem.spec_slic(2).z_e = z_max+lz; % Ending z position of the amorphous layer (Ã…)
 end
-input_multem.spec_slic(2).dz = 2.0; % slice thick of the amorphous layer (Å)
+input_multem.spec_slic(2).dz = 2.0; % slice thick of the amorphous layer (Ã…)
 
 ilm_show_xtl(1, input_multem.spec_atoms)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

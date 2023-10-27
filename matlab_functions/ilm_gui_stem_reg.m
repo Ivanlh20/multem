@@ -668,11 +668,11 @@ function[data, nr_grid, at_p] = ilm_gui_stem_reg(system_config, data_i, at_p0)
             
             Rx = Rx_i + double(nr_grid.x(:, :, ik_r));
             Ry = Ry_i + double(nr_grid.y(:, :, ik_r));
-            im_r = ilc_interp_rn_2d(system_config, double(data(:, :, ik_r)), Rx, Ry);
+            im_r = ilc_intrpl_rn_2d(system_config, double(data(:, :, ik_r)), Rx, Ry);
             
             Rx = Rx_i + double(nr_grid.x(:, :, ik_s));
             Ry = Ry_i + double(nr_grid.y(:, :, ik_s));
-            im_s = ilc_interp_rn_2d(system_config, double(data(:, :, ik_s)), Rx, Ry);
+            im_s = ilc_intrpl_rn_2d(system_config, double(data(:, :, ik_s)), Rx, Ry);
             
             fcn_plot_data_nrg(im_r, im_s, p, sigma_gt, bd, title_ax_2, title_ax_3)
         end
@@ -729,11 +729,11 @@ function[data, nr_grid, at_p] = ilm_gui_stem_reg(system_config, data_i, at_p0)
             
             Rx = Rx_i + double(nr_grid.x(:, :, ik-1));
             Ry = Ry_i + double(nr_grid.y(:, :, ik-1));
-            im_r = ilc_interp_rn_2d(system_config, double(data(:, :, ik-1)), Rx, Ry);
+            im_r = ilc_intrpl_rn_2d(system_config, double(data(:, :, ik-1)), Rx, Ry);
             
             Rx = Rx_i + double(nr_grid.x(:, :, ik));
             Ry = Ry_i + double(nr_grid.y(:, :, ik));
-            im_s = ilc_interp_rn_2d(system_config, double(data(:, :, ik)), Rx, Ry);
+            im_s = ilc_intrpl_rn_2d(system_config, double(data(:, :, ik)), Rx, Ry);
             
             fcn_plot_data_nrg(im_r, im_s, p, sigma_gt, bd, title_ax_2, title_ax_3)
 
