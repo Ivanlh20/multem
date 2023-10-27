@@ -37,11 +37,11 @@ set(CMAKE_CUDA_FLAGS_MINSIZEREL "${CMAKE_CUDA_FLAGS_MINSIZEREL} -O1 -DNDEBUG -Xc
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
 # Source file(s)
-add_executable(multem ${CMAKE_CURRENT_SOURCE_DIR}/morph/morp_op.cpp)
+add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/morph/morp_op.cpp)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # Linked libraries
-target_link_libraries(multem PRIVATE
+target_link_libraries(${PROJECT_NAME} PRIVATE
     ${HDF5_CXX_LIBRARIES}
     fftw3f
     fftw3
