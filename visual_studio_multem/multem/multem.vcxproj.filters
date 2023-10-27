@@ -1,0 +1,265 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\fftw3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\amorp_spec.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\atomic_data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\box_occ.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cubic_spline.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lapack.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\output_multislice.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\output_tomography.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\quadrature.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\slicing.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\spec.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cpu_fcns.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fxeg_data.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\xtl_build.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\atomic_data_mt.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\atomic_fcns_mt.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\mex_files_multem\ilc_add_amorp_lay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_amorp_spec.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_crystal_by_lays.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_feg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_fwhm_2_sigma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_fxg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_gamma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_gmax.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_hwhm_2_sigma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_iehwgd_2_sigma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_lambda.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_vz.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_vr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_vp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_spec_slicing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_spec_rot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_spec_planes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_sigma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_scherzer_defocus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_scherzer_aperture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_rdf_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_pr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_mrad_2_sigma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_min_spl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_fxeg_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_mrad_2_rAng.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_edx_vr_parm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mex_files_multem\ilc_edx_vp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\wave_function.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\atomic_cross_section.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\blas.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\energy_loss.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\fft.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\image_functions.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\incident_wave.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\input_multislice.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\input_tomography.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\lin_alg_def.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\matlab_mex.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\matlab_types.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\memory_info.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\microscope_effects.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\peak_finding.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\projected_potential.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\propagator.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\stream.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\timing.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\traits.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\transmission_function.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\types.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\gpu_fcns.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\cgpu_fcns.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\cgpu_classes.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\tem_simulation.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\src\cgpu_rand.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\mex_files_multem\ilc_incident_wave.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\mex_files_multem\ilc_wave_function.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\mex_files_multem\ilc_transmission_function.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\mex_files_multem\ilc_propagate.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\mex_files_multem\ilc_projected_potential.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\mex_files_multem\ilc_microscope_aberrations.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\mex_files_multem\ilc_multem_edx.cu">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\src\math.cuh">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\..\mex_files_multem\ilc_apply_ctf.cu">
+      <Filter>Source Files</Filter>
+    </CudaCompile>
+  </ItemGroup>
+</Project>

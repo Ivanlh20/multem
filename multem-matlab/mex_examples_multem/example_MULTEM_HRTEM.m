@@ -1,7 +1,7 @@
 % output_multislice = input_multem.ilc_multem perform TEM simulation
 % High resolution transmission electron microscopy (HRTEM) simulation
 % All parameters of the input_multem structure are explained in ilm_dflt_input_multem()
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear; clc;
 addpath([fileparts(pwd) filesep 'mex_bin'])
@@ -62,13 +62,8 @@ input_multem.phi = 0.0;                          % Till ilumination (�)
 input_multem.illumination_model = 2;             % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
 input_multem.temporal_spatial_incoh = 1;         % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 
-%%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
-        %%%%%%%%%% source spread function %%%%%%%%%%%%
-ssf_sigma = ilc_mrad_2_sigma(input_multem.E_0, 0.02);  % mrad to standard deviation
-input_multem.obj_lens_ssf_sigma = ssf_sigma;          % standard deviation: For parallel ilumination(�^-1); otherwise (�)
-input_multem.obj_lens_ssf_npoints = 4;                % # of integration points. It will be only used if illumination_model=4
-
 %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
+
 input_multem.obj_lens_m = 0;                   % Vortex momentum
 input_multem.obj_lens_c_10 = 20;               % Defocus (�)
 input_multem.obj_lens_c_30 = 0.04;             % Third order spherical aberration (mm)
@@ -84,6 +79,11 @@ input_multem.obj_lens_outer_aper_ang = 0.0;    % Outer aperture (mrad)
 dsf_sigma = ilc_iehwgd_2_sigma(32); % from defocus spread to standard deviation
 input_multem.obj_lens_ti_sigma = dsf_sigma;   % standard deviation (�)
 input_multem.obj_lens_ti_npts = 5;         % # of integration points. It will be only used if illumination_model=4
+
+%%%%%%%%%% source spread function %%%%%%%%%%%%
+ssf_sigma = ilc_mrad_2_sigma(input_multem.E_0, 0.02);  % mrad to standard deviation
+input_multem.obj_lens_si_sigma = ssf_sigma;          % standard deviation: For parallel ilumination(�^-1); otherwise (�)
+input_multem.obj_lens_si_rad_npts = 4;                % # of integration points. It will be only used if illumination_model=4
 
 %%%%%%%%% zero defocus reference %%%%%%%%%%%%
 input_multem.obj_lens_zero_defocus_type = 1;   % eZDT_First = 1, eZDT_User_Define = 4

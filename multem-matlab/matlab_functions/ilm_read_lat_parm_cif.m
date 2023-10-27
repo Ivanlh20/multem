@@ -1,5 +1,5 @@
 % Read lattice parameter from cif file
-% Copyright 2021 Ivan Lobato <Ivanlh20@gmail.com>
+% Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 function [a, b, c] = ilm_read_lat_parm_cif(path)
     str_file = fileread(path);
     str_file = strtrim(strsplit(str_file, '\n'));
