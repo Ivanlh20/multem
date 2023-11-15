@@ -12,7 +12,9 @@ find_package(HDF5 REQUIRED COMPONENTS CXX)
 # set(FFTW_DIR "/usr/lib/cmake/fftw3")
 set(FFTW_DIR "${CMAKE_SOURCE_DIR}/include")
 
-find_package(FFTW REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(FFTW IMPORTED_TARGET REQUIRED fftw3)
+# find_package(FFTW REQUIRED)
 find_package(CUDAToolkit REQUIRED)
 
 # Include directories
@@ -20,7 +22,6 @@ include_directories(
     ${CUDAToolkit_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_SOURCE_DIR}/morph/tomlplusplus/include
 )
 
 # set(CMAKE_CUDA_COMPILER /usr/local/cuda-11.2/bin/nvcc)
