@@ -39,8 +39,32 @@ namespace mt
 {
 #ifndef VCTR_DEC
 	#define VCTR_DEC
+    /**
+     * @brief Forward declaration of the Vctr template class.
+     * 
+     * The `Vctr` template class represents a vector-like data structure and is
+     * a fundamental component of the Multem library. It is designed to handle
+     * vectors on different devices, such as CPUs and GPUs.
+     * 
+     * @tparam T The type of data stored in the vector.
+     * @tparam Dev The device type (e.g., edev_cpu or edev_gpu) where the vector
+     *             resides.
+     */	
 	template <class T, eDev Dev> class Vctr;
 
+	/**
+	 * @brief Forward declaration of the pVctr template class.
+	 * 
+	 * The `pVctr` template class is used in conjunction with the `Vctr` class and
+	 * represents a pointer to a vector. It is also an essential part of the Multem
+	 * library and can be used on various devices, including CPUs and GPUs.
+	 * 
+	 * @tparam T The type of data stored in the vector.
+	 * @tparam Dev The device type (e.g., edev_cpu or edev_gpu) where the vector
+	 *             resides.
+	 * @tparam ST A template parameter for specifying additional properties or
+	 *            transformations applied to the vector.
+	 */
 	template <class T, eDev Dev, class ST> class pVctr;
 #endif
 }
@@ -48,53 +72,168 @@ namespace mt
 /* derived class */
 namespace mt
 {
+	/**
+	 * @brief Specialization of Vctr using std::vector on CPU.
+	 * 
+	 * The `Vctr_std` type alias represents a specialization of the `Vctr` class
+	 * using the `std::vector` container on the CPU. It is a convenient way to
+	 * work with CPU-based vectors in the Multem library.
+	 * 
+	 * @tparam T The type of data stored in the vector.
+	 */
 	template <class T>
 	using Vctr_std = std::vector<T>;
 
+	/**
+	 * @brief Specialization of Vctr for 2D matrices on CPU.
+	 * 
+	 * The `Vctr_cpu` type alias represents a specialization of the `Vctr` class
+	 * designed to handle 2D matrices on the CPU in the Multem library.
+	 * 
+	 * @tparam T The type of data stored in the matrix.
+	 */
 	template <class T>
 	using Vctr_cpu = Vctr<T, edev_cpu>;
 
 	/***************************************************************************************/
+
+	/**
+	 * @brief Alias for a CPU vector of 32-bit unsigned integers.
+	 */
 	using Vctr_uint32_cpu = Vctr_cpu<dt_uint32>;
 
+	/**
+	 * @brief Alias for a CPU vector of 32-bit signed integers.
+	 */
 	using Vctr_int32_cpu = Vctr_cpu<dt_int32>;
 
+	/**
+	 * @brief Alias for a CPU vector of 64-bit unsigned integers.
+	 */
 	using Vctr_uint64_cpu = Vctr_cpu<dt_uint64>;
 
+	/**
+	 * @brief Alias for a CPU vector of 64-bit signed integers.
+	 */
 	using Vctr_int64_cpu = Vctr_cpu<dt_int64>;
 
 	/***************************************************************************************/
+
+	/**
+	 * @brief Specialization of Vctr for 2D matrices on a specified device.
+	 * 
+	 * The `Vctr_r_2d` type alias represents a specialization of the `Vctr` class
+	 * designed to handle 2D matrices of type `R_2d<T>` on a specified device in
+	 * the Multem library.
+	 * 
+	 * @tparam T The type of data stored in the matrix.
+	 * @tparam Dev The device type (e.g., edev_cpu or edev_gpu).
+	 */
 	template <class T, eDev Dev>
 	using Vctr_r_2d = Vctr<R_2d<T>, Dev>;
 
+	/**
+	 * @brief Specialization of Vctr for 2D matrices on CPU.
+	 * 
+	 * The `Vctr_r_2d_cpu` type alias represents a specialization of the `Vctr` class
+	 * designed to handle 2D matrices of type `R_2d<T>` on the CPU in the Multem library.
+	 * 
+	 * @tparam T The type of data stored in the matrix.
+	 */
 	template <class T>
 	using Vctr_r_2d_cpu = Vctr<R_2d<T>, edev_cpu>;
 
 	/***************************************************************************************/
+
+	/**
+	 * @brief Specialization of Vctr for 3D matrices on a specified device.
+	 * 
+	 * The `Vctr_r_3d` type alias represents a specialization of the `Vctr` class
+	 * designed to handle 3D matrices of type `R_3d<T>` on a specified device in
+	 * the Multem library.
+	 * 
+	 * @tparam T The type of data stored in the matrix.
+	 * @tparam Dev The device type (e.g., edev_cpu or edev_gpu).
+	 */
 	template <class T, eDev Dev>
 	using Vctr_r_3d = Vctr<R_3d<T>, Dev>;
-		
+
+	/**
+	 * @brief Specialization of Vctr for 3D matrices on CPU.
+	 * 
+	 * The `Vctr_r_3d_cpu` type alias represents a specialization of the `Vctr` class
+	 * designed to handle 3D matrices of type `R_3d<T>` on the CPU in the Multem library.
+	 * 
+	 * @tparam T The type of data stored in the matrix.
+	 */
 	template <class T>
 	using Vctr_r_3d_cpu = Vctr<R_3d<T>, edev_cpu>;
 
 	/***************************************************************************************/
+
+	/**
+	 * @brief Specialization of Vctr for 2x2 matrices on a specified device.
+	 * 
+	 * The `Vctr_Mx_2x2` type alias represents a specialization of the `Vctr` class
+	 * designed to handle 2x2 matrices of type `Mx_2x2<T>` on a specified device in
+	 * the Multem library.
+	 * 
+	 * @tparam T The type of data stored in the matrix.
+	 * @tparam Dev The device type (e.g., edev_cpu or edev_gpu).
+	 */
 	template <class T, eDev Dev>
 	using Vctr_Mx_2x2 = Vctr<Mx_2x2<T>, Dev>;
-		
+
+	/**
+	 * @brief Specialization of Vctr for 2x2 matrices on CPU.
+	 * 
+	 * The `Vctr_Mx_2x2_cpu` type alias represents a specialization of the `Vctr` class
+	 * designed to handle 2x2 matrices of type `Mx_2x2<T>` on the CPU in the Multem library.
+	 * 
+	 * @tparam T The type of data stored in the matrix.
+	 */
 	template <class T>
 	using Vctr_Mx_2x2_cpu = Vctr<Mx_2x2<T>, edev_cpu>;
 
 	/***************************************************************************************/
+
+	/**
+	 * @brief Specialization of Vctr for 3x3 matrices on a specified device.
+	 * 
+	 * The `Vctr_Mx_3x3` type alias represents a specialization of the `Vctr` class
+	 * designed to handle 3x3 matrices of type `Mx_3x3<T>` on a specified device in
+	 * the Multem library.
+	 * 
+	 * @tparam T The type of data stored in the matrix.
+	 * @tparam Dev The device type (e.g., edev_cpu or edev_gpu).
+	 */
 	template <class T, eDev Dev>
 	using Vctr_Mx_3x3 = Vctr<Mx_3x3<T>, Dev>;
-		
+
+	/**
+	 * @brief Specialization of Vctr for 3x3 matrices on CPU.
+	 * 
+	 * The `Vctr_Mx_3x3_cpu` type alias represents a specialization of the `Vctr` class
+	 * designed to handle 3x3 matrices of type `Mx_3x3<T>` on the CPU in the Multem library.
+	 * 
+	 * @tparam T The type of data stored in the matrix.
+	 */
 	template <class T>
 	using Vctr_Mx_3x3_cpu = Vctr<Mx_3x3<T>, edev_cpu>;
+
 }
 
 /* cpu vector */
 namespace mt
 {
+	/**
+     * @brief A class representing a vector on the CPU.
+     * 
+     * This class provides various methods and operations for working with vectors
+     * on the CPU.
+     * 
+     * @tparam T The type of data stored in the vector.
+     */
 	template <class T>
 	class Vctr<T, edev_cpu>
 	{
@@ -116,16 +255,46 @@ namespace mt
 		size_type m_pitch_s3;
 
 		/************************************* constructors ************************************/
+		/**
+		 * @brief Default constructor for Vctr.
+		 */		
 		explicit Vctr();
 
+		/**
+		 * @brief Constructor for Vctr that initializes from a list of values (float 64).
+		 * 
+		 * @param data The list of values to initialize the vector with.
+		 */
 		Vctr(const dt_init_list_f64& data);
 
+		/**
+		 * @brief Constructor for Vctr with a specified size.
+		 * 
+		 * @param s0 The size of the vector.
+		*/
 		Vctr(size_type s0);
 
+		/**
+		 * @brief Constructor for Vctr with a specified size and initial value.
+		 * 
+		 * @param s0 The size of the vector.
+		 * @param value The initial value to fill the vector with.
+		 */
 		Vctr(size_type s0, const T& value);
 
+		/**
+		 * @brief Constructor for Vctr with a specified shape.
+		 * 
+		 * @param shape The shape of the vector.
+		 */
 		explicit Vctr(const dt_shape_st<size_type>& shape);
 
+		/**
+		 * @brief Constructor for Vctr with a specified shape and initial value.
+		 * 
+		 * @param shape The shape of the vector.
+		 * @param value The initial value to fill the vector with.
+		 */
 		explicit Vctr(const dt_shape_st<size_type>& shape, const T& value);
 
 		/* copy constructor */
@@ -135,19 +304,65 @@ namespace mt
 		Vctr(Vctr<T, edev_cpu>&& vctr);
 
 		/* converting constructor */
+
+		/**
+		 * @brief Converting constructor that constructs a new Vctr from a different type of Vctr on the CPU.
+		 * 
+		 * This constructor allows you to create a new `Vctr` object from an existing `Vctr` of a different data type
+		 * while keeping the same execution device (CPU).
+		 * 
+		 * @tparam U The data type of the source `Vctr`.
+		 * @param vctr The source `Vctr` to be converted.
+		 */
 		template <class U>
 		Vctr(const Vctr<U, edev_cpu>& vctr);
 
+		/**
+		 * @brief Converting constructor that constructs a new Vctr from a range of elements specified by iterators.
+		 * 
+		 * This constructor allows you to create a new `Vctr` object from a range of elements specified by iterators.
+		 * 
+		 * @tparam U The data type of the elements in the range.
+		 * @param first An iterator pointing to the first element of the range.
+		 * @param last An iterator pointing one past the last element of the range.
+		 */		
 		template <class U>
 		Vctr(U* first, U* last);
 
+		/**
+		 * @brief Converting constructor that constructs a new Vctr from a memory buffer with optional column offset.
+		 * 
+		 * This constructor allows you to create a new `Vctr` object from a memory buffer with an optional column offset.
+		 * 
+		 * @tparam U The data type of the elements in the memory buffer.
+		 * @tparam V The data type of the elements in the new `Vctr`.
+		 * @param p A pointer to the memory buffer.
+		 * @param n_p The number of elements in the memory buffer.
+		 * @param icol An optional column offset (default is 0).
+		 */
 		template <class U, class V=T, class = enable_if_r_nd<V>>
 		Vctr(U *p, dt_int64 n_p, dt_int64 icol=0);
 
+		/**
+		 * @brief Converting constructor that constructs a new Vctr from a std::vector.
+		 * 
+		 * This constructor allows you to create a new `Vctr` object from a std::vector of a different data type.
+		 * 
+		 * @tparam U The data type of the elements in the std::vector.
+		 * @param vctr The std::vector to be converted.
+		 */	
 		template <class U>
 		Vctr(const std::vector<U>& vctr);
 
-		// from cpu pVctr to Vctr
+		/**
+		 * @brief Converting constructor that constructs a new Vctr from a CPU pVctr with optional storage type.
+		 * 
+		 * This constructor allows you to create a new `Vctr` object from a CPU pVctr with an optional storage type.
+		 * 
+		 * @tparam U The data type of the elements in the source pVctr.
+		 * @tparam STU The storage type of the source pVctr.
+		 * @param pvctr The source pVctr to be converted.
+		 */
 		template <class U, class STU>
 		Vctr(const pVctr<U, edev_cpu, STU>& pvctr);
 
