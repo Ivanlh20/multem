@@ -12,7 +12,9 @@ find_package(HDF5 REQUIRED COMPONENTS CXX)
 # set(FFTW_DIR "/usr/lib/cmake/fftw3")
 set(FFTW_DIR "${CMAKE_SOURCE_DIR}/include")
 
-find_package(FFTW REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(FFTW IMPORTED_TARGET REQUIRED fftw3)
+# find_package(FFTW REQUIRED)
 find_package(CUDAToolkit REQUIRED)
 
 # Include directories
@@ -20,7 +22,6 @@ include_directories(
     ${CUDAToolkit_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_SOURCE_DIR}/morph/tomlplusplus/include
 )
 
 # set(CMAKE_CUDA_COMPILER /usr/local/cuda-11.2/bin/nvcc)
@@ -48,3 +49,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     fftw3f_threads
     fftw3_threads
 )
+
+# Enable testing
+enable_testing()
+
+# Include Google Test
+add_subdirectory(googletest)
+
+# Add your test executable
+add_executable(test_vctr_cpu tests/test_vctr_cpu.cpp)  # Make sure the path is correct
+
+# Link libraries to your test executable
+target_link_libraries(test_vctr_cpu gtest gtest_main)
+
+# Add the test to CMake's test system
+add_test(NAME test_vctr_cpu COMMAND test_vctr_cpu)
