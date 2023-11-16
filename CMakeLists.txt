@@ -49,3 +49,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     fftw3f_threads
     fftw3_threads
 )
+
+# Enable testing
+enable_testing()
+
+# Include Google Test
+add_subdirectory(googletest)
+
+# Add your test executable
+add_executable(test_vctr_cpu tests/test_vctr_cpu.cpp)  # Make sure the path is correct
+
+# Link libraries to your test executable
+target_link_libraries(test_vctr_cpu gtest gtest_main)
+
+# Add the test to CMake's test system
+add_test(NAME test_vctr_cpu COMMAND test_vctr_cpu)
