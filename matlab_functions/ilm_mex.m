@@ -38,6 +38,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
     CUDA_VERSION = CUDA_PATH((idx(end)+1):end);
     CUDA_VERSION = CUDA_VERSION(~isletter(CUDA_VERSION));
     CUDA_VERSION = erase(CUDA_VERSION, {'-', '_'});
+    % CUDA_VERSION = '11.8';
     
     if isempty(CUDA_VERSION)
         CUDA_VERSION_PATH = [CUDA_PATH, filesep,'version.txt'];
@@ -65,6 +66,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
     CUDA_LIBS = '-lcudart -lcufft -lcublas';
     
     %%%%%%%%%%%%%%% set NVCC compiler location %%%%%%%%%%%%%%%%%%
+    setenv('CUDA_ROOT', CUDA_PATH);
     setenv('CUDA_PATH', CUDA_PATH);
     setenv('CUDA_BIN_PATH', CUDA_BIN_PATH);
     setenv('CUDA_LIB_PATH', CUDA_LIB_PATH);
@@ -85,13 +87,13 @@ function [] = ilm_mex(option, m_file, src, varargin)
     CARD_75="-gencode=arch=compute_75,code=&#92;&quot;sm_75,compute_75&#92;&quot;";
     CARD_86="-gencode=arch=compute_86,code=&#92;&quot;sm_86,compute_86&#92;&quot;";
     CARD_87="-gencode=arch=compute_87,code=&#92;&quot;sm_87,compute_87&#92;&quot;";
-    CARD_MULT = join([CARD_30, CARD_35, CARD_50, CARD_60, CARD_70, CARD_75], ' ');
+    CARD_MULT = join([CARD_35, CARD_50, CARD_60, CARD_70, CARD_75], ' ');
     
     if CUDA_VERSION_D >= 11.0
         CARD_MULT = join([CARD_MULT CARD_86, CARD_87], ' ');
     end
     
-    if 1
+    if 0
         % Get compute capabilities of all available devices
         gpu_comp_cap = zeros(1,gpuDeviceCount);
         ARCH_FLAGS = "";

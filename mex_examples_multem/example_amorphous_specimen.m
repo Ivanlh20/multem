@@ -1,10 +1,10 @@
 % Copyright 2023 Ivan Lobato <Ivanlh20@gmail.com>
 
 clear; clc;
-addpath([fileparts(pwd) filesep 'mex_bin'])
-addpath([fileparts(pwd) filesep 'crystalline_materials'])
-addpath([fileparts(pwd) filesep 'matlab_functions'])
-
+root = '/media/ivan/Data_4TB/multem_gh';
+addpath([root filesep 'mex_bin'])
+addpath([root filesep 'crystalline_materials'])
+addpath([root filesep 'matlab_functions'])
 
 lx = 50;
 ly = 50;
@@ -27,17 +27,16 @@ plot3(atoms(:, 2), atoms(:, 3), atoms(:, 4),'.r');
 axis equal;
 
 NA = 6.022140857e+23;
-
 d = 0;
 lx0 = lx-d;
 ly0 = ly-d;
 lz0 = lz;
 ii = find((0.5*d<=atoms(:,2))&(atoms(:,2)<=lx-0.5*d)&(0.5*d<=atoms(:,3))&(atoms(:,3)<=ly-0.5*d));
-% atoms = atoms(ii, :);
-density = length(atoms)*12.011/(lx0*ly0*lz0*NA*(1e-8)^3)
+density = length(atoms)*12.011/(lx0*ly0*lz0*NA*(1e-8)^3);
+disp(['density = ', num2str(density)])
 
 tic;
-[r, rdf] = ilc_rdf_3d(atoms, 8, 200);
+[r, rdf] = ilc_rdf_3d(atoms(1:5e+4, :), 8, 200);
 toc;
 
 figure(2); clf;

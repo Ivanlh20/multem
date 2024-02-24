@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!-- Copyright 2017-2019 The MathWorks, Inc. -->
-<!-- CUDA MEX options for MSVC 2017 -->
+<!-- Copyright 2020-2022 The MathWorks, Inc. -->
+<!-- CUDA MEX options for MSVC 2019 -->
 <config
     Name="NVIDIA CUDA Compiler"
     ShortName="nvcc"
-    HostCompiler="MSVCPP150"
+    HostCompiler="MSVCPP160"
     Manufacturer="NVIDIA"
     Version="XXX_CUDA_VER"
     Language="CUDA"
     Priority="A"
-    Location="$NVCC" >
+    Location="$CUDA_PATH\bin\nvcc.exe" >
     <Details
         CompilerExecutable="$COMPILER"
         CompilerDefines="$COMPDEFINES"
@@ -38,7 +38,7 @@
         CMDLINE300="del $EXP $LIB $MANIFEST $ILK"
           	         
 		MATLABMEX="/DMATLAB_MEX_FILE"           
-        INCLUDE="-I&quot;$MATLABROOT\extern\include&quot; -I&quot;$MATLABROOT\simulink\include&quot;"
+        INCLUDE="-I&quot;$MATLABROOT\extern\include&quot;"
 
         ARCH_FLAGS="XXX_ARCH_FLAGS"
         NVCC_FLAGS="--std=c++14 --default-stream per-thread --expt-extended-lambda --expt-relaxed-constexpr $ARCH_FLAGS"
@@ -62,25 +62,36 @@
         OBJEXT=".obj"
         LDEXT=".mexw64"
         SETENV="set COMPILER=$COMPILER
-            set COMPFLAGS=/c $COMPFLAGS $COMPDEFINES $MATLABMEX
-            set OPTIMFLAGS=$OPTIMFLAGS
-            set DEBUGFLAGS=$DEBUGFLAGS
-            set LINKER=$LINKER
-            set LINKFLAGS=$LINKFLAGS /export:%ENTRYPOINT% $LINKTYPE $LINKLIBS $LINKEXPORT
-            set LINKDEBUGFLAGS=/debug /PDB:&quot;%OUTDIR%%MEX_NAME%$LDEXT.pdb&quot;
-            set NAME_OUTPUT=/out:&quot;%OUTDIR%%MEX_NAME%%MEX_EXT%&quot;"
+        set COMPFLAGS=/c $COMPFLAGS $COMPDEFINES $MATLABMEX
+        set OPTIMFLAGS=$OPTIMFLAGS
+        set DEBUGFLAGS=$DEBUGFLAGS
+        set LINKER=$LINKER
+        set LINKFLAGS=$LINKFLAGS /export:%ENTRYPOINT% $LINKTYPE $LINKLIBS $LINKEXPORT
+        set LINKDEBUGFLAGS=/debug /PDB:&quot;%OUTDIR%%MEX_NAME%$LDEXT.pdb&quot;
+        set NAME_OUTPUT=/out:&quot;%OUTDIR%%MEX_NAME%%MEX_EXT%&quot;"
     />
     <locationFinder>
         <VCROOT>
-            <and>
-                <or>
-                    <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                </or>
-                <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%" />
-            </and>
+            <or>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Enterprise -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Professional -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Community -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%" />
+                </and>
+            </or>	
         </VCROOT>
         <SDKROOT>
             <or>
@@ -92,34 +103,69 @@
         </SDKROOT>
         <VSINSTALLDIR>
             <or>
-                <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-            </or>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Enterprise -property installationPath -format value" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Professional -property installationPath -format value" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Community -property installationPath -format value" />
+                </and>
+            </or>	
         </VSINSTALLDIR>
         <VCINSTALLDIR>
-          <and>
             <or>
-              <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-              <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-              <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-              <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-            </or>
-            <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%\VC\Tools\MSVC\%a" />
-          </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Enterprise -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%\VC\Tools\MSVC\%a" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Professional -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%\VC\Tools\MSVC\%a" />
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Community -property installationPath -format value" />
+                    <cmdReturns name="set &quot;vcroot=$$&quot;&amp;for /f &quot;delims= &quot; %a in ('type &quot;$$\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt&quot;') do @if exist &quot;$$\VC\Tools\MSVC\%a\bin\HostX64\x64\cl.exe&quot; call echo %vcroot%\VC\Tools\MSVC\%a" />
+                </and>
+            </or>	
         </VCINSTALLDIR>
         <VCVARSALLDIR>
-           <and>
-                <or>
-                    <hklmExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hkcuExists path="SOFTWARE\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hklmExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                    <hkcuExists path="SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7" name="15.0" />
-                </or>
-                <fileExists name="$$\VC\Auxiliary\Build\vcvarsall.bat" />
-                <dirExists name="$$"/>
-            </and>
+            <or>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Enterprise -property installationPath -format value" />
+                    <fileExists name="$$\VC\Auxiliary\Build\vcvarsall.bat" />
+                    <dirExists name="$$"/>
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Professional -property installationPath -format value" />
+                    <fileExists name="$$\VC\Auxiliary\Build\vcvarsall.bat" />
+                    <dirExists name="$$"/>
+                </and>
+                <and>
+                    <envVarExists name="ProgramFiles(x86)" />
+                    <fileExists name="$$\Microsoft Visual Studio\Installer\vswhere.exe" />
+                    <cmdReturns name="&quot;$$\\vswhere.exe&quot; -version &quot;[16.0,17.0)&quot; -products Microsoft.VisualStudio.Product.Community -property installationPath -format value" />
+                    <fileExists name="$$\VC\Auxiliary\Build\vcvarsall.bat" />
+                    <dirExists name="$$"/>
+                </and>
+            </or>	
         </VCVARSALLDIR>
         <KITSROOT>
             <or>
@@ -143,6 +189,8 @@
                 <cmdReturns name="echo off&amp;set &quot;sdkversion=&quot;&amp;(for /f %a IN ('dir &quot;$$\include\&quot; /b /ad-h /on') do ( @if exist &quot;$$\include\%a\ucrt\&quot; set &quot;sdkversion=%a&quot; ))&amp;call echo %sdkversion%" />
             </and>
         </SDKVERSION>
+        <!-- g2024064: We need to check the version of the cudart that is going to be used. Otherwise, if the shipping toolkit is going to be used it is possible that CUDA_LIB_PATH will point to a different -->
+        <!-- toolkit than the one of the NVCC. -->
         <CUDA_LIB_PATH>
             <or>
                 <and>
@@ -164,11 +212,49 @@
                         </and>
                     </or>
                     <dirExists name="$$" />
+                    <!-- cmdReturns will replace all backslashes with a single backslash unless they are the very first characters -->
+                    <or>
+                        <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
+                        <cmdReturns name="$$\..\..\bin\nvcc --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                    </or>
+                </and>
+                <!-- For local paths, duplicate the same syntax in order to execute nvcc --version with quotes around the path, to handle spaces -->
+                <and>
+                    <or>
+                        <and>
+                            <envVarExists name="MW_NVCC_PATH"/>
+                            <fileExists name="$$\..\lib\x64\cudart.lib" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_LIB_PATH"/>
+                            <fileExists name="$$\cudart.lib" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_PATH"/>
+                            <fileExists name="$$\lib\x64\cudart.lib" />
+                        </and>
+                        <and>
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vXXX_CUDA_VER\lib\x64\cudart.lib" />
+                        </and>
+                    </or>
+                    <dirExists name="$$" />
+                    <!-- cmdReturns will replace all backslashes with a single backslash unless they are the very first characters -->
+                    <!-- This means that we need to external or. We cannot have this in one command -->
+                    <or>
+                        <!-- $(MW_ALLOW_ANY_CUDA) should be set to a non-empty string -->
+                        <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
+                        <cmdReturns name="&quot;$$\..\..\bin\nvcc&quot; --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                    </or>
                 </and>
                 <fileExists name="$MATLABROOT\sys\cuda\win64\cuda\lib\x64\cudart.lib"/>
-			</or>
+            </or>
+            <!-- cmdReturns will replace all backslashes with a single. Thus we need to fix the path --> 
+            <or>
+                <dirExists name="$$" />
+                <dirExists name="\$$" />
+            </or>
         </CUDA_LIB_PATH>
-        <CUDA_BIN_PATH>
+        <CUDA_ROOT> <!--  It is more useful to keep the path to the CUDA root instead of the path to nvcc -->
             <or>
                 <!-- This section is for UNC paths. We can only execute nvcc --version with no quotes around a UNC path -->
                 <and>
@@ -190,7 +276,11 @@
                         </and>
                     </or>
                     <!-- cmdReturns will replace all backslashes with a single backslash unless they are the very first characters -->
-                    <cmdReturns name="$$\nvcc --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                    <dirExists name="$$\.." />
+                    <or>
+                        <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
+                        <cmdReturns name="$$\bin\nvcc --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                    </or>
                 </and>
                 <!-- For local paths, duplicate the same syntax in order to execute nvcc --version with quotes around the path, to handle spaces -->
                 <and>
@@ -211,17 +301,92 @@
                             <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vXXX_CUDA_VER\bin\nvcc.exe" />
                         </and>
                     </or>
-                    <cmdReturns name="&quot;$$\nvcc&quot; --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                    <dirExists name="$$\.." />
+                    <or>
+                        <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
+                        <cmdReturns name="&quot;$$\bin\nvcc&quot; --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                    </or>
                 </and>
-                <fileExists name="$MATLABROOT\sys\cuda\win64\cuda\bin\nvcc.exe"/> <!-- No user-installed nvcc was found. Use the shipped -->
+                <and>
+                    <fileExists name="$MATLABROOT\sys\cuda\win64\cuda\bin\nvcc.exe"/> <!-- No user-installed nvcc was found. Use the shipped -->
+                    <dirExists name="$$\.." />
+                </and>
             </or>
-        </CUDA_BIN_PATH>
+            <or>
+                <dirExists name="$$" />
+                <dirExists name="\$$" />
+            </or>
+        </CUDA_ROOT>
+        <!-- We need to add to the path and link against the right libdevice library -->
+        <LIBDEVICE>
+            <or>
+                <!-- This section is for UNC paths. We can only execute nvcc --version with no quotes around a UNC path -->
+                <and>
+                    <or>
+                        <and>
+                            <envVarExists name="MW_NVCC_PATH"/>
+                            <fileExists name="$$\nvcc.exe" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_BIN_PATH"/>
+                            <fileExists name="$$\nvcc.exe" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_PATH"/>
+                            <fileExists name="$$\bin\nvcc.exe" />
+                        </and>
+                        <and>
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vXXX_CUDA_VER\bin\nvcc.exe" />
+                        </and>
+                    </or>
+                    <!-- cmdReturns will replace all backslashes with a single backslash unless they are the very first characters -->
+                    <dirExists name="$$\..\nvvm\libdevice" />
+                    <or>
+                        <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
+                        <cmdReturns name="$$\..\..\bin\nvcc --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                    </or>
+                </and>
+                <!-- For local paths, duplicate the same syntax in order to execute nvcc --version with quotes around the path, to handle spaces -->
+                <and>
+                    <or>
+                        <and>
+                            <envVarExists name="MW_NVCC_PATH"/>
+                            <fileExists name="$$\nvcc.exe" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_BIN_PATH"/>
+                            <fileExists name="$$\nvcc.exe" />
+                        </and>
+                        <and>
+                            <envVarExists name="CUDA_PATH"/>
+                            <fileExists name="$$\bin\nvcc.exe" />
+                        </and>
+                        <and>
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vXXX_CUDA_VER\bin\nvcc.exe" />
+                        </and>
+                    </or>
+                    <dirExists name="$$\..\nvvm\libdevice" />
+                    <or>
+                        <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
+                        <cmdReturns name="&quot;$$\..\..\bin\nvcc&quot; --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                    </or>
+                </and>
+                <and>
+                    <fileExists name="$MATLABROOT\sys\cuda\win64\cuda\bin\nvcc.exe"/> <!-- No user-installed nvcc was found. Use the shipped -->
+                    <dirExists name="$MATLABROOT\bin\win64" />
+                </and>
+            </or>
+            <or>
+                <dirExists name="$$" />
+                <dirExists name="\$$" />
+            </or>
+        </LIBDEVICE>
     </locationFinder>
-    <!-- To use the shipping CUDA toolkit we need to adjust the PATH -->
+    <!-- PATH: We need to expand $PATH with the paths to NVVM, NVCC, ptxas and the paths to .lib and .dll -->
     <env
-        PATH="$MATLABROOT\bin\$ARCH;$CUDA_BIN_PATH;$VCINSTALLDIR\bin\HostX64\x64\;$VCROOT\Common7\IDE\VC\vcpackages;$VCROOT\Common7\IDE;$VCROOT\Common7\Tools;$SDKROOT\Bin\$SDKVERSION\x64;$SDKROOT\Bin\$SDKVERSION\x86;$SDKROOT\Bin\x64;$SDKROOT\Bin\x86;"
-        INCLUDE="$VCINSTALLDIR\include;$VCINSTALLDIR\atlmfc\include;$KITSROOT\include\$SDKVERSION\ucrt;$KITSROOT\include\$SDKVERSION\shared;$KITSROOT\include\$SDKVERSION\um;$KITSROOT\include\$SDKVERSION\winrt;$MATLABROOT\extern\include;$MATLABROOT\toolbox\parallel\gpu\extern\include"
-        LIB="$MATLABROOT\sys\cuda\$ARCH\cuda\lib\x64;$VCINSTALLDIR\lib\x64;$VCINSTALLDIR\atlmfc\lib\x64;$KITSROOT\Lib\$SDKVERSION\ucrt\x64;$KITSROOT\lib\$SDKVERSION\um\x64;$MATLABROOT\lib\$ARCH;$CUDA_LIB_PATH"
+        PATH="$CUDA_PATH;$CUDA_PATH\nvvm\bin;$CUDA_BIN_PATH;$VCINSTALLDIR\bin\HostX64\x64\;$VCROOT\Common7\IDE\VC\vcpackages;$VCROOT\Common7\IDE;$VCROOT\Common7\Tools;$SDKROOT\Bin\$SDKVERSION\x64;$SDKROOT\Bin\$SDKVERSION\x86;$SDKROOT\Bin\x64;$SDKROOT\Bin\x86;"
+        INCLUDE="$CUDA_PATH\include;$VCINSTALLDIR\include;$VCINSTALLDIR\atlmfc\include;$KITSROOT\include\$SDKVERSION\ucrt;$KITSROOT\include\$SDKVERSION\shared;$KITSROOT\include\$SDKVERSION\um;$KITSROOT\include\$SDKVERSION\winrt;$MATLABROOT\extern\include;$MATLABROOT\toolbox\parallel\gpu\extern\include"
+        LIB="$CUDA_PATH;$CUDA_LIB_PATH;$VCINSTALLDIR\lib\x64;$VCINSTALLDIR\atlmfc\lib\x64;$KITSROOT\Lib\$SDKVERSION\ucrt\x64;$KITSROOT\lib\$SDKVERSION\um\x64;$MATLABROOT\lib\$ARCH"
         LIBPATH="$VCINSTALLDIR\lib\x64;$VCINSTALLDIR\atlmfc\lib\x64"
     />
 </config>

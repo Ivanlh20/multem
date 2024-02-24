@@ -33,12 +33,12 @@ input_multem.potential_slicing = 1;              % ePS_Planes = 1, ePS_dz_Proj =
 input_multem.pn_model = 3;                       % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multem.pn_coh_contrib = 0;
 input_multem.pn_single_conf = 0;                 % 1: true, 0:false (extract single configuration)
-input_multem.pn_nconf = 10;                      % true: specific phonon configuration, false: number of frozen phonon configurations
+input_multem.pn_nconf = 25;                      % true: specific phonon configuration, false: number of frozen phonon configurations
 input_multem.pn_dim = 110;                       % phonon dimensions (xyz)
 input_multem.pn_seed = 300183;                   % Random seed(frozen phonon)
 
 %%%%%%%%%%%%%%%%%%%%%%% Specimen information %%%%%%%%%%%%%%%%%%%%%%%
-na = 8; nb = 8; nc = 40; ncu = 2; rmsd_3d = 0.085;
+na = 8; nb = 8; nc = 19; ncu = 2; rmsd_3d = 0.085;
 
 [input_multem.spec_atoms, input_multem.spec_lx...
 , input_multem.spec_ly, input_multem.spec_lz...
@@ -49,17 +49,17 @@ input_multem.thick_type = 1;                     % eTT_Whole_Spec = 1, eTT_Throu
 input_multem.thick = 0;   % Array of thickes (�)
 
 %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.nx = 2048;
-input_multem.ny = 2048;
+input_multem.nx = 1024;
+input_multem.ny = 1024;
 input_multem.bwl = 0;                            % Band-width limit, 1: true, 0:false
 
 %%%%%%%%%%%%%%%%%%%% Microscope parameters %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.E_0 = 100;                          % Acceleration Voltage (keV)
+input_multem.E_0 = 300;                          % Acceleration Voltage (keV)
 input_multem.theta = 0.0;                        % Till ilumination (�)
 input_multem.phi = 0.0;                          % Till ilumination (�)
 
 %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.illumination_model = 4;             % 1: coherente mode, 4: Numerical integration
+input_multem.illumination_model = 1;             % 1: coherente mode, 4: Numerical integration
 input_multem.temporal_spatial_incoh = 1;         % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Incident wave %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,15 +70,15 @@ input_multem.iw_y = input_multem.spec_ly/2;  % y position
 
 %%%%%%%%%%%%%%%%%%%%%%%% condenser lens %%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.cond_lens_m = 0;                   % Vortex momentum
-input_multem.cond_lens_c_10 = 1110;             % Defocus (�)
-input_multem.cond_lens_c_30 = 3.3;              % Third order spherical aberration (mm)
+input_multem.cond_lens_c_10 = 100;             % Defocus (�)
+input_multem.cond_lens_c_30 = 0.01;              % Third order spherical aberration (mm)
 input_multem.cond_lens_c_50 = 0.00;             % Fifth order spherical aberration (mm)
 input_multem.cond_lens_c_12 = 0.0;              % Twofold astigmatism (�)
 input_multem.cond_lens_phi_12 = 0.0;            % Azimuthal angle of the twofold astigmatism (�)
 input_multem.cond_lens_c_23 = 0.0;              % Threefold astigmatism (�)
 input_multem.cond_lens_phi_23 = 0.0;            % Azimuthal angle of the threefold astigmatism (�)
 input_multem.cond_lens_inner_aper_ang = 0.0;    % Inner aperture (mrad)
-input_multem.cond_lens_outer_aper_ang = 7.50;   % Outer aperture (mrad)
+input_multem.cond_lens_outer_aper_ang = 16;   % Outer aperture (mrad)
 
 %%%%%%%%% defocus spread function %%%%%%%%%%%%
 dsf_sigma = ilc_iehwgd_2_sigma(32); % from defocus spread to standard deviation
@@ -104,7 +104,7 @@ tic;
 output_multislice = input_multem.ilc_multem;
 toc;
 
-c = 1e5;
+c = 1e1;
 figure(1); clf;
 for i=1:length(output_multislice.data)
     m2psi_tot = output_multislice.data(i).m2psi_tot;

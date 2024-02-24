@@ -27,7 +27,7 @@ na = 4; nb = 4; nc = 4; ncu = 2; rmsd_3d = 0.25;
 [input_multem.spec_atoms, input_multem.spec_lx...
 , input_multem.spec_ly, input_multem.spec_lz...
 , a, b, c, input_multem.spec_dz] = Au001_xtl(na, nb, nc, ncu, rmsd_3d);
-
+input_multem.spec_dz = 10000;
 input_multem.nx = 2048; 
 input_multem.ny = 2048;
 
