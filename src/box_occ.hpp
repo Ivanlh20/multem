@@ -104,32 +104,50 @@ namespace mt
 				}
 			}
 
-			std::vector<int> range_loop_pbc(const int &k, const int &n_k)
-			{
-				if(k==0)
-				{
-					return std::vector<int>{n_k-2, n_k-1, k, k+1, k+2};
-				}
-				else if(k==1)
-				{
-					return std::vector<int>{n_k-1, k-1, k, k+1, k+2};
-				}
-				else if(k==n_k-1)
-				{
-					return std::vector<int>{k-2, k-1, k, 0, 1};
-				}
-				else if(k==n_k-2)
-				{
-					return std::vector<int>{k-2, k-1, k, k+1, 0};
-				}
-				else
-				{
-					return std::vector<int>{k-2, k-1, k, k+1, k+2};
-				}
-			}	 
+			// std::vector<int> range_loop_pbc(const int &k, const int &n_k) {
+			// 	return {
+			// 		(k - 2 + n_k) % n_k,
+			// 		(k - 1 + n_k) % n_k,
+			// 		k,
+			// 		(k + 1) % n_k,
+			// 		(k + 2) % n_k
+			// 	};
+			// }
+
+			std::vector<int> range_loop_pbc(const int &k, const int &n_k) {
+				return {
+					(k - 1 + n_k) % n_k,
+					k,
+					(k + 1) % n_k,
+				};
+			}
+
+			// std::vector<int> range_loop_pbc(const int &k, const int &n_k)
+			// {
+			// 	if(k==0)
+			// 	{
+			// 		return std::vector<int>{n_k-2, n_k-1, k, k+1, k+2};
+			// 	}
+			// 	else if(k==1)
+			// 	{
+			// 		return std::vector<int>{n_k-1, k-1, k, k+1, k+2};
+			// 	}
+			// 	else if(k==n_k-1)
+			// 	{
+			// 		return std::vector<int>{k-2, k-1, k, 0, 1};
+			// 	}
+			// 	else if(k==n_k-2)
+			// 	{
+			// 		return std::vector<int>{k-2, k-1, k, k+1, 0};
+			// 	}
+			// 	else
+			// 	{
+			// 		return std::vector<int>{k-2, k-1, k, k+1, k+2};
+			// 	}
+			// }	 
 
 			template <class TAtom>
-			bool check_r_min(TAtom &atoms, const r3d<T> &r)
+			bool check_r_min(TAtom &atoms, const r3d<T> &r, T &d2)
 			{
 				const int ix_i = static_cast<int>(floor(r.x/a_min));
 				const int iy_i = static_cast<int>(floor(r.y/a_min));
@@ -153,7 +171,7 @@ namespace mt
 							auto iatoms = get_occ(ix, iy, iz);
 							if(iatoms>-1)
 							{
-								auto d2 = atoms.norm_pbc_xy(iatoms, r);
+								d2 = atoms.norm_pbc_xy(iatoms, r);
 								if(d2<d2_min)
 								{
 									return false;

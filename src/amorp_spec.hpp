@@ -47,19 +47,17 @@ namespace mt
 			for (int iatoms = iatoms_0; iatoms < m_atoms.size(); iatoms++)
 			{
 				r3d<T> r;
-				if (rand_point(m_atoms, r))
-				{
-					box.set_occ(r, iatoms_c);
-					m_atoms.Z[iatoms_c] = Z;
-					m_atoms.x[iatoms_c] = r.x;
-					m_atoms.y[iatoms_c] = r.y;
-					m_atoms.z[iatoms_c] = r.z;
-					m_atoms.sigma[iatoms_c] = rms_3d;
-					m_atoms.occ[iatoms_c] = 1.0;
-					m_atoms.region[iatoms_c] = region;
-					m_atoms.charge[iatoms_c] = 0;
-					iatoms_c++;
-				}
+				rand_point(m_atoms, r);
+				box.set_occ(r, iatoms_c);
+				m_atoms.Z[iatoms_c] = Z;
+				m_atoms.x[iatoms_c] = r.x;
+				m_atoms.y[iatoms_c] = r.y;
+				m_atoms.z[iatoms_c] = r.z;
+				m_atoms.sigma[iatoms_c] = rms_3d;
+				m_atoms.occ[iatoms_c] = 1.0;
+				m_atoms.region[iatoms_c] = region;
+				m_atoms.charge[iatoms_c] = 0;
+				iatoms_c++;
 			}
 			m_atoms.resize(iatoms_c);
 			m_atoms.shrink_to_fit();
@@ -177,7 +175,7 @@ namespace mt
 				box.set_occ(m_atoms.to_r3d(iatoms), iatoms);
 			}
 
-			 return natoms_sct;
+			return natoms_sct;
 		}
 
 		T convert_density(int Z, T m_rho)
@@ -203,13 +201,20 @@ namespace mt
 
 		bool rand_point(Atom_Data<T> &atoms, r3d<T> &r_o)
 		{
+			T d2_max = 0;
 			for(auto itrial = 0; itrial < m_ntrial; itrial++)
 			{
 				auto r = rand_3d();
-				if(box.check_r_min(atoms, r))
+				T d2=0;
+				if(box.check_r_min(atoms, r, d2))
 				{
 					r_o = r;
 					return true;
+				}
+				else if(d2>d2_max)
+				{
+					d2_max = d2;
+					r_o = r;
 				}
 			}
 

@@ -39,6 +39,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[ ])
 	mt::Atom_Data<float> atoms; 
 	atoms.set_atoms(ratoms.rows, ratoms.cols, ratoms.real);
 
+	// for(auto i = 0; i<atoms.size(); i++)
+	// {
+	// 	mexPrintf("i = %d, [Z, x, y, z, sigma] = %8.5f,  %8.5f, %8.5f, %8.5f\n", i, double(atoms.Z[i]), double(atoms.x[i]), double(atoms.y[i]), double(atoms.z[i]), double(atoms.sigma[i]));
+	// }
+
+
 	mt::rdf_3d(atoms, r_max, nr, r, rdf);
 
 	thrust::copy(r.begin(), r.end(), rr_o.begin());

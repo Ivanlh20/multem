@@ -13,7 +13,7 @@ input_multem = multem_input.parameters;          % Load default values;
 
 %%%%%%%%%%%%%%%%%%%%% Set system configuration %%%%%%%%%%%%%%%%%%%%%
 input_multem.system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
-input_multem.system_conf.device = 2;                              % eD_CPU = 1, eD_GPU = 2
+input_multem.system_conf.device = 1;                              % eD_CPU = 1, eD_GPU = 2
 input_multem.system_conf.cpu_nthread = 1; 
 input_multem.system_conf.gpu_device = 0;
 
@@ -38,7 +38,7 @@ input_multem.pn_dim = 110;                       % phonon dimensions (xyz)
 input_multem.pn_seed = 300183;                   % Random seed(frozen phonon)
 
 %%%%%%%%%%%%%%%%%%%%%%% Specimen information %%%%%%%%%%%%%%%%%%%%%%%
-na = 16; nb = 16; nc = 20; ncu = 2; rmsd_3d = 0.085;
+na = 16; nb = 16; nc = 5; ncu = 2; rmsd_3d = 0.085;
 
 [input_multem.spec_atoms, input_multem.spec_lx...
 , input_multem.spec_ly, input_multem.spec_lz...
