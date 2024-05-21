@@ -183,7 +183,7 @@ function [input_multem] = ilm_dflt_input_multem()
     input_multem.obj_lens_phi_56 = 0.00;                        % [phi_A5]	Azimuthal angle of 6-fold astigmatism (°)
 
     input_multem.obj_lens_inner_aper_ang = 0.0;     			% Inner aperture (mrad) 
-    input_multem.obj_lens_outer_aper_ang = 24.0;    			% Outer aperture (mrad)
+    input_multem.obj_lens_outer_aper_ang = 21.4;    			% Outer aperture (mrad)
 
     %%%%%%%%% defocus spread function %%%%%%%%%%%%
     dsf_sigma = ilc_iehwgd_2_sigma(32);                         % from defocus spread to standard deviation

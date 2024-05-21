@@ -38,6 +38,7 @@
 
 #include "cgpu_fcns.cuh"
 #include "quadrature.hpp"
+#include <mex.h>
 
 namespace mt
 {
@@ -1724,12 +1725,14 @@ namespace mt
 		for (int iatoms = 0; iatoms < natoms; iatoms++)
 		{
 			const r3d<T> r_i = atoms.to_r3d(iatoms);
+			// mexPrintf("i = %d, [x, y, z] = %8.5f,  %8.5f, %8.5f, %8.5f\n", iatoms, r_i.x, r_i.y, r_i.z);
 			for (int iatoms_s = 0; iatoms_s < natoms; iatoms_s++)
 			{
 				auto d2 = atoms.norm(iatoms_s, r_i);
 				if ((iatoms != iatoms_s) && (d2 < r2_max))
 				{
 					auto ir = static_cast<int>(floor(sqrt(d2) / dr));
+					// mexPrintf("i = %d, d = %8.5f\n", iatoms, sqrt(d2));
 					rdf[ir] += 1;
 				}
 			}

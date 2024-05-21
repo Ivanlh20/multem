@@ -27,7 +27,7 @@ input_multem.interaction_model = 1;              % eESIM_Multislice = 1, eESIM_P
 input_multem.potential_type = 6;                 % ePT_Doyle_0_4 = 1, ePT_Peng_0_4 = 2, ePT_Peng_0_12 = 3, ePT_Kirkland_0_12 = 4, ePT_Weickenmeier_0_12 = 5, ePT_Lobato_0_12 = 6
 
 %%%%%%%%%%%%%%%%%%%%%%% Potential slicing %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.potential_slicing = 1;              % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
+input_multem.potential_slicing = 2;              % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 
 %%%%%%%%%%%%%%% Electron-Phonon interaction model %%%%%%%%%%%%%%%%%%
 input_multem.pn_model = 3;                       % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
@@ -44,8 +44,26 @@ na = 8; nb = 8; nc = 40; ncu = 2; rmsd_3d = 0.085;
 , input_multem.spec_ly, input_multem.spec_lz...
 , a, b, c, input_multem.spec_dz] = Cu001_xtl(na, nb, nc, ncu, rmsd_3d);
 
+% load('/media/ivan/Data_4TB/research/neural_network/nt_carbon/specimen/spec_relax_airebo_ppp/amorphous_carbon_lz_1000.00_rho_2.20.mat')
+% input_multem.spec_lx = bs(1);
+% input_multem.spec_ly = bs(2);
+% input_multem.spec_lz = bs(3);
+% nput_multem.spec_dz = 20;
+% atoms_0 = [];
+% n = 2;
+% for ix = 1:n
+%     for iy = 1:n
+%         atoms_t = atoms;
+%         atoms_t(:, 2:3) = atoms_t(:, 2:3) + bs(1:2).*([ix, iy]-1);
+%         atoms_0 = [atoms_0; atoms_t];
+%     end
+% end
+% input_multem.spec_atoms = atoms_0;
+% input_multem.spec_lx = n*input_multem.spec_lx;
+% input_multem.spec_ly = n*input_multem.spec_ly;
+
 %%%%%%%%%%%%%%%%%%%%%% Specimen thickness %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.thick_type = 2;                     % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
+input_multem.thick_type = 1;                     % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
 input_multem.thick = c:c:1000;                   % Array of thickes (�)
 
 %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

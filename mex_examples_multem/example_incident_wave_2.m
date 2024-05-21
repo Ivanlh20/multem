@@ -8,11 +8,12 @@ addpath([fileparts(pwd) filesep 'mex_bin'])
 addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
-input_multem = multem_input.parameters;         % Load default values;
+input_multem = ilm_dflt_input_multem();          % Load default values;
+% input_multem = multem_input.parameters;          % Load default values;
 
 input_multem.system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
-input_multem.system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
-input_multem.system_conf.cpu_nthread = 4; 
+input_multem.system_conf.device = 1;                        % eD_CPU = 1, eD_GPU = 2
+input_multem.system_conf.cpu_nthread = 1; 
 input_multem.system_conf.gpu_device = 0;
 
 input_multem.E_0 = 200;                          % Acceleration Voltage (keV)
@@ -52,11 +53,13 @@ for x = (0.4:0.025:0.6)*input_multem.spec_lx
         
         input_multem.iw_x = x;
         input_multem.iw_y = y;
-%         input_multem.iw_x = input_multem.spec_lx/2;
-%         input_multem.iw_y = input_multem.spec_ly/2;
+        input_multem.iw_x = input_multem.spec_lx/2;
+        input_multem.iw_y = input_multem.spec_ly/2;
         
         tic;
-        output_incident_wave = input_multem.ilc_incident_wave; 
+%         output_incident_wave = input_multem.ilc_incident_wave; 
+%         output_incident_wave = ilc_incident_wave(input_multem.toStruct); 
+        output_multislice = ilc_multem(input_multem.system_conf, input_multem);
         toc;
         psi_0 = flipud(output_incident_wave.psi_0);
         figure(2);
