@@ -31,7 +31,7 @@ input_multem.pn_nconf = 5;
 input_multem.illumination_model = 2;            % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
 input_multem.temporal_spatial_incoh = 1;        % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 
-input_multem.bwl = 0;
+input_multem.bwl = 1;
 
 input_multem.E_0 = 300;                         % Acceleration Voltage (keV)
 input_multem.theta = 0.0;                       % Till ilumination (�)
