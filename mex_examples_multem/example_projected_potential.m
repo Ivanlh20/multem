@@ -39,14 +39,14 @@ for islice = 1:nslice
     input_multem.islice = islice;
     
     input_multem.system_conf.device = 1;                        % eD_CPU = 1, eD_GPU = 2
-    input_multem.system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
+    input_multem.system_conf.precision = 2;                     % eP_Float = 1, eP_double = 2
     tic;
     clear ilc_projected_potential;
     ouput_multislice_1 = input_multem.ilc_projected_potential;
     toc;
     
     input_multem.system_conf.device = 2;                        % eD_CPU = 1, eD_GPU = 2
-    input_multem.system_conf.precision = 1;                     % eP_Float = 1, eP_double = 2
+    input_multem.system_conf.precision = 2;                     % eP_Float = 1, eP_double = 2
     tic;
     clear ilc_projected_potential;
     ouput_multislice_2 = input_multem.ilc_projected_potential;

@@ -51,7 +51,7 @@ input_multem.thick = c:c:1000;                   % Array of thickes (�)
 %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.nx = 1024;
 input_multem.ny = 1024;
-input_multem.bwl = 1;                            % Band-width limit, 1: true, 0:false
+input_multem.bwl = 0;                            % Band-width limit, 1: true, 0:false
 
 %%%%%%%%%%%%%%%%%%%% Microscope parameters %%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.E_0 = 300;                          % Acceleration Voltage (keV)

@@ -102,7 +102,10 @@ namespace mt
 							y[ib] = input_multislice->grid_2d.exp_factor_Ry(y_b[ib]);
 						}
 
-						mt::mul_exp_g_factor_2d(*stream, input_multislice->grid_2d, x, y, fpsi_0, psi);
+						// mt::mul_exp_g_factor_2d(*stream, input_multislice->grid_2d, x, y, fpsi_0, psi);
+						mt::exp_g_factor_2d(*stream, input_multislice->grid_2d, x[0], y[0], fpsi_0, psi);
+
+						// mt::assign(fpsi_0, psi);
 
 						fft_2d->inverse(psi);
 					}

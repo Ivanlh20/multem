@@ -28,7 +28,7 @@ input_multem.pn_seed = 300183;                  % Random seed(frozen phonon)
 input_multem.pn_single_conf = 0;                % 1: true, 0:false (extract single configuration)
 input_multem.pn_nconf = 5;                      % true: phonon configuration, false: number of frozen phonon configurations
 
-input_multem.bwl = 1;                           % Band-width limit, 1: true, 0:false
+input_multem.bwl = 0;                           % Band-width limit, 1: true, 0:false
 
 input_multem.E_0 = 300;                         % Acceleration Voltage (keV)
 input_multem.theta = 0.0;                       % Till ilumination (�)

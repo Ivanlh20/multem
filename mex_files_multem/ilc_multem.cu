@@ -522,6 +522,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	auto system_conf = mt::read_system_conf(prhs[0]);
 	int idx_0 = (system_conf.active)?1:0;
 
+	// run_multislice<float, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
+
 	if (system_conf.is_float_host())
 	{
 		//mexPrintf("cpu - float precision calculation\n");
@@ -542,5 +544,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		//mexPrintf("gpu - double precision calculation\n");
 		run_multislice<double, mt::e_device>(system_conf, prhs[idx_0], plhs[0]);
 	}
-	//cudaDeviceReset();
+	// //cudaDeviceReset();
 }

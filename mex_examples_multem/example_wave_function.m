@@ -29,7 +29,7 @@ input_multem.pn_nconf = 3;                      % true: phonon configuration, fa
 input_multem.thick_type = 1;                % eTT_Whole_Spec = 1, eTT_Through_Thick = 2, eTT_Through_Slices = 3
 input_multem.thick = 0;                     % Array of thickes
 
-input_multem.bwl = 1;
+input_multem.bwl = 0;
 
 input_multem.E_0 = 100;
 input_multem.theta = 0.01;

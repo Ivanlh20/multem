@@ -133,6 +133,8 @@ namespace mt
 
 				if(atoms.size() == 0)
 				{
+					z_plane.resize(1);
+					z_plane[0] = 0.0;
 					return z_plane;
 				}
 
@@ -167,8 +169,8 @@ namespace mt
 				}
 
 				std::vector<double> zt2(z_plane.begin(), z_plane.end());
-	auto bb_ali = !atoms.amorp_lay_info.empty();
-	if(bb_ali && (fabs(atoms.z_min-z_plane.front())>z_eps))
+				auto bb_ali = !atoms.amorp_lay_info.empty();
+				if(bb_ali && (fabs(atoms.z_min-z_plane.front())>z_eps))
 				{
 					T dz_b = get_spacing(1, z_plane);
 					auto amorp = atoms.amorp_lay_info.front();
@@ -176,7 +178,7 @@ namespace mt
 					z_plane.insert(z_plane.begin(), z_plane_top.begin(), z_plane_top.end());
 				}
 
-	 if(bb_ali && (fabs(z_plane.back()-atoms.z_max)>z_eps))
+				if(bb_ali && (fabs(z_plane.back()-atoms.z_max)>z_eps))
 				{
 					T dz_b = get_spacing(z_plane.size()-1, z_plane);
 					auto amorp = atoms.amorp_lay_info.back();
@@ -282,6 +284,20 @@ namespace mt
 				auto b_sws = input_multislice->is_subslicing_whole_spec();
 
 				Vector<Thick<T>, e_host> thick(input_multislice->thick.size());
+
+				if (atoms.size() == 0)
+				{
+					for(auto ik = 0; ik<thick.size(); ik++)
+					{
+						thick[ik].z = input_multislice->thick[ik];
+						thick[ik].islice = 0;
+						thick[ik].iatom_e = 0;
+						thick[ik].z_zero_def_plane = 0;
+						thick[ik].z_back_prop = 0;
+					}
+					return thick;
+				}
+				
 				for(auto ik = 0; ik<thick.size(); ik++)
 				{
 					thick[ik].z = input_multislice->thick[ik];
@@ -389,6 +405,11 @@ namespace mt
 			// find atoms in slice
 			int fd_by_z(TVector_r &z, T z_e, bool Inc_Borders)
 			{
+				if (z.size() == 0)
+				{
+					return -1;
+				}
+
 				int iz_e =-1;
 				z_e = (Inc_Borders)?z_e+Epsilon<T>::rel:z_e;
 

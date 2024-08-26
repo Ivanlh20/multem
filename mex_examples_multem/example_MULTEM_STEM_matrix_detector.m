@@ -9,12 +9,13 @@ addpath([fileparts(pwd) filesep 'crystalline_materials'])
 addpath([fileparts(pwd) filesep 'matlab_functions'])
 
 %%%%%%%%%%%%%%%%%% Load multem default parameter %%%%%%%%$$%%%%%%%%%
-input_multem = multem_input.parameters;          % Load default values;
+% input_multem = multem_input.parameters;          % Load default values;
+input_multem = ilm_dflt_input_multem();
 
 %%%%%%%%%%%%%%%%%%%%% Set system configuration %%%%%%%%%%%%%%%%%%%%%
-input_multem.system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
+input_multem.system_conf.precision = 2;                           % eP_Float = 1, eP_double = 2
 input_multem.system_conf.device = 2;                              % eD_CPU = 1, eD_GPU = 2
-input_multem.system_conf.cpu_nthread = 6;
+input_multem.system_conf.cpu_nthread = 4;
 input_multem.system_conf.gpu_device = 0;
 
 %%%%%%%%%%%%%%%%%%%% Set simulation experiment %%%%%%%%%%%%%%%%%%%%%
@@ -30,7 +31,7 @@ input_multem.potential_type = 6;                 % ePT_Doyle_0_4 = 1, ePT_Peng_0
 input_multem.potential_slicing = 1;              % ePS_Planes = 1, ePS_dz_Proj = 2, ePS_dz_Sub = 3, ePS_Auto = 4
 
 %%%%%%%%%%%%%%% Electron-Phonon interaction model %%%%%%%%%%%%%%%%%%
-input_multem.pn_model = 3;                       % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
+input_multem.pn_model = 1;                       % ePM_Still_Atom = 1, ePM_Absorptive = 2, ePM_Frozen_Phonon = 3
 input_multem.pn_coh_contrib = 0;
 input_multem.pn_single_conf = 0;                 % 1: true, 0:false (extract single configuration)
 input_multem.pn_nconf = 10;                      % true: specific phonon configuration, false: number of frozen phonon configurations
@@ -51,7 +52,7 @@ input_multem.thick = c/2:c:1000;                   % Array of thickes (�)
 %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.nx = 512;
 input_multem.ny = 512;
-input_multem.bwl = 1;                            % Band-width limit, 1: true, 0:false
+input_multem.bwl = 0;                            % Band-width limit, 1: true, 0:false
 
 %%%%%%%%%%%%%%%%%%%% Microscope parameters %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.E_0 = 300;                          % Acceleration Voltage (keV)
@@ -100,11 +101,12 @@ input_multem.scanning_ye = 4*b;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Circular Detector %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.detector.type = 1;  % eDT_Circular = 1, eDT_Radial = 2, eDT_Matrix = 3
 input_multem.detector.cir(1).inner_ang = 40;  % Inner angle(mrad)
-input_multem.detector.cir(1).outer_ang = 160; % Outer angle(mrad)
+input_multem.detector.cir(1).outer_ang = 120; % Outer angle(mrad)
 
 clear ilc_multem;
 tic;
-output_radial_detector = input_multem.ilc_multem;
+% output_radial_detector = input_multem.ilc_multem;
+output_radial_detector = ilc_multem(input_multem.system_conf, input_multem);
 toc;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Matrix Detector %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -130,19 +132,20 @@ input_multem.detector.matrix(1).fR = detector;
 % Plot Matrix detector
 figure(1); clf;
 imagesc(detector);
-caxis([0 1]);
+clim([0 1]);
 axis image;
 colormap gray;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% run multem %%%%%%%%%%%%%%%%%%%%%%%%%%
 clear ilc_multem;
 tic;
-output_matrix_detector = input_multem.ilc_multem;
+% output_matrix_detector = input_multem.ilc_multem;
+output_matrix_detector = ilc_multem(input_multem.system_conf, input_multem);
 toc;
 
 figure(2); clf;
 for i=1:length(output_radial_detector.data)
-    suptitle(['Thickness = ' num2str(i)])
+    % suptitle(['Thickness = ' num2str(i)])
     subplot(1, 3, 1);
     imagesc(output_radial_detector.data(i).image_tot(1).image);
     title('Radial Detector');
@@ -157,11 +160,11 @@ for i=1:length(output_radial_detector.data)
     colorbar;
     subplot(1, 3, 3);
     dI = output_radial_detector.data(i).image_tot(1).image - output_matrix_detector.data(i).image_tot(1).image;
-    dI(dI<1e-6) = 0;
+    % dI(dI<1e-6) = 0;
     imagesc(dI);
     title('Difference');
     axis image;
     colormap jet;
     colorbar;
-    pause(0.5);
+    pause(0.25);
 end

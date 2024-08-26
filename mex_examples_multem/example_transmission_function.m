@@ -23,7 +23,7 @@ input_multem.pn_seed = 300183;                  % Random seed(frozen phonon)
 input_multem.pn_single_conf = 1;                % 1: true, 0:false
 input_multem.pn_nconf = 1;                      % true: phonon configuration, false: number of frozen phonon configurations
 
-input_multem.bwl = 1;
+input_multem.bwl = 0;
 
 input_multem.E_0 = 300;
 input_multem.theta = 0.0; 

@@ -66,7 +66,7 @@ ny = tfm_pn_fact(g*2*ly,3);
 %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.nx = nx;
 input_multem.ny = ny;
-input_multem.bwl = 1;                            % Band-width limit, 1: true, 0:false
+input_multem.bwl = 0;                            % Band-width limit, 1: true, 0:false
 
 %%%%%%%%%%%%%%%%%%%% Microscope parameters %%%%%%%%%%%%%%%%%%%%%%%%%%
 input_multem.E_0 = 300;                          % Acceleration Voltage (keV)

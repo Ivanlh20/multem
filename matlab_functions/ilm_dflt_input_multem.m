@@ -53,7 +53,7 @@ function [input_multem] = ilm_dflt_input_multem()
     %%%%%%%%%%%%%%%%%%%%%% x-y sampling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     input_multem.nx = 256;                                      % number of pixels in x direction
     input_multem.ny = 256;                                      % number of pixels in y direction
-    input_multem.bwl = 1;                                       % Band-width limit, 1: true, 0:false
+    input_multem.bwl = 0;                                       % Band-width limit, 1: true, 0:false
 
     %%%%%%%%%%%%%%%%%%%%%%%% Simulation type %%%%%%%%%%%%%%%%%%%%%%%%%%%
     % eTEMST_STEM=11, eTEMST_ISTEM=12, eTEMST_CBED=21, eTEMST_CBEI=22, 

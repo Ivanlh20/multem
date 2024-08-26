@@ -92,6 +92,8 @@ function [] = ilm_mex(option, m_file, src, varargin)
     if CUDA_VERSION_D >= 11.0
         CARD_MULT = join([CARD_MULT CARD_86, CARD_87], ' ');
     end
+
+    % CARD_MULT = CARD_75;
     
     if 0
         % Get compute capabilities of all available devices

@@ -1936,10 +1936,11 @@ namespace mt
 			const auto gx = grid_2d.gx_shift(ix);
 			const auto gy = grid_2d.gy_shift(iy);
 
-			T_c exp_sup = 0;
-			for(auto it=0; it<Rx.size(); it++)
+			T_c exp_sup(0, 0);
+			for(auto it=0; it<1; it++)
 			{
 				exp_sup += euler(Rx[it]*gx + Ry[it]*gy);
+				// exp_sup += gx + gy;
 			}
 			psi_o[ixy] = psi_i[ixy]*exp_sup/grid_2d.nxy_r();
 		}

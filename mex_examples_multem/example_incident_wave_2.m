@@ -53,13 +53,12 @@ for x = (0.4:0.025:0.6)*input_multem.spec_lx
         
         input_multem.iw_x = x;
         input_multem.iw_y = y;
-        input_multem.iw_x = input_multem.spec_lx/2;
-        input_multem.iw_y = input_multem.spec_ly/2;
+        % input_multem.iw_x = input_multem.spec_lx/2;
+        % input_multem.iw_y = input_multem.spec_ly/2;
         
         tic;
 %         output_incident_wave = input_multem.ilc_incident_wave; 
-%         output_incident_wave = ilc_incident_wave(input_multem.toStruct); 
-        output_multislice = ilc_multem(input_multem.system_conf, input_multem);
+        output_incident_wave = ilc_incident_wave(input_multem);
         toc;
         psi_0 = flipud(output_incident_wave.psi_0);
         figure(2);
