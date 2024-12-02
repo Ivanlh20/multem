@@ -74,7 +74,7 @@ namespace mt
 				Transmission_Function<T, dev>::set_input_data(input_multislice_i, stream_i, fft2_i);
 			}
 
-			void phase_multiplication(const T_r &gxu, const T_r &gyu, TVector_c &psi_i, TVector_c &psi_o)
+			void phase_multiplication(const T_r &gxu, const T_r &gyu, TVector_c &psi_i, TVector_c &psi_o, bool scaling=true)
 			{
 				if(this->input_multislice->dp_Shift || isZero(gxu, gyu))
 				{
@@ -85,19 +85,20 @@ namespace mt
 					return;
 				}
 
-				mt::exp_r_factor_2d(*(this->stream), this->input_multislice->grid_2d, c_2Pi*gxu, c_2Pi*gyu, psi_i, psi_o);
+				mt::exp_r_factor_2d(*(this->stream), this->input_multislice->grid_2d, c_2Pi*gxu, c_2Pi*gyu, psi_i, psi_o, scaling);
 			}
 
-			void phase_multiplication(const T_r &gxu, const T_r &gyu, TVector_c &psi_io)
+			void phase_multiplication(const T_r &gxu, const T_r &gyu, TVector_c &psi_io, bool scaling=true)
 			{
-				phase_multiplication(gxu, gyu, psi_io, psi_io);
+				phase_multiplication(gxu, gyu, psi_io, psi_io, scaling);
 			}
 
 			TVector_c* get_psi(const eSpace &space, const T_r &gxu, const T_r &gyu, 
 			T_r z, TVector_c &psi_i)
 			{
 				TVector_c *psi_o = &(this->trans_0);
-				phase_multiplication(gxu, gyu, psi_i, *psi_o);
+				// real space not need to include scaling and phase multiplication oposite sign as the propagation
+				phase_multiplication(-gxu, -gyu, psi_i, *psi_o, false); 
 				propagator(space, gxu, gyu, z, *psi_o);
 
 				return psi_o;

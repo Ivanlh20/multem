@@ -1867,12 +1867,13 @@ namespace mt
 		template <class TGrid, class TVector_c>
 		DEVICE_CALLABLE FORCE_INLINE 
 		void exp_r_factor_2d(const int &ix, const int &iy, const TGrid &grid_2d, 
-		const Value_type<TGrid> &gx, const Value_type<TGrid> &gy, TVector_c &psi_i, TVector_c &psi_o)
+		const Value_type<TGrid> &gx, const Value_type<TGrid> &gy, TVector_c &psi_i, TVector_c &psi_o, bool scaling)
 		{
 			const int ixy = grid_2d.ind_col(ix, iy);
 			const auto Rx = grid_2d.Rx_shift(ix)-grid_2d.Rx_c();
 			const auto Ry = grid_2d.Ry_shift(iy)-grid_2d.Ry_c();
-			psi_o[ixy] = psi_i[ixy]*euler(gx*Rx + gy*Ry)/grid_2d.nxy_r();
+			const auto scale = (scaling)?grid_2d.nxy_r():1;
+			psi_o[ixy] = psi_i[ixy]*euler(gx*Rx + gy*Ry)/scale;
 		}
 
 		template <class TGrid, class TVector_r, class TVector_c>

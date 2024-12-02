@@ -921,11 +921,11 @@ namespace mt
 	template <class TGrid, class TVector_c>
 	enable_if_host_vector<TVector_c, void>
 		exp_r_factor_2d(Stream<e_host> &stream, TGrid &grid_2d, Value_type<TGrid> gx, Value_type<TGrid> gy,
-			TVector_c &fPsi_i, TVector_c &fPsi_o)
+			TVector_c &fPsi_i, TVector_c &fPsi_o, bool scaling=true)
 	{
 		stream.set_n_act_stream(grid_2d.nx);
 		stream.set_grid(grid_2d.nx, grid_2d.ny);
-		stream.exec_matrix(host_device_detail::exp_r_factor_2d<TGrid, TVector_c>, grid_2d, gx, gy, fPsi_i, fPsi_o);
+		stream.exec_matrix(host_device_detail::exp_r_factor_2d<TGrid, TVector_c>, grid_2d, gx, gy, fPsi_i, fPsi_o, scaling);
 	}
 
 	template <class TGrid, class TVector_c>

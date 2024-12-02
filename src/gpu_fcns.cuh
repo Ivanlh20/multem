@@ -649,14 +649,14 @@ namespace mt
 		// phase factor 2d
 		template <class TGrid, class T>
 		__global__ void exp_r_factor_2d(TGrid grid_2d, Value_type<TGrid> gx, 
-		Value_type<TGrid> gy, rVector<T> psi_i, rVector<T> psi_o)
+		Value_type<TGrid> gy, rVector<T> psi_i, rVector<T> psi_o, scaling)
 		{
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;
 
 			if((ix < grid_2d.nx) && (iy < grid_2d.ny))
 			{
-				host_device_detail::exp_r_factor_2d(ix, iy, grid_2d, gx, gy, psi_i, psi_o);
+				host_device_detail::exp_r_factor_2d(ix, iy, grid_2d, gx, gy, psi_i, psi_o, scaling);
 			}
 		}
 
@@ -1325,11 +1325,11 @@ namespace mt
 
 	template <class TGrid, class TVector_c>
 	enable_if_device_vector<TVector_c, void>
-	exp_r_factor_2d(Stream<e_device> &stream, TGrid &grid_2d, Value_type<TGrid> gx, Value_type<TGrid> gy, TVector_c &fPsi_i, TVector_c &fPsi_o)
+	exp_r_factor_2d(Stream<e_device> &stream, TGrid &grid_2d, Value_type<TGrid> gx, Value_type<TGrid> gy, TVector_c &fPsi_i, TVector_c &fPsi_o, bool scaling=true)
 	{
 		auto grid_bt = grid_2d.cuda_grid();
 
-		device_detail::exp_r_factor_2d<TGrid, typename TVector_c::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, gx, gy, fPsi_i, fPsi_o);
+		device_detail::exp_r_factor_2d<TGrid, typename TVector_c::value_type><<<grid_bt.Blk, grid_bt.Thr>>>(grid_2d, gx, gy, fPsi_i, fPsi_o, scaling);
 	}
 
 	template <class TGrid, class TVector_c>
