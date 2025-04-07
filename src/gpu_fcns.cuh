@@ -649,7 +649,7 @@ namespace mt
 		// phase factor 2d
 		template <class TGrid, class T>
 		__global__ void exp_r_factor_2d(TGrid grid_2d, Value_type<TGrid> gx, 
-		Value_type<TGrid> gy, rVector<T> psi_i, rVector<T> psi_o, scaling)
+		Value_type<TGrid> gy, rVector<T> psi_i, rVector<T> psi_o, bool scaling)
 		{
 			int iy = threadIdx.x + blockIdx.x*blockDim.x;
 			int ix = threadIdx.y + blockIdx.y*blockDim.y;

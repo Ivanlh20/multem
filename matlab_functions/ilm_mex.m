@@ -30,7 +30,7 @@ function [] = ilm_mex(option, m_file, src, varargin)
             CUDA_PATH = '/usr/local/cuda-10.0';
         end
     end
-
+    % CUDA_PATH = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8';
     CUDA_PATH = ilm_replace_filesep(CUDA_PATH);
     
     %%%%%%%%%%%%%%%%%%%% get cuda version  %%%%%%%%%%%%%%%%%%%%%%%
@@ -88,7 +88,8 @@ function [] = ilm_mex(option, m_file, src, varargin)
     CARD_86="-gencode=arch=compute_86,code=&#92;&quot;sm_86,compute_86&#92;&quot;";
     CARD_87="-gencode=arch=compute_87,code=&#92;&quot;sm_87,compute_87&#92;&quot;";
     CARD_MULT = join([CARD_35, CARD_50, CARD_60, CARD_70, CARD_75], ' ');
-    
+
+    CARD_MULT = join([CARD_50, CARD_60, CARD_70, CARD_75], ' ');
     if CUDA_VERSION_D >= 11.0
         CARD_MULT = join([CARD_MULT CARD_86, CARD_87], ' ');
     end

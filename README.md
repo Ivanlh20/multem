@@ -37,7 +37,7 @@ The precompiled mexfiles are only available for Windows operating system and Ubu
 
 ### Building MULTEM for Matlab
 
-The following steps have been tested and found to work with Matlab 2022b and CUDA 11.8. It is assumed that a C++ compiler such as Visual Studio 2019 Community, g++11.3 or Clang (Xcode 10.x) is installed on your operating system. Additionally, MULTEM also requires the fftw3, BLAS, and LAPACK libraries to be installed.The following steps have been tested and found to work with Matlab 2022b and CUDA 11.8. It is assumed that a C++ compiler such as Visual Studio 2019 Community, g++11.3 or Clang (Xcode 10.x) is installed on your operating system. Additionally, MULTEM also requires the fftw3, BLAS, and LAPACK libraries to be installed.
+The following steps have been tested and found to work with Matlab 2022b and CUDA 11.8. It is assumed that a C++ compiler such as Visual Studio 2022 Community, g++11.3 or Clang (Xcode 10.x) is installed on your operating system. Additionally, MULTEM also requires the fftw3, BLAS, and LAPACK libraries to be installed.The following steps have been tested and found to work with Matlab 2022b and CUDA 11.8. It is assumed that a C++ compiler such as Visual Studio 2022 Community, g++11.3 or Clang (Xcode 10.x) is installed on your operating system. Additionally, MULTEM also requires the fftw3, BLAS, and LAPACK libraries to be installed.
 
 - Firstly, a C++ compiler must be set for Matlab by executing the following command: `mex -setup cpp`. It is important to note that Matlab 2022b only supports the compilers listed above.
 - Next, add the following folders to the Matlab path: crystalline_materials, matlab_functions, and mex_bin.
@@ -50,7 +50,7 @@ The following steps have been tested and found to work with Matlab 2022b and CUD
 
   **for Windows:**
   
-  	- Verify the installation of Visual studio 2019 community.
+  	- Verify the installation of Visual studio 2022 community.
   	- Verify the installation of Cuda 11.8 (https://developer.nvidia.com/cuda-downloads).
   	
   **for Linux:**

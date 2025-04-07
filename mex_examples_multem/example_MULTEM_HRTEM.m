@@ -13,7 +13,7 @@ input_multem = multem_input.parameters;          % Load default values;
 
 %%%%%%%%%%%%%%%%%%%%% Set system configuration %%%%%%%%%%%%%%%%%%%%%
 input_multem.system_conf.precision = 1;                           % eP_Float = 1, eP_double = 2
-input_multem.system_conf.device = 1;                              % eD_CPU = 1, eD_GPU = 2
+input_multem.system_conf.device = 2;                              % eD_CPU = 1, eD_GPU = 2
 input_multem.system_conf.cpu_nthread = 1; 
 input_multem.system_conf.gpu_device = 0;
 
@@ -59,7 +59,7 @@ input_multem.theta = 0.0;                        % Till ilumination (�)
 input_multem.phi = 0.0;                          % Till ilumination (�)
 
 %%%%%%%%%%%%%%%%%%%%%% Illumination model %%%%%%%%%%%%%%%%%%%%%%%%%%
-input_multem.illumination_model = 2;             % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
+input_multem.illumination_model = 1;             % 1: coherente mode, 2: Partial coherente mode, 3: transmission cross coefficient, 4: Numerical integration
 input_multem.temporal_spatial_incoh = 1;         % 1: Temporal and Spatial, 2: Temporal, 3: Spatial
 
 %%%%%%%%%%%%%%%%%%%%%%%% Objective lens %%%%%%%%%%%%%%%%%%%%%%%%
