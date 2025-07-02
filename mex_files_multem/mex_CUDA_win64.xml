@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!-- Copyright 2020-2022 The MathWorks, Inc. -->
-<!-- CUDA MEX options for MSVC 2022 -->
+<!-- CUDA MEX options for MSVC 2019 -->
 <config
     Name="NVIDIA CUDA Compiler"
     ShortName="nvcc"
     HostCompiler="MSVCPP190"
     Manufacturer="NVIDIA"
-    Version="XXX_CUDA_VER"
+    Version="11.8"
     Language="CUDA"
     Priority="A"
     Location="$CUDA_PATH\bin\nvcc.exe" >
@@ -40,8 +40,8 @@
 		MATLABMEX="/DMATLAB_MEX_FILE"           
         INCLUDE="-I&quot;$MATLABROOT\extern\include&quot;"
 
-        ARCH_FLAGS="XXX_ARCH_FLAGS"
-        NVCC_FLAGS="--std=c++14 --default-stream per-thread --expt-extended-lambda --expt-relaxed-constexpr  -allow-unsupported-compiler $ARCH_FLAGS"
+        ARCH_FLAGS="-gencode=arch=compute_50,code=&#92;&quot;sm_50,compute_50&#92;&quot; -gencode=arch=compute_60,code=&#92;&quot;sm_60,compute_60&#92;&quot; -gencode=arch=compute_70,code=&#92;&quot;sm_70,compute_70&#92;&quot; -gencode=arch=compute_75,code=&#92;&quot;sm_75,compute_75&#92;&quot; -gencode=arch=compute_86,code=&#92;&quot;sm_86,compute_86&#92;&quot; -gencode=arch=compute_87,code=&#92;&quot;sm_87,compute_87&#92;&quot;"
+        NVCC_FLAGS="--std=c++14 --default-stream per-thread --expt-extended-lambda --expt-relaxed-constexpr $ARCH_FLAGS"
           
         COMPILER="nvcc"
         COMPFLAGS="--compiler-options=/Zp8,/GR,/bigobj,/W3,/EHs,/nologo,/MD,/arch:AVX2 $NVCC_FLAGS"          
@@ -208,14 +208,14 @@
                             <fileExists name="$$\lib\x64\cudart.lib" />
                         </and>
                         <and>
-                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vXXX_CUDA_VER\lib\x64\cudart.lib" />
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\lib\x64\cudart.lib" />
                         </and>
                     </or>
                     <dirExists name="$$" />
                     <!-- cmdReturns will replace all backslashes with a single backslash unless they are the very first characters -->
                     <or>
                         <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
-                        <cmdReturns name="$$\..\..\bin\nvcc --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                        <cmdReturns name="$$\..\..\bin\nvcc --version | findstr /c:&quot;release 11.8&quot; > NUL && echo $$" />
                     </or>
                 </and>
                 <!-- For local paths, duplicate the same syntax in order to execute nvcc --version with quotes around the path, to handle spaces -->
@@ -234,7 +234,7 @@
                             <fileExists name="$$\lib\x64\cudart.lib" />
                         </and>
                         <and>
-                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vXXX_CUDA_VER\lib\x64\cudart.lib" />
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\lib\x64\cudart.lib" />
                         </and>
                     </or>
                     <dirExists name="$$" />
@@ -243,7 +243,7 @@
                     <or>
                         <!-- $(MW_ALLOW_ANY_CUDA) should be set to a non-empty string -->
                         <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
-                        <cmdReturns name="&quot;$$\..\..\bin\nvcc&quot; --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                        <cmdReturns name="&quot;$$\..\..\bin\nvcc&quot; --version | findstr /c:&quot;release 11.8&quot; > NUL && echo $$" />
                     </or>
                 </and>
                 <fileExists name="$MATLABROOT\sys\cuda\win64\cuda\lib\x64\cudart.lib"/>
@@ -272,14 +272,14 @@
                             <fileExists name="$$\bin\nvcc.exe" />
                         </and>
                         <and>
-                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vXXX_CUDA_VER\bin\nvcc.exe" />
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin\nvcc.exe" />
                         </and>
                     </or>
                     <!-- cmdReturns will replace all backslashes with a single backslash unless they are the very first characters -->
                     <dirExists name="$$\.." />
                     <or>
                         <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
-                        <cmdReturns name="$$\bin\nvcc --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                        <cmdReturns name="$$\bin\nvcc --version | findstr /c:&quot;release 11.8&quot; > NUL && echo $$" />
                     </or>
                 </and>
                 <!-- For local paths, duplicate the same syntax in order to execute nvcc --version with quotes around the path, to handle spaces -->
@@ -298,13 +298,13 @@
                             <fileExists name="$$\bin\nvcc.exe" />
                         </and>
                         <and>
-                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vXXX_CUDA_VER\bin\nvcc.exe" />
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin\nvcc.exe" />
                         </and>
                     </or>
                     <dirExists name="$$\.." />
                     <or>
                         <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
-                        <cmdReturns name="&quot;$$\bin\nvcc&quot; --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                        <cmdReturns name="&quot;$$\bin\nvcc&quot; --version | findstr /c:&quot;release 11.8&quot; > NUL && echo $$" />
                     </or>
                 </and>
                 <and>
@@ -336,14 +336,14 @@
                             <fileExists name="$$\bin\nvcc.exe" />
                         </and>
                         <and>
-                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vXXX_CUDA_VER\bin\nvcc.exe" />
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin\nvcc.exe" />
                         </and>
                     </or>
                     <!-- cmdReturns will replace all backslashes with a single backslash unless they are the very first characters -->
                     <dirExists name="$$\..\nvvm\libdevice" />
                     <or>
                         <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
-                        <cmdReturns name="$$\..\..\bin\nvcc --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                        <cmdReturns name="$$\..\..\bin\nvcc --version | findstr /c:&quot;release 11.8&quot; > NUL && echo $$" />
                     </or>
                 </and>
                 <!-- For local paths, duplicate the same syntax in order to execute nvcc --version with quotes around the path, to handle spaces -->
@@ -362,13 +362,13 @@
                             <fileExists name="$$\bin\nvcc.exe" />
                         </and>
                         <and>
-                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vXXX_CUDA_VER\bin\nvcc.exe" />
+                            <fileExists name="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin\nvcc.exe" />
                         </and>
                     </or>
                     <dirExists name="$$\..\nvvm\libdevice" />
                     <or>
                         <cmdReturns name="(IF DEFINED MW_ALLOW_ANY_CUDA ( true )  ELSE ( false )) > NUL && echo $$" />
-                        <cmdReturns name="&quot;$$\..\..\bin\nvcc&quot; --version | findstr /c:&quot;release XXX_CUDA_VER&quot; > NUL && echo $$" />
+                        <cmdReturns name="&quot;$$\..\..\bin\nvcc&quot; --version | findstr /c:&quot;release 11.8&quot; > NUL && echo $$" />
                     </or>
                 </and>
                 <and>

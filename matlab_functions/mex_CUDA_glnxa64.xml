@@ -34,7 +34,7 @@
           INCLUDE="-I&quot;$MATLABROOT/extern/include&quot;" 
        
           ARCH_FLAGS="XXX_ARCH_FLAGS"
-          NVCC_FLAGS="--std=c++14 --default-stream per-thread --expt-extended-lambda --expt-relaxed-constexpr $ARCH_FLAGS"
+          NVCC_FLAGS="--std=c++14 --default-stream per-thread --expt-extended-lambda --expt-relaxed-constexpr -allow-unsupported-compiler $ARCH_FLAGS"
           
           CXX="$NVCC"
           CFLAGS="--compiler-options=-fexceptions,-fPIC,-fno-omit-frame-pointer,-pthread,-fwrapv,-march=native"

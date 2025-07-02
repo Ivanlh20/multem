@@ -28,7 +28,7 @@ The precompiled GUI interface is only available for Windows operating system.
 
 ### Using precompiled mexfiles for Matlab
 
-The precompiled mexfiles are only available for Windows operating system and Ubuntu 18.04-based Linux distributions.
+The precompiled mexfiles are only available for Windows operating system and Ubuntu 24.10-based Linux distributions.
 
 - Go to [https://github.com/Ivanlh20/MULTEM/releases](https://github.com/Ivanlh20/MULTEM/releases) and download `MULTEM.zip`.
 - Execute `vc_redist.x64.exe` located in `mex_bin` folder. (Windows only)
@@ -37,9 +37,9 @@ The precompiled mexfiles are only available for Windows operating system and Ubu
 
 ### Building MULTEM for Matlab
 
-The following steps have been tested and found to work with Matlab 2022b and CUDA 11.8. It is assumed that a C++ compiler such as Visual Studio 2022 Community, g++11.3 or Clang (Xcode 10.x) is installed on your operating system. Additionally, MULTEM also requires the fftw3, BLAS, and LAPACK libraries to be installed.The following steps have been tested and found to work with Matlab 2022b and CUDA 11.8. It is assumed that a C++ compiler such as Visual Studio 2022 Community, g++11.3 or Clang (Xcode 10.x) is installed on your operating system. Additionally, MULTEM also requires the fftw3, BLAS, and LAPACK libraries to be installed.
+The following steps have been tested and found to work with Matlab 2025a and CUDA 11.8. It is assumed that a C++ compiler such as Visual Studio 2022 Community, g++11.3 or Clang (Xcode 10.x) is installed on your operating system. Additionally, MULTEM also requires the fftw3, BLAS, and LAPACK libraries to be installed.The following steps have been tested and found to work with Matlab 2025a and CUDA 11.8. It is assumed that a C++ compiler such as Visual Studio 2022 Community, g++11.3 or Clang (Xcode 10.x) is installed on your operating system. Additionally, MULTEM also requires the fftw3, BLAS, and LAPACK libraries to be installed.
 
-- Firstly, a C++ compiler must be set for Matlab by executing the following command: `mex -setup cpp`. It is important to note that Matlab 2022b only supports the compilers listed above.
+- Firstly, a C++ compiler must be set for Matlab by executing the following command: `mex -setup cpp`. It is important to note that Matlab 2025a only supports the compilers listed above.
 - Next, add the following folders to the Matlab path: crystalline_materials, matlab_functions, and mex_bin.
 - Run the script `compile_mex_multem.m`. This will create the necessary executable files to run the examples.
 - Finally, run the examples located in the `mex_examples_multem folder`.
