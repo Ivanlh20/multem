@@ -23,11 +23,11 @@ function [] = ilm_mex(option, m_file, src, varargin)
     
     if(isempty(CUDA_PATH))
         if(ispc)
-            CUDA_PATH = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0';
+            CUDA_PATH = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8';
         elseif(ismac)
-            CUDA_PATH = '/Developer/NVIDIA/CUDA-10.0';
+            CUDA_PATH = '/Developer/NVIDIA/CUDA-11.8';
         else
-            CUDA_PATH = '/usr/local/cuda-10.0';
+            CUDA_PATH = '/usr/local/cuda-11.8';
         end
     end
     % CUDA_PATH = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8';

@@ -45,7 +45,8 @@
           
         COMPILER="nvcc"
         COMPFLAGS="--compiler-options=/Zp8,/GR,/bigobj,/W3,/EHs,/nologo,/MD,/arch:AVX2 $NVCC_FLAGS"          
-        COMPDEFINES="--compiler-options=/D_CRT_SECURE_NO_DEPRECATE,/D_SCL_SECURE_NO_DEPRECATE,/D_SECURE_SCL=0,$MATLABMEX" 
+        COMPDEFINES="--compiler-options=/D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH,/D_CRT_SECURE_NO_DEPRECATE,/D_SCL_SECURE_NO_DEPRECATE,/D_SECURE_SCL=0,$MATLABMEX"
+
         OPTIMFLAGS="--compiler-options=/O2,/Oy-,/DNDEBUG"          
         DEBUGFLAGS="--compiler-options=/Zi -g"
           
